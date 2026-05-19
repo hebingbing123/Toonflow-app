@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../config.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
+import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 
 /// Read-only PG job queue stats when **`OPENFLOW_INTERNAL_OPS_TOKEN`** dart-define matches server env.
@@ -87,31 +88,37 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
                 runSpacing: StudioSpacing.xs,
                 children: <Widget>[
                   _QueueMetricChip(
-                    label: 'pending',
+                    label: studioJobQueueMetricLabel(l10n, 'pending'),
                     value: '${_stats!.pending}',
                   ),
                   _QueueMetricChip(
-                    label: 'claimable',
+                    label: studioJobQueueMetricLabel(l10n, 'claimable'),
                     value: '${_stats!.pendingClaimable}',
                   ),
                   _QueueMetricChip(
-                    label: 'running',
+                    label: studioJobQueueMetricLabel(l10n, 'running'),
                     value: '${_stats!.running}',
                   ),
-                  _QueueMetricChip(label: 'dead', value: '${_stats!.dead}'),
                   _QueueMetricChip(
-                    label: 'failed 24h',
+                    label: studioJobQueueMetricLabel(l10n, 'dead'),
+                    value: '${_stats!.dead}',
+                  ),
+                  _QueueMetricChip(
+                    label: studioJobQueueMetricLabel(l10n, 'failed 24h'),
                     value: '${_stats!.failedLast24h}',
                   ),
                   _QueueMetricChip(
-                    label: 'oldest secs',
-                    value: '${_stats!.oldestClaimableQueuedAgeSecs ?? 'null'}',
+                    label: studioJobQueueMetricLabel(l10n, 'oldest secs'),
+                    value: '${_stats!.oldestClaimableQueuedAgeSecs ?? l10n.studioUnknownCodeEmpty}',
                   ),
                 ],
               ),
               if (_stats!.pendingByKind.isNotEmpty) ...<Widget>[
                 const SizedBox(height: StudioSpacing.sm),
-                Text('pending_by_kind', style: theme.textTheme.labelMedium),
+                Text(
+                  studioJobQueueMetricLabel(l10n, 'pending_by_kind'),
+                  style: theme.textTheme.labelMedium,
+                ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: StudioSpacing.xs,
@@ -119,7 +126,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
                   children: _stats!.pendingByKind.entries
                       .map(
                         (entry) => _QueueMetricChip(
-                          label: entry.key,
+                          label: studioJobKindLabel(l10n, entry.key),
                           value: '${entry.value}',
                         ),
                       )

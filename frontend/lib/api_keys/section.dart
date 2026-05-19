@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
@@ -725,7 +726,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           if (item.lastUsedIp != null || item.lastUsedUserAgent != null)
             Text(
               l10n.apiKeysSourceLine(
-                '${item.lastUsedIp ?? 'unknown'}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
+                '${studioApiKeysLastUsedLabel(l10n, item.lastUsedIp ?? 'unknown')}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
               ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

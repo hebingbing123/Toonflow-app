@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
+import '../../agent_workspace_preset_labels.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board for the script workspace.
@@ -151,7 +152,8 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                       if (recipe.domainTool != null)
                         Chip(
                           label: Text(
-                            l10n.agentWorkspaceScriptToolChip(
+                            agentWorkspaceScriptDomainToolLabel(
+                              l10n,
                               recipe.domainTool!,
                             ),
                           ),
@@ -159,7 +161,8 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                       if (recipe.subAgentTool != null)
                         Chip(
                           label: Text(
-                            l10n.agentWorkspaceScriptAgentChip(
+                            agentWorkspaceScriptSubAgentLabel(
+                              l10n,
                               recipe.subAgentTool!,
                             ),
                           ),

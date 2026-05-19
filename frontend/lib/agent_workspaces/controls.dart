@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
 
@@ -30,9 +31,22 @@ InputDecoration agentWorkspaceFieldDecoration(
   String? helperText,
 }) {
   final tokens = StudioTokens.of(context);
+  final theme = Theme.of(context);
+  final labelStyle = TextStyle(color: tokens.textSecondary);
+  final helperStyle =
+      theme.inputDecorationTheme.helperStyle ??
+      theme.textTheme.bodySmall?.copyWith(color: tokens.textMuted);
   return InputDecoration(
-    labelText: labelText,
-    helperText: helperText,
+    label: labelText == null
+        ? null
+        : StudioEllipsisTooltipText(text: labelText, style: labelStyle),
+    helper: helperText == null
+        ? null
+        : StudioEllipsisTooltipText(
+            text: helperText,
+            style: helperStyle,
+            maxLines: 2,
+          ),
     filled: true,
     fillColor: tokens.bgInset,
     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -42,7 +56,7 @@ InputDecoration agentWorkspaceFieldDecoration(
     floatingLabelBehavior: labelText == null
         ? FloatingLabelBehavior.never
         : FloatingLabelBehavior.auto,
-    labelStyle: TextStyle(color: tokens.textSecondary),
+    labelStyle: labelStyle,
     hintStyle: TextStyle(color: tokens.textMuted),
   );
 }
@@ -69,8 +83,8 @@ Widget agentWorkspaceLabeledField(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     mainAxisSize: MainAxisSize.min,
     children: <Widget>[
-      Text(
-        label,
+      StudioEllipsisTooltipText(
+        text: label,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: tokens.textSecondary,
           height: 1.3,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/studio_code_labels.dart';
 import '../../../rust_api.dart';
 
 class AgentWorkspaceActivityPanel extends StatelessWidget {
@@ -68,7 +69,11 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 if (eventType != null)
                   Chip(
-                    label: Text(l10n.agentWorkspaceActivityLatest(eventType)),
+                    label: Text(
+                      l10n.agentWorkspaceActivityLatest(
+                        studioHarnessWsEventTypeLabel(l10n, eventType),
+                      ),
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
               ],

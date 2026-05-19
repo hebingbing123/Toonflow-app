@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
+import '../../agent_workspace_preset_labels.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board.
@@ -99,7 +100,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     children: <Widget>[
                       Chip(
                         label: Text(
-                          l10n.agentWorkspaceProductionFlowChip(stage.flowKey),
+                          agentWorkspaceFlowKeyLabel(l10n, stage.flowKey),
                         ),
                       ),
                       OutlinedButton(
@@ -226,13 +227,14 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     children: <Widget>[
                       Chip(
                         label: Text(
-                          l10n.agentWorkspaceProductionFlowChip(recipe.flowKey),
+                          agentWorkspaceFlowKeyLabel(l10n, recipe.flowKey),
                         ),
                       ),
                       if (recipe.domainTool != null)
                         Chip(
                           label: Text(
-                            l10n.agentWorkspaceProductionToolChip(
+                            agentWorkspaceProductionDomainToolLabel(
+                              l10n,
                               recipe.domainTool!,
                             ),
                           ),
@@ -240,7 +242,8 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                       if (recipe.subAgentTool != null)
                         Chip(
                           label: Text(
-                            l10n.agentWorkspaceProductionAgentChip(
+                            agentWorkspaceProductionSubAgentLabel(
+                              l10n,
                               recipe.subAgentTool!,
                             ),
                           ),

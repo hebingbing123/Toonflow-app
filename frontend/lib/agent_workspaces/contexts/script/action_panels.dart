@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
+import '../../agent_workspace_preset_labels.dart';
 import '../../controls.dart';
 import '../../prompt_preset.dart';
 
@@ -192,7 +193,10 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                     .map(
                       (String tool) => DropdownMenuItem<String>(
                         value: tool,
-                        child: Text(tool, style: fieldStyle),
+                        child: Text(
+                          agentWorkspaceScriptDomainToolLabel(l10n, tool),
+                          style: fieldStyle,
+                        ),
                       ),
                     )
                     .toList(growable: false),
@@ -240,7 +244,10 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                     .map(
                       (String tool) => DropdownMenuItem<String>(
                         value: tool,
-                        child: Text(tool, style: fieldStyle),
+                        child: Text(
+                          agentWorkspaceScriptSubAgentLabel(l10n, tool),
+                          style: fieldStyle,
+                        ),
                       ),
                     )
                     .toList(growable: false),

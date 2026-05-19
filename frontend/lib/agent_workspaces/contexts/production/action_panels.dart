@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
+import '../../agent_workspace_preset_labels.dart';
 import '../../controls.dart';
 import '../../prompt_preset.dart';
 import 'support.dart';
@@ -151,7 +152,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                       .map(
                         (String tool) => DropdownMenuItem<String>(
                           value: tool,
-                          child: Text(tool),
+                          child: Text(
+                            agentWorkspaceProductionDomainToolLabel(l10n, tool),
+                          ),
                         ),
                       )
                       .toList(growable: false),
@@ -179,7 +182,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                       .map(
                         (String key) => DropdownMenuItem<String>(
                           value: key,
-                          child: Text(key),
+                          child: Text(agentWorkspaceFlowKeyLabel(l10n, key)),
                         ),
                       )
                       .toList(growable: false),
@@ -223,7 +226,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                       .map(
                         (String tool) => DropdownMenuItem<String>(
                           value: tool,
-                          child: Text(tool),
+                          child: Text(
+                            agentWorkspaceProductionSubAgentLabel(l10n, tool),
+                          ),
                         ),
                       )
                       .toList(growable: false),

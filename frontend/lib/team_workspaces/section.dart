@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
@@ -58,12 +59,11 @@ List<WorkspaceInviteResponse> filterInvitesByExpiryVisibility(
 
 String formatWorkspaceInviteMeta(
   WorkspaceInviteResponse invite, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final expiry = invite.expiresAt.toLocal().toIso8601String();
   final stateText = inviteStatusLabel(invite, l10n: l10n);
-  return l10n?.teamWorkspaceInviteMetaLine(stateText, expiry) ??
-      'Status: $stateText · expires: $expiry';
+  return l10n.teamWorkspaceInviteMetaLine(stateText, expiry);
 }
 
 bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
@@ -72,21 +72,21 @@ bool isWorkspaceInviteExpired(WorkspaceInviteResponse invite) {
 
 String inviteStatusLabel(
   WorkspaceInviteResponse invite, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   if (invite.status == 'revoked') {
-    return l10n?.teamWorkspaceInviteStatusRevoked ?? 'Revoked';
+    return l10n.teamWorkspaceInviteStatusRevoked;
   }
   if (isWorkspaceInviteExpired(invite)) {
-    return l10n?.teamWorkspaceInviteStatusExpired ?? 'Expired';
+    return l10n.teamWorkspaceInviteStatusExpired;
   }
   if (invite.status == 'pending') {
-    return l10n?.teamWorkspaceInviteStatusValid ?? 'Valid';
+    return l10n.teamWorkspaceInviteStatusValid;
   }
   if (invite.status == 'accepted') {
-    return l10n?.teamWorkspaceInviteStatusAccepted ?? 'Accepted';
+    return l10n.teamWorkspaceInviteStatusAccepted;
   }
-  return invite.status;
+  return studioUnknownCodeLabel(l10n, invite.status);
 }
 
 String buildInviteCopyText(WorkspaceInviteResponse invite) {
@@ -98,29 +98,31 @@ String buildInviteCopyText(WorkspaceInviteResponse invite) {
       'token=${invite.token}';
 }
 
-String workspaceAuditActionLabel(String action, {AppLocalizations? l10n}) {
+String workspaceAuditActionLabel(
+  String action, {
+  required AppLocalizations l10n,
+}) {
   switch (action) {
     case 'workspace_member_upserted':
-      return l10n?.teamWorkspaceAuditMemberUpserted ??
-          'Member added or updated';
+      return l10n.teamWorkspaceAuditMemberUpserted;
     case 'workspace_member_role_changed':
-      return l10n?.teamWorkspaceAuditMemberRoleChanged ?? 'Member role changed';
+      return l10n.teamWorkspaceAuditMemberRoleChanged;
     case 'workspace_member_removed':
-      return l10n?.teamWorkspaceAuditMemberRemoved ?? 'Member removed';
+      return l10n.teamWorkspaceAuditMemberRemoved;
     case 'workspace_member_left':
-      return l10n?.teamWorkspaceAuditMemberLeft ?? 'Member left workspace';
+      return l10n.teamWorkspaceAuditMemberLeft;
     case 'workspace_owner_transferred':
-      return l10n?.teamWorkspaceAuditOwnerTransferred ?? 'Owner transferred';
+      return l10n.teamWorkspaceAuditOwnerTransferred;
     case 'workspace_invite_created':
-      return l10n?.teamWorkspaceAuditInviteCreated ?? 'Invite created';
+      return l10n.teamWorkspaceAuditInviteCreated;
     case 'workspace_invite_resent':
-      return l10n?.teamWorkspaceAuditInviteResent ?? 'Invite resent';
+      return l10n.teamWorkspaceAuditInviteResent;
     case 'workspace_invite_revoked':
-      return l10n?.teamWorkspaceAuditInviteRevoked ?? 'Invite revoked';
+      return l10n.teamWorkspaceAuditInviteRevoked;
     case 'workspace_invite_accepted':
-      return l10n?.teamWorkspaceAuditInviteAccepted ?? 'Invite accepted';
+      return l10n.teamWorkspaceAuditInviteAccepted;
     default:
-      return action;
+      return studioUnknownCodeLabel(l10n, action);
   }
 }
 
@@ -1814,7 +1816,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   '${invite.email} · ${roleOptionLabel(invite.role)}',
                                 ),
                                 subtitle: SelectableText(
-                                  '$label\n${formatWorkspaceInviteMeta(invite, l10n: l10n)}\ninvite token: ${invite.token}',
+                                  '$label\n${formatWorkspaceInviteMeta(invite, l10n: l10n)}\n${l10n.teamWorkspaceInviteTokenLine(invite.token)}',
                                 ),
                               ),
                               if (invite.status == 'pending')

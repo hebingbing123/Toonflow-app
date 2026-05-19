@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'l10n/studio_code_labels.dart';
 import 'design_system/components/studio_text_styles.dart';
 import 'design_system/tokens.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
+import 'native_bridge/native_bridge_bootstrap.dart';
 import 'rust_api.dart';
 
 bool shouldOpenStatusPageForInitialUri(Uri uri) {
@@ -45,10 +47,15 @@ class StatusPageFetchers {
 }
 
 class StatusPage extends StatefulWidget {
-  StatusPage({super.key, StatusPageFetchers? fetchers})
-    : fetchers = fetchers ?? StatusPageFetchers();
+  StatusPage({
+    super.key,
+    StatusPageFetchers? fetchers,
+    NativeBridgeBootstrap? bootstrap,
+  }) : fetchers = fetchers ?? StatusPageFetchers(),
+       bootstrap = bootstrap ?? NativeBridgeBootstrap.instance;
 
   final StatusPageFetchers fetchers;
+  final NativeBridgeBootstrap bootstrap;
 
   @override
   State<StatusPage> createState() => _StatusPageState();
@@ -224,20 +231,69 @@ class _StatusPageState extends State<StatusPage> {
               ],
             ),
           ],
+          const SizedBox(height: StudioSpacing.sm),
+          ListenableBuilder(
+            listenable: widget.bootstrap,
+            builder: (context, _) {
+              final snapshot = widget.bootstrap.snapshot;
+              return _StatusBand(
+                title: 'desktop_rust_bridge',
+                tone: switch (snapshot.state) {
+                  NativeBridgeStartupState.ready => _BandTone.info,
+                  NativeBridgeStartupState.failed => _BandTone.error,
+                  NativeBridgeStartupState.skipped => _BandTone.neutral,
+                  NativeBridgeStartupState.idle => _BandTone.neutral,
+                },
+                lines: [
+                  'state=${snapshot.state.name}',
+                  'message=${snapshot.message}',
+                  if (snapshot.libraryPath != null)
+                    'library_path=${snapshot.libraryPath}',
+                  if (snapshot.error != null) 'error=${snapshot.error}',
+                ],
+              );
+            },
+          ),
           if (_queueStats != null) ...[
             const SizedBox(height: StudioSpacing.sm),
             _StatusBand(
               title: l10n.statusPageInternalQueueSectionTitle,
               tone: _BandTone.info,
               lines: [
-                'pending=${_queueStats!.pending}',
-                'pending_claimable=${_queueStats!.pendingClaimable}',
-                'running=${_queueStats!.running}',
-                'dead=${_queueStats!.dead}',
-                'failed_last_24h=${_queueStats!.failedLast24h}',
-                'oldest_claimable_queued_age_secs=${_queueStats!.oldestClaimableQueuedAgeSecs ?? 'null'}',
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'pending'),
+                  '${_queueStats!.pending}',
+                ),
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'claimable'),
+                  '${_queueStats!.pendingClaimable}',
+                ),
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'running'),
+                  '${_queueStats!.running}',
+                ),
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'dead'),
+                  '${_queueStats!.dead}',
+                ),
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'failed_last_24h'),
+                  '${_queueStats!.failedLast24h}',
+                ),
+                l10n.statusPageQueueMetricLine(
+                  studioJobQueueMetricLabel(l10n, 'oldest_claimable_queued_age_secs'),
+                  '${_queueStats!.oldestClaimableQueuedAgeSecs ?? l10n.platformStatusHealthUnknown}',
+                ),
                 if (_queueStats!.pendingByKind.isNotEmpty)
-                  'pending_by_kind=${_queueStats!.pendingByKind}',
+                  l10n.statusPageQueueMetricLine(
+                    studioJobQueueMetricLabel(l10n, 'pending_by_kind'),
+                    _queueStats!.pendingByKind.entries
+                        .map(
+                          (entry) =>
+                              '${studioJobKindLabel(l10n, entry.key)}=${entry.value}',
+                        )
+                        .join(', '),
+                  ),
               ],
             ),
           ],

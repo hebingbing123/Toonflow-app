@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
-import 'package:openflow_app/status_page.dart';
+import 'package:openflow_app/native_bridge/native_bridge_bootstrap.dart';
+import 'package:openflow_app/native_bridge/native_bridge_bootstrap_platform.dart';
 import 'package:openflow_app/rust_api.dart';
+import 'package:openflow_app/status_page.dart';
 
 Widget _buildApp(Widget child) {
   return MaterialApp(
@@ -63,4 +65,113 @@ void main() {
     expect(find.textContaining('API：'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('status page renders desktop bridge ready details', (
+    WidgetTester tester,
+  ) async {
+    final bootstrap = NativeBridgeBootstrap(
+      platformSupport: const _TestPlatformSupport(),
+      initializeDefault: () async => throw StateError('default failed'),
+      initializeFromPath: (path) async {
+        if (path != 'bundle/Frameworks/libopenflow_core_bridge.dylib') {
+          throw StateError('not here');
+        }
+      },
+    );
+    await bootstrap.ensureStarted();
+
+    await tester.pumpWidget(
+      _buildApp(
+        StatusPage(
+          bootstrap: bootstrap,
+          fetchers: StatusPageFetchers(
+            fetchHealthRoot: () async =>
+                const HealthResponse(status: 'ok', service: 'openflow'),
+            fetchHealthV1: () async =>
+                const HealthResponse(status: 'ok', service: 'openflow'),
+            fetchReadyV1: () async =>
+                const ReadyV1Response(status: 'ready', database: 'connected'),
+            fetchVersionV1: () async => const VersionResponse(
+              service: 'openflow',
+              version: '1.2.3',
+              gitSha: 'abc123',
+            ),
+            fetchJobQueueStats: (_) async => null,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('desktop_rust_bridge'), findsOneWidget);
+    expect(find.text('state=ready'), findsOneWidget);
+    expect(
+      find.text(
+        'message=Desktop Rust bridge loaded from bundle/Frameworks/libopenflow_core_bridge.dylib.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'library_path=bundle/Frameworks/libopenflow_core_bridge.dylib',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('status page renders desktop bridge failure details', (
+    WidgetTester tester,
+  ) async {
+    final bootstrap = NativeBridgeBootstrap(
+      platformSupport: const _TestPlatformSupport(),
+      initializeDefault: () async => throw StateError('default failed'),
+      initializeFromPath: (_) async => throw StateError('fallback failed'),
+    );
+    await bootstrap.ensureStarted();
+
+    await tester.pumpWidget(
+      _buildApp(
+        StatusPage(
+          bootstrap: bootstrap,
+          fetchers: StatusPageFetchers(
+            fetchHealthRoot: () async =>
+                const HealthResponse(status: 'ok', service: 'openflow'),
+            fetchHealthV1: () async =>
+                const HealthResponse(status: 'ok', service: 'openflow'),
+            fetchReadyV1: () async =>
+                const ReadyV1Response(status: 'ready', database: 'connected'),
+            fetchVersionV1: () async => const VersionResponse(
+              service: 'openflow',
+              version: '1.2.3',
+              gitSha: 'abc123',
+            ),
+            fetchJobQueueStats: (_) async => null,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('desktop_rust_bridge'), findsOneWidget);
+    expect(find.text('state=failed'), findsOneWidget);
+    expect(
+      find.text('message=Desktop Rust bridge failed to initialize.'),
+      findsOneWidget,
+    );
+    expect(find.text('error=Bad state: default failed'), findsOneWidget);
+  });
+}
+
+class _TestPlatformSupport extends NativeBridgePlatformSupport {
+  const _TestPlatformSupport();
+
+  @override
+  bool get supportsExplicitLibraryLoading => true;
+
+  @override
+  List<String> candidateLibraryPaths() => const [
+    'bundle/Frameworks/libopenflow_core_bridge.dylib',
+  ];
 }

@@ -88,6 +88,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceContextNoWorkspace => 'No workspace';
 
   @override
+  String get workspaceTypePersonal => 'Personal';
+
+  @override
+  String get workspaceTypeEnterprise => 'Team';
+
+  @override
+  String get workspaceContextPersonalDefaultName => 'Personal workspace';
+
+  @override
   String get workspaceContextNoProject => 'No project selected';
 
   @override
@@ -523,8 +532,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Delete shared template';
 
   @override
-  String notificationsComplianceStageOverrideLabel(String stage) {
-    return '$stage override';
+  String notificationsComplianceStageOverrideLabel(String stageLabel) {
+    return '$stageLabel override';
   }
 
   @override
@@ -908,7 +917,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get platformConfigToggleWorkspaceActivitySubtitle =>
-      'Agent workspace activity navigation entry';
+      'Show the Agent workspace Activity nav entry';
 
   @override
   String get platformConfigToggleBenchmarkTitle => 'Benchmark baseline';
@@ -994,15 +1003,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNavSectionTitle => 'Product navigation';
 
   @override
-  String get productNavShortVideoSpace => 'Short-video Space';
+  String get productNavShortVideoSpace => 'Multi-platform release';
+
+  @override
+  String get productShellLoginHeroTitle =>
+      'Novel intake, scripts, storyboards, and multi-platform release in one flow';
 
   @override
   String get productShellLoginTagline =>
-      'AI short-drama studio — script to publish in one place.';
+      'AI short-drama studio — from novel intake through production to multi-platform publishing.';
 
   @override
   String get productShellDevCredentialsHint =>
-      'Local dev: admin@toonflow.local / admin123';
+      'Local dev: admin@openflow.local / admin123';
 
   @override
   String get productShellMoreMenu => 'More';
@@ -1018,14 +1031,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioPipelineSelectProjectFirst =>
-      'Select a project from the list first, then open Script or Production.';
+      'Select a project from the list first, then open Screenplay or Production.';
 
   @override
   String get studioProductHarnessRedirectTitle => 'Use project studio';
 
   @override
   String get studioProductHarnessRedirectSubtitle =>
-      'Script and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.';
+      'Screenplay and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.';
 
   @override
   String get studioProjectsHomeTitle => 'Your projects';
@@ -1057,10 +1070,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioWizardStepBasics => 'Basics';
 
   @override
-  String get studioWizardStepContent => 'Content';
+  String get studioWizardStepContent => 'Story premise';
 
   @override
-  String get studioWizardStepReview => 'Review';
+  String get studioWizardStepReview => 'Confirm';
 
   @override
   String get studioWizardBack => 'Back';
@@ -1086,6 +1099,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioExitProjectStudio => 'Back to projects';
 
   @override
+  String get studioBackPreviousPane => 'Back';
+
+  @override
   String get studioProjectStudioSubtitle =>
       'Six-step workflow from script to delivery';
 
@@ -1109,6 +1125,326 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioAgentGridPrompts => 'Grid prompts';
+
+  @override
+  String studioJobTrayActiveJobs(int count) {
+    return '$count jobs in progress';
+  }
+
+  @override
+  String get studioUnknownCodeEmpty => '(empty)';
+
+  @override
+  String studioUnknownCodeLabel(String code) {
+    return 'Unknown: $code';
+  }
+
+  @override
+  String studioJobListTitle(String kindLabel, String statusLabel) {
+    return '$kindLabel · $statusLabel';
+  }
+
+  @override
+  String get studioJobKindAssetGenerateImage => 'Single image generation';
+
+  @override
+  String get studioJobKindAssetPolishPrompt => 'Asset prompt polish';
+
+  @override
+  String get studioJobKindAssetGenerateBatch => 'Batch image generation';
+
+  @override
+  String get studioJobKindAssetPolishBatch => 'Batch prompt polish';
+
+  @override
+  String get studioJobKindSettingsVendorModelTest => 'Vendor model test';
+
+  @override
+  String get studioJobKindSettingsAccountExport => 'Account data export';
+
+  @override
+  String get studioJobKindSettingsWorkspaceAuditExport =>
+      'Workspace audit export';
+
+  @override
+  String get studioJobKindFlutterProbe => 'Flutter probe job';
+
+  @override
+  String get studioJobKindVideoGenerate => 'Video generation';
+
+  @override
+  String get studioJobKindVideoExport => 'Video export';
+
+  @override
+  String get studioJobKindShortVideoPreAssembly => 'Short-video pre-assembly';
+
+  @override
+  String get studioJobKindShortVideoTimelinePreview => 'Timeline preview';
+
+  @override
+  String get studioJobKindVoiceoverGenerate => 'Voiceover generation';
+
+  @override
+  String get studioJobKindSubtitleGenerate => 'Subtitle generation';
+
+  @override
+  String get studioJobKindBgmGenerate => 'Background music generation';
+
+  @override
+  String get studioJobKindNovelCrawlImportBatch => 'Novel crawl import batch';
+
+  @override
+  String get studioJobStatusQueued => 'Queued';
+
+  @override
+  String get studioJobStatusRunning => 'Running';
+
+  @override
+  String get studioJobStatusFailed => 'Failed';
+
+  @override
+  String get studioJobStatusSucceeded => 'Succeeded';
+
+  @override
+  String get studioJobStatusCancelled => 'Cancelled';
+
+  @override
+  String get studioJobStatusDead => 'Dead';
+
+  @override
+  String get studioJobQueueMetricPending => 'Pending';
+
+  @override
+  String get studioJobQueueMetricClaimable => 'Claimable';
+
+  @override
+  String get studioJobQueueMetricRunning => 'Running';
+
+  @override
+  String get studioJobQueueMetricDead => 'Dead';
+
+  @override
+  String get studioJobQueueMetricFailed24h => 'Failed (24h)';
+
+  @override
+  String get studioJobQueueMetricOldestSecs => 'Oldest queued (sec)';
+
+  @override
+  String get studioJobQueueMetricPendingByKind => 'Pending by kind';
+
+  @override
+  String get studioHarnessWsEventHarnessAgentStarted => 'Agent started';
+
+  @override
+  String get studioHarnessWsEventChatContentUpdated => 'Chat content updated';
+
+  @override
+  String get studioHarnessWsEventHarnessToolResult => 'Tool result';
+
+  @override
+  String get studioHarnessWsEventHarnessAgentCancelled => 'Agent cancelled';
+
+  @override
+  String get studioHarnessWsEventChatMessageUpdated => 'Chat message updated';
+
+  @override
+  String get studioHarnessWsEventErrorOccurred => 'Error occurred';
+
+  @override
+  String get studioHarnessWsEventGenerationJobUpdated =>
+      'Generation job updated';
+
+  @override
+  String get studioModelPricingTypeText => 'Text';
+
+  @override
+  String get studioModelPricingTypeImage => 'Image';
+
+  @override
+  String get studioModelPricingTypeVideo => 'Video';
+
+  @override
+  String get notificationsComplianceStageCriticalUnclaimed =>
+      'Critical unclaimed';
+
+  @override
+  String get notificationsComplianceStageOverCapacity => 'Over capacity';
+
+  @override
+  String get notificationsComplianceStageStalledClaimed => 'Stalled claimed';
+
+  @override
+  String get notificationsComplianceStageEscalated72h => 'Escalated 72h+';
+
+  @override
+  String get adminConsoleAclModeInherited => 'Inherited';
+
+  @override
+  String get adminConsoleAclModeRestricted => 'Restricted';
+
+  @override
+  String get adminConsoleAclModeOpen => 'Open';
+
+  @override
+  String get benchmarkExperimentStatusDraft => 'Draft';
+
+  @override
+  String get benchmarkExperimentStatusRunning => 'Running';
+
+  @override
+  String get benchmarkExperimentStatusCompleted => 'Completed';
+
+  @override
+  String get benchmarkExperimentStatusFailed => 'Failed';
+
+  @override
+  String get benchmarkExperimentStatusArchived => 'Archived';
+
+  @override
+  String get benchmarkReviewTypeHuman => 'Human review';
+
+  @override
+  String get benchmarkReviewTypeAuto => 'Auto review';
+
+  @override
+  String get benchmarkReviewTypeGate => 'Gate review';
+
+  @override
+  String get benchmarkReviewStatusPending => 'Pending';
+
+  @override
+  String get benchmarkReviewStatusApproved => 'Approved';
+
+  @override
+  String get benchmarkReviewStatusRejected => 'Rejected';
+
+  @override
+  String get benchmarkReviewStatusSkipped => 'Skipped';
+
+  @override
+  String get benchmarkSampleTierSmoke => 'Smoke';
+
+  @override
+  String get benchmarkSampleTierRegression => 'Regression';
+
+  @override
+  String get benchmarkSampleTierFull => 'Full';
+
+  @override
+  String get benchmarkGateDecisionPass => 'Pass';
+
+  @override
+  String get benchmarkGateDecisionFail => 'Fail';
+
+  @override
+  String get platformStatusHealthOk => 'OK';
+
+  @override
+  String get platformStatusHealthUnknown => 'Unknown';
+
+  @override
+  String get apiKeysLastUsedUnknown => 'Unknown source';
+
+  @override
+  String get qualityReviewsDimensionVisualConsistency =>
+      'Visual / character consistency';
+
+  @override
+  String get qualityReviewsDimensionNarrativeCoherence => 'Narrative coherence';
+
+  @override
+  String get qualityReviewsDimensionLipSync => 'Lip sync';
+
+  @override
+  String get qualityReviewsDimensionPacing => 'Pacing';
+
+  @override
+  String get qualityReviewsDimensionCharacterConsistency =>
+      'Character consistency';
+
+  @override
+  String get qualityReviewsDimensionDialogueNaturalness =>
+      'Dialogue naturalness';
+
+  @override
+  String get qualityReviewsDimensionFaithfulness => 'Faithfulness to source';
+
+  @override
+  String get qualityReviewsDimensionRiskBadge => 'Dimension risk';
+
+  @override
+  String get qualityReviewsDimensionScoreSkip => 'Skip';
+
+  @override
+  String get qualityReviewsDimensionScoreEmpty => 'No dimension scores';
+
+  @override
+  String get qualityReviewsDimensionScoreInvalid =>
+      'Enter an integer from 1–10';
+
+  @override
+  String get qualityReviewsDimensionScoreOutOfRange =>
+      'Score must be between 1 and 10';
+
+  @override
+  String qualityReviewsRubricVersionLine(String version) {
+    return 'Rubric version: $version';
+  }
+
+  @override
+  String get qualityReviewsApplySuggestedActionTooltip =>
+      'Apply suggested action';
+
+  @override
+  String get qualityReviewsNoSuggestedActionToApply =>
+      'This review has no suggested action to apply.';
+
+  @override
+  String qualityReviewsCopiedReworkBrief(String actionLabel) {
+    return 'Copied rework brief: $actionLabel';
+  }
+
+  @override
+  String qualityReviewsOpenedScopeSnack(String actionLabel, String target) {
+    return 'Opened $target scope for $actionLabel';
+  }
+
+  @override
+  String get studioRetry => 'Retry';
+
+  @override
+  String studioBatchSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String studioOnboardingStepCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get studioOnboardingPrevious => 'Previous';
+
+  @override
+  String get studioOnboardingNext => 'Next';
+
+  @override
+  String get studioOnboardingDone => 'Done';
+
+  @override
+  String get studioOnboardingStep1 =>
+      'Use the left nav to start creating under Projects.';
+
+  @override
+  String get studioOnboardingStep2 =>
+      'Inside a project, follow the six steps from script to delivery.';
+
+  @override
+  String get studioOnboardingStep3 =>
+      'Press ⌘K to jump between steps and settings quickly.';
+
+  @override
+  String get studioCommandPaletteSearchHint => 'Search commands…';
 
   @override
   String studioAgentSubmitted(String kind) {
@@ -1444,7 +1780,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNavTeamWorkspaces => 'Team workspaces';
 
   @override
-  String get productNavScriptWorkspace => 'Script workspace';
+  String get productNavScriptWorkspace => 'Screenplay workspace';
 
   @override
   String get productNavProductionWorkspace => 'Production workspace';
@@ -1475,13 +1811,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productPipelineStripSubtitle =>
-      'Unified entry from project settings through scripts, production, tasks, and quality review; Short-video Space handles scheduling and assembly.';
+      'Unified entry from project settings through screenplays, production, tasks, and quality review; multi-platform release handles publishing and channel scheduling.';
 
   @override
   String get productPipelineStripProjects => 'Projects';
 
   @override
-  String get productPipelineStripScripts => 'Scripts';
+  String get productPipelineStripScripts => 'Screenplay';
 
   @override
   String get productPipelineStripProduction => 'Production';
@@ -1496,7 +1832,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productPipelineStripQuality => 'Quality';
 
   @override
-  String get productPipelineStripShortVideo => 'Short video';
+  String get productPipelineStripShortVideo => 'Distribution';
 
   @override
   String workspaceDebugOverviewApiBase(String baseUrl) {
@@ -1966,6 +2302,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingAuditOnlyStateful => 'Stateful only';
 
   @override
+  String billingAuditQuerySummaryProvider(String value) {
+    return 'Provider: $value';
+  }
+
+  @override
+  String billingAuditQuerySummaryInformational(String value) {
+    return 'Informational: $value';
+  }
+
+  @override
+  String billingAuditQuerySummarySort(String value) {
+    return 'Sort: $value';
+  }
+
+  @override
+  String billingAuditQueryFilterLine(String label, String value) {
+    return '$label=$value';
+  }
+
+  @override
   String get billingAuditEventTypeHint =>
       'e.g. invoice.paid / subscription.expired';
 
@@ -2284,13 +2640,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsRoleProjectOwner => 'project owner';
 
   @override
-  String get projectsRoleEditor => 'editor';
+  String get projectsRoleEditor => 'Editor';
 
   @override
-  String get projectsRoleViewer => 'viewer';
+  String get projectsRoleViewer => 'Viewer';
 
   @override
-  String get projectsRoleMember => 'member';
+  String get projectsRoleMember => 'Member';
 
   @override
   String get projectsDialogCreateTitle => 'New project';
@@ -3005,6 +3361,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentMemoryFieldQueryTypeHelper => 'summary / message / all';
 
   @override
+  String get agentMemoryQueryTypeSummary => 'Summary';
+
+  @override
+  String get agentMemoryQueryTypeMessage => 'Message';
+
+  @override
+  String get agentMemoryQueryTypeAll => 'All';
+
+  @override
   String get agentMemoryFieldMemoryTier => 'Memory tier';
 
   @override
@@ -3016,6 +3381,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentMemoryFieldAutomationModeHelper => 'standard / lean / off';
+
+  @override
+  String get agentMemoryAutomationStandard => 'Standard';
+
+  @override
+  String get agentMemoryAutomationLean => 'Lean';
+
+  @override
+  String get agentMemoryAutomationOff => 'Off';
+
+  @override
+  String get agentMemoryAppendTypeMessage => 'Message';
+
+  @override
+  String get agentMemoryAppendTypeSummary => 'Summary';
 
   @override
   String get agentMemoryIsolateHint =>
@@ -3440,7 +3820,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskCenterSectionIntro =>
-      'Use the formal workbench for task projects/categories, filtered task listing, and details. The main section no longer depends on first-row or UUID probe buttons.';
+      'Open the task workbench to browse generation jobs for your project, filter by status, and retry failures.';
 
   @override
   String get taskCenterOpenWorkbench => 'Open task workbench';
@@ -3593,7 +3973,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskCenterOpenProductionWorkspace => 'Open production workspace';
 
   @override
-  String get taskCenterOpenScriptWorkspace => 'Open script workspace';
+  String get taskCenterOpenScriptWorkspace => 'Open screenplay workspace';
 
   @override
   String get taskCenterRegenerate => 'Regenerate';
@@ -3631,7 +4011,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open production workspace (storyboard)';
 
   @override
-  String get taskCenterOpenScriptScript => 'Open script workspace (script)';
+  String get taskCenterOpenScriptScript => 'Open screenplay workspace';
 
   @override
   String get taskCenterOpenSpaceProject => 'Open short-video Space (project)';
@@ -4382,6 +4762,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String qualityReviewsFilterGrade(String value) {
     return 'Grade $value';
+  }
+
+  @override
+  String qualityReviewsFilterSuggestedAction(String value) {
+    return 'Suggested action: $value';
   }
 
   @override
@@ -5295,16 +5680,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityReviewsFreshnessUnknownAge => 'unknown_age';
 
   @override
-  String get qualityReviewsFreshnessNever => 'never';
+  String get qualityReviewsFreshnessUnknownAgeLabel => 'Unknown age';
 
   @override
-  String get qualityReviewsFreshnessNone => 'none';
+  String get qualityReviewsFreshnessNever => 'Not refreshed yet';
+
+  @override
+  String get qualityReviewsFreshnessNone => 'None';
 
   @override
   String get qualityReviewsFreshnessStale => 'STALE';
 
   @override
   String get qualityReviewsFreshnessFresh => 'fresh';
+
+  @override
+  String get qualityReviewsFreshnessStaleTitle =>
+      'Dashboard data may be outdated';
+
+  @override
+  String get qualityReviewsFreshnessFreshTitle =>
+      'Dashboard data is up to date';
+
+  @override
+  String qualityReviewsFreshnessStaleBody(String refreshedAt, String age) {
+    return 'Last updated $refreshedAt (about $age ago)';
+  }
+
+  @override
+  String qualityReviewsFreshnessAgeSeconds(int count) {
+    return '${count}s';
+  }
+
+  @override
+  String qualityReviewsFreshnessAgeMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get qualityReviewsFreshnessRefresh => 'Refresh dashboard';
+
+  @override
+  String get qualityReviewsFreshnessShowDetails => 'Technical details';
+
+  @override
+  String qualityReviewsFreshnessTechnicalDetails(
+    int snapshotRows,
+    int reviewCount,
+    int usageCount,
+    String reason,
+    String mode,
+  ) {
+    return 'snapshotRows=$snapshotRows · reviews=$reviewCount · usage=$usageCount · reason=$reason · mode=$mode';
+  }
+
+  @override
+  String get studioApiErrorCalloutTitle => 'Could not load';
+
+  @override
+  String get studioDismiss => 'Dismiss';
+
+  @override
+  String get studioLoadFailedTitle => 'Could not load content';
 
   @override
   String get qualityReviewsStageStorySkeleton => 'Story skeleton';
@@ -5325,37 +5762,142 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityReviewsStageVideoPrompt => 'Video prompt';
 
   @override
-  String get qualityReviewsSourceAuto => 'source=auto';
+  String get qualityReviewsSourceAuto => 'Auto';
 
   @override
-  String get qualityReviewsFieldTargetType => 'targetType';
+  String get qualityReviewsFieldTargetType => 'Target type';
 
   @override
-  String get qualityReviewsFieldTargetId => 'targetId';
+  String get qualityReviewsFieldTargetId => 'Target ID';
 
   @override
-  String get qualityReviewsFieldSource => 'source';
+  String get qualityReviewsFieldSource => 'Source';
 
   @override
-  String get qualityReviewsFieldOverallScore => 'overallScore';
+  String get qualityReviewsFieldOverallScore => 'Overall score';
 
   @override
-  String get qualityReviewsFieldStage => 'stage';
+  String get qualityReviewsFieldStage => 'Stage';
 
   @override
-  String get qualityReviewsFieldGrade => 'grade';
+  String get qualityReviewsFieldGrade => 'Grade';
 
   @override
-  String get qualityReviewsFieldComments => 'comments';
+  String get qualityReviewsFieldComments => 'Comments';
 
   @override
-  String get qualityReviewsFieldPassed => 'passed';
+  String get qualityReviewsFieldPassed => 'Passed';
 
   @override
-  String get qualityReviewsFieldIsBadCase => 'isBadCase';
+  String get qualityReviewsFieldIsBadCase => 'Bad case';
 
   @override
-  String get qualityReviewsFieldBadCaseCategory => 'badCaseCategory';
+  String get qualityReviewsFieldBadCaseCategory => 'Bad case category';
+
+  @override
+  String get qualityReviewsFilterSuggestedActionLabel => 'Suggested action';
+
+  @override
+  String get qualityReviewsSuggestedActionRollbackDirector =>
+      'Rollback to director planning';
+
+  @override
+  String get qualityReviewsSuggestedActionUpdateAnchor =>
+      'Update character anchor';
+
+  @override
+  String get qualityReviewsSuggestedActionPatchStoryboard =>
+      'Patch storyboard items';
+
+  @override
+  String get qualityReviewsSuggestedActionAdjustPrompt => 'Adjust video prompt';
+
+  @override
+  String get qualityReviewsSuggestedActionRetryVideo =>
+      'Retry video generation';
+
+  @override
+  String get qualityReviewsSuggestedActionRegenStoryboard =>
+      'Regenerate storyboard';
+
+  @override
+  String get qualityReviewsSuggestedActionManualReview => 'Manual review';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRollbackDirector =>
+      'Return to director planning first; resolve conflicts and motivation before continuing generation.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairUpdateAnchor =>
+      'Update character anchors first—appearance, tone, and emotional reactions—then retry.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairPatchStoryboard =>
+      'Patch storyboard items locally: fill in action, eyelines, and pacing.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairAdjustPrompt =>
+      'Tighten the video prompt first; make performance cues and emotional anchors concrete.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRetryVideo =>
+      'Keep current constraints, add key negative limits, then retry generation.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRegenStoryboard =>
+      'Regenerate storyboard rhythm with clearer peaks and shot layering.';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairManualReview =>
+      'Manually review the bad case root cause before choosing a rework entry point.';
+
+  @override
+  String qualityReviewsHotspotCount(String label, int count) {
+    return '$label ×$count';
+  }
+
+  @override
+  String get qualityReviewsTargetTypeStoryboard => 'Storyboard';
+
+  @override
+  String get qualityReviewsTargetTypeScript => 'Script';
+
+  @override
+  String get qualityReviewsTargetTypeVideo => 'Video';
+
+  @override
+  String get qualityReviewsTargetTypeAsset => 'Asset';
+
+  @override
+  String get qualityReviewsTargetTypeOutput => 'Output';
+
+  @override
+  String get qualityReviewsSourceManual => 'Manual';
+
+  @override
+  String get qualityReviewsBadCaseCategoryNone => '(none)';
+
+  @override
+  String get qualityReviewsBadCaseCategoryPlotHole => 'Plot hole';
+
+  @override
+  String get qualityReviewsBadCaseCategoryCharacterBreak => 'Character break';
+
+  @override
+  String get qualityReviewsBadCaseCategoryStoryboardMismatch =>
+      'Storyboard mismatch';
+
+  @override
+  String get qualityReviewsBadCaseCategoryDialogueIssue => 'Dialogue issue';
+
+  @override
+  String get qualityReviewsBadCaseCategoryVisualError => 'Visual error';
+
+  @override
+  String get qualityReviewsBadCaseCategoryPacingIssue => 'Pacing issue';
+
+  @override
+  String get qualityReviewsBadCaseCategoryOther => 'Other';
 
   @override
   String get qualityReviewsDeliveryTag => 'delivery';
@@ -10908,7 +11450,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'From the project, align theme, live references, creative bible, and character setup.';
 
   @override
-  String get shortVideoStageCard2Title => '2. Generate script';
+  String get shortVideoStageCard2Title => '2. Write screenplay';
 
   @override
   String get shortVideoStageCard2Status => 'Available now';
@@ -11144,7 +11686,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceNavProjects => 'Projects';
 
   @override
-  String get shortVideoSpaceNavScriptWorkspace => 'Script workspace';
+  String get shortVideoSpaceNavScriptWorkspace => 'Screenplay workspace';
 
   @override
   String get shortVideoSpaceNavProductionWorkspace => 'Production workspace';
@@ -13472,6 +14014,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorAssetGenWorkbenchAssetTypeAll => 'All types';
+
+  @override
+  String get projectEditorAssetTypeRole => 'Role';
+
+  @override
+  String get projectEditorAssetTypeClip => 'Clip';
+
+  @override
+  String get projectEditorAssetTypeProps => 'Props';
+
+  @override
+  String get projectEditorAssetTypeScene => 'Scene';
+
+  @override
+  String get projectEditorAssetTypeCharacter => 'Character';
 
   @override
   String get projectEditorAssetGenWorkbenchModelOptionalLabel =>
@@ -15812,6 +16369,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceProductionLatestExportNewerRunning =>
+      'A newer export is currently running.';
+
+  @override
+  String get shortVideoSpaceProductionLatestExportNewerQueued =>
+      'A newer export is queued.';
+
+  @override
+  String get shortVideoSpaceProductionLatestExportStaleSelection =>
+      'Current selected clips changed after this export.';
+
+  @override
+  String shortVideoSpaceProductionLatestExportSelectionSummary(
+    int selected,
+    int total,
+  ) {
+    return 'Current selection: $selected / $total clips.';
+  }
+
+  @override
+  String shortVideoSpaceProductionLatestExportVoiceoverSummary(
+    int ready,
+    int total,
+  ) {
+    return 'Voiceover ready: $ready / $total';
+  }
+
+  @override
+  String get shortVideoSpaceProductionLatestExportRerun => 'Re-export';
+
+  @override
   String get shortVideoSpaceProductionAssemblyReplaceVideoTitle =>
       'Replace current video version';
 
@@ -18057,27 +18645,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoPanelVersionRefreshPanelTooltip => 'Refresh panel';
 
   @override
-  String get accountSectionTitle => 'Account section title';
+  String get accountSectionTitle => 'Account';
 
   @override
-  String get accountRiskyPrefsTooltip => 'Account risky prefs tooltip';
+  String get accountRiskyPrefsTooltip => 'Risky operation preferences';
 
   @override
-  String get accountSectionSubtitle => 'Account section subtitle';
+  String get accountSectionSubtitle =>
+      'Profile, exports, and local client settings';
 
   @override
-  String get accountExportTitle => 'Account export title';
+  String get accountExportTitle => 'Data export';
 
   @override
-  String get accountExportCreate => 'Account export create';
+  String get accountExportCreate => 'Create export';
 
   @override
-  String get accountExportIncludeAuditLogs =>
-      'Account export include audit logs';
+  String get accountExportIncludeAuditLogs => 'Include audit logs';
 
   @override
-  String get accountExportIncludeNotifications =>
-      'Account export include notifications';
+  String get accountExportIncludeNotifications => 'Include notifications';
 
   @override
   String accountExportActiveCount(int count) {
@@ -18085,11 +18672,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountExportCopyLastSavedPath =>
-      'Account export copy last saved path';
+  String get accountExportCopyLastSavedPath => 'Copy last saved path';
 
   @override
-  String get accountExportEmpty => 'Account export empty';
+  String get accountExportEmpty => 'No account exports yet.';
 
   @override
   String accountExportDefaultFileName(int numericTaskId) {
@@ -18112,22 +18698,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountExportDownload => 'Account export download';
+  String get accountExportDownload => 'Download to device';
 
   @override
-  String get accountExportCopyFileName => 'Account export copy file name';
+  String get accountExportCopyFileName => 'Copy file name';
 
   @override
-  String get accountDeleteTitle => 'Account delete title';
+  String get accountDeleteTitle => 'Delete account';
 
   @override
-  String get accountDeleteDescription => 'Account delete description';
+  String get accountDeleteDescription =>
+      'Deletes your user, owned workspaces, personal projects, jobs, notifications, and local export/media folders. Memberships in shared workspaces are removed.';
 
   @override
-  String get accountDeleteConfirmLabel => 'Account delete confirm label';
+  String get accountDeleteConfirmLabel => 'Type DELETE MY ACCOUNT to confirm';
 
   @override
-  String get accountDeleteIrreversibleAck => 'Account delete irreversible ack';
+  String get accountDeleteIrreversibleAck =>
+      'I understand this is irreversible and accept workspace/project cascade deletion.';
 
   @override
   String accountDeleteLastResponse(
@@ -18139,19 +18727,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountDeleteButton => 'Account delete button';
+  String get accountDeleteButton => 'Permanently delete this account';
 
   @override
-  String get accountExportStatusQueued => 'Account export status queued';
+  String get accountExportStatusQueued => 'Queued';
 
   @override
-  String get accountExportStatusRunning => 'Account export status running';
+  String get accountExportStatusRunning => 'Ready to download';
 
   @override
-  String get accountExportStatusSucceeded => 'Account export status succeeded';
+  String get accountExportStatusSucceeded => 'Ready to download';
 
   @override
-  String get accountExportStatusFailed => 'Account export status failed';
+  String get accountExportStatusFailed => 'Ready to download';
 
   @override
   String adminConsoleMembershipItem(
@@ -18168,9 +18756,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String kind,
     String status,
     String projectId,
-    String ownerEmail,
+    String createdAt,
   ) {
-    return '$kind · $status · project $projectId · $ownerEmail';
+    return '$kind · $status · project $projectId · $createdAt';
   }
 
   @override
@@ -18191,7 +18779,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminConsoleArchivedLabel => 'Admin console archived label';
+  String get adminConsoleArchivedLabel => 'Archived';
 
   @override
   String adminConsoleMemberListItem(
@@ -18299,121 +18887,204 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminConsoleFieldUserId => 'User ID';
 
   @override
-  String get adminConsoleFieldCreatedAt => 'Admin console field created at';
+  String get adminConsoleFieldCreatedAt => 'Created at';
 
   @override
-  String get adminConsoleFieldUpdatedAt => 'Admin console field updated at';
+  String get adminConsoleFieldUpdatedAt => 'Updated at';
 
   @override
-  String get adminConsoleFieldOperationalStatus =>
-      'Admin console field operational status';
+  String get adminConsoleFieldOperationalStatus => 'Operational status';
 
   @override
-  String get adminConsoleFieldBillingProvider =>
-      'Admin console field billing provider';
+  String get adminConsoleFieldBillingProvider => 'Billing provider';
 
   @override
-  String get adminConsoleFieldSubscription =>
-      'Admin console field subscription';
+  String get adminConsoleFieldSubscription => 'Subscription';
 
   @override
-  String get adminConsoleFieldCurrentWorkspace =>
-      'Admin console field current workspace';
+  String get adminConsoleFieldCurrentWorkspace => 'Current workspace';
 
   @override
-  String get adminConsoleFieldWorkspaceId => 'Admin console field workspace id';
+  String get adminConsoleFieldWorkspaceId => 'Workspace ID';
 
   @override
-  String get adminConsoleFieldOwner => 'Admin console field owner';
+  String get adminConsoleFieldOwner => 'Owner';
 
   @override
-  String get adminConsoleFieldArchivedAt => 'Admin console field archived at';
+  String get adminConsoleFieldArchivedAt => 'Archived at';
 
   @override
-  String get adminConsoleFieldOpsNote => 'Admin console field ops note';
+  String get adminConsoleFieldOpsNote => 'Ops note';
 
   @override
-  String get adminConsoleFieldProjectId => 'Admin console field project id';
+  String get adminConsoleFieldProjectId => 'Project ID';
 
   @override
-  String get adminConsoleFieldWorkspace => 'Admin console field workspace';
+  String get adminConsoleFieldWorkspace => 'Workspace';
 
   @override
-  String get adminConsoleFieldProjectArchivedAt =>
-      'Admin console field project archived at';
+  String get adminConsoleFieldProjectArchivedAt => 'Project archived at';
 
   @override
-  String get adminConsoleFieldAclMode => 'Admin console field acl mode';
+  String get adminConsoleFieldAclMode => 'ACL mode';
 
   @override
-  String get adminConsoleFieldEditorCount => 'Admin console field editor count';
+  String get adminConsoleFieldEditorCount => 'Editors';
 
   @override
-  String get adminConsoleFieldViewerCount => 'Admin console field viewer count';
+  String get adminConsoleFieldViewerCount => 'Viewers';
 
   @override
-  String get agentWorkspaceProductionPromptLabel =>
-      'Agent workspace production prompt label';
+  String get agentWorkspaceProductionPromptLabel => 'Production prompt';
 
   @override
   String get agentWorkspaceProductionPromptHelper =>
-      'Agent workspace production prompt helper';
+      'Prompt for production harness.agent.run';
 
   @override
-  String get agentWorkspaceProductionRunWorkflow =>
-      'Agent workspace production run workflow';
+  String get agentWorkspaceProductionRunWorkflow => 'Run production workflow';
+
+  @override
+  String get agentWorkspacePresetFlowKeyScriptPlan => 'Director plan';
+
+  @override
+  String get agentWorkspacePresetFlowKeyAssets => 'Assets';
+
+  @override
+  String get agentWorkspacePresetFlowKeyScript => 'Script';
+
+  @override
+  String get agentWorkspacePresetFlowKeyStoryboardTable => 'Storyboard table';
+
+  @override
+  String get agentWorkspacePresetFlowKeyStoryboard => 'Storyboard';
+
+  @override
+  String get agentWorkspacePresetFlowKeyWorkspaceResult => 'Workspace result';
+
+  @override
+  String get agentWorkspacePresetProductionToolGetFlowData => 'Read flow data';
+
+  @override
+  String get agentWorkspacePresetProductionToolAddDeriveAsset =>
+      'Add derived asset';
+
+  @override
+  String get agentWorkspacePresetProductionToolDelDeriveAsset =>
+      'Delete derived asset';
+
+  @override
+  String get agentWorkspacePresetProductionToolGenerateDeriveAsset =>
+      'Generate derived asset';
+
+  @override
+  String get agentWorkspacePresetProductionToolGenerateStoryboard =>
+      'Generate storyboard';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentDirectorPlan =>
+      'Director plan sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentDeriveAssets =>
+      'Derive assets sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentGenerateAssets =>
+      'Generate assets sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentSupervision =>
+      'Production supervision sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardGen =>
+      'Storyboard generation sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardPanel =>
+      'Storyboard panel sub-agent';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardTable =>
+      'Storyboard table sub-agent';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetPlanData =>
+      'Read plan data (get_planData)';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetScriptContent =>
+      'Read script body';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetNovelText => 'Read novel text';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetNovelEvents =>
+      'Read novel events';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentStorySkeleton =>
+      'Story skeleton sub-agent';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentAdaptationStrategy =>
+      'Adaptation strategy sub-agent';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentScript => 'Script sub-agent';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentSupervision =>
+      'Supervision agent';
 
   @override
   String get agentWorkspaceProductionDomainToolLabel =>
-      'Agent workspace production domain tool label';
+      'Production domain tool';
 
   @override
-  String get agentWorkspaceProductionFlowKeyLabel =>
-      'Agent workspace production flow key label';
+  String get agentWorkspaceProductionFlowKeyLabel => 'Flow key';
 
   @override
   String get agentWorkspaceProductionFlowKeyHelper =>
-      'Agent workspace production flow key helper';
+      'Used as get_flowData key and writeback key';
 
   @override
-  String get agentWorkspaceProductionArgsLabel =>
-      'Agent workspace production args label';
+  String get agentWorkspaceProductionArgsLabel => 'Tool arguments (JSON)';
 
   @override
   String get agentWorkspaceProductionArgsHelper =>
-      'Agent workspace production args helper';
+      'For non-get_flowData tools, e.g. ids:[1,2] (JSON)';
 
   @override
-  String get agentWorkspaceProductionReadTool =>
-      'Agent workspace production read tool';
+  String get agentWorkspaceProductionReadTool => 'Read production tool';
 
   @override
   String get agentWorkspaceProductionSubAgentToolLabel =>
-      'Agent workspace production sub agent tool label';
+      'Production sub-agent tool';
 
   @override
   String get agentWorkspaceProductionSubAgentArgsLabel =>
-      'Agent workspace production sub agent args label';
+      'Sub-agent arguments (JSON)';
 
   @override
   String get agentWorkspaceProductionSubAgentArgsHelper =>
-      'Agent workspace production sub agent args helper';
+      'e.g. storyboardIds:[1,2], assetIds:[7,12] (JSON)';
 
   @override
-  String get agentWorkspaceProductionRunSubAgent =>
-      'Agent workspace production run sub agent';
+  String get agentWorkspaceProductionRunSubAgent => 'Run sub-agent';
 
   @override
   String get agentWorkspaceProductionWritebackToolResult =>
-      'Agent workspace production writeback tool result';
+      'Write back tool result';
 
   @override
-  String get agentWorkspaceProductionArgumentTemplates =>
-      'Agent workspace production argument templates';
+  String get agentWorkspaceProductionArgumentTemplates => 'Argument templates';
 
   @override
   String get agentWorkspaceProductionCurrentCandidateArgs =>
-      'Agent workspace production current candidate args';
+      'Current result candidate args';
 
   @override
   String agentWorkspaceProductionCandidateIds(int count, String preview) {
@@ -18421,12 +19092,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionPromptPreviewTitle =>
-      'Agent workspace production prompt preview title';
+  String get agentWorkspaceProductionPromptPreviewTitle => 'Execution prompt';
 
   @override
-  String get agentWorkspaceProductionStagesTitle =>
-      'Agent workspace production stages title';
+  String get agentWorkspaceProductionStagesTitle => 'Execution stages';
 
   @override
   String get agentWorkspaceProductionStageFlowScriptPlan => 'Director plan';
@@ -18646,12 +19315,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionApplyStage =>
-      'Agent workspace production apply stage';
+  String get agentWorkspaceProductionApplyStage => 'Apply stage';
 
   @override
-  String get agentWorkspaceProductionDiagnosisTitle =>
-      'Agent workspace production diagnosis title';
+  String get agentWorkspaceProductionDiagnosisTitle => 'Next-step suggestions';
 
   @override
   String agentWorkspaceProductionToolChip(String tool) {
@@ -18664,36 +19331,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionApplySuggestion =>
-      'Agent workspace production apply suggestion';
+  String get agentWorkspaceProductionApplySuggestion => 'Apply suggestion';
 
   @override
   String get agentWorkspaceProductionStepPullAssetsFlow =>
-      'Agent workspace production step pull assets flow';
+      '1) Pull assets flow';
 
   @override
   String get agentWorkspaceProductionStepRunAssetsSubAgent =>
-      'Agent workspace production step run assets sub agent';
+      '2) Run assets sub-agent';
 
   @override
   String get agentWorkspaceProductionStepPullStoryboardFlow =>
-      'Agent workspace production step pull storyboard flow';
+      '3) Pull storyboard flow';
 
   @override
-  String get agentWorkspaceProductionStepWritebackFlow =>
-      'Agent workspace production step writeback flow';
+  String get agentWorkspaceProductionStepWritebackFlow => '4) Write back flow';
 
   @override
   String get agentWorkspaceProductionStepRunStoryboardSubAgent =>
-      'Agent workspace production step run storyboard sub agent';
+      '5) Run storyboard sub-agent';
 
   @override
   String get agentWorkspaceProductionStepRunDirectorPlanSubAgent =>
-      'Agent workspace production step run director plan sub agent';
+      '6) Run director-plan sub-agent';
 
   @override
   String get agentWorkspaceProductionPromptFlowDown =>
-      'Agent workspace production prompt flow down';
+      'Order: confirm director-plan assets, then storyboard table and shots.';
 
   @override
   String agentWorkspaceProductionPromptRewriteFocus(String focus) {
@@ -18717,7 +19382,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionPromptExecutionOrder =>
-      'Agent workspace production prompt execution order';
+      'Order: confirm director-plan assets, then storyboard table and shots.';
 
   @override
   String get agentWorkspaceProductionStoryboardPriorityMissing =>
@@ -19453,12 +20118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionModeTextOnly =>
-      'Agent workspace production mode text only';
+  String get agentWorkspaceProductionModeTextOnly => 'Result: frames present';
 
   @override
-  String get agentWorkspaceProductionResultHasImage =>
-      'Agent workspace production result has image';
+  String get agentWorkspaceProductionResultHasImage => 'Result: missing frames';
 
   @override
   String agentWorkspaceProductionResultMissingImage(String assets) {
@@ -19472,27 +20135,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionContextDerivedRewrite =>
-      'Agent workspace production context derived rewrite';
+      'Production execution hints derived from scriptPlan';
 
   @override
   String get agentWorkspaceProductionContextDerivedRewriteSubtitle =>
-      'Agent workspace production context derived rewrite subtitle';
+      'Production execution hints derived from scriptPlan';
 
   @override
-  String get agentWorkspaceProductionContextReturnList =>
-      'Agent workspace production context return list';
+  String agentWorkspaceProductionContextReturnList(Object toolName) {
+    return 'From $toolName';
+  }
 
   @override
-  String get agentWorkspaceProductionContextToolText =>
-      'Agent workspace production context tool text';
+  String get agentWorkspaceProductionContextToolText => 'Tool text output';
 
   @override
-  String get agentWorkspaceProductionContextReviewSummary =>
-      'Agent workspace production context review summary';
+  String agentWorkspaceProductionContextReviewSummary(Object toolName) {
+    return 'From $toolName';
+  }
 
   @override
-  String get agentWorkspaceProductionContextSnapshotTitle =>
-      'Agent workspace production context snapshot title';
+  String get agentWorkspaceProductionContextSnapshotTitle => 'Context snapshot';
 
   @override
   String agentWorkspaceSummaryReturnedList(int count) {
@@ -19548,11 +20211,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionSummaryFlowEmpty =>
-      'Agent workspace production summary flow empty';
+      'Current flow is empty';
 
   @override
   String get agentWorkspaceProductionSummaryFlowEmptyString =>
-      'Agent workspace production summary flow empty string';
+      'Current flow is an empty string';
 
   @override
   String agentWorkspaceProductionSummaryTextChars(int chars) {
@@ -19640,7 +20303,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionIdleHint =>
-      'Agent workspace production idle hint';
+      'Waiting to run — use guided tasks or form actions.';
 
   @override
   String agentWorkspaceProductionLatestToolResult(String detail) {
@@ -19648,8 +20311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionResultSummary =>
-      'Agent workspace production result summary';
+  String get agentWorkspaceProductionResultSummary => 'Result summary';
 
   @override
   String agentWorkspaceProductionSuggestedFlowKey(String flowKey) {
@@ -19657,88 +20319,72 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionUseSuggestedFlowKey =>
-      'Agent workspace production use suggested flow key';
+  String get agentWorkspaceProductionUseSuggestedFlowKey => 'Use this key';
 
   @override
   String get agentWorkspaceProductionWritebackStrategy =>
-      'Agent workspace production writeback strategy';
+      'Writeback keys: get_flowData writes directly; asset/storyboard/director-plan tools refresh the matching flow key first.';
 
   @override
-  String get agentWorkspaceScriptStepFetchPlanData =>
-      'Agent workspace script step fetch plan data';
+  String get agentWorkspaceScriptStepFetchPlanData => '1) Fetch planData';
 
   @override
-  String get agentWorkspaceScriptStepFetchContent =>
-      'Agent workspace script step fetch content';
+  String get agentWorkspaceScriptStepFetchContent => '2) Fetch script body';
 
   @override
   String get agentWorkspaceScriptStepGenerateDraft =>
-      'Agent workspace script step generate draft';
+      '3) Generate script draft';
 
   @override
-  String get agentWorkspaceScriptStepWriteback =>
-      'Agent workspace script step writeback';
+  String get agentWorkspaceScriptStepWriteback => '4) Write back script';
 
   @override
-  String get agentWorkspaceScriptPromptLabel =>
-      'Agent workspace script prompt label';
+  String get agentWorkspaceScriptPromptLabel => 'Script prompt';
 
   @override
   String get agentWorkspaceScriptPromptHelper =>
-      'Agent workspace script prompt helper';
+      'Prompt for script harness.agent.run';
 
   @override
-  String get agentWorkspaceScriptRunWorkflow =>
-      'Agent workspace script run workflow';
+  String get agentWorkspaceScriptRunWorkflow => 'Run script workflow';
 
   @override
-  String get agentWorkspaceScriptDomainToolLabel =>
-      'Agent workspace script domain tool label';
+  String get agentWorkspaceScriptDomainToolLabel => 'Script domain tool';
 
   @override
-  String get agentWorkspaceScriptReadContext =>
-      'Agent workspace script read context';
+  String get agentWorkspaceScriptReadContext => 'Read script context';
 
   @override
-  String get agentWorkspaceScriptArgsLabel =>
-      'Agent workspace script args label';
+  String get agentWorkspaceScriptArgsLabel => 'Tool arguments';
 
   @override
   String get agentWorkspaceScriptArgsHelper =>
-      'Agent workspace script args helper';
+      'Prefer the latest chapter result for novelId; leave blank if unsure.';
 
   @override
-  String get agentWorkspaceScriptSubAgentToolLabel =>
-      'Agent workspace script sub agent tool label';
+  String get agentWorkspaceScriptSubAgentToolLabel => 'Script sub-agent tool';
 
   @override
-  String get agentWorkspaceScriptRunSubAgent =>
-      'Agent workspace script run sub agent';
+  String get agentWorkspaceScriptRunSubAgent => 'Run sub-agent';
 
   @override
-  String get agentWorkspaceScriptWritebackPlanData =>
-      'Agent workspace script writeback plan data';
+  String get agentWorkspaceScriptWritebackPlanData => 'Write back plan data';
 
   @override
   String get agentWorkspaceScriptWritebackUpdateData =>
-      'Agent workspace script writeback update data';
+      'Write back update-data';
 
   @override
-  String get agentWorkspaceScriptStagesTitle =>
-      'Agent workspace script stages title';
+  String get agentWorkspaceScriptStagesTitle => 'Execution stages';
 
   @override
-  String get agentWorkspaceScriptApplyStage =>
-      'Agent workspace script apply stage';
+  String get agentWorkspaceScriptApplyStage => 'Apply stage';
 
   @override
-  String get agentWorkspaceScriptAdvanceStage =>
-      'Agent workspace script advance stage';
+  String get agentWorkspaceScriptAdvanceStage => 'Advance stage';
 
   @override
-  String get agentWorkspaceScriptDiagnosisTitle =>
-      'Agent workspace script diagnosis title';
+  String get agentWorkspaceScriptDiagnosisTitle => 'Next-step suggestions';
 
   @override
   String agentWorkspaceScriptToolChip(String tool) {
@@ -19751,8 +20397,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceScriptApplySuggestion =>
-      'Agent workspace script apply suggestion';
+  String get agentWorkspaceScriptApplySuggestion => 'Apply suggestion';
 
   @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
@@ -19766,59 +20411,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptContextExecutionOrder =>
-      'Agent workspace script context execution order';
+      'Dialogue: avoid exposition; favor spoken conflict and emotional beats.';
 
   @override
   String get agentWorkspaceScriptContextDialogueConstraint =>
-      'Agent workspace script context dialogue constraint';
+      'Dialogue: avoid exposition; favor spoken conflict and emotional beats.';
 
   @override
-  String get agentWorkspaceScriptContextStorySkeleton =>
-      'Agent workspace script context story skeleton';
+  String get agentWorkspaceScriptContextStorySkeleton => 'From get_planData';
 
   @override
-  String get agentWorkspaceScriptContextFromPlanData =>
-      'Agent workspace script context from plan data';
+  String get agentWorkspaceScriptContextFromPlanData => 'From get_planData';
 
   @override
   String get agentWorkspaceScriptContextAdaptationStrategy =>
-      'Agent workspace script context adaptation strategy';
+      'From get_planData';
 
   @override
   String get agentWorkspaceScriptContextRewriteConstraints =>
-      'Agent workspace script context rewrite constraints';
+      'Downstream hints derived from get_planData';
 
   @override
   String get agentWorkspaceScriptContextRewriteConstraintsSubtitle =>
-      'Agent workspace script context rewrite constraints subtitle';
+      'Downstream hints derived from get_planData';
 
   @override
-  String get agentWorkspaceScriptContextUntitledScript =>
-      'Agent workspace script context untitled script';
+  String get agentWorkspaceScriptContextUntitledScript => 'Untitled script';
 
   @override
-  String get agentWorkspaceScriptContextNoBody =>
-      'Agent workspace script context no body';
+  String get agentWorkspaceScriptContextNoBody => 'No body';
 
   @override
   String get agentWorkspaceScriptContextPlanDrafts =>
-      'Agent workspace script context plan drafts';
+      'Up to 4 script rows shown';
 
   @override
   String get agentWorkspaceScriptContextPlanDraftsSubtitle =>
-      'Agent workspace script context plan drafts subtitle';
+      'Up to 4 script rows shown';
 
   @override
   String get agentWorkspaceScriptContextCurrentScriptBody =>
-      'Agent workspace script context current script body';
+      'From get_script_content';
 
   @override
   String get agentWorkspaceScriptContextFromScriptContent =>
-      'Agent workspace script context from script content';
+      'From get_script_content';
 
   @override
-  String get agentWorkspaceScriptContextUntitledChapter =>
-      'Agent workspace script context untitled chapter';
+  String get agentWorkspaceScriptContextUntitledChapter => 'Chapter';
 
   @override
   String agentWorkspaceScriptContextChapterPrefix(
@@ -19830,31 +20470,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptContextNovelChapters =>
-      'Agent workspace script context novel chapters';
+      'From get_novel_text (first 4 shown)';
 
   @override
   String get agentWorkspaceScriptContextNovelChaptersSubtitle =>
-      'Agent workspace script context novel chapters subtitle';
+      'From get_novel_text (first 4 shown)';
 
   @override
-  String get agentWorkspaceScriptContextUntitledEvent =>
-      'Agent workspace script context untitled event';
+  String get agentWorkspaceScriptContextUntitledEvent => 'Untitled event';
 
   @override
   String get agentWorkspaceScriptContextNovelEvents =>
-      'Agent workspace script context novel events';
+      'From get_novel_events (first 6 shown)';
 
   @override
   String get agentWorkspaceScriptContextNovelEventsSubtitle =>
-      'Agent workspace script context novel events subtitle';
+      'From get_novel_events (first 6 shown)';
 
   @override
-  String get agentWorkspaceScriptContextSnapshotTitle =>
-      'Agent workspace script context snapshot title';
+  String get agentWorkspaceScriptContextSnapshotTitle => 'Context snapshot';
 
   @override
   String get agentWorkspaceScriptLatestAssistantResult =>
-      'Agent workspace script latest assistant result';
+      'Latest assistant result';
 
   @override
   String agentWorkspaceScriptWritebackSource(String source) {
@@ -19863,7 +20501,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptSummaryReviewReturned =>
-      'Agent workspace script summary review returned';
+      'Review result returned';
 
   @override
   String agentWorkspaceScriptSummaryReviewLine(
@@ -19877,15 +20515,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptSummaryPlanDataMissing =>
-      'Agent workspace script summary plan data missing';
+      'planData missing data';
 
   @override
   String get agentWorkspaceScriptSummaryStorySkeletonReady =>
-      'Agent workspace script summary story skeleton ready';
+      'Story skeleton ready';
 
   @override
   String get agentWorkspaceScriptSummaryAdaptationReady =>
-      'Agent workspace script summary adaptation ready';
+      'Adaptation strategy ready';
 
   @override
   String agentWorkspaceScriptSummaryPlanScripts(int count) {
@@ -19894,11 +20532,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptSummaryRewriteReady =>
-      'Agent workspace script summary rewrite ready';
+      'Rewrite constraints ready for downstream use';
 
   @override
-  String get agentWorkspaceScriptSummaryPlanDataReturned =>
-      'Agent workspace script summary plan data returned';
+  String get agentWorkspaceScriptSummaryPlanDataReturned => 'planData returned';
 
   @override
   String agentWorkspaceScriptSummaryScriptEmpty(int chars) {
@@ -20298,36 +20935,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Read the review’s primary content first, then decide whether to rerun the sub-agent.';
 
   @override
-  String get agentWorkspaceScopeProjectIdLabel =>
-      'Agent workspace scope project id label';
+  String get agentWorkspaceScopeProjectIdLabel => 'Project ID';
 
   @override
-  String get agentWorkspaceScopeScriptIdLabel =>
-      'Agent workspace scope script id label';
+  String get agentWorkspaceScopeScriptIdLabel => 'Script ID';
 
   @override
-  String get agentWorkspaceScopeProjectUuidLabel =>
-      'Agent workspace scope project uuid label';
+  String get agentWorkspaceScopeProjectUuidLabel => 'Project UUID (optional)';
 
   @override
   String get agentWorkspaceScopeScriptUuidLabel =>
-      'Agent workspace scope script uuid label';
+      'Script UUID (optional, production attach)';
 
   @override
   String get agentWorkspaceScopeWorkspaceUuidLabel =>
-      'Agent workspace scope workspace uuid label';
+      'Workspace UUID (optional, WS workspaceUuid)';
 
   @override
-  String get agentWorkspacePaneScript => 'Agent workspace pane script';
+  String get agentWorkspacePaneScript => 'Script activity';
 
   @override
-  String get agentWorkspacePaneProduction => 'Agent workspace pane production';
+  String get agentWorkspacePaneProduction => 'Production activity';
 
   @override
-  String get agentWorkspacePaneActivity => 'Agent workspace pane activity';
+  String get agentWorkspacePaneActivity => 'Activity';
 
   @override
-  String get agentWorkspaceActivityTitle => 'Agent workspace activity title';
+  String get agentWorkspaceActivityTitle => 'Activity';
 
   @override
   String agentWorkspaceActivityLatest(String eventType) {
@@ -20341,19 +20975,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceActivityLatestAssistantText =>
-      'Agent workspace activity latest assistant text';
+      'Latest assistant text';
 
   @override
-  String get agentWorkspaceActivityNoWsEvents =>
-      'Agent workspace activity no ws events';
+  String get agentWorkspaceActivityNoWsEvents => 'No WebSocket events yet.';
 
   @override
-  String get agentWorkspaceProductionCardTitle =>
-      'Agent workspace production card title';
+  String get agentWorkspaceProductionCardTitle => 'Production workspace';
 
   @override
-  String get agentWorkspaceGuidedTasksTitle =>
-      'Agent workspace guided tasks title';
+  String get agentWorkspaceGuidedTasksTitle => 'Guided tasks';
 
   @override
   String get agentWorkspaceScriptWritebackSourceAssistant => 'Assistant output';
@@ -20373,117 +21004,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentWorkspaceScriptRunningWorkflow =>
-      'Agent workspace script running workflow';
+      'Running: workflow writeback';
 
   @override
   String get agentWorkspaceScriptRunningReadContext =>
-      'Agent workspace script running read context';
+      'Running: reading context for writeback';
 
   @override
   String get agentWorkspaceScriptRunningSubAgent =>
-      'Agent workspace script running sub agent';
+      'Running: sub-agent writeback';
 
   @override
   String get agentWorkspaceScriptRunningWriteback =>
-      'Agent workspace script running writeback';
+      'Running: writeback in progress';
 
   @override
   String get agentWorkspaceScriptRunningWritebackPlan =>
-      'Agent workspace script running writeback plan';
+      'Running: plan writeback in progress';
 
   @override
-  String get agentWorkspaceScriptCardTitle =>
-      'Agent workspace script card title';
+  String get agentWorkspaceScriptCardTitle => 'Script workspace';
 
   @override
-  String get agentWorkspaceSectionTitle => 'Agent workspace section title';
+  String get agentWorkspaceSectionTitle => 'Agent workspace';
 
   @override
   String get agentWorkspaceSectionDescription =>
-      'Agent workspace section description';
+      'Split script and production into separate panels and consolidate execution logs in a dedicated activity pane.';
 
   @override
-  String get contentComplianceTargetProject =>
-      'Content compliance target project';
+  String get contentComplianceTargetProject => 'Project';
 
   @override
-  String get contentComplianceTargetScript =>
-      'Content compliance target script';
+  String get contentComplianceTargetScript => 'Script';
 
   @override
-  String get contentComplianceTargetStoryboard =>
-      'Content compliance target storyboard';
+  String get contentComplianceTargetStoryboard => 'Storyboard';
 
   @override
-  String get contentComplianceTargetAsset => 'Content compliance target asset';
+  String get contentComplianceTargetAsset => 'Asset';
 
   @override
-  String get contentComplianceTargetNovel => 'Content compliance target novel';
+  String get contentComplianceTargetNovel => 'Novel';
 
   @override
-  String get contentComplianceTargetUser => 'Content compliance target user';
+  String get contentComplianceTargetUser => 'User';
 
   @override
-  String get contentComplianceOptionAll => 'Content compliance option all';
+  String get contentComplianceOptionAll => 'All';
 
   @override
-  String get contentComplianceCategoryCopyright =>
-      'Content compliance category copyright';
+  String get contentComplianceCategoryCopyright => 'Copyright';
 
   @override
-  String get contentComplianceCategorySafety =>
-      'Content compliance category safety';
+  String get contentComplianceCategorySafety => 'Safety';
 
   @override
-  String get contentComplianceCategoryHarassment =>
-      'Content compliance category harassment';
+  String get contentComplianceCategoryHarassment => 'Harassment';
 
   @override
-  String get contentComplianceCategoryAdult =>
-      'Content compliance category adult';
+  String get contentComplianceCategoryAdult => 'Adult content';
 
   @override
-  String get contentComplianceCategoryViolence =>
-      'Content compliance category violence';
+  String get contentComplianceCategoryViolence => 'Violence';
 
   @override
-  String get contentComplianceCategorySpam =>
-      'Content compliance category spam';
+  String get contentComplianceCategorySpam => 'Spam';
 
   @override
-  String get contentComplianceCategoryOther =>
-      'Content compliance category other';
+  String get contentComplianceCategoryOther => 'Other';
 
   @override
-  String get contentComplianceSeverityLow => 'Content compliance severity low';
+  String get contentComplianceSeverityLow => 'Low';
 
   @override
-  String get contentComplianceSeverityMedium =>
-      'Content compliance severity medium';
+  String get contentComplianceSeverityMedium => 'Medium';
 
   @override
-  String get contentComplianceSeverityHigh =>
-      'Content compliance severity high';
+  String get contentComplianceSeverityHigh => 'High';
 
   @override
-  String get contentComplianceSeverityCritical =>
-      'Content compliance severity critical';
+  String get contentComplianceSeverityCritical => 'Critical';
 
   @override
-  String get contentComplianceStatusPending =>
-      'Content compliance status pending';
+  String get contentComplianceStatusPending => 'Pending';
 
   @override
-  String get contentComplianceStatusClaimed =>
-      'Content compliance status claimed';
+  String get contentComplianceStatusClaimed => 'Claimed';
 
   @override
-  String get contentComplianceStatusResolved =>
-      'Content compliance status resolved';
+  String get contentComplianceStatusResolved => 'Resolved';
 
   @override
-  String get contentComplianceStatusDismissed =>
-      'Content compliance status dismissed';
+  String get contentComplianceStatusDismissed => 'Dismissed';
 
   @override
   String contentComplianceSlaOpenOver24h(int count) {
@@ -20501,23 +21114,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceFieldTargetType =>
-      'Content compliance field target type';
+  String get contentComplianceFieldTargetType => 'Target type';
 
   @override
-  String get contentComplianceFieldCategory =>
-      'Content compliance field category';
+  String get contentComplianceFieldCategory => 'Category';
 
   @override
-  String get contentComplianceFieldSeverity =>
-      'Content compliance field severity';
+  String get contentComplianceFieldSeverity => 'Severity';
 
   @override
-  String get contentComplianceFieldTargetUuid =>
-      'Content compliance field target uuid';
+  String get contentComplianceFieldTargetUuid => 'Target UUID';
 
   @override
-  String get contentComplianceFieldStatus => 'Content compliance field status';
+  String get contentComplianceFieldStatus => 'Status';
+
+  @override
+  String get contentComplianceCsvColumnReportId => 'Report ID';
+
+  @override
+  String get contentComplianceCsvColumnClaimedBy => 'Claimed by';
+
+  @override
+  String get contentComplianceCsvColumnWorkspaceName => 'Workspace';
+
+  @override
+  String get contentComplianceCsvColumnProjectName => 'Project';
+
+  @override
+  String get contentComplianceCsvColumnTargetId => 'Target ID';
+
+  @override
+  String get contentComplianceCsvColumnReporter => 'Reporter';
+
+  @override
+  String get contentComplianceCsvColumnCreatedAt => 'Created at';
+
+  @override
+  String get contentComplianceCsvColumnClaimedAt => 'Claimed at';
+
+  @override
+  String get contentComplianceCsvColumnResolvedAt => 'Resolved at';
+
+  @override
+  String get contentComplianceCsvColumnDetail => 'Detail';
 
   @override
   String contentComplianceSlaChip(String bucket) {
@@ -20536,17 +21175,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceMetricResolved(int count) {
-    return 'resolved $count';
+    return 'Resolved $count';
   }
 
   @override
   String contentComplianceMetricDismissed(int count) {
-    return 'dismissed $count';
+    return 'Dismissed $count';
   }
 
   @override
   String contentComplianceMetricCritical(int count) {
-    return 'critical $count';
+    return 'Critical $count';
   }
 
   @override
@@ -20556,7 +21195,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceMetricOverdue(int count) {
-    return 'overdue $count';
+    return 'Overdue $count';
   }
 
   @override
@@ -20639,19 +21278,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceAuditVerbClaim => 'claim';
+  String get contentComplianceAuditVerbClaim => 'Claim';
 
   @override
-  String get contentComplianceAuditVerbResolve => 'resolve';
+  String get contentComplianceAuditVerbResolve => 'Resolve';
 
   @override
-  String get contentComplianceAuditVerbDismiss => 'dismiss';
+  String get contentComplianceAuditVerbDismiss => 'Dismiss';
 
   @override
-  String get contentComplianceAuditVerbReassign => 'reassign';
+  String get contentComplianceAuditVerbReassign => 'Reassign';
 
   @override
-  String get contentComplianceAuditVerbAutoRebalance => 'auto-rebalance';
+  String get contentComplianceAuditVerbAutoRebalance => 'Auto rebalance';
 
   @override
   String contentComplianceAuditStatusChanged(String from, String to) {
@@ -20665,42 +21304,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceResolutionLine(String note) {
-    return 'resolution: $note';
+    return 'Resolution: $note';
   }
 
   @override
-  String get contentComplianceActionClaim => 'Content compliance action claim';
+  String get contentComplianceActionClaim => 'Claim';
 
   @override
-  String get contentComplianceActionResolve =>
-      'Content compliance action resolve';
+  String get contentComplianceActionResolve => 'Resolve';
 
   @override
-  String get contentComplianceActionDismiss =>
-      'Content compliance action dismiss';
+  String get contentComplianceActionDismiss => 'Dismiss';
 
   @override
-  String get contentComplianceFieldDisposition =>
-      'Content compliance field disposition';
+  String get contentComplianceFieldDisposition => 'Disposition';
 
   @override
-  String get contentComplianceDispositionNone =>
-      'Content compliance disposition none';
+  String get contentComplianceDispositionNone => 'None';
 
   @override
-  String get contentComplianceDispositionArchiveProject =>
-      'Content compliance disposition archive project';
+  String get contentComplianceDispositionArchiveProject => 'Archive project';
 
   @override
-  String get contentComplianceDispositionSuspendUser =>
-      'Content compliance disposition suspend user';
+  String get contentComplianceDispositionSuspendUser => 'Suspend user';
 
   @override
-  String get contentComplianceFieldResolutionNote =>
-      'Content compliance field resolution note';
+  String get contentComplianceFieldResolutionNote => 'Resolution note';
 
   @override
-  String get jobsEmptyValue => 'Jobs empty value';
+  String get projectEditorBasicsModelCatalogHelper =>
+      'Pick from the catalog or type a custom model ID.';
+
+  @override
+  String statusPageQueueMetricLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String get jobsEmptyValue => 'No jobs';
 
   @override
   String get systemProbesDataEmptyMarker => '(empty)';
@@ -20722,7 +21363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jobsUpdatedAt(String updatedAt) {
-    return 'updated $updatedAt';
+    return 'Updated $updatedAt';
   }
 
   @override
@@ -20736,52 +21377,54 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get jobsTitle => 'Jobs title';
+  String get jobsTitle => 'Jobs';
 
   @override
-  String get jobsPrefsTooltip => 'Jobs prefs tooltip';
+  String get jobsPrefsTooltip => 'Client preferences';
 
   @override
-  String get jobsSubtitle => 'Jobs subtitle';
+  String get jobsSubtitle =>
+      'Browse job list and status summaries, or open a job by ID.';
 
   @override
-  String get jobsLoadList => 'Jobs load list';
+  String get jobsLoadList => 'Load job list';
 
   @override
-  String get jobsLoadFailed => 'Jobs load failed';
+  String get jobsLoadFailed => 'Show failed jobs';
 
   @override
-  String get jobsLoadKinds => 'Jobs load kinds';
+  String get jobsLoadKinds => 'Load job kinds';
 
   @override
-  String get jobsLoadKindSummary => 'Jobs load kind summary';
+  String get jobsLoadKindSummary => 'Show kind summary';
 
   @override
-  String get jobsLoadStatusSummary => 'Jobs load status summary';
+  String get jobsLoadStatusSummary => 'Show status summary';
 
   @override
-  String get jobsCompatTitle => 'Jobs compat title';
+  String get jobsCompatTitle => 'Dev probes (Harness)';
 
   @override
-  String get jobsCompatSubtitle => 'Jobs compat subtitle';
+  String get jobsCompatSubtitle =>
+      'Debug shell only — for Harness job probe regression.';
 
   @override
-  String get jobsCompatHttpProbeFilters => 'Jobs compat http probe filters';
+  String get jobsCompatHttpProbeFilters => 'HTTP probe filters';
 
   @override
-  String get jobsFilterFlutterProbe => 'Jobs filter flutter probe';
+  String get jobsFilterFlutterProbe => 'Filter flutter.probe';
 
   @override
-  String get jobsFilterFlutterProbeQueued => 'Jobs filter flutter probe queued';
+  String get jobsFilterFlutterProbeQueued => 'Show queued flutter.probe';
 
   @override
-  String get jobsCreateProbeJob => 'Jobs create probe job';
+  String get jobsCreateProbeJob => 'Create probe job';
 
   @override
-  String get jobsJobIdLabel => 'Jobs job id label';
+  String get jobsJobIdLabel => 'Job ID (tap a list row to fill)';
 
   @override
-  String get jobsFetchDetail => 'Jobs fetch detail';
+  String get jobsFetchDetail => 'Load job detail';
 
   @override
   String jobsDetailLabel(String detail) {
@@ -20809,30 +21452,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get jobsRetry => 'Jobs retry';
+  String get jobsRetry => 'Retry';
 
   @override
-  String get jobsCancel => 'Jobs cancel';
+  String get jobsCancel => 'Cancel';
 
   @override
   String get notificationsRealtimeDisconnected =>
-      'Notifications realtime disconnected';
+      'Realtime notifications disconnected';
 
   @override
   String get notificationsPlatformStatusRecovered =>
-      'Notifications platform status recovered';
+      'Platform status recovered';
 
   @override
-  String get notificationsPlatformStatusDegraded =>
-      'Notifications platform status degraded';
+  String get notificationsPlatformStatusDegraded => 'Platform status degraded';
 
   @override
   String get notificationsPlatformStatusRecoveredMessage =>
-      'Notifications platform status recovered message';
+      'All monitored endpoints are healthy again.';
 
   @override
   String get notificationsPlatformStatusDegradedMessage =>
-      'Notifications platform status degraded message';
+      'Some platform endpoints are degraded.';
 
   @override
   String notificationsPlatformStatusAffectedEndpoints(String endpoints) {
@@ -20851,7 +21493,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsComplianceSharedAsyncExportCompleted =>
-      'Notifications compliance shared async export completed';
+      'Workspace shared audit export completed';
 
   @override
   String notificationsComplianceSharedAsyncExportCancelled(int taskId) {
@@ -20873,11 +21515,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsComplianceSharedAsyncExportTimedOut =>
-      'Notifications compliance shared async export timed out';
+      'Workspace shared audit export timed out';
 
   @override
   String get notificationsImportJsonObjectRequired =>
-      'Notifications import json object required';
+      'Imported JSON must be an object';
 
   @override
   String notificationsImportJsonParseFailed(String message) {
@@ -20930,36 +21572,83 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get billingAuditEventTypeLabel => 'Billing audit event type label';
+  String get billingAuditEventTypeLabel => 'Event type';
 
   @override
-  String get billingAuditProviderEventIdLabel =>
-      'Billing audit provider event id label';
+  String get billingAuditProviderEventIdLabel => 'Provider event ID';
 
   @override
-  String get billingAuditRawEventIdLabel => 'Billing audit raw event id label';
+  String get billingAuditRawEventIdLabel => 'Raw event ID';
 
   @override
   String get billingAuditProviderEventIdPrefixLabel =>
-      'Billing audit provider event id prefix label';
+      'Provider event ID prefix';
 
   @override
-  String get billingAuditRawEventIdPrefixLabel =>
-      'Billing audit raw event id prefix label';
+  String get billingAuditRawEventIdPrefixLabel => 'Raw event ID prefix';
 
   @override
-  String get billingAuditEventCreatedFromLabel =>
-      'Billing audit event created from label';
+  String get billingAuditEventCreatedFromLabel => 'Event created (from)';
 
   @override
-  String get billingAuditEventCreatedToLabel =>
-      'Billing audit event created to label';
+  String get billingAuditEventCreatedToLabel => 'Event created (to)';
 
   @override
-  String get billingAuditCreatedFromLabel => 'Billing audit created from label';
+  String get billingAuditCreatedFromLabel => 'Recorded (from)';
 
   @override
-  String get billingAuditCreatedToLabel => 'Billing audit created to label';
+  String get billingAuditCreatedToLabel => 'Recorded (to)';
+
+  @override
+  String get projectStudioOpenAssetEditor => 'Open asset editor';
+
+  @override
+  String get projectStudioTasks => 'Tasks';
+
+  @override
+  String projectStudioTasksRunning(int count) {
+    return 'Tasks ($count)';
+  }
+
+  @override
+  String get shortVideoDownloadDesktopApp => 'Download desktop app';
+
+  @override
+  String get projectEditorBasicsModelRoutingTitle => 'Model routing';
+
+  @override
+  String get projectEditorBasicsTextModelLabel => 'Text model';
+
+  @override
+  String get projectEditorBasicsTextModelHelper =>
+      'Default model for project-level text generation.';
+
+  @override
+  String get projectEditorBasicsMultimodalModelLabel => 'Multimodal model';
+
+  @override
+  String get projectEditorBasicsMultimodalModelHelper =>
+      'Used for vision or mixed-input workflows.';
+
+  @override
+  String get projectEditorBasicsImageModelLabel => 'Image model';
+
+  @override
+  String get projectEditorBasicsVideoModelLabel => 'Video model';
+
+  @override
+  String get projectEditorBasicsVoiceModelLabel => 'Voice model';
+
+  @override
+  String get projectEditorBasicsVoiceModelHelper =>
+      'Optional TTS model override for this project.';
+
+  @override
+  String get projectEditorBasicsVoiceProfileLabel => 'Voice profile';
+
+  @override
+  String get projectEditorBasicsVoiceProfileHelper =>
+      'Preset name or JSON voice configuration.';
 
   @override
   String notificationsFilterCount(int count) {
@@ -21210,7 +21899,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' TOONFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
+      ' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
 
   @override
   String get statusPageRefreshing => 'Refreshing…';
@@ -21531,7 +22220,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      'Uses TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import 'quality_reviews_l10n.dart';
 import 'support_actions.dart';
 import 'support_models.dart';
 
@@ -8,6 +9,7 @@ String? summarizeMemoryScopePressureFromQualityReviews(
   int maxScopes = 3,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final scopes =
       <
         String,
@@ -83,18 +85,13 @@ String? summarizeMemoryScopePressureFromQualityReviews(
           l10n: l10n,
         );
         final parts = <String>[
-          '${entry.key} ${entry.value.reviews}${l10n?.qualityReviewsItemUnit ?? ' items'}',
+          '${entry.key} ${entry.value.reviews}${loc.qualityReviewsItemUnit}',
         ];
         if (hitSummary.isNotEmpty) {
-          parts.add(
-            l10n?.qualityReviewsHitSummary(hitSummary) ?? 'hit $hitSummary',
-          );
+          parts.add(loc.qualityReviewsHitSummary(hitSummary));
         }
         if (suppressedSummary.isNotEmpty) {
-          parts.add(
-            l10n?.qualityReviewsSuppressedSummary(suppressedSummary) ??
-                'suppressed $suppressedSummary',
-          );
+          parts.add(loc.qualityReviewsSuppressedSummary(suppressedSummary));
         }
         return parts.join(' · ');
       })
@@ -106,6 +103,7 @@ String? summarizeMemoryOptimizationSavingsFromQualityReviews(
   int maxScopes = 3,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final scopes =
       <
         String,
@@ -167,15 +165,14 @@ String? summarizeMemoryOptimizationSavingsFromQualityReviews(
       .take(maxScopes)
       .map((entry) {
         final value = entry.value;
-        return l10n?.qualityReviewsMemoryOptimizationScopeLine(
-              entry.key,
-              value.reviews,
-              value.removedChars,
-              value.removedRows,
-              value.removedDuplicateRows,
-              value.removedVisualRows,
-            ) ??
-            '${entry.key} ${value.reviews} items · slim ${value.removedChars} chars / ${value.removedRows} items (dup ${value.removedDuplicateRows} / visual-only ${value.removedVisualRows})';
+        return loc.qualityReviewsMemoryOptimizationScopeLine(
+          entry.key,
+          value.reviews,
+          value.removedChars,
+          value.removedRows,
+          value.removedDuplicateRows,
+          value.removedVisualRows,
+        );
       })
       .join(' | ');
 }
@@ -186,6 +183,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
   int maxSuggestionsPerScope = 2,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final scopes =
       <
         String,
@@ -225,7 +223,7 @@ String? summarizeScopeRepairQueueFromQualityReviews(
     final removedChars = diagnostics == null
         ? 0
         : diagnosticInt(diagnostics, 'memoryOptimizationRemovedChars');
-    final suggestions = buildQualityReviewRepairSuggestions(row, l10n: l10n);
+    final suggestions = buildQualityReviewRepairSuggestions(row, l10n: loc);
     final dialogueRisk = hasDialogueRisk(row);
     final visualRisk = hasVisualRisk(row);
     if (!row.isBadCase &&
@@ -305,22 +303,18 @@ String? summarizeScopeRepairQueueFromQualityReviews(
             .map((item) => item.key)
             .join(' / ');
         final parts = <String>[
-          '${entry.key} ${value.reviews}${l10n?.qualityReviewsItemUnit ?? ' items'}',
+          '${entry.key} ${value.reviews}${loc.qualityReviewsItemUnit}',
           if (value.badCases > 0)
-            l10n?.qualityReviewsBadCaseCount(value.badCases) ??
-                'bad cases ${value.badCases}',
+            loc.qualityReviewsBadCaseCount(value.badCases),
           if (value.dialogueRiskHits > 0)
-            l10n?.qualityReviewsDialogueRiskCount(value.dialogueRiskHits) ??
-                'emotion/dialogue ${value.dialogueRiskHits}',
+            loc.qualityReviewsDialogueRiskCount(value.dialogueRiskHits),
           if (value.visualRiskHits > 0)
-            l10n?.qualityReviewsVisualRiskCount(value.visualRiskHits) ??
-                'realism ${value.visualRiskHits}',
-          if (value.removedChars > 0) 'slim ${value.removedChars} chars',
+            loc.qualityReviewsVisualRiskCount(value.visualRiskHits),
+          if (value.removedChars > 0)
+            loc.qualityReviewsMemorySlimming('${value.removedChars}'),
         ];
         if (nextStep.isNotEmpty) {
-          parts.add(
-            l10n?.qualityReviewsNextStep(nextStep) ?? 'next step $nextStep',
-          );
+          parts.add(loc.qualityReviewsNextStep(nextStep));
         }
         return parts.join(' · ');
       })

@@ -15,19 +15,46 @@ extension _ShortVideoSpaceSectionExportHistoryDialog
   ///
   /// Shows all export tasks for the current project with filtering options
   // ignore: unused_element
-  Future<void> _openExportHistoryDialog({
+  Future<ExportHistoryDialogResult> _openExportHistoryDialog({
     required BuildContext context,
+    String? currentTaskId,
   }) async {
-    await showDialog<void>(
+    final initialTaskId =
+        currentTaskId ??
+        (_activeAssemblyJob?.kind == 'video.export' ? _activeAssemblyJob?.id : null);
+    final result = await showDialog<ExportHistoryDialogResult>(
       context: context,
       builder: (dialogContext) {
         return ExportHistoryDialog(
           projectId: _selectedProjectId ?? '',
           accessToken: widget.accessToken,
+          currentTaskId: initialTaskId,
+          onOpenProductionWorkspace: () {
+            Navigator.of(dialogContext).pop(
+              ExportHistoryDialogResult(
+                focusedTaskId: initialTaskId,
+                shouldTrackFocusedTask: true,
+                openProductionWorkspaceRequested: true,
+              ),
+            );
+          },
         );
       },
     );
+    return result ?? const ExportHistoryDialogResult();
   }
+}
+
+class ExportHistoryDialogResult {
+  const ExportHistoryDialogResult({
+    this.focusedTaskId,
+    this.shouldTrackFocusedTask = false,
+    this.openProductionWorkspaceRequested = false,
+  });
+
+  final String? focusedTaskId;
+  final bool shouldTrackFocusedTask;
+  final bool openProductionWorkspaceRequested;
 }
 
 /// Time filter options for export history
@@ -112,6 +139,7 @@ class ExportHistoryItem {
     this.completedAt,
     this.outputUrl,
     this.errorMessage,
+    this.failureCode,
     this.fileSize,
   });
 
@@ -125,6 +153,7 @@ class ExportHistoryItem {
   final DateTime? completedAt;
   final String? outputUrl;
   final String? errorMessage;
+  final String? failureCode;
   final int? fileSize; // in bytes
 
   factory ExportHistoryItem.fromJson(Map<String, dynamic> json) {
@@ -149,6 +178,7 @@ class ExportHistoryItem {
           json['output_url'] as String? ?? json['outputUrl'] as String?,
       errorMessage: json['error_message'] as String? ??
           json['errorMessage'] as String?,
+      failureCode: json['failure_code'] as String? ?? json['failureCode'] as String?,
       fileSize: (json['file_size'] as num?)?.toInt() ??
           (json['fileSize'] as num?)?.toInt(),
     );
@@ -181,15 +211,86 @@ class ExportHistoryItem {
   }
 }
 
+String _bitrateLabelFromQualityMap(Map<String, dynamic> quality) {
+  final raw = quality['bitrate'];
+  if (raw is num) {
+    if (raw >= 7000) {
+      return 'high';
+    }
+    if (raw >= 3000) {
+      return 'medium';
+    }
+    return 'low';
+  }
+  final text = quality['bitrateLabel'] as String?;
+  if (text != null && text.trim().isNotEmpty) {
+    return text.trim();
+  }
+  return 'medium';
+}
+
+ExportHistoryItem exportHistoryItemFromJob(JobRow job) {
+  final status = switch (job.status) {
+    'succeeded' => ExportTaskStatus.completed,
+    'failed' => ExportTaskStatus.failed,
+    'cancelled' => ExportTaskStatus.cancelled,
+    'running' => ExportTaskStatus.processing,
+    _ => ExportTaskStatus.queued,
+  };
+  final payload = job.payload;
+  final quality = payload['quality'] as Map<String, dynamic>?;
+  final format = payload['format'] as String? ?? 'mp4';
+  final resolution =
+      payload['resolution'] as String? ??
+      quality?['resolution'] as String? ??
+      '1080p';
+  final bitrate = payload['bitrate_label'] as String? ??
+      (quality == null ? null : _bitrateLabelFromQualityMap(quality)) ??
+      'medium';
+  final framerate = (payload['framerate'] as num?)?.toInt() ??
+      (quality?['fps'] as num?)?.toInt() ??
+      30;
+  final result = job.result;
+  final outputUrl = result == null
+      ? null
+      : result['output_url'] as String? ??
+            result['file_url'] as String? ??
+            result['url'] as String?;
+  final fileSize = result == null
+      ? null
+      : (result['file_size'] as num?)?.toInt() ??
+            (result['size_bytes'] as num?)?.toInt();
+  final created = DateTime.tryParse(job.createdAt) ?? DateTime.now();
+  final updated = DateTime.tryParse(job.updatedAt);
+  return ExportHistoryItem(
+    taskId: job.id,
+    status: status,
+    format: format,
+    resolution: resolution,
+    bitrate: bitrate,
+    framerate: framerate,
+    createdAt: created,
+    completedAt: status == ExportTaskStatus.completed ? updated : null,
+    outputUrl: outputUrl,
+    errorMessage: job.errorMessage,
+    failureCode: job.errorDetails?['code'] as String?,
+    fileSize: fileSize,
+  );
+}
+
 class ExportHistoryDialog extends StatefulWidget {
   const ExportHistoryDialog({
     super.key,
     required this.projectId,
     required this.accessToken,
+    this.currentTaskId,
+    this.onOpenProductionWorkspace,
   });
 
   final String projectId;
   final String? accessToken;
+  final String? currentTaskId;
+  final VoidCallback? onOpenProductionWorkspace;
 
   @override
   State<ExportHistoryDialog> createState() => _ExportHistoryDialogState();
@@ -202,11 +303,23 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   bool _loading = true;
   String? _errorMessage;
   final Set<String> _downloadingTasks = {};
+  Timer? _refreshTimer;
+  String? _focusedTaskId;
+  bool _shouldTrackFocusedTask = false;
 
   @override
   void initState() {
     super.initState();
+    _focusedTaskId = widget.currentTaskId?.trim().isEmpty ?? true
+        ? null
+        : widget.currentTaskId!.trim();
     _loadHistory();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadHistory() async {
@@ -230,6 +343,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         _historyItems = items;
         _loading = false;
       });
+      _syncAutoRefresh(items);
     } catch (e) {
       if (!mounted) return;
 
@@ -238,6 +352,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(describeUserVisibleApiError(l10n, e));
         _loading = false;
       });
+      _syncAutoRefresh(const <ExportHistoryItem>[]);
     }
   }
 
@@ -260,39 +375,17 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     final projectJobs = jobs
         .where((j) => j.payload['project_uuid']?.toString() == projectId)
         .toList(growable: false);
-    final items = projectJobs
-        .map((job) {
-          final status = switch (job.status) {
-            'succeeded' => ExportTaskStatus.completed,
-            'failed' => ExportTaskStatus.failed,
-            'cancelled' => ExportTaskStatus.cancelled,
-            'running' => ExportTaskStatus.processing,
-            _ => ExportTaskStatus.queued,
-          };
-          final payload = job.payload;
-          final format = payload['format'] as String? ?? 'mp4';
-          final result = job.result;
-          final outputUrl = result == null
-              ? null
-              : result['output_url'] as String? ??
-                    result['file_url'] as String? ??
-                    result['url'] as String?;
-          final created = DateTime.tryParse(job.createdAt) ?? DateTime.now();
-          final updated = DateTime.tryParse(job.updatedAt);
-          return ExportHistoryItem(
-            taskId: job.id,
-            status: status,
-            format: format,
-            resolution: '1080p',
-            bitrate: 'medium',
-            framerate: 30,
-            createdAt: created,
-            completedAt: status == ExportTaskStatus.completed ? updated : null,
-            outputUrl: outputUrl,
-            errorMessage: job.errorMessage,
-          );
-        })
-        .toList(growable: false);
+    final items = projectJobs.map(exportHistoryItemFromJob).toList(growable: true);
+    final currentTaskId = _focusedTaskId;
+    if (currentTaskId != null &&
+        currentTaskId.isNotEmpty &&
+        items.every((item) => item.taskId != currentTaskId)) {
+      final currentJob = await fetchJob(token, currentTaskId);
+      if (currentJob.payload['project_uuid']?.toString() == projectId &&
+        currentJob.kind == 'video.export') {
+        items.add(exportHistoryItemFromJob(currentJob));
+      }
+    }
 
     // Apply filters
     var filtered = items.where((item) {
@@ -310,27 +403,37 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
     // Sort by creation time (newest first)
     filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final focusedTaskId = _focusedTaskId;
+    if (focusedTaskId != null && focusedTaskId.isNotEmpty) {
+      filtered.sort((a, b) {
+        final aFocused = a.taskId == focusedTaskId ? 1 : 0;
+        final bFocused = b.taskId == focusedTaskId ? 1 : 0;
+        if (aFocused != bFocused) {
+          return bFocused.compareTo(aFocused);
+        }
+        return b.createdAt.compareTo(a.createdAt);
+      });
+    }
 
     return filtered;
   }
 
-  // ignore: unused_element
-  String _bitrateLabelFromQuality(Map<String, dynamic> quality) {
-    final raw = quality['bitrate'];
-    if (raw is num) {
-      if (raw >= 7000) {
-        return 'high';
-      }
-      if (raw >= 3000) {
-        return 'medium';
-      }
-      return 'low';
+  void _syncAutoRefresh(List<ExportHistoryItem> items) {
+    final hasActive = items.any(
+      (item) =>
+          item.status == ExportTaskStatus.queued ||
+          item.status == ExportTaskStatus.processing,
+    );
+    if (!hasActive) {
+      _refreshTimer?.cancel();
+      _refreshTimer = null;
+      return;
     }
-    final text = quality['bitrateLabel'] as String?;
-    if (text != null && text.trim().isNotEmpty) {
-      return text.trim();
-    }
-    return 'medium';
+    _refreshTimer ??= Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!_loading) {
+        unawaited(_loadHistory());
+      }
+    });
   }
 
   Future<void> _downloadExport(ExportHistoryItem item) async {
@@ -378,6 +481,42 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     }
   }
 
+  Future<void> _retryExport(ExportHistoryItem item) async {
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty || _loading) {
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+      _focusedTaskId = item.taskId;
+    });
+    try {
+      final updated = await retryJob(token, item.taskId);
+      _focusedTaskId = updated.id;
+      _shouldTrackFocusedTask = true;
+      if (!mounted) {
+        return;
+      }
+      await _loadHistory();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      final l10n = resolveAppLocalizationsForErrors(context);
+      setState(() {
+        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(
+          describeUserVisibleApiError(l10n, e),
+        );
+        _loading = false;
+      });
+    }
+  }
+
+  void _openProductionWorkspace() {
+    widget.onOpenProductionWorkspace?.call();
+  }
+
   Future<void> _triggerDownload(String url, String taskId) async {
     await Clipboard.setData(ClipboardData(text: url));
     debugPrint('Export download url for task $taskId: $url');
@@ -408,6 +547,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_focusedTaskId != null && _focusedTaskId!.isNotEmpty) ...[
+              _buildCurrentTaskBanner(theme),
+              const SizedBox(height: 16),
+            ],
             // Filters
             Row(
               children: [
@@ -483,7 +626,12 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(
+            ExportHistoryDialogResult(
+              focusedTaskId: _focusedTaskId,
+              shouldTrackFocusedTask: _shouldTrackFocusedTask,
+            ),
+          ),
           child: Text(l10n.shortVideoSpaceDialogExportHistoryClose),
         ),
       ],
@@ -565,118 +713,324 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     );
   }
 
+  Widget _buildCurrentTaskBanner(ThemeData theme) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ExportHistoryItem? focused;
+    for (final item in _historyItems) {
+      if (item.taskId == _focusedTaskId) {
+        focused = item;
+        break;
+      }
+    }
+    if (focused == null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          'Task ID: ${_focusedTaskId!}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            focused.status == ExportTaskStatus.processing ||
+                    focused.status == ExportTaskStatus.queued
+                ? Icons.sync
+                : focused.status == ExportTaskStatus.failed
+                ? Icons.error_outline
+                : focused.status == ExportTaskStatus.cancelled
+                ? Icons.cancel_outlined
+                : Icons.task_alt,
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${focused.status.displayName(l10n)} · ${getFormatDisplayName(l10n, focused.format.toLowerCase())}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Task ID: ${focused.taskId}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (focused.status == ExportTaskStatus.processing ||
+              focused.status == ExportTaskStatus.queued)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHistoryItem(ExportHistoryItem item, ThemeData theme) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final isDownloading = _downloadingTasks.contains(item.taskId);
+    final isFocused = item.taskId == _focusedTaskId;
+    final failureCode = (item.failureCode ?? '').trim();
+    final failureCodeLabel = failureCode.isEmpty
+        ? null
+        : videoExportFailureCodeLabel(l10n, failureCode);
+    final structuredFailureLine =
+        (failureCodeLabel ?? '').trim().isEmpty
+        ? null
+        : l10n.taskCenterStructuredFailure(failureCodeLabel!);
+    final rawErrorLine = (item.errorMessage ?? '').trim().isEmpty
+        ? null
+        : item.errorMessage!.trim();
 
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
+    return Container(
+      decoration: BoxDecoration(
+        color: isFocused
+            ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.45)
+            : null,
+        border: isFocused
+            ? Border(
+                left: BorderSide(
+                  color: theme.colorScheme.secondary,
+                  width: 3,
+                ),
+              )
+            : null,
       ),
-      leading: _buildStatusIcon(item.status, theme),
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '${getFormatDisplayName(l10n, item.format.toLowerCase())} · ${getResolutionDisplayName(l10n, item.resolution)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: _getStatusColor(item.status, theme).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              item.status.displayName(l10n),
-              style: TextStyle(
-                fontSize: 12,
-                color: _getStatusColor(item.status, theme),
-                fontWeight: FontWeight.bold,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        leading: _buildStatusIcon(item.status, theme),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${getFormatDisplayName(l10n, item.format.toLowerCase())} · ${getResolutionDisplayName(l10n, item.resolution)}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          Text(
-            l10n.shortVideoSpaceDialogExportHistoryCreatedAt(_formatDateTime(item.createdAt)),
-            style: theme.textTheme.bodySmall,
-          ),
-          if (item.completedAt != null)
-            Text(
-              l10n.shortVideoSpaceDialogExportHistoryCompletedAt(
-                _formatDateTime(item.completedAt!),
-                item.formattedDuration(l10n),
+            if (isFocused) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  l10n.teamWorkspaceCurrentBadge,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-              style: theme.textTheme.bodySmall,
-            ),
-          if (item.fileSize != null)
-            Text(
-              l10n.shortVideoSpaceDialogExportHistoryFileSize(item.formattedFileSize(l10n)),
-              style: theme.textTheme.bodySmall,
-            ),
-          if (item.errorMessage != null) ...[
-            const SizedBox(height: 4),
+            ],
+            const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer,
+                color: _getStatusColor(item.status, theme).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 16,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      item.errorMessage!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onErrorContainer,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                item.status.displayName(l10n),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _getStatusColor(item.status, theme),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
-          const SizedBox(height: 4),
-          Text(
-            l10n.shortVideoSpaceDialogExportHistorySettings(
-              getBitrateDisplayName(l10n, item.bitrate),
-              l10n.shortVideoExportSettingsFramerateOption(item.framerate),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              l10n.shortVideoSpaceDialogExportHistoryCreatedAt(_formatDateTime(item.createdAt)),
+              style: theme.textTheme.bodySmall,
             ),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            if (item.completedAt != null)
+              Text(
+                l10n.shortVideoSpaceDialogExportHistoryCompletedAt(
+                  _formatDateTime(item.completedAt!),
+                  item.formattedDuration(l10n),
+                ),
+                style: theme.textTheme.bodySmall,
+              ),
+            Text(
+              'Task ID: ${item.taskId}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-        ],
+            if (item.fileSize != null)
+              Text(
+                l10n.shortVideoSpaceDialogExportHistoryFileSize(item.formattedFileSize(l10n)),
+                style: theme.textTheme.bodySmall,
+              ),
+            if (structuredFailureLine != null || rawErrorLine != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 16,
+                      color: theme.colorScheme.onErrorContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (structuredFailureLine != null)
+                            Text(
+                              structuredFailureLine,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onErrorContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          if (rawErrorLine != null) ...[
+                            if (structuredFailureLine != null)
+                              const SizedBox(height: 2),
+                            Text(
+                              rawErrorLine,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              l10n.shortVideoSpaceDialogExportHistorySettings(
+                getBitrateDisplayName(l10n, item.bitrate),
+                l10n.shortVideoExportSettingsFramerateOption(item.framerate),
+              ),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        trailing: _buildHistoryItemTrailing(
+          item: item,
+          isDownloading: isDownloading,
+          l10n: l10n,
+        ),
       ),
-      trailing: item.status == ExportTaskStatus.completed && item.outputUrl != null
-          ? FilledButton.icon(
-              onPressed: isDownloading ? null : () => _downloadExport(item),
-              icon: isDownloading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.download),
-              label: Text(isDownloading ? l10n.shortVideoSpaceDialogExportHistoryDownloading : l10n.shortVideoSpaceDialogExportHistoryDownload),
-            )
-          : null,
     );
+  }
+
+  Widget? _buildHistoryItemTrailing({
+    required ExportHistoryItem item,
+    required bool isDownloading,
+    required AppLocalizations l10n,
+  }) {
+    if (item.status == ExportTaskStatus.completed && item.outputUrl != null) {
+      return FilledButton.icon(
+        onPressed: isDownloading ? null : () => _downloadExport(item),
+        icon: isDownloading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.download),
+        label: Text(
+          isDownloading
+              ? l10n.shortVideoSpaceDialogExportHistoryDownloading
+              : l10n.shortVideoSpaceDialogExportHistoryDownload,
+        ),
+      );
+    }
+    if (item.status == ExportTaskStatus.failed ||
+        item.status == ExportTaskStatus.cancelled) {
+      final recommendedAction = recommendExportFailureAction(
+        _classifyExportFailurePhase(null, item.failureCode),
+        item.failureCode,
+      );
+      final retryButton = OutlinedButton.icon(
+        onPressed: _loading ? null : () => _retryExport(item),
+        icon: const Icon(Icons.refresh),
+        label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
+      );
+      final openProductionButton = OutlinedButton.icon(
+        onPressed: widget.onOpenProductionWorkspace == null
+            ? null
+            : _openProductionWorkspace,
+        icon: const Icon(Icons.movie_creation_outlined),
+        label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
+      );
+      if (recommendedAction == ShortVideoLatestExportAction.openProductionWorkspace &&
+          widget.onOpenProductionWorkspace != null) {
+        return FilledButton.icon(
+          onPressed: _openProductionWorkspace,
+          icon: const Icon(Icons.movie_creation_outlined),
+          label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
+        );
+      }
+      if (recommendedAction == ShortVideoLatestExportAction.retry) {
+        return FilledButton.icon(
+          onPressed: _loading ? null : () => _retryExport(item),
+          icon: const Icon(Icons.refresh),
+          label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
+        );
+      }
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          retryButton,
+          if (widget.onOpenProductionWorkspace != null) openProductionButton,
+        ],
+      );
+    }
+    return null;
   }
 
   Widget _buildStatusIcon(ExportTaskStatus status, ThemeData theme) {

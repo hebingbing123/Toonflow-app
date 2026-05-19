@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
+import '../../platform/studio_load_state.dart';
+import '../../l10n/studio_code_labels.dart';
 import '../../rust_api.dart';
 
 class JobsSectionViewModel {
@@ -16,6 +20,8 @@ class JobsSectionViewModel {
     required this.loadingJobById,
     required this.jobIdController,
     required this.jobs,
+    this.jobsLoadState = StudioLoadState.initial,
+    this.jobsLastError,
     required this.jobByIdLine,
     required this.jobKindsLine,
     required this.jobKindSummaryLine,
@@ -32,6 +38,8 @@ class JobsSectionViewModel {
   final bool loadingJobById;
   final TextEditingController jobIdController;
   final List<JobRow>? jobs;
+  final StudioLoadState jobsLoadState;
+  final Object? jobsLastError;
   final String? jobByIdLine;
   final String? jobKindsLine;
   final String? jobKindSummaryLine;
@@ -97,11 +105,9 @@ class JobsSectionView extends StatelessWidget {
             title: l10n.jobsTitle,
             subtitle: l10n.jobsSubtitle,
             showBack: studioPresentation,
-            trailing: studioPresentation
-                ? null
-                : RiskyOperationConfirmPrefsOverflowMenu(
-                    tooltip: l10n.jobsPrefsTooltip,
-                  ),
+            trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.jobsPrefsTooltip,
+            ),
           ),
           const SizedBox(height: 12),
           if (studioPresentation)
@@ -160,28 +166,39 @@ class JobsSectionView extends StatelessWidget {
                 ),
               ],
             ),
-          const SizedBox(height: 8),
-          ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: EdgeInsets.zero,
-            initiallyExpanded: !studioPresentation,
-            title: Text(l10n.jobsCompatTitle),
-            subtitle: Text(
-              l10n.jobsCompatSubtitle,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: muted),
+          if (studioPresentation &&
+              model.jobsLoadState == StudioLoadState.error &&
+              model.jobsLastError != null) ...<Widget>[
+            const SizedBox(height: 12),
+            StudioApiErrorCallout(
+              error: model.jobsLastError!,
+              onRetry: callbacks.onLoadJobs,
             ),
-            children: [
-              if (studioPresentation)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: RiskyOperationConfirmPrefsOverflowMenu(
-                    tooltip: l10n.jobsPrefsTooltip,
-                  ),
-                ),
-              if (studioPresentation) const SizedBox(height: 8),
-              if (!studioPresentation) ...[
+          ] else if (studioPresentation &&
+              model.jobsLoadState == StudioLoadState.empty) ...<Widget>[
+            const SizedBox(height: 12),
+            StudioEmptyState(
+              title: l10n.jobsEmptyValue,
+              subtitle: l10n.jobsSubtitle,
+              icon: Icons.work_outline,
+              actionLabel: l10n.jobsLoadList,
+              onAction: callbacks.onLoadJobs,
+            ),
+          ],
+          if (!studioPresentation) ...<Widget>[
+            const SizedBox(height: 8),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: EdgeInsets.zero,
+              initiallyExpanded: false,
+              title: Text(l10n.jobsCompatTitle),
+              subtitle: Text(
+                l10n.jobsCompatSubtitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -192,12 +209,10 @@ class JobsSectionView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-              ],
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (!studioPresentation) ...[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
                     FilledButton.tonal(
                       onPressed: model.loadingJobs
                           ? null
@@ -210,16 +225,14 @@ class JobsSectionView extends StatelessWidget {
                           : callbacks.onLoadJobsKindProbeStatusQueued,
                       child: Text(l10n.jobsFilterFlutterProbeQueued),
                     ),
-                  ],
-                  FilledButton.tonal(
-                    onPressed: model.creatingJob
-                        ? null
-                        : callbacks.onCreateProbeJob,
-                    child: Text(
-                      model.creatingJob ? '…' : l10n.jobsCreateProbeJob,
+                    FilledButton.tonal(
+                      onPressed: model.creatingJob
+                          ? null
+                          : callbacks.onCreateProbeJob,
+                      child: Text(
+                        model.creatingJob ? '…' : l10n.jobsCreateProbeJob,
+                      ),
                     ),
-                  ),
-                  if (studioPresentation) ...[
                     FilledButton.tonal(
                       onPressed: model.loadingJobKinds
                           ? null
@@ -248,38 +261,28 @@ class JobsSectionView extends StatelessWidget {
                             : l10n.jobsLoadStatusSummary,
                       ),
                     ),
-                    FilledButton.tonal(
-                      onPressed: model.loadingJobs
-                          ? null
-                          : callbacks.onLoadJobsKindFlutterProbe,
-                      child: Text(l10n.jobsFilterFlutterProbe),
-                    ),
-                    FilledButton.tonal(
-                      onPressed: model.loadingJobs
-                          ? null
-                          : callbacks.onLoadJobsKindProbeStatusQueued,
-                      child: Text(l10n.jobsFilterFlutterProbeQueued),
-                    ),
                   ],
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: model.jobIdController,
-            onChanged: callbacks.onJobIdChanged,
-            decoration: InputDecoration(labelText: l10n.jobsJobIdLabel),
-          ),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed:
-                (model.loadingJobById ||
-                    model.jobIdController.text.trim().isEmpty)
-                ? null
-                : callbacks.onFetchJobById,
-            child: Text(model.loadingJobById ? '…' : l10n.jobsFetchDetail),
-          ),
+                ),
+              ],
+            ),
+          ],
+          if (!studioPresentation) ...<Widget>[
+            const SizedBox(height: 12),
+            TextField(
+              controller: model.jobIdController,
+              onChanged: callbacks.onJobIdChanged,
+              decoration: InputDecoration(labelText: l10n.jobsJobIdLabel),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed:
+                  (model.loadingJobById ||
+                      model.jobIdController.text.trim().isEmpty)
+                  ? null
+                  : callbacks.onFetchJobById,
+              child: Text(model.loadingJobById ? '…' : l10n.jobsFetchDetail),
+            ),
+          ],
           if (!studioPresentation && model.jobByIdLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(
@@ -305,63 +308,78 @@ class JobsSectionView extends StatelessWidget {
           ],
           if (model.jobs != null) ...[
             const SizedBox(height: 12),
-            Text(
-              l10n.jobsCountLabel(model.jobs!.length),
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            ...model.jobs!
-                .take(8)
-                .map(
-                  (job) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.l10nBatch_c084376ea9(job.kind, job.status)),
-                    subtitle: Text(
-                      [
-                        job.id,
-                        if (job.errorMessage != null &&
-                            job.errorMessage!.isNotEmpty)
-                          l10n.jobsFailedReason(job.errorMessage!),
-                        if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
-                          l10n.jobsClaimedBy(job.claimedBy!),
-                      ].join(' · '),
+            Builder(
+              builder: (context) {
+                final visibleJobs = studioPresentation
+                    ? model.jobs!
+                          .where((job) => job.kind != 'flutter.probe')
+                          .toList(growable: false)
+                    : model.jobs!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.jobsCountLabel(visibleJobs.length),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    onTap: () => callbacks.onSelectJob(job),
-                    trailing:
-                        (job.status == 'failed' ||
-                            job.status == 'queued' ||
-                            job.status == 'running')
-                        ? Wrap(
-                            spacing: 4,
-                            children: [
-                              if (job.status == 'failed')
-                                TextButton(
-                                  onPressed: model.retryingJobId == job.id
-                                      ? null
-                                      : () => callbacks.onRetryFailedJob(job),
-                                  child: Text(
-                                    model.retryingJobId == job.id
-                                        ? '…'
-                                        : l10n.jobsRetry,
-                                  ),
-                                ),
-                              if (job.status == 'queued' ||
-                                  job.status == 'running')
-                                TextButton(
-                                  onPressed: model.cancellingJobId == job.id
-                                      ? null
-                                      : () => callbacks.onCancelQueuedJob(job),
-                                  child: Text(
-                                    model.cancellingJobId == job.id
-                                        ? '…'
-                                        : l10n.jobsCancel,
-                                  ),
-                                ),
-                            ],
-                          )
-                        : null,
-                  ),
-                ),
+                    ...visibleJobs.take(8).map(
+                      (job) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(studioJobListTitle(l10n, job.kind, job.status)),
+                        subtitle: Text(
+                          [
+                            job.id,
+                            if (job.errorMessage != null &&
+                                job.errorMessage!.isNotEmpty)
+                              l10n.jobsFailedReason(job.errorMessage!),
+                            if (job.claimedBy != null &&
+                                job.claimedBy!.isNotEmpty)
+                              l10n.jobsClaimedBy(job.claimedBy!),
+                          ].join(' · '),
+                        ),
+                        onTap: () => callbacks.onSelectJob(job),
+                        trailing:
+                            (job.status == 'failed' ||
+                                job.status == 'queued' ||
+                                job.status == 'running')
+                            ? Wrap(
+                                spacing: 4,
+                                children: [
+                                  if (job.status == 'failed')
+                                    TextButton(
+                                      onPressed: model.retryingJobId == job.id
+                                          ? null
+                                          : () =>
+                                                callbacks.onRetryFailedJob(job),
+                                      child: Text(
+                                        model.retryingJobId == job.id
+                                            ? '…'
+                                            : l10n.jobsRetry,
+                                      ),
+                                    ),
+                                  if (job.status == 'queued' ||
+                                      job.status == 'running')
+                                    TextButton(
+                                      onPressed: model.cancellingJobId == job.id
+                                          ? null
+                                          : () =>
+                                                callbacks.onCancelQueuedJob(job),
+                                      child: Text(
+                                        model.cancellingJobId == job.id
+                                            ? '…'
+                                            : l10n.jobsCancel,
+                                      ),
+                                    ),
+                                ],
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ],
       ),

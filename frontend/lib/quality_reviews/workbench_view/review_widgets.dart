@@ -22,26 +22,8 @@ const List<String> _qualitySuggestedActionOptions = <String>[
   'manual_review',
 ];
 
-String _qualityStageLabel(String stage, AppLocalizations l10n) {
-  switch (stage) {
-    case 'all':
-      return l10n.qualityReviewsAll;
-    case 'story_skeleton':
-      return l10n.qualityReviewsStageStorySkeleton;
-    case 'adaptation_strategy':
-      return l10n.qualityReviewsStageAdaptationStrategy;
-    case 'director_planning':
-      return l10n.qualityReviewsStageDirectorPlanning;
-    case 'storyboard_table':
-      return l10n.qualityReviewsStageStoryboardTable;
-    case 'storyboard_panel':
-      return l10n.qualityReviewsStageStoryboardPanel;
-    case 'video_prompt':
-      return l10n.qualityReviewsStageVideoPrompt;
-    default:
-      return stage;
-  }
-}
+String _qualityStageLabel(String stage, AppLocalizations l10n) =>
+    qualityStageLabel(stage, l10n);
 
 Color _qualityGradeColor(BuildContext context, String grade) {
   final scheme = Theme.of(context).colorScheme;
@@ -59,23 +41,12 @@ Color _qualityGradeColor(BuildContext context, String grade) {
   }
 }
 
-String _qualitySuggestedActionLabel(String action) {
-  switch (action) {
-    case 'rollback_to_director_planning':
-      return 'rollback director';
-    case 'update_character_anchor':
-      return 'update anchor';
-    case 'patch_storyboard_items':
-      return 'patch storyboard';
-    case 'adjust_video_prompt':
-      return 'adjust prompt';
-    case 'retry_video_generation':
-      return 'retry video';
-    case 'regenerate_storyboard':
-      return 'regen storyboard';
-    case 'manual_review':
-      return 'manual review';
-    default:
-      return action;
+String _qualityGradeLabel(String grade, AppLocalizations l10n) {
+  if (grade == 'all') {
+    return l10n.qualityReviewsAll;
   }
+  return grade;
 }
+
+String _qualitySuggestedActionLabel(String action, AppLocalizations l10n) =>
+    qualitySuggestedActionLabel(action, l10n);

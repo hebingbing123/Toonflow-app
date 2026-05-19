@@ -87,6 +87,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workspaceContextNoWorkspace => '无工作区';
 
   @override
+  String get workspaceTypePersonal => '个人';
+
+  @override
+  String get workspaceTypeEnterprise => '团队';
+
+  @override
+  String get workspaceContextPersonalDefaultName => '个人工作区';
+
+  @override
   String get workspaceContextNoProject => '未选择项目';
 
   @override
@@ -322,7 +331,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpaceConfigurationDescription =>
-      '把创作模式和画幅直接写回项目,后面的脚本与制作流程就能基于同一份项目配置继续工作。';
+      '把创作模式和画幅直接写回项目，后面的剧本与制作流程就能基于同一份项目配置继续工作。';
 
   @override
   String get shortVideoSpaceTargetProject => '目标项目';
@@ -381,7 +390,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationsTypeCompliance => '合规';
 
   @override
-  String get notificationsSearchLabel => '搜索标题 / 内容 / file / job';
+  String get notificationsSearchLabel => '搜索标题 / 内容 / 任务';
 
   @override
   String get notificationsRefresh => '刷新';
@@ -491,8 +500,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationsComplianceTooltipDeleteSharedTemplate => '删除共享模板';
 
   @override
-  String notificationsComplianceStageOverrideLabel(String stage) {
-    return '$stage 覆盖值';
+  String notificationsComplianceStageOverrideLabel(String stageLabel) {
+    return '$stageLabel 覆盖值';
   }
 
   @override
@@ -931,14 +940,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productNavSectionTitle => '产品导航';
 
   @override
-  String get productNavShortVideoSpace => '短视频 Space';
+  String get productNavShortVideoSpace => '多平台分发';
 
   @override
-  String get productShellLoginTagline => 'AI 短剧工作室 — 从剧本到发布一站完成。';
+  String get productShellLoginHeroTitle => '小说采集、剧本、分镜与多平台分发，一站完成';
+
+  @override
+  String get productShellLoginTagline => 'AI 短剧工作室 — 从小说入库、制片到多平台发布一站串联。';
 
   @override
   String get productShellDevCredentialsHint =>
-      '本地开发：admin@toonflow.local / admin123';
+      '本地开发：admin@openflow.local / admin123';
 
   @override
   String get productShellMoreMenu => '更多';
@@ -953,14 +965,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioAppBarHelp => '帮助';
 
   @override
-  String get studioPipelineSelectProjectFirst => '请先在项目列表中选择一个项目，再打开「脚本」或「制作」。';
+  String get studioPipelineSelectProjectFirst => '请先在项目列表中选择一个项目，再打开「剧本」或「制作」。';
 
   @override
   String get studioProductHarnessRedirectTitle => '请使用项目工作室';
 
   @override
   String get studioProductHarnessRedirectSubtitle =>
-      '脚本与制作工作区在项目内完成。请从项目网格选择项目，或通过平台链进入。';
+      '剧本与制作工作区需在项目内打开。请从项目网格选择项目，或通过平台链进入。';
 
   @override
   String get studioProjectsHomeTitle => '你的项目';
@@ -990,10 +1002,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioWizardStepBasics => '基础信息';
 
   @override
-  String get studioWizardStepContent => '内容';
+  String get studioWizardStepContent => '故事前提';
 
   @override
-  String get studioWizardStepReview => '确认';
+  String get studioWizardStepReview => '确认创建';
 
   @override
   String get studioWizardBack => '上一步';
@@ -1015,6 +1027,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioExitProjectStudio => '返回项目';
+
+  @override
+  String get studioBackPreviousPane => '返回上一页';
 
   @override
   String get studioProjectStudioSubtitle => '六步工作流：从剧本到成片';
@@ -1039,6 +1054,313 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioAgentGridPrompts => '宫格提示词';
+
+  @override
+  String studioJobTrayActiveJobs(int count) {
+    return '$count 个任务进行中';
+  }
+
+  @override
+  String get studioUnknownCodeEmpty => '（空）';
+
+  @override
+  String studioUnknownCodeLabel(String code) {
+    return '未知项：$code';
+  }
+
+  @override
+  String studioJobListTitle(String kindLabel, String statusLabel) {
+    return '$kindLabel · $statusLabel';
+  }
+
+  @override
+  String get studioJobKindAssetGenerateImage => '单图资产生成';
+
+  @override
+  String get studioJobKindAssetPolishPrompt => '资产提示词润色';
+
+  @override
+  String get studioJobKindAssetGenerateBatch => '批量资产生成';
+
+  @override
+  String get studioJobKindAssetPolishBatch => '批量提示词润色';
+
+  @override
+  String get studioJobKindSettingsVendorModelTest => '供应商模型探测';
+
+  @override
+  String get studioJobKindSettingsAccountExport => '账户数据导出';
+
+  @override
+  String get studioJobKindSettingsWorkspaceAuditExport => '工作区审计导出';
+
+  @override
+  String get studioJobKindFlutterProbe => 'Flutter 探测作业';
+
+  @override
+  String get studioJobKindVideoGenerate => '视频生成';
+
+  @override
+  String get studioJobKindVideoExport => '视频导出';
+
+  @override
+  String get studioJobKindShortVideoPreAssembly => '短视频预装配';
+
+  @override
+  String get studioJobKindShortVideoTimelinePreview => '时间线预览';
+
+  @override
+  String get studioJobKindVoiceoverGenerate => '配音生成';
+
+  @override
+  String get studioJobKindSubtitleGenerate => '字幕生成';
+
+  @override
+  String get studioJobKindBgmGenerate => '背景音乐生成';
+
+  @override
+  String get studioJobKindNovelCrawlImportBatch => '小说批量爬取导入';
+
+  @override
+  String get studioJobStatusQueued => '排队中';
+
+  @override
+  String get studioJobStatusRunning => '运行中';
+
+  @override
+  String get studioJobStatusFailed => '失败';
+
+  @override
+  String get studioJobStatusSucceeded => '成功';
+
+  @override
+  String get studioJobStatusCancelled => '已取消';
+
+  @override
+  String get studioJobStatusDead => '僵死';
+
+  @override
+  String get studioJobQueueMetricPending => '待处理';
+
+  @override
+  String get studioJobQueueMetricClaimable => '可认领';
+
+  @override
+  String get studioJobQueueMetricRunning => '运行中';
+
+  @override
+  String get studioJobQueueMetricDead => '僵死';
+
+  @override
+  String get studioJobQueueMetricFailed24h => '24 小时内失败';
+
+  @override
+  String get studioJobQueueMetricOldestSecs => '最老排队秒数';
+
+  @override
+  String get studioJobQueueMetricPendingByKind => '按类型待处理';
+
+  @override
+  String get studioHarnessWsEventHarnessAgentStarted => '智能体已启动';
+
+  @override
+  String get studioHarnessWsEventChatContentUpdated => '对话内容已更新';
+
+  @override
+  String get studioHarnessWsEventHarnessToolResult => '工具结果';
+
+  @override
+  String get studioHarnessWsEventHarnessAgentCancelled => '智能体已取消';
+
+  @override
+  String get studioHarnessWsEventChatMessageUpdated => '对话消息已更新';
+
+  @override
+  String get studioHarnessWsEventErrorOccurred => '发生错误';
+
+  @override
+  String get studioHarnessWsEventGenerationJobUpdated => '生成作业已更新';
+
+  @override
+  String get studioModelPricingTypeText => '文本';
+
+  @override
+  String get studioModelPricingTypeImage => '图像';
+
+  @override
+  String get studioModelPricingTypeVideo => '视频';
+
+  @override
+  String get notificationsComplianceStageCriticalUnclaimed => '严重未认领';
+
+  @override
+  String get notificationsComplianceStageOverCapacity => '超容量';
+
+  @override
+  String get notificationsComplianceStageStalledClaimed => '认领停滞';
+
+  @override
+  String get notificationsComplianceStageEscalated72h => '升级超 72 小时';
+
+  @override
+  String get adminConsoleAclModeInherited => '继承';
+
+  @override
+  String get adminConsoleAclModeRestricted => '受限';
+
+  @override
+  String get adminConsoleAclModeOpen => '开放';
+
+  @override
+  String get benchmarkExperimentStatusDraft => '草稿';
+
+  @override
+  String get benchmarkExperimentStatusRunning => '运行中';
+
+  @override
+  String get benchmarkExperimentStatusCompleted => '已完成';
+
+  @override
+  String get benchmarkExperimentStatusFailed => '失败';
+
+  @override
+  String get benchmarkExperimentStatusArchived => '已归档';
+
+  @override
+  String get benchmarkReviewTypeHuman => '人工评审';
+
+  @override
+  String get benchmarkReviewTypeAuto => '自动评审';
+
+  @override
+  String get benchmarkReviewTypeGate => '门禁评审';
+
+  @override
+  String get benchmarkReviewStatusPending => '待处理';
+
+  @override
+  String get benchmarkReviewStatusApproved => '已通过';
+
+  @override
+  String get benchmarkReviewStatusRejected => '已拒绝';
+
+  @override
+  String get benchmarkReviewStatusSkipped => '已跳过';
+
+  @override
+  String get benchmarkSampleTierSmoke => '冒烟';
+
+  @override
+  String get benchmarkSampleTierRegression => '回归';
+
+  @override
+  String get benchmarkSampleTierFull => '全量';
+
+  @override
+  String get benchmarkGateDecisionPass => '通过';
+
+  @override
+  String get benchmarkGateDecisionFail => '未通过';
+
+  @override
+  String get platformStatusHealthOk => '正常';
+
+  @override
+  String get platformStatusHealthUnknown => '未知';
+
+  @override
+  String get apiKeysLastUsedUnknown => '未知来源';
+
+  @override
+  String get qualityReviewsDimensionVisualConsistency => '画面/人设一致性';
+
+  @override
+  String get qualityReviewsDimensionNarrativeCoherence => '叙事连贯性';
+
+  @override
+  String get qualityReviewsDimensionLipSync => '对口型';
+
+  @override
+  String get qualityReviewsDimensionPacing => '节奏';
+
+  @override
+  String get qualityReviewsDimensionCharacterConsistency => '人设一致性';
+
+  @override
+  String get qualityReviewsDimensionDialogueNaturalness => '对白自然度';
+
+  @override
+  String get qualityReviewsDimensionFaithfulness => '与原著/设定符合度';
+
+  @override
+  String get qualityReviewsDimensionRiskBadge => '维度风险';
+
+  @override
+  String get qualityReviewsDimensionScoreSkip => '跳过';
+
+  @override
+  String get qualityReviewsDimensionScoreEmpty => '暂无维度评分';
+
+  @override
+  String get qualityReviewsDimensionScoreInvalid => '请输入 1–10 的整数';
+
+  @override
+  String get qualityReviewsDimensionScoreOutOfRange => '分值须在 1–10 之间';
+
+  @override
+  String qualityReviewsRubricVersionLine(String version) {
+    return '量表版本：$version';
+  }
+
+  @override
+  String get qualityReviewsApplySuggestedActionTooltip => '应用建议动作';
+
+  @override
+  String get qualityReviewsNoSuggestedActionToApply => '该评审没有可应用的建议动作。';
+
+  @override
+  String qualityReviewsCopiedReworkBrief(String actionLabel) {
+    return '已复制返工说明：$actionLabel';
+  }
+
+  @override
+  String qualityReviewsOpenedScopeSnack(String actionLabel, String target) {
+    return '已为「$actionLabel」打开 $target 范围';
+  }
+
+  @override
+  String get studioRetry => '重试';
+
+  @override
+  String studioBatchSelectedCount(int count) {
+    return '已选 $count';
+  }
+
+  @override
+  String studioOnboardingStepCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get studioOnboardingPrevious => '上一步';
+
+  @override
+  String get studioOnboardingNext => '下一步';
+
+  @override
+  String get studioOnboardingDone => '完成';
+
+  @override
+  String get studioOnboardingStep1 => '用左侧导航在「项目」里开始创作。';
+
+  @override
+  String get studioOnboardingStep2 => '进入项目后按六步完成剧本到成片。';
+
+  @override
+  String get studioOnboardingStep3 => '按 ⌘K 可快速跳转步骤与设置。';
+
+  @override
+  String get studioCommandPaletteSearchHint => '搜索命令…';
 
   @override
   String studioAgentSubmitted(String kind) {
@@ -1361,7 +1683,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productNavTeamWorkspaces => '团队工作区';
 
   @override
-  String get productNavScriptWorkspace => '脚本工作区';
+  String get productNavScriptWorkspace => '剧本工作区';
 
   @override
   String get productNavProductionWorkspace => '制作工作区';
@@ -1392,13 +1714,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productPipelineStripSubtitle =>
-      '从项目配置到脚本、制作、任务与质量评审的统一入口；短视频 Space 用于编排与成片相关能力。';
+      '从项目配置到剧本、制作、任务与质量评审的统一入口；多平台分发用于成片发布与渠道排期。';
 
   @override
   String get productPipelineStripProjects => '项目';
 
   @override
-  String get productPipelineStripScripts => '脚本';
+  String get productPipelineStripScripts => '剧本';
 
   @override
   String get productPipelineStripProduction => '制作';
@@ -1413,7 +1735,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productPipelineStripQuality => '质量';
 
   @override
-  String get productPipelineStripShortVideo => '短视频';
+  String get productPipelineStripShortVideo => '多平台分发';
 
   @override
   String workspaceDebugOverviewApiBase(String baseUrl) {
@@ -1832,10 +2154,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get opsWhDelete => '删除';
 
   @override
-  String get billingAuditTitle => 'Billing Webhook 审计';
+  String get billingAuditTitle => '计费 Webhook 审计';
 
   @override
-  String get billingAuditProviderLabel => 'Provider';
+  String get billingAuditProviderLabel => '提供商';
 
   @override
   String get billingAuditProviderStripe => 'Stripe';
@@ -1859,10 +2181,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingAuditSortOldest => '最早优先';
 
   @override
-  String get billingAuditOnlyInformational => '仅 informational';
+  String get billingAuditOnlyInformational => '仅信息类事件';
 
   @override
-  String get billingAuditOnlyStateful => '仅 stateful';
+  String get billingAuditOnlyStateful => '仅状态类事件';
+
+  @override
+  String billingAuditQuerySummaryProvider(String value) {
+    return '提供商：$value';
+  }
+
+  @override
+  String billingAuditQuerySummaryInformational(String value) {
+    return '信息类：$value';
+  }
+
+  @override
+  String billingAuditQuerySummarySort(String value) {
+    return '排序：$value';
+  }
+
+  @override
+  String billingAuditQueryFilterLine(String label, String value) {
+    return '$label=$value';
+  }
 
   @override
   String get billingAuditEventTypeHint =>
@@ -2174,13 +2516,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsRoleProjectOwner => '项目 owner';
 
   @override
-  String get projectsRoleEditor => 'editor';
+  String get projectsRoleEditor => '编辑';
 
   @override
-  String get projectsRoleViewer => 'viewer';
+  String get projectsRoleViewer => '查看';
 
   @override
-  String get projectsRoleMember => 'member';
+  String get projectsRoleMember => '成员';
 
   @override
   String get projectsDialogCreateTitle => '新建项目';
@@ -2871,10 +3213,19 @@ class AppLocalizationsZh extends AppLocalizations {
       'JSON 对象；常见键：episodeId、storyboardIds、focusSections';
 
   @override
-  String get agentMemoryFieldQueryType => 'query type';
+  String get agentMemoryFieldQueryType => '查询类型';
 
   @override
-  String get agentMemoryFieldQueryTypeHelper => 'summary / message / all';
+  String get agentMemoryFieldQueryTypeHelper => '摘要 / 消息 / 全部';
+
+  @override
+  String get agentMemoryQueryTypeSummary => '摘要';
+
+  @override
+  String get agentMemoryQueryTypeMessage => '消息';
+
+  @override
+  String get agentMemoryQueryTypeAll => '全部';
 
   @override
   String get agentMemoryFieldMemoryTier => 'memory tier';
@@ -2884,10 +3235,25 @@ class AppLocalizationsZh extends AppLocalizations {
       'all / style_bible / stage_summary / delta_memory / message';
 
   @override
-  String get agentMemoryFieldAutomationMode => 'automation mode';
+  String get agentMemoryFieldAutomationMode => '自动化模式';
 
   @override
-  String get agentMemoryFieldAutomationModeHelper => 'standard / lean / off';
+  String get agentMemoryFieldAutomationModeHelper => '标准 / 精简 / 关闭';
+
+  @override
+  String get agentMemoryAutomationStandard => '标准';
+
+  @override
+  String get agentMemoryAutomationLean => '精简';
+
+  @override
+  String get agentMemoryAutomationOff => '关闭';
+
+  @override
+  String get agentMemoryAppendTypeMessage => '消息';
+
+  @override
+  String get agentMemoryAppendTypeSummary => '摘要';
 
   @override
   String get agentMemoryIsolateHint =>
@@ -2927,7 +3293,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'style_bible / stage_summary / delta_memory / message';
 
   @override
-  String get agentMemoryFieldRole => 'role';
+  String get agentMemoryFieldRole => '角色';
 
   @override
   String get agentMemoryFieldNameOptional => 'name（可空）';
@@ -3302,8 +3668,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskCenterLocalClientPrefs => '本机客户端偏好';
 
   @override
-  String get taskCenterSectionIntro =>
-      '用正式工作台完成任务项目、分类、筛选列表和详情查看，主区不再依赖首条/UUID probe 按钮。';
+  String get taskCenterSectionIntro => '打开任务工作台查看项目下的生成任务，按状态筛选并处理失败项。';
 
   @override
   String get taskCenterOpenWorkbench => '打开任务工作台';
@@ -3488,7 +3853,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskCenterOpenProductionStoryboard => '打开制作工作区（分镜）';
 
   @override
-  String get taskCenterOpenScriptScript => '打开剧本工作区（脚本）';
+  String get taskCenterOpenScriptScript => '打开剧本工作区';
 
   @override
   String get taskCenterOpenSpaceProject => '打开短视频 Space（项目）';
@@ -4217,6 +4582,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String qualityReviewsFilterGrade(String value) {
     return '等级 $value';
+  }
+
+  @override
+  String qualityReviewsFilterSuggestedAction(String value) {
+    return '建议动作：$value';
   }
 
   @override
@@ -5094,16 +5464,66 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityReviewsFreshnessUnknownAge => 'unknown_age';
 
   @override
-  String get qualityReviewsFreshnessNever => 'never';
+  String get qualityReviewsFreshnessUnknownAgeLabel => '时间未知';
 
   @override
-  String get qualityReviewsFreshnessNone => 'none';
+  String get qualityReviewsFreshnessNever => '尚未刷新';
+
+  @override
+  String get qualityReviewsFreshnessNone => '无';
 
   @override
   String get qualityReviewsFreshnessStale => 'STALE';
 
   @override
   String get qualityReviewsFreshnessFresh => 'fresh';
+
+  @override
+  String get qualityReviewsFreshnessStaleTitle => '看板数据可能不是最新';
+
+  @override
+  String get qualityReviewsFreshnessFreshTitle => '看板数据已是最新';
+
+  @override
+  String qualityReviewsFreshnessStaleBody(String refreshedAt, String age) {
+    return '上次更新于 $refreshedAt（约 $age 前）';
+  }
+
+  @override
+  String qualityReviewsFreshnessAgeSeconds(int count) {
+    return '$count 秒';
+  }
+
+  @override
+  String qualityReviewsFreshnessAgeMinutes(int count) {
+    return '$count 分钟';
+  }
+
+  @override
+  String get qualityReviewsFreshnessRefresh => '刷新看板';
+
+  @override
+  String get qualityReviewsFreshnessShowDetails => '查看技术详情';
+
+  @override
+  String qualityReviewsFreshnessTechnicalDetails(
+    int snapshotRows,
+    int reviewCount,
+    int usageCount,
+    String reason,
+    String mode,
+  ) {
+    return '快照行数=$snapshotRows · 评审源=$reviewCount · 用量源=$usageCount · 原因=$reason · 模式=$mode';
+  }
+
+  @override
+  String get studioApiErrorCalloutTitle => '加载失败';
+
+  @override
+  String get studioDismiss => '关闭';
+
+  @override
+  String get studioLoadFailedTitle => '无法加载内容';
 
   @override
   String get qualityReviewsStageStorySkeleton => '故事骨架';
@@ -5124,37 +5544,136 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityReviewsStageVideoPrompt => '视频提示词';
 
   @override
-  String get qualityReviewsSourceAuto => 'source=auto';
+  String get qualityReviewsSourceAuto => '自动';
 
   @override
-  String get qualityReviewsFieldTargetType => 'targetType';
+  String get qualityReviewsFieldTargetType => '目标类型';
 
   @override
-  String get qualityReviewsFieldTargetId => 'targetId';
+  String get qualityReviewsFieldTargetId => '目标 ID';
 
   @override
-  String get qualityReviewsFieldSource => 'source';
+  String get qualityReviewsFieldSource => '来源';
 
   @override
-  String get qualityReviewsFieldOverallScore => 'overallScore';
+  String get qualityReviewsFieldOverallScore => '总分';
 
   @override
-  String get qualityReviewsFieldStage => 'stage';
+  String get qualityReviewsFieldStage => '阶段';
 
   @override
-  String get qualityReviewsFieldGrade => 'grade';
+  String get qualityReviewsFieldGrade => '等级';
 
   @override
-  String get qualityReviewsFieldComments => 'comments';
+  String get qualityReviewsFieldComments => '备注';
 
   @override
-  String get qualityReviewsFieldPassed => 'passed';
+  String get qualityReviewsFieldPassed => '是否通过';
 
   @override
-  String get qualityReviewsFieldIsBadCase => 'isBadCase';
+  String get qualityReviewsFieldIsBadCase => '是否坏例';
 
   @override
-  String get qualityReviewsFieldBadCaseCategory => 'badCaseCategory';
+  String get qualityReviewsFieldBadCaseCategory => '坏例类别';
+
+  @override
+  String get qualityReviewsFilterSuggestedActionLabel => '建议动作';
+
+  @override
+  String get qualityReviewsSuggestedActionRollbackDirector => '回退到导演策划';
+
+  @override
+  String get qualityReviewsSuggestedActionUpdateAnchor => '更新角色锚点';
+
+  @override
+  String get qualityReviewsSuggestedActionPatchStoryboard => '修补分镜条目';
+
+  @override
+  String get qualityReviewsSuggestedActionAdjustPrompt => '调整视频提示词';
+
+  @override
+  String get qualityReviewsSuggestedActionRetryVideo => '重试视频生成';
+
+  @override
+  String get qualityReviewsSuggestedActionRegenStoryboard => '重新生成分镜';
+
+  @override
+  String get qualityReviewsSuggestedActionManualReview => '人工复核';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRollbackDirector =>
+      '先回到导演规划，重排冲突和动机，再继续往下生成。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairUpdateAnchor =>
+      '先补角色锚点，明确外形、气质和情绪反应，再重试。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairPatchStoryboard =>
+      '先局部修分镜条目，把动作、视线和节奏补齐。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairAdjustPrompt =>
+      '先收紧 video prompt，把表演线索和情绪锚点写实。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRetryVideo =>
+      '先保留当前约束，补关键负向限制后重试生成。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairRegenStoryboard =>
+      '先重做分镜节奏，拉开起伏和镜头层次。';
+
+  @override
+  String get qualityReviewsSuggestedActionRepairManualReview =>
+      '先人工复核坏例原因，再决定返工入口。';
+
+  @override
+  String qualityReviewsHotspotCount(String label, int count) {
+    return '$label ×$count';
+  }
+
+  @override
+  String get qualityReviewsTargetTypeStoryboard => '分镜';
+
+  @override
+  String get qualityReviewsTargetTypeScript => '剧本';
+
+  @override
+  String get qualityReviewsTargetTypeVideo => '视频';
+
+  @override
+  String get qualityReviewsTargetTypeAsset => '资产';
+
+  @override
+  String get qualityReviewsTargetTypeOutput => '产出';
+
+  @override
+  String get qualityReviewsSourceManual => '手动';
+
+  @override
+  String get qualityReviewsBadCaseCategoryNone => '（无）';
+
+  @override
+  String get qualityReviewsBadCaseCategoryPlotHole => '剧情漏洞';
+
+  @override
+  String get qualityReviewsBadCaseCategoryCharacterBreak => '角色崩坏';
+
+  @override
+  String get qualityReviewsBadCaseCategoryStoryboardMismatch => '分镜不一致';
+
+  @override
+  String get qualityReviewsBadCaseCategoryDialogueIssue => '对白问题';
+
+  @override
+  String get qualityReviewsBadCaseCategoryVisualError => '画面错误';
+
+  @override
+  String get qualityReviewsBadCaseCategoryPacingIssue => '节奏问题';
+
+  @override
+  String get qualityReviewsBadCaseCategoryOther => '其他';
 
   @override
   String get qualityReviewsDeliveryTag => 'delivery';
@@ -5533,22 +6052,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get teamWorkspaceLeaveWorkspaceAction => '退出该空间';
 
   @override
-  String get teamWorkspaceRoleOptionMember => 'member';
+  String get teamWorkspaceRoleOptionMember => '成员';
 
   @override
-  String get teamWorkspaceRoleOptionAdmin => 'admin';
+  String get teamWorkspaceRoleOptionAdmin => '管理员';
 
   @override
-  String get teamWorkspaceStatusOptionPending => 'pending';
+  String get teamWorkspaceStatusOptionPending => '待接受';
 
   @override
-  String get teamWorkspaceStatusOptionAccepted => 'accepted';
+  String get teamWorkspaceStatusOptionAccepted => '已接受';
 
   @override
-  String get teamWorkspaceStatusOptionRevoked => 'revoked';
+  String get teamWorkspaceStatusOptionRevoked => '已撤销';
 
   @override
-  String get teamWorkspaceStatusOptionAll => 'all';
+  String get teamWorkspaceStatusOptionAll => '全部';
 
   @override
   String teamWorkspaceInvitesDialogTitle(String workspace) {
@@ -5602,7 +6121,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get teamWorkspaceRevokeAction => '撤销';
 
   @override
-  String get teamWorkspaceRoleOptionOwner => 'owner';
+  String get teamWorkspaceRoleOptionOwner => '所有者';
 
   @override
   String teamWorkspaceMemberPrimaryOwnerLine(String role) {
@@ -5652,10 +6171,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get platformStatusAutoRefresh => '自动轮询';
 
   @override
-  String get platformStatusHealthy => 'healthy';
+  String get platformStatusHealthy => '正常';
 
   @override
-  String get platformStatusDegraded => 'degraded';
+  String get platformStatusDegraded => '降级';
 
   @override
   String platformStatusVersionLine(
@@ -8329,7 +8848,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get scriptEditorWorkbenchPanelTitle => '脚本工作台';
+  String get scriptEditorWorkbenchPanelTitle => '剧本工作台';
 
   @override
   String get scriptEditorWorkbenchPanelIntro =>
@@ -8683,7 +9202,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorStoryboardsReadinessBasicSlot => '时间线槽位';
 
   @override
-  String get scriptEditorStoryboardsReadinessPromptContext => '脚本 / 提示词';
+  String get scriptEditorStoryboardsReadinessPromptContext => '剧本 / 提示词';
 
   @override
   String get scriptEditorStoryboardsReadinessReferenceVisual => '参考图';
@@ -8721,7 +9240,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scriptEditorStoryboardsReadinessBlockingMissingPromptContext =>
-      '脚本 / 提示词';
+      '剧本 / 提示词';
 
   @override
   String get scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual =>
@@ -8753,7 +9272,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scriptEditorEditImageWorkbenchIntro =>
-      '直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。';
+      '直接在剧本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。';
 
   @override
   String get scriptEditorEditImageWorkbenchSyncing => '同步中…';
@@ -10019,7 +10538,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoReadinessEmptyProjectHeadline =>
-      '当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。';
+      '当前项目还没有分镜行，可先在剧本侧拆镜后再看聚合。';
 
   @override
   String shortVideoReadinessRollupHeadline(int ready, int total, int blocked) {
@@ -10038,7 +10557,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String shortVideoReadinessScriptSuffix(int scriptId) {
-    return ' · 脚本 #$scriptId';
+    return ' · 剧本 #$scriptId';
   }
 
   @override
@@ -10118,7 +10637,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoReadinessGapAllReadyAnimated =>
-      '动漫短剧的基础准备项已经齐了，可以直接推进脚本、制作和质检闭环。';
+      '动漫短剧的基础准备项已经齐了，可以直接推进剧本、制作和质检闭环。';
 
   @override
   String get shortVideoReadinessGapAllReadyLive =>
@@ -10354,11 +10873,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpaceModeAdviceAnimated =>
-      '建议先准备画风、视觉手册和角色资产，再进入脚本与制作流程。';
+      '建议先准备画风、视觉手册和角色资产，再进入剧本与制作流程。';
 
   @override
   String get shortVideoSpaceModeAdviceLive =>
-      '建议先准备真人参考图、角色设定、镜头语气和视觉手册，再进入脚本与制作流程。';
+      '建议先准备真人参考图、角色设定、镜头语气和视觉手册，再进入剧本与制作流程。';
 
   @override
   String get shortVideoProjectOptionUnnamed => '未命名项目';
@@ -10421,17 +10940,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoStageCard1DetailLive => '从项目开始收口题材、真人参考、创作手册和角色设定。';
 
   @override
-  String get shortVideoStageCard2Title => '2. 生成脚本';
+  String get shortVideoStageCard2Title => '2. 撰写剧本';
 
   @override
   String get shortVideoStageCard2Status => '现在可用';
 
   @override
   String get shortVideoStageCard2DetailAnimated =>
-      '复用脚本工作区的上下文探测、子 Agent 和正文回写。';
+      '复用剧本工作区的上下文探测、子 Agent 和正文回写。';
 
   @override
-  String get shortVideoStageCard2DetailLive => '复用脚本工作区生成更贴近口播、表演和场景调度的脚本版本。';
+  String get shortVideoStageCard2DetailLive => '复用剧本工作区生成更贴近口播、表演和场景调度的剧本版本。';
 
   @override
   String get shortVideoStageCard3Title => '3. 组织素材';
@@ -10462,7 +10981,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoMigrationSummaryAnimated =>
-      '先做单入口，再补链路。第一波只编排现有项目、脚本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。';
+      '先做单入口，再补链路。第一波只编排现有项目、剧本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。';
 
   @override
   String get shortVideoMigrationSummaryLive =>
@@ -10612,7 +11131,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpacePageSubtitle =>
-      '参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把脚本、素材、旁白、字幕和质检串成标准流程。';
+      '参考 MoneyPrinterTurbo 的长处，先把“主题到成片”的链路聚成一个入口，再逐步把剧本、素材、旁白、字幕和质检串成标准流程。';
 
   @override
   String get shortVideoSpaceSectionCreativeMode => '创作模式';
@@ -10649,7 +11168,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpaceNavProjects => '项目';
 
   @override
-  String get shortVideoSpaceNavScriptWorkspace => '脚本工作区';
+  String get shortVideoSpaceNavScriptWorkspace => '剧本工作区';
 
   @override
   String get shortVideoSpaceNavProductionWorkspace => '制作工作区';
@@ -10670,7 +11189,7 @@ class AppLocalizationsZh extends AppLocalizations {
     int storyboardId,
     int scriptId,
   ) {
-    return '分镜 #$storyboardId · 脚本 #$scriptId';
+    return '分镜 #$storyboardId · 剧本 #$scriptId';
   }
 
   @override
@@ -12687,7 +13206,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectEditorShortDramaTargetsSectionBody =>
-      '与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。\n首页「短剧生产平台链」可一键跳到脚本 / 制作 / 任务 / 作业 / 质量 / 短视频。';
+      '与多平台分发相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。\n首页「短剧生产平台链」可一键跳到剧本 / 制作 / 任务 / 作业 / 质量 / 多平台分发。';
 
   @override
   String get projectEditorShortDramaTargetsFlavorLabel => '短剧形态';
@@ -12856,6 +13375,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectEditorAssetGenWorkbenchAssetTypeAll => '（全部类型）';
+
+  @override
+  String get projectEditorAssetTypeRole => '角色';
+
+  @override
+  String get projectEditorAssetTypeClip => '片段';
+
+  @override
+  String get projectEditorAssetTypeProps => '道具';
+
+  @override
+  String get projectEditorAssetTypeScene => '场景';
+
+  @override
+  String get projectEditorAssetTypeCharacter => '人物';
 
   @override
   String get projectEditorAssetGenWorkbenchModelOptionalLabel => '模型（可选）';
@@ -15062,6 +15596,36 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceProductionLatestExportNewerRunning =>
+      '有一个更新的导出正在执行。';
+
+  @override
+  String get shortVideoSpaceProductionLatestExportNewerQueued => '有一个更新的导出已排队。';
+
+  @override
+  String get shortVideoSpaceProductionLatestExportStaleSelection =>
+      '当前已选镜头在这次导出之后发生了变化。';
+
+  @override
+  String shortVideoSpaceProductionLatestExportSelectionSummary(
+    int selected,
+    int total,
+  ) {
+    return '当前选片：$selected / $total 条镜头。';
+  }
+
+  @override
+  String shortVideoSpaceProductionLatestExportVoiceoverSummary(
+    int ready,
+    int total,
+  ) {
+    return '配音就绪：$ready / $total';
+  }
+
+  @override
+  String get shortVideoSpaceProductionLatestExportRerun => '重新导出';
+
+  @override
   String get shortVideoSpaceProductionAssemblyReplaceVideoTitle => '替换当前视频版本';
 
   @override
@@ -16758,25 +17322,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoProjectReadinessAwaitingStats =>
-      '读取项目统计后，会在这里提示你更适合先去脚本还是制作。';
+      '读取项目统计后，会在这里提示你更适合先去剧本还是制作。';
 
   @override
-  String get shortVideoProjectReadinessNoScript => '当前项目还没有剧本，建议先去脚本工作区生成第一版。';
+  String get shortVideoProjectReadinessNoScript => '当前项目还没有剧本，建议先去剧本工作区生成第一版。';
 
   @override
   String get shortVideoProjectReadinessNoStoryboard =>
-      '已有剧本但还缺分镜，建议先继续脚本/分镜规划，再进入制作。';
+      '已有剧本但还缺分镜，建议先继续剧本/分镜规划，再进入制作。';
 
   @override
   String get shortVideoProjectReadinessNoRoles =>
-      '已有脚本和分镜，但角色资产还少，建议先补角色与参考素材。';
+      '已有剧本和分镜，但角色资产还少，建议先补角色与参考素材。';
 
   @override
   String get shortVideoProjectReadinessProductionReady =>
-      '脚本、分镜和角色资产都已有基础，可以直接进入制作工作区继续出图和出片。';
+      '剧本、分镜和角色资产都已有基础，可以直接进入制作工作区继续出图和出片。';
 
   @override
-  String get shortVideoSpaceOverviewAggregating => '正在汇总当前项目的脚本、任务和质检状态…';
+  String get shortVideoSpaceOverviewAggregating => '正在汇总当前项目的剧本、任务和质检状态…';
 
   @override
   String get shortVideoSpaceOverviewSelectProjectFirst =>
@@ -16784,7 +17348,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpaceOverviewProjectSelectedNoStats =>
-      '项目已选中，但概览还没读到。可以先刷新项目或直接进入脚本工作区。';
+      '项目已选中，但概览还没读到。可以先刷新项目或直接进入剧本工作区。';
 
   @override
   String shortVideoSpaceOverviewRecentFailedTasks(int count) {
@@ -16793,17 +17357,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String shortVideoSpaceOverviewRunningTasks(int count) {
-    return '当前还有 $count 个任务在处理中，适合先去任务中心盯进度，同时准备下一轮脚本或素材。';
+    return '当前还有 $count 个任务在处理中，适合先去任务中心盯进度，同时准备下一轮剧本或素材。';
   }
 
   @override
   String shortVideoSpaceOverviewBadCaseRecords(int count) {
-    return '这个项目已有 $count 条坏例记录，建议先看质量评审再决定是改脚本还是重做分镜。';
+    return '这个项目已有 $count 条坏例记录，建议先看质量评审再决定是改剧本还是重做分镜。';
   }
 
   @override
   String shortVideoSpaceOverviewRecentTaskRecords(int count) {
-    return '当前项目最近已有 $count 条任务记录，基础链路已经跑起来了，可以继续推进脚本、制作或质检复核。';
+    return '当前项目最近已有 $count 条任务记录，基础链路已经跑起来了，可以继续推进剧本、制作或质检复核。';
   }
 
   @override
@@ -16819,7 +17383,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoNextStepCtaOpenProjectsPrep => '打开项目区补准备项';
 
   @override
-  String get shortVideoNextStepCtaOpenScriptWorkspace => '打开脚本工作区';
+  String get shortVideoNextStepCtaOpenScriptWorkspace => '打开剧本工作区';
 
   @override
   String get shortVideoNextStepCtaOpenProductionWorkspace => '打开制作工作区';
@@ -16836,18 +17400,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoNextStepFailedTasksDetail =>
-      '最近已有失败任务，先去任务中心确认是脚本、素材、出图还是出片环节卡住。';
+      '最近已有失败任务，先去任务中心确认是剧本、素材、出图还是出片环节卡住。';
 
   @override
   String get shortVideoNextStepQualityTitle => '先看坏例和质检反馈';
 
   @override
   String get shortVideoNextStepQualityDetailAnimated =>
-      '当前更适合先看角色一致性、画面连续性和镜头节奏的坏例，再决定返工脚本还是分镜。';
+      '当前更适合先看角色一致性、画面连续性和镜头节奏的坏例，再决定返工剧本还是分镜。';
 
   @override
   String get shortVideoNextStepQualityDetailLive =>
-      '当前更适合先看表演自然度、场景真实感和口播镜头质感的坏例，再决定返工脚本还是镜头。';
+      '当前更适合先看表演自然度、场景真实感和口播镜头质感的坏例，再决定返工剧本还是镜头。';
 
   @override
   String get shortVideoNextStepAnimVisualStyleTitle => '先收口画风与视觉风格';
@@ -16882,18 +17446,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoNextStepFirstScriptDetailAnimated =>
-      '先在脚本工作区把动漫短剧的情绪节奏、角色关系和章节改编跑起来。';
+      '先在剧本工作区把动漫短剧的情绪节奏、角色关系和章节改编跑起来。';
 
   @override
   String get shortVideoNextStepFirstScriptDetailLive =>
-      '先在脚本工作区把真人短剧的对白自然度、口播感和场景调度跑起来。';
+      '先在剧本工作区把真人短剧的对白自然度、口播感和场景调度跑起来。';
 
   @override
   String get shortVideoNextStepStoryboardTitle => '先补分镜和镜头结构';
 
   @override
   String get shortVideoNextStepStoryboardDetail =>
-      '剧本已经有了，但还没拆到分镜层；下一步适合继续脚本/分镜规划，再进制作。';
+      '剧本已经有了，但还没拆到分镜层；下一步适合继续剧本/分镜规划，再进制作。';
 
   @override
   String get shortVideoNextStepRolesAnimTitle => '先补角色与画风资产';
@@ -16914,11 +17478,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoNextStepProductionReadyDetailAnimated =>
-      '当前项目已经具备脚本、分镜和角色基础，可以继续进制作工作区出图、出片和复核。';
+      '当前项目已经具备剧本、分镜和角色基础，可以继续进制作工作区出图、出片和复核。';
 
   @override
   String get shortVideoNextStepProductionReadyDetailLive =>
-      '当前项目已经具备脚本、分镜和角色基础，可以继续进制作工作区推进真人镜头、视频生成和复核。';
+      '当前项目已经具备剧本、分镜和角色基础，可以继续进制作工作区推进真人镜头、视频生成和复核。';
 
   @override
   String shortVideoPublishExportCheckReworkRouteSuffix(String route) {
@@ -17271,7 +17835,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '删号会删除当前用户、其 owner workspace、个人项目、任务、通知和本地导出/媒体目录。共享 workspace 中的成员关系也会移除。';
 
   @override
-  String get accountDeleteConfirmLabel => '输入 DELETE MY ACCOUNT 以确认';
+  String get accountDeleteConfirmLabel => '为确认删除，请输入：DELETE MY ACCOUNT';
 
   @override
   String get accountDeleteIrreversibleAck =>
@@ -17316,9 +17880,9 @@ class AppLocalizationsZh extends AppLocalizations {
     String kind,
     String status,
     String projectId,
-    String ownerEmail,
+    String createdAt,
   ) {
-    return '$kind · $status · 项目 $projectId · $ownerEmail';
+    return '$kind · $status · 项目 $projectId · $createdAt';
   }
 
   @override
@@ -17339,7 +17903,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get adminConsoleArchivedLabel => 'archived';
+  String get adminConsoleArchivedLabel => '已归档';
 
   @override
   String adminConsoleMemberListItem(
@@ -17447,57 +18011,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adminConsoleFieldUserId => '用户 ID';
 
   @override
-  String get adminConsoleFieldCreatedAt => 'admin console field created at';
+  String get adminConsoleFieldCreatedAt => '创建时间';
 
   @override
-  String get adminConsoleFieldUpdatedAt => 'admin console field updated at';
+  String get adminConsoleFieldUpdatedAt => '更新时间';
 
   @override
-  String get adminConsoleFieldOperationalStatus =>
-      'admin console field operational status';
+  String get adminConsoleFieldOperationalStatus => '运营状态';
 
   @override
-  String get adminConsoleFieldBillingProvider =>
-      'admin console field billing provider';
+  String get adminConsoleFieldBillingProvider => '计费提供商';
 
   @override
-  String get adminConsoleFieldSubscription =>
-      'admin console field subscription';
+  String get adminConsoleFieldSubscription => '订阅';
 
   @override
-  String get adminConsoleFieldCurrentWorkspace =>
-      'admin console field current workspace';
+  String get adminConsoleFieldCurrentWorkspace => '当前工作区';
 
   @override
-  String get adminConsoleFieldWorkspaceId => 'admin console field workspace id';
+  String get adminConsoleFieldWorkspaceId => '工作区 ID';
 
   @override
-  String get adminConsoleFieldOwner => 'admin console field owner';
+  String get adminConsoleFieldOwner => '所有者';
 
   @override
-  String get adminConsoleFieldArchivedAt => 'admin console field archived at';
+  String get adminConsoleFieldArchivedAt => '归档时间';
 
   @override
-  String get adminConsoleFieldOpsNote => 'admin console field ops note';
+  String get adminConsoleFieldOpsNote => '运维备注';
 
   @override
-  String get adminConsoleFieldProjectId => 'admin console field project id';
+  String get adminConsoleFieldProjectId => '项目 ID';
 
   @override
-  String get adminConsoleFieldWorkspace => 'admin console field workspace';
+  String get adminConsoleFieldWorkspace => '工作区';
 
   @override
-  String get adminConsoleFieldProjectArchivedAt =>
-      'admin console field project archived at';
+  String get adminConsoleFieldProjectArchivedAt => '项目归档时间';
 
   @override
-  String get adminConsoleFieldAclMode => 'admin console field acl mode';
+  String get adminConsoleFieldAclMode => 'ACL 模式';
 
   @override
-  String get adminConsoleFieldEditorCount => 'admin console field editor count';
+  String get adminConsoleFieldEditorCount => '编辑者数';
 
   @override
-  String get adminConsoleFieldViewerCount => 'admin console field viewer count';
+  String get adminConsoleFieldViewerCount => '查看者数';
 
   @override
   String get agentWorkspaceProductionPromptLabel => '用于制作通道 harness.agent.run';
@@ -17507,6 +18066,88 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get agentWorkspaceProductionRunWorkflow => '运行制作工作流';
+
+  @override
+  String get agentWorkspacePresetFlowKeyScriptPlan => '导演计划';
+
+  @override
+  String get agentWorkspacePresetFlowKeyAssets => '资产';
+
+  @override
+  String get agentWorkspacePresetFlowKeyScript => '剧本';
+
+  @override
+  String get agentWorkspacePresetFlowKeyStoryboardTable => '分镜表';
+
+  @override
+  String get agentWorkspacePresetFlowKeyStoryboard => '分镜';
+
+  @override
+  String get agentWorkspacePresetFlowKeyWorkspaceResult => '工作区结果';
+
+  @override
+  String get agentWorkspacePresetProductionToolGetFlowData => '读取流程数据';
+
+  @override
+  String get agentWorkspacePresetProductionToolAddDeriveAsset => '添加衍生资产';
+
+  @override
+  String get agentWorkspacePresetProductionToolDelDeriveAsset => '删除衍生资产';
+
+  @override
+  String get agentWorkspacePresetProductionToolGenerateDeriveAsset => '生成衍生资产';
+
+  @override
+  String get agentWorkspacePresetProductionToolGenerateStoryboard => '生成分镜';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentDirectorPlan => '导演计划子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentDeriveAssets => '衍生资产子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentGenerateAssets => '生成资产子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentSupervision => '制作督导子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardGen => '分镜生成子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardPanel => '分镜画面子代理';
+
+  @override
+  String get agentWorkspacePresetProductionSubAgentStoryboardTable => '分镜表子代理';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetPlanData =>
+      '读取计划数据（get_planData）';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetScriptContent =>
+      '读取剧本正文（get_script_content）';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetNovelText =>
+      '读取小说文本（get_novel_text）';
+
+  @override
+  String get agentWorkspacePresetScriptToolGetNovelEvents =>
+      '读取小说事件（get_novel_events）';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentStorySkeleton => '故事骨架子代理';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentAdaptationStrategy => '改编策略子代理';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentScript => '剧本子代理';
+
+  @override
+  String get agentWorkspacePresetScriptSubAgentSupervision => '督导代理';
 
   @override
   String get agentWorkspaceProductionDomainToolLabel => '制作域工具';
@@ -18578,13 +19219,17 @@ class AppLocalizationsZh extends AppLocalizations {
       '由 scriptPlan 派生的 production 执行提示';
 
   @override
-  String get agentWorkspaceProductionContextReturnList => '来自 \$toolName';
+  String agentWorkspaceProductionContextReturnList(Object toolName) {
+    return '来自 \$toolName';
+  }
 
   @override
   String get agentWorkspaceProductionContextToolText => '工具返回文本';
 
   @override
-  String get agentWorkspaceProductionContextReviewSummary => '来自 \$toolName';
+  String agentWorkspaceProductionContextReviewSummary(Object toolName) {
+    return '来自 \$toolName';
+  }
 
   @override
   String get agentWorkspaceProductionContextSnapshotTitle => '上下文快照';
@@ -19401,12 +20046,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptRunningSubAgent => '执行中：写回计划数据';
 
   @override
-  String get agentWorkspaceScriptRunningWriteback =>
-      'agent workspace script running writeback';
+  String get agentWorkspaceScriptRunningWriteback => '执行中：回写中';
 
   @override
-  String get agentWorkspaceScriptRunningWritebackPlan =>
-      'agent workspace script running writeback plan';
+  String get agentWorkspaceScriptRunningWritebackPlan => '执行中：计划回写中';
 
   @override
   String get agentWorkspaceScriptCardTitle => '剧本工作区';
@@ -19419,87 +20062,70 @@ class AppLocalizationsZh extends AppLocalizations {
       '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独执行动态面板。';
 
   @override
-  String get contentComplianceTargetProject =>
-      'content compliance target project';
+  String get contentComplianceTargetProject => '项目';
 
   @override
-  String get contentComplianceTargetScript =>
-      'content compliance target script';
+  String get contentComplianceTargetScript => '剧本';
 
   @override
-  String get contentComplianceTargetStoryboard =>
-      'content compliance target storyboard';
+  String get contentComplianceTargetStoryboard => '分镜';
 
   @override
-  String get contentComplianceTargetAsset => 'content compliance target asset';
+  String get contentComplianceTargetAsset => '资产';
 
   @override
-  String get contentComplianceTargetNovel => 'content compliance target novel';
+  String get contentComplianceTargetNovel => '小说';
 
   @override
-  String get contentComplianceTargetUser => 'content compliance target user';
+  String get contentComplianceTargetUser => '用户';
 
   @override
-  String get contentComplianceOptionAll => 'content compliance option all';
+  String get contentComplianceOptionAll => '全部';
 
   @override
-  String get contentComplianceCategoryCopyright =>
-      'content compliance category copyright';
+  String get contentComplianceCategoryCopyright => '版权';
 
   @override
-  String get contentComplianceCategorySafety =>
-      'content compliance category safety';
+  String get contentComplianceCategorySafety => '安全';
 
   @override
-  String get contentComplianceCategoryHarassment =>
-      'content compliance category harassment';
+  String get contentComplianceCategoryHarassment => '骚扰';
 
   @override
-  String get contentComplianceCategoryAdult =>
-      'content compliance category adult';
+  String get contentComplianceCategoryAdult => '成人内容';
 
   @override
-  String get contentComplianceCategoryViolence =>
-      'content compliance category violence';
+  String get contentComplianceCategoryViolence => '暴力';
 
   @override
-  String get contentComplianceCategorySpam =>
-      'content compliance category spam';
+  String get contentComplianceCategorySpam => '垃圾信息';
 
   @override
-  String get contentComplianceCategoryOther =>
-      'content compliance category other';
+  String get contentComplianceCategoryOther => '其他';
 
   @override
-  String get contentComplianceSeverityLow => 'content compliance severity low';
+  String get contentComplianceSeverityLow => '低';
 
   @override
-  String get contentComplianceSeverityMedium =>
-      'content compliance severity medium';
+  String get contentComplianceSeverityMedium => '中';
 
   @override
-  String get contentComplianceSeverityHigh =>
-      'content compliance severity high';
+  String get contentComplianceSeverityHigh => '高';
 
   @override
-  String get contentComplianceSeverityCritical =>
-      'content compliance severity critical';
+  String get contentComplianceSeverityCritical => '严重';
 
   @override
-  String get contentComplianceStatusPending =>
-      'content compliance status pending';
+  String get contentComplianceStatusPending => '待处理';
 
   @override
-  String get contentComplianceStatusClaimed =>
-      'content compliance status claimed';
+  String get contentComplianceStatusClaimed => '已认领';
 
   @override
-  String get contentComplianceStatusResolved =>
-      'content compliance status resolved';
+  String get contentComplianceStatusResolved => '已解决';
 
   @override
-  String get contentComplianceStatusDismissed =>
-      'content compliance status dismissed';
+  String get contentComplianceStatusDismissed => '已忽略';
 
   @override
   String contentComplianceSlaOpenOver24h(int count) {
@@ -19517,19 +20143,49 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceFieldTargetType => 'storyboard';
+  String get contentComplianceFieldTargetType => '目标类型';
 
   @override
-  String get contentComplianceFieldCategory => 'violence';
+  String get contentComplianceFieldCategory => '违规类别';
 
   @override
-  String get contentComplianceFieldSeverity => 'critical';
+  String get contentComplianceFieldSeverity => '严重程度';
 
   @override
-  String get contentComplianceFieldTargetUuid => 'target UUID';
+  String get contentComplianceFieldTargetUuid => '目标 UUID';
 
   @override
-  String get contentComplianceFieldStatus => 'resolved';
+  String get contentComplianceFieldStatus => '状态';
+
+  @override
+  String get contentComplianceCsvColumnReportId => '举报 ID';
+
+  @override
+  String get contentComplianceCsvColumnClaimedBy => '认领人';
+
+  @override
+  String get contentComplianceCsvColumnWorkspaceName => '工作区';
+
+  @override
+  String get contentComplianceCsvColumnProjectName => '项目';
+
+  @override
+  String get contentComplianceCsvColumnTargetId => '目标 ID';
+
+  @override
+  String get contentComplianceCsvColumnReporter => '上报人';
+
+  @override
+  String get contentComplianceCsvColumnCreatedAt => '创建时间';
+
+  @override
+  String get contentComplianceCsvColumnClaimedAt => '认领时间';
+
+  @override
+  String get contentComplianceCsvColumnResolvedAt => '结案时间';
+
+  @override
+  String get contentComplianceCsvColumnDetail => '详情';
 
   @override
   String contentComplianceSlaChip(String bucket) {
@@ -19681,31 +20337,39 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceActionClaim => 'content compliance action claim';
+  String get contentComplianceActionClaim => '认领';
 
   @override
-  String get contentComplianceActionResolve => 'resolve';
+  String get contentComplianceActionResolve => '结案';
 
   @override
-  String get contentComplianceActionDismiss => 'dismiss';
+  String get contentComplianceActionDismiss => '忽略';
 
   @override
-  String get contentComplianceFieldDisposition => 'disposition';
+  String get contentComplianceFieldDisposition => '处置方式';
 
   @override
-  String get contentComplianceDispositionNone => 'disposition';
+  String get contentComplianceDispositionNone => '无';
 
   @override
-  String get contentComplianceDispositionArchiveProject => 'archive_project';
+  String get contentComplianceDispositionArchiveProject => '归档项目';
 
   @override
-  String get contentComplianceDispositionSuspendUser => 'suspend_user';
+  String get contentComplianceDispositionSuspendUser => '暂停用户';
 
   @override
-  String get contentComplianceFieldResolutionNote => 'resolution note';
+  String get contentComplianceFieldResolutionNote => '处理说明';
 
   @override
-  String get jobsEmptyValue => 'jobs empty value';
+  String get projectEditorBasicsModelCatalogHelper => '从目录选择或手动输入模型 ID。';
+
+  @override
+  String statusPageQueueMetricLine(String label, String value) {
+    return '$label：$value';
+  }
+
+  @override
+  String get jobsEmptyValue => '暂无作业任务';
 
   @override
   String get systemProbesDataEmptyMarker => '（空）';
@@ -19765,13 +20429,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jobsLoadStatusSummary => '查看状态汇总';
 
   @override
-  String get jobsCompatTitle => '保留 flutter.probe 相关回归入口，默认折叠';
+  String get jobsCompatTitle => '开发探针（Harness）';
 
   @override
-  String get jobsCompatSubtitle => '保留 flutter.probe 相关回归入口，默认折叠';
+  String get jobsCompatSubtitle => '仅调试壳可见，用于 Harness 作业探针回归。';
 
   @override
-  String get jobsCompatHttpProbeFilters => 'HTTP probe filters';
+  String get jobsCompatHttpProbeFilters => 'HTTP 探针筛选';
 
   @override
   String get jobsFilterFlutterProbe => '按 flutter.probe 查看';
@@ -19814,30 +20478,25 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get jobsRetry => 'jobs retry';
+  String get jobsRetry => '重试';
 
   @override
-  String get jobsCancel => 'jobs cancel';
+  String get jobsCancel => '取消';
 
   @override
-  String get notificationsRealtimeDisconnected =>
-      'notifications realtime disconnected';
+  String get notificationsRealtimeDisconnected => '实时通知已断开';
 
   @override
-  String get notificationsPlatformStatusRecovered =>
-      'notifications platform status recovered';
+  String get notificationsPlatformStatusRecovered => '平台状态已恢复';
 
   @override
-  String get notificationsPlatformStatusDegraded =>
-      'notifications platform status degraded';
+  String get notificationsPlatformStatusDegraded => '平台状态已降级';
 
   @override
-  String get notificationsPlatformStatusRecoveredMessage =>
-      'notifications platform status recovered message';
+  String get notificationsPlatformStatusRecoveredMessage => '监控端点已全部恢复健康。';
 
   @override
-  String get notificationsPlatformStatusDegradedMessage =>
-      'notifications platform status degraded message';
+  String get notificationsPlatformStatusDegradedMessage => '部分平台端点处于降级状态。';
 
   @override
   String notificationsPlatformStatusAffectedEndpoints(String endpoints) {
@@ -19856,7 +20515,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationsComplianceSharedAsyncExportCompleted =>
-      'notifications compliance shared async export completed';
+      '工作区共享审计导出已完成';
 
   @override
   String notificationsComplianceSharedAsyncExportCancelled(int taskId) {
@@ -19877,12 +20536,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get notificationsComplianceSharedAsyncExportTimedOut =>
-      'notifications compliance shared async export timed out';
+  String get notificationsComplianceSharedAsyncExportTimedOut => '工作区共享审计导出已超时';
 
   @override
-  String get notificationsImportJsonObjectRequired =>
-      'notifications import json object required';
+  String get notificationsImportJsonObjectRequired => '导入的 JSON 必须是对象';
 
   @override
   String notificationsImportJsonParseFailed(String message) {
@@ -19935,32 +20592,78 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get billingAuditEventTypeLabel => 'event_type';
+  String get billingAuditEventTypeLabel => '事件类型';
 
   @override
-  String get billingAuditProviderEventIdLabel => 'provider_event_id';
+  String get billingAuditProviderEventIdLabel => '提供商事件 ID';
 
   @override
-  String get billingAuditRawEventIdLabel => 'raw_event_id';
+  String get billingAuditRawEventIdLabel => '原始事件 ID';
 
   @override
-  String get billingAuditProviderEventIdPrefixLabel =>
-      'provider_event_id_prefix';
+  String get billingAuditProviderEventIdPrefixLabel => '提供商事件 ID 前缀';
 
   @override
-  String get billingAuditRawEventIdPrefixLabel => 'raw_event_id_prefix';
+  String get billingAuditRawEventIdPrefixLabel => '原始事件 ID 前缀';
 
   @override
-  String get billingAuditEventCreatedFromLabel => 'event_created_from';
+  String get billingAuditEventCreatedFromLabel => '事件创建时间（起）';
 
   @override
-  String get billingAuditEventCreatedToLabel => 'event_created_to';
+  String get billingAuditEventCreatedToLabel => '事件创建时间（止）';
 
   @override
-  String get billingAuditCreatedFromLabel => 'created_from';
+  String get billingAuditCreatedFromLabel => '记录创建时间（起）';
 
   @override
-  String get billingAuditCreatedToLabel => 'created_to';
+  String get billingAuditCreatedToLabel => '记录创建时间（止）';
+
+  @override
+  String get projectStudioOpenAssetEditor => '打开资产编辑器';
+
+  @override
+  String get projectStudioTasks => '任务';
+
+  @override
+  String projectStudioTasksRunning(int count) {
+    return '任务（$count）';
+  }
+
+  @override
+  String get shortVideoDownloadDesktopApp => '下载桌面版';
+
+  @override
+  String get projectEditorBasicsModelRoutingTitle => '模型路由';
+
+  @override
+  String get projectEditorBasicsTextModelLabel => '文本模型';
+
+  @override
+  String get projectEditorBasicsTextModelHelper => '项目级文本生成默认模型。';
+
+  @override
+  String get projectEditorBasicsMultimodalModelLabel => '多模态模型';
+
+  @override
+  String get projectEditorBasicsMultimodalModelHelper => '用于视觉或混合输入工作流。';
+
+  @override
+  String get projectEditorBasicsImageModelLabel => '图像模型';
+
+  @override
+  String get projectEditorBasicsVideoModelLabel => '视频模型';
+
+  @override
+  String get projectEditorBasicsVoiceModelLabel => '语音模型';
+
+  @override
+  String get projectEditorBasicsVoiceModelHelper => '本项目可选的 TTS 模型覆盖。';
+
+  @override
+  String get projectEditorBasicsVoiceProfileLabel => '音色配置';
+
+  @override
+  String get projectEditorBasicsVoiceProfileHelper => '预设名称或 JSON 音色配置。';
 
   @override
   String notificationsFilterCount(int count) {
@@ -20207,7 +20910,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' 当前 dart-define 带 TOONFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
+      ' 当前 dart-define 带 OPENFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
 
   @override
   String get statusPageRefreshing => '刷新中…';
@@ -20527,7 +21230,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      '使用 TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      '使用 OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

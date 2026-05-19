@@ -6,11 +6,13 @@ import 'field_styling.dart';
 import 'previews.dart';
 import 'support.dart';
 import 'workbench_view.dart';
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
 import '../task_center/support.dart';
+import 'enum_labels.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
@@ -164,14 +166,15 @@ class QualityReviewsSection extends StatelessWidget {
               mutedColor: muted,
               reviewSummary: reviewSummary,
             ),
-            if (platformConfig.qualityDashboardEnabled && !studioPresentation) ...[
+            if (platformConfig.qualityDashboardEnabled) ...<Widget>[
               const SizedBox(height: 8),
               Text(
                 l10n.qualityReviewsOpsDashboardTitle,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 6),
-              if (controller.qualityDashboardLine != null)
+              if (!studioPresentation &&
+                  controller.qualityDashboardLine != null)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton(
@@ -201,7 +204,14 @@ class QualityReviewsSection extends StatelessWidget {
                 refreshSummary: platformConfig.qualityRefreshControlsEnabled
                     ? controller.qualityDashboardRefreshLine
                     : null,
-                freshnessSummary: controller.qualityDashboardFreshnessLine,
+                freshnessMeta: controller.qualityDashboardMeta,
+                dashboardLoadState: controller.qualityDashboardLoadState,
+                dashboardLoadError: controller.qualityDashboardLastError,
+                loadingDashboard: controller.loadingQualityDashboard,
+                onRefreshDashboard: () async {
+                  final projectId = await _resolveInitialProjectNumericId();
+                  await controller.loadQualityDashboard(projectId: projectId);
+                },
                 qualityStatsRows: controller.qualityStatsRows,
                 stageGradeRows: controller.qualityStageGradeRows,
                 scopeInsightRows: controller.qualityScopeInsightRows,
@@ -209,51 +219,12 @@ class QualityReviewsSection extends StatelessWidget {
                 badCaseStats: controller.qualityBadCaseStatItems,
               ),
             ],
+            const SizedBox(height: 12),
             if (studioPresentation)
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                title: Text(l10n.qualityReviewsOpsDashboardTitle),
-                children: <Widget>[
-                  if (platformConfig.qualityDashboardEnabled) ...<Widget>[
-                    const SizedBox(height: 8),
-                    QualityReviewsOpsDashboardPreview(
-                      mutedColor: muted,
-                      dashboardSummary: controller.qualityDashboardLine,
-                      refreshControlsEnabled:
-                          platformConfig.qualityRefreshControlsEnabled,
-                      refreshSummary:
-                          platformConfig.qualityRefreshControlsEnabled
-                          ? controller.qualityDashboardRefreshLine
-                          : null,
-                      freshnessSummary:
-                          controller.qualityDashboardFreshnessLine,
-                      qualityStatsRows: controller.qualityStatsRows,
-                      stageGradeRows: controller.qualityStageGradeRows,
-                      scopeInsightRows: controller.qualityScopeInsightRows,
-                      tokenEfficiencyRows:
-                          controller.qualityTokenEfficiencyRows,
-                      badCaseStats: controller.qualityBadCaseStatItems,
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  QualityReviewsCompatibilityPanel(
-                    mutedColor: muted,
-                    creatingQualityReview: controller.creatingQualityReview,
-                    onCreateQualityReviewProbe:
-                        controller.createQualityReviewProbe,
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: controller.qualityReviewIdController,
-                    onChanged: controller.onQualityReviewIdChanged,
-                    style: qualityReviewsFieldTextStyle(context),
-                    decoration: qualityReviewsInputDecoration(
-                      context,
-                      labelText: l10n.qualityReviewsFieldReviewId,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  FilledButton.tonal(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final stackControls = constraints.maxWidth < 520;
+                  final actionButton = FilledButton.tonal(
                     onPressed:
                         (controller.loadingQualityReviewById ||
                             controller.qualityReviewIdController.text
@@ -266,17 +237,55 @@ class QualityReviewsSection extends StatelessWidget {
                           ? l10n.projectsBusyProcessing
                           : l10n.qualityReviewsViewReviewDetails,
                     ),
-                  ),
-                ],
-              )
-            else ...<Widget>[
-              const SizedBox(height: 8),
-              QualityReviewsCompatibilityPanel(
-                mutedColor: muted,
-                creatingQualityReview: controller.creatingQualityReview,
-                onCreateQualityReviewProbe: controller.createQualityReviewProbe,
+                  );
+                  if (stackControls) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        TextField(
+                          controller: controller.qualityReviewIdController,
+                          onChanged: controller.onQualityReviewIdChanged,
+                          style: qualityReviewsFieldTextStyle(context),
+                          decoration: qualityReviewsInputDecoration(
+                            context,
+                            labelText: l10n.qualityReviewsFieldReviewId,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        actionButton,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          controller: controller.qualityReviewIdController,
+                          onChanged: controller.onQualityReviewIdChanged,
+                          style: qualityReviewsFieldTextStyle(context),
+                          decoration: qualityReviewsInputDecoration(
+                            context,
+                            labelText: l10n.qualityReviewsFieldReviewId,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      actionButton,
+                    ],
+                  );
+                },
               ),
+            if (studioPresentation &&
+                controller.qualityReviewByIdLine != null) ...<Widget>[
               const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryReviewDetails(
+                  controller.qualityReviewByIdLine!,
+                ),
+              ),
+            ],
+            if (!studioPresentation) ...<Widget>[
               TextField(
                 controller: controller.qualityReviewIdController,
                 onChanged: controller.onQualityReviewIdChanged,
@@ -307,52 +316,57 @@ class QualityReviewsSection extends StatelessWidget {
                   ),
                 ),
               ],
-              if (controller.qualityStatsLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
+            ],
+            if (!studioPresentation && controller.qualityStatsLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
+              ),
+            ],
+            if (!studioPresentation &&
+                controller.qualityStagePassRateLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryStagePassRate(
+                  controller.qualityStagePassRateLine!,
                 ),
-              ],
-              if (controller.qualityStagePassRateLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryStagePassRate(
-                    controller.qualityStagePassRateLine!,
-                  ),
+              ),
+            ],
+            if (!studioPresentation &&
+                controller.qualityStageGradeLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryStageGrade(
+                  controller.qualityStageGradeLine!,
                 ),
-              ],
-              if (controller.qualityStageGradeLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryStageGrade(
-                    controller.qualityStageGradeLine!,
-                  ),
+              ),
+            ],
+            if (!studioPresentation &&
+                controller.qualityScopeInsightsLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryScopeInsights(
+                  controller.qualityScopeInsightsLine!,
                 ),
-              ],
-              if (controller.qualityScopeInsightsLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryScopeInsights(
-                    controller.qualityScopeInsightsLine!,
-                  ),
+              ),
+            ],
+            if (!studioPresentation &&
+                controller.qualityTokenEfficiencyLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryTokenEfficiency(
+                  controller.qualityTokenEfficiencyLine!,
                 ),
-              ],
-              if (controller.qualityTokenEfficiencyLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryTokenEfficiency(
-                    controller.qualityTokenEfficiencyLine!,
-                  ),
+              ),
+            ],
+            if (!studioPresentation &&
+                controller.qualityBadCaseStatsLine != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(
+                l10n.qualityReviewsSummaryBadCaseHotspots(
+                  controller.qualityBadCaseStatsLine!,
                 ),
-              ],
-              if (controller.qualityBadCaseStatsLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.qualityReviewsSummaryBadCaseHotspots(
-                    controller.qualityBadCaseStatsLine!,
-                  ),
-                ),
-              ],
+              ),
             ],
             if (controller.qualityReviews != null) ...[
               QualityReviewsListPreview(

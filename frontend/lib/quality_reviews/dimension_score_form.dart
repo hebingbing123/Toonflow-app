@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
+
 // ---------------------------------------------------------------------------
 // Compile-time constant: rubric version from docs/plans/quality-rubric.md
 // ---------------------------------------------------------------------------
 const String kRubricVersion = '2026-06-01';
-
-// ---------------------------------------------------------------------------
-// Dimension key → Chinese label mapping
-// ---------------------------------------------------------------------------
-const Map<String, String> kDimensionLabels = {
-  'visual_consistency': '画面/人设一致性',
-  'narrative_coherence': '叙事连贯性',
-  'lip_sync': '对口型',
-  'pacing': '节奏',
-  'character_consistency': '人设一致性',
-  'dialogue_naturalness': '对白自然度',
-  'faithfulness': '与原著/设定符合度',
-};
 
 /// Ordered list of dimension keys (preserves display order).
 const List<String> kDimensionKeys = [
@@ -133,13 +123,13 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
     _notifyChanged();
   }
 
-  void _onTextChanged(String key, String text) {
+  void _onTextChanged(String key, String text, AppLocalizations l10n) {
     final parsed = int.tryParse(text.trim());
     setState(() {
       if (parsed == null) {
-        _errors[key] = '请输入 1–10 的整数';
+        _errors[key] = l10n.qualityReviewsDimensionScoreInvalid;
       } else if (parsed < 1 || parsed > 10) {
-        _errors[key] = '分值须在 1–10 之间';
+        _errors[key] = l10n.qualityReviewsDimensionScoreOutOfRange;
       } else {
         _errors[key] = null;
         _scores[key] = parsed;
@@ -170,6 +160,7 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -177,7 +168,7 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            '量表版本：$kRubricVersion',
+            l10n.qualityReviewsRubricVersionLine(kRubricVersion),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -187,13 +178,14 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
         ...kDimensionKeys.map(
           (key) => _DimensionRow(
             dimensionKey: key,
-            label: kDimensionLabels[key]!,
+            label: studioQualityDimensionLabel(l10n, key),
             score: _scores[key]!,
             skipped: _skipped[key]!,
             controller: _controllers[key]!,
             errorText: _errors[key],
+            skipLabel: l10n.qualityReviewsDimensionScoreSkip,
             onSliderChanged: (v) => _onSliderChanged(key, v),
-            onTextChanged: (v) => _onTextChanged(key, v),
+            onTextChanged: (v) => _onTextChanged(key, v, l10n),
             onSkipChanged: (v) => _onSkipChanged(key, v),
           ),
         ),
@@ -214,6 +206,7 @@ class _DimensionRow extends StatelessWidget {
     required this.skipped,
     required this.controller,
     required this.errorText,
+    required this.skipLabel,
     required this.onSliderChanged,
     required this.onTextChanged,
     required this.onSkipChanged,
@@ -225,6 +218,7 @@ class _DimensionRow extends StatelessWidget {
   final bool skipped;
   final TextEditingController controller;
   final String? errorText;
+  final String skipLabel;
   final ValueChanged<double> onSliderChanged;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<bool?> onSkipChanged;
@@ -252,7 +246,7 @@ class _DimensionRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '跳过',
+                    skipLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -328,9 +322,10 @@ class DimensionScoreDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (scores == null || scores!.isEmpty) {
       return Text(
-        '暂无维度评分',
+        l10n.qualityReviewsDimensionScoreEmpty,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
@@ -343,7 +338,10 @@ class DimensionScoreDisplayWidget extends StatelessWidget {
         // Show dimensions in canonical order; fall back to map iteration order
         // for any keys not in kDimensionKeys.
         for (final key in _orderedKeys(scores!))
-          _ScoreRow(label: kDimensionLabels[key] ?? key, score: scores![key]!),
+          _ScoreRow(
+            label: studioQualityDimensionLabel(l10n, key),
+            score: scores![key]!,
+          ),
       ],
     );
   }

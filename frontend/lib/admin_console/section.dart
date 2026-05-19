@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 
@@ -390,7 +391,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return ListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
-      title: Text(l10n.adminConsoleJobHitTitle(item.kind, item.status)),
+      title: Text(studioJobListTitle(l10n, item.kind, item.status)),
       subtitle: Text(
         l10n.adminConsoleJobHitSummary(
           item.ownerEmail ?? item.ownerUserId,
@@ -451,8 +452,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           items: detail.recentJobs
               .map(
                 (job) => l10n.adminConsoleRecentJobItem(
-                  job.kind,
-                  job.status,
+                  studioJobKindLabel(l10n, job.kind),
+                  studioJobStatusLabel(l10n, job.status),
                   _jobProjectScopeLabel(job),
                   _fmt(job.createdAt),
                 ),
@@ -1200,7 +1201,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     '#${project.numericId} ${project.name ?? ''}',
                     style: theme.textTheme.bodySmall,
                   ),
-                  Chip(label: Text(project.aclMode)),
+                  Chip(label: Text(studioAdminAclModeLabel(l10n, project.aclMode))),
                   Chip(
                     label: Text(
                       l10n.adminConsoleExplicitAclCount(
@@ -1454,8 +1455,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           items: detail.recentJobs
               .map(
                 (job) => l10n.adminConsoleRecentJobItem(
-                  job.kind,
-                  job.status,
+                  studioJobKindLabel(l10n, job.kind),
+                  studioJobStatusLabel(l10n, job.status),
                   _jobProjectScopeLabel(job),
                   _fmt(job.createdAt),
                 ),
@@ -1699,7 +1700,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         l10n.adminConsoleChipAsset(detail.assetCount),
         l10n.adminConsoleChipJob(detail.jobCount),
         l10n.adminConsoleChipActiveJob(detail.activeJobCount),
-        detail.projectAclMode,
+        studioAdminAclModeLabel(l10n, detail.projectAclMode),
         l10n.adminConsoleExplicitAclCount(detail.explicitAclCount),
         if (detail.archivedAt != null) l10n.adminConsoleArchivedLabel,
       ],
@@ -1755,8 +1756,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           items: detail.recentJobs
               .map(
                 (job) => l10n.adminConsoleProjectRecentJobItem(
-                  job.kind,
-                  job.status,
+                  studioJobKindLabel(l10n, job.kind),
+                  studioJobStatusLabel(l10n, job.status),
                   job.ownerEmail ?? job.ownerUserId,
                   _fmt(job.createdAt),
                 ),

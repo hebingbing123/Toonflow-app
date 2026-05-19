@@ -71,6 +71,9 @@ String formatRustApiExceptionForDisplay(
   if (error.statusCode == 499) {
     return l10n.rustApiClientRequestCancelled;
   }
+  if ((error.statusCode ?? 0) >= 500) {
+    return l10n.rustApiClientUnknownError(l10n.rustApiClientRetryAfterTryLater);
+  }
   final trimmed = error.message.trim();
   if (trimmed.isNotEmpty &&
       !trimmed.startsWith('{') &&

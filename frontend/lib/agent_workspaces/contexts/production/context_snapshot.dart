@@ -425,7 +425,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
     final items = result['items'];
     if (items is List && items.isNotEmpty) {
       addPreviewCard(
-        title: l10n.agentWorkspaceProductionContextReturnList,
+        title: l10n.agentWorkspaceProductionContextReturnList(toolName),
         subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
         body: items.take(6).toList(growable: false),
       );
@@ -443,7 +443,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
     final review = parseProductionSupervisionReview(result);
     if (review != null) {
       addPreviewCard(
-        title: l10n.agentWorkspaceProductionContextReviewSummary,
+        title: l10n.agentWorkspaceProductionContextReviewSummary(toolName),
         subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
         body: _reviewDigest(l10n, review),
       );

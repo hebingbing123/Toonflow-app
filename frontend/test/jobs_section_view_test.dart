@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/jobs/section_view.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/platform/studio_load_state.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void noop() {}
@@ -42,6 +43,8 @@ JobsSectionViewModel buildModel({
   String? jobStatusSummaryLine = 'failed=1',
   String? cancellingJobId,
   String? retryingJobId,
+  StudioLoadState jobsLoadState = StudioLoadState.initial,
+  Object? jobsLastError,
 }) {
   return JobsSectionViewModel(
     loadingJobs: loadingJobs,
@@ -51,6 +54,8 @@ JobsSectionViewModel buildModel({
     creatingJob: creatingJob,
     loadingJobById: loadingJobById,
     jobIdController: jobIdController,
+    jobsLoadState: jobsLoadState,
+    jobsLastError: jobsLastError,
     jobs:
         jobs ??
         <JobRow>[
@@ -294,5 +299,40 @@ void main() {
     expect(find.widgetWithText(ListTile, 'flutter.probe · succeeded'), findsOneWidget);
     expect(find.widgetWithText(TextButton, 'jobs retry'), findsOneWidget);
     expect(find.widgetWithText(TextButton, 'jobs cancel'), findsOneWidget);
+  });
+
+  testWidgets('product studio hides flutter.probe regression panel', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: JobsSectionView(
+            studioPresentation: true,
+            model: buildModel(jobIdController: jobIdController),
+            callbacks: buildCallbacks(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('加载作业列表'), findsOneWidget);
+    expect(find.text('查看失败作业'), findsOneWidget);
+    expect(
+      find.text('查看作业列表、状态汇总，并按 ID 打开单条执行记录。'),
+      findsOneWidget,
+    );
+    expect(find.text('开发探针（Harness）'), findsNothing);
+    expect(find.text('创建 probe 作业'), findsNothing);
+    expect(find.text('查看作业详情'), findsNothing);
+    expect(find.widgetWithText(ListTile, 'flutter.probe · failed'), findsNothing);
   });
 }

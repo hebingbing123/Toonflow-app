@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../platform/studio_load_state.dart';
 import '../../rust_api.dart';
+import 'enum_labels.dart';
 import 'support.dart';
 
 typedef QualityReviewsAccessTokenProvider = String? Function();
@@ -40,8 +42,11 @@ class QualityReviewsController extends ChangeNotifier {
   String? qualityBadCaseStatsLine;
   String? qualityDashboardLine;
   String? qualityDashboardRefreshLine;
+  @Deprecated('Use qualityDashboardMeta + StudioFreshnessBanner')
   String? qualityDashboardFreshnessLine;
   String? qualityReviewByIdLine;
+  StudioLoadState qualityDashboardLoadState = StudioLoadState.initial;
+  Object? qualityDashboardLastError;
   List<QualityReview>? qualityReviews;
   List<QualityDashboardTargetStat>? qualityStatsRows;
   List<QualityDashboardStagePassRateItem>? qualityStagePassRateRows;
@@ -315,6 +320,7 @@ class QualityReviewsController extends ChangeNotifier {
     final token = _accessToken;
     if (token == null) return;
     loadingQualityDashboard = true;
+    qualityDashboardLoadState = StudioLoadState.loading;
     if (refreshReadModel) {
       refreshingQualityDashboardReadModel = true;
     }
@@ -358,7 +364,12 @@ class QualityReviewsController extends ChangeNotifier {
           : '$scopePrefix${dashboard.stats.map((row) {
               final passPct = row.passRatePercent.toStringAsFixed(1);
               final avgScore = row.avgOverallScore.toStringAsFixed(1);
-              return loc.qualityReviewsDashboardTargetStatRow(row.targetType, row.totalReviews, passPct, avgScore);
+              return loc.qualityReviewsDashboardTargetStatRow(
+                qualityTargetTypeLabel(row.targetType, loc),
+                row.totalReviews,
+                passPct,
+                avgScore,
+              );
             }).join(' | ')}';
       qualityStagePassRateRows = dashboard.stagePassRate;
       qualityStagePassRateLine = dashboard.stagePassRate.isEmpty
@@ -372,7 +383,7 @@ class QualityReviewsController extends ChangeNotifier {
                   final passPct = row.passRatePercent.toStringAsFixed(1);
                   return loc.qualityReviewsDashboardStagePassRateRow(
                     date,
-                    row.targetType,
+                    qualityTargetTypeLabel(row.targetType, loc),
                     passPct,
                     row.totalReviews,
                   );
@@ -402,44 +413,25 @@ class QualityReviewsController extends ChangeNotifier {
         maxItems: 5,
         l10n: _l10nResolved,
       );
-      qualityDashboardFreshnessLine = _buildQualityDashboardFreshnessLine(
-        dashboard.meta,
-      );
+      qualityDashboardFreshnessLine = null;
+      qualityDashboardLoadState = StudioLoadState.success;
+      qualityDashboardLastError = null;
       _refreshQualityDashboardLine();
     } catch (e) {
+      qualityDashboardLoadState = StudioLoadState.error;
+      qualityDashboardLastError = e;
+      qualityDashboardMeta = null;
       reportRustOrDescribeApiError(
         e,
         onErrorChanged: _setError,
         l10n: _l10nResolved,
+        showGlobalSnackBar: false,
       );
     } finally {
       loadingQualityDashboard = false;
       refreshingQualityDashboardReadModel = false;
       notifyListeners();
     }
-  }
-
-  String _buildQualityDashboardFreshnessLine(QualityDashboardMeta meta) {
-    final loc = _l10nResolved;
-    final age = meta.ageSeconds == null
-        ? loc.qualityReviewsFreshnessUnknownAge
-        : meta.ageSeconds! < 60
-        ? '${meta.ageSeconds}s'
-        : '${(meta.ageSeconds! / 60).floor()}m';
-    final refreshedAt = meta.refreshedAt == null
-        ? loc.qualityReviewsFreshnessNever
-        : meta.refreshedAt!.toLocal().toString().substring(0, 19);
-    final reviewMax = meta.sourceMaxReviewCreatedAt == null
-        ? loc.qualityReviewsFreshnessNone
-        : meta.sourceMaxReviewCreatedAt!.toLocal().toString().substring(0, 19);
-    final usageMax = meta.sourceMaxUsageCreatedAt == null
-        ? loc.qualityReviewsFreshnessNone
-        : meta.sourceMaxUsageCreatedAt!.toLocal().toString().substring(0, 19);
-    final verdict = meta.stale
-        ? loc.qualityReviewsFreshnessStale
-        : loc.qualityReviewsFreshnessFresh;
-    final reason = meta.staleReason == null ? '' : ' · ${meta.staleReason}';
-    return '$verdict · age=$age · refreshed=$refreshedAt · snapshot=${meta.snapshotRowCount} · source reviews=${meta.sourceReviewCount} @ $reviewMax · usage=${meta.sourceUsageCount} @ $usageMax$reason';
   }
 
   void _refreshQualityDashboardLine() {

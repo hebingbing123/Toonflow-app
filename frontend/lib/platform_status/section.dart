@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../local_prefs/risky_operation_confirm_prefs.dart';
+import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 
 class PlatformStatusSection extends StatefulWidget {
@@ -33,7 +34,12 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   void initState() {
     super.initState();
     _startAutoRefreshTimer();
-    unawaited(_refresh());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(_refresh());
+    });
   }
 
   @override
@@ -267,12 +273,18 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             children: <Widget>[
               _StatusChip(
                 title: l10n.platformStatusChipHealth,
-                value: _health?.status ?? '-',
+                value: studioPlatformHealthValueLabel(
+                  l10n,
+                  _health?.status ?? '-',
+                ),
                 color: _statusColor((_health?.status ?? '') == 'ok'),
               ),
               _StatusChip(
                 title: l10n.platformStatusChipReady,
-                value: _ready?.status ?? '-',
+                value: studioPlatformHealthValueLabel(
+                  l10n,
+                  _ready?.status ?? '-',
+                ),
                 color: _statusColor((_ready?.status ?? '') == 'ok'),
               ),
               _StatusChip(

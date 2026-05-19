@@ -236,6 +236,24 @@ abstract class AppLocalizations {
   /// **'No workspace'**
   String get workspaceContextNoWorkspace;
 
+  /// No description provided for @workspaceTypePersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get workspaceTypePersonal;
+
+  /// No description provided for @workspaceTypeEnterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get workspaceTypeEnterprise;
+
+  /// No description provided for @workspaceContextPersonalDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal workspace'**
+  String get workspaceContextPersonalDefaultName;
+
   /// No description provided for @workspaceContextNoProject.
   ///
   /// In en, this message translates to:
@@ -981,8 +999,8 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsComplianceStageOverrideLabel.
   ///
   /// In en, this message translates to:
-  /// **'{stage} override'**
-  String notificationsComplianceStageOverrideLabel(String stage);
+  /// **'{stageLabel} override'**
+  String notificationsComplianceStageOverrideLabel(String stageLabel);
 
   /// No description provided for @notificationsComplianceStageOverrideHint.
   ///
@@ -1627,7 +1645,7 @@ abstract class AppLocalizations {
   /// No description provided for @platformConfigToggleWorkspaceActivitySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity navigation entry'**
+  /// **'Show the Agent workspace Activity nav entry'**
   String get platformConfigToggleWorkspaceActivitySubtitle;
 
   /// No description provided for @platformConfigToggleBenchmarkTitle.
@@ -1771,19 +1789,25 @@ abstract class AppLocalizations {
   /// No description provided for @productNavShortVideoSpace.
   ///
   /// In en, this message translates to:
-  /// **'Short-video Space'**
+  /// **'Multi-platform release'**
   String get productNavShortVideoSpace;
+
+  /// No description provided for @productShellLoginHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel intake, scripts, storyboards, and multi-platform release in one flow'**
+  String get productShellLoginHeroTitle;
 
   /// No description provided for @productShellLoginTagline.
   ///
   /// In en, this message translates to:
-  /// **'AI short-drama studio — script to publish in one place.'**
+  /// **'AI short-drama studio — from novel intake through production to multi-platform publishing.'**
   String get productShellLoginTagline;
 
   /// No description provided for @productShellDevCredentialsHint.
   ///
   /// In en, this message translates to:
-  /// **'Local dev: admin@toonflow.local / admin123'**
+  /// **'Local dev: admin@openflow.local / admin123'**
   String get productShellDevCredentialsHint;
 
   /// No description provided for @productShellMoreMenu.
@@ -1813,7 +1837,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioPipelineSelectProjectFirst.
   ///
   /// In en, this message translates to:
-  /// **'Select a project from the list first, then open Script or Production.'**
+  /// **'Select a project from the list first, then open Screenplay or Production.'**
   String get studioPipelineSelectProjectFirst;
 
   /// No description provided for @studioProductHarnessRedirectTitle.
@@ -1825,7 +1849,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioProductHarnessRedirectSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Script and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.'**
+  /// **'Screenplay and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.'**
   String get studioProductHarnessRedirectSubtitle;
 
   /// No description provided for @studioProjectsHomeTitle.
@@ -1885,13 +1909,13 @@ abstract class AppLocalizations {
   /// No description provided for @studioWizardStepContent.
   ///
   /// In en, this message translates to:
-  /// **'Content'**
+  /// **'Story premise'**
   String get studioWizardStepContent;
 
   /// No description provided for @studioWizardStepReview.
   ///
   /// In en, this message translates to:
-  /// **'Review'**
+  /// **'Confirm'**
   String get studioWizardStepReview;
 
   /// No description provided for @studioWizardBack.
@@ -1935,6 +1959,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to projects'**
   String get studioExitProjectStudio;
+
+  /// No description provided for @studioBackPreviousPane.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get studioBackPreviousPane;
 
   /// No description provided for @studioProjectStudioSubtitle.
   ///
@@ -1983,6 +2013,588 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grid prompts'**
   String get studioAgentGridPrompts;
+
+  /// No description provided for @studioJobTrayActiveJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} jobs in progress'**
+  String studioJobTrayActiveJobs(int count);
+
+  /// No description provided for @studioUnknownCodeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty)'**
+  String get studioUnknownCodeEmpty;
+
+  /// No description provided for @studioUnknownCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown: {code}'**
+  String studioUnknownCodeLabel(String code);
+
+  /// No description provided for @studioJobListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{kindLabel} · {statusLabel}'**
+  String studioJobListTitle(String kindLabel, String statusLabel);
+
+  /// No description provided for @studioJobKindAssetGenerateImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Single image generation'**
+  String get studioJobKindAssetGenerateImage;
+
+  /// No description provided for @studioJobKindAssetPolishPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset prompt polish'**
+  String get studioJobKindAssetPolishPrompt;
+
+  /// No description provided for @studioJobKindAssetGenerateBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch image generation'**
+  String get studioJobKindAssetGenerateBatch;
+
+  /// No description provided for @studioJobKindAssetPolishBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch prompt polish'**
+  String get studioJobKindAssetPolishBatch;
+
+  /// No description provided for @studioJobKindSettingsVendorModelTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor model test'**
+  String get studioJobKindSettingsVendorModelTest;
+
+  /// No description provided for @studioJobKindSettingsAccountExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Account data export'**
+  String get studioJobKindSettingsAccountExport;
+
+  /// No description provided for @studioJobKindSettingsWorkspaceAuditExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace audit export'**
+  String get studioJobKindSettingsWorkspaceAuditExport;
+
+  /// No description provided for @studioJobKindFlutterProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'Flutter probe job'**
+  String get studioJobKindFlutterProbe;
+
+  /// No description provided for @studioJobKindVideoGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Video generation'**
+  String get studioJobKindVideoGenerate;
+
+  /// No description provided for @studioJobKindVideoExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Video export'**
+  String get studioJobKindVideoExport;
+
+  /// No description provided for @studioJobKindShortVideoPreAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-video pre-assembly'**
+  String get studioJobKindShortVideoPreAssembly;
+
+  /// No description provided for @studioJobKindShortVideoTimelinePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline preview'**
+  String get studioJobKindShortVideoTimelinePreview;
+
+  /// No description provided for @studioJobKindVoiceoverGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover generation'**
+  String get studioJobKindVoiceoverGenerate;
+
+  /// No description provided for @studioJobKindSubtitleGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle generation'**
+  String get studioJobKindSubtitleGenerate;
+
+  /// No description provided for @studioJobKindBgmGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Background music generation'**
+  String get studioJobKindBgmGenerate;
+
+  /// No description provided for @studioJobKindNovelCrawlImportBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel crawl import batch'**
+  String get studioJobKindNovelCrawlImportBatch;
+
+  /// No description provided for @studioJobStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get studioJobStatusQueued;
+
+  /// No description provided for @studioJobStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get studioJobStatusRunning;
+
+  /// No description provided for @studioJobStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get studioJobStatusFailed;
+
+  /// No description provided for @studioJobStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get studioJobStatusSucceeded;
+
+  /// No description provided for @studioJobStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get studioJobStatusCancelled;
+
+  /// No description provided for @studioJobStatusDead.
+  ///
+  /// In en, this message translates to:
+  /// **'Dead'**
+  String get studioJobStatusDead;
+
+  /// No description provided for @studioJobQueueMetricPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get studioJobQueueMetricPending;
+
+  /// No description provided for @studioJobQueueMetricClaimable.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimable'**
+  String get studioJobQueueMetricClaimable;
+
+  /// No description provided for @studioJobQueueMetricRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get studioJobQueueMetricRunning;
+
+  /// No description provided for @studioJobQueueMetricDead.
+  ///
+  /// In en, this message translates to:
+  /// **'Dead'**
+  String get studioJobQueueMetricDead;
+
+  /// No description provided for @studioJobQueueMetricFailed24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed (24h)'**
+  String get studioJobQueueMetricFailed24h;
+
+  /// No description provided for @studioJobQueueMetricOldestSecs.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest queued (sec)'**
+  String get studioJobQueueMetricOldestSecs;
+
+  /// No description provided for @studioJobQueueMetricPendingByKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending by kind'**
+  String get studioJobQueueMetricPendingByKind;
+
+  /// No description provided for @studioHarnessWsEventHarnessAgentStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent started'**
+  String get studioHarnessWsEventHarnessAgentStarted;
+
+  /// No description provided for @studioHarnessWsEventChatContentUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat content updated'**
+  String get studioHarnessWsEventChatContentUpdated;
+
+  /// No description provided for @studioHarnessWsEventHarnessToolResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool result'**
+  String get studioHarnessWsEventHarnessToolResult;
+
+  /// No description provided for @studioHarnessWsEventHarnessAgentCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent cancelled'**
+  String get studioHarnessWsEventHarnessAgentCancelled;
+
+  /// No description provided for @studioHarnessWsEventChatMessageUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat message updated'**
+  String get studioHarnessWsEventChatMessageUpdated;
+
+  /// No description provided for @studioHarnessWsEventErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred'**
+  String get studioHarnessWsEventErrorOccurred;
+
+  /// No description provided for @studioHarnessWsEventGenerationJobUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation job updated'**
+  String get studioHarnessWsEventGenerationJobUpdated;
+
+  /// No description provided for @studioModelPricingTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get studioModelPricingTypeText;
+
+  /// No description provided for @studioModelPricingTypeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get studioModelPricingTypeImage;
+
+  /// No description provided for @studioModelPricingTypeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get studioModelPricingTypeVideo;
+
+  /// No description provided for @notificationsComplianceStageCriticalUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical unclaimed'**
+  String get notificationsComplianceStageCriticalUnclaimed;
+
+  /// No description provided for @notificationsComplianceStageOverCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Over capacity'**
+  String get notificationsComplianceStageOverCapacity;
+
+  /// No description provided for @notificationsComplianceStageStalledClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stalled claimed'**
+  String get notificationsComplianceStageStalledClaimed;
+
+  /// No description provided for @notificationsComplianceStageEscalated72h.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated 72h+'**
+  String get notificationsComplianceStageEscalated72h;
+
+  /// No description provided for @adminConsoleAclModeInherited.
+  ///
+  /// In en, this message translates to:
+  /// **'Inherited'**
+  String get adminConsoleAclModeInherited;
+
+  /// No description provided for @adminConsoleAclModeRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restricted'**
+  String get adminConsoleAclModeRestricted;
+
+  /// No description provided for @adminConsoleAclModeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get adminConsoleAclModeOpen;
+
+  /// No description provided for @benchmarkExperimentStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get benchmarkExperimentStatusDraft;
+
+  /// No description provided for @benchmarkExperimentStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get benchmarkExperimentStatusRunning;
+
+  /// No description provided for @benchmarkExperimentStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get benchmarkExperimentStatusCompleted;
+
+  /// No description provided for @benchmarkExperimentStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get benchmarkExperimentStatusFailed;
+
+  /// No description provided for @benchmarkExperimentStatusArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get benchmarkExperimentStatusArchived;
+
+  /// No description provided for @benchmarkReviewTypeHuman.
+  ///
+  /// In en, this message translates to:
+  /// **'Human review'**
+  String get benchmarkReviewTypeHuman;
+
+  /// No description provided for @benchmarkReviewTypeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto review'**
+  String get benchmarkReviewTypeAuto;
+
+  /// No description provided for @benchmarkReviewTypeGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate review'**
+  String get benchmarkReviewTypeGate;
+
+  /// No description provided for @benchmarkReviewStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get benchmarkReviewStatusPending;
+
+  /// No description provided for @benchmarkReviewStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get benchmarkReviewStatusApproved;
+
+  /// No description provided for @benchmarkReviewStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get benchmarkReviewStatusRejected;
+
+  /// No description provided for @benchmarkReviewStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get benchmarkReviewStatusSkipped;
+
+  /// No description provided for @benchmarkSampleTierSmoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Smoke'**
+  String get benchmarkSampleTierSmoke;
+
+  /// No description provided for @benchmarkSampleTierRegression.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression'**
+  String get benchmarkSampleTierRegression;
+
+  /// No description provided for @benchmarkSampleTierFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get benchmarkSampleTierFull;
+
+  /// No description provided for @benchmarkGateDecisionPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get benchmarkGateDecisionPass;
+
+  /// No description provided for @benchmarkGateDecisionFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fail'**
+  String get benchmarkGateDecisionFail;
+
+  /// No description provided for @platformStatusHealthOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get platformStatusHealthOk;
+
+  /// No description provided for @platformStatusHealthUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get platformStatusHealthUnknown;
+
+  /// No description provided for @apiKeysLastUsedUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown source'**
+  String get apiKeysLastUsedUnknown;
+
+  /// No description provided for @qualityReviewsDimensionVisualConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual / character consistency'**
+  String get qualityReviewsDimensionVisualConsistency;
+
+  /// No description provided for @qualityReviewsDimensionNarrativeCoherence.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrative coherence'**
+  String get qualityReviewsDimensionNarrativeCoherence;
+
+  /// No description provided for @qualityReviewsDimensionLipSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Lip sync'**
+  String get qualityReviewsDimensionLipSync;
+
+  /// No description provided for @qualityReviewsDimensionPacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pacing'**
+  String get qualityReviewsDimensionPacing;
+
+  /// No description provided for @qualityReviewsDimensionCharacterConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Character consistency'**
+  String get qualityReviewsDimensionCharacterConsistency;
+
+  /// No description provided for @qualityReviewsDimensionDialogueNaturalness.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialogue naturalness'**
+  String get qualityReviewsDimensionDialogueNaturalness;
+
+  /// No description provided for @qualityReviewsDimensionFaithfulness.
+  ///
+  /// In en, this message translates to:
+  /// **'Faithfulness to source'**
+  String get qualityReviewsDimensionFaithfulness;
+
+  /// No description provided for @qualityReviewsDimensionRiskBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimension risk'**
+  String get qualityReviewsDimensionRiskBadge;
+
+  /// No description provided for @qualityReviewsDimensionScoreSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get qualityReviewsDimensionScoreSkip;
+
+  /// No description provided for @qualityReviewsDimensionScoreEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No dimension scores'**
+  String get qualityReviewsDimensionScoreEmpty;
+
+  /// No description provided for @qualityReviewsDimensionScoreInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an integer from 1–10'**
+  String get qualityReviewsDimensionScoreInvalid;
+
+  /// No description provided for @qualityReviewsDimensionScoreOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Score must be between 1 and 10'**
+  String get qualityReviewsDimensionScoreOutOfRange;
+
+  /// No description provided for @qualityReviewsRubricVersionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Rubric version: {version}'**
+  String qualityReviewsRubricVersionLine(String version);
+
+  /// No description provided for @qualityReviewsApplySuggestedActionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply suggested action'**
+  String get qualityReviewsApplySuggestedActionTooltip;
+
+  /// No description provided for @qualityReviewsNoSuggestedActionToApply.
+  ///
+  /// In en, this message translates to:
+  /// **'This review has no suggested action to apply.'**
+  String get qualityReviewsNoSuggestedActionToApply;
+
+  /// No description provided for @qualityReviewsCopiedReworkBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied rework brief: {actionLabel}'**
+  String qualityReviewsCopiedReworkBrief(String actionLabel);
+
+  /// No description provided for @qualityReviewsOpenedScopeSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened {target} scope for {actionLabel}'**
+  String qualityReviewsOpenedScopeSnack(String actionLabel, String target);
+
+  /// No description provided for @studioRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get studioRetry;
+
+  /// No description provided for @studioBatchSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String studioBatchSelectedCount(int count);
+
+  /// No description provided for @studioOnboardingStepCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{total}'**
+  String studioOnboardingStepCounter(int current, int total);
+
+  /// No description provided for @studioOnboardingPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get studioOnboardingPrevious;
+
+  /// No description provided for @studioOnboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get studioOnboardingNext;
+
+  /// No description provided for @studioOnboardingDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get studioOnboardingDone;
+
+  /// No description provided for @studioOnboardingStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the left nav to start creating under Projects.'**
+  String get studioOnboardingStep1;
+
+  /// No description provided for @studioOnboardingStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside a project, follow the six steps from script to delivery.'**
+  String get studioOnboardingStep2;
+
+  /// No description provided for @studioOnboardingStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Press ⌘K to jump between steps and settings quickly.'**
+  String get studioOnboardingStep3;
+
+  /// No description provided for @studioCommandPaletteSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search commands…'**
+  String get studioCommandPaletteSearchHint;
 
   /// No description provided for @studioAgentSubmitted.
   ///
@@ -2575,7 +3187,7 @@ abstract class AppLocalizations {
   /// No description provided for @productNavScriptWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Script workspace'**
+  /// **'Screenplay workspace'**
   String get productNavScriptWorkspace;
 
   /// No description provided for @productNavProductionWorkspace.
@@ -2635,7 +3247,7 @@ abstract class AppLocalizations {
   /// No description provided for @productPipelineStripSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Unified entry from project settings through scripts, production, tasks, and quality review; Short-video Space handles scheduling and assembly.'**
+  /// **'Unified entry from project settings through screenplays, production, tasks, and quality review; multi-platform release handles publishing and channel scheduling.'**
   String get productPipelineStripSubtitle;
 
   /// No description provided for @productPipelineStripProjects.
@@ -2647,7 +3259,7 @@ abstract class AppLocalizations {
   /// No description provided for @productPipelineStripScripts.
   ///
   /// In en, this message translates to:
-  /// **'Scripts'**
+  /// **'Screenplay'**
   String get productPipelineStripScripts;
 
   /// No description provided for @productPipelineStripProduction.
@@ -2677,7 +3289,7 @@ abstract class AppLocalizations {
   /// No description provided for @productPipelineStripShortVideo.
   ///
   /// In en, this message translates to:
-  /// **'Short video'**
+  /// **'Distribution'**
   String get productPipelineStripShortVideo;
 
   /// No description provided for @workspaceDebugOverviewApiBase.
@@ -3490,6 +4102,30 @@ abstract class AppLocalizations {
   /// **'Stateful only'**
   String get billingAuditOnlyStateful;
 
+  /// No description provided for @billingAuditQuerySummaryProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider: {value}'**
+  String billingAuditQuerySummaryProvider(String value);
+
+  /// No description provided for @billingAuditQuerySummaryInformational.
+  ///
+  /// In en, this message translates to:
+  /// **'Informational: {value}'**
+  String billingAuditQuerySummaryInformational(String value);
+
+  /// No description provided for @billingAuditQuerySummarySort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: {value}'**
+  String billingAuditQuerySummarySort(String value);
+
+  /// No description provided for @billingAuditQueryFilterLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}={value}'**
+  String billingAuditQueryFilterLine(String label, String value);
+
   /// No description provided for @billingAuditEventTypeHint.
   ///
   /// In en, this message translates to:
@@ -3991,19 +4627,19 @@ abstract class AppLocalizations {
   /// No description provided for @projectsRoleEditor.
   ///
   /// In en, this message translates to:
-  /// **'editor'**
+  /// **'Editor'**
   String get projectsRoleEditor;
 
   /// No description provided for @projectsRoleViewer.
   ///
   /// In en, this message translates to:
-  /// **'viewer'**
+  /// **'Viewer'**
   String get projectsRoleViewer;
 
   /// No description provided for @projectsRoleMember.
   ///
   /// In en, this message translates to:
-  /// **'member'**
+  /// **'Member'**
   String get projectsRoleMember;
 
   /// No description provided for @projectsDialogCreateTitle.
@@ -5158,6 +5794,24 @@ abstract class AppLocalizations {
   /// **'summary / message / all'**
   String get agentMemoryFieldQueryTypeHelper;
 
+  /// No description provided for @agentMemoryQueryTypeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get agentMemoryQueryTypeSummary;
+
+  /// No description provided for @agentMemoryQueryTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get agentMemoryQueryTypeMessage;
+
+  /// No description provided for @agentMemoryQueryTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get agentMemoryQueryTypeAll;
+
   /// No description provided for @agentMemoryFieldMemoryTier.
   ///
   /// In en, this message translates to:
@@ -5181,6 +5835,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'standard / lean / off'**
   String get agentMemoryFieldAutomationModeHelper;
+
+  /// No description provided for @agentMemoryAutomationStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get agentMemoryAutomationStandard;
+
+  /// No description provided for @agentMemoryAutomationLean.
+  ///
+  /// In en, this message translates to:
+  /// **'Lean'**
+  String get agentMemoryAutomationLean;
+
+  /// No description provided for @agentMemoryAutomationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get agentMemoryAutomationOff;
+
+  /// No description provided for @agentMemoryAppendTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get agentMemoryAppendTypeMessage;
+
+  /// No description provided for @agentMemoryAppendTypeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get agentMemoryAppendTypeSummary;
 
   /// No description provided for @agentMemoryIsolateHint.
   ///
@@ -5807,7 +6491,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskCenterSectionIntro.
   ///
   /// In en, this message translates to:
-  /// **'Use the formal workbench for task projects/categories, filtered task listing, and details. The main section no longer depends on first-row or UUID probe buttons.'**
+  /// **'Open the task workbench to browse generation jobs for your project, filter by status, and retry failures.'**
   String get taskCenterSectionIntro;
 
   /// No description provided for @taskCenterOpenWorkbench.
@@ -6071,7 +6755,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskCenterOpenScriptWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Open script workspace'**
+  /// **'Open screenplay workspace'**
   String get taskCenterOpenScriptWorkspace;
 
   /// No description provided for @taskCenterRegenerate.
@@ -6143,7 +6827,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskCenterOpenScriptScript.
   ///
   /// In en, this message translates to:
-  /// **'Open script workspace (script)'**
+  /// **'Open screenplay workspace'**
   String get taskCenterOpenScriptScript;
 
   /// No description provided for @taskCenterOpenSpaceProject.
@@ -7366,6 +8050,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grade {value}'**
   String qualityReviewsFilterGrade(String value);
+
+  /// No description provided for @qualityReviewsFilterSuggestedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested action: {value}'**
+  String qualityReviewsFilterSuggestedAction(String value);
 
   /// No description provided for @qualityReviewsStatusLoadedReviews.
   ///
@@ -8673,16 +9363,22 @@ abstract class AppLocalizations {
   /// **'unknown_age'**
   String get qualityReviewsFreshnessUnknownAge;
 
+  /// No description provided for @qualityReviewsFreshnessUnknownAgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown age'**
+  String get qualityReviewsFreshnessUnknownAgeLabel;
+
   /// No description provided for @qualityReviewsFreshnessNever.
   ///
   /// In en, this message translates to:
-  /// **'never'**
+  /// **'Not refreshed yet'**
   String get qualityReviewsFreshnessNever;
 
   /// No description provided for @qualityReviewsFreshnessNone.
   ///
   /// In en, this message translates to:
-  /// **'none'**
+  /// **'None'**
   String get qualityReviewsFreshnessNone;
 
   /// No description provided for @qualityReviewsFreshnessStale.
@@ -8696,6 +9392,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'fresh'**
   String get qualityReviewsFreshnessFresh;
+
+  /// No description provided for @qualityReviewsFreshnessStaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard data may be outdated'**
+  String get qualityReviewsFreshnessStaleTitle;
+
+  /// No description provided for @qualityReviewsFreshnessFreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard data is up to date'**
+  String get qualityReviewsFreshnessFreshTitle;
+
+  /// No description provided for @qualityReviewsFreshnessStaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated {refreshedAt} (about {age} ago)'**
+  String qualityReviewsFreshnessStaleBody(String refreshedAt, String age);
+
+  /// No description provided for @qualityReviewsFreshnessAgeSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s'**
+  String qualityReviewsFreshnessAgeSeconds(int count);
+
+  /// No description provided for @qualityReviewsFreshnessAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String qualityReviewsFreshnessAgeMinutes(int count);
+
+  /// No description provided for @qualityReviewsFreshnessRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh dashboard'**
+  String get qualityReviewsFreshnessRefresh;
+
+  /// No description provided for @qualityReviewsFreshnessShowDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical details'**
+  String get qualityReviewsFreshnessShowDetails;
+
+  /// No description provided for @qualityReviewsFreshnessTechnicalDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'snapshotRows={snapshotRows} · reviews={reviewCount} · usage={usageCount} · reason={reason} · mode={mode}'**
+  String qualityReviewsFreshnessTechnicalDetails(
+    int snapshotRows,
+    int reviewCount,
+    int usageCount,
+    String reason,
+    String mode,
+  );
+
+  /// No description provided for @studioApiErrorCalloutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load'**
+  String get studioApiErrorCalloutTitle;
+
+  /// No description provided for @studioDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get studioDismiss;
+
+  /// No description provided for @studioLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load content'**
+  String get studioLoadFailedTitle;
 
   /// No description provided for @qualityReviewsStageStorySkeleton.
   ///
@@ -8736,68 +9504,248 @@ abstract class AppLocalizations {
   /// No description provided for @qualityReviewsSourceAuto.
   ///
   /// In en, this message translates to:
-  /// **'source=auto'**
+  /// **'Auto'**
   String get qualityReviewsSourceAuto;
 
   /// No description provided for @qualityReviewsFieldTargetType.
   ///
   /// In en, this message translates to:
-  /// **'targetType'**
+  /// **'Target type'**
   String get qualityReviewsFieldTargetType;
 
   /// No description provided for @qualityReviewsFieldTargetId.
   ///
   /// In en, this message translates to:
-  /// **'targetId'**
+  /// **'Target ID'**
   String get qualityReviewsFieldTargetId;
 
   /// No description provided for @qualityReviewsFieldSource.
   ///
   /// In en, this message translates to:
-  /// **'source'**
+  /// **'Source'**
   String get qualityReviewsFieldSource;
 
   /// No description provided for @qualityReviewsFieldOverallScore.
   ///
   /// In en, this message translates to:
-  /// **'overallScore'**
+  /// **'Overall score'**
   String get qualityReviewsFieldOverallScore;
 
   /// No description provided for @qualityReviewsFieldStage.
   ///
   /// In en, this message translates to:
-  /// **'stage'**
+  /// **'Stage'**
   String get qualityReviewsFieldStage;
 
   /// No description provided for @qualityReviewsFieldGrade.
   ///
   /// In en, this message translates to:
-  /// **'grade'**
+  /// **'Grade'**
   String get qualityReviewsFieldGrade;
 
   /// No description provided for @qualityReviewsFieldComments.
   ///
   /// In en, this message translates to:
-  /// **'comments'**
+  /// **'Comments'**
   String get qualityReviewsFieldComments;
 
   /// No description provided for @qualityReviewsFieldPassed.
   ///
   /// In en, this message translates to:
-  /// **'passed'**
+  /// **'Passed'**
   String get qualityReviewsFieldPassed;
 
   /// No description provided for @qualityReviewsFieldIsBadCase.
   ///
   /// In en, this message translates to:
-  /// **'isBadCase'**
+  /// **'Bad case'**
   String get qualityReviewsFieldIsBadCase;
 
   /// No description provided for @qualityReviewsFieldBadCaseCategory.
   ///
   /// In en, this message translates to:
-  /// **'badCaseCategory'**
+  /// **'Bad case category'**
   String get qualityReviewsFieldBadCaseCategory;
+
+  /// No description provided for @qualityReviewsFilterSuggestedActionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested action'**
+  String get qualityReviewsFilterSuggestedActionLabel;
+
+  /// No description provided for @qualityReviewsSuggestedActionRollbackDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback to director planning'**
+  String get qualityReviewsSuggestedActionRollbackDirector;
+
+  /// No description provided for @qualityReviewsSuggestedActionUpdateAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Update character anchor'**
+  String get qualityReviewsSuggestedActionUpdateAnchor;
+
+  /// No description provided for @qualityReviewsSuggestedActionPatchStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Patch storyboard items'**
+  String get qualityReviewsSuggestedActionPatchStoryboard;
+
+  /// No description provided for @qualityReviewsSuggestedActionAdjustPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust video prompt'**
+  String get qualityReviewsSuggestedActionAdjustPrompt;
+
+  /// No description provided for @qualityReviewsSuggestedActionRetryVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry video generation'**
+  String get qualityReviewsSuggestedActionRetryVideo;
+
+  /// No description provided for @qualityReviewsSuggestedActionRegenStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate storyboard'**
+  String get qualityReviewsSuggestedActionRegenStoryboard;
+
+  /// No description provided for @qualityReviewsSuggestedActionManualReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual review'**
+  String get qualityReviewsSuggestedActionManualReview;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairRollbackDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to director planning first; resolve conflicts and motivation before continuing generation.'**
+  String get qualityReviewsSuggestedActionRepairRollbackDirector;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairUpdateAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Update character anchors first—appearance, tone, and emotional reactions—then retry.'**
+  String get qualityReviewsSuggestedActionRepairUpdateAnchor;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairPatchStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Patch storyboard items locally: fill in action, eyelines, and pacing.'**
+  String get qualityReviewsSuggestedActionRepairPatchStoryboard;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairAdjustPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tighten the video prompt first; make performance cues and emotional anchors concrete.'**
+  String get qualityReviewsSuggestedActionRepairAdjustPrompt;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairRetryVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current constraints, add key negative limits, then retry generation.'**
+  String get qualityReviewsSuggestedActionRepairRetryVideo;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairRegenStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate storyboard rhythm with clearer peaks and shot layering.'**
+  String get qualityReviewsSuggestedActionRepairRegenStoryboard;
+
+  /// No description provided for @qualityReviewsSuggestedActionRepairManualReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually review the bad case root cause before choosing a rework entry point.'**
+  String get qualityReviewsSuggestedActionRepairManualReview;
+
+  /// No description provided for @qualityReviewsHotspotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ×{count}'**
+  String qualityReviewsHotspotCount(String label, int count);
+
+  /// No description provided for @qualityReviewsTargetTypeStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get qualityReviewsTargetTypeStoryboard;
+
+  /// No description provided for @qualityReviewsTargetTypeScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get qualityReviewsTargetTypeScript;
+
+  /// No description provided for @qualityReviewsTargetTypeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get qualityReviewsTargetTypeVideo;
+
+  /// No description provided for @qualityReviewsTargetTypeAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset'**
+  String get qualityReviewsTargetTypeAsset;
+
+  /// No description provided for @qualityReviewsTargetTypeOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get qualityReviewsTargetTypeOutput;
+
+  /// No description provided for @qualityReviewsSourceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get qualityReviewsSourceManual;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'(none)'**
+  String get qualityReviewsBadCaseCategoryNone;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryPlotHole.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot hole'**
+  String get qualityReviewsBadCaseCategoryPlotHole;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryCharacterBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Character break'**
+  String get qualityReviewsBadCaseCategoryCharacterBreak;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryStoryboardMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard mismatch'**
+  String get qualityReviewsBadCaseCategoryStoryboardMismatch;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryDialogueIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialogue issue'**
+  String get qualityReviewsBadCaseCategoryDialogueIssue;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryVisualError.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual error'**
+  String get qualityReviewsBadCaseCategoryVisualError;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryPacingIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pacing issue'**
+  String get qualityReviewsBadCaseCategoryPacingIssue;
+
+  /// No description provided for @qualityReviewsBadCaseCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get qualityReviewsBadCaseCategoryOther;
 
   /// No description provided for @qualityReviewsDeliveryTag.
   ///
@@ -17145,7 +18093,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoStageCard2Title.
   ///
   /// In en, this message translates to:
-  /// **'2. Generate script'**
+  /// **'2. Write screenplay'**
   String get shortVideoStageCard2Title;
 
   /// No description provided for @shortVideoStageCard2Status.
@@ -17553,7 +18501,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpaceNavScriptWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Script workspace'**
+  /// **'Screenplay workspace'**
   String get shortVideoSpaceNavScriptWorkspace;
 
   /// No description provided for @shortVideoSpaceNavProductionWorkspace.
@@ -21033,6 +21981,36 @@ abstract class AppLocalizations {
   /// **'All types'**
   String get projectEditorAssetGenWorkbenchAssetTypeAll;
 
+  /// No description provided for @projectEditorAssetTypeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get projectEditorAssetTypeRole;
+
+  /// No description provided for @projectEditorAssetTypeClip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clip'**
+  String get projectEditorAssetTypeClip;
+
+  /// No description provided for @projectEditorAssetTypeProps.
+  ///
+  /// In en, this message translates to:
+  /// **'Props'**
+  String get projectEditorAssetTypeProps;
+
+  /// No description provided for @projectEditorAssetTypeScene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene'**
+  String get projectEditorAssetTypeScene;
+
+  /// No description provided for @projectEditorAssetTypeCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character'**
+  String get projectEditorAssetTypeCharacter;
+
   /// No description provided for @projectEditorAssetGenWorkbenchModelOptionalLabel.
   ///
   /// In en, this message translates to:
@@ -24423,6 +25401,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export start failed: {error}'**
   String shortVideoSpaceProductionAssemblyExportStartFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportNewerRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer export is currently running.'**
+  String get shortVideoSpaceProductionLatestExportNewerRunning;
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportNewerQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer export is queued.'**
+  String get shortVideoSpaceProductionLatestExportNewerQueued;
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportStaleSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Current selected clips changed after this export.'**
+  String get shortVideoSpaceProductionLatestExportStaleSelection;
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportSelectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Current selection: {selected} / {total} clips.'**
+  String shortVideoSpaceProductionLatestExportSelectionSummary(
+    int selected,
+    int total,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportVoiceoverSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover ready: {ready} / {total}'**
+  String shortVideoSpaceProductionLatestExportVoiceoverSummary(
+    int ready,
+    int total,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionLatestExportRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-export'**
+  String get shortVideoSpaceProductionLatestExportRerun;
 
   /// No description provided for @shortVideoSpaceProductionAssemblyReplaceVideoTitle.
   ///
@@ -27843,43 +28863,43 @@ abstract class AppLocalizations {
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Account section title'**
+  /// **'Account'**
   String get accountSectionTitle;
 
   /// No description provided for @accountRiskyPrefsTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Account risky prefs tooltip'**
+  /// **'Risky operation preferences'**
   String get accountRiskyPrefsTooltip;
 
   /// No description provided for @accountSectionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Account section subtitle'**
+  /// **'Profile, exports, and local client settings'**
   String get accountSectionSubtitle;
 
   /// No description provided for @accountExportTitle.
   ///
   /// In en, this message translates to:
-  /// **'Account export title'**
+  /// **'Data export'**
   String get accountExportTitle;
 
   /// No description provided for @accountExportCreate.
   ///
   /// In en, this message translates to:
-  /// **'Account export create'**
+  /// **'Create export'**
   String get accountExportCreate;
 
   /// No description provided for @accountExportIncludeAuditLogs.
   ///
   /// In en, this message translates to:
-  /// **'Account export include audit logs'**
+  /// **'Include audit logs'**
   String get accountExportIncludeAuditLogs;
 
   /// No description provided for @accountExportIncludeNotifications.
   ///
   /// In en, this message translates to:
-  /// **'Account export include notifications'**
+  /// **'Include notifications'**
   String get accountExportIncludeNotifications;
 
   /// No description provided for @accountExportActiveCount.
@@ -27891,13 +28911,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportCopyLastSavedPath.
   ///
   /// In en, this message translates to:
-  /// **'Account export copy last saved path'**
+  /// **'Copy last saved path'**
   String get accountExportCopyLastSavedPath;
 
   /// No description provided for @accountExportEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Account export empty'**
+  /// **'No account exports yet.'**
   String get accountExportEmpty;
 
   /// No description provided for @accountExportDefaultFileName.
@@ -27927,37 +28947,37 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportDownload.
   ///
   /// In en, this message translates to:
-  /// **'Account export download'**
+  /// **'Download to device'**
   String get accountExportDownload;
 
   /// No description provided for @accountExportCopyFileName.
   ///
   /// In en, this message translates to:
-  /// **'Account export copy file name'**
+  /// **'Copy file name'**
   String get accountExportCopyFileName;
 
   /// No description provided for @accountDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Account delete title'**
+  /// **'Delete account'**
   String get accountDeleteTitle;
 
   /// No description provided for @accountDeleteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Account delete description'**
+  /// **'Deletes your user, owned workspaces, personal projects, jobs, notifications, and local export/media folders. Memberships in shared workspaces are removed.'**
   String get accountDeleteDescription;
 
   /// No description provided for @accountDeleteConfirmLabel.
   ///
   /// In en, this message translates to:
-  /// **'Account delete confirm label'**
+  /// **'Type DELETE MY ACCOUNT to confirm'**
   String get accountDeleteConfirmLabel;
 
   /// No description provided for @accountDeleteIrreversibleAck.
   ///
   /// In en, this message translates to:
-  /// **'Account delete irreversible ack'**
+  /// **'I understand this is irreversible and accept workspace/project cascade deletion.'**
   String get accountDeleteIrreversibleAck;
 
   /// No description provided for @accountDeleteLastResponse.
@@ -27973,31 +28993,31 @@ abstract class AppLocalizations {
   /// No description provided for @accountDeleteButton.
   ///
   /// In en, this message translates to:
-  /// **'Account delete button'**
+  /// **'Permanently delete this account'**
   String get accountDeleteButton;
 
   /// No description provided for @accountExportStatusQueued.
   ///
   /// In en, this message translates to:
-  /// **'Account export status queued'**
+  /// **'Queued'**
   String get accountExportStatusQueued;
 
   /// No description provided for @accountExportStatusRunning.
   ///
   /// In en, this message translates to:
-  /// **'Account export status running'**
+  /// **'Ready to download'**
   String get accountExportStatusRunning;
 
   /// No description provided for @accountExportStatusSucceeded.
   ///
   /// In en, this message translates to:
-  /// **'Account export status succeeded'**
+  /// **'Ready to download'**
   String get accountExportStatusSucceeded;
 
   /// No description provided for @accountExportStatusFailed.
   ///
   /// In en, this message translates to:
-  /// **'Account export status failed'**
+  /// **'Ready to download'**
   String get accountExportStatusFailed;
 
   /// No description provided for @adminConsoleMembershipItem.
@@ -28014,12 +29034,12 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleRecentJobItem.
   ///
   /// In en, this message translates to:
-  /// **'{kind} · {status} · project {projectId} · {ownerEmail}'**
+  /// **'{kind} · {status} · project {projectId} · {createdAt}'**
   String adminConsoleRecentJobItem(
     String kind,
     String status,
     String projectId,
-    String ownerEmail,
+    String createdAt,
   );
 
   /// No description provided for @adminConsoleAuditListItem.
@@ -28047,7 +29067,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleArchivedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Admin console archived label'**
+  /// **'Archived'**
   String get adminConsoleArchivedLabel;
 
   /// No description provided for @adminConsoleMemberListItem.
@@ -28170,193 +29190,349 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleFieldCreatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field created at'**
+  /// **'Created at'**
   String get adminConsoleFieldCreatedAt;
 
   /// No description provided for @adminConsoleFieldUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field updated at'**
+  /// **'Updated at'**
   String get adminConsoleFieldUpdatedAt;
 
   /// No description provided for @adminConsoleFieldOperationalStatus.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field operational status'**
+  /// **'Operational status'**
   String get adminConsoleFieldOperationalStatus;
 
   /// No description provided for @adminConsoleFieldBillingProvider.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field billing provider'**
+  /// **'Billing provider'**
   String get adminConsoleFieldBillingProvider;
 
   /// No description provided for @adminConsoleFieldSubscription.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field subscription'**
+  /// **'Subscription'**
   String get adminConsoleFieldSubscription;
 
   /// No description provided for @adminConsoleFieldCurrentWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field current workspace'**
+  /// **'Current workspace'**
   String get adminConsoleFieldCurrentWorkspace;
 
   /// No description provided for @adminConsoleFieldWorkspaceId.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field workspace id'**
+  /// **'Workspace ID'**
   String get adminConsoleFieldWorkspaceId;
 
   /// No description provided for @adminConsoleFieldOwner.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field owner'**
+  /// **'Owner'**
   String get adminConsoleFieldOwner;
 
   /// No description provided for @adminConsoleFieldArchivedAt.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field archived at'**
+  /// **'Archived at'**
   String get adminConsoleFieldArchivedAt;
 
   /// No description provided for @adminConsoleFieldOpsNote.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field ops note'**
+  /// **'Ops note'**
   String get adminConsoleFieldOpsNote;
 
   /// No description provided for @adminConsoleFieldProjectId.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field project id'**
+  /// **'Project ID'**
   String get adminConsoleFieldProjectId;
 
   /// No description provided for @adminConsoleFieldWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field workspace'**
+  /// **'Workspace'**
   String get adminConsoleFieldWorkspace;
 
   /// No description provided for @adminConsoleFieldProjectArchivedAt.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field project archived at'**
+  /// **'Project archived at'**
   String get adminConsoleFieldProjectArchivedAt;
 
   /// No description provided for @adminConsoleFieldAclMode.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field acl mode'**
+  /// **'ACL mode'**
   String get adminConsoleFieldAclMode;
 
   /// No description provided for @adminConsoleFieldEditorCount.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field editor count'**
+  /// **'Editors'**
   String get adminConsoleFieldEditorCount;
 
   /// No description provided for @adminConsoleFieldViewerCount.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field viewer count'**
+  /// **'Viewers'**
   String get adminConsoleFieldViewerCount;
 
   /// No description provided for @agentWorkspaceProductionPromptLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt label'**
+  /// **'Production prompt'**
   String get agentWorkspaceProductionPromptLabel;
 
   /// No description provided for @agentWorkspaceProductionPromptHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt helper'**
+  /// **'Prompt for production harness.agent.run'**
   String get agentWorkspaceProductionPromptHelper;
 
   /// No description provided for @agentWorkspaceProductionRunWorkflow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production run workflow'**
+  /// **'Run production workflow'**
   String get agentWorkspaceProductionRunWorkflow;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Director plan'**
+  String get agentWorkspacePresetFlowKeyScriptPlan;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get agentWorkspacePresetFlowKeyAssets;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get agentWorkspacePresetFlowKeyScript;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table'**
+  String get agentWorkspacePresetFlowKeyStoryboardTable;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get agentWorkspacePresetFlowKeyStoryboard;
+
+  /// No description provided for @agentWorkspacePresetFlowKeyWorkspaceResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace result'**
+  String get agentWorkspacePresetFlowKeyWorkspaceResult;
+
+  /// No description provided for @agentWorkspacePresetProductionToolGetFlowData.
+  ///
+  /// In en, this message translates to:
+  /// **'Read flow data'**
+  String get agentWorkspacePresetProductionToolGetFlowData;
+
+  /// No description provided for @agentWorkspacePresetProductionToolAddDeriveAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Add derived asset'**
+  String get agentWorkspacePresetProductionToolAddDeriveAsset;
+
+  /// No description provided for @agentWorkspacePresetProductionToolDelDeriveAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete derived asset'**
+  String get agentWorkspacePresetProductionToolDelDeriveAsset;
+
+  /// No description provided for @agentWorkspacePresetProductionToolGenerateDeriveAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate derived asset'**
+  String get agentWorkspacePresetProductionToolGenerateDeriveAsset;
+
+  /// No description provided for @agentWorkspacePresetProductionToolGenerateStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate storyboard'**
+  String get agentWorkspacePresetProductionToolGenerateStoryboard;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentDirectorPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Director plan sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentDirectorPlan;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentDeriveAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Derive assets sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentDeriveAssets;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentGenerateAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate assets sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentGenerateAssets;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentSupervision.
+  ///
+  /// In en, this message translates to:
+  /// **'Production supervision sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentSupervision;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentStoryboardGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard generation sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentStoryboardGen;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentStoryboardPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard panel sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentStoryboardPanel;
+
+  /// No description provided for @agentWorkspacePresetProductionSubAgentStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table sub-agent'**
+  String get agentWorkspacePresetProductionSubAgentStoryboardTable;
+
+  /// No description provided for @agentWorkspacePresetScriptToolGetPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Read plan data (get_planData)'**
+  String get agentWorkspacePresetScriptToolGetPlanData;
+
+  /// No description provided for @agentWorkspacePresetScriptToolGetScriptContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Read script body'**
+  String get agentWorkspacePresetScriptToolGetScriptContent;
+
+  /// No description provided for @agentWorkspacePresetScriptToolGetNovelText.
+  ///
+  /// In en, this message translates to:
+  /// **'Read novel text'**
+  String get agentWorkspacePresetScriptToolGetNovelText;
+
+  /// No description provided for @agentWorkspacePresetScriptToolGetNovelEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Read novel events'**
+  String get agentWorkspacePresetScriptToolGetNovelEvents;
+
+  /// No description provided for @agentWorkspacePresetScriptSubAgentStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton sub-agent'**
+  String get agentWorkspacePresetScriptSubAgentStorySkeleton;
+
+  /// No description provided for @agentWorkspacePresetScriptSubAgentAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation strategy sub-agent'**
+  String get agentWorkspacePresetScriptSubAgentAdaptationStrategy;
+
+  /// No description provided for @agentWorkspacePresetScriptSubAgentScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script sub-agent'**
+  String get agentWorkspacePresetScriptSubAgentScript;
+
+  /// No description provided for @agentWorkspacePresetScriptSubAgentSupervision.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervision agent'**
+  String get agentWorkspacePresetScriptSubAgentSupervision;
 
   /// No description provided for @agentWorkspaceProductionDomainToolLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production domain tool label'**
+  /// **'Production domain tool'**
   String get agentWorkspaceProductionDomainToolLabel;
 
   /// No description provided for @agentWorkspaceProductionFlowKeyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production flow key label'**
+  /// **'Flow key'**
   String get agentWorkspaceProductionFlowKeyLabel;
 
   /// No description provided for @agentWorkspaceProductionFlowKeyHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production flow key helper'**
+  /// **'Used as get_flowData key and writeback key'**
   String get agentWorkspaceProductionFlowKeyHelper;
 
   /// No description provided for @agentWorkspaceProductionArgsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production args label'**
+  /// **'Tool arguments (JSON)'**
   String get agentWorkspaceProductionArgsLabel;
 
   /// No description provided for @agentWorkspaceProductionArgsHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production args helper'**
+  /// **'For non-get_flowData tools, e.g. ids:[1,2] (JSON)'**
   String get agentWorkspaceProductionArgsHelper;
 
   /// No description provided for @agentWorkspaceProductionReadTool.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production read tool'**
+  /// **'Read production tool'**
   String get agentWorkspaceProductionReadTool;
 
   /// No description provided for @agentWorkspaceProductionSubAgentToolLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production sub agent tool label'**
+  /// **'Production sub-agent tool'**
   String get agentWorkspaceProductionSubAgentToolLabel;
 
   /// No description provided for @agentWorkspaceProductionSubAgentArgsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production sub agent args label'**
+  /// **'Sub-agent arguments (JSON)'**
   String get agentWorkspaceProductionSubAgentArgsLabel;
 
   /// No description provided for @agentWorkspaceProductionSubAgentArgsHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production sub agent args helper'**
+  /// **'e.g. storyboardIds:[1,2], assetIds:[7,12] (JSON)'**
   String get agentWorkspaceProductionSubAgentArgsHelper;
 
   /// No description provided for @agentWorkspaceProductionRunSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production run sub agent'**
+  /// **'Run sub-agent'**
   String get agentWorkspaceProductionRunSubAgent;
 
   /// No description provided for @agentWorkspaceProductionWritebackToolResult.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production writeback tool result'**
+  /// **'Write back tool result'**
   String get agentWorkspaceProductionWritebackToolResult;
 
   /// No description provided for @agentWorkspaceProductionArgumentTemplates.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production argument templates'**
+  /// **'Argument templates'**
   String get agentWorkspaceProductionArgumentTemplates;
 
   /// No description provided for @agentWorkspaceProductionCurrentCandidateArgs.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production current candidate args'**
+  /// **'Current result candidate args'**
   String get agentWorkspaceProductionCurrentCandidateArgs;
 
   /// No description provided for @agentWorkspaceProductionCandidateIds.
@@ -28368,13 +29544,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionPromptPreviewTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt preview title'**
+  /// **'Execution prompt'**
   String get agentWorkspaceProductionPromptPreviewTitle;
 
   /// No description provided for @agentWorkspaceProductionStagesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production stages title'**
+  /// **'Execution stages'**
   String get agentWorkspaceProductionStagesTitle;
 
   /// No description provided for @agentWorkspaceProductionStageFlowScriptPlan.
@@ -28700,13 +29876,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionApplyStage.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production apply stage'**
+  /// **'Apply stage'**
   String get agentWorkspaceProductionApplyStage;
 
   /// No description provided for @agentWorkspaceProductionDiagnosisTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production diagnosis title'**
+  /// **'Next-step suggestions'**
   String get agentWorkspaceProductionDiagnosisTitle;
 
   /// No description provided for @agentWorkspaceProductionToolChip.
@@ -28724,49 +29900,49 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionApplySuggestion.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production apply suggestion'**
+  /// **'Apply suggestion'**
   String get agentWorkspaceProductionApplySuggestion;
 
   /// No description provided for @agentWorkspaceProductionStepPullAssetsFlow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step pull assets flow'**
+  /// **'1) Pull assets flow'**
   String get agentWorkspaceProductionStepPullAssetsFlow;
 
   /// No description provided for @agentWorkspaceProductionStepRunAssetsSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step run assets sub agent'**
+  /// **'2) Run assets sub-agent'**
   String get agentWorkspaceProductionStepRunAssetsSubAgent;
 
   /// No description provided for @agentWorkspaceProductionStepPullStoryboardFlow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step pull storyboard flow'**
+  /// **'3) Pull storyboard flow'**
   String get agentWorkspaceProductionStepPullStoryboardFlow;
 
   /// No description provided for @agentWorkspaceProductionStepWritebackFlow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step writeback flow'**
+  /// **'4) Write back flow'**
   String get agentWorkspaceProductionStepWritebackFlow;
 
   /// No description provided for @agentWorkspaceProductionStepRunStoryboardSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step run storyboard sub agent'**
+  /// **'5) Run storyboard sub-agent'**
   String get agentWorkspaceProductionStepRunStoryboardSubAgent;
 
   /// No description provided for @agentWorkspaceProductionStepRunDirectorPlanSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production step run director plan sub agent'**
+  /// **'6) Run director-plan sub-agent'**
   String get agentWorkspaceProductionStepRunDirectorPlanSubAgent;
 
   /// No description provided for @agentWorkspaceProductionPromptFlowDown.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt flow down'**
+  /// **'Order: confirm director-plan assets, then storyboard table and shots.'**
   String get agentWorkspaceProductionPromptFlowDown;
 
   /// No description provided for @agentWorkspaceProductionPromptRewriteFocus.
@@ -28796,7 +29972,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionPromptExecutionOrder.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt execution order'**
+  /// **'Order: confirm director-plan assets, then storyboard table and shots.'**
   String get agentWorkspaceProductionPromptExecutionOrder;
 
   /// No description provided for @agentWorkspaceProductionStoryboardPriorityMissing.
@@ -29710,13 +30886,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionModeTextOnly.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production mode text only'**
+  /// **'Result: frames present'**
   String get agentWorkspaceProductionModeTextOnly;
 
   /// No description provided for @agentWorkspaceProductionResultHasImage.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production result has image'**
+  /// **'Result: missing frames'**
   String get agentWorkspaceProductionResultHasImage;
 
   /// No description provided for @agentWorkspaceProductionResultMissingImage.
@@ -29734,37 +30910,37 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionContextDerivedRewrite.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context derived rewrite'**
+  /// **'Production execution hints derived from scriptPlan'**
   String get agentWorkspaceProductionContextDerivedRewrite;
 
   /// No description provided for @agentWorkspaceProductionContextDerivedRewriteSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context derived rewrite subtitle'**
+  /// **'Production execution hints derived from scriptPlan'**
   String get agentWorkspaceProductionContextDerivedRewriteSubtitle;
 
   /// No description provided for @agentWorkspaceProductionContextReturnList.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context return list'**
-  String get agentWorkspaceProductionContextReturnList;
+  /// **'From {toolName}'**
+  String agentWorkspaceProductionContextReturnList(Object toolName);
 
   /// No description provided for @agentWorkspaceProductionContextToolText.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context tool text'**
+  /// **'Tool text output'**
   String get agentWorkspaceProductionContextToolText;
 
   /// No description provided for @agentWorkspaceProductionContextReviewSummary.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context review summary'**
-  String get agentWorkspaceProductionContextReviewSummary;
+  /// **'From {toolName}'**
+  String agentWorkspaceProductionContextReviewSummary(Object toolName);
 
   /// No description provided for @agentWorkspaceProductionContextSnapshotTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context snapshot title'**
+  /// **'Context snapshot'**
   String get agentWorkspaceProductionContextSnapshotTitle;
 
   /// No description provided for @agentWorkspaceSummaryReturnedList.
@@ -29831,13 +31007,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryFlowEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary flow empty'**
+  /// **'Current flow is empty'**
   String get agentWorkspaceProductionSummaryFlowEmpty;
 
   /// No description provided for @agentWorkspaceProductionSummaryFlowEmptyString.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary flow empty string'**
+  /// **'Current flow is an empty string'**
   String get agentWorkspaceProductionSummaryFlowEmptyString;
 
   /// No description provided for @agentWorkspaceProductionSummaryTextChars.
@@ -29945,7 +31121,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionIdleHint.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production idle hint'**
+  /// **'Waiting to run — use guided tasks or form actions.'**
   String get agentWorkspaceProductionIdleHint;
 
   /// No description provided for @agentWorkspaceProductionLatestToolResult.
@@ -29957,7 +31133,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionResultSummary.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production result summary'**
+  /// **'Result summary'**
   String get agentWorkspaceProductionResultSummary;
 
   /// No description provided for @agentWorkspaceProductionSuggestedFlowKey.
@@ -29969,127 +31145,127 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionUseSuggestedFlowKey.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production use suggested flow key'**
+  /// **'Use this key'**
   String get agentWorkspaceProductionUseSuggestedFlowKey;
 
   /// No description provided for @agentWorkspaceProductionWritebackStrategy.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production writeback strategy'**
+  /// **'Writeback keys: get_flowData writes directly; asset/storyboard/director-plan tools refresh the matching flow key first.'**
   String get agentWorkspaceProductionWritebackStrategy;
 
   /// No description provided for @agentWorkspaceScriptStepFetchPlanData.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script step fetch plan data'**
+  /// **'1) Fetch planData'**
   String get agentWorkspaceScriptStepFetchPlanData;
 
   /// No description provided for @agentWorkspaceScriptStepFetchContent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script step fetch content'**
+  /// **'2) Fetch script body'**
   String get agentWorkspaceScriptStepFetchContent;
 
   /// No description provided for @agentWorkspaceScriptStepGenerateDraft.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script step generate draft'**
+  /// **'3) Generate script draft'**
   String get agentWorkspaceScriptStepGenerateDraft;
 
   /// No description provided for @agentWorkspaceScriptStepWriteback.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script step writeback'**
+  /// **'4) Write back script'**
   String get agentWorkspaceScriptStepWriteback;
 
   /// No description provided for @agentWorkspaceScriptPromptLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script prompt label'**
+  /// **'Script prompt'**
   String get agentWorkspaceScriptPromptLabel;
 
   /// No description provided for @agentWorkspaceScriptPromptHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script prompt helper'**
+  /// **'Prompt for script harness.agent.run'**
   String get agentWorkspaceScriptPromptHelper;
 
   /// No description provided for @agentWorkspaceScriptRunWorkflow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script run workflow'**
+  /// **'Run script workflow'**
   String get agentWorkspaceScriptRunWorkflow;
 
   /// No description provided for @agentWorkspaceScriptDomainToolLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script domain tool label'**
+  /// **'Script domain tool'**
   String get agentWorkspaceScriptDomainToolLabel;
 
   /// No description provided for @agentWorkspaceScriptReadContext.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script read context'**
+  /// **'Read script context'**
   String get agentWorkspaceScriptReadContext;
 
   /// No description provided for @agentWorkspaceScriptArgsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script args label'**
+  /// **'Tool arguments'**
   String get agentWorkspaceScriptArgsLabel;
 
   /// No description provided for @agentWorkspaceScriptArgsHelper.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script args helper'**
+  /// **'Prefer the latest chapter result for novelId; leave blank if unsure.'**
   String get agentWorkspaceScriptArgsHelper;
 
   /// No description provided for @agentWorkspaceScriptSubAgentToolLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script sub agent tool label'**
+  /// **'Script sub-agent tool'**
   String get agentWorkspaceScriptSubAgentToolLabel;
 
   /// No description provided for @agentWorkspaceScriptRunSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script run sub agent'**
+  /// **'Run sub-agent'**
   String get agentWorkspaceScriptRunSubAgent;
 
   /// No description provided for @agentWorkspaceScriptWritebackPlanData.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script writeback plan data'**
+  /// **'Write back plan data'**
   String get agentWorkspaceScriptWritebackPlanData;
 
   /// No description provided for @agentWorkspaceScriptWritebackUpdateData.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script writeback update data'**
+  /// **'Write back update-data'**
   String get agentWorkspaceScriptWritebackUpdateData;
 
   /// No description provided for @agentWorkspaceScriptStagesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script stages title'**
+  /// **'Execution stages'**
   String get agentWorkspaceScriptStagesTitle;
 
   /// No description provided for @agentWorkspaceScriptApplyStage.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script apply stage'**
+  /// **'Apply stage'**
   String get agentWorkspaceScriptApplyStage;
 
   /// No description provided for @agentWorkspaceScriptAdvanceStage.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script advance stage'**
+  /// **'Advance stage'**
   String get agentWorkspaceScriptAdvanceStage;
 
   /// No description provided for @agentWorkspaceScriptDiagnosisTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script diagnosis title'**
+  /// **'Next-step suggestions'**
   String get agentWorkspaceScriptDiagnosisTitle;
 
   /// No description provided for @agentWorkspaceScriptToolChip.
@@ -30107,7 +31283,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptApplySuggestion.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script apply suggestion'**
+  /// **'Apply suggestion'**
   String get agentWorkspaceScriptApplySuggestion;
 
   /// No description provided for @agentWorkspaceScriptContextSkeletonFocus.
@@ -30125,85 +31301,85 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptContextExecutionOrder.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context execution order'**
+  /// **'Dialogue: avoid exposition; favor spoken conflict and emotional beats.'**
   String get agentWorkspaceScriptContextExecutionOrder;
 
   /// No description provided for @agentWorkspaceScriptContextDialogueConstraint.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context dialogue constraint'**
+  /// **'Dialogue: avoid exposition; favor spoken conflict and emotional beats.'**
   String get agentWorkspaceScriptContextDialogueConstraint;
 
   /// No description provided for @agentWorkspaceScriptContextStorySkeleton.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context story skeleton'**
+  /// **'From get_planData'**
   String get agentWorkspaceScriptContextStorySkeleton;
 
   /// No description provided for @agentWorkspaceScriptContextFromPlanData.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context from plan data'**
+  /// **'From get_planData'**
   String get agentWorkspaceScriptContextFromPlanData;
 
   /// No description provided for @agentWorkspaceScriptContextAdaptationStrategy.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context adaptation strategy'**
+  /// **'From get_planData'**
   String get agentWorkspaceScriptContextAdaptationStrategy;
 
   /// No description provided for @agentWorkspaceScriptContextRewriteConstraints.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context rewrite constraints'**
+  /// **'Downstream hints derived from get_planData'**
   String get agentWorkspaceScriptContextRewriteConstraints;
 
   /// No description provided for @agentWorkspaceScriptContextRewriteConstraintsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context rewrite constraints subtitle'**
+  /// **'Downstream hints derived from get_planData'**
   String get agentWorkspaceScriptContextRewriteConstraintsSubtitle;
 
   /// No description provided for @agentWorkspaceScriptContextUntitledScript.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context untitled script'**
+  /// **'Untitled script'**
   String get agentWorkspaceScriptContextUntitledScript;
 
   /// No description provided for @agentWorkspaceScriptContextNoBody.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context no body'**
+  /// **'No body'**
   String get agentWorkspaceScriptContextNoBody;
 
   /// No description provided for @agentWorkspaceScriptContextPlanDrafts.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context plan drafts'**
+  /// **'Up to 4 script rows shown'**
   String get agentWorkspaceScriptContextPlanDrafts;
 
   /// No description provided for @agentWorkspaceScriptContextPlanDraftsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context plan drafts subtitle'**
+  /// **'Up to 4 script rows shown'**
   String get agentWorkspaceScriptContextPlanDraftsSubtitle;
 
   /// No description provided for @agentWorkspaceScriptContextCurrentScriptBody.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context current script body'**
+  /// **'From get_script_content'**
   String get agentWorkspaceScriptContextCurrentScriptBody;
 
   /// No description provided for @agentWorkspaceScriptContextFromScriptContent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context from script content'**
+  /// **'From get_script_content'**
   String get agentWorkspaceScriptContextFromScriptContent;
 
   /// No description provided for @agentWorkspaceScriptContextUntitledChapter.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context untitled chapter'**
+  /// **'Chapter'**
   String get agentWorkspaceScriptContextUntitledChapter;
 
   /// No description provided for @agentWorkspaceScriptContextChapterPrefix.
@@ -30218,43 +31394,43 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptContextNovelChapters.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context novel chapters'**
+  /// **'From get_novel_text (first 4 shown)'**
   String get agentWorkspaceScriptContextNovelChapters;
 
   /// No description provided for @agentWorkspaceScriptContextNovelChaptersSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context novel chapters subtitle'**
+  /// **'From get_novel_text (first 4 shown)'**
   String get agentWorkspaceScriptContextNovelChaptersSubtitle;
 
   /// No description provided for @agentWorkspaceScriptContextUntitledEvent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context untitled event'**
+  /// **'Untitled event'**
   String get agentWorkspaceScriptContextUntitledEvent;
 
   /// No description provided for @agentWorkspaceScriptContextNovelEvents.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context novel events'**
+  /// **'From get_novel_events (first 6 shown)'**
   String get agentWorkspaceScriptContextNovelEvents;
 
   /// No description provided for @agentWorkspaceScriptContextNovelEventsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context novel events subtitle'**
+  /// **'From get_novel_events (first 6 shown)'**
   String get agentWorkspaceScriptContextNovelEventsSubtitle;
 
   /// No description provided for @agentWorkspaceScriptContextSnapshotTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context snapshot title'**
+  /// **'Context snapshot'**
   String get agentWorkspaceScriptContextSnapshotTitle;
 
   /// No description provided for @agentWorkspaceScriptLatestAssistantResult.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script latest assistant result'**
+  /// **'Latest assistant result'**
   String get agentWorkspaceScriptLatestAssistantResult;
 
   /// No description provided for @agentWorkspaceScriptWritebackSource.
@@ -30266,7 +31442,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryReviewReturned.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary review returned'**
+  /// **'Review result returned'**
   String get agentWorkspaceScriptSummaryReviewReturned;
 
   /// No description provided for @agentWorkspaceScriptSummaryReviewLine.
@@ -30283,19 +31459,19 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryPlanDataMissing.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary plan data missing'**
+  /// **'planData missing data'**
   String get agentWorkspaceScriptSummaryPlanDataMissing;
 
   /// No description provided for @agentWorkspaceScriptSummaryStorySkeletonReady.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary story skeleton ready'**
+  /// **'Story skeleton ready'**
   String get agentWorkspaceScriptSummaryStorySkeletonReady;
 
   /// No description provided for @agentWorkspaceScriptSummaryAdaptationReady.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary adaptation ready'**
+  /// **'Adaptation strategy ready'**
   String get agentWorkspaceScriptSummaryAdaptationReady;
 
   /// No description provided for @agentWorkspaceScriptSummaryPlanScripts.
@@ -30307,13 +31483,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryRewriteReady.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary rewrite ready'**
+  /// **'Rewrite constraints ready for downstream use'**
   String get agentWorkspaceScriptSummaryRewriteReady;
 
   /// No description provided for @agentWorkspaceScriptSummaryPlanDataReturned.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary plan data returned'**
+  /// **'planData returned'**
   String get agentWorkspaceScriptSummaryPlanDataReturned;
 
   /// No description provided for @agentWorkspaceScriptSummaryScriptEmpty.
@@ -30913,55 +32089,55 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScopeProjectIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace scope project id label'**
+  /// **'Project ID'**
   String get agentWorkspaceScopeProjectIdLabel;
 
   /// No description provided for @agentWorkspaceScopeScriptIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace scope script id label'**
+  /// **'Script ID'**
   String get agentWorkspaceScopeScriptIdLabel;
 
   /// No description provided for @agentWorkspaceScopeProjectUuidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace scope project uuid label'**
+  /// **'Project UUID (optional)'**
   String get agentWorkspaceScopeProjectUuidLabel;
 
   /// No description provided for @agentWorkspaceScopeScriptUuidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace scope script uuid label'**
+  /// **'Script UUID (optional, production attach)'**
   String get agentWorkspaceScopeScriptUuidLabel;
 
   /// No description provided for @agentWorkspaceScopeWorkspaceUuidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace scope workspace uuid label'**
+  /// **'Workspace UUID (optional, WS workspaceUuid)'**
   String get agentWorkspaceScopeWorkspaceUuidLabel;
 
   /// No description provided for @agentWorkspacePaneScript.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace pane script'**
+  /// **'Script activity'**
   String get agentWorkspacePaneScript;
 
   /// No description provided for @agentWorkspacePaneProduction.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace pane production'**
+  /// **'Production activity'**
   String get agentWorkspacePaneProduction;
 
   /// No description provided for @agentWorkspacePaneActivity.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace pane activity'**
+  /// **'Activity'**
   String get agentWorkspacePaneActivity;
 
   /// No description provided for @agentWorkspaceActivityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity title'**
+  /// **'Activity'**
   String get agentWorkspaceActivityTitle;
 
   /// No description provided for @agentWorkspaceActivityLatest.
@@ -30979,25 +32155,25 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceActivityLatestAssistantText.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity latest assistant text'**
+  /// **'Latest assistant text'**
   String get agentWorkspaceActivityLatestAssistantText;
 
   /// No description provided for @agentWorkspaceActivityNoWsEvents.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity no ws events'**
+  /// **'No WebSocket events yet.'**
   String get agentWorkspaceActivityNoWsEvents;
 
   /// No description provided for @agentWorkspaceProductionCardTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production card title'**
+  /// **'Production workspace'**
   String get agentWorkspaceProductionCardTitle;
 
   /// No description provided for @agentWorkspaceGuidedTasksTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace guided tasks title'**
+  /// **'Guided tasks'**
   String get agentWorkspaceGuidedTasksTitle;
 
   /// No description provided for @agentWorkspaceScriptWritebackSourceAssistant.
@@ -31024,181 +32200,181 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptRunningWorkflow.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script running workflow'**
+  /// **'Running: workflow writeback'**
   String get agentWorkspaceScriptRunningWorkflow;
 
   /// No description provided for @agentWorkspaceScriptRunningReadContext.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script running read context'**
+  /// **'Running: reading context for writeback'**
   String get agentWorkspaceScriptRunningReadContext;
 
   /// No description provided for @agentWorkspaceScriptRunningSubAgent.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script running sub agent'**
+  /// **'Running: sub-agent writeback'**
   String get agentWorkspaceScriptRunningSubAgent;
 
   /// No description provided for @agentWorkspaceScriptRunningWriteback.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script running writeback'**
+  /// **'Running: writeback in progress'**
   String get agentWorkspaceScriptRunningWriteback;
 
   /// No description provided for @agentWorkspaceScriptRunningWritebackPlan.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script running writeback plan'**
+  /// **'Running: plan writeback in progress'**
   String get agentWorkspaceScriptRunningWritebackPlan;
 
   /// No description provided for @agentWorkspaceScriptCardTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script card title'**
+  /// **'Script workspace'**
   String get agentWorkspaceScriptCardTitle;
 
   /// No description provided for @agentWorkspaceSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace section title'**
+  /// **'Agent workspace'**
   String get agentWorkspaceSectionTitle;
 
   /// No description provided for @agentWorkspaceSectionDescription.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace section description'**
+  /// **'Split script and production into separate panels and consolidate execution logs in a dedicated activity pane.'**
   String get agentWorkspaceSectionDescription;
 
   /// No description provided for @contentComplianceTargetProject.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target project'**
+  /// **'Project'**
   String get contentComplianceTargetProject;
 
   /// No description provided for @contentComplianceTargetScript.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target script'**
+  /// **'Script'**
   String get contentComplianceTargetScript;
 
   /// No description provided for @contentComplianceTargetStoryboard.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target storyboard'**
+  /// **'Storyboard'**
   String get contentComplianceTargetStoryboard;
 
   /// No description provided for @contentComplianceTargetAsset.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target asset'**
+  /// **'Asset'**
   String get contentComplianceTargetAsset;
 
   /// No description provided for @contentComplianceTargetNovel.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target novel'**
+  /// **'Novel'**
   String get contentComplianceTargetNovel;
 
   /// No description provided for @contentComplianceTargetUser.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance target user'**
+  /// **'User'**
   String get contentComplianceTargetUser;
 
   /// No description provided for @contentComplianceOptionAll.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance option all'**
+  /// **'All'**
   String get contentComplianceOptionAll;
 
   /// No description provided for @contentComplianceCategoryCopyright.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category copyright'**
+  /// **'Copyright'**
   String get contentComplianceCategoryCopyright;
 
   /// No description provided for @contentComplianceCategorySafety.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category safety'**
+  /// **'Safety'**
   String get contentComplianceCategorySafety;
 
   /// No description provided for @contentComplianceCategoryHarassment.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category harassment'**
+  /// **'Harassment'**
   String get contentComplianceCategoryHarassment;
 
   /// No description provided for @contentComplianceCategoryAdult.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category adult'**
+  /// **'Adult content'**
   String get contentComplianceCategoryAdult;
 
   /// No description provided for @contentComplianceCategoryViolence.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category violence'**
+  /// **'Violence'**
   String get contentComplianceCategoryViolence;
 
   /// No description provided for @contentComplianceCategorySpam.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category spam'**
+  /// **'Spam'**
   String get contentComplianceCategorySpam;
 
   /// No description provided for @contentComplianceCategoryOther.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance category other'**
+  /// **'Other'**
   String get contentComplianceCategoryOther;
 
   /// No description provided for @contentComplianceSeverityLow.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance severity low'**
+  /// **'Low'**
   String get contentComplianceSeverityLow;
 
   /// No description provided for @contentComplianceSeverityMedium.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance severity medium'**
+  /// **'Medium'**
   String get contentComplianceSeverityMedium;
 
   /// No description provided for @contentComplianceSeverityHigh.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance severity high'**
+  /// **'High'**
   String get contentComplianceSeverityHigh;
 
   /// No description provided for @contentComplianceSeverityCritical.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance severity critical'**
+  /// **'Critical'**
   String get contentComplianceSeverityCritical;
 
   /// No description provided for @contentComplianceStatusPending.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance status pending'**
+  /// **'Pending'**
   String get contentComplianceStatusPending;
 
   /// No description provided for @contentComplianceStatusClaimed.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance status claimed'**
+  /// **'Claimed'**
   String get contentComplianceStatusClaimed;
 
   /// No description provided for @contentComplianceStatusResolved.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance status resolved'**
+  /// **'Resolved'**
   String get contentComplianceStatusResolved;
 
   /// No description provided for @contentComplianceStatusDismissed.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance status dismissed'**
+  /// **'Dismissed'**
   String get contentComplianceStatusDismissed;
 
   /// No description provided for @contentComplianceSlaOpenOver24h.
@@ -31222,32 +32398,92 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceFieldTargetType.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field target type'**
+  /// **'Target type'**
   String get contentComplianceFieldTargetType;
 
   /// No description provided for @contentComplianceFieldCategory.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field category'**
+  /// **'Category'**
   String get contentComplianceFieldCategory;
 
   /// No description provided for @contentComplianceFieldSeverity.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field severity'**
+  /// **'Severity'**
   String get contentComplianceFieldSeverity;
 
   /// No description provided for @contentComplianceFieldTargetUuid.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field target uuid'**
+  /// **'Target UUID'**
   String get contentComplianceFieldTargetUuid;
 
   /// No description provided for @contentComplianceFieldStatus.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field status'**
+  /// **'Status'**
   String get contentComplianceFieldStatus;
+
+  /// No description provided for @contentComplianceCsvColumnReportId.
+  ///
+  /// In en, this message translates to:
+  /// **'Report ID'**
+  String get contentComplianceCsvColumnReportId;
+
+  /// No description provided for @contentComplianceCsvColumnClaimedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed by'**
+  String get contentComplianceCsvColumnClaimedBy;
+
+  /// No description provided for @contentComplianceCsvColumnWorkspaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get contentComplianceCsvColumnWorkspaceName;
+
+  /// No description provided for @contentComplianceCsvColumnProjectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get contentComplianceCsvColumnProjectName;
+
+  /// No description provided for @contentComplianceCsvColumnTargetId.
+  ///
+  /// In en, this message translates to:
+  /// **'Target ID'**
+  String get contentComplianceCsvColumnTargetId;
+
+  /// No description provided for @contentComplianceCsvColumnReporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporter'**
+  String get contentComplianceCsvColumnReporter;
+
+  /// No description provided for @contentComplianceCsvColumnCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at'**
+  String get contentComplianceCsvColumnCreatedAt;
+
+  /// No description provided for @contentComplianceCsvColumnClaimedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed at'**
+  String get contentComplianceCsvColumnClaimedAt;
+
+  /// No description provided for @contentComplianceCsvColumnResolvedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved at'**
+  String get contentComplianceCsvColumnResolvedAt;
+
+  /// No description provided for @contentComplianceCsvColumnDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get contentComplianceCsvColumnDetail;
 
   /// No description provided for @contentComplianceSlaChip.
   ///
@@ -31270,19 +32506,19 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricResolved.
   ///
   /// In en, this message translates to:
-  /// **'resolved {count}'**
+  /// **'Resolved {count}'**
   String contentComplianceMetricResolved(int count);
 
   /// No description provided for @contentComplianceMetricDismissed.
   ///
   /// In en, this message translates to:
-  /// **'dismissed {count}'**
+  /// **'Dismissed {count}'**
   String contentComplianceMetricDismissed(int count);
 
   /// No description provided for @contentComplianceMetricCritical.
   ///
   /// In en, this message translates to:
-  /// **'critical {count}'**
+  /// **'Critical {count}'**
   String contentComplianceMetricCritical(int count);
 
   /// No description provided for @contentComplianceMetricHigh.
@@ -31294,7 +32530,7 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricOverdue.
   ///
   /// In en, this message translates to:
-  /// **'overdue {count}'**
+  /// **'Overdue {count}'**
   String contentComplianceMetricOverdue(int count);
 
   /// No description provided for @contentComplianceOldestHours.
@@ -31394,31 +32630,31 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceAuditVerbClaim.
   ///
   /// In en, this message translates to:
-  /// **'claim'**
+  /// **'Claim'**
   String get contentComplianceAuditVerbClaim;
 
   /// No description provided for @contentComplianceAuditVerbResolve.
   ///
   /// In en, this message translates to:
-  /// **'resolve'**
+  /// **'Resolve'**
   String get contentComplianceAuditVerbResolve;
 
   /// No description provided for @contentComplianceAuditVerbDismiss.
   ///
   /// In en, this message translates to:
-  /// **'dismiss'**
+  /// **'Dismiss'**
   String get contentComplianceAuditVerbDismiss;
 
   /// No description provided for @contentComplianceAuditVerbReassign.
   ///
   /// In en, this message translates to:
-  /// **'reassign'**
+  /// **'Reassign'**
   String get contentComplianceAuditVerbReassign;
 
   /// No description provided for @contentComplianceAuditVerbAutoRebalance.
   ///
   /// In en, this message translates to:
-  /// **'auto-rebalance'**
+  /// **'Auto rebalance'**
   String get contentComplianceAuditVerbAutoRebalance;
 
   /// No description provided for @contentComplianceAuditStatusChanged.
@@ -31436,61 +32672,73 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceResolutionLine.
   ///
   /// In en, this message translates to:
-  /// **'resolution: {note}'**
+  /// **'Resolution: {note}'**
   String contentComplianceResolutionLine(String note);
 
   /// No description provided for @contentComplianceActionClaim.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance action claim'**
+  /// **'Claim'**
   String get contentComplianceActionClaim;
 
   /// No description provided for @contentComplianceActionResolve.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance action resolve'**
+  /// **'Resolve'**
   String get contentComplianceActionResolve;
 
   /// No description provided for @contentComplianceActionDismiss.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance action dismiss'**
+  /// **'Dismiss'**
   String get contentComplianceActionDismiss;
 
   /// No description provided for @contentComplianceFieldDisposition.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field disposition'**
+  /// **'Disposition'**
   String get contentComplianceFieldDisposition;
 
   /// No description provided for @contentComplianceDispositionNone.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance disposition none'**
+  /// **'None'**
   String get contentComplianceDispositionNone;
 
   /// No description provided for @contentComplianceDispositionArchiveProject.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance disposition archive project'**
+  /// **'Archive project'**
   String get contentComplianceDispositionArchiveProject;
 
   /// No description provided for @contentComplianceDispositionSuspendUser.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance disposition suspend user'**
+  /// **'Suspend user'**
   String get contentComplianceDispositionSuspendUser;
 
   /// No description provided for @contentComplianceFieldResolutionNote.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance field resolution note'**
+  /// **'Resolution note'**
   String get contentComplianceFieldResolutionNote;
+
+  /// No description provided for @projectEditorBasicsModelCatalogHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from the catalog or type a custom model ID.'**
+  String get projectEditorBasicsModelCatalogHelper;
+
+  /// No description provided for @statusPageQueueMetricLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}'**
+  String statusPageQueueMetricLine(String label, String value);
 
   /// No description provided for @jobsEmptyValue.
   ///
   /// In en, this message translates to:
-  /// **'Jobs empty value'**
+  /// **'No jobs'**
   String get jobsEmptyValue;
 
   /// No description provided for @systemProbesDataEmptyMarker.
@@ -31520,7 +32768,7 @@ abstract class AppLocalizations {
   /// No description provided for @jobsUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'updated {updatedAt}'**
+  /// **'Updated {updatedAt}'**
   String jobsUpdatedAt(String updatedAt);
 
   /// No description provided for @jobsClaimedBy.
@@ -31538,97 +32786,97 @@ abstract class AppLocalizations {
   /// No description provided for @jobsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Jobs title'**
+  /// **'Jobs'**
   String get jobsTitle;
 
   /// No description provided for @jobsPrefsTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Jobs prefs tooltip'**
+  /// **'Client preferences'**
   String get jobsPrefsTooltip;
 
   /// No description provided for @jobsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Jobs subtitle'**
+  /// **'Browse job list and status summaries, or open a job by ID.'**
   String get jobsSubtitle;
 
   /// No description provided for @jobsLoadList.
   ///
   /// In en, this message translates to:
-  /// **'Jobs load list'**
+  /// **'Load job list'**
   String get jobsLoadList;
 
   /// No description provided for @jobsLoadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Jobs load failed'**
+  /// **'Show failed jobs'**
   String get jobsLoadFailed;
 
   /// No description provided for @jobsLoadKinds.
   ///
   /// In en, this message translates to:
-  /// **'Jobs load kinds'**
+  /// **'Load job kinds'**
   String get jobsLoadKinds;
 
   /// No description provided for @jobsLoadKindSummary.
   ///
   /// In en, this message translates to:
-  /// **'Jobs load kind summary'**
+  /// **'Show kind summary'**
   String get jobsLoadKindSummary;
 
   /// No description provided for @jobsLoadStatusSummary.
   ///
   /// In en, this message translates to:
-  /// **'Jobs load status summary'**
+  /// **'Show status summary'**
   String get jobsLoadStatusSummary;
 
   /// No description provided for @jobsCompatTitle.
   ///
   /// In en, this message translates to:
-  /// **'Jobs compat title'**
+  /// **'Dev probes (Harness)'**
   String get jobsCompatTitle;
 
   /// No description provided for @jobsCompatSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Jobs compat subtitle'**
+  /// **'Debug shell only — for Harness job probe regression.'**
   String get jobsCompatSubtitle;
 
   /// No description provided for @jobsCompatHttpProbeFilters.
   ///
   /// In en, this message translates to:
-  /// **'Jobs compat http probe filters'**
+  /// **'HTTP probe filters'**
   String get jobsCompatHttpProbeFilters;
 
   /// No description provided for @jobsFilterFlutterProbe.
   ///
   /// In en, this message translates to:
-  /// **'Jobs filter flutter probe'**
+  /// **'Filter flutter.probe'**
   String get jobsFilterFlutterProbe;
 
   /// No description provided for @jobsFilterFlutterProbeQueued.
   ///
   /// In en, this message translates to:
-  /// **'Jobs filter flutter probe queued'**
+  /// **'Show queued flutter.probe'**
   String get jobsFilterFlutterProbeQueued;
 
   /// No description provided for @jobsCreateProbeJob.
   ///
   /// In en, this message translates to:
-  /// **'Jobs create probe job'**
+  /// **'Create probe job'**
   String get jobsCreateProbeJob;
 
   /// No description provided for @jobsJobIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs job id label'**
+  /// **'Job ID (tap a list row to fill)'**
   String get jobsJobIdLabel;
 
   /// No description provided for @jobsFetchDetail.
   ///
   /// In en, this message translates to:
-  /// **'Jobs fetch detail'**
+  /// **'Load job detail'**
   String get jobsFetchDetail;
 
   /// No description provided for @jobsDetailLabel.
@@ -31664,43 +32912,43 @@ abstract class AppLocalizations {
   /// No description provided for @jobsRetry.
   ///
   /// In en, this message translates to:
-  /// **'Jobs retry'**
+  /// **'Retry'**
   String get jobsRetry;
 
   /// No description provided for @jobsCancel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs cancel'**
+  /// **'Cancel'**
   String get jobsCancel;
 
   /// No description provided for @notificationsRealtimeDisconnected.
   ///
   /// In en, this message translates to:
-  /// **'Notifications realtime disconnected'**
+  /// **'Realtime notifications disconnected'**
   String get notificationsRealtimeDisconnected;
 
   /// No description provided for @notificationsPlatformStatusRecovered.
   ///
   /// In en, this message translates to:
-  /// **'Notifications platform status recovered'**
+  /// **'Platform status recovered'**
   String get notificationsPlatformStatusRecovered;
 
   /// No description provided for @notificationsPlatformStatusDegraded.
   ///
   /// In en, this message translates to:
-  /// **'Notifications platform status degraded'**
+  /// **'Platform status degraded'**
   String get notificationsPlatformStatusDegraded;
 
   /// No description provided for @notificationsPlatformStatusRecoveredMessage.
   ///
   /// In en, this message translates to:
-  /// **'Notifications platform status recovered message'**
+  /// **'All monitored endpoints are healthy again.'**
   String get notificationsPlatformStatusRecoveredMessage;
 
   /// No description provided for @notificationsPlatformStatusDegradedMessage.
   ///
   /// In en, this message translates to:
-  /// **'Notifications platform status degraded message'**
+  /// **'Some platform endpoints are degraded.'**
   String get notificationsPlatformStatusDegradedMessage;
 
   /// No description provided for @notificationsPlatformStatusAffectedEndpoints.
@@ -31724,7 +32972,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsComplianceSharedAsyncExportCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance shared async export completed'**
+  /// **'Workspace shared audit export completed'**
   String get notificationsComplianceSharedAsyncExportCompleted;
 
   /// No description provided for @notificationsComplianceSharedAsyncExportCancelled.
@@ -31751,13 +32999,13 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsComplianceSharedAsyncExportTimedOut.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance shared async export timed out'**
+  /// **'Workspace shared audit export timed out'**
   String get notificationsComplianceSharedAsyncExportTimedOut;
 
   /// No description provided for @notificationsImportJsonObjectRequired.
   ///
   /// In en, this message translates to:
-  /// **'Notifications import json object required'**
+  /// **'Imported JSON must be an object'**
   String get notificationsImportJsonObjectRequired;
 
   /// No description provided for @notificationsImportJsonParseFailed.
@@ -31823,56 +33071,146 @@ abstract class AppLocalizations {
   /// No description provided for @billingAuditEventTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit event type label'**
+  /// **'Event type'**
   String get billingAuditEventTypeLabel;
 
   /// No description provided for @billingAuditProviderEventIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit provider event id label'**
+  /// **'Provider event ID'**
   String get billingAuditProviderEventIdLabel;
 
   /// No description provided for @billingAuditRawEventIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit raw event id label'**
+  /// **'Raw event ID'**
   String get billingAuditRawEventIdLabel;
 
   /// No description provided for @billingAuditProviderEventIdPrefixLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit provider event id prefix label'**
+  /// **'Provider event ID prefix'**
   String get billingAuditProviderEventIdPrefixLabel;
 
   /// No description provided for @billingAuditRawEventIdPrefixLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit raw event id prefix label'**
+  /// **'Raw event ID prefix'**
   String get billingAuditRawEventIdPrefixLabel;
 
   /// No description provided for @billingAuditEventCreatedFromLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit event created from label'**
+  /// **'Event created (from)'**
   String get billingAuditEventCreatedFromLabel;
 
   /// No description provided for @billingAuditEventCreatedToLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit event created to label'**
+  /// **'Event created (to)'**
   String get billingAuditEventCreatedToLabel;
 
   /// No description provided for @billingAuditCreatedFromLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit created from label'**
+  /// **'Recorded (from)'**
   String get billingAuditCreatedFromLabel;
 
   /// No description provided for @billingAuditCreatedToLabel.
   ///
   /// In en, this message translates to:
-  /// **'Billing audit created to label'**
+  /// **'Recorded (to)'**
   String get billingAuditCreatedToLabel;
+
+  /// No description provided for @projectStudioOpenAssetEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open asset editor'**
+  String get projectStudioOpenAssetEditor;
+
+  /// No description provided for @projectStudioTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get projectStudioTasks;
+
+  /// No description provided for @projectStudioTasksRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks ({count})'**
+  String projectStudioTasksRunning(int count);
+
+  /// No description provided for @shortVideoDownloadDesktopApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Download desktop app'**
+  String get shortVideoDownloadDesktopApp;
+
+  /// No description provided for @projectEditorBasicsModelRoutingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model routing'**
+  String get projectEditorBasicsModelRoutingTitle;
+
+  /// No description provided for @projectEditorBasicsTextModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Text model'**
+  String get projectEditorBasicsTextModelLabel;
+
+  /// No description provided for @projectEditorBasicsTextModelHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Default model for project-level text generation.'**
+  String get projectEditorBasicsTextModelHelper;
+
+  /// No description provided for @projectEditorBasicsMultimodalModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Multimodal model'**
+  String get projectEditorBasicsMultimodalModelLabel;
+
+  /// No description provided for @projectEditorBasicsMultimodalModelHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for vision or mixed-input workflows.'**
+  String get projectEditorBasicsMultimodalModelHelper;
+
+  /// No description provided for @projectEditorBasicsImageModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image model'**
+  String get projectEditorBasicsImageModelLabel;
+
+  /// No description provided for @projectEditorBasicsVideoModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video model'**
+  String get projectEditorBasicsVideoModelLabel;
+
+  /// No description provided for @projectEditorBasicsVoiceModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice model'**
+  String get projectEditorBasicsVoiceModelLabel;
+
+  /// No description provided for @projectEditorBasicsVoiceModelHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional TTS model override for this project.'**
+  String get projectEditorBasicsVoiceModelHelper;
+
+  /// No description provided for @projectEditorBasicsVoiceProfileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice profile'**
+  String get projectEditorBasicsVoiceProfileLabel;
+
+  /// No description provided for @projectEditorBasicsVoiceProfileHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset name or JSON voice configuration.'**
+  String get projectEditorBasicsVoiceProfileHelper;
 
   /// No description provided for @notificationsFilterCount.
   ///
@@ -32291,7 +33629,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusPageIntroInternalSuffix.
   ///
   /// In en, this message translates to:
-  /// **' TOONFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
+  /// **' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
   String get statusPageIntroInternalSuffix;
 
   /// No description provided for @statusPageRefreshing.
@@ -32818,7 +34156,7 @@ abstract class AppLocalizations {
   /// No description provided for @shellJobQueueStatsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Uses TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
+  /// **'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
   String get shellJobQueueStatsSubtitle;
 
   /// No description provided for @shellJobQueueStatsStatsLine.

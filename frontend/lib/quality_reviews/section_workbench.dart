@@ -126,7 +126,6 @@ class _QualityReviewsWorkbenchDialogState
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
     _reviewDetails = widget.initialReviewDetails;
-    _refreshExecutionChecklist();
     if (_reviews.isNotEmpty) {
       _ctrls.reviewIdCtrl.text = _reviews.first.id;
     }
@@ -138,12 +137,13 @@ class _QualityReviewsWorkbenchDialogState
     super.dispose();
   }
 
-  void _refreshExecutionChecklist() {
+  void _refreshExecutionChecklist(AppLocalizations l10n) {
     _tokenEfficiencyExecutionChecklist = buildQualityScopedExecutionChecklist(
       reviews: _reviews,
       tokenRows: _tokenEfficiencyRows,
       projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
       scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+      l10n: l10n,
     );
   }
 
@@ -259,7 +259,7 @@ class _QualityReviewsWorkbenchDialogState
     final action = review.suggestedAction?.trim();
     if (action == null || action.isEmpty) {
       setState(() {
-        _statusLine = 'This review has no suggested action to apply.';
+        _statusLine = l10n.qualityReviewsNoSuggestedActionToApply;
       });
       return;
     }
@@ -272,14 +272,23 @@ class _QualityReviewsWorkbenchDialogState
     if (!mounted) return;
     if (link == null || widget.onNavigateDomainDeepLink == null) {
       setState(() {
-        _statusLine = 'Copied rework brief for $action.';
+        _statusLine = l10n.qualityReviewsCopiedReworkBrief(
+          qualitySuggestedActionLabel(action, l10n),
+        );
       });
       return;
     }
     widget.onNavigateDomainDeepLink!(link);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opened ${link.target.name} scope for $action.')),
+      SnackBar(
+        content: Text(
+          l10n.qualityReviewsOpenedScopeSnack(
+            qualitySuggestedActionLabel(action, l10n),
+            link.target.name,
+          ),
+        ),
+      ),
     );
     Navigator.of(context).pop();
   }
@@ -317,7 +326,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _reviews = rows;
-        _refreshExecutionChecklist();
+        _refreshExecutionChecklist(l10n);
         _filterBadCasesOnly = onlyBadCases;
         _filterDeliveryPriorityOnly = onlyDeliveryPriority;
         _filterAutoSourceOnly = onlyAutoSource;
@@ -326,15 +335,23 @@ class _QualityReviewsWorkbenchDialogState
         if (onlyDeliveryPriority) {
           labels.add(l10n.qualityReviewsFilterDeliveryPriorityHit);
         }
-        if (onlyAutoSource) labels.add('auto');
+        if (onlyAutoSource) labels.add(l10n.qualityReviewsFilterAutoSamples);
         if (_stageFilterValue != null) {
-          labels.add(l10n.qualityReviewsFilterStage(_stageFilterValue!));
+          labels.add(
+            l10n.qualityReviewsFilterStage(
+              qualityStageLabel(_stageFilterValue!, l10n),
+            ),
+          );
         }
         if (_gradeFilterValue != null) {
           labels.add(l10n.qualityReviewsFilterGrade(_gradeFilterValue!));
         }
         if (_suggestedActionFilterValue != null) {
-          labels.add('suggested=${_suggestedActionFilterValue!}');
+          labels.add(
+            l10n.qualityReviewsFilterSuggestedAction(
+              qualitySuggestedActionLabel(_suggestedActionFilterValue!, l10n),
+            ),
+          );
         }
         _statusLine = labels.isEmpty
             ? l10n.qualityReviewsStatusLoadedReviews(rows.length)
@@ -495,8 +512,9 @@ class _QualityReviewsWorkbenchDialogState
           rows,
           projectId: int.tryParse(_ctrls.projectIdFilterCtrl.text.trim()),
           scriptId: int.tryParse(_ctrls.scriptIdFilterCtrl.text.trim()),
+          l10n: l10n,
         );
-        _refreshExecutionChecklist();
+        _refreshExecutionChecklist(l10n);
         _statusLine = l10n.qualityReviewsStatusRefreshedTokenAggregate;
       });
     } catch (e) {

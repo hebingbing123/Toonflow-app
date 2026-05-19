@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../design_system/components/studio_code_dropdown_field.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'enum_labels.dart';
 import 'dimension_score_form.dart';
 import 'field_styling.dart';
 import 'support.dart';
@@ -350,11 +352,16 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: model.targetTypeFilterCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.qualityReviewsFilterTargetType,
-                ),
+              StudioCodeDropdownField(
+                width: null,
+                value: model.targetTypeFilterCtrl.text.trim(),
+                labelText: l10n.qualityReviewsFilterTargetType,
+                codes: qualityTargetTypeFilterOptions,
+                labelForValue: (code) =>
+                    qualityTargetTypeFilterLabel(code, l10n),
+                onChanged: (value) {
+                  model.targetTypeFilterCtrl.text = value;
+                },
               ),
               const SizedBox(height: 8),
               TextField(
@@ -409,9 +416,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(
-                                value == 'all' ? l10n.qualityReviewsAll : value,
-                              ),
+                              child: Text(_qualityGradeLabel(value, l10n)),
                             ),
                           )
                           .toList(growable: false),
@@ -430,18 +435,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     model.suggestedActionFilterCtrl.text.trim().isEmpty
                     ? 'all'
                     : model.suggestedActionFilterCtrl.text.trim(),
-                decoration: const InputDecoration(
-                  labelText: 'Suggested action',
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFilterSuggestedActionLabel,
                 ),
                 items: _qualitySuggestedActionOptions
                     .map(
                       (value) => DropdownMenuItem<String>(
                         value: value,
-                        child: Text(
-                          value == 'all'
-                              ? l10n.qualityReviewsAll
-                              : _qualitySuggestedActionLabel(value),
-                        ),
+                        child: Text(_qualitySuggestedActionLabel(value, l10n)),
                       ),
                     )
                     .toList(growable: false),
@@ -611,11 +612,17 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: model.createTargetTypeCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.qualityReviewsFieldTargetType,
-                ),
+              StudioCodeDropdownField(
+                width: null,
+                value: model.createTargetTypeCtrl.text.trim().isEmpty
+                    ? qualityTargetTypeOptions.first
+                    : model.createTargetTypeCtrl.text.trim(),
+                labelText: l10n.qualityReviewsFieldTargetType,
+                codes: qualityTargetTypeOptions,
+                labelForValue: (code) => qualityTargetTypeLabel(code, l10n),
+                onChanged: (value) {
+                  model.createTargetTypeCtrl.text = value;
+                },
               ),
               const SizedBox(height: 8),
               TextField(
@@ -625,11 +632,17 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: model.createSourceCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.qualityReviewsFieldSource,
-                ),
+              StudioCodeDropdownField(
+                width: null,
+                value: model.createSourceCtrl.text.trim().isEmpty
+                    ? qualitySourceOptions.first
+                    : model.createSourceCtrl.text.trim(),
+                labelText: l10n.qualityReviewsFieldSource,
+                codes: qualitySourceOptions,
+                labelForValue: (code) => qualitySourceLabel(code, l10n),
+                onChanged: (value) {
+                  model.createSourceCtrl.text = value;
+                },
               ),
               const SizedBox(height: 8),
               TextField(
@@ -648,20 +661,34 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: model.createStageCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.qualityReviewsFieldStage,
-                      ),
+                    child: StudioCodeDropdownField(
+                      width: null,
+                      value: model.createStageCtrl.text.trim().isEmpty
+                          ? qualityCreateStageOptions.first
+                          : model.createStageCtrl.text.trim(),
+                      labelText: l10n.qualityReviewsFieldStage,
+                      codes: qualityCreateStageOptions,
+                      labelForValue: (code) =>
+                          _qualityStageLabel(code, l10n),
+                      onChanged: (value) {
+                        model.createStageCtrl.text = value;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
-                      controller: model.createGradeCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.qualityReviewsFieldGrade,
-                      ),
+                    child: StudioCodeDropdownField(
+                      width: null,
+                      value: model.createGradeCtrl.text.trim().isEmpty
+                          ? qualityCreateGradeOptions.first
+                          : model.createGradeCtrl.text.trim(),
+                      labelText: l10n.qualityReviewsFieldGrade,
+                      codes: qualityCreateGradeOptions,
+                      labelForValue: (code) =>
+                          _qualityGradeLabel(code, l10n),
+                      onChanged: (value) {
+                        model.createGradeCtrl.text = value;
+                      },
                     ),
                   ),
                 ],
@@ -692,11 +719,16 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ? null
                     : callbacks.onCreateBadCaseChanged,
               ),
-              TextField(
-                controller: model.createBadCaseCategoryCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.qualityReviewsFieldBadCaseCategory,
-                ),
+              StudioCodeDropdownField(
+                width: null,
+                value: model.createBadCaseCategoryCtrl.text.trim(),
+                labelText: l10n.qualityReviewsFieldBadCaseCategory,
+                codes: qualityBadCaseCategoryCreateOptions,
+                labelForValue: (code) =>
+                    qualityBadCaseCategoryLabel(code, l10n),
+                onChanged: (value) {
+                  model.createBadCaseCategoryCtrl.text = value;
+                },
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
@@ -932,7 +964,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       l10n.qualityReviewsReviewRowTitle(
-                        review.targetType,
+                        qualityTargetTypeLabel(review.targetType, l10n),
                         review.source,
                         (review.overallScore ?? l10n.qualityReviewsNotAvailable)
                             .toString(),
@@ -1015,6 +1047,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                               label: Text(
                                 _qualitySuggestedActionLabel(
                                   review.suggestedAction!.trim(),
+                                  l10n,
                                 ),
                               ),
                               visualDensity: VisualDensity.compact,
@@ -1024,7 +1057,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: Chip(
-                              label: const Text('维度风险'),
+                              label: Text(l10n.qualityReviewsDimensionRiskBadge),
                               visualDensity: VisualDensity.compact,
                               backgroundColor: Theme.of(
                                 context,
@@ -1041,7 +1074,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           ),
                         if ((review.suggestedAction ?? '').trim().isNotEmpty)
                           IconButton(
-                            tooltip: 'Apply suggested action',
+                            tooltip: l10n.qualityReviewsApplySuggestedActionTooltip,
                             visualDensity: VisualDensity.compact,
                             onPressed: () =>
                                 callbacks.onApplySuggestedAction(review),

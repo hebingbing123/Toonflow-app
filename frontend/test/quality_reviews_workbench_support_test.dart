@@ -115,6 +115,7 @@ void main() {
         badCaseCategory: 'continuity',
         suggestedAction: 'patch_storyboard_items',
       ),
+      l10n: _zh,
     );
 
     expect(
@@ -123,7 +124,7 @@ void main() {
         'r1 · output · manual · target=job-1 · score=88 · passed=true · bad_case · category=continuity · suggested_action=patch_storyboard_items',
       ),
     );
-    expect(details, contains('suggestions=先局部修分镜条目，把动作、视线和节奏补齐。'));
+    expect(details, contains('建议=先局部修分镜条目，把动作、视线和节奏补齐。'));
   });
 
   test('QualityReview.fromJson parses suggestedAction', () {
@@ -314,8 +315,8 @@ void main() {
         ),
       ], l10n: _zh);
 
-      expect(summary, contains('先局部修分镜条目，把动作、视线和节奏补齐。 2x'));
-      expect(summary, contains('先收紧 video prompt，把表演线索和情绪锚点写实。 1x'));
+      expect(summary, contains('先局部修分镜条目，把动作、视线和节奏补齐。 ×2'));
+      expect(summary, contains('先收紧 video prompt，把表演线索和情绪锚点写实。 ×1'));
     },
   );
 
@@ -565,7 +566,7 @@ void main() {
 
       expect(
         summary,
-        contains('P12/S7 1条 · 坏例 1 · 情绪/台词 1 · 真实感 1 · slim 88 chars'),
+        contains('P12/S7 1条 · 坏例 1 · 情绪/台词 1 · 真实感 1 · 记忆瘦身：88'),
       );
       expect(summary, contains('下一步'));
       expect(summary, contains('P30 1条 · 真实感 1'));

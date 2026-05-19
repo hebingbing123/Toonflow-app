@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_filter_row.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
+import '../design_system/ix/studio_freshness_banner.dart';
+import '../platform/studio_load_state.dart';
 import '../rust_api.dart';
+import 'enum_labels.dart';
 
 /// Groups the section-level review actions above the detailed workbench flow.
 class QualityReviewsActionsBar extends StatelessWidget {
@@ -44,72 +50,53 @@ class QualityReviewsActionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (studioPresentation) {
-      return Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          FilledButton.tonal(
-            onPressed: onOpenWorkbench,
-            child: Text(l10n.qualityReviewsOpenWorkbench),
-          ),
-          if (showDashboardControls)
-            FilledButton(
-              onPressed:
-                  loadingQualityDashboard ? null : onLoadQualityDashboard,
-              child: Text(
-                loadingQualityDashboard
-                    ? l10n.projectsBusyProcessing
-                    : l10n.qualityReviewsLoadCurrentDashboard,
-              ),
-            ),
-          FilledButton.tonal(
-            onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
-            child: Text(
-              loadingQualityReviews
-                  ? l10n.projectsBusyProcessing
-                  : l10n.qualityReviewsLoadReviewList,
-            ),
-          ),
-        ],
-      );
-    }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
+    final actionButtons = <Widget>[
+      FilledButton.tonal(
+        onPressed: onOpenWorkbench,
+        child: Text(l10n.qualityReviewsOpenWorkbench),
+      ),
+      if (showDashboardControls)
+        (studioPresentation
+            ? FilledButton.tonal(
+                onPressed: loadingQualityDashboard
+                    ? null
+                    : onLoadQualityDashboard,
+                child: Text(
+                  loadingQualityDashboard
+                      ? l10n.projectsBusyProcessing
+                      : l10n.qualityReviewsFreshnessRefresh,
+                ),
+              )
+            : FilledButton(
+                onPressed: loadingQualityDashboard
+                    ? null
+                    : onLoadQualityDashboard,
+                child: Text(
+                  loadingQualityDashboard
+                      ? l10n.projectsBusyProcessing
+                      : l10n.qualityReviewsLoadCurrentDashboard,
+                ),
+              )),
+      if (!studioPresentation && showDashboardControls && showRefreshControls)
         FilledButton.tonal(
-          onPressed: onOpenWorkbench,
-          child: Text(l10n.qualityReviewsOpenWorkbench),
-        ),
-        if (showDashboardControls)
-          FilledButton(
-            onPressed: loadingQualityDashboard ? null : onLoadQualityDashboard,
-            child: Text(
-              loadingQualityDashboard
-                  ? l10n.projectsBusyProcessing
-                  : l10n.qualityReviewsLoadCurrentDashboard,
-            ),
-          ),
-        if (showDashboardControls && showRefreshControls)
-          FilledButton.tonal(
-            onPressed: refreshingQualityDashboardReadModel
-                ? null
-                : onRefreshQualityDashboardReadModel,
-            child: Text(
-              refreshingQualityDashboardReadModel
-                  ? l10n.projectsBusyProcessing
-                  : l10n.qualityReviewsRefreshReadModel,
-            ),
-          ),
-        FilledButton.tonal(
-          onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
+          onPressed: refreshingQualityDashboardReadModel
+              ? null
+              : onRefreshQualityDashboardReadModel,
           child: Text(
-            loadingQualityReviews
+            refreshingQualityDashboardReadModel
                 ? l10n.projectsBusyProcessing
-                : l10n.qualityReviewsLoadReviewList,
+                : l10n.qualityReviewsRefreshReadModel,
           ),
         ),
+      FilledButton.tonal(
+        onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
+        child: Text(
+          loadingQualityReviews
+              ? l10n.projectsBusyProcessing
+              : l10n.qualityReviewsLoadReviewList,
+        ),
+      ),
+      if (!studioPresentation)
         FilledButton.tonal(
           onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,
           child: Text(
@@ -118,6 +105,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
                 : l10n.qualityReviewsViewBadCases,
           ),
         ),
+      if (!studioPresentation)
         FilledButton.tonal(
           onPressed: loadingQualityStats ? null : onLoadQualityStats,
           child: Text(
@@ -126,6 +114,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
                 : l10n.qualityReviewsViewStats,
           ),
         ),
+      if (!studioPresentation)
         FilledButton.tonal(
           onPressed: loadingQualityStagePassRate
               ? null
@@ -136,7 +125,10 @@ class QualityReviewsActionsBar extends StatelessWidget {
                 : l10n.qualityReviewsViewStagePassRate,
           ),
         ),
-      ],
+    ];
+    return StudioFilterRow(
+      wideBreakpoint: studioPresentation ? 620 : 760,
+      children: actionButtons,
     );
   }
 }
@@ -148,7 +140,11 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     required this.dashboardSummary,
     required this.refreshControlsEnabled,
     required this.refreshSummary,
-    required this.freshnessSummary,
+    this.freshnessMeta,
+    this.dashboardLoadState = StudioLoadState.initial,
+    this.dashboardLoadError,
+    this.loadingDashboard = false,
+    this.onRefreshDashboard,
     required this.qualityStatsRows,
     required this.stageGradeRows,
     required this.scopeInsightRows,
@@ -160,7 +156,11 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   final String? dashboardSummary;
   final bool refreshControlsEnabled;
   final String? refreshSummary;
-  final String? freshnessSummary;
+  final QualityDashboardMeta? freshnessMeta;
+  final StudioLoadState dashboardLoadState;
+  final Object? dashboardLoadError;
+  final bool loadingDashboard;
+  final VoidCallback? onRefreshDashboard;
   final List<QualityDashboardTargetStat>? qualityStatsRows;
   final List<QualityDashboardStageGradeItem>? stageGradeRows;
   final List<QualityDashboardScopeInsightItem>? scopeInsightRows;
@@ -170,23 +170,37 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    if (dashboardLoadState == StudioLoadState.error &&
+        dashboardLoadError != null) {
+      return StudioApiErrorCallout(
+        error: dashboardLoadError!,
+        onRetry: onRefreshDashboard,
+      );
+    }
+
     final hasAnything =
         dashboardSummary != null ||
         refreshSummary != null ||
-        freshnessSummary != null ||
+        freshnessMeta != null ||
         (qualityStatsRows?.isNotEmpty ?? false) ||
         (stageGradeRows?.isNotEmpty ?? false) ||
         (scopeInsightRows?.isNotEmpty ?? false) ||
         (tokenEfficiencyRows?.isNotEmpty ?? false) ||
         (badCaseStats?.isNotEmpty ?? false);
     if (!hasAnything) {
-      return Text(
-        refreshControlsEnabled
+      if (dashboardLoadState == StudioLoadState.loading || loadingDashboard) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return StudioEmptyState(
+        title: l10n.qualityReviewsOpsDashboardTitle,
+        subtitle: refreshControlsEnabled
             ? l10n.qualityReviewsDashboardNotLoadedRefreshEnabled
             : l10n.qualityReviewsDashboardNotLoadedRefreshDisabled,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: mutedColor),
+        icon: Icons.analytics_outlined,
+        actionLabel: onRefreshDashboard != null
+            ? l10n.qualityReviewsFreshnessRefresh
+            : null,
+        onAction: onRefreshDashboard,
       );
     }
     return Column(
@@ -201,15 +215,12 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        if (freshnessSummary != null) ...[
-          SelectableText(
-            freshnessSummary!,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: mutedColor),
+        if (freshnessMeta != null)
+          StudioFreshnessBanner(
+            meta: freshnessMeta!,
+            onRefresh: onRefreshDashboard,
+            loading: loadingDashboard,
           ),
-          const SizedBox(height: 8),
-        ],
         if (dashboardSummary != null) ...[
           SelectableText(
             dashboardSummary!,
@@ -232,7 +243,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                   (row) => Chip(
                     label: Text(
                       l10n.qualityReviewsTargetTypeChip(
-                        row.targetType,
+                        qualityTargetTypeLabel(row.targetType, l10n),
                         row.passRatePercent.toStringAsFixed(1),
                         row.totalReviews,
                       ),
@@ -324,7 +335,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 (row) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
-                    '${row.targetType} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+                    '${qualityTargetTypeLabel(row.targetType, l10n)} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -348,11 +359,11 @@ class QualityReviewsSummaryPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    return SelectableText(
       reviewSummary,
       style: Theme.of(
         context,
-      ).textTheme.bodySmall?.copyWith(color: mutedColor),
+      ).textTheme.bodySmall?.copyWith(color: mutedColor, height: 1.35),
     );
   }
 }
@@ -429,6 +440,11 @@ class QualityReviewsListPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final compact = MediaQuery.sizeOf(context).width < 520;
+    final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      height: 1.35,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -437,37 +453,50 @@ class QualityReviewsListPreview extends StatelessWidget {
           l10n.qualityReviewsCount(reviews.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        ...reviews
-            .take(8)
-            .map(
-              (review) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  l10n.qualityReviewsPreviewListTitle(
-                    review.targetType,
-                    review.source,
-                    review.overallScore?.toString() ??
-                        l10n.qualityReviewsAbbrevNotAvailable,
-                  ),
-                ),
-                subtitle: Text(
-                  [
-                    review.id,
-                    if (review.targetId != null && review.targetId!.isNotEmpty)
-                      l10n.qualityReviewsPreviewDetailTarget(review.targetId!),
-                    if (review.passed != null)
-                      l10n.qualityReviewsPreviewDetailPassed(
-                        review.passed!.toString(),
-                      ),
-                    if (review.isBadCase)
-                      l10n.qualityReviewsPreviewDetailBadCase,
-                  ].join(' · '),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => onSelectQualityReview(review),
+        ...reviews.take(8).map((review) {
+          final detailLines = <String>[
+            review.id,
+            if (review.targetId != null && review.targetId!.isNotEmpty)
+              l10n.qualityReviewsPreviewDetailTarget(review.targetId!),
+            if (review.passed != null)
+              l10n.qualityReviewsPreviewDetailPassed(review.passed!.toString()),
+            if (review.isBadCase) l10n.qualityReviewsPreviewDetailBadCase,
+          ];
+          return ListTile(
+            dense: !compact,
+            contentPadding: EdgeInsets.zero,
+            minVerticalPadding: compact ? 10 : 6,
+            title: Text(
+              l10n.qualityReviewsPreviewListTitle(
+                qualityTargetTypeLabel(review.targetType, l10n),
+                qualitySourceLabel(review.source, l10n),
+                review.overallScore?.toString() ??
+                    l10n.qualityReviewsAbbrevNotAvailable,
+              ),
+              maxLines: compact ? 2 : 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  for (var i = 0; i < detailLines.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 4),
+                    Text(
+                      detailLines[i],
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: detailStyle,
+                    ),
+                  ],
+                ],
               ),
             ),
+            trailing: compact ? null : const Icon(Icons.chevron_right),
+            onTap: () => onSelectQualityReview(review),
+          );
+        }),
       ],
     );
   }

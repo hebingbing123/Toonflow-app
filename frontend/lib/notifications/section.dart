@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../l10n/billing_l10n_helpers.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
@@ -678,7 +679,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     child: _complianceLabeledField(
                       context,
                       label: l10n.notificationsComplianceStageOverrideLabel(
-                        stage,
+                        studioNotificationsComplianceStageLabel(l10n, stage),
                       ),
                       width: 200,
                       child: TextField(
@@ -1822,7 +1823,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       case 'delete':
         return l10n.notificationsAuditActionDelete;
       default:
-        return action;
+        return studioUnknownCodeLabel(l10n, action);
     }
   }
 

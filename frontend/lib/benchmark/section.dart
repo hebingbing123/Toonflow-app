@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'support.dart';
@@ -368,11 +369,21 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   (item) => ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.l10nBatch_c084376ea9(item.name, item.status)),
+                    title: Text(
+                      l10n.l10nBatch_c084376ea9(
+                        item.name,
+                        studioBenchmarkExperimentStatusLabel(
+                          l10n,
+                          item.status,
+                        ),
+                      ),
+                    ),
                     subtitle: Text(
                       l10n.benchmarkExperimentRowSubtitle(
-                        item.sampleTier,
-                        item.stageScope.join(', '),
+                        studioBenchmarkSampleTierLabel(l10n, item.sampleTier),
+                        item.stageScope
+                            .map((s) => studioUnknownCodeLabel(l10n, s))
+                            .join(', '),
                         item.id,
                       ),
                     ),
@@ -397,7 +408,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      '${item.reviewType} · ${item.status} · P${item.priority}',
+                      '${studioBenchmarkReviewTypeLabel(l10n, item.reviewType)} · ${studioBenchmarkReviewStatusLabel(l10n, item.status)} · P${item.priority}',
                     ),
                     subtitle: Text(item.prompt),
                     onTap: () {
@@ -464,7 +475,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               (item) => Text(
                 l10n.benchmarkGateAssessmentRow(
                   item.variantLabel,
-                  item.autoDecision,
+                  studioBenchmarkGateDecisionLabel(l10n, item.autoDecision),
                   item.qualityScoreDelta.toStringAsFixed(2),
                   '${item.severeGuardFailures}',
                 ),
@@ -503,7 +514,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             const SizedBox(height: 6),
             ..._abCompare!.comparisons.take(12).map(
               (item) => Text(
-                '${item.testCaseId} · ${item.passed ? "PASS" : "FAIL"} · '
+                '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, item.passed ? 'PASS' : 'FAIL')} · '
                 'tokenΔ ${item.tokenReductionPct.toStringAsFixed(1)}% · '
                 'qualityΔ ${(item.qualityScoreDiff ?? 0).toStringAsFixed(2)}'
                 '${item.failureReasons.isEmpty ? '' : ' · ${item.failureReasons.join(" | ")}'}',
@@ -530,7 +541,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ? (cmp['failureReasons'] as List).map((e) => e.toString()).toList()
                   : const <String>[];
               return Text(
-                '${item.testCaseId} · ${passed ? "PASS" : "FAIL"} · '
+                '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, passed ? 'PASS' : 'FAIL')} · '
                 'tokenΔ ${(tokenDelta ?? 0).toStringAsFixed(1)}% · '
                 'qualityΔ ${(qualityDelta ?? 0).toStringAsFixed(2)}'
                 '${reasons.isEmpty ? "" : " · ${reasons.join(" | ")}"}',

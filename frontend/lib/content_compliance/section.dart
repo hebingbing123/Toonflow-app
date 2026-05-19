@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../design_system/components/studio_code_dropdown_field.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 
@@ -25,6 +27,50 @@ class ContentComplianceSection extends StatefulWidget {
 }
 
 class _ContentComplianceSectionState extends State<ContentComplianceSection> {
+  static const List<String> _reportTargetTypeCodes = <String>[
+    'project',
+    'script',
+    'storyboard',
+    'asset',
+    'novel',
+    'user',
+  ];
+  static const List<String> _categoryCodes = <String>[
+    'copyright',
+    'safety',
+    'harassment',
+    'adult',
+    'violence',
+    'spam',
+    'other',
+  ];
+  static const List<String> _severityCodes = <String>[
+    'low',
+    'medium',
+    'high',
+    'critical',
+  ];
+  static const List<String> _queueStatusCodes = <String>[
+    'all',
+    'pending',
+    'claimed',
+    'resolved',
+    'dismissed',
+  ];
+  static const List<String> _queueCategoryCodes = <String>[
+    'all',
+    ..._categoryCodes,
+  ];
+  static const List<String> _queueTargetTypeCodes = <String>[
+    'all',
+    ..._reportTargetTypeCodes,
+  ];
+  static const List<String> _dispositionCodes = <String>[
+    'none',
+    'archive_project',
+    'suspend_user',
+  ];
+
   static const String _alertActionPreferenceKey =
       'content_compliance_alert_action_preference_stages_v1';
   final _targetIdController = TextEditingController();
@@ -185,7 +231,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'auto-rebalance':
         return l10n.contentComplianceAuditVerbAutoRebalance;
       default:
-        return action;
+        return studioUnknownCodeLabel(l10n, action);
     }
   }
 
@@ -206,7 +252,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'suspend_user':
         return l10n.contentComplianceDispositionSuspendUser;
       default:
-        return code;
+        return studioUnknownCodeLabel(l10n, code);
     }
   }
 
@@ -269,7 +315,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'all':
         return l10n.contentComplianceOptionAll;
       default:
-        return value;
+        return studioUnknownCodeLabel(l10n, value);
     }
   }
 
@@ -292,7 +338,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'all':
         return l10n.contentComplianceOptionAll;
       default:
-        return value;
+        return studioUnknownCodeLabel(l10n, value);
     }
   }
 
@@ -307,7 +353,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'critical':
         return l10n.contentComplianceSeverityCritical;
       default:
-        return value;
+        return studioUnknownCodeLabel(l10n, value);
     }
   }
 
@@ -324,7 +370,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'all':
         return l10n.contentComplianceOptionAll;
       default:
-        return value;
+        return studioUnknownCodeLabel(l10n, value);
     }
   }
 
@@ -343,7 +389,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             .contentComplianceSlaUnclaimedCritical(0)
             .replaceFirst(' 0', '');
       default:
-        return value;
+        return studioUnknownCodeLabel(l10n, value);
     }
   }
 
@@ -894,46 +940,50 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     return '"$escaped"';
   }
 
+  List<String> _csvHeaderRow(AppLocalizations l10n) => <String>[
+    l10n.contentComplianceCsvColumnReportId,
+    l10n.contentComplianceFieldStatus,
+    l10n.contentComplianceFieldSeverity,
+    l10n.contentComplianceFieldCategory,
+    l10n.contentComplianceCsvColumnClaimedBy,
+    l10n.contentComplianceCsvColumnWorkspaceName,
+    l10n.contentComplianceCsvColumnProjectName,
+    l10n.contentComplianceFieldTargetType,
+    l10n.contentComplianceCsvColumnTargetId,
+    l10n.contentComplianceCsvColumnReporter,
+    l10n.contentComplianceCsvColumnCreatedAt,
+    l10n.contentComplianceCsvColumnClaimedAt,
+    l10n.contentComplianceCsvColumnResolvedAt,
+    l10n.contentComplianceCsvColumnDetail,
+  ];
+
+  List<String> _csvDataRow(AppLocalizations l10n, ContentComplianceReportItemV1 item) =>
+      <String>[
+        item.id,
+        _statusLabel(l10n, item.status),
+        _severityLabel(l10n, item.severity),
+        _categoryLabel(l10n, item.category),
+        item.claimedByLabel ?? '',
+        item.workspaceName ?? '',
+        item.projectName ?? '',
+        _targetTypeLabel(l10n, item.targetType),
+        item.targetId,
+        item.reporterEmail ?? item.reporterUserId,
+        item.createdAt,
+        item.claimedAt ?? '',
+        item.resolvedAt ?? '',
+        item.detail ?? '',
+      ];
+
   Future<void> _copyCurrentQueueCsv() async {
     final queue = widget.controller.queue;
     if (queue == null) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final rows = <List<String>>[
-      <String>[
-        'report_id',
-        'status',
-        'severity',
-        'category',
-        'claimed_by',
-        'workspace_name',
-        'project_name',
-        'target_type',
-        'target_id',
-        'reporter',
-        'created_at',
-        'claimed_at',
-        'resolved_at',
-        'detail',
-      ],
-      ...queue.items.map(
-        (item) => <String>[
-          item.id,
-          item.status,
-          item.severity,
-          item.category,
-          item.claimedByLabel ?? '',
-          item.workspaceName ?? '',
-          item.projectName ?? '',
-          item.targetType,
-          item.targetId,
-          item.reporterEmail ?? item.reporterUserId,
-          item.createdAt,
-          item.claimedAt ?? '',
-          item.resolvedAt ?? '',
-          item.detail ?? '',
-        ],
-      ),
+      _csvHeaderRow(l10n),
+      ...queue.items.map((item) => _csvDataRow(l10n, item)),
     ];
     await Clipboard.setData(
       ClipboardData(
@@ -1208,105 +1258,34 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                DropdownMenu<String>(
-                  initialSelection: _targetType,
-                  label: Text(l10n.contentComplianceFieldTargetType),
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: 'project',
-                      label: l10n.contentComplianceTargetProject,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'script',
-                      label: l10n.contentComplianceTargetScript,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'storyboard',
-                      label: l10n.contentComplianceTargetStoryboard,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'asset',
-                      label: l10n.contentComplianceTargetAsset,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'novel',
-                      label: l10n.contentComplianceTargetNovel,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'user',
-                      label: l10n.contentComplianceTargetUser,
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == null) return;
+                StudioCodeDropdownField(
+                  value: _targetType,
+                  labelText: l10n.contentComplianceFieldTargetType,
+                  codes: _reportTargetTypeCodes,
+                  labelForValue: (code) => _targetTypeLabel(l10n, code),
+                  onChanged: (value) {
                     setState(() {
                       _targetType = value;
                     });
                   },
                 ),
-                DropdownMenu<String>(
-                  initialSelection: _category,
-                  label: Text(l10n.contentComplianceFieldCategory),
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: 'copyright',
-                      label: l10n.contentComplianceCategoryCopyright,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'safety',
-                      label: l10n.contentComplianceCategorySafety,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'harassment',
-                      label: l10n.contentComplianceCategoryHarassment,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'adult',
-                      label: l10n.contentComplianceCategoryAdult,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'violence',
-                      label: l10n.contentComplianceCategoryViolence,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'spam',
-                      label: l10n.contentComplianceCategorySpam,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'other',
-                      label: l10n.contentComplianceCategoryOther,
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == null) return;
+                StudioCodeDropdownField(
+                  value: _category,
+                  labelText: l10n.contentComplianceFieldCategory,
+                  codes: _categoryCodes,
+                  labelForValue: (code) => _categoryLabel(l10n, code),
+                  onChanged: (value) {
                     setState(() {
                       _category = value;
                     });
                   },
                 ),
-                DropdownMenu<String>(
-                  initialSelection: _severity,
-                  label: Text(l10n.contentComplianceFieldSeverity),
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: 'low',
-                      label: l10n.contentComplianceSeverityLow,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'medium',
-                      label: l10n.contentComplianceSeverityMedium,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'high',
-                      label: l10n.contentComplianceSeverityHigh,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'critical',
-                      label: l10n.contentComplianceSeverityCritical,
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == null) return;
+                StudioCodeDropdownField(
+                  value: _severity,
+                  labelText: l10n.contentComplianceFieldSeverity,
+                  codes: _severityCodes,
+                  labelForValue: (code) => _severityLabel(l10n, code),
+                  onChanged: (value) {
                     setState(() {
                       _severity = value;
                     });
@@ -1715,33 +1694,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    DropdownMenu<String>(
-                      initialSelection: _queueStatus,
-                      label: Text(l10n.contentComplianceFieldStatus),
-                      dropdownMenuEntries: [
-                        DropdownMenuEntry(
-                          value: 'all',
-                          label: l10n.contentComplianceOptionAll,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'pending',
-                          label: l10n.contentComplianceStatusPending,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'claimed',
-                          label: l10n.contentComplianceStatusClaimed,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'resolved',
-                          label: l10n.contentComplianceStatusResolved,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'dismissed',
-                          label: l10n.contentComplianceStatusDismissed,
-                        ),
-                      ],
-                      onSelected: (value) {
-                        if (value == null) return;
+                    StudioCodeDropdownField(
+                      value: _queueStatus,
+                      labelText: l10n.contentComplianceFieldStatus,
+                      codes: _queueStatusCodes,
+                      labelForValue: (code) => _statusLabel(l10n, code),
+                      onChanged: (value) {
                         setState(() {
                           _queueStatus = value;
                         });
@@ -1758,45 +1716,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         );
                       },
                     ),
-                    DropdownMenu<String>(
-                      initialSelection: _queueCategory,
-                      label: Text(l10n.contentComplianceFieldCategory),
-                      dropdownMenuEntries: [
-                        DropdownMenuEntry(
-                          value: 'all',
-                          label: l10n.contentComplianceOptionAll,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'copyright',
-                          label: l10n.contentComplianceCategoryCopyright,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'safety',
-                          label: l10n.contentComplianceCategorySafety,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'harassment',
-                          label: l10n.contentComplianceCategoryHarassment,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'adult',
-                          label: l10n.contentComplianceCategoryAdult,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'violence',
-                          label: l10n.contentComplianceCategoryViolence,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'spam',
-                          label: l10n.contentComplianceCategorySpam,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'other',
-                          label: l10n.contentComplianceCategoryOther,
-                        ),
-                      ],
-                      onSelected: (value) {
-                        if (value == null) return;
+                    StudioCodeDropdownField(
+                      value: _queueCategory,
+                      labelText: l10n.contentComplianceFieldCategory,
+                      codes: _queueCategoryCodes,
+                      labelForValue: (code) => _categoryLabel(l10n, code),
+                      onChanged: (value) {
                         setState(() {
                           _queueCategory = value;
                         });
@@ -1813,41 +1738,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         );
                       },
                     ),
-                    DropdownMenu<String>(
-                      initialSelection: _queueTargetType,
-                      label: Text(l10n.contentComplianceFieldTargetType),
-                      dropdownMenuEntries: [
-                        DropdownMenuEntry(
-                          value: 'all',
-                          label: l10n.contentComplianceOptionAll,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'project',
-                          label: l10n.contentComplianceTargetProject,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'script',
-                          label: l10n.contentComplianceTargetScript,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'storyboard',
-                          label: l10n.contentComplianceTargetStoryboard,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'asset',
-                          label: l10n.contentComplianceTargetAsset,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'novel',
-                          label: l10n.contentComplianceTargetNovel,
-                        ),
-                        DropdownMenuEntry(
-                          value: 'user',
-                          label: l10n.contentComplianceTargetUser,
-                        ),
-                      ],
-                      onSelected: (value) {
-                        if (value == null) return;
+                    StudioCodeDropdownField(
+                      value: _queueTargetType,
+                      labelText: l10n.contentComplianceFieldTargetType,
+                      codes: _queueTargetTypeCodes,
+                      labelForValue: (code) => _targetTypeLabel(l10n, code),
+                      onChanged: (value) {
                         setState(() {
                           _queueTargetType = value;
                         });
@@ -2604,25 +2500,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 ],
                 const SizedBox(height: 8),
-                DropdownMenu<String>(
-                  initialSelection: _disposition,
-                  label: Text(l10n.contentComplianceFieldDisposition),
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: 'none',
-                      label: l10n.contentComplianceDispositionNone,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'archive_project',
-                      label: l10n.contentComplianceDispositionArchiveProject,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'suspend_user',
-                      label: l10n.contentComplianceDispositionSuspendUser,
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == null) return;
+                StudioCodeDropdownField(
+                  value: _disposition,
+                  labelText: l10n.contentComplianceFieldDisposition,
+                  codes: _dispositionCodes,
+                  labelForValue: (code) => _dispositionCodeLabel(l10n, code),
+                  onChanged: (value) {
                     setState(() {
                       _disposition = value;
                     });

@@ -6,20 +6,20 @@ part of '../section.dart';
 /// - Polls export task status every 2 seconds
 /// - Displays current stage and percentage
 /// - Shows cancel button to abort export
-/// - Auto-closes on completion or failure
+/// - Offers explicit next actions after completion or failure
 ///
 /// **Validates: Requirement 13**
 extension _ShortVideoSpaceSectionExportProgressDialog
     on _ShortVideoSpaceSectionState {
   /// Opens the export progress dialog and starts polling
   ///
-  /// Returns true if export completed successfully, false if cancelled or failed
+  /// Returns terminal status and whether the user wants to jump into history
   // ignore: unused_element
-  Future<bool> _openExportProgressDialog({
+  Future<ExportProgressDialogResult> _openExportProgressDialog({
     required BuildContext context,
     required String taskId,
   }) async {
-    final result = await showDialog<bool>(
+    final result = await showDialog<ExportProgressDialogResult>(
       context: context,
       barrierDismissible: false, // Prevent dismissing by tapping outside
       builder: (dialogContext) {
@@ -29,8 +29,18 @@ extension _ShortVideoSpaceSectionExportProgressDialog
         );
       },
     );
-    return result ?? false;
+    return result ?? const ExportProgressDialogResult();
   }
+}
+
+class ExportProgressDialogResult {
+  const ExportProgressDialogResult({
+    this.completed = false,
+    this.openHistoryRequested = false,
+  });
+
+  final bool completed;
+  final bool openHistoryRequested;
 }
 
 /// Export task status
@@ -129,6 +139,7 @@ class ExportTaskProgress {
   const ExportTaskProgress({
     required this.taskId,
     required this.status,
+    required this.format,
     this.stage,
     this.progress = 0.0,
     this.errorMessage,
@@ -137,6 +148,7 @@ class ExportTaskProgress {
 
   final String taskId;
   final ExportTaskStatus status;
+  final String format;
   final ExportTaskStage? stage;
   final double progress; // 0.0 to 1.0
   final String? errorMessage;
@@ -148,6 +160,7 @@ class ExportTaskProgress {
       status: ExportTaskStatus.fromString(
         json['status'] as String? ?? 'queued',
       ),
+      format: json['format'] as String? ?? 'mp4',
       stage: json['stage'] != null
           ? ExportTaskStage.fromString(json['stage'] as String)
           : null,
@@ -221,15 +234,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       if (progress.status.isTerminal) {
         _pollTimer?.cancel();
         _pollTimer = null;
-
-        // Wait a moment to show the final status
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        if (!mounted) return;
-
-        Navigator.of(context).pop(
-          progress.status == ExportTaskStatus.completed,
-        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -253,6 +257,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     }
     final job = await fetchJob(token, taskId);
     final status = job.status.trim().toLowerCase();
+    final payload = job.payload;
     ExportTaskStatus mapped;
     switch (status) {
       case 'running':
@@ -286,6 +291,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     return ExportTaskProgress(
       taskId: job.id,
       status: mapped,
+      format: payload['format'] as String? ?? 'mp4',
       stage: status == 'running'
           ? ExportTaskStage.encoding
           : ExportTaskStage.finalizing,
@@ -316,7 +322,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
       _pollTimer?.cancel();
       _pollTimer = null;
-      Navigator.of(context).pop(false);
+      Navigator.of(
+        context,
+      ).pop(const ExportProgressDialogResult(completed: false));
     } catch (e) {
       if (!mounted) return;
 
@@ -336,6 +344,28 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
     await cancelJob(token, taskId);
+  }
+
+  Future<void> _downloadExportOutput(ExportTaskProgress progress) async {
+    final url = progress.outputUrl;
+    if (url == null || url.trim().isEmpty) {
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: url));
+    if (!mounted) {
+      return;
+    }
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.shortVideoSpaceDialogExportHistoryDownloadLinkCopied(
+            getFormatDisplayName(l10n, progress.format.toLowerCase()),
+          ),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -495,14 +525,38 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
               ],
             ],
 
-            // Task ID (for debugging) — show in loading / error / progress states
             const SizedBox(height: 12),
-            Text(
-              l10n.shortVideoSpaceDialogExportProgressTaskId(widget.taskId),
+            SelectableText(
+              l10n.shortVideoSpaceDialogExportProgressTaskId(
+                widget.taskId,
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontFamily: 'monospace',
               ),
+            ),
+            const SizedBox(height: 4),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(top: 4, bottom: 8),
+              initiallyExpanded: false,
+              title: Text(
+                l10n.qualityReviewsFreshnessShowDetails,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              children: [
+                SelectableText(
+                  l10n.shortVideoSpaceDialogExportProgressTaskId(
+                    widget.taskId,
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -510,7 +564,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       actions: [
         if (progress == null && _errorMessage != null)
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(const ExportProgressDialogResult(completed: false)),
             child: Text(l10n.shortVideoSpaceDialogExportProgressCloseButton),
           ),
         if (progress != null && !progress.status.isTerminal)
@@ -525,9 +581,28 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
           ),
         if (progress?.status.isTerminal == true)
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(
+              ExportProgressDialogResult(
+                completed: progress?.status == ExportTaskStatus.completed,
+                openHistoryRequested: true,
+              ),
+            ),
+            child: Text(l10n.shortVideoSpaceExportHistory),
+          ),
+        if (progress?.status == ExportTaskStatus.completed &&
+            (progress?.outputUrl?.trim().isNotEmpty ?? false))
+          FilledButton.tonalIcon(
+            onPressed: () => _downloadExportOutput(progress!),
+            icon: const Icon(Icons.download_outlined),
+            label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
+          ),
+        if (progress?.status.isTerminal == true)
           FilledButton(
             onPressed: () => Navigator.of(context).pop(
-              progress?.status == ExportTaskStatus.completed,
+              ExportProgressDialogResult(
+                completed: progress?.status == ExportTaskStatus.completed,
+              ),
             ),
             child: Text(l10n.shortVideoSpaceDialogExportProgressCloseButton),
           ),

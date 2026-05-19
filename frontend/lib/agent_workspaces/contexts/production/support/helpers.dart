@@ -438,7 +438,7 @@ String _summarizeProductionBlockerReason(
   final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
   switch (stage.status) {
     case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
-      final coverage = _extractProductionCoverageDigest(detail);
+      final coverage = _extractProductionCoverageDigest(detail, l10n);
       return coverage.isEmpty
           ? l10n.agentWorkspaceProductionBlockerExpandTable
           : l10n.agentWorkspaceProductionBlockerExpandTableWithCoverage(
@@ -447,7 +447,7 @@ String _summarizeProductionBlockerReason(
     case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
       return l10n.agentWorkspaceProductionBlockerRefineScriptPlan;
     case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
-      final coverage = _extractProductionCoverageDigest(detail);
+      final coverage = _extractProductionCoverageDigest(detail, l10n);
       return coverage.isEmpty
           ? l10n.agentWorkspaceProductionBlockerExpandTableCoverage
           : l10n.agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
@@ -458,25 +458,44 @@ String _summarizeProductionBlockerReason(
   }
 }
 
-String _extractProductionCoverageDigest(String detail) {
+String _extractProductionCoverageDigest(
+  String detail,
+  AppLocalizations l10n,
+) {
   final ratioMatch = RegExp(r'(\d+)\s*/\s*(\d+)').firstMatch(detail);
   if (ratioMatch == null) return '';
-  final left = ratioMatch.group(1)!;
-  final right = ratioMatch.group(2)!;
+  final sampled = int.tryParse(ratioMatch.group(1)!) ?? 0;
+  final total = int.tryParse(ratioMatch.group(2)!) ?? 0;
   final expandMatchZh = RegExp(r'待展开\s*(\d+)\s*行').firstMatch(detail);
   if (expandMatchZh != null) {
-    return '分镜表已读 $left/$right 行，待展开 ${expandMatchZh.group(1)} 行';
+    final remaining = int.tryParse(expandMatchZh.group(1)!) ?? 0;
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageWithPending(
+      remaining,
+      sampled,
+      total,
+    );
   }
   final expandMatchEn = RegExp(
     r'(\d+)\s+rows\s+still\s+to\s+expand',
   ).firstMatch(detail);
   if (expandMatchEn != null) {
-    return 'Storyboard table: read $left/$right rows; ${expandMatchEn.group(1)} rows still to expand';
+    final remaining = int.tryParse(expandMatchEn.group(1)!) ?? 0;
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageWithPending(
+      remaining,
+      sampled,
+      total,
+    );
   }
   if (detail.contains('Storyboard table: read') && detail.contains('rows')) {
-    return 'Storyboard table: read $left/$right rows';
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageProgress(
+      sampled,
+      total,
+    );
   }
-  return '分镜表已读 $left/$right 行';
+  return l10n.agentWorkspaceProductionStoryboardTableCoverageProgress(
+    sampled,
+    total,
+  );
 }
 
 String productionStageDomainButtonLabel(

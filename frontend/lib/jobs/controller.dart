@@ -6,6 +6,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/studio_code_labels.dart';
+import '../platform/studio_load_state.dart';
 import '../studio/job_center.dart';
 import 'product_scope.dart';
 import '../../rust_api.dart';
@@ -45,6 +47,8 @@ class JobsController extends ChangeNotifier {
   String? cancellingJobId;
   String? retryingJobId;
   List<JobRow>? jobs;
+  StudioLoadState jobsLoadState = StudioLoadState.initial;
+  Object? jobsLastError;
   String? jobByIdLine;
   String? jobKindsLine;
   String? jobKindSummaryLine;
@@ -82,6 +86,8 @@ class JobsController extends ChangeNotifier {
     cancellingJobId = null;
     retryingJobId = null;
     jobs = null;
+    jobsLoadState = StudioLoadState.initial;
+    jobsLastError = null;
     jobByIdLine = null;
     jobKindsLine = null;
     jobKindSummaryLine = null;
@@ -117,15 +123,28 @@ class JobsController extends ChangeNotifier {
     if (token == null) return;
     await _ensureLiveUpdates(token);
     loadingJobs = true;
+    jobsLoadState = StudioLoadState.loading;
     jobs = null;
+    jobsLastError = null;
     _lastKindFilter = kind;
     _lastStatusFilter = status;
     _setError(null);
     notifyListeners();
     try {
-      jobs = await fetchJobs(token, kind: kind, status: status);
+      final fetched = await fetchJobs(token, kind: kind, status: status);
+      jobs = fetched;
+      jobsLoadState = fetched.isEmpty
+          ? StudioLoadState.empty
+          : StudioLoadState.success;
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      jobsLoadState = StudioLoadState.error;
+      jobsLastError = e;
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+        showGlobalSnackBar: false,
+      );
     } finally {
       loadingJobs = false;
       notifyListeners();
@@ -165,7 +184,10 @@ class JobsController extends ChangeNotifier {
           ? _l10nResolved.jobsEmptyValue
           : rows
                 .map(
-                  (r) => _l10nResolved.jobsKindCountEntry(r.kind, r.jobCount),
+                  (r) => _l10nResolved.jobsKindCountEntry(
+                    studioJobKindLabel(_l10nResolved, r.kind),
+                    r.jobCount,
+                  ),
                 )
                 .join(', ');
     } catch (e) {
@@ -190,7 +212,10 @@ class JobsController extends ChangeNotifier {
           : rows
                 .map(
                   (r) =>
-                      _l10nResolved.jobsStatusCountEntry(r.status, r.jobCount),
+                      _l10nResolved.jobsStatusCountEntry(
+                        studioJobStatusLabel(_l10nResolved, r.status),
+                        r.jobCount,
+                      ),
                 )
                 .join(', ');
     } catch (e) {

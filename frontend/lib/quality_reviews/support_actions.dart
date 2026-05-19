@@ -1,34 +1,26 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import 'enum_labels.dart';
 import 'support_models.dart';
 
 String? describeSuggestedRepairAction(
   String? action, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
-  switch (action?.trim()) {
-    case 'rollback_to_director_planning':
-      return '先回到导演规划，重排冲突和动机，再继续往下生成。';
-    case 'update_character_anchor':
-      return '先补角色锚点，明确外形、气质和情绪反应，再重试。';
-    case 'patch_storyboard_items':
-      return '先局部修分镜条目，把动作、视线和节奏补齐。';
-    case 'adjust_video_prompt':
-      return '先收紧 video prompt，把表演线索和情绪锚点写实。';
-    case 'retry_video_generation':
-      return '先保留当前约束，补关键负向限制后重试生成。';
-    case 'regenerate_storyboard':
-      return '先重做分镜节奏，拉开起伏和镜头层次。';
-    case 'manual_review':
-      return '先人工复核坏例原因，再决定返工入口。';
-    default:
-      return null;
+  final hint = qualitySuggestedActionRepairHint(action ?? '', l10n);
+  if (hint != null) {
+    return hint;
   }
+  final trimmed = action?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
+    return null;
+  }
+  return qualitySuggestedActionLabel(trimmed, l10n);
 }
 
 List<String> buildQualityReviewRepairSuggestions(
   QualityReview row, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final diagnostics = qualityDiagnosticsMap(row);
   final suggestions = <String>[];
@@ -111,15 +103,13 @@ List<String> buildQualityReviewRepairSuggestions(
             badCaseCategory.contains('continuity'))) {
       addTagged(
         'reference_frame',
-        l10n?.qualityReviewsSuggestionReferenceFrame ??
-            'Add reference frame and previous-shot continuity first; lock face, costume/props, and blocking continuity.',
+        l10n.qualityReviewsSuggestionReferenceFrame,
       );
     }
     if (continuityCount > 0 || badCaseCategory.contains('continuity')) {
       addTagged(
         'continuity',
-        l10n?.qualityReviewsSuggestionContinuity ??
-            'Compress continuity constraints to 1-2 hard rules: camera setup, costume/props, and character positions only.',
+        l10n.qualityReviewsSuggestionContinuity,
       );
     }
     if (hitBuckets.contains('表演') ||
@@ -131,8 +121,7 @@ List<String> buildQualityReviewRepairSuggestions(
         comments.contains('无情绪')) {
       addTagged(
         'delivery',
-        l10n?.qualityReviewsSuggestionDelivery ??
-            'Keep delivery/tone memory, add performable emotional actions, and do not trim delivery memory first.',
+        l10n.qualityReviewsSuggestionDelivery,
       );
     }
     if (suppressedBuckets.contains('动作') ||
@@ -141,23 +130,20 @@ List<String> buildQualityReviewRepairSuggestions(
         memoryStyleChars >= 96) {
       addTagged(
         'trim_generic',
-        l10n?.qualityReviewsSuggestionTrimGeneric ??
-            'Continue trimming generic action/lighting lines and reserve budget for expressions, lip sync, and identity continuity.',
+        l10n.qualityReviewsSuggestionTrimGeneric,
       );
     }
     if (autoNegativeSource != null && negativePromptChars > 0) {
       addTagged(
         'negative_reuse',
-        l10n?.qualityReviewsSuggestionNegativeReuse ??
-            'Reuse existing bad-case negative constraints; dedupe manually added phrases first to avoid repeated token burn.',
+        l10n.qualityReviewsSuggestionNegativeReuse,
       );
     }
     if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory') ||
         directorSaved > 0) {
       addTagged(
         'director_trim',
-        l10n?.qualityReviewsSuggestionDirectorTrim ??
-            'Director descriptions already yielded to memory; reclaim repeated director lines first and keep key performance anchors.',
+        l10n.qualityReviewsSuggestionDirectorTrim,
       );
     }
     if (projectScopeRows > 0 &&
@@ -166,8 +152,7 @@ List<String> buildQualityReviewRepairSuggestions(
         memoryStyleChars >= 48) {
       addTagged(
         'project_scope_trim',
-        l10n?.qualityReviewsSuggestionProjectScopeTrim ??
-            'Current hits are mostly project-scoped memory; trim generic style lines first and keep character performance details.',
+        l10n.qualityReviewsSuggestionProjectScopeTrim,
       );
     }
     if (roleScopeRows > 0 &&
@@ -175,8 +160,7 @@ List<String> buildQualityReviewRepairSuggestions(
         comments.contains('情绪')) {
       addTagged(
         'role_scope_keep',
-        l10n?.qualityReviewsSuggestionRoleScopeKeep ??
-            'Role-scoped memory already hit; strengthen role performance actions first and avoid regressing to generic project copy.',
+        l10n.qualityReviewsSuggestionRoleScopeKeep,
       );
     }
   }
@@ -189,8 +173,7 @@ List<String> buildQualityReviewRepairSuggestions(
           comments.contains('台词'))) {
     addTagged(
       'emotion',
-      l10n?.qualityReviewsSuggestionEmotion ??
-          'In next round, turn emotional arc into observable actions; avoid explanatory dialogue only.',
+      l10n.qualityReviewsSuggestionEmotion,
     );
   }
   if (row.isBadCase &&
@@ -200,15 +183,13 @@ List<String> buildQualityReviewRepairSuggestions(
           comments.contains('不自然'))) {
     addTagged(
       'visual',
-      l10n?.qualityReviewsSuggestionVisual ??
-          'Prioritize character appearance and shot realism constraints, then decide whether to add more style descriptions.',
+      l10n.qualityReviewsSuggestionVisual,
     );
   }
   if (overallScore < 70 && suggestions.isEmpty) {
     addTagged(
       'general',
-      l10n?.qualityReviewsSuggestionGeneral ??
-          'Lock emotion, continuity, and bad-case constraints first, then run the next generation round.',
+      l10n.qualityReviewsSuggestionGeneral,
     );
   }
   return suggestions;
@@ -217,7 +198,7 @@ List<String> buildQualityReviewRepairSuggestions(
 String? summarizeQualityRepairPlanFromReviews(
   Iterable<QualityReview> rows, {
   int maxItems = 3,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final counts = <String, int>{};
   for (final row in rows) {
@@ -237,18 +218,14 @@ String? summarizeQualityRepairPlanFromReviews(
     });
   return ranked
       .take(maxItems)
-      .map(
-        (entry) =>
-            l10n?.qualityReviewsRepairPlanCount(entry.key, entry.value) ??
-            '${entry.key} ${entry.value} times',
-      )
+      .map((entry) => l10n.qualityReviewsRepairPlanCount(entry.key, entry.value))
       .join(' | ');
 }
 
 String? summarizeSuggestedActionHotspotsFromReviews(
   Iterable<QualityReview> rows, {
   int maxItems = 4,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final counts = <String, int>{};
   for (final row in rows) {
@@ -267,8 +244,8 @@ String? summarizeSuggestedActionHotspotsFromReviews(
       .take(maxItems)
       .map((entry) {
         final summary = describeSuggestedRepairAction(entry.key, l10n: l10n);
-        final label = summary ?? entry.key;
-        return '$label ${entry.value}x';
+        final label = summary ?? qualitySuggestedActionLabel(entry.key, l10n);
+        return l10n.qualityReviewsHotspotCount(label, entry.value);
       })
       .join(' | ');
 }
@@ -278,7 +255,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
   int? projectId,
   int? scriptId,
   int maxItems = 3,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final items = rows
       .where((row) => row.memoryAction != 'observe')
@@ -288,7 +265,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
   final scope = () {
     if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
     if (projectId != null) return 'P$projectId';
-    return l10n?.qualityReviewsCurrentFilterScope ?? 'current filter scope';
+    return l10n.qualityReviewsCurrentFilterScope;
   }();
 
   final ranked = items.toList()
@@ -309,29 +286,25 @@ String? summarizeQualityTokenEfficiencyActionPlan(
         );
         switch (row.memoryAction) {
           case 'keep_delivery_memory':
-            return l10n?.qualityReviewsActionPlanKeepDelivery(
-                  row.targetType,
-                  focus,
-                ) ??
-                '${row.targetType}: keep delivery/emotion memory from $focus; continue trimming generic style lines before delivery fragments.';
+            return l10n.qualityReviewsActionPlanKeepDelivery(
+              row.targetType,
+              focus,
+            );
           case 'reuse_negative_memory':
-            return l10n?.qualityReviewsActionPlanReuseNegative(
-                  row.targetType,
-                  focus,
-                ) ??
-                '${row.targetType}: reuse $focus for bad-case isolation constraints; lock glitches/fakeness before deciding prompt additions.';
+            return l10n.qualityReviewsActionPlanReuseNegative(
+              row.targetType,
+              focus,
+            );
           case 'trim_generic_style_memory':
-            return l10n?.qualityReviewsActionPlanTrimGeneric(
-                  row.targetType,
-                  focus,
-                ) ??
-                '${row.targetType}: prioritize trimming action/lighting/mood filler in $focus; reserve tokens for performance, lip sync, and continuity.';
+            return l10n.qualityReviewsActionPlanTrimGeneric(
+              row.targetType,
+              focus,
+            );
           case 'promote_selected_memory':
-            return l10n?.qualityReviewsActionPlanPromoteSelected(
-                  row.targetType,
-                  focus,
-                ) ??
-                '${row.targetType}: promote one high-score sample to $focus; reuse emotion and shot execution while reducing repetitive descriptions.';
+            return l10n.qualityReviewsActionPlanPromoteSelected(
+              row.targetType,
+              focus,
+            );
           default:
             return null;
         }
@@ -339,8 +312,7 @@ String? summarizeQualityTokenEfficiencyActionPlan(
       .whereType<String>()
       .join(' | ');
   if (visible.isEmpty) return null;
-  return l10n?.qualityReviewsScopedMemorySuggestion(scope, visible) ??
-      '$scope scoped-memory suggestion: $visible';
+  return l10n.qualityReviewsScopedMemorySuggestion(scope, visible);
 }
 
 String? buildQualityScopedExecutionChecklist({
@@ -350,41 +322,29 @@ String? buildQualityScopedExecutionChecklist({
   int? projectId,
   int? scriptId,
   int maxItems = 4,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final steps = <String>{};
   final scope = () {
     if (projectId != null && scriptId != null) return 'P$projectId/S$scriptId';
     if (projectId != null) return 'P$projectId';
-    return l10n?.qualityReviewsCurrentFilterScope ?? 'current filter scope';
+    return l10n.qualityReviewsCurrentFilterScope;
   }();
 
   for (final row in tokenRows.where((row) => row.memoryAction != 'observe')) {
     final focus = qualityTokenEfficiencyFocusLabel(row.memoryFocus, l10n: l10n);
     switch (row.memoryAction) {
       case 'keep_delivery_memory':
-        steps.add(
-          l10n?.qualityReviewsChecklistKeepDelivery(focus) ??
-              'Keep performance/tone/lip-sync/emotion memory in $focus, only trim generic style filler.',
-        );
+        steps.add(l10n.qualityReviewsChecklistKeepDelivery(focus));
         break;
       case 'reuse_negative_memory':
-        steps.add(
-          l10n?.qualityReviewsChecklistReuseNegative(focus) ??
-              'Reuse bad-case constraints in $focus first; lock glitches/fakeness/coldness before deciding prompt additions.',
-        );
+        steps.add(l10n.qualityReviewsChecklistReuseNegative(focus));
         break;
       case 'trim_generic_style_memory':
-        steps.add(
-          l10n?.qualityReviewsChecklistTrimGeneric(focus) ??
-              'Remove action/lighting/mood filler in $focus; keep tokens for performance and continuity.',
-        );
+        steps.add(l10n.qualityReviewsChecklistTrimGeneric(focus));
         break;
       case 'promote_selected_memory':
-        steps.add(
-          l10n?.qualityReviewsChecklistPromoteSelected(focus) ??
-              'Promote high-score samples to $focus; reuse emotion and shot execution while reducing repetitive director copy.',
-        );
+        steps.add(l10n.qualityReviewsChecklistPromoteSelected(focus));
         break;
     }
     if (steps.length >= maxItems) break;
@@ -418,10 +378,9 @@ String? buildQualityScopedExecutionChecklist({
 
   final numbered = steps.take(maxItems).toList(growable: false);
   final lines = <String>[
-    l10n?.qualityReviewsChecklistTitle(scope) ?? '$scope checklist:',
+    l10n.qualityReviewsChecklistTitle(scope),
     for (var i = 0; i < numbered.length; i++) '${i + 1}. ${numbered[i]}',
-    l10n?.qualityReviewsChecklistScope(scope) ??
-        'Scope: memory takes effect only in $scope; no reuse across users, projects, or shows.',
+    l10n.qualityReviewsChecklistScope(scope),
   ];
   return lines.join('\n');
 }

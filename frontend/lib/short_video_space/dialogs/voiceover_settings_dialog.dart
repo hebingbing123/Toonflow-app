@@ -22,9 +22,34 @@ extension _ShortVideoSpaceSectionVoiceoverSettingsDialog
     return showDialog<VoiceoverSettings>(
       context: context,
       builder: (dialogContext) {
-        return VoiceoverSettingsDialog(initialSettings: initialSettings);
+        return VoiceoverSettingsDialog(
+          initialSettings: initialSettings,
+          onPreviewRequested: _previewVoiceoverSettings,
+        );
       },
     );
+  }
+
+  Future<Uint8List> _previewVoiceoverSettings(VoiceoverSettings settings) async {
+    final token = widget.accessToken?.trim();
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      throw StateError('Voice preview requires an active project and session.');
+    }
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final response = await previewTtsV1(
+      token,
+      text: l10n.shortVideoCharactersPreviewSampleText,
+      projectId: project.id,
+      voiceId: settings.voiceId,
+      provider: settings.provider,
+      emotion: settings.emotion,
+      speed: settings.speed,
+    );
+    if (response.statusCode != 200) {
+      throw RustApiException.fromHttpResponse(response);
+    }
+    return response.bodyBytes;
   }
 }
 
@@ -79,9 +104,14 @@ class VoiceoverSettingsDialog extends StatefulWidget {
   const VoiceoverSettingsDialog({
     super.key,
     this.initialSettings,
+    this.onPreviewRequested,
+    this.onPreviewAudioReady,
   });
 
   final VoiceoverSettings? initialSettings;
+  final Future<Uint8List> Function(VoiceoverSettings settings)?
+  onPreviewRequested;
+  final Future<void> Function(Uint8List bytes)? onPreviewAudioReady;
 
   @override
   State<VoiceoverSettingsDialog> createState() =>
@@ -93,6 +123,10 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
   late String _selectedVoiceId;
   late String _selectedEmotion;
   late double _selectedSpeed;
+  late final AudioPlayer _previewPlayer;
+  bool _previewBusy = false;
+  bool _previewStatusIsError = false;
+  String? _previewStatusLine;
 
   @override
   void initState() {
@@ -103,12 +137,72 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
     _selectedEmotion = settings.emotion;
     _selectedSpeed = settings.speed;
     _syncVoiceIdWithProvider();
+    _previewPlayer = AudioPlayer();
+  }
+
+  @override
+  void dispose() {
+    unawaited(_previewPlayer.dispose());
+    super.dispose();
   }
 
   void _syncVoiceIdWithProvider() {
     final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
     if (!availableVoices.contains(_selectedVoiceId)) {
       _selectedVoiceId = availableVoices.first;
+    }
+  }
+
+  VoiceoverSettings get _currentSettings => VoiceoverSettings(
+    provider: _selectedProvider,
+    voiceId: _selectedVoiceId,
+    emotion: _selectedEmotion,
+    speed: _selectedSpeed,
+  );
+
+  Future<void> _runPreview() async {
+    final loader = widget.onPreviewRequested;
+    if (loader == null || _previewBusy) {
+      return;
+    }
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final voiceName = getVoiceoverDisplayName(_selectedVoiceId, l10n);
+    setState(() {
+      _previewBusy = true;
+      _previewStatusIsError = false;
+      _previewStatusLine = l10n.shortVideoCharactersPreviewLoading(voiceName);
+    });
+    try {
+      final bytes = await loader(_currentSettings);
+      if (widget.onPreviewAudioReady != null) {
+        await widget.onPreviewAudioReady!(bytes);
+      } else {
+        await _previewPlayer.stop();
+        await _previewPlayer.play(BytesSource(bytes));
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _previewStatusLine = l10n.shortVideoCharactersPreviewReady(voiceName);
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _previewStatusIsError = true;
+        _previewStatusLine = l10n.shortVideoCharactersPreviewFailed(
+          voiceName,
+          describeUserVisibleApiError(l10n, e),
+        );
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _previewBusy = false;
+        });
+      }
     }
   }
 
@@ -281,6 +375,39 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedRange,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+              if (widget.onPreviewRequested != null) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    FilledButton.tonalIcon(
+                      onPressed: _previewBusy ? null : _runPreview,
+                      icon: _previewBusy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.play_arrow),
+                      label: Text(l10n.shortVideoCharactersPreviewVoice),
+                    ),
+                    if (_previewStatusLine != null) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _previewStatusLine!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: _previewStatusIsError
+                                    ? Theme.of(context).colorScheme.error
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -321,12 +448,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop(
-              VoiceoverSettings(
-                provider: _selectedProvider,
-                voiceId: _selectedVoiceId,
-                emotion: _selectedEmotion,
-                speed: _selectedSpeed,
-              ),
+              _currentSettings,
             );
           },
           child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsSave),
