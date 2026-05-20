@@ -60,7 +60,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       });
     } catch (e) {
       if (!mounted) return;
-      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _rows.clear();
         _hasMore = false;
@@ -90,7 +89,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       });
     } catch (e) {
       if (!mounted) return;
-      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _loadingMore = false;
         _error = describeUserVisibleApiErrorResolved(context, e);

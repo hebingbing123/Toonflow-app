@@ -5,7 +5,6 @@ part of '../../home_page.dart';
 extension _HomePageRuntimeHelpers on _HomePageState {
   void _setErrorFromException(Object error) {
     if (!mounted) return;
-    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() => _error = describeUserVisibleApiErrorResolved(context, error));
   }
 }

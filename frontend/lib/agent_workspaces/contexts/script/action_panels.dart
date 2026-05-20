@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
-import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
 import '../../controls.dart';
@@ -153,7 +152,6 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final fieldStyle = agentWorkspaceFieldTextStyle(context);
-    final tokens = StudioTokens.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

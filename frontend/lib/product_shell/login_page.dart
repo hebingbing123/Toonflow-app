@@ -273,9 +273,6 @@ class _HeroStage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final typography = StudioTypography.of(context);
-    final displaySize = compact
-        ? math.min(typography.paneTitle + 2, 26).toDouble()
-        : math.min(typography.display + 2, 34).toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -880,6 +877,7 @@ class _AuthPanel extends StatelessWidget {
     required this.l10n,
     required this.authController,
     required this.mode,
+    // ignore: unused_element_parameter
     this.errorMessage,
     required this.confirmPasswordController,
     required this.onModeChanged,

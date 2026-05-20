@@ -17,7 +17,6 @@ import 'package:openflow_app/task_center/section.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/desktop_layout_fixtures.dart';
-import '../support/help_hub_fixtures.dart';
 import '../support/product_shell_chrome_fixture.dart';
 import '../support/ui_gallery_capture.dart';
 

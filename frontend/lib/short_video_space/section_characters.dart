@@ -22,7 +22,6 @@ extension _ShortVideoSpaceSectionCharactersExtension
       });
     } catch (e) {
       if (!mounted) return;
-      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _loadingCharacters = false;
         _charactersStatusLine = describeUserVisibleApiErrorResolved(context, e);

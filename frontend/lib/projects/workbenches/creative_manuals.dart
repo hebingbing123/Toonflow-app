@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_dropdown_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
-import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'creative_manuals_row.dart';
 part 'creative_manuals_state.dart';

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
-import 'package:openflow_app/project_studio/art_step_panel.dart';
 import 'package:openflow_app/project_studio/project_studio_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

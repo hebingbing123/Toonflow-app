@@ -1,5 +1,3 @@
-import 'dart:ui' show Size;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';

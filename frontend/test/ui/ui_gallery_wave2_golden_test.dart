@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/design_system/components/studio_pane_header.dart';
+import 'package:openflow_app/design_system/theme.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/notifications/controller.dart';
 import 'package:openflow_app/notifications/section.dart';
-
-import 'package:openflow_app/design_system/components/studio_pane_header.dart';
-import 'package:openflow_app/design_system/theme.dart';
-import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_page.dart';
 import 'package:openflow_app/project_studio/studio_agent_quick_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';

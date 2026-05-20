@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,7 +13,6 @@ import 'package:openflow_app/product_shell/studio_theme.dart';
 import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
-import 'package:openflow_app/config.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

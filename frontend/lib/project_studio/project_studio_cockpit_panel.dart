@@ -129,9 +129,6 @@ class _CockpitStepFilter {
     List<ProjectHomeMetric> metrics,
     StudioStep step,
   ) {
-    if (step == StudioStep.script) {
-      return metrics;
-    }
     if (step == StudioStep.deliver || step == StudioStep.quality) {
       return metrics;
     }
@@ -145,9 +142,6 @@ class _CockpitStepFilter {
     List<ProjectHomeAction> actions,
     StudioStep step,
   ) {
-    if (step == StudioStep.script) {
-      return actions;
-    }
     if (step == StudioStep.deliver || step == StudioStep.quality) {
       return actions;
     }

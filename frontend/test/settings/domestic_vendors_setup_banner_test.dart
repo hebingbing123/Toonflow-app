@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/rust_api/shared_kernel/models.dart';
 import 'package:openflow_app/settings/model_vendors/domestic_vendor_setup_prefs.dart';

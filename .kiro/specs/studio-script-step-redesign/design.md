@@ -1,350 +1,268 @@
 # 设计文档：工作室「剧本步」重设计（studio-script-step-redesign）
 
+> **文档版本**：v2，2026-05-20，与最新代码对齐
+
 ## 概述
 
-本功能将项目工作室（Project Studio）的「剧本」步（`StudioStep.script`）从当前的「驾驶舱全链路指标 + Agent 编排」模式，重构为以「小说采集/上传 → 章节/事件管理 → 生成/编辑剧本 → 提取角色场景」为核心的完整产线主区。同时修复 `_restoreLastStep` 的 P0 路由同步 Bug，解决驾驶舱（`_ProjectCockpitCard`）在剧本步渲染中后期无关内容的归属混乱问题，并将美术步（`StudioStep.art`）的主区从 `AgentWorkspacePane.script` 改为画风/风格包 UI。
+本功能将项目工作室（Project Studio）的「剧本」步（`StudioStep.script`）重构为以「小说采集/上传 → 章节/事件管理 → 生成/编辑剧本 → 提取角色场景」为核心的完整产线主区。同时解决驾驶舱（`_ProjectCockpitCard`）在剧本步渲染中后期无关内容的归属混乱问题。
 
-本次重设计遵循「竖切可维护」原则：不改变现有 API 契约，不引入新的后端接口，仅在 Flutter 前端层面重新组织 UI 分发逻辑和组件归属。所有改动集中在 `frontend/lib/project_studio/` 和 `frontend/lib/shell/build_sections_product.dart` 两个区域，并将小说工作台从 `home_page.dart` 的 `part` 扩展中解耦为独立的 `ScriptStepPane` Widget。
+本次重设计遵循「竖切可维护」原则：不改变现有 API 契约，不引入新的后端接口，仅在 Flutter 前端层面重新组织 UI 分发逻辑和组件归属。
 
-## 实现状态（2026-05，与代码对齐）
+## 当前实现状态（2026-05，与代码对齐）
 
-原设计中的 **`ScriptStepPane` 三 Tab**（`NovelPipelinePanel` / `ScriptGeneratePanel` / `EntityExtractPanel`）**未按 Tab 拆分落地**。当前实现为：
+以下是代码库中**已落地**的实现，与原始设计的对照：
 
-| 设计项 | 实际组件 / 行为 |
-|--------|-----------------|
-| 剧本步主区 | [`ProjectStudioScriptStepPanel`](../../../frontend/lib/project_studio/script_step_panel.dart)：宽屏左轨为 **小说 / 剧本 / 提取** 三 Tab；窄屏仍为「内容 + Agent」双 Tab |
-| 小说采集 | [`StudioScriptNovelInlineImport`](../../../frontend/lib/project_studio/novel_inline_import_section.dart) 内嵌于内容轨；完整能力在 **Advanced workbench** 对话框（`openNovelWorkbenchDialog`） |
-| 爬取鉴权 | [`StudioNovelCrawlAuthSection`](../../../frontend/lib/project_studio/novel_crawl_auth_section.dart) |
-| 美术步 | [`ProjectStudioArtStepPanel`](../../../frontend/lib/project_studio/art_step_panel.dart)：内联编辑画风/故事风格包 + 遗留 `artStyle` 文本，`PATCH …/style-config` 与 `PATCH …/projects/{id}` 保存；目录来自 `visual-manual` / `query-director-manual`（[`buildStylePackCatalogFromResponses`](../../../frontend/lib/project_editor/style_pack_catalog.dart)）；后端 [`style_pack_paths`](../../../backend/src/projects/style_pack_paths.rs) 校验路径；测试：`art_step_panel_test`、`studio_step_art_test`、golden `studio_step_art.png`、`project_studio_art_scope_test` |
-| 交付 / 质检 | `StudioStep.deliver` 内 **组装 / 发布 / 质检** 三 Tab，嵌入 `ShortVideoSpaceEmbedScope`；`StudioStep.quality` 为 **交付质检 Tab 的 URL 别名**（`/projects/:id/quality`），不在六步 SOP 条中 |
-| 路由同步 | `_restoreLastStep` / `_selectStep` 已 `context.go` 同步 `stepSlug` |
+| 原设计项 | 实际落地状态 | 实际组件 / 文件 |
+|----------|-------------|-----------------|
+| `ScriptStepPane`（新建） | ✅ **已落地**，名称不同 | `ProjectStudioScriptStepPanel`（`script_step_panel.dart`） |
+| 小说 / 剧本 / 提取 三 Tab | ✅ **已落地**（宽屏左轨） | `DefaultTabController(length: 3)` 内含「小说」「剧本」「提取」Tab |
+| 窄屏双 Tab | ✅ **已落地** | 「内容」+「生成」双 Tab，`constraints.maxWidth >= 1080` 分支 |
+| `NovelPipelinePanel`（新建） | ✅ **已落地**，拆为两个组件 | `StudioScriptNovelInlineImport`（内联导入）+ `openNovelWorkbenchDialog`（高级工作台弹窗） |
+| 爬取鉴权 | ✅ **已落地** | `StudioNovelCrawlAuthSection`（`novel_crawl_auth_section.dart`） |
+| `ArtStyleStepPane`（新建） | ✅ **已落地**，名称不同 | `ProjectStudioArtStepPanel`（`art_step_panel.dart`）：内联编辑画风/故事风格包 |
+| 美术步挂错 `AgentWorkspacePane.script` | ✅ **已修复** | `StudioStep.art` → `ProjectStudioArtStepPanel` |
+| `_restoreLastStep` P0 路由同步 | ✅ **已修复** | `_restoreLastStep` 调用 `_syncRouteToStep`；`_selectStep` 调用 `context.go` |
+| `quality` 步 URL 别名 | ✅ **已落地** | `/projects/:id/quality` → `_buildProjectStudioDeliverStepBody(initialTabIndex: 2)` |
+| `_filterMetricsForStep` 驾驶舱过滤 | ✅ **已落地** | `_CockpitStepFilter._filterMetrics`：`script` 步现在走通用 `_isRelevantForStep` 过滤，不再全量返回 |
 
-**后续若要做三 Tab**：可在 `ProjectStudioScriptStepPanel` 内容轨内将「小说 / 剧本 / 提取」拆为子 Tab，无需重命名路由；本 spec 保留三 Tab 设计作为可选演进，不以之为阻塞项。
+**所有项均已落地**，本 spec 实现完成。
 
 ---
 
 ## 架构
 
-### 当前架构（问题所在）
+### 已落地架构（当前代码实际状态）
 
 ```mermaid
 graph TD
-    A[ProjectStudioPage] --> B[_ProjectCockpitCard 全量渲染所有步骤指标]
+    A[ProjectStudioPage] --> B[_ProjectCockpitCard ⚠️ 仍全量渲染所有步骤指标]
     A --> C[IndexedStack]
-    C --> D[StudioStep.script → AgentWorkspacePane.script]
-    C --> E[StudioStep.art → AgentWorkspacePane.script BUG]
+    C --> D[StudioStep.script → ProjectStudioScriptStepPanel ✅]
+    C --> E[StudioStep.art → ProjectStudioArtStepPanel ✅]
     C --> F[StudioStep.assets → AgentWorkspacePane.production]
     C --> G[StudioStep.storyboard → AgentWorkspacePane.production]
     C --> H[StudioStep.video → StudioVideoStepPanel]
-    C --> I[StudioStep.deliver → TabBarView]
+    C --> I[StudioStep.deliver → TabBarView 组装/发布/质检]
+    C --> J[StudioStep.quality → TabBarView initialTabIndex=2]
 
-    J[_restoreLastStep] -->|setState + onStepChanged| A
-    J -->|缺少 context.go| K[URL 不同步 P0 Bug]
+    K[_restoreLastStep] -->|setState + _dispatchHostStepChanged + _syncRouteToStep ✅| A
 
-    L[NovelWorkbench project_editor/novels/] -->|Dialog 弹窗| M[home_page.dart part]
-    L -->|未接入剧本步主区| D
+    D --> D1[宽屏: 左轨380px 小说/剧本/提取三Tab + 右侧AgentWorkspace]
+    D --> D2[窄屏: 内容Tab + 生成Tab]
+    D1 --> D1a[小说Tab: StudioScriptNovelInlineImport + buildProjectNovelsWorkbenchSection]
+    D1 --> D1b[剧本Tab: buildProjectScriptsSection]
+    D1 --> D1c[提取Tab: 提取状态 + 批量提取入口]
+    D1 --> D1d[高级工作台: openNovelWorkbenchDialog 弹窗]
+
+    E --> E1[画风包选择器 artStylePack/storyStylePack]
+    E --> E2[遗留 artStyle 文本字段]
+    E --> E3[PATCH style-config + PATCH projects/id 保存]
 ```
 
-### 目标架构（重设计后）
+### 目标架构（待实现：驾驶舱按步过滤）
 
 ```mermaid
 graph TD
-    A[ProjectStudioPage] --> B[_ProjectCockpitCard 按步骤过滤指标]
-    A --> C[IndexedStack]
-    C --> D[StudioStep.script → ScriptStepPane]
-    C --> E[StudioStep.art → ArtStyleStepPane]
-    C --> F[StudioStep.assets → AgentWorkspacePane.production]
-    C --> G[StudioStep.storyboard → AgentWorkspacePane.production]
-    C --> H[StudioStep.video → StudioVideoStepPanel]
-    C --> I[StudioStep.deliver → TabBarView]
+    A[ProjectStudioPage] --> B[_ProjectCockpitCard 按步骤过滤指标 🎯待实现]
+    A --> C[IndexedStack 其余不变]
 
-    J[_restoreLastStep] -->|setState + onStepChanged + context.go| A
-
-    D --> D1[NovelPipelinePanel 采集/上传/章节管理]
-    D --> D2[ScriptGeneratePanel 生成/编辑剧本]
-    D --> D3[EntityExtractPanel 提取角色场景]
-    D1 --> D1a[NovelImportTab URL爬取/文本粘贴]
-    D1 --> D1b[NovelChapterListTab 章节列表/审核]
-    D1 --> D1c[NovelEventTab 事件管理]
+    B --> B1[script步: 仅显示 novel/script 相关指标]
+    B --> B2[art步: 仅显示 art/style/pack 相关指标]
+    B --> B3[assets步: 仅显示 character/role/asset 相关指标]
+    B --> B4[storyboard/video/deliver/quality: 全量显示]
 ```
 
 ---
 
 ## 组件与接口
 
-### 组件 1：ScriptStepPane
+### 组件 1：ProjectStudioScriptStepPanel（已落地）
 
-**用途**：剧本步主区根组件，替换原来的 `_buildAgentWorkspacePane(initialPane: AgentWorkspacePane.script)`。
+**位置**：`frontend/lib/project_studio/script_step_panel.dart`
 
-**位置**：`frontend/lib/project_studio/script_step_pane.dart`（新建）
-
-**接口**：
+**实际接口**：
 ```dart
-class ScriptStepPane extends StatefulWidget {
-  const ScriptStepPane({
+class ProjectStudioScriptStepPanel extends StatefulWidget {
+  const ProjectStudioScriptStepPanel({
     super.key,
-    required this.projectNumericId,
-    required this.projectUuid,
     required this.accessToken,
-    required this.onRunHarnessAgent,
-    required this.agentPaneBuilder,
+    required this.project,          // ProjectRow（含 id/numericId/artStylePack 等）
+    required this.agentWorkspace,   // 注入的 AgentWorkspace Widget
+    required this.onOpenNovelWorkbench,    // 打开高级小说工作台弹窗
+    required this.onOpenScriptsWorkbench,  // 打开剧本工作台弹窗
+    required this.onOpenPlanWorkbench,     // 打开计划工作台弹窗
+    required this.onOpenBatchAddScripts,   // 批量新建剧本
+    required this.onOpenScriptEditor,      // 打开剧本编辑器
+    this.onScriptSelected,          // 剧本选中回调
+    this.onContentChanged,          // 内容变更通知
+    this.openNovelWorkbenchOnMount, // 挂载时自动打开小说工作台
   });
-
-  final int projectNumericId;
-  final String projectUuid;
-  final String accessToken;
-  final Future<void> Function(String agentKind) onRunHarnessAgent;
-  // 注入 AgentWorkspacePane 构建器，避免 ScriptStepPane 直接依赖 home_page.dart
-  final Widget Function() agentPaneBuilder;
 }
 ```
 
-**职责**：
-- 持有 `_ScriptStepTab` 枚举状态（`novels` / `generate` / `entities`）
-- 通过 `IndexedStack` 懒加载各子面板
-- 向 `NovelPipelinePanel` 传递 `projectUuid`、`accessToken`
-- 通过 `agentPaneBuilder` 回调注入 Agent 工作区（解耦 home_page.dart 依赖）
+**布局逻辑**：
+- `constraints.maxWidth >= 1080`（宽屏）：左轨 380px（小说/剧本/提取三 Tab）+ 右侧 Agent 工作区
+- 窄屏：「内容」+「生成」双 Tab
+
+**数据加载**：`_reloadContent()` 并发加载 `fetchProjectNovelsByProjectId` + `postScriptsGetScriptApiByProjectId` + `fetchProjectStatsByProjectId`
 
 ---
 
-### 组件 2：NovelPipelinePanel
+### 组件 2：ProjectStudioArtStepPanel（已落地）
 
-**用途**：小说采集/上传/章节管理面板，将现有 `openNovelWorkbenchDialog` 的功能从弹窗迁移到主区内联展示。
-
-**位置**：`frontend/lib/project_studio/novel_pipeline_panel.dart`（新建）
-
-**接口**：
-```dart
-class NovelPipelinePanel extends StatefulWidget {
-  const NovelPipelinePanel({
-    super.key,
-    required this.projectUuid,
-    required this.accessToken,
-    this.onChaptersChanged,
-  });
-
-  final String projectUuid;
-  final String accessToken;
-  final VoidCallback? onChaptersChanged;
-}
-```
+**位置**：`frontend/lib/project_studio/art_step_panel.dart`
 
 **职责**：
-- 渲染三个子 Tab：「导入」「章节列表」「事件」
-- 复用 `project_editor/novels/sections/` 中已有的 section widget 逻辑
-- 管理本地 `List<NovelRow>` 状态，支持刷新
-- 通过 `fetchProjectNovelsByProjectId` 加载章节列表
+- 内联编辑 `artStylePack`、`storyStylePack`（从 `buildStylePackCatalogFromResponses` 获取目录）
+- 遗留 `artStyle` 文本字段
+- 保存：`PATCH .../style-config` + `PATCH .../projects/{id}`
+- 测试覆盖：`art_step_panel_test`、`studio_step_art_test`、golden `studio_step_art.png`、`project_studio_art_scope_test`
 
 ---
 
-### 组件 3：ArtStyleStepPane
+### 组件 3：_ProjectCockpitCard 驾驶舱过滤（待实现）
 
-**用途**：美术步主区，替换原来错误挂载的 `AgentWorkspacePane.script`。
+**修改位置**：`frontend/lib/project_studio/project_studio_page.dart`（或 `project_studio_cockpit_panel.dart`）
 
-**位置**：`frontend/lib/project_studio/art_style_step_pane.dart`（新建）
+**问题**：驾驶舱当前对所有步骤全量渲染指标，剧本步顶部会出现「交付检查路线」「样片路线」「坏例/分镜指标」等中后期信息。
 
-**接口**：
-```dart
-class ArtStyleStepPane extends StatelessWidget {
-  const ArtStyleStepPane({
-    super.key,
-    required this.projectNumericId,
-    required this.projectUuid,
-    required this.accessToken,
-    required this.onRunHarnessAgent,
-    this.artStylePack,
-    this.storyStylePack,
-  });
-
-  final int projectNumericId;
-  final String projectUuid;
-  final String accessToken;
-  final Future<void> Function(String agentKind) onRunHarnessAgent;
-  final String? artStylePack;
-  final String? storyStylePack;
-}
-```
-
-**职责**：
-- 展示项目当前画风包（`artStylePack`、`storyStylePack`）
-- 提供「选择画风包」入口（链接到 Asset Hub 或项目设置）
-- 无画风包时显示空状态提示
-
----
-
-### 组件 4：_ProjectCockpitCard（修改）
-
-**用途**：驾驶舱卡片，扩展过滤逻辑，在美术步和资产步也按内容归属过滤指标。
-
-**修改位置**：`frontend/lib/project_studio/project_studio_page.dart`
-
-**现有问题**：`_filterMetricsForStep` 对非 `script` 步骤直接 `return metrics`（全量），导致美术步、资产步也显示「交付检查路线」「样片路线」等中后期指标。
+**待实现方法**：`_filterMetricsForStep(List<ProjectHomeMetric> metrics, StudioStep step)`
 
 ---
 
 ## 数据模型
 
-### _ScriptStepTab（新增枚举）
+### ProjectStudioScriptStepPanel 内部状态（已落地）
 
 ```dart
-enum _ScriptStepTab {
-  novels,    // 小说采集/章节管理
-  generate,  // 生成/编辑剧本（Agent 工作区）
-  entities,  // 提取角色场景
-}
+// State 持有：
+final List<ListNovelsResponse?> _novelsRef;   // 小说列表（单元素包装）
+final List<bool> _novelsLoading;
+final List<bool> _novelsBusy;
+final List<ScriptBrief> _scriptList;          // 剧本列表
+final List<bool> _saving;
+final List<bool> _scriptTaskBusy;
+final List<String?> _scriptTaskLine;
+final List<ProjectStats?> _statsRef;          // 项目统计
+
+bool _loading;
+String? _loadError;
+int? _selectedScriptId;
+bool _pendingNovelWorkbenchOpen;
 ```
 
-### NovelPipelinePanel 内部状态
+### StudioStep 路由映射（已落地）
 
 ```dart
-enum _NovelPipelineTab { import, chapters, events }
-
-// 内部 State 持有：
-// List<NovelRow> _chapters
-// List<NovelEventRow> _events
-// bool _loading
-// String? _errorMessage
-// _NovelPipelineTab _activeTab
+// _uriForStudioStep 的实际映射：
+StudioStep.script    → /projects/{id}/script
+StudioStep.art       → /projects/{id}/art
+StudioStep.assets    → /projects/{id}/assets
+StudioStep.storyboard → /projects/{id}/storyboard
+StudioStep.video     → /projects/{id}/video
+StudioStep.deliver   → /projects/{id}/deliver
+StudioStep.quality   → /projects/{id}/deliver?tab=quality  // URL 别名
 ```
-
-### StudioReadinessSnapshot（不变）
-
-现有模型已足够，无需新增字段。剧本步所需的小说数据通过 `NovelPipelinePanel` 自行加载，不走快照。
 
 ---
 
 ## 主算法/工作流
 
-### 序列图：剧本步初始化与路由同步（P0 修复）
+### 序列图：路由同步（已落地）
 
 ```mermaid
 sequenceDiagram
     participant Router as GoRouter
     participant Page as ProjectStudioPage
     participant Prefs as StudioStepPrefs
-    participant Host as ProjectStudioHost
 
     Router->>Page: build(initialStep: StudioStep.script)
-    Page->>Page: initState() _step=script _visited={script}
+    Page->>Page: initState() _step=script
+    Page->>Page: addPostFrameCallback → _restoreLastStep()
+    Page->>Page: _routeRequestedStepOrNull() → null（URL 无 stepSlug）
     Page->>Prefs: loadLastStep(projectNumericId)
     Prefs-->>Page: last = StudioStep.video
-    Page->>Page: setState(_step=video, _visited+=video)
-    Page->>Host: onStepChanged(video)
-    Page->>Router: context.go('/projects/42/video') P0修复
-    Router-->>Page: URL 同步为 /video
+    Page->>Page: setState(_step=video, _markStepVisited)
+    Page->>Page: _dispatchHostStepChanged(video)
+    Page->>Router: _syncRouteToStep(video) → context.go('/projects/42/video')
+    Router-->>Page: URL 同步为 /video ✅
 ```
 
-### 序列图：小说导入到生成剧本完整产线
+### 序列图：小说导入到生成剧本（已落地）
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant ScriptPane as ScriptStepPane
-    participant NovelPanel as NovelPipelinePanel
+    participant Panel as ProjectStudioScriptStepPanel
+    participant Inline as StudioScriptNovelInlineImport
     participant API as Rust API
-    participant AgentPane as ScriptGeneratePanel
+    participant Agent as AgentWorkspace
 
-    User->>ScriptPane: 切换到剧本步
-    ScriptPane->>NovelPanel: 渲染导入Tab（默认）
-    User->>NovelPanel: 输入 URL 或粘贴文本
-    NovelPanel->>API: postProjectNovelCrawlImport
-    API-->>NovelPanel: 返回 chaptersCreated=24
-    NovelPanel->>NovelPanel: 刷新章节列表
-    User->>ScriptPane: 切换到生成剧本Tab
-    ScriptPane->>AgentPane: 渲染 AgentWorkspacePane.script
-    User->>AgentPane: 触发 script_rewriter Agent
-    AgentPane->>API: runScriptWorkspaceAgent
-    API-->>AgentPane: 流式返回剧本内容
-    User->>ScriptPane: 切换到提取实体Tab
-    ScriptPane->>API: onRunHarnessAgent('extractor')
+    User->>Panel: 切换到剧本步（宽屏）
+    Panel->>API: fetchProjectNovelsByProjectId + postScriptsGetScriptApiByProjectId
+    API-->>Panel: novels=[], scripts=[]
+    Panel->>Panel: 渲染左轨「小说」Tab（默认）
+    User->>Inline: 输入 URL 或粘贴文本
+    Inline->>API: postProjectNovelCrawlImport / createProjectNovelUnderProject
+    API-->>Inline: 章节入库成功
+    Inline->>Panel: onReload() → _reloadContent()
+    Panel->>Panel: 刷新小说列表，显示章节数
+    User->>Panel: 切换到右侧 Agent 工作区
+    User->>Agent: 触发 script_rewriter Agent
+    Agent->>API: 流式返回剧本内容
+```
+
+### 序列图：驾驶舱指标过滤（待实现）
+
+```mermaid
+sequenceDiagram
+    participant Page as ProjectStudioPage
+    participant Cockpit as _ProjectCockpitCard
+    participant Filter as _filterMetricsForStep
+
+    Page->>Cockpit: build(metrics=allMetrics, step=script)
+    Cockpit->>Filter: _filterMetricsForStep(allMetrics, StudioStep.script)
+    Filter-->>Cockpit: [novel_count, script_count]（过滤掉交付/样片指标）
+    Cockpit->>Cockpit: 渲染过滤后的指标卡片
 ```
 
 ---
 
 ## 关键函数与形式规格
 
-### 函数 1：_restoreLastStep（修复 P0）
+### 函数 1：_restoreLastStep（已落地，含防重复派发）
 
 ```dart
+// 实际代码（project_studio_page.dart）
 Future<void> _restoreLastStep() async {
+  final routeStep = _routeRequestedStepOrNull();
+  if (routeStep != null) return; // 路由已指定步骤，不覆盖
   final last = await StudioStepPrefs.loadLastStep(
     widget.host.projectNumericId,
   );
   if (!mounted || last == _step) return;
   setState(() {
     _step = last;
-    _visited.add(last);
+    _markStepVisited(last);
   });
-  widget.host.onStepChanged(last);
-  _syncRouteToStep(last); // 补上这一行，_syncRouteToStep 已存在于第 68-73 行
+  _dispatchHostStepChanged(last); // 防重复派发（_lastDispatchedHostStep 去重）
+  _syncRouteToStep(last);         // context.go 同步 URL ✅
 }
 ```
 
-**前置条件**：
-- `widget.host.projectNumericId` 为有效正整数
-- `mounted == true`（异步返回后检查）
+**前置条件**：`widget.host.projectNumericId` 为有效正整数，`mounted == true`
 
 **后置条件**：
-- `_step == last`（SharedPreferences 中存储的步骤）
-- URL 路径 == `/projects/{id}/{last.slug}`
+- `_step == last`
+- URL 路径 == `/projects/{id}/{last.slug}`（quality 步为 `/deliver?tab=quality`）
 - `_visited.contains(last) == true`
 
-**根因**：原代码第 56-66 行调用了 `widget.host.onStepChanged(last)` 但遗漏了 `_syncRouteToStep(last)`，而 `_syncRouteToStep` 方法已在同文件第 68-73 行定义。
-
 ---
 
-### 函数 2：_buildProjectStudioStepBody（修改）
+### 函数 2：_filterMetricsForStep（待实现）
 
 ```dart
-Widget _buildProjectStudioStepBody(
-  BuildContext context,
-  AppLocalizations l10n,
-  StudioStep step,
-  int projectNumericId,
-) {
-  switch (step) {
-    case StudioStep.script:
-      return ScriptStepPane(
-        projectNumericId: projectNumericId,
-        projectUuid: effectiveProjectUuid,
-        accessToken: token,
-        onRunHarnessAgent: _runStudioAgent,
-        agentPaneBuilder: () => _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.script,
-          sectionTitle: l10n.productAgentScriptWorkspaceTitle,
-          sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
-        ),
-      );
-    case StudioStep.art:
-      return ArtStyleStepPane(
-        projectNumericId: projectNumericId,
-        projectUuid: effectiveProjectUuid,
-        accessToken: token,
-        onRunHarnessAgent: _runStudioAgent,
-      );
-    case StudioStep.assets:
-    case StudioStep.storyboard:
-      return _buildAgentWorkspacePane(
-        initialPane: AgentWorkspacePane.production,
-        sectionTitle: l10n.productAgentProductionWorkspaceTitle,
-        sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
-      );
-    // video, deliver, quality 不变
-  }
-}
-```
-
-**前置条件**：`step` 为有效枚举值，`effectiveProjectUuid` 非空
-
-**后置条件**：
-- `StudioStep.script` → 返回 `ScriptStepPane`（包含小说产线）
-- `StudioStep.art` → 返回 `ArtStyleStepPane`（不再是 script Agent）
-
----
-
-### 函数 3：_filterMetricsForStep（扩展）
-
-```dart
+// 待添加到 project_studio_page.dart 或 project_studio_cockpit_panel.dart
 List<ProjectHomeMetric> _filterMetricsForStep(
   List<ProjectHomeMetric> metrics,
   StudioStep step,
@@ -367,16 +285,22 @@ List<ProjectHomeMetric> _filterMetricsForStep(
   }
 }
 
-bool _isArtMetric(ProjectHomeMetric metric) {
-  const artKeywords = {'art', 'style', 'visual', 'pack', 'image', '画风', '风格'};
+bool _isScriptMetric(ProjectHomeMetric metric) {
+  const keys = {'novel', 'script', '小说', '剧本', 'chapter', '章节'};
   final text = '${metric.key} ${metric.label} ${metric.detail}'.toLowerCase();
-  return artKeywords.any(text.contains);
+  return keys.any(text.contains);
+}
+
+bool _isArtMetric(ProjectHomeMetric metric) {
+  const keys = {'art', 'style', 'visual', 'pack', 'image', '画风', '风格'};
+  final text = '${metric.key} ${metric.label} ${metric.detail}'.toLowerCase();
+  return keys.any(text.contains);
 }
 
 bool _isAssetsOrCharacterMetric(ProjectHomeMetric metric) {
-  const assetKeywords = {'asset', 'character', 'role', 'voice', 'anchor', '角色', '资产'};
+  const keys = {'asset', 'character', 'role', 'voice', 'anchor', '角色', '资产'};
   final text = '${metric.key} ${metric.label} ${metric.detail}'.toLowerCase();
-  return assetKeywords.any(text.contains);
+  return keys.any(text.contains);
 }
 ```
 
@@ -385,118 +309,95 @@ bool _isAssetsOrCharacterMetric(ProjectHomeMetric metric) {
 **后置条件**：
 - 返回列表是原始 `metrics` 的子集
 - 若过滤结果为空，回退到原始 `metrics`（防止驾驶舱空白）
-- 剧本步不返回含「交付检查路线」「样片路线」「坏例/分镜指标」的 metric
-
-**循环不变量**：`where` 遍历中，已处理的 metric 均已按关键词判断归属
+- `script` 步不返回含「交付检查路线」「样片路线」「坏例/分镜指标」的 metric
 
 ---
 
-### 函数 4：ScriptStepPane.build（新增）
+### 函数 3：_buildProjectStudioScriptStepBody（已落地）
 
 ```dart
-@override
-Widget build(BuildContext context) {
-  final l10n = AppLocalizations.of(context)!;
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _ScriptStepTabBar(
-        current: _activeTab,
-        tabs: [
-          (tab: _ScriptStepTab.novels, label: l10n.scriptStepTabNovels),
-          (tab: _ScriptStepTab.generate, label: l10n.scriptStepTabGenerate),
-          (tab: _ScriptStepTab.entities, label: l10n.scriptStepTabEntities),
-        ],
-        onSelect: (tab) => setState(() => _activeTab = tab),
-      ),
-      Expanded(
-        child: IndexedStack(
-          index: _ScriptStepTab.values.indexOf(_activeTab),
-          children: [
-            NovelPipelinePanel(
-              projectUuid: widget.projectUuid,
-              accessToken: widget.accessToken,
-            ),
-            widget.agentPaneBuilder(),
-            _EntityExtractHint(onRunAgent: () =>
-                widget.onRunHarnessAgent('extractor')),
-          ],
-        ),
-      ),
-    ],
+// 实际代码（build_sections_product.dart）
+Widget _buildProjectStudioScriptStepBody(
+  BuildContext context,
+  int projectNumericId,
+) {
+  final token = _effectiveAccessToken;
+  final project = _studioProjectRowForNumericId(projectNumericId);
+  if (token == null || token.isEmpty || project == null || project.id.isEmpty) {
+    return Center(child: Text(l10n.studioScriptStepScopeMissing));
+  }
+  return ProjectStudioScriptStepPanel(
+    accessToken: token,
+    project: project,
+    openNovelWorkbenchOnMount: _pendingStudioNovelWorkbench,
+    agentWorkspace: _buildAgentWorkspacePane(
+      initialPane: AgentWorkspacePane.script,
+      sectionTitle: l10n.productAgentScriptWorkspaceTitle,
+      sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
+    ),
+    onOpenNovelWorkbench: (novelsRef, novelsBusy, reload) =>
+        _studioScriptOpenNovelWorkbench(project, novelsRef, novelsBusy, reload),
+    onOpenScriptsWorkbench: (...) => _studioScriptOpenScriptsWorkbench(...),
+    onOpenPlanWorkbench: () => _openProjectScriptPlanWorkbenchDialog(...),
+    onOpenBatchAddScripts: () async { ... },
+    onOpenScriptEditor: (script) async { ... },
   );
 }
 ```
-
-**前置条件**：`widget.projectUuid` 非空，`widget.agentPaneBuilder` 非 null
-
-**后置条件**：
-- 返回包含三个 Tab 的 Column Widget
-- `IndexedStack` 保证非活跃 Tab 保留状态（不重建）
 
 ---
 
 ## 示例用法
 
-### 示例 1：剧本步路由恢复（P0 修复后）
+### 示例 1：路由恢复（已落地）
 
 ```dart
-// 用户上次停在「成片」步，关闭后重新打开项目
-// 修复前：URL = /script，主区显示成片内容
-// 修复后：
+// 用户上次停在「视频」步，重新打开项目
+// URL 初始为 /projects/42/script（路由未指定 stepSlug）
 await _restoreLastStep();
+// _routeRequestedStepOrNull() → null
+// StudioStepPrefs.loadLastStep → StudioStep.video
 // _step = StudioStep.video
-// URL = /projects/42/video
-// IndexedStack 显示 StudioVideoStepPanel
+// URL = /projects/42/video ✅
 ```
 
-### 示例 2：小说 URL 爬取到章节入库
+### 示例 2：小说 URL 爬取到章节入库（已落地）
 
 ```dart
-// 用户在 NovelPipelinePanel 的「导入」Tab 输入 URL
-final result = await postProjectNovelCrawlImport(
-  accessToken,
-  projectUuid,
-  'https://example.com/novel/chapter-list',
-  intakeStatus: 'admitted',
-);
-// result.chaptersCreated = 24
-// 章节列表 Tab 自动刷新，显示 24 章
+// 用户在 StudioScriptNovelInlineImport 输入 URL
+// → postProjectNovelCrawlImport(token, projectUuid, url)
+// → 成功后 onReload() → _reloadContent()
+// → 小说 Tab 刷新，显示新章节数
 ```
 
-### 示例 3：驾驶舱指标过滤（剧本步）
+### 示例 3：驾驶舱指标过滤（待实现）
 
 ```dart
-// 后端返回的 metrics 包含：
-// [novel_count, script_count, storyboard_count, delivery_check, sample_route]
-// 剧本步过滤后只显示：
-// [novel_count, script_count]  含 script/novel 关键词
-// 「交付检查路线」「样片路线」不再出现在剧本步
+// 后端返回 metrics = [novel_count, script_count, storyboard_count, delivery_check, sample_route]
+// 剧本步调用 _filterMetricsForStep(metrics, StudioStep.script)
+// → 过滤后 = [novel_count, script_count]
+// 「交付检查路线」「样片路线」不再出现在剧本步顶部 ✅
 ```
 
-### 示例 4：美术步正确挂载
+### 示例 4：美术步正确挂载（已落地）
 
 ```dart
-// 修复前：StudioStep.art → AgentWorkspacePane.script（剧本 Agent）
-// 修复后：StudioStep.art → ArtStyleStepPane（画风包 UI）
+// build_sections_product.dart switch 分支：
 case StudioStep.art:
-  return ArtStyleStepPane(
-    projectNumericId: projectNumericId,
-    projectUuid: effectiveProjectUuid,
-    accessToken: token,
-    onRunHarnessAgent: _runStudioAgent,
-  );
+  return _buildProjectStudioArtStepBody(context, projectNumericId);
+// → ProjectStudioArtStepPanel（画风包 UI）✅
+// 不再是 AgentWorkspacePane.script
 ```
 
 ---
 
 ## 正确性属性
 
-- **路由一致性**：对任意 `StudioStep s`，`_restoreLastStep` 完成后，`GoRouterState.of(context).uri.path` 必须等于 `/projects/{id}/{s.slug}`。
-- **内容归属**：对任意 `step ∈ {script, art, assets}`，`_filterMetricsForStep(metrics, step)` 返回的列表不包含 `targetStep ∈ {storyboard, video, deliver, quality}` 的 metric（除非过滤结果为空时的回退）。
-- **产线完整性**：`ScriptStepPane` 的三个 Tab 均可独立渲染，不依赖彼此的加载状态。
-- **状态保留**：`IndexedStack` 保证切换 Tab 时 `NovelPipelinePanel` 的已加载章节列表不丢失。
-- **美术步隔离**：`StudioStep.art` 的 `buildStepBody` 返回值类型为 `ArtStyleStepPane`，不再是 `AgentWorkspacesSection`。
+- **路由一致性**（已落地）：对任意 `StudioStep s`，`_restoreLastStep` 完成后，`GoRouterState.of(context).uri` 必须等于 `_uriForStudioStep(s)`（`quality` 步为 `/deliver?tab=quality`）。
+- **防重复派发**（已落地）：`_dispatchHostStepChanged` 通过 `_lastDispatchedHostStep` 去重，避免路由重建时重复触发 `onStepChanged`。
+- **内容归属**（待实现）：对任意 `step ∈ {script, art, assets}`，`_filterMetricsForStep(metrics, step)` 返回的列表不包含中后期（storyboard/video/deliver/quality）的 metric（除非过滤结果为空时的回退）。
+- **产线完整性**（已落地）：`ProjectStudioScriptStepPanel` 的三个内容 Tab（小说/剧本/提取）均可独立渲染，不依赖彼此的加载状态。
+- **美术步隔离**（已落地）：`StudioStep.art` 的 `buildStepBody` 返回 `ProjectStudioArtStepPanel`，不再是 `AgentWorkspacesSection`。
 
 ---
 
@@ -505,87 +406,83 @@ case StudioStep.art:
 ### 场景 1：_restoreLastStep 异步返回时 Widget 已卸载
 
 **条件**：用户快速切换项目，`mounted == false`
-**响应**：`if (!mounted || last == _step) return;` 提前返回，不调用 `setState` 或 `context.go`
-**恢复**：无需恢复，Widget 已销毁
+**响应**：`if (!mounted || last == _step) return;` 提前返回
+**状态**：已落地 ✅
 
-### 场景 2：NovelPipelinePanel 加载章节失败
+### 场景 2：ProjectStudioScriptStepPanel 加载内容失败
 
 **条件**：网络错误或 API 返回 4xx/5xx
-**响应**：显示 `StudioApiErrorCallout`，提供「重试」按钮
-**恢复**：用户点击重试，重新调用 `fetchProjectNovelsByProjectId`
+**响应**：`_loadError` 非空时渲染 `StudioEmptyState`（icon: `cloud_off_outlined`），提供「重试」按钮（`studioScriptStepRetry`）
+**状态**：已落地 ✅
 
 ### 场景 3：_filterMetricsForStep 过滤结果为空
 
-**条件**：后端返回的 metrics 全部不含剧本关键词（如全新项目）
+**条件**：后端返回的 metrics 全部不含对应步骤关键词（如全新项目）
 **响应**：回退到 `return metrics`（全量显示），防止驾驶舱空白
-**恢复**：自动回退，无需用户操作
+**状态**：待实现，设计已包含回退逻辑
 
-### 场景 4：ArtStyleStepPane 项目无画风包
+### 场景 4：ProjectStudioArtStepPanel 项目无画风包
 
-**条件**：`artStylePack == null && storyStylePack == null`
-**响应**：显示空状态提示「尚未设置画风包」，提供「前往设置」按钮
-**恢复**：跳转到项目设置或 Asset Hub
+**条件**：`project.artStylePack == null && project.storyStylePack == null`
+**响应**：显示空状态提示，提供「高级项目设定」入口（`studioArtStepOpenSettings`）
+**状态**：已落地 ✅
 
 ---
 
 ## 测试策略
 
-### 单元测试
+### 已有测试（勿重复）
+
+- `art_step_panel_test`：`ProjectStudioArtStepPanel` 单元测试
+- `studio_step_art_test`：美术步集成测试
+- golden `studio_step_art.png`：美术步视觉回归
+- `project_studio_art_scope_test`：美术步权限范围测试
+
+### 待补充测试
 
 - `_filterMetricsForStep`：对每个 `StudioStep` 枚举值，验证过滤结果的关键词归属
-- `_isArtMetric` / `_isAssetsOrCharacterMetric`：边界关键词测试
-- `StudioStep.fromSlug`：空字符串、未知 slug 的回退行为
-
-### 属性测试（Property-Based Testing）
-
-**测试库**：`package:test`（Flutter 标准）
-
-- **属性**：对任意 `metrics` 列表和 `step ∈ {script, art, assets}`，`_filterMetricsForStep` 的返回值是原列表的子集（`∀ m ∈ result: m ∈ metrics`）
-- **属性**：若 `metrics` 非空，`_filterMetricsForStep` 的返回值非空（回退保证）
-
-### 集成测试
-
-- `_restoreLastStep` 修复验证：mock `StudioStepPrefs.loadLastStep` 返回 `StudioStep.video`，验证 `GoRouter` 路径变为 `/projects/42/video`
-- `ScriptStepPane` Tab 切换：验证 `IndexedStack` 索引与 `_activeTab` 一致
-- `_buildProjectStudioStepBody(StudioStep.art)` 返回 `ArtStyleStepPane` 类型
+- `_isScriptMetric` / `_isArtMetric` / `_isAssetsOrCharacterMetric`：边界关键词测试
+- **属性测试**：对任意 `metrics` 列表和 `step ∈ {script, art, assets}`，`_filterMetricsForStep` 的返回值是原列表的子集（`∀ m ∈ result: m ∈ metrics`）；若 `metrics` 非空，返回值非空（回退保证）
+- `ProjectStudioScriptStepPanel` 宽/窄屏布局切换：验证 `constraints.maxWidth >= 1080` 分支
 
 ---
 
 ## 性能考量
 
-- `NovelPipelinePanel` 使用懒加载：仅在用户首次切换到「剧本」步时触发 `fetchProjectNovelsByProjectId`，不在 `StudioReadinessSnapshot` 加载时预取
-- `IndexedStack` 保留已加载 Tab 的状态，避免重复 API 调用
+- `ProjectStudioScriptStepPanel` 使用 `_reloadContent()` 懒加载：仅在用户首次切换到剧本步时触发，不在 `StudioReadinessSnapshot` 加载时预取
 - `_filterMetricsForStep` 为纯函数，无副作用，可在 `build` 中直接调用（metrics 列表通常 < 20 条）
-- `ArtStyleStepPane` 为轻量 StatelessWidget，不发起额外 API 请求（画风包信息来自 `ProjectRow`，已在 `ProjectStudioHost` 中持有）
+- `ProjectStudioArtStepPanel` 画风包目录通过 `visual-manual` / `query-director-manual` 按需加载，不预取
 
 ---
 
 ## 安全考量
 
-- `accessToken` 通过 `ProjectStudioHost` 向下传递，不存储在 SharedPreferences
-- `NovelPipelinePanel` 的爬取 URL 在客户端侧爬取时，使用固定 `User-Agent: OpenFlow/1.0 content-intake crawler`，不携带用户凭证
-- 服务端爬取（`postProjectNovelCrawlImport`）通过 Bearer Token 鉴权，与现有 API 契约一致
+- `accessToken` 通过 `ProjectStudioHost` → `ProjectRow` 向下传递，不存储在 SharedPreferences
+- 小说爬取 URL 通过 `postProjectNovelCrawlImport` 服务端爬取，Bearer Token 鉴权，与现有 API 契约一致
+- `StudioNovelCrawlAuthSection` 处理爬取鉴权，不在客户端存储第三方凭证
 
 ---
 
 ## 依赖
 
-- `package:go_router`：路由同步（`context.go`）
+- `package:go_router`：路由同步（`context.go`、`GoRouterState`）
 - `package:shared_preferences`：步骤持久化（`StudioStepPrefs`）
-- `frontend/lib/project_editor/novels/`：复用现有小说工作台逻辑（actions、sections）
-- `frontend/lib/rust_api.dart`：`fetchProjectNovelsByProjectId`、`postProjectNovelCrawlImport`、`createProjectNovelUnderProject`、`fetchNovelWorkbenchFullRows`
-- `frontend/lib/design_system/`：`StudioTokens`、`StudioApiErrorCallout`、`StudioEmptyState`
+- `frontend/lib/project_editor/novels/`：`workbench_section_builder.dart`（`buildProjectNovelsWorkbenchSection`）、`sections/`（各 section widget）
+- `frontend/lib/project_editor/scripts/section_builder.dart`：`buildProjectScriptsSection`
+- `frontend/lib/rust_api.dart`：`fetchProjectNovelsByProjectId`、`postProjectNovelCrawlImport`、`postScriptsGetScriptApiByProjectId`、`fetchProjectStatsByProjectId`
+- `frontend/lib/design_system/`：`StudioTokens`、`StudioEmptyState`
 
 ---
 
 ## 变更范围汇总
 
-| 文件 | 变更类型 | 说明 |
-|------|----------|------|
-| `project_studio/project_studio_page.dart` | 修改 | `_restoreLastStep` 补调 `_syncRouteToStep`；`_filterMetricsForStep` 扩展美术/资产步过滤 |
-| `shell/build_sections_product.dart` | 修改 | `_buildProjectStudioStepBody` 中 `script` 步改用 `ScriptStepPane`，`art` 步改用 `ArtStyleStepPane` |
-| `project_studio/script_step_pane.dart` | 新建 | `ScriptStepPane` + `_ScriptStepTabBar` |
-| `project_studio/novel_pipeline_panel.dart` | 新建 | `NovelPipelinePanel`（内联小说产线，复用 novels/ 逻辑） |
-| `project_studio/art_style_step_pane.dart` | 新建 | `ArtStyleStepPane`（画风包 UI） |
-| `l10n/app_localizations_zh.dart` | 修改 | 新增剧本步 Tab 文案 |
-| `l10n/app_localizations_en.dart` | 修改 | 新增剧本步 Tab 文案（英文） |
+| 文件 | 变更类型 | 状态 | 说明 |
+|------|----------|------|------|
+| `project_studio/script_step_panel.dart` | 新建 | ✅ 已落地 | `ProjectStudioScriptStepPanel`（宽屏三 Tab + 窄屏双 Tab） |
+| `project_studio/novel_inline_import_section.dart` | 新建 | ✅ 已落地 | `StudioScriptNovelInlineImport`（内联导入） |
+| `project_studio/novel_crawl_auth_section.dart` | 新建 | ✅ 已落地 | `StudioNovelCrawlAuthSection`（爬取鉴权） |
+| `project_studio/art_step_panel.dart` | 新建 | ✅ 已落地 | `ProjectStudioArtStepPanel`（画风包 UI） |
+| `project_studio/project_studio_page.dart` | 修改 | ✅ 已落地 | `_restoreLastStep` 调用 `_syncRouteToStep`；`_dispatchHostStepChanged` 防重复派发 |
+| `shell/build_sections_product.dart` | 修改 | ✅ 已落地 | `script` 步 → `ProjectStudioScriptStepPanel`；`art` 步 → `ProjectStudioArtStepPanel` |
+| `project_studio/project_studio_cockpit_panel.dart` | 修改 | ✅ 已落地 | `_CockpitStepFilter._filterMetrics` / `_filterActions`：移除 `script` 步的全量返回特例，统一走 `_isRelevantForStep` 过滤 |
+| `l10n/app_localizations_zh.dart` | 修改 | ✅ 已落地 | `studioScriptStepTabNovel`、`studioScriptStepTabScripts`、`studioScriptStepTabExtract` 等 key |

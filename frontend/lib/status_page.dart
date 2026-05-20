@@ -116,7 +116,6 @@ class _StatusPageState extends State<StatusPage> {
       if (!mounted) {
         return;
       }
-      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _error = describeUserVisibleApiErrorResolved(context, error);
         _loading = false;

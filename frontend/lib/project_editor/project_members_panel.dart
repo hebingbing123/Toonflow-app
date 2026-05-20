@@ -53,7 +53,6 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _reload() async {
-    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loading = true;
       _error = null;
@@ -102,8 +101,6 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       });
       return;
     }
-
-    final l10n = resolveAppLocalizationsForErrors(context);
 
     setState(() {
       _loadingWorkspaceMembers = true;

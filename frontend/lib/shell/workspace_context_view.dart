@@ -70,7 +70,7 @@ class WorkspaceContextView extends StatelessWidget {
         : (resolvedWorkspaceName?.isNotEmpty == true
               ? (isBackendDefaultPersonalWorkspaceName(resolvedWorkspaceName!)
                     ? l10n.workspaceContextPersonalDefaultName
-                    : resolvedWorkspaceName!)
+                    : resolvedWorkspaceName)
               : l10n.workspaceContextNoWorkspace);
     final scopeLine = projectLabel?.trim().isNotEmpty == true
         ? projectLabel!.trim()
