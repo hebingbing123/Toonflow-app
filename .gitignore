@@ -76,6 +76,9 @@ frontend/.l10n_batch/
 # Cursor IDE (local)
 .cursor/
 
+# Kiro: local per-workspace tooling config (keep specs markdown in Git if desired)
+.kiro/**/.config.kiro
+
 # Local automation scripts (machine-specific)
 auto-refactor.sh
 cursorpro_watch_click.applescript
