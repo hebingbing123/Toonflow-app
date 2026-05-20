@@ -18,6 +18,51 @@ use super::super::super::extraction::{
 };
 use super::super::super::MAX_GENERATE_EVENTS_CONCURRENCY;
 
+fn job_run_error_to_api(err: crate::jobs::worker::JobRunError) -> ApiError {
+    match err {
+        crate::jobs::worker::JobRunError::Failed(msg) => ApiError::DatabaseError(msg),
+        crate::jobs::worker::JobRunError::FailedStructured { message, .. } => {
+            ApiError::DatabaseError(message)
+        }
+        crate::jobs::worker::JobRunError::Cancelled => ApiError::BadRequest("job cancelled".into()),
+    }
+}
+
+async fn resolve_novel_events_llm(
+    state: &AppState,
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_numeric_id: Option<i32>,
+) -> Result<Option<crate::llm::LlmConfig>, ApiError> {
+    use crate::projects::model_routing::jobs::{
+        load_project_uuid_for_actor, try_build_routed_llm_config,
+    };
+    use crate::projects::model_routing::{ModelSlot, StudioStepSlug};
+
+    if let Some(numeric_id) = project_numeric_id {
+        if let Some(project_uuid) = load_project_uuid_for_actor(pool, uid, numeric_id)
+            .await
+            .map_err(job_run_error_to_api)?
+        {
+            if let Some(cfg) = try_build_routed_llm_config(
+                state,
+                pool,
+                uid,
+                project_uuid,
+                StudioStepSlug::Script,
+                ModelSlot::Text,
+                None,
+            )
+            .await
+            .map_err(|_| ApiError::LlmNotConfigured)?
+            {
+                return Ok(Some(cfg));
+            }
+        }
+    }
+    Ok(state.llm.clone())
+}
+
 fn is_blocked_intake_status(status: Option<&str>) -> bool {
     matches!(
         status,
@@ -135,7 +180,13 @@ pub(crate) async fn post_generate_novel_events_for_project(
 
     let prompt = resolve_event_extraction_prompt(pool, uid).await?;
     let pool_clone = pool.clone();
-    let llm = state.llm.clone();
+    let llm = resolve_novel_events_llm(
+        &state,
+        pool,
+        uid,
+        novels.first().map(|n| n.project_numeric_id),
+    )
+    .await?;
     let http_client = state.http_client.clone();
     let concurrency = body.concurrent_count;
 

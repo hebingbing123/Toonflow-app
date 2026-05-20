@@ -7,7 +7,7 @@ fn image_size_maps_dalle3() {
         "1792x1024"
     );
     assert_eq!(
-        resolve_openai_image_size("dall-e-3", "1024 × 1792"),
+        resolve_openai_image_size("dall-e-3", "1024 Ă 1792"),
         "1024x1792"
     );
     assert_eq!(
@@ -32,5 +32,21 @@ fn image_model_from_catalog_string() {
     assert_eq!(
         resolve_openai_image_model("unknown-catalog-id").as_str(),
         "dall-e-3"
+    );
+}
+
+#[test]
+fn image_model_preserves_native_vendor_ids() {
+    assert_eq!(
+        resolve_openai_image_model("18:doubao-seedream-3-0-t2i").as_str(),
+        "doubao-seedream-3-0-t2i"
+    );
+    assert_eq!(
+        resolve_openai_image_model("15:imagen-3.0-generate-002").as_str(),
+        "imagen-3.0-generate-002"
+    );
+    assert_eq!(
+        resolve_openai_image_model("7:wanx2.1-t2i-turbo").as_str(),
+        "wanx2.1-t2i-turbo"
     );
 }

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
+import '../components/studio_dialog_shell.dart';
 import '../components/studio_primary_button.dart';
+import '../components/studio_text_styles.dart';
 
 /// Bottom sheet before enqueueing a paid generation job.
 Future<bool> showStudioCostConfirmSheet({
@@ -11,7 +13,7 @@ Future<bool> showStudioCostConfirmSheet({
   required BillingEstimateResponse estimate,
 }) async {
   final l10n = AppLocalizations.of(context)!;
-  final result = await showModalBottomSheet<bool>(
+  final result = await showStudioBottomSheet<bool>(
     context: context,
     showDragHandle: true,
     builder: (ctx) {
@@ -24,7 +26,7 @@ Future<bool> showStudioCostConfirmSheet({
           children: <Widget>[
             Text(
               l10n.studioCostConfirmTitle,
-              style: Theme.of(ctx).textTheme.titleLarge,
+              style: studioDialogTitleStyle(ctx),
             ),
             const SizedBox(height: 12),
             Text(

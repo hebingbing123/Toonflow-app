@@ -161,7 +161,7 @@ class CornerScapeWorkbenchController {
     } catch (e) {
       setState(() {
         session.summaryLine = l10n.projectEditorAssetsCornerScapeLoadFailed(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(ctx, e),
         );
         session.selectedAssetNumericId = null;
         session.selectedHistoryImageId = null;

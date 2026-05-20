@@ -31,6 +31,7 @@ class ProjectsSection extends StatelessWidget {
     this.productPresentation = false,
     this.currentWorkspaceName,
     this.currentWorkspaceType,
+    this.onOpenModelVendorSettings,
   });
 
   final String? accessToken;
@@ -45,6 +46,7 @@ class ProjectsSection extends StatelessWidget {
   final bool productPresentation;
   final String? currentWorkspaceName;
   final String? currentWorkspaceType;
+  final VoidCallback? onOpenModelVendorSettings;
 
   bool get _showEnterpriseProjectEmptyState =>
       currentWorkspaceType == 'enterprise' &&
@@ -128,6 +130,7 @@ class ProjectsSection extends StatelessWidget {
         currentWorkspaceName: currentWorkspaceName,
         currentWorkspaceType: currentWorkspaceType,
         onOpenTeamWorkspaces: onOpenTeamWorkspaces,
+        onOpenModelVendorSettings: onOpenModelVendorSettings,
       );
     }
 

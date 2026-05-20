@@ -587,7 +587,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorVersionCreate(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -626,7 +626,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorVersionSwitch(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -675,7 +675,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorVersionDelete(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -818,7 +818,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorDraftSave(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -945,7 +945,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorDraftRestore(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -1014,7 +1014,7 @@ class _VersionManagerState extends State<VersionManager> {
         final l10nErr = resolveAppLocalizationsForErrors(context);
         setState(() {
           _errorMessage = l10nErr.shortVideoVersionManagerErrorDraftDelete(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }

@@ -1,4 +1,4 @@
-/// Six-step (+ optional quality) project studio SOP.
+/// Six-step project studio SOP, plus [quality] as a deliver QA tab alias (not in [sopSteps]).
 enum StudioStep {
   script('script', 0),
   art('art', 1),
@@ -6,6 +6,7 @@ enum StudioStep {
   storyboard('storyboard', 3),
   video('video', 4),
   deliver('deliver', 5),
+  /// Deep-link alias for deliver → quality tab (`/projects/:id/quality`).
   quality('quality', 6);
 
   const StudioStep(this.slug, this.order);
@@ -34,5 +35,22 @@ enum StudioStep {
     final i = sopSteps.indexOf(this);
     if (i < 0 || i >= sopSteps.length - 1) return null;
     return sopSteps[i + 1];
+  }
+
+  /// Index for [IndexedStack] over [sopSteps]; [quality] maps to deliver body.
+  int get sopStackIndex {
+    if (this == StudioStep.quality) {
+      return sopSteps.indexOf(StudioStep.deliver);
+    }
+    final i = sopSteps.indexOf(this);
+    return i < 0 ? 0 : i;
+  }
+
+  /// Whether the six-step bar should highlight [step] for the current route step.
+  bool highlightsSopStep(StudioStep step) {
+    if (this == StudioStep.quality) {
+      return step == StudioStep.deliver;
+    }
+    return step == this;
   }
 }

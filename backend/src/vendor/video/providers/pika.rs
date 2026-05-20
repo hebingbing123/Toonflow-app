@@ -1,30 +1,65 @@
+//! Pika via fal.ai queue API — https://docs.fal.ai/model-apis/model-endpoints/queue/
+//!
+//! Public Pika models are hosted on `queue.fal.run`, not `api.pika.art`.
+
 use serde_json::json;
 
-use crate::vendor::video::client::VideoProviderClient;
+use crate::vendor::http_extract::{json_str, json_url};
+use crate::vendor::video::client::{VideoProviderCall, VideoProviderClient};
 use crate::vendor::video::types::{
-    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
+    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus,
 };
+
+fn fal_pika_endpoint(req: &VideoGenerationRequest) -> &'static str {
+    let has_image = req
+        .image_url
+        .as_deref()
+        .map(str::trim)
+        .is_some_and(|s| !s.is_empty());
+    if has_image {
+        "fal-ai/pika/v2.2/image-to-video"
+    } else {
+        "fal-ai/pika/v2.2/text-to-video"
+    }
+}
+
+fn parse_fal_task_id(task_id: &str) -> (&str, &str) {
+    if let Some((_prefix, rest)) = task_id.split_once('|') {
+        if let Some((endpoint, request_id)) = rest.split_once('|') {
+            return (endpoint, request_id);
+        }
+    }
+    ("fal-ai/pika/v2.2/text-to-video", task_id)
+}
+
+fn encode_fal_task_id(endpoint: &str, request_id: &str) -> String {
+    format!("fal|{endpoint}|{request_id}")
+}
 
 impl VideoProviderClient {
     pub(crate) async fn generate_pika(
         &self,
         req: &VideoGenerationRequest,
-        api_key: &str,
+        call: &VideoProviderCall,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        let url = format!("{}/v1/generations", VideoProvider::Pika.api_base());
-        let body = json!({
+        let api_key = call.auth.bearer_token()?;
+        let endpoint = fal_pika_endpoint(req);
+        let url = format!("{}/{endpoint}", call.api_base);
+        let mut body = json!({
             "prompt": req.prompt,
-            "negative_prompt": req.negative_prompt,
-            "duration": req.duration,
             "aspect_ratio": req.aspect_ratio,
-            "image_url": req.image_url,
-            "seed": req.seed,
         });
+        if let Some(image) = req.image_url.as_deref().filter(|s| !s.is_empty()) {
+            body["image_url"] = json!(image);
+        }
+        if req.duration > 0 {
+            body["duration"] = json!(req.duration);
+        }
 
         let resp = self
             .http
             .post(&url)
-            .header("Authorization", format!("Bearer {}", api_key))
+            .header("Authorization", format!("Key {api_key}"))
             .header("Content-Type", "application/json")
             .json(&body)
             .send()
@@ -33,19 +68,17 @@ impl VideoProviderClient {
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
-            return Err(anyhow::anyhow!("Pika API error {}: {}", status, text));
+            return Err(anyhow::anyhow!("fal/Pika API error {status}: {text}"));
         }
 
         let result: serde_json::Value = resp.json().await?;
-        let task_id = result["id"]
-            .as_str()
-            .ok_or_else(|| anyhow::anyhow!("Missing task ID in Pika response"))?
-            .to_string();
+        let request_id = json_str(&result, &["/request_id"])
+            .ok_or_else(|| anyhow::anyhow!("fal/Pika: missing request_id"))?;
 
         Ok(VideoGenerationResponse {
             provider: "pika".to_string(),
             model: req.model.clone(),
-            task_id,
+            task_id: encode_fal_task_id(endpoint, &request_id),
             status: VideoGenerationStatus::Queued,
             video_url: None,
             preview_url: None,
@@ -53,57 +86,83 @@ impl VideoProviderClient {
         })
     }
 
-    pub(crate) async fn poll_pika(&self, task_id: &str) -> anyhow::Result<VideoGenerationResponse> {
-        let api_key = std::env::var("PIKA_API_KEY")?;
-        let url = format!(
-            "{}/v1/generations/{}",
-            VideoProvider::Pika.api_base(),
-            task_id
+    pub(crate) async fn poll_pika(
+        &self,
+        task_id: &str,
+        call: &VideoProviderCall,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        let api_key = call.auth.bearer_token()?;
+        let (endpoint, request_id) = parse_fal_task_id(task_id);
+        let status_url = format!(
+            "{}/{endpoint}/requests/{request_id}/status",
+            call.api_base
         );
 
         let resp = self
             .http
-            .get(&url)
-            .header("Authorization", format!("Bearer {}", api_key))
+            .get(&status_url)
+            .header("Authorization", format!("Key {api_key}"))
             .send()
             .await?;
 
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
-            return Err(anyhow::anyhow!("Pika poll error {}: {}", status, text));
+            return Err(anyhow::anyhow!("fal/Pika poll error {status}: {text}"));
         }
 
         let result: serde_json::Value = resp.json().await?;
-        let status_str = result["status"].as_str().unwrap_or("unknown");
+        let status_str = result["status"].as_str().unwrap_or("IN_QUEUE");
         let (status, video_url, error_message) = match status_str {
-            "completed" | "succeeded" => (
-                VideoGenerationStatus::Completed,
-                result["video_url"].as_str().map(String::from),
-                None,
-            ),
-            "failed" => (
+            "COMPLETED" => {
+                let result_url =
+                    format!("{}/{endpoint}/requests/{request_id}", call.api_base);
+                let video_url = self
+                    .fetch_fal_video_url(&result_url, api_key)
+                    .await
+                    .ok();
+                (VideoGenerationStatus::Completed, video_url, None)
+            }
+            "FAILED" => (
                 VideoGenerationStatus::Failed,
                 None,
                 Some(
-                    result["error"]
-                        .as_str()
-                        .unwrap_or("Unknown error")
-                        .to_string(),
+                    json_str(&result, &["/error", "/detail"])
+                        .unwrap_or_else(|| "fal/Pika generation failed".into()),
                 ),
             ),
-            "processing" => (VideoGenerationStatus::Processing, None, None),
+            "IN_PROGRESS" => (VideoGenerationStatus::Processing, None, None),
             _ => (VideoGenerationStatus::Queued, None, None),
         };
 
         Ok(VideoGenerationResponse {
             provider: "pika".to_string(),
-            model: "pika-1.5".to_string(),
+            model: String::new(),
             task_id: task_id.to_string(),
             status,
             video_url,
-            preview_url: result["thumbnail_url"].as_str().map(String::from),
+            preview_url: None,
             error_message,
         })
+    }
+
+    async fn fetch_fal_video_url(&self, result_url: &str, api_key: &str) -> anyhow::Result<String> {
+        let resp = self
+            .http
+            .get(result_url)
+            .header("Authorization", format!("Key {api_key}"))
+            .send()
+            .await?;
+        let result: serde_json::Value = resp.json().await?;
+        json_url(
+            &result,
+            &[
+                "/video/url",
+                "/video/0/url",
+                "/data/video/url",
+                "/output/video/url",
+            ],
+        )
+        .ok_or_else(|| anyhow::anyhow!("fal result missing video url"))
     }
 }

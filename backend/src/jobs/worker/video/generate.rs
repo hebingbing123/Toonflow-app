@@ -9,6 +9,7 @@ use crate::jobs::worker::common::{generation_job_is_cancelled, job_ok, job_ok_wi
 use crate::jobs::worker::{JobCompletion, JobRunError};
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::state::AppState;
+use crate::vendor::video::credentials::load_video_provider_call;
 use crate::vendor::video::{
     VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
 };
@@ -112,6 +113,16 @@ pub(crate) async fn run_video_generate(
         "video generation: submitting to provider"
     );
 
+    let catalog_model_id = p
+        .get("catalog_model_id")
+        .and_then(|x| x.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
+    let (_user_creds, call) =
+        load_video_provider_call(pool, row.owner_user_id, provider, catalog_model_id)
+            .await
+            .map_err(JobRunError::Failed)?;
+
     let client = VideoProviderClient::new();
     let req = VideoGenerationRequest {
         provider,
@@ -126,7 +137,7 @@ pub(crate) async fn run_video_generate(
     };
 
     let mut gen_resp = client
-        .generate_video(&req)
+        .generate_video_with_call(&req, &call)
         .await
         .map_err(|e| JobRunError::Failed(format!("video generation submission failed: {e}")))?;
 
@@ -148,7 +159,7 @@ pub(crate) async fn run_video_generate(
             _ => {
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                 gen_resp = client
-                    .poll_generation(provider, &gen_resp.task_id)
+                    .poll_generation_with_call(provider, &gen_resp.task_id, &call)
                     .await
                     .map_err(|e| JobRunError::Failed(format!("poll failed: {e}")))?;
             }

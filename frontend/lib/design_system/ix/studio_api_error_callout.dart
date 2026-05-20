@@ -44,7 +44,7 @@ class StudioApiErrorCallout extends StatelessWidget {
     final errorColor = theme.colorScheme.error;
     final message = error is String
         ? compactUserVisibleApiErrorText(l10n, error as String)
-        : describeUserVisibleApiError(l10n, error);
+        : describeUserVisibleApiErrorResolved(context, error);
     final canRetry = onRetry != null && studioApiErrorShouldOfferRetry(error);
 
     return LayoutBuilder(

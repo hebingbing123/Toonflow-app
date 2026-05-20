@@ -2,33 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 
-Finder _statusDropdownButton() => find.byWidgetPredicate(
-  (widget) => widget is PopupMenuButton<ShotStatusFilter>,
-  description: 'status filter dropdown',
-);
+Finder _statusDropdownButton() =>
+    find.byType(StudioMultiSelectField<ShotStatusFilter>);
 
-Finder _qualityDropdownButton() => find.byWidgetPredicate(
-  (widget) => widget is PopupMenuButton<QualityFilter>,
-  description: 'quality filter dropdown',
-);
+Finder _qualityDropdownButton() =>
+    find.byType(StudioMultiSelectField<QualityFilter>);
 
-Finder _checkedStatusMenuItem(String label) => find.ancestor(
-  of: find.text(label).last,
-  matching: find.byWidgetPredicate(
-    (widget) => widget is CheckedPopupMenuItem<ShotStatusFilter>,
-    description: 'status menu item',
-  ),
-);
+Future<void> _openMultiSelectMenu(WidgetTester tester, Finder field) async {
+  await tester.ensureVisible(field);
+  await tester.tap(
+    find.descendant(of: field, matching: find.byType(InkWell)).first,
+  );
+  await tester.pumpAndSettle();
+}
 
-Finder _checkedQualityMenuItem(String label) => find.ancestor(
-  of: find.text(label).last,
-  matching: find.byWidgetPredicate(
-    (widget) => widget is CheckedPopupMenuItem<QualityFilter>,
-    description: 'quality menu item',
-  ),
-);
+Future<void> _tapOverlayMenuLabel(WidgetTester tester, String label) async {
+  await tester.tap(find.byKey(ValueKey<String>('studio_multi_select_$label')));
+}
 
 void main() {
   final zh = AppLocalizationsZh();
@@ -271,11 +264,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
 
       // Select a status filter
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _tapOverlayMenuLabel(tester, '已启用');
       await tester.pump(const Duration(milliseconds: 100));
       
       // Should not trigger yet (debounce is 200ms)
@@ -291,11 +283,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
 
       // Select a quality filter
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await _tapOverlayMenuLabel(tester, '有坏例');
       await tester.pump(const Duration(milliseconds: 100));
       
       // Should not trigger yet (debounce is 200ms)
@@ -311,15 +302,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Open status filter dropdown and select first filter
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle(const Duration(milliseconds: 1));
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
+      await _tapOverlayMenuLabel(tester, '已启用');
       await tester.pump(const Duration(milliseconds: 100));
-      
-      // Open status filter dropdown again and select second filter before debounce completes
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle(const Duration(milliseconds: 1));
-      await tester.tap(_checkedStatusMenuItem('有视频'));
+      await _tapOverlayMenuLabel(tester, '有视频');
       await tester.pump(const Duration(milliseconds: 250));
 
       // The final debounced state should include both filters. In widget tests
@@ -366,11 +352,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
 
       // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
 
       // Select a status filter
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _tapOverlayMenuLabel(tester, '已启用');
       await tester.pumpAndSettle();
 
       // Verify both filters are active
@@ -388,11 +373,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
 
       // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
 
       // Select a quality filter
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await _tapOverlayMenuLabel(tester, '有坏例');
       await tester.pumpAndSettle();
 
       // Verify both filters are active
@@ -406,19 +390,17 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
 
       // Select a status filter
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _tapOverlayMenuLabel(tester, '已启用');
       await tester.pumpAndSettle();
 
       // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
 
       // Select a quality filter
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await _tapOverlayMenuLabel(tester, '有坏例');
       await tester.pumpAndSettle();
 
       // Verify both filters are active
@@ -436,19 +418,17 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
 
       // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
 
       // Select a status filter
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _tapOverlayMenuLabel(tester, '已启用');
       await tester.pumpAndSettle();
 
       // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
 
       // Select a quality filter
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await _tapOverlayMenuLabel(tester, '有坏例');
       await tester.pumpAndSettle();
 
       // Verify all filters are active
@@ -464,20 +444,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Select first status filter
-      await tester.tap(_checkedStatusMenuItem('已启用'));
-      await tester.pumpAndSettle();
-
-      // Open status filter dropdown again
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Select second status filter
-      await tester.tap(_checkedStatusMenuItem('有视频'));
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
+      await _tapOverlayMenuLabel(tester, '已启用');
+      await _tapOverlayMenuLabel(tester, '有视频');
+      await tester.pump(const Duration(milliseconds: 250));
       await tester.pumpAndSettle();
 
       // Verify both status filters are active
@@ -491,20 +461,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Select first quality filter
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
-      await tester.pumpAndSettle();
-
-      // Open quality filter dropdown again
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Select second quality filter
-      await tester.tap(_checkedQualityMenuItem('生成阶段'));
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
+      await _tapOverlayMenuLabel(tester, '有坏例');
+      await _tapOverlayMenuLabel(tester, '生成阶段');
+      await tester.pump(const Duration(milliseconds: 250));
       await tester.pumpAndSettle();
 
       // Verify both quality filters are active
@@ -521,12 +481,9 @@ void main() {
       );
       await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
 
-      // Open status filter dropdown
-      await tester.tap(_statusDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Tap the already selected filter to toggle it off
-      await tester.tap(_checkedStatusMenuItem('已启用'));
+      await _openMultiSelectMenu(tester, _statusDropdownButton());
+      await _tapOverlayMenuLabel(tester, '已启用');
+      await tester.pump(const Duration(milliseconds: 250));
       await tester.pumpAndSettle();
 
       // Verify filter is removed
@@ -540,12 +497,9 @@ void main() {
       );
       await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
 
-      // Open quality filter dropdown
-      await tester.tap(_qualityDropdownButton());
-      await tester.pumpAndSettle();
-
-      // Tap the already selected filter to toggle it off
-      await tester.tap(_checkedQualityMenuItem('有坏例'));
+      await _openMultiSelectMenu(tester, _qualityDropdownButton());
+      await _tapOverlayMenuLabel(tester, '有坏例');
+      await tester.pump(const Duration(milliseconds: 250));
       await tester.pumpAndSettle();
 
       // Verify filter is removed

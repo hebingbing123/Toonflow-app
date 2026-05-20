@@ -349,7 +349,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(describeUserVisibleApiError(l10n, e));
+        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(describeUserVisibleApiErrorResolved(context, e));
         _loading = false;
       });
       _syncAutoRefresh(const <ExportHistoryItem>[]);
@@ -467,7 +467,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(describeUserVisibleApiError(l10n, e))),
+          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(describeUserVisibleApiErrorResolved(context, e))),
           backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 3),
         ),
@@ -506,7 +506,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
         _loading = false;
       });

@@ -47,6 +47,13 @@ Widget buildProjectNovelsWorkbenchSection({
         ),
         const SizedBox(height: 4),
         Text(
+          l10n.projectEditorNovelsWorkbenchStudioCrossLink,
+          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
           first == null
               ? l10n.projectEditorNovelsWorkbenchCardSummaryEmptyHelp
               : l10n.projectEditorNovelsWorkbenchCardSummaryDualBounds(

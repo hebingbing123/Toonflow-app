@@ -59,7 +59,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
           SnackBar(
             content: Text(
               l10n.shortVideoPublishCopySuggestFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
           ),
@@ -130,7 +130,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
         SnackBar(
           content: Text(
             l10n.shortVideoPublishCopySaveFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),

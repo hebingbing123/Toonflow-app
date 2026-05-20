@@ -173,7 +173,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                       SnackBar(
                         content: Text(
                           l10n.projectEditorPublishOverviewFailed(
-                            describeUserVisibleApiError(l10n, e),
+                            describeUserVisibleApiErrorResolved(ctx, e),
                           ),
                         ),
                       ),

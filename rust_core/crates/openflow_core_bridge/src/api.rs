@@ -34,11 +34,20 @@ pub struct WorkflowSummary {
     pub edge_count: usize,
 }
 
+/// Whether this bridge artifact was built for a desktop FFI host OS.
+const fn bridge_targets_desktop_ffi() -> bool {
+    cfg!(any(
+        target_os = "macos",
+        target_os = "windows",
+        target_os = "linux"
+    ))
+}
+
 pub fn bridge_health() -> CoreBridgeHealth {
     CoreBridgeHealth {
         bridge_api_version: 1,
         rust_core_version: env!("CARGO_PKG_VERSION").to_string(),
-        desktop_supported: true,
+        desktop_supported: bridge_targets_desktop_ffi(),
     }
 }
 
@@ -57,7 +66,14 @@ pub fn summarize_timeline_document(document: TimelineDocument) -> TimelineSummar
 }
 
 pub fn new_image_document(width: u32, height: u32) -> ImageDocument {
-    ImageDocument::new(width, height)
+    ImageDocument::try_new(width, height).unwrap_or_else(|invalid| {
+        panic!(
+            "invalid image dimensions: {}x{} (each edge must be 1..={})",
+            invalid.width,
+            invalid.height,
+            media_image_doc::MAX_IMAGE_DIMENSION,
+        );
+    })
 }
 
 pub fn summarize_image_document(document: ImageDocument) -> ImageDocumentSummary {
@@ -89,7 +105,13 @@ mod tests {
     fn bridge_health_reports_desktop_support() {
         let health = bridge_health();
         assert_eq!(health.bridge_api_version, 1);
-        assert!(health.desktop_supported);
+        assert_eq!(health.desktop_supported, bridge_targets_desktop_ffi());
+    }
+
+    #[test]
+    fn new_image_document_rejects_zero_dimensions() {
+        let result = std::panic::catch_unwind(|| new_image_document(0, 1080));
+        assert!(result.is_err());
     }
 
     #[test]

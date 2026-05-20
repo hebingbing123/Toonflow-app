@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
@@ -13,11 +14,59 @@ import '../rust_api.dart';
 import 'grid_storyboard_dialog.dart';
 import 'storyboard_frame_image.dart';
 
+typedef StoryboardProjectUuidResolver =
+    Future<String> Function(String accessToken, int projectNumericId);
+
+typedef StoryboardOpenProductionWorkspaceCallback =
+    FutureOr<void> Function({required String projectUuid});
+
+typedef StoryboardCloseCallback = FutureOr<void> Function();
+
 typedef StoryboardShotEditorCallback =
-    Future<void> Function({
+    FutureOr<void> Function({
+      required String projectUuid,
       required int scriptNumericId,
       required int storyboardNumericId,
     });
+
+final RegExp _kStoryboardStudioUuidCompactPattern = RegExp(
+  r'^[0-9a-fA-F]{32}$',
+);
+final RegExp _kStoryboardStudioUuidHyphenatedPattern = RegExp(
+  r'^[0-9a-fA-F]{8}-'
+  r'[0-9a-fA-F]{4}-'
+  r'[0-9a-fA-F]{4}-'
+  r'[0-9a-fA-F]{4}-'
+  r'[0-9a-fA-F]{12}$',
+);
+
+@visibleForTesting
+String? storyboardStudioProjectUuidOrNull(String? raw) {
+  final value = raw?.trim();
+  if (value == null || value.isEmpty) {
+    return null;
+  }
+  if (_kStoryboardStudioUuidCompactPattern.hasMatch(value) ||
+      _kStoryboardStudioUuidHyphenatedPattern.hasMatch(value)) {
+    return value;
+  }
+  return null;
+}
+
+@visibleForTesting
+Future<String> resolveStoryboardStudioProjectUuid({
+  required String accessToken,
+  required int projectNumericId,
+  required String? projectUuid,
+  StoryboardProjectUuidResolver? resolveFromNumericId,
+}) async {
+  final direct = storyboardStudioProjectUuidOrNull(projectUuid);
+  if (direct != null) {
+    return direct;
+  }
+  final resolver = resolveFromNumericId ?? projectIdForNumericId;
+  return resolver(accessToken, projectNumericId);
+}
 
 /// Full-screen storyboard studio: shot list, preview, properties, grid generate.
 class StoryboardStudioPage extends StatefulWidget {
@@ -27,6 +76,8 @@ class StoryboardStudioPage extends StatefulWidget {
     required this.projectUuid,
     required this.accessToken,
     required this.onOpenProductionWorkspace,
+    this.onClose,
+    this.projectUuidResolver,
     this.onOpenShotEditor,
     this.initialScriptNumericId,
     this.debugScripts,
@@ -36,7 +87,9 @@ class StoryboardStudioPage extends StatefulWidget {
   final int projectNumericId;
   final String projectUuid;
   final String accessToken;
-  final VoidCallback onOpenProductionWorkspace;
+  final StoryboardOpenProductionWorkspaceCallback onOpenProductionWorkspace;
+  final StoryboardCloseCallback? onClose;
+  final StoryboardProjectUuidResolver? projectUuidResolver;
   final StoryboardShotEditorCallback? onOpenShotEditor;
   final int? initialScriptNumericId;
   final List<ScriptWorkbenchDetailRow>? debugScripts;
@@ -57,6 +110,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
   int? _scriptNumericId;
   int? _selectedShotId;
   String? _dataVersion;
+  String? _resolvedProjectUuid;
   Timer? _pollTimer;
   final _promptCtrl = TextEditingController();
   final _durationCtrl = TextEditingController();
@@ -88,15 +142,34 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     super.dispose();
   }
 
+  Future<String> _ensureProjectUuid() async {
+    final current =
+        storyboardStudioProjectUuidOrNull(_resolvedProjectUuid) ??
+        storyboardStudioProjectUuidOrNull(widget.projectUuid);
+    if (current != null) {
+      _resolvedProjectUuid = current;
+      return current;
+    }
+    final resolved = await resolveStoryboardStudioProjectUuid(
+      accessToken: widget.accessToken,
+      projectNumericId: widget.projectNumericId,
+      projectUuid: widget.projectUuid,
+      resolveFromNumericId: widget.projectUuidResolver,
+    );
+    _resolvedProjectUuid = resolved.trim();
+    return _resolvedProjectUuid!;
+  }
+
   Future<void> _loadScripts() async {
     setState(() {
       _loadingScripts = true;
       _loadError = null;
     });
     try {
+      final projectUuid = await _ensureProjectUuid();
       final scripts = await postScriptsGetScriptApiByProjectId(
         widget.accessToken,
-        widget.projectUuid,
+        projectUuid,
       );
       if (!mounted) return;
       final initial =
@@ -129,9 +202,10 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       });
     }
     try {
+      final projectUuid = await _ensureProjectUuid();
       final response = await postProductionGetStoryboardDataV1(
         widget.accessToken,
-        projectUuid: widget.projectUuid,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         clientDataVersion: _dataVersion,
       );
@@ -192,7 +266,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
   }
 
   Future<void> _runGridGenerate() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final scriptId = _scriptNumericId;
     if (scriptId == null || _shots.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -212,9 +286,10 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
 
     setState(() => _gridBusy = true);
     try {
+      final projectUuid = await _ensureProjectUuid();
       await postStoryboardGridGenerateAndAssignV1(
         widget.accessToken,
-        projectUuid: widget.projectUuid,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         rows: config.rows,
         cols: config.cols,
@@ -231,11 +306,12 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       await _loadShots();
     } catch (e) {
       if (!mounted) return;
+      final errL10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.studioGridStoryboardFailed(
-              describeUserVisibleApiError(l10n, e),
+            errL10n.studioGridStoryboardFailed(
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),
@@ -255,7 +331,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
   }
 
   Future<void> _savePrompt() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final scriptId = _scriptNumericId;
     final shot = _findShot(_selectedShotId);
     if (scriptId == null || shot == null) return;
@@ -263,11 +339,12 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     setState(() => _savingPrompt = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
+      final projectUuid = await _ensureProjectUuid();
       final durationRaw = _durationCtrl.text.trim();
       final duration = durationRaw.isEmpty ? null : int.tryParse(durationRaw);
       await postStoryboardEditInfoV1(
         widget.accessToken,
-        projectUuid: widget.projectUuid,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: shot.id,
         prompt: _promptCtrl.text.trim(),
@@ -282,11 +359,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            describeUserVisibleApiError(l10n, e),
-          ),
-        ),
+        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
       );
     } finally {
       if (mounted) setState(() => _savingPrompt = false);
@@ -299,14 +372,53 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     if (scriptId == null || shotId == null) return;
     final open = widget.onOpenShotEditor;
     if (open == null) {
-      widget.onOpenProductionWorkspace();
+      await _openProductionWorkspace();
       return;
     }
-    await open(scriptNumericId: scriptId, storyboardNumericId: shotId);
-    if (mounted) {
-      _dataVersion = null;
-      await _loadShots(silent: true);
+    try {
+      final projectUuid = await _ensureProjectUuid();
+      await open(
+        projectUuid: projectUuid,
+        scriptNumericId: scriptId,
+        storyboardNumericId: shotId,
+      );
+      if (mounted) {
+        _dataVersion = null;
+        await _loadShots(silent: true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+      );
     }
+  }
+
+  Future<void> _openProductionWorkspace() async {
+    try {
+      final projectUuid = await _ensureProjectUuid();
+      await widget.onOpenProductionWorkspace(projectUuid: projectUuid);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+      );
+    }
+  }
+
+  void _openScriptStep() {
+    if (!mounted) return;
+    context.go('/projects/${widget.projectNumericId}/script');
+  }
+
+  Future<void> _closeStudio() async {
+    final close = widget.onClose;
+    if (close != null) {
+      await close();
+      return;
+    }
+    if (!mounted) return;
+    context.go('/projects/${widget.projectNumericId}/script');
   }
 
   @override
@@ -314,19 +426,22 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     final selected = _findShot(_selectedShotId);
+    final projectUuid =
+        _resolvedProjectUuid ??
+        storyboardStudioProjectUuidOrNull(widget.projectUuid) ??
+        '';
+    final noShots = !_loadingShots && _shots.isEmpty;
+    final topActionLabel = noShots
+        ? l10n.projectStudioOpenStep(l10n.studioStepScriptShort)
+        : l10n.studioStepOpenProduction;
+    final topAction = noShots ? _openScriptStep : _openProductionWorkspace;
 
     return Scaffold(
       backgroundColor: tokens.bgBase,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/projects/${widget.projectNumericId}/script');
-            }
-          },
+          onPressed: _closeStudio,
         ),
         title: Text(
           l10n.studioStoryboardStudioTitle,
@@ -336,7 +451,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
           if (_scripts.length > 1)
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: DropdownButton<int>(
+              child: StudioDropdownButton<int>(
                 value: _scriptNumericId,
                 items: _scripts
                     .map(
@@ -363,10 +478,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                       },
               ),
             ),
-          TextButton(
-            onPressed: widget.onOpenProductionWorkspace,
-            child: Text(l10n.studioStepOpenProduction),
-          ),
+          TextButton(onPressed: topAction, child: Text(topActionLabel)),
         ],
       ),
       body: _loadingScripts
@@ -460,19 +572,41 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                       Expanded(
                         child: selected == null
                             ? Center(
-                                child: Text(
-                                  l10n.studioStoryboardStudioSelectShot,
-                                  textAlign: TextAlign.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text(
+                                        noShots
+                                            ? l10n.studioStoryboardStudioNoShots
+                                            : l10n.studioStoryboardStudioSelectShot,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      if (noShots) ...<Widget>[
+                                        const SizedBox(height: 16),
+                                        OutlinedButton(
+                                          onPressed: _openScriptStep,
+                                          child: Text(
+                                            l10n.projectStudioOpenStep(
+                                              l10n.studioStepScriptShort,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
                               )
                             : SingleChildScrollView(
                                 padding: const EdgeInsets.all(24),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: <Widget>[
                                     StoryboardFrameImage(
                                       accessToken: widget.accessToken,
-                                      projectUuid: widget.projectUuid,
+                                      projectUuid: projectUuid,
                                       scriptNumericId: _scriptNumericId!,
                                       storyboardNumericId: selected.id,
                                       imageUrl: selected.url,
@@ -484,7 +618,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       selected.prompt?.trim().isNotEmpty == true
                                           ? selected.prompt!.trim()
                                           : l10n.studioStoryboardStudioEmptyPrompt,
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
                                     ),
                                     const SizedBox(height: 16),
                                     Wrap(
@@ -493,7 +629,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       children: <Widget>[
                                         StudioPrimaryButton(
                                           label: l10n.studioStepOpenProduction,
-                                          onPressed: widget.onOpenProductionWorkspace,
+                                          onPressed: _openProductionWorkspace,
                                         ),
                                         if (widget.onOpenShotEditor != null)
                                           OutlinedButton(
@@ -547,7 +683,8 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                 controller: _promptCtrl,
                                 maxLines: 6,
                                 decoration: InputDecoration(
-                                  labelText: l10n.storyboardEditorPromptLabelClearEmpty,
+                                  labelText: l10n
+                                      .storyboardEditorPromptLabelClearEmpty,
                                   alignLabelWithHint: true,
                                 ),
                               ),
@@ -561,7 +698,8 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                               ),
                               const SizedBox(height: 16),
                               StudioPrimaryButton(
-                                label: l10n.studioStoryboardStudioSaveProperties,
+                                label:
+                                    l10n.studioStoryboardStudioSaveProperties,
                                 onPressed: _savingPrompt ? null : _savePrompt,
                               ),
                             ],

@@ -531,6 +531,23 @@
   "studioEnterStudio": "Open studio",
   "studioProjectsEmptyTitle": "No projects yet",
   "studioProjectsEmptySubtitle": "Create your first project to start the script-to-video workflow.",
+  "studioProjectsEmptyStep1": "Tap Create project, name it, and pick a story premise.",
+  "studioProjectsEmptyStep2": "Open the project — you land on Script to write or import your story.",
+  "studioProjectsEmptyStep3": "Before AI generation, add models and API keys under Settings → Model vendors.",
+  "studioGettingStartedStepSemantics": "Step {stepNumber} of {stepTotal}: {stepText}",
+  "@studioGettingStartedStepSemantics": {
+    "placeholders": {
+      "stepNumber": {
+        "type": "int"
+      },
+      "stepTotal": {
+        "type": "int"
+      },
+      "stepText": {
+        "type": "String"
+      }
+    }
+  },
   "studioCreateProjectWizardTitle": "Create project",
   "studioWizardStepBasics": "Basics",
   "studioWizardStepContent": "Story premise",
@@ -691,7 +708,7 @@
   "studioOnboardingPrevious": "Previous",
   "studioOnboardingNext": "Next",
   "studioOnboardingDone": "Done",
-  "studioOnboardingStep1": "Use the left nav to start creating under Projects.",
+  "studioOnboardingStep1": "Open Projects from the app navigation to start creating.",
   "studioOnboardingStep2": "Inside a project, follow the six steps from script to delivery.",
   "studioOnboardingStep3": "Press ⌘K to jump between steps and settings quickly.",
   "studioCommandPaletteSearchHint": "Search commands…",
@@ -15263,6 +15280,41 @@
   "settingsModelVendorsBaseUrlLabel": "API base URL",
   "settingsModelVendorsBaseUrlLocalHint": "OpenAI-compatible endpoint for Ollama / LM Studio on this machine.",
   "settingsModelVendorsBaseUrlCloudHint": "Override the default cloud endpoint if needed.",
+  "settingsDomesticVendorsSetupTitle": "Set up China-based model providers",
+  "settingsDomesticVendorsSetupSubtitle": "Add API keys for the providers you use. Project Studio model routing picks from enabled vendors here.",
+  "settingsDomesticVendorsSetupProgress": "{ready} of {total} core providers ready",
+  "@settingsDomesticVendorsSetupProgress": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "settingsDomesticVendorsSetupConfigureAction": "Add API key",
+  "settingsDomesticVendorsSetupDismiss": "Remind me later",
+  "settingsDomesticVendorsSetupShowExtended": "More China-based providers (video & others)",
+  "settingsDomesticVendorsSetupHideExtended": "Hide additional providers",
+  "settingsInternationalVendorsSetupTitle": "International model providers",
+  "settingsInternationalVendorsSetupSubtitle": "Optional: add keys for OpenAI, Gemini, Claude, and other global vendors you use.",
+  "settingsInternationalVendorsSetupProgress": "{ready} of {total} global providers ready",
+  "@settingsInternationalVendorsSetupProgress": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "settingsInternationalVendorsSetupShowExtended": "More global providers (video & Azure)",
+  "settingsInternationalVendorsSetupHideExtended": "Hide additional global providers",
+  "studioVendorSetupSnackMessage": "Configure a China-based model provider before generating with AI.",
+  "studioVendorSetupSnackAction": "Open settings",
+  "studioVendorSetupProjectsNudgeTitle": "Add API keys for domestic model providers to start generating.",
+  "studioModelRoutingCatalogEmptyTitle": "No models available for this step",
+  "studioModelRoutingCatalogEmptyBody": "Enable model providers and save API keys under Settings → API & models. Domestic providers (Qwen, DeepSeek, etc.) are listed first.",
+  "studioModelRoutingOpenVendorSettings": "Configure model providers",
+  "settingsModelVendorsAggregationHint": "Unified gateway · OpenAI API",
+  "settingsModelVendorsProtocolArk": "Ark",
+  "settingsModelVendorsProtocolAnthropic": "Claude",
+  "settingsModelVendorsProtocolGemini": "Gemini",
+  "settingsModelVendorsProtocolAzure": "Azure",
   "settingsModelVendorsSaveBaseUrl": "Save base URL",
   "settingsModelVendorsCredentialOptionalLocal": "API key optional for local server",
   "settingsModelVendorsCredentialDialogBodyLocal": "Local servers often need no key. Leave fields empty unless your proxy requires one.",

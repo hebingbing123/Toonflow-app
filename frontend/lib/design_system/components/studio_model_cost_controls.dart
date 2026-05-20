@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../project_studio/project_studio_model_routing_scope.dart';
 import '../../rust_api.dart';
 import 'studio_cost_estimate_chip.dart';
 import 'studio_model_picker.dart';
@@ -13,6 +14,10 @@ class StudioModelCostControls extends StatefulWidget {
     this.typeFilter = 'image',
     this.quantity = 1,
     this.modelValueController,
+    this.projectUuid,
+    this.studioStepSlug,
+    this.modelSlot = 'image',
+    this.initialModelId,
     this.enabled = true,
     this.onEstimateChanged,
   });
@@ -22,11 +27,16 @@ class StudioModelCostControls extends StatefulWidget {
   final String typeFilter;
   final int quantity;
   final TextEditingController? modelValueController;
+  final String? projectUuid;
+  final String? studioStepSlug;
+  final String modelSlot;
+  final String? initialModelId;
   final bool enabled;
   final ValueChanged<BillingEstimateResponse?>? onEstimateChanged;
 
   @override
-  State<StudioModelCostControls> createState() => _StudioModelCostControlsState();
+  State<StudioModelCostControls> createState() =>
+      _StudioModelCostControlsState();
 }
 
 class _StudioModelCostControlsState extends State<StudioModelCostControls> {
@@ -66,9 +76,39 @@ class _StudioModelCostControlsState extends State<StudioModelCostControls> {
       final ctrl = widget.modelValueController;
       if (ctrl != null && ctrl.text.trim().isNotEmpty) {
         final v = ctrl.text.trim();
-        final match = models.where((m) => m.value == v || m.effectiveModelId == v);
+        final match = models.where(
+          (m) => m.value == v || m.effectiveModelId == v,
+        );
         if (match.isNotEmpty) {
           selected = match.first.effectiveModelId;
+        }
+      }
+      selected ??= widget.initialModelId?.trim();
+      if ((selected == null || selected.isEmpty) &&
+          widget.projectUuid != null &&
+          widget.studioStepSlug != null) {
+        final scoped = ProjectStudioModelRoutingScope.routingOf(context);
+        final fromScope = scoped?.effectiveModelFor(
+          step: widget.studioStepSlug!,
+          slot: widget.modelSlot,
+        );
+        if (fromScope != null && fromScope.isNotEmpty) {
+          selected = fromScope;
+        }
+      }
+      if ((selected == null || selected.isEmpty) &&
+          widget.projectUuid != null &&
+          widget.studioStepSlug != null) {
+        try {
+          final resolved = await resolveProjectModelV1(
+            widget.accessToken,
+            widget.projectUuid!,
+            step: widget.studioStepSlug!,
+            slot: widget.modelSlot,
+          );
+          selected = resolved.modelId;
+        } catch (_) {
+          // Fall back to catalog default below.
         }
       }
       selected ??= models.isNotEmpty ? models.first.effectiveModelId : null;

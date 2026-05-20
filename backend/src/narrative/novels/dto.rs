@@ -103,11 +103,60 @@ pub struct PatchNovelBody {
     pub intake_note: Option<Value>,
 }
 
+/// Optional per-request crawl auth override (merged with stored project config).
+#[derive(Debug, Deserialize, Serialize, ToSchema, Default, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct NovelCrawlAuthOverride {
+    #[serde(default)]
+    pub cookie: Option<String>,
+    #[serde(default)]
+    pub username: Option<String>,
+    #[serde(default)]
+    pub password: Option<String>,
+}
+
+/// Body for **`PUT …/novels/crawl-auth`** — persist encrypted crawl credentials.
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct NovelCrawlAuthPutBody {
+    pub auth_mode: String,
+    #[serde(default)]
+    pub cookie: Option<String>,
+    #[serde(default)]
+    pub username: Option<String>,
+    #[serde(default)]
+    pub password: Option<String>,
+    #[serde(default)]
+    pub login_url: Option<String>,
+    #[serde(default)]
+    pub login_username_field: Option<String>,
+    #[serde(default)]
+    pub login_password_field: Option<String>,
+}
+
+/// Response for **`GET/PUT …/novels/crawl-auth`** (never returns secret values).
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NovelCrawlAuthGetResponse {
+    pub auth_mode: String,
+    pub has_cookie: bool,
+    pub has_username: bool,
+    pub has_password: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub login_url: Option<String>,
+    pub login_username_field: String,
+    pub login_password_field: String,
+    pub encryption_configured: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+}
+
 /// Body for **`POST …/novels/crawl-preview`** — server-side HTML fetch + text extraction (preview only).
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct NovelCrawlPreviewBody {
     pub url: String,
+    #[serde(default)]
+    pub auth: Option<NovelCrawlAuthOverride>,
 }
 
 /// Response for **`POST …/novels/crawl-preview`**.
@@ -129,6 +178,8 @@ pub struct NovelCrawlImportBody {
     pub intake_status: String,
     #[serde(default)]
     pub intake_note: Option<String>,
+    #[serde(default)]
+    pub auth: Option<NovelCrawlAuthOverride>,
 }
 
 /// Response for **`POST …/novels/crawl-import`**.
@@ -151,6 +202,8 @@ pub struct NovelCrawlImportBatchBody {
     pub intake_status: String,
     #[serde(default)]
     pub intake_note: Option<String>,
+    #[serde(default)]
+    pub auth: Option<NovelCrawlAuthOverride>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

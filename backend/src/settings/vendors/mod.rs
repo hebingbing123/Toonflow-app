@@ -13,6 +13,13 @@ mod dto;
 pub(crate) mod handlers;
 mod store;
 
+pub(crate) async fn load_user_vendor_config(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+) -> Result<crate::state::VendorConfig, crate::error::ApiError> {
+    store::load_vendor_config(pool, uid).await
+}
+
 pub(super) const MAX_VENDOR_MODEL_TEST_FIELD_LEN: usize = 512;
 
 use axum::Router;

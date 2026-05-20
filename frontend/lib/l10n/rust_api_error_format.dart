@@ -57,7 +57,7 @@ String formatRustApiExceptionForDisplay(
           : formatRetryAfterMsForDisplay(l10n, waitMs);
       return l10n.rustApiClientQuotaOrRateWithWait(waitText);
     }
-    return details.message;
+    return _compactGenericErrorMessage(l10n, details.message);
   }
   if (error.statusCode == 429) {
     final waitMs = error.retryAfterMsHint;
@@ -79,7 +79,7 @@ String formatRustApiExceptionForDisplay(
   if (trimmed.isNotEmpty &&
       !trimmed.startsWith('{') &&
       !trimmed.startsWith('[')) {
-    return trimmed;
+    return _compactGenericErrorMessage(l10n, trimmed);
   }
   return l10n.rustApiClientUnknownError(error.toString());
 }
@@ -96,6 +96,21 @@ String describeUserVisibleApiError(AppLocalizations l10n, Object error) {
   }
   return l10n.rustApiClientUnknownError(
     _compactGenericErrorMessage(l10n, error.toString()),
+  );
+}
+
+/// Same as [describeUserVisibleApiError], but resolves [AppLocalizations] from
+/// [context] when handling the error.
+///
+/// Prefer in async **`catch`** (after **`await`**) instead of reusing an
+/// [AppLocalizations] captured earlier or relying on [AppLocalizations.of]!.
+String describeUserVisibleApiErrorResolved(
+  BuildContext context,
+  Object error,
+) {
+  return describeUserVisibleApiError(
+    resolveAppLocalizationsForErrors(context),
+    error,
   );
 }
 
@@ -120,6 +135,12 @@ String _compactGenericErrorMessage(AppLocalizations l10n, String raw) {
   compact = compact.replaceFirst(RegExp(r'^Bad state:\s*'), '');
   compact = compact.replaceAll(RegExp(r',\s*uri=https?://\S+'), '');
   compact = compact.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (RegExp(
+    r'error occurred while decoding column \d+: unexpected null',
+    caseSensitive: false,
+  ).hasMatch(compact)) {
+    return l10n.rustApiClientRetryAfterTryLater;
+  }
   if (compact.endsWith(',')) {
     compact = compact.substring(0, compact.length - 1).trim();
   }

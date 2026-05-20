@@ -146,10 +146,9 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       });
     } catch (e) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _loadingCatalog = false;
-        _catalogError = describeUserVisibleApiError(l10n, e);
+        _catalogError = describeUserVisibleApiErrorResolved(context, e);
       });
     }
   }
@@ -206,7 +205,9 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     }
   }

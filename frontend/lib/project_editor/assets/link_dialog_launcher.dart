@@ -150,7 +150,7 @@ Future<void> openProjectAssetLinkDialog({
     if (ctx.mounted) {
       setDialogState(() => assetsBusy[0] = false);
       ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
       );
     }
   }

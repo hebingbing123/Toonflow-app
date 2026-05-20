@@ -26,6 +26,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
     required TextEditingController importIntakeNoteCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
+    required NovelCrawlAuthOverride? crawlAuthOverride,
+    required void Function(NovelCrawlAuthOverride? value) setCrawlAuthOverride,
   }) {
     void updatePreviewRows(
       List<ParsedNovelChapter> rows,
@@ -47,6 +49,13 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           l10n.projectEditorNovelsWorkbenchImportSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.projectEditorNovelsWorkbenchImportStudioHint,
+          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: importUrlCtrl,
@@ -54,6 +63,16 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             labelText: l10n.projectEditorNovelsWorkbenchImportCrawlUrlLabel,
             helperText: l10n.projectEditorNovelsWorkbenchImportCrawlUrlHelper,
           ),
+        ),
+        const SizedBox(height: 8),
+        StudioNovelCrawlAuthSection(
+          accessToken: token,
+          projectId: project.id,
+          siteUrlProvider: () {
+            final url = importUrlCtrl.text.trim();
+            return url.isEmpty ? null : url;
+          },
+          onOverrideChanged: setCrawlAuthOverride,
         ),
         const SizedBox(height: 8),
         TextField(
@@ -191,6 +210,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       importExecutionSideCtrl: importExecutionSideCtrl,
                       applyInfoLine: updateInfoLine,
                       applyImportPreview: applyImportPreview,
+                      crawlAuth: crawlAuthOverride,
                     ),
                   ),
             child: Text(l10n.projectEditorNovelsWorkbenchImportCrawlPreparseButton),
@@ -293,6 +313,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         refreshWorkbench: refreshWorkbench,
                         setLocalState: setLocalState,
                         applyInfoLine: updateInfoLine,
+                        crawlAuth: crawlAuthOverride,
                       ),
                     ),
               child: Text(l10n.projectEditorNovelsWorkbenchImportServerImportButton),
@@ -319,6 +340,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         refreshWorkbench: refreshWorkbench,
                         setLocalState: setLocalState,
                         applyInfoLine: updateInfoLine,
+                        crawlAuth: crawlAuthOverride,
                       ),
                     ),
               child: Text(

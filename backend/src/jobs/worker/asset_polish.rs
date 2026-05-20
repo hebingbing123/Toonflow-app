@@ -101,12 +101,16 @@ pub(super) async fn run_asset_polish_prompt(
         "asset polish-prompt: calling LLM"
     );
 
-    let mut effective_cfg = cfg.clone();
-    if let Some(project_model) =
-        load_project_text_model(pool, row.owner_user_id, project_numeric_id).await?
-    {
-        effective_cfg.model = project_model;
-    }
+    let effective_cfg = effective_polish_llm_config(
+        state,
+        pool,
+        cfg,
+        row.owner_user_id,
+        project_numeric_id,
+        &row.payload,
+        None,
+    )
+    .await?;
 
     let result = polish_asset_description_llm(
         &effective_cfg,
@@ -182,12 +186,16 @@ pub(super) async fn run_asset_polish_batch(
         "asset batch-polish: calling LLM per item"
     );
 
-    let mut effective_cfg = cfg.clone();
-    if let Some(project_model) =
-        load_project_text_model(pool, row.owner_user_id, project_numeric_id).await?
-    {
-        effective_cfg.model = project_model;
-    }
+    let effective_cfg = effective_polish_llm_config(
+        state,
+        pool,
+        cfg,
+        row.owner_user_id,
+        project_numeric_id,
+        &row.payload,
+        None,
+    )
+    .await?;
 
     let mut out = Vec::with_capacity(items.len());
     for item in items {
@@ -257,6 +265,51 @@ pub(super) async fn run_asset_polish_batch(
         result["project_uuid"] = json!(project_uuid);
     }
     Ok(result)
+}
+
+async fn effective_polish_llm_config(
+    state: &AppState,
+    pool: &PgPool,
+    fallback: &LlmConfig,
+    owner_user_id: uuid::Uuid,
+    project_numeric_id: i32,
+    payload: &serde_json::Value,
+    model_override: Option<&str>,
+) -> Result<LlmConfig, JobRunError> {
+    use crate::projects::model_routing::jobs::{
+        load_project_uuid_for_actor, try_build_routed_llm_config,
+    };
+    use crate::projects::model_routing::{ModelSlot, StudioStepSlug};
+
+    if let Some(project_uuid) = payload_project_uuid(payload).or(load_project_uuid_for_actor(
+        pool,
+        owner_user_id,
+        project_numeric_id,
+    )
+    .await?)
+    {
+        if let Some(cfg) = try_build_routed_llm_config(
+            state,
+            pool,
+            owner_user_id,
+            project_uuid,
+            StudioStepSlug::Assets,
+            ModelSlot::Text,
+            model_override,
+        )
+        .await?
+        {
+            return Ok(cfg);
+        }
+    }
+
+    let mut effective_cfg = fallback.clone();
+    if let Some(project_model) =
+        load_project_text_model(pool, owner_user_id, project_numeric_id).await?
+    {
+        effective_cfg.model = project_model;
+    }
+    Ok(effective_cfg)
 }
 
 async fn load_project_text_model(

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../components/studio_dialog_shell.dart';
+import '../theme.dart';
 import '../tokens.dart';
 
 /// Command palette action (⌘K / Ctrl+K).
@@ -106,53 +107,71 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
     final tokens = StudioTokens.of(context);
     final items = _filtered;
 
+    final studio = StudioColors.of(context);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520, maxHeight: 420),
         child: Material(
-          color: tokens.bgElevated,
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(StudioSpacing.sm),
-                child: TextField(
-                  controller: _query,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!
-                        .studioCommandPaletteSearchHint,
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                  onChanged: (v) => setState(() => _filter = v),
-                  onSubmitted: (_) {
-                    if (items.isNotEmpty) {
-                      Navigator.of(context).pop();
-                      items.first.onInvoke();
-                    }
-                  },
+          color: Colors.transparent,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: studio.panelGradient,
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+              border: Border.all(color: tokens.surfaceHighlight),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: tokens.panelGlow.withValues(alpha: 0.18),
+                  blurRadius: 32,
+                  spreadRadius: -12,
+                  offset: const Offset(0, 16),
                 ),
-              ),
-              const Divider(height: 1),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final action = items[index];
-                    return ListTile(
-                      leading: Icon(action.icon ?? Icons.chevron_right),
-                      title: Text(action.label),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        action.onInvoke();
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(StudioSpacing.sm),
+                    child: TextField(
+                      controller: _query,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!
+                            .studioCommandPaletteSearchHint,
+                        prefixIcon: Icon(Icons.search, color: tokens.signal),
+                      ),
+                      onChanged: (v) => setState(() => _filter = v),
+                      onSubmitted: (_) {
+                        if (items.isNotEmpty) {
+                          Navigator.of(context).pop();
+                          items.first.onInvoke();
+                        }
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  Divider(height: 1, color: tokens.borderSubtle),
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final action = items[index];
+                        return ListTile(
+                          leading: Icon(action.icon ?? Icons.chevron_right),
+                          title: Text(action.label),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            action.onInvoke();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

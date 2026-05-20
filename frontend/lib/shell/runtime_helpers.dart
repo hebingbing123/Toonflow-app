@@ -6,6 +6,6 @@ extension _HomePageRuntimeHelpers on _HomePageState {
   void _setErrorFromException(Object error) {
     if (!mounted) return;
     final l10n = resolveAppLocalizationsForErrors(context);
-    setState(() => _error = describeUserVisibleApiError(l10n, error));
+    setState(() => _error = describeUserVisibleApiErrorResolved(context, error));
   }
 }

@@ -17,6 +17,7 @@ class ScriptEditImageWorkbenchDialogViewModel {
     required this.promptCtrl,
     required this.modelCtrl,
     required this.accessToken,
+    required this.projectId,
     required this.onEstimateChanged,
     required this.stepIdCtrl,
     required this.stepStatusCtrl,
@@ -33,6 +34,7 @@ class ScriptEditImageWorkbenchDialogViewModel {
   final TextEditingController promptCtrl;
   final TextEditingController modelCtrl;
   final String accessToken;
+  final String projectId;
   final ValueChanged<BillingEstimateResponse?> onEstimateChanged;
   final TextEditingController stepIdCtrl;
   final TextEditingController stepStatusCtrl;
@@ -170,6 +172,9 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               StudioModelCostControls(
                 accessToken: model.accessToken,
+                projectUuid: model.projectId,
+                studioStepSlug: 'script',
+                modelSlot: 'image',
                 taskKind: 'script_edit_image',
                 typeFilter: 'image',
                 modelValueController: model.modelCtrl,

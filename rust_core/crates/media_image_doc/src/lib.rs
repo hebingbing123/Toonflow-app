@@ -50,14 +50,35 @@ impl Default for LayerTransform {
     }
 }
 
+/// Largest edge length accepted for a native image document canvas.
+pub const MAX_IMAGE_DIMENSION: u32 = 65_536;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InvalidImageDimensions {
+    pub width: u32,
+    pub height: u32,
+}
+
 impl ImageDocument {
-    pub fn new(width: u32, height: u32) -> Self {
-        Self {
+    pub fn try_new(width: u32, height: u32) -> Result<Self, InvalidImageDimensions> {
+        if width == 0
+            || height == 0
+            || width > MAX_IMAGE_DIMENSION
+            || height > MAX_IMAGE_DIMENSION
+        {
+            return Err(InvalidImageDimensions { width, height });
+        }
+
+        Ok(Self {
             id: Uuid::new_v4(),
             width,
             height,
             layers: Vec::new(),
-        }
+        })
+    }
+
+    pub fn new(width: u32, height: u32) -> Self {
+        Self::try_new(width, height).expect("valid image dimensions")
     }
 }
 
@@ -71,5 +92,12 @@ mod tests {
         assert_eq!(doc.width, 1920);
         assert_eq!(doc.height, 1080);
         assert!(doc.layers.is_empty());
+    }
+
+    #[test]
+    fn try_new_rejects_invalid_dimensions() {
+        assert!(ImageDocument::try_new(0, 1080).is_err());
+        assert!(ImageDocument::try_new(1920, 0).is_err());
+        assert!(ImageDocument::try_new(MAX_IMAGE_DIMENSION + 1, 1).is_err());
     }
 }

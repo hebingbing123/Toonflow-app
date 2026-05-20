@@ -2,13 +2,15 @@
 
 use std::{collections::HashSet, net::IpAddr};
 
+use super::super::crawl_auth::{
+    apply_crawl_auth, build_crawl_http_client, resolve_crawl_auth_for_request, ResolvedCrawlAuth,
+};
 use axum::{
     extract::{Json, Path, State},
     http::HeaderMap,
     Json as JsonResponse,
 };
 use regex::Regex;
-use reqwest::header::USER_AGENT;
 use scraper::{Html, Selector};
 use serde_json::{Map, Value};
 use uuid::Uuid;
@@ -258,15 +260,16 @@ fn extract_crawler_content(
 async fn fetch_crawler_content(
     state: &AppState,
     parsed: &url::Url,
+    auth: &ResolvedCrawlAuth,
 ) -> Result<ExtractedCrawlerContent, ApiError> {
     assert_fetchable_url(parsed)?;
-    let resp = state
-        .http_client
-        .get(parsed.clone())
-        .header(
-            USER_AGENT,
-            "Openflow/1.0 server-side content-intake crawler",
-        )
+    let client = if auth.cookie_header.is_some() || auth.basic_auth.is_some() {
+        build_crawl_http_client(state).await
+    } else {
+        state.http_client.clone()
+    };
+    let req = apply_crawl_auth(client.get(parsed.clone()), auth);
+    let resp = req
         .send()
         .await
         .map_err(|e| bad_request_i18n(&format!("fetch failed: {e}"), &format!("抓取失败：{e}")))?;
@@ -304,8 +307,9 @@ async fn fetch_crawler_content(
 pub(crate) async fn crawl_preview_adaptive(
     state: &AppState,
     seed_url: &url::Url,
+    auth: &ResolvedCrawlAuth,
 ) -> Result<NovelCrawlPreviewResponse, ApiError> {
-    let seed = fetch_crawler_content(state, seed_url).await?;
+    let seed = fetch_crawler_content(state, seed_url, auth).await?;
 
     if !seed.chapter_urls.is_empty() {
         let mut chunks = Vec::<String>::new();
@@ -313,7 +317,7 @@ pub(crate) async fn crawl_preview_adaptive(
             let Ok(parsed) = url::Url::parse(chapter_url) else {
                 continue;
             };
-            let chapter = fetch_crawler_content(state, &parsed).await?;
+            let chapter = fetch_crawler_content(state, &parsed, auth).await?;
             if chapter.body_text.trim().is_empty() {
                 continue;
             }
@@ -344,7 +348,7 @@ pub(crate) async fn crawl_preview_adaptive(
         let Ok(parsed) = url::Url::parse(&raw_next) else {
             break;
         };
-        let page = fetch_crawler_content(state, &parsed).await?;
+        let page = fetch_crawler_content(state, &parsed, auth).await?;
         if page.body_text.trim().is_empty() {
             break;
         }
@@ -400,7 +404,8 @@ pub(crate) async fn post_novel_crawl_preview(
         url::Url::parse(raw_url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
     assert_fetchable_url(&parsed)?;
 
-    let payload = crawl_preview_adaptive(&state, &parsed).await?;
+    let auth = resolve_crawl_auth_for_request(&state, project_id, body.auth.as_ref()).await?;
+    let payload = crawl_preview_adaptive(&state, &parsed, &auth).await?;
     Ok(JsonResponse(payload))
 }
 
@@ -713,7 +718,8 @@ pub(crate) async fn post_novel_crawl_import(
         url::Url::parse(raw_url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
     assert_fetchable_url(&parsed)?;
 
-    let preview = crawl_preview_adaptive(&state, &parsed).await?;
+    let auth = resolve_crawl_auth_for_request(&state, project_id, body.auth.as_ref()).await?;
+    let preview = crawl_preview_adaptive(&state, &parsed, &auth).await?;
     let normalized_for_import = normalize_extracted_text_for_import(&preview.body_text);
 
     let mut chapters =
@@ -839,6 +845,8 @@ pub(crate) async fn post_novel_crawl_import_batch(
         ));
     }
 
+    let auth = resolve_crawl_auth_for_request(&state, project_id, body.auth.as_ref()).await?;
+
     let mut items: Vec<NovelCrawlImportBatchItem> = Vec::new();
     let mut succeeded = 0i32;
     let mut failed = 0i32;
@@ -854,7 +862,7 @@ pub(crate) async fn post_novel_crawl_import_batch(
                 url::Url::parse(&url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
             assert_fetchable_url(&parsed)?;
 
-            let preview = crawl_preview_adaptive(&state, &parsed).await?;
+            let preview = crawl_preview_adaptive(&state, &parsed, &auth).await?;
             let normalized_for_import = normalize_extracted_text_for_import(&preview.body_text);
             let mut chapters =
                 parse_whole_book_chapters_from_normalized(&normalized_for_import, "导入章节");

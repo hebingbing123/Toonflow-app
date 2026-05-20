@@ -66,7 +66,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
         setState(
           () =>
               statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
         );
       } finally {
@@ -82,7 +82,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
       try {
         await action();
       } catch (e) {
-        setState(() => statusLine = describeUserVisibleApiError(l10n, e));
+        setState(() => statusLine = describeUserVisibleApiErrorResolved(context, e));
       } finally {
         setState(() => busy = false);
       }
@@ -111,6 +111,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                   promptCtrl: promptCtrl,
                   modelCtrl: modelCtrl,
                   accessToken: token,
+                  projectId: projectId,
                   onEstimateChanged: (est) => editImageEstimate = est,
                   stepIdCtrl: stepIdCtrl,
                   stepStatusCtrl: stepStatusCtrl,

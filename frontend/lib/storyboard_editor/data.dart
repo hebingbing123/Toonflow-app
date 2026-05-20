@@ -113,7 +113,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
           l10n,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
         _setWorkbenchFailureNotice(
           actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,

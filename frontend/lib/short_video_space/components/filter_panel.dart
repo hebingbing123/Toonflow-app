@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 /// Filter panel component for short video assembly
 /// 
@@ -357,46 +359,90 @@ class _FilterPanelState extends State<FilterPanel> {
               // Presets dropdown
               if (widget.presets.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                PopupMenuButton<FilterPreset>(
-                  tooltip: l10n.shortVideoFilterPanelApplyPresetTooltip,
-                  icon: const Icon(Icons.bookmarks),
-                  onSelected: _applyPreset,
-                  itemBuilder: (context) => [
+                StudioMenuAnchor(
+                  menuChildren: [
                     for (final preset in widget.presets)
-                      PopupMenuItem<FilterPreset>(
-                        value: preset,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                      Builder(
+                        builder: (menuContext) {
+                          final menuController = MenuController.maybeOf(menuContext);
+                          final theme = Theme.of(menuContext);
+                          final tokens = StudioTokens.of(menuContext);
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    preset.name,
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                  Text(
-                                    preset.summarize(l10n),
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  Expanded(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(
+                                        StudioSpacing.radiusButton,
+                                      ),
+                                      onTap: () {
+                                        menuController?.close();
+                                        _applyPreset(preset);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 10,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              preset.name,
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                color: tokens.textPrimary,
+                                              ),
+                                            ),
+                                            Text(
+                                              preset.summarize(l10n),
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                color: tokens.textSecondary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, size: 18),
+                                    onPressed: () {
+                                      menuController?.close();
+                                      _deletePreset(preset);
+                                    },
+                                    tooltip: l10n
+                                        .shortVideoFilterPanelDeletePresetTooltip,
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, size: 18),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                _deletePreset(preset);
-                              },
-                              tooltip: l10n.shortVideoFilterPanelDeletePresetTooltip,
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                   ],
+                  builder: (context, controller, child) {
+                    return IconButton(
+                      tooltip: l10n.shortVideoFilterPanelApplyPresetTooltip,
+                      icon: const Icon(Icons.bookmarks),
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                    );
+                  },
                 ),
               ],
             ],
@@ -459,41 +505,25 @@ class _StatusFilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return PopupMenuButton<ShotStatusFilter>(
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: l10n.shortVideoFilterPanelStatusLabel,
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          suffixIcon: const Icon(Icons.arrow_drop_down),
-        ),
-        child: Text(
-          selectedFilters.isEmpty
-              ? l10n.shortVideoFilterPanelDropdownAll
-              : l10n.shortVideoFilterPanelDropdownSelectedCount(selectedFilters.length),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
-      onSelected: (filter) {
-        final newFilters = Set<ShotStatusFilter>.from(selectedFilters);
-        if (newFilters.contains(filter)) {
-          newFilters.remove(filter);
-        } else {
-          newFilters.add(filter);
-        }
-        onChanged(newFilters);
-      },
-      itemBuilder: (context) => [
+    return StudioMultiSelectField<ShotStatusFilter>(
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ).copyWith(labelText: l10n.shortVideoFilterPanelStatusLabel),
+      valueLabel: selectedFilters.isEmpty
+          ? l10n.shortVideoFilterPanelDropdownAll
+          : l10n.shortVideoFilterPanelDropdownSelectedCount(
+              selectedFilters.length,
+            ),
+      entries: [
         for (final filter in ShotStatusFilter.values)
-          CheckedPopupMenuItem<ShotStatusFilter>(
+          StudioDropdownEntry<ShotStatusFilter>(
             value: filter,
-            checked: selectedFilters.contains(filter),
-            child: Text(filter.localizedLabel(l10n)),
+            label: filter.localizedLabel(l10n),
           ),
       ],
+      selectedValues: selectedFilters,
+      onChanged: onChanged,
     );
   }
 }
@@ -511,41 +541,25 @@ class _QualityFilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return PopupMenuButton<QualityFilter>(
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: l10n.shortVideoFilterPanelQualityLabel,
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          suffixIcon: const Icon(Icons.arrow_drop_down),
-        ),
-        child: Text(
-          selectedFilters.isEmpty
-              ? l10n.shortVideoFilterPanelDropdownAll
-              : l10n.shortVideoFilterPanelDropdownSelectedCount(selectedFilters.length),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
-      onSelected: (filter) {
-        final newFilters = Set<QualityFilter>.from(selectedFilters);
-        if (newFilters.contains(filter)) {
-          newFilters.remove(filter);
-        } else {
-          newFilters.add(filter);
-        }
-        onChanged(newFilters);
-      },
-      itemBuilder: (context) => [
+    return StudioMultiSelectField<QualityFilter>(
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ).copyWith(labelText: l10n.shortVideoFilterPanelQualityLabel),
+      valueLabel: selectedFilters.isEmpty
+          ? l10n.shortVideoFilterPanelDropdownAll
+          : l10n.shortVideoFilterPanelDropdownSelectedCount(
+              selectedFilters.length,
+            ),
+      entries: [
         for (final filter in QualityFilter.values)
-          CheckedPopupMenuItem<QualityFilter>(
+          StudioDropdownEntry<QualityFilter>(
             value: filter,
-            checked: selectedFilters.contains(filter),
-            child: Text(filter.localizedLabel(l10n)),
+            label: filter.localizedLabel(l10n),
           ),
       ],
+      selectedValues: selectedFilters,
+      onChanged: onChanged,
     );
   }
 }

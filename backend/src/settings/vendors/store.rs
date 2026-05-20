@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::state::VendorConfig;
 
-pub(super) async fn load_vendor_config(pool: &PgPool, uid: Uuid) -> Result<VendorConfig, ApiError> {
+pub(crate) async fn load_vendor_config(pool: &PgPool, uid: Uuid) -> Result<VendorConfig, ApiError> {
     let row: Option<sqlx::types::Json<VendorConfig>> = sqlx::query_scalar(
         r#"
         SELECT vendor_config FROM app_user_profile WHERE user_id = $1

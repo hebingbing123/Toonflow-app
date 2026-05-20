@@ -531,6 +531,23 @@
   "studioEnterStudio": "进入工作室",
   "studioProjectsEmptyTitle": "还没有项目",
   "studioProjectsEmptySubtitle": "创建第一个项目，开始从剧本到成片的工作流。",
+  "studioProjectsEmptyStep1": "点击「创建项目」，填写名称并选择故事前提。",
+  "studioProjectsEmptyStep2": "打开项目后从「剧本」步开始写作或导入内容。",
+  "studioProjectsEmptyStep3": "需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。",
+  "studioGettingStartedStepSemantics": "第 {stepNumber} 步，共 {stepTotal} 步：{stepText}",
+  "@studioGettingStartedStepSemantics": {
+    "placeholders": {
+      "stepNumber": {
+        "type": "int"
+      },
+      "stepTotal": {
+        "type": "int"
+      },
+      "stepText": {
+        "type": "String"
+      }
+    }
+  },
   "studioCreateProjectWizardTitle": "创建项目",
   "studioWizardStepBasics": "基础信息",
   "studioWizardStepContent": "故事前提",
@@ -691,7 +708,7 @@
   "studioOnboardingPrevious": "上一步",
   "studioOnboardingNext": "下一步",
   "studioOnboardingDone": "完成",
-  "studioOnboardingStep1": "用左侧导航在「项目」里开始创作。",
+  "studioOnboardingStep1": "从应用导航进入「项目」开始创作。",
   "studioOnboardingStep2": "进入项目后按六步完成剧本到成片。",
   "studioOnboardingStep3": "按 ⌘K 可快速跳转步骤与设置。",
   "studioCommandPaletteSearchHint": "搜索命令…",
@@ -15258,6 +15275,41 @@
   "settingsModelVendorsBaseUrlLabel": "API 基础地址",
   "settingsModelVendorsBaseUrlLocalHint": "本机 Ollama / LM Studio 的 OpenAI 兼容地址。",
   "settingsModelVendorsBaseUrlCloudHint": "如需覆盖默认云端地址，可在此填写。",
+  "settingsDomesticVendorsSetupTitle": "配置国内模型厂商",
+  "settingsDomesticVendorsSetupSubtitle": "为你实际使用的厂商添加 API Key。项目工作室的模型路由会从这里已启用的厂商中选择。",
+  "settingsDomesticVendorsSetupProgress": "核心厂商已就绪 {ready}/{total}",
+  "@settingsDomesticVendorsSetupProgress": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "settingsDomesticVendorsSetupConfigureAction": "添加 Key",
+  "settingsDomesticVendorsSetupDismiss": "稍后再说",
+  "settingsDomesticVendorsSetupShowExtended": "更多国内厂商（视频等）",
+  "settingsDomesticVendorsSetupHideExtended": "收起更多厂商",
+  "settingsInternationalVendorsSetupTitle": "配置国际模型厂商",
+  "settingsInternationalVendorsSetupSubtitle": "可选：为你使用的 OpenAI、Gemini、Claude 等海外厂商添加 API Key。",
+  "settingsInternationalVendorsSetupProgress": "国际厂商已就绪 {ready}/{total}",
+  "@settingsInternationalVendorsSetupProgress": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "settingsInternationalVendorsSetupShowExtended": "更多国际厂商（视频、Azure 等）",
+  "settingsInternationalVendorsSetupHideExtended": "收起更多国际厂商",
+  "studioVendorSetupSnackMessage": "使用 AI 生成前，请先配置至少一家国内模型厂商的 API Key。",
+  "studioVendorSetupSnackAction": "去设置",
+  "studioVendorSetupProjectsNudgeTitle": "先配置国内模型厂商 API Key，即可开始生成。",
+  "studioModelRoutingCatalogEmptyTitle": "当前步骤没有可用模型",
+  "studioModelRoutingCatalogEmptyBody": "请在「设置 → API 与模型」中启用厂商并保存 API Key；国内厂商（通义、DeepSeek 等）排在列表前面。",
+  "studioModelRoutingOpenVendorSettings": "配置模型厂商",
+  "settingsModelVendorsAggregationHint": "聚合平台 · OpenAI 协议",
+  "settingsModelVendorsProtocolArk": "Ark",
+  "settingsModelVendorsProtocolAnthropic": "Claude",
+  "settingsModelVendorsProtocolGemini": "Gemini",
+  "settingsModelVendorsProtocolAzure": "Azure",
   "settingsModelVendorsSaveBaseUrl": "保存地址",
   "settingsModelVendorsCredentialOptionalLocal": "本地服务通常无需 API Key",
   "settingsModelVendorsCredentialDialogBodyLocal": "本地推理多数情况可留空；仅当你的代理要求鉴权时再填写。",

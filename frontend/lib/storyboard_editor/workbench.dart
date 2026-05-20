@@ -280,6 +280,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
         ),
         const SizedBox(height: 16),
         _StoryboardVideoSection(
+          projectId: widget.projectId,
           accessToken: widget.token,
           saving: _saving,
           loadingWorkbench: _loadingWorkbench,

@@ -118,7 +118,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       setState(() {
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusReloadFail(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -178,7 +178,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbCreate,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -244,7 +244,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbSave,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -286,7 +286,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbDelete,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }

@@ -216,7 +216,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
       setState(() {
         _hasError = true;
         _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }

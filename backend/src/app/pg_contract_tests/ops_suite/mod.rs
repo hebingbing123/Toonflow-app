@@ -8,5 +8,7 @@ mod settings_memory_config_and_clear_agent_memories_roundtrip;
 mod settings_platform_config_guards_roundtrip;
 mod settings_platform_config_roundtrip;
 mod settings_vendor_model_test_enqueue;
+mod settings_vendor_model_test_video_enqueue;
 mod settings_workspace_shared_audit_export_roundtrip;
 mod vendor_credential_store_get_delete_roundtrip;
+mod vendor_credential_video_and_image_byok;

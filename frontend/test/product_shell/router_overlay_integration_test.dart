@@ -38,6 +38,8 @@ HomePage _overlayPage({
   int? scriptNumericId,
   String? stepSlug,
 }) {
+  final projectUuid =
+      '00000000-0000-0000-0000-${projectNumericId.toString().padLeft(12, '0')}';
   return HomePage(
     shellMode: HomeShellMode.product,
     studioOverlay: overlay,
@@ -47,7 +49,7 @@ HomePage _overlayPage({
     debugAuthenticatedAccessToken: 'test-token',
     debugSkipSessionContextSync: true,
     debugSkipAuthListenerAttach: true,
-    debugStudioProjectUuid: 'project-$projectNumericId',
+    debugStudioProjectUuid: projectUuid,
     debugStudioProjectName: 'Project Delta',
     debugProjectStudioSnapshotLoader: (accessToken, projectUuid) async =>
         const StudioReadinessSnapshot(completedSteps: 4),
@@ -134,6 +136,53 @@ void main() {
     );
     expect(find.text('Production workspace'), findsWidgets);
     expect(find.text('Storyboard studio'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('storyboard overlay close navigates to script route', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final router = GoRouter(
+      initialLocation: '/projects/7/storyboard',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/projects/:projectNumericId/storyboard',
+          builder: (context, state) => _overlayPage(
+            overlay: StudioOverlayMode.storyboardStudio,
+            projectNumericId: int.parse(
+              state.pathParameters['projectNumericId']!,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/projects/:projectNumericId/:stepSlug',
+          builder: (context, state) => _overlayPage(
+            overlay: StudioOverlayMode.projectStudio,
+            projectNumericId: int.parse(
+              state.pathParameters['projectNumericId']!,
+            ),
+            stepSlug: state.pathParameters['stepSlug'],
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_routerApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routeInformationProvider.value.uri.toString(),
+      '/projects/7/script',
+    );
+    expect(find.text('Storyboard studio'), findsNothing);
+    expect(find.text('Project Delta'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_getting_started_steps.dart';
 import 'package:openflow_app/project_studio/projects_studio_home.dart';
 import 'package:openflow_app/projects/controller.dart';
 
@@ -34,6 +35,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(StudioEmptyState), findsOneWidget);
+    expect(find.byType(StudioGettingStartedSteps), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
     expect(find.textContaining('uuid='), findsNothing);
     expect(tester.takeException(), isNull);
   });

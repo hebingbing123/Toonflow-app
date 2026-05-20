@@ -62,6 +62,8 @@ Future<void> openNovelWorkbenchDialog({
     required TextEditingController importIntakeNoteCtrl,
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
+    required NovelCrawlAuthOverride? crawlAuthOverride,
+    required void Function(NovelCrawlAuthOverride? value) setCrawlAuthOverride,
   })
   buildImportSection,
   required Widget Function({
@@ -293,6 +295,10 @@ Future<void> openNovelWorkbenchDialog({
                             local.importPreviewRows = rows;
                             local.infoLine = message;
                           });
+                        },
+                        crawlAuthOverride: local.crawlAuthOverride,
+                        setCrawlAuthOverride: (value) {
+                          setLocalState(() => local.crawlAuthOverride = value);
                         },
                       ),
                       const SizedBox(height: 16),

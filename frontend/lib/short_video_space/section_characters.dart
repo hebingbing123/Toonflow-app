@@ -25,7 +25,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _loadingCharacters = false;
-        _charactersStatusLine = describeUserVisibleApiError(l10n, e);
+        _charactersStatusLine = describeUserVisibleApiErrorResolved(context, e);
       });
     }
   }
@@ -66,7 +66,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
       setState(() {
         _charactersStatusLine = l10n.shortVideoCharactersPreviewFailed(
           character.name,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -101,7 +101,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
       setState(() {
         _charactersStatusLine = l10n.shortVideoCharactersVoiceSaveFailed(
           character.name,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -383,7 +383,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
       if (!mounted) return;
       setState(() {
         _charactersStatusLine = l10n.shortVideoCharactersCloneFailed(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }

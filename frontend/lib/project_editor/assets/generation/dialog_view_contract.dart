@@ -29,6 +29,7 @@ class AssetGenerationWorkbenchDialogViewModel {
     required this.batchNameCtrl,
     required this.batchLimitCtrl,
     required this.accessToken,
+    required this.projectUuid,
     required this.batchAssetCount,
     required this.onBatchEstimateChanged,
   });
@@ -58,6 +59,7 @@ class AssetGenerationWorkbenchDialogViewModel {
   final TextEditingController batchNameCtrl;
   final TextEditingController batchLimitCtrl;
   final String accessToken;
+  final String projectUuid;
   final int batchAssetCount;
   final ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged;
 }

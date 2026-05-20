@@ -9,6 +9,7 @@ import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import '../settings/model_pricing/model_pricing_catalog_view.dart';
+import '../settings/model_vendors/model_vendors_section.dart';
 import '../settings/plan_usage/plan_usage_section.dart';
 import '../team_workspaces/section.dart';
 
@@ -22,6 +23,7 @@ class SettingsHubPage extends StatefulWidget {
     required this.onAccountDeleted,
     required this.onWorkspaceContextChanged,
     this.currentWorkspaceId,
+    this.initialTabIndex = 0,
   });
 
   final AccountController accountController;
@@ -30,6 +32,9 @@ class SettingsHubPage extends StatefulWidget {
   final Future<void> Function(AccountDeleteResponseV1) onAccountDeleted;
   final Future<void> Function() onWorkspaceContextChanged;
   final String? currentWorkspaceId;
+
+  /// 0 account · 1 plan · 2 API & models · 3 workspaces
+  final int initialTabIndex;
 
   @override
   State<SettingsHubPage> createState() => _SettingsHubPageState();
@@ -40,9 +45,20 @@ class _SettingsHubPageState extends State<SettingsHubPage>
   late final TabController _tabController = TabController(
     length: 4,
     vsync: this,
+    initialIndex: widget.initialTabIndex.clamp(0, 3),
   )..addListener(_handleTabChanged);
 
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialTabIndex.clamp(0, 3);
+
+  @override
+  void didUpdateWidget(covariant SettingsHubPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = widget.initialTabIndex.clamp(0, 3);
+    if (next != oldWidget.initialTabIndex && _tabController.index != next) {
+      _tabController.animateTo(next);
+      setState(() => _selectedIndex = next);
+    }
+  }
 
   @override
   void dispose() {
@@ -95,10 +111,7 @@ class _SettingsHubPageState extends State<SettingsHubPage>
         Widget tabScrollChild(Widget child) {
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 32),
-            child: SizedBox(
-              width: contentWidth,
-              child: child,
-            ),
+            child: SizedBox(width: contentWidth, child: child),
           );
         }
 
@@ -111,13 +124,13 @@ class _SettingsHubPageState extends State<SettingsHubPage>
                 onAccountDeleted: widget.onAccountDeleted,
               ),
             ),
-            tabScrollChild(
-              PlanUsageSection(accessToken: widget.accessToken),
-            ),
+            tabScrollChild(PlanUsageSection(accessToken: widget.accessToken)),
             tabScrollChild(
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  ModelVendorsSection(accessToken: widget.accessToken),
+                  const SizedBox(height: 24),
                   ModelPricingCatalogView(accessToken: widget.accessToken),
                   const SizedBox(height: 24),
                   ApiKeysSection(controller: widget.apiKeysController),
@@ -194,6 +207,7 @@ class _SettingsHeroCard extends StatelessWidget {
         TextStyle(color: theme.colorScheme.onSurfaceVariant);
     final tabBar = TabBar(
       controller: controller,
+      tabAlignment: scrollableTabs ? TabAlignment.start : TabAlignment.fill,
       indicator: const BoxDecoration(),
       dividerColor: Colors.transparent,
       overlayColor: WidgetStatePropertyAll<Color>(

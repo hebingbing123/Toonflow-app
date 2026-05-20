@@ -176,11 +176,10 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
       });
     } catch (error) {
       if (!mounted) return;
-      final errL10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _statusLine = l10n.benchmarkStatusFailed(
           label,
-          describeUserVisibleApiError(errL10n, error),
+          describeUserVisibleApiErrorResolved(context, error),
         );
       });
     } finally {

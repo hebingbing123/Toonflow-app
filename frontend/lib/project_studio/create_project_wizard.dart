@@ -9,11 +9,13 @@ import '../l10n/app_localizations.dart';
 Future<Map<String, dynamic>?> showCreateProjectWizard(
   BuildContext context,
 ) async {
+  final tokens = StudioTokens.of(context);
   return showModalBottomSheet<Map<String, dynamic>>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
+    barrierColor: tokens.overlay,
     builder: (ctx) => const _CreateProjectWizardSheet(),
   );
 }
@@ -241,8 +243,8 @@ class _WizardStepIndicator extends StatelessWidget {
                     color: isCurrent
                         ? tokens.textPrimary
                         : active
-                            ? tokens.textSecondary
-                            : tokens.textMuted,
+                        ? tokens.textSecondary
+                        : tokens.textMuted,
                   ),
                 ),
               ],

@@ -115,7 +115,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _loadingProjects = false;
       });
     }
@@ -139,7 +139,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _loadingCategories = false;
       });
     }
@@ -206,7 +206,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _loadingTasks = false;
       });
     }
@@ -234,7 +234,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _loadingNumericIdTaskDetail = false;
       });
     }
@@ -262,7 +262,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _loadingUuidDetails = false;
       });
     }
@@ -287,7 +287,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _retryingJobId = null;
       });
     }
@@ -312,7 +312,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
+        _statusLine = describeUserVisibleApiErrorResolved(context, e);
         _cancellingJobId = null;
       });
     }

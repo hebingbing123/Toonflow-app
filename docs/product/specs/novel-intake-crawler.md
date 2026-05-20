@@ -27,6 +27,8 @@
 - `crawler_client` 首版：按 URL 抓网页、抽标题与正文、回填整本导入区
 - `POST /api/v1/projects/{project_id}/novels/crawl-preview`：托管端抓取预览（工作台「抓取执行端」选 server 时走该路径，支持 TOC / 分页 / 单页回退）
 - `POST /api/v1/projects/{project_id}/novels/crawl-import`：托管端抓取 + 解析 + 质量门 + 落库（工作台「托管导入（增值）」按钮触发）
+- `GET/PUT /api/v1/projects/{project_id}/novels/crawl-auth`：按项目保存站点认证（Cookie / 账号密码，AES-256-GCM 加密，密钥 `OPENFLOW_VENDOR_CREDENTIAL_KEY`）
+- 剧本步内嵌导入与小说高级工作台均提供「站点认证」折叠区；抓取请求可附带可选 `auth` 覆盖已保存配置
 - `intake_source` / `intake_source_url` / `intake_status` / `intake_note`
 - 手动、整本、客户端爬虫三条入口统一写入 intake 元数据
 - 列表筛选与批量准入操作
@@ -136,6 +138,18 @@
 - 相同的导入修正页
 
 这样可以避免以后两套爬虫两套后处理。
+
+#### 站点认证（Cookie / 账号密码）
+
+- **Cookie**：
+  - **桌面端（推荐）**：「应用内登录并获取 Cookie」→ 内嵌浏览器完成登录 → 一键读取 Cookie（无需开发者工具复制）。
+  - **备用**：手动粘贴 `Cookie` 请求头。
+  - **平台**：一键获取仅 **macOS / Windows / Linux 桌面客户端**；**Web** 展示下载引导；**iOS / Android** 暂未支持内嵌登录（可粘贴 Cookie 或改用桌面版）。
+- **账号密码**：
+  - 若填写 **登录 URL**：服务端对该 URL 发起 `application/x-www-form-urlencoded` POST（字段名可配置，默认 `username` / `password`），合并响应 `Set-Cookie` 后再抓章节。
+  - 若 **未填登录 URL**：对章节请求使用 **HTTP Basic**（仅适用于站点本身支持 Basic 的场景）。
+- **限制**：无法覆盖任意站点的 JS 登录、验证码、二次验证；此类站点请用手动粘贴或仅保存 Cookie。
+- **安全**：凭据加密依赖 `OPENFLOW_VENDOR_CREDENTIAL_KEY`；`GET crawl-auth` 不返回明文，仅 `has_cookie` / `has_password` 等元数据。
 
 ## 还需要补齐的计划点
 

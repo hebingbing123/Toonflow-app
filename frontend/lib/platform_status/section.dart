@@ -118,7 +118,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(l10n, error);
+        _error = describeUserVisibleApiErrorResolved(context, error);
       });
     } finally {
       if (mounted) {
@@ -189,6 +189,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
               ),
               StudioDropdownButton<int>(
                 value: _windowMinutes,
+                width: 132,
                 onChanged: _loading
                     ? null
                     : (next) {

@@ -11,8 +11,9 @@ extension _StoryboardBatchWorkbenchActions
       await action();
     } catch (e) {
       if (mounted) {
-        final loc = resolveAppLocalizationsForErrors(context);
-        _applyBatchWorkbenchState(() => _statusLine = describeUserVisibleApiError(loc, e));
+        _applyBatchWorkbenchState(
+          () => _statusLine = describeUserVisibleApiErrorResolved(context, e),
+        );
       }
     } finally {
       if (mounted) _applyBatchWorkbenchState(() => _busyMutation = false);

@@ -195,7 +195,7 @@ class _StoryboardBatchWorkbenchDialogState
         final loc = resolveAppLocalizationsForErrors(context);
         setState(
           () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
-            describeUserVisibleApiError(loc, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
         );
       }

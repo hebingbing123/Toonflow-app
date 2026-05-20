@@ -65,7 +65,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
         _rows.clear();
         _hasMore = false;
         _loading = false;
-        _error = describeUserVisibleApiError(l10nErr, e);
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     }
   }
@@ -93,7 +93,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _loadingMore = false;
-        _error = describeUserVisibleApiError(l10nErr, e);
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     }
   }

@@ -76,7 +76,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftLoadFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -285,7 +285,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftSaveFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -322,7 +322,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftRestoreFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -394,7 +394,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftDeleteFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -465,7 +465,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionCreateFailed(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -508,7 +508,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionSwitchFailed(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -569,7 +569,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionDeleteFailed(
-            describeUserVisibleApiError(l10nErr, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );

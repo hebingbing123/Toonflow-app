@@ -1047,6 +1047,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioProjectsEmptySubtitle => '创建第一个项目，开始从剧本到成片的工作流。';
 
   @override
+  String get studioProjectsEmptyStep1 => '点击「创建项目」，填写名称并选择故事前提。';
+
+  @override
+  String get studioProjectsEmptyStep2 => '打开项目后从「剧本」步开始写作或导入内容。';
+
+  @override
+  String get studioProjectsEmptyStep3 => '需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。';
+
+  @override
+  String studioGettingStartedStepSemantics(
+    int stepNumber,
+    int stepTotal,
+    String stepText,
+  ) {
+    return '第 $stepNumber 步，共 $stepTotal 步：$stepText';
+  }
+
+  @override
   String get studioCreateProjectWizardTitle => '创建项目';
 
   @override
@@ -1408,7 +1426,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioOnboardingDone => '完成';
 
   @override
-  String get studioOnboardingStep1 => '用左侧导航在「项目」里开始创作。';
+  String get studioOnboardingStep1 => '从应用导航进入「项目」开始创作。';
 
   @override
   String get studioOnboardingStep2 => '进入项目后按六步完成剧本到成片。';
@@ -21390,6 +21408,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsModelVendorsBaseUrlCloudHint => '如需覆盖默认云端地址，可在此填写。';
+
+  @override
+  String get settingsDomesticVendorsSetupTitle => '配置国内模型厂商';
+
+  @override
+  String get settingsDomesticVendorsSetupSubtitle =>
+      '为你实际使用的厂商添加 API Key。项目工作室的模型路由会从这里已启用的厂商中选择。';
+
+  @override
+  String settingsDomesticVendorsSetupProgress(int ready, int total) {
+    return '核心厂商已就绪 $ready/$total';
+  }
+
+  @override
+  String get settingsDomesticVendorsSetupConfigureAction => '添加 Key';
+
+  @override
+  String get settingsDomesticVendorsSetupDismiss => '稍后再说';
+
+  @override
+  String get settingsDomesticVendorsSetupShowExtended => '更多国内厂商（视频等）';
+
+  @override
+  String get settingsDomesticVendorsSetupHideExtended => '收起更多厂商';
+
+  @override
+  String get settingsInternationalVendorsSetupTitle => '配置国际模型厂商';
+
+  @override
+  String get settingsInternationalVendorsSetupSubtitle =>
+      '可选：为你使用的 OpenAI、Gemini、Claude 等海外厂商添加 API Key。';
+
+  @override
+  String settingsInternationalVendorsSetupProgress(int ready, int total) {
+    return '国际厂商已就绪 $ready/$total';
+  }
+
+  @override
+  String get settingsInternationalVendorsSetupShowExtended =>
+      '更多国际厂商（视频、Azure 等）';
+
+  @override
+  String get settingsInternationalVendorsSetupHideExtended => '收起更多国际厂商';
+
+  @override
+  String get studioVendorSetupSnackMessage =>
+      '使用 AI 生成前，请先配置至少一家国内模型厂商的 API Key。';
+
+  @override
+  String get studioVendorSetupSnackAction => '去设置';
+
+  @override
+  String get studioVendorSetupProjectsNudgeTitle => '先配置国内模型厂商 API Key，即可开始生成。';
+
+  @override
+  String get studioModelRoutingCatalogEmptyTitle => '当前步骤没有可用模型';
+
+  @override
+  String get studioModelRoutingCatalogEmptyBody =>
+      '请在「设置 → API 与模型」中启用厂商并保存 API Key；国内厂商（通义、DeepSeek 等）排在列表前面。';
+
+  @override
+  String get studioModelRoutingOpenVendorSettings => '配置模型厂商';
+
+  @override
+  String get settingsModelVendorsAggregationHint => '聚合平台 · OpenAI 协议';
+
+  @override
+  String get settingsModelVendorsProtocolArk => 'Ark';
+
+  @override
+  String get settingsModelVendorsProtocolAnthropic => 'Claude';
+
+  @override
+  String get settingsModelVendorsProtocolGemini => 'Gemini';
+
+  @override
+  String get settingsModelVendorsProtocolAzure => 'Azure';
 
   @override
   String get settingsModelVendorsSaveBaseUrl => '保存地址';

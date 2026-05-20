@@ -42,7 +42,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -98,7 +98,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -141,7 +141,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))));
                   }
                 } finally {
                   if (ctx.mounted) {

@@ -25,7 +25,7 @@ Widget _page(BuildContext context) {
 }
 
 void main() {
-  testWidgets('episode console switches tabs and shows deliver child', (
+  testWidgets('episode console preview shows deliver child and beta label', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
@@ -49,12 +49,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Voice'), findsAtLeastNWidgets(1));
-    expect(find.text('deliver-body'), findsNothing);
-
-    await tester.tap(find.text('Assemble'));
-    await tester.pumpAndSettle();
-
+    expect(find.text('Beta'), findsOneWidget); // studioEpisodeConsoleBetaLabel (en)
     expect(find.text('deliver-body'), findsOneWidget);
   });
 

@@ -80,14 +80,12 @@ class ModelsCatalogController extends ChangeNotifier {
           : vendors.vendors.first;
       final vendorsBit = firstVendor == null
           ? 'vendors: $emptyMarker'
-          : 'vendors: ${vendors.vendors.length} · ${firstVendor.name} kinds=${firstVendor.modelKinds.join(",")} source=${vendors.source}';
+          : 'vendors: ${vendors.vendors.length} · ${firstVendor.catalog.name} kinds=${firstVendor.catalog.modelKinds.join(",")} source=${vendors.source}';
       final agentDeployBit =
           'agent-deploy: ${agentDeployRows.length} rows · ${_formatProbeStatusMap(settingsSummary)} · ${_formatProbeStatusMap(productionSummary.statuses)} · prod/implemented ${productionSummary.implementedCount}x(200/404/503)';
       modelsCatalogBody = '$modelsLine · $vendorsBit · $agentDeployBit';
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(_l10nResolved, error),
-      );
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
     } finally {
       loadingModelsCatalog = false;
       notifyListeners();

@@ -18,6 +18,7 @@ Page<void> _studioShellPlaceholderPage(GoRouterState state) {
 
 HomePage buildStoryboardStudioHomePage({required int projectNumericId}) {
   return HomePage(
+    key: ValueKey<String>('storyboard-$projectNumericId'),
     shellMode: HomeShellMode.product,
     studioOverlay: StudioOverlayMode.storyboardStudio,
     studioProjectNumericId: projectNumericId,
@@ -29,6 +30,7 @@ HomePage buildEpisodeConsoleHomePage({
   required int scriptNumericId,
 }) {
   return HomePage(
+    key: ValueKey<String>('console-$projectNumericId-$scriptNumericId'),
     shellMode: HomeShellMode.product,
     studioOverlay: StudioOverlayMode.episodeConsole,
     studioProjectNumericId: projectNumericId,
@@ -41,6 +43,7 @@ HomePage buildProjectStudioHomePage({
   required String? stepSlug,
 }) {
   return HomePage(
+    key: ValueKey<String>('project-$projectNumericId-${stepSlug ?? ''}'),
     shellMode: HomeShellMode.product,
     initialProductPane: ProductWorkspacePane.projects,
     studioOverlay: StudioOverlayMode.projectStudio,
@@ -76,6 +79,7 @@ GoRouter createStudioRouter() {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomePage(
+            key: const ValueKey<String>('studio-shell-root'),
             shellMode: HomeShellMode.product,
             navigationShell: navigationShell,
           );
@@ -95,6 +99,7 @@ GoRouter createStudioRouter() {
       GoRoute(
         path: '/settings/models',
         builder: (context, state) => const HomePage(
+          key: ValueKey<String>('studio-shell-model-settings'),
           shellMode: HomeShellMode.product,
           initialProductPane: ProductWorkspacePane.platformConfig,
         ),

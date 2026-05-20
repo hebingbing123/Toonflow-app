@@ -450,8 +450,12 @@ pub async fn delete_api_key(
     )
     .await?;
     let pool = state.require_pool()?;
-    let deleted = sqlx::query_scalar::<_, i64>(
-        r#"DELETE FROM public.app_api_key WHERE id = $1 AND owner_user_id = $2 RETURNING 1"#,
+    let deleted = sqlx::query_scalar::<_, bool>(
+        r#"
+        DELETE FROM public.app_api_key
+        WHERE id = $1 AND owner_user_id = $2
+        RETURNING TRUE
+        "#,
     )
     .bind(id)
     .bind(owner_user_id)
@@ -462,4 +466,122 @@ pub async fn delete_api_key(
         return Err(ApiError::NotFound);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use sqlx::PgPool;
+    use tokio::sync::RwLock;
+    use uuid::Uuid;
+
+    use crate::http_kit::metrics::MetricsRegistry;
+    use crate::metering::BillingConfig;
+    use crate::state::{MemoryConfig, WsNotifyHub};
+
+    use super::*;
+
+    fn test_database_url() -> Option<String> {
+        std::env::var("TEST_DATABASE_URL").ok()
+    }
+
+    fn test_state(pool: PgPool) -> AppState {
+        AppState {
+            pool: Some(pool),
+            jwt_secret: Some(b"contract-smoke-jwt-secret-bytes-32chars!".to_vec()),
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
+            local_asset_image_dir: None,
+            local_art_style_cover_dir: None,
+            local_video_export_dir: None,
+            local_voiceover_audio_dir: None,
+            metrics_registry: Arc::new(MetricsRegistry::default()),
+            billing_config: BillingConfig::default(),
+        }
+    }
+
+    async fn insert_test_user(pool: &PgPool, user_id: Uuid) {
+        let email = format!("api-key-delete-{}@example.test", user_id.simple());
+        sqlx::query(
+            r#"
+            INSERT INTO auth.users (
+              id, email, encrypted_password, email_confirmed_at, created_at, updated_at
+            )
+            VALUES ($1, $2, 'contract-test-password', NOW(), NOW(), NOW())
+            "#,
+        )
+        .bind(user_id)
+        .bind(email)
+        .execute(pool)
+        .await
+        .expect("insert auth.users fixture");
+    }
+
+    async fn cleanup_test_user(pool: &PgPool, user_id: Uuid) {
+        let _ = sqlx::query("DELETE FROM auth.users WHERE id = $1")
+            .bind(user_id)
+            .execute(pool)
+            .await;
+    }
+
+    #[tokio::test]
+    async fn delete_api_key_removes_row_and_preserves_deleted_audit() {
+        let Some(db_url) = test_database_url() else {
+            eprintln!("skipping api key delete regression test: TEST_DATABASE_URL not set");
+            return;
+        };
+
+        let pool = PgPool::connect(&db_url)
+            .await
+            .expect("connect test database");
+        let state = test_state(pool.clone());
+        let user_id = Uuid::new_v4();
+
+        insert_test_user(&pool, user_id).await;
+
+        let created = create_api_key(
+            &state,
+            user_id,
+            user_id,
+            ApiKeyCreateBody {
+                display_name: "delete regression".into(),
+                scope: ApiKeyScopeDto::ReadWrite,
+                expires_at: None,
+            },
+        )
+        .await
+        .expect("create api key");
+
+        delete_api_key(&state, user_id, user_id, created.record.id)
+            .await
+            .expect("delete api key");
+
+        let exists = sqlx::query_scalar::<_, bool>(
+            "SELECT EXISTS(SELECT 1 FROM public.app_api_key WHERE id = $1)",
+        )
+        .bind(created.record.id)
+        .fetch_one(&pool)
+        .await
+        .expect("check deleted row");
+        assert!(!exists, "api key row should be deleted");
+
+        let deleted_audit_count = sqlx::query_scalar::<_, i64>(
+            r#"
+            SELECT COUNT(*)::bigint
+            FROM public.app_api_key_audit
+            WHERE api_key_id = $1 AND event_type = 'deleted'
+            "#,
+        )
+        .bind(created.record.id)
+        .fetch_one(&pool)
+        .await
+        .expect("count deleted audit rows");
+        assert_eq!(deleted_audit_count, 1, "deleted audit row should remain");
+
+        cleanup_test_user(&pool, user_id).await;
+    }
 }

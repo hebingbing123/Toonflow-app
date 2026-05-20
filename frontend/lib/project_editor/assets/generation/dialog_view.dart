@@ -50,6 +50,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
                 selectedScriptNumericId: model.selectedScriptNumericId,
                 selectedType: model.selectedType,
                 accessToken: model.accessToken,
+                projectUuid: model.projectUuid,
                 batchAssetCount: model.batchAssetCount,
                 onBatchEstimateChanged: model.onBatchEstimateChanged,
                 modelCtrl: model.modelCtrl,

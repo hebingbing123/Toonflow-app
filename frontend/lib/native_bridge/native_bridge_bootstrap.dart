@@ -87,6 +87,7 @@ class NativeBridgeBootstrap extends ChangeNotifier {
 
       final initializeFromPath =
           _initializeFromPath ?? _defaultInitializeFromPath;
+      Object? lastCandidateError;
       for (final candidate in _platformSupport.candidateLibraryPaths()) {
         try {
           await initializeFromPath(candidate);
@@ -97,8 +98,12 @@ class NativeBridgeBootstrap extends ChangeNotifier {
               libraryPath: candidate,
             ),
           );
-        } catch (_) {
-          continue;
+        } catch (error) {
+          lastCandidateError = error;
+          debugPrint(
+            'native_bridge_bootstrap: candidate failed '
+            'path=$candidate error=$error',
+          );
         }
       }
 
@@ -106,7 +111,7 @@ class NativeBridgeBootstrap extends ChangeNotifier {
         NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.failed,
           message: 'Desktop Rust bridge failed to initialize.',
-          error: defaultError,
+          error: lastCandidateError ?? defaultError,
         ),
       );
     }

@@ -19,6 +19,49 @@ Future<T?> showStudioDialog<T>({
   );
 }
 
+/// Bottom sheet with studio panel chrome (gradient surface + overlay barrier).
+Future<T?> showStudioBottomSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool isScrollControlled = false,
+  bool showDragHandle = false,
+  bool useSafeArea = true,
+  bool isDismissible = true,
+  bool enableDrag = true,
+}) {
+  final tokens = StudioTokens.of(context);
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: isScrollControlled,
+    showDragHandle: showDragHandle,
+    useSafeArea: useSafeArea,
+    isDismissible: isDismissible,
+    enableDrag: enableDrag,
+    backgroundColor: Colors.transparent,
+    barrierColor: tokens.overlay,
+    builder: (ctx) {
+      final studio = StudioColors.of(ctx);
+      final sheetTokens = StudioTokens.of(ctx);
+      return ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(StudioSpacing.radiusCard),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: studio.panelGradient,
+            border: Border(
+              top: BorderSide(color: sheetTokens.surfaceHighlight),
+              left: BorderSide(color: sheetTokens.surfaceHighlight),
+              right: BorderSide(color: sheetTokens.surfaceHighlight),
+            ),
+          ),
+          child: builder(ctx),
+        ),
+      );
+    },
+  );
+}
+
 /// Simple confirm/cancel dialog using studio chrome.
 Future<bool?> showStudioConfirmDialog({
   required BuildContext context,

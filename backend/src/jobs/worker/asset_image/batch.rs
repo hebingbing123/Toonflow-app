@@ -8,6 +8,10 @@ use crate::jobs::payload_project::{
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size};
+use crate::projects::model_routing::jobs::{
+    resolve_asset_image_llm_config, resolve_job_image_model_id,
+};
+use crate::projects::model_routing::StudioStepSlug;
 use crate::state::AppState;
 
 use super::common::{
@@ -24,7 +28,6 @@ async fn run_asset_generate_batch_items(
     pool: &PgPool,
     job_id: Uuid,
     row: &JobRow,
-    cfg: &crate::llm::LlmConfig,
     p: &Value,
     items: &[Value],
 ) -> Result<serde_json::Value, JobRunError> {
@@ -34,6 +37,15 @@ async fn run_asset_generate_batch_items(
         .get("model")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing model".into()))?;
+    let cfg = resolve_asset_image_llm_config(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Assets,
+        model_in,
+    )
+    .await?;
     let resolution = p
         .get("resolution")
         .and_then(|x| x.as_str())
@@ -45,7 +57,16 @@ async fn run_asset_generate_batch_items(
         .and_then(|n| i32::try_from(n).ok())
         .filter(|&n| n > 0);
 
-    let image_model = resolve_openai_image_model(model_in);
+    let routed_model = resolve_job_image_model_id(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Assets,
+        model_in,
+    )
+    .await?;
+    let image_model = resolve_openai_image_model(routed_model.as_str());
     let size = resolve_openai_image_size(&image_model, resolution);
 
     tracing::info!(
@@ -59,7 +80,7 @@ async fn run_asset_generate_batch_items(
     );
 
     let ctx = AssetImageGenCtx {
-        cfg,
+        cfg: &cfg,
         http_client: &state.http_client,
         pool,
         job_id,
@@ -139,18 +160,18 @@ pub(crate) async fn run_asset_generate_batch(
     job_id: Uuid,
     row: &JobRow,
 ) -> Result<serde_json::Value, JobRunError> {
+    let p = &row.payload;
+    if let Some(items) = p.get("items").and_then(|x| x.as_array()) {
+        if !items.is_empty() {
+            return run_asset_generate_batch_items(state, pool, job_id, row, p, items).await;
+        }
+    }
+
     let Some(ref cfg) = state.llm else {
         return Err(JobRunError::Failed(
             "LLM not configured (set OPENAI_API_KEY or LLM_API_KEY)".into(),
         ));
     };
-
-    let p = &row.payload;
-    if let Some(items) = p.get("items").and_then(|x| x.as_array()) {
-        if !items.is_empty() {
-            return run_asset_generate_batch_items(state, pool, job_id, row, cfg, p, items).await;
-        }
-    }
 
     let source = p
         .get("source")

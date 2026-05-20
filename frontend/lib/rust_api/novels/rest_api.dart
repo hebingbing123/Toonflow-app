@@ -176,15 +176,80 @@ Future<void> deleteProjectNovelByProjectIds(
   ensureHttpStatus(res, 204);
 }
 
+Map<String, dynamic>? _novelCrawlAuthJson(NovelCrawlAuthOverride? auth) {
+  if (auth == null || auth.isEmpty) return null;
+  return auth.toJson();
+}
+
+/// `GET /api/v1/projects/{project_id}/novels/crawl-auth` — see `getProjectNovelCrawlAuthByProjectIdV1`.
+Future<NovelCrawlAuthGetResponse> getProjectNovelCrawlAuth(
+  String accessToken,
+  String projectId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-auth',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  ensureHttpSuccess(res);
+  return NovelCrawlAuthGetResponse.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
+/// `PUT /api/v1/projects/{project_id}/novels/crawl-auth` — see `putProjectNovelCrawlAuthByProjectIdV1`.
+Future<NovelCrawlAuthGetResponse> putProjectNovelCrawlAuth(
+  String accessToken,
+  String projectId,
+  NovelCrawlAuthPutBody body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-auth',
+  );
+  final res = await http
+      .put(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body.toJson()),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400 || res.statusCode == 501) {
+    throw RustApiException.fromHttpResponse(res);
+  }
+  ensureHttpSuccess(res);
+  return NovelCrawlAuthGetResponse.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
 /// `POST /api/v1/projects/{project_id}/novels/crawl-preview` — see `postProjectNovelCrawlPreviewByProjectIdV1`.
 Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
   String accessToken,
   String projectId,
-  String url,
-) async {
+  String url, {
+  NovelCrawlAuthOverride? auth,
+}) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-preview',
   );
+  final payload = <String, dynamic>{'url': url};
+  final authJson = _novelCrawlAuthJson(auth);
+  if (authJson != null) {
+    payload['auth'] = authJson;
+  }
   final res = await http
       .post(
         uri,
@@ -192,7 +257,7 @@ Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(<String, dynamic>{'url': url}),
+        body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 60));
   if (res.statusCode == 404) {
@@ -213,6 +278,7 @@ Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
   String url, {
   required String intakeStatus,
   String? intakeNote,
+  NovelCrawlAuthOverride? auth,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-import',
@@ -223,6 +289,10 @@ Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
     // Rust `Option<String>` accepts `null` as missing/None.
     'intake_note': intakeNote,
   };
+  final authJson = _novelCrawlAuthJson(auth);
+  if (authJson != null) {
+    body['auth'] = authJson;
+  }
   final res = await http
       .post(
         uri,
@@ -251,6 +321,7 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
   List<String> urls, {
   required String intakeStatus,
   String? intakeNote,
+  NovelCrawlAuthOverride? auth,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-import-batch',
@@ -260,6 +331,10 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
     'intake_status': intakeStatus,
     'intake_note': intakeNote,
   };
+  final authJson = _novelCrawlAuthJson(auth);
+  if (authJson != null) {
+    body['auth'] = authJson;
+  }
   final res = await http
       .post(
         uri,

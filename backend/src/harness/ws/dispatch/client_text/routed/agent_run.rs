@@ -7,6 +7,12 @@ use crate::harness::ws::agent::{self, HarnessAgentWsParams};
 use crate::harness::ws::auth::WsConnectionSession;
 use crate::harness::ws::channel::WsAgentChannel;
 use crate::harness::ws::outbound::send_error;
+use crate::projects::model_routing::jobs::{
+    load_project_uuid_for_actor, try_build_routed_llm_config,
+};
+use crate::projects::model_routing::{
+    build_llm_config_for_model, harness_channel_to_step_slot, ModelSlot,
+};
 use crate::state::AppState;
 
 use crate::harness::ws::dispatch::envelope::ClientEnvelope;
@@ -76,25 +82,37 @@ pub(super) async fn harness_agent_run(
         );
     }
 
-    let Some(cfg) = state.llm.clone() else {
-        let _ = send_error(
-            socket,
-            "llm_not_configured",
-            "set OPENAI_API_KEY or LLM_API_KEY",
-            env.request_id.as_deref(),
-        )
-        .await;
-        return;
+    let channel = sess.channel.expect("channel checked above");
+    let (step, slot) = harness_channel_to_step_slot(channel);
+
+    let cfg = match resolve_harness_agent_llm_config(
+        state,
+        sess,
+        channel,
+        step,
+        slot,
+        p.model_id.as_deref(),
+    )
+    .await
+    {
+        Ok(cfg) => cfg,
+        Err(code) => {
+            let _ = send_error(
+                socket,
+                code,
+                "LLM not configured for harness agent",
+                env.request_id.as_deref(),
+            )
+            .await;
+            return;
+        }
     };
 
     sess.llm_cancel.cancel();
     sess.llm_cancel = CancellationToken::new();
     let cancel = sess.llm_cancel.clone();
 
-    let assistant_name = sess
-        .channel
-        .map(WsAgentChannel::assistant_name_zh)
-        .expect("channel checked above");
+    let assistant_name = channel.assistant_name_zh();
 
     let max_rounds = p.max_tool_rounds.clamp(1, 32);
     let project_numeric_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
@@ -116,4 +134,55 @@ pub(super) async fn harness_agent_run(
         request_id: env.request_id.clone(),
         billing_config: state.billing_config.clone(),
     });
+}
+
+async fn resolve_harness_agent_llm_config(
+    state: &AppState,
+    sess: &WsConnectionSession,
+    channel: WsAgentChannel,
+    step: crate::projects::model_routing::StudioStepSlug,
+    slot: crate::projects::model_routing::ModelSlot,
+    model_override: Option<&str>,
+) -> Result<crate::llm::LlmConfig, &'static str> {
+    if let Some(pool) = state.pool.as_ref() {
+        if let Some(project_numeric_id) = sess.project_id.and_then(|v| i32::try_from(v).ok()) {
+            if let Ok(Some(project_uuid)) =
+                load_project_uuid_for_actor(pool, sess.user_id, project_numeric_id).await
+            {
+                for try_slot in harness_agent_slot_candidates(channel, slot) {
+                    if let Ok(Some(cfg)) = try_build_routed_llm_config(
+                        state,
+                        pool,
+                        sess.user_id,
+                        project_uuid,
+                        step,
+                        try_slot,
+                        model_override,
+                    )
+                    .await
+                    {
+                        return Ok(cfg);
+                    }
+                }
+                if let Some(override_id) = model_override.filter(|s| !s.trim().is_empty()) {
+                    if let Ok(cfg) =
+                        build_llm_config_for_model(state, pool, sess.user_id, override_id.trim())
+                            .await
+                    {
+                        return Ok(cfg);
+                    }
+                }
+            }
+        }
+    }
+
+    state.llm.clone().ok_or("llm_not_configured")
+}
+
+fn harness_agent_slot_candidates(channel: WsAgentChannel, primary: ModelSlot) -> Vec<ModelSlot> {
+    if channel == WsAgentChannel::Production && primary == ModelSlot::Text {
+        vec![ModelSlot::Text, ModelSlot::Multimodal]
+    } else {
+        vec![primary]
+    }
 }

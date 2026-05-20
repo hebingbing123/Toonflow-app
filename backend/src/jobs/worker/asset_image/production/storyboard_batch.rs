@@ -10,6 +10,10 @@ use crate::jobs::JobRow;
 use crate::llm::{
     images_generation_or_edit_url, resolve_openai_image_model, resolve_openai_image_size, LlmConfig,
 };
+use crate::projects::model_routing::jobs::{
+    resolve_asset_image_llm_config, resolve_job_image_model_id,
+};
+use crate::projects::model_routing::StudioStepSlug;
 use crate::state::AppState;
 
 use super::super::common::payload_json_i32;
@@ -19,7 +23,7 @@ pub(crate) async fn run_production_storyboard_batch_generate_image(
     pool: &PgPool,
     job_id: Uuid,
     row: &JobRow,
-    cfg: &LlmConfig,
+    _fallback_cfg: &LlmConfig,
     p: &Value,
 ) -> Result<serde_json::Value, JobRunError> {
     if generation_job_is_cancelled(pool, job_id).await? {
@@ -82,10 +86,28 @@ pub(crate) async fn run_production_storyboard_batch_generate_image(
     .map_err(|e| JobRunError::Failed(e.to_string()))?
     .ok_or_else(|| JobRunError::Failed("storyboard not in scope".into()))?;
 
-    let image_model = resolve_openai_image_model(model_in);
+    let routed_model = resolve_job_image_model_id(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Storyboard,
+        model_in,
+    )
+    .await?;
+    let cfg = resolve_asset_image_llm_config(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Storyboard,
+        routed_model.as_str(),
+    )
+    .await?;
+    let image_model = resolve_openai_image_model(routed_model.as_str());
     let size = resolve_openai_image_size(&image_model, resolution);
     let (url, revised) = images_generation_or_edit_url(
-        cfg,
+        &cfg,
         &state.http_client,
         image_model.as_str(),
         prompt.as_str(),

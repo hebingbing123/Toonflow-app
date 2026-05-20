@@ -147,7 +147,9 @@ class _ProjectOverviewSection extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: badCaseMetrics
-                .map((item) => _MetricChip(label: item.label, value: item.value))
+                .map(
+                  (item) => _MetricChip(label: item.label, value: item.value),
+                )
                 .toList(growable: false),
           ),
         ],
@@ -170,9 +172,7 @@ class _ProjectOverviewSection extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(line, style: theme.textTheme.bodySmall),
-                  ),
+                  Expanded(child: Text(line, style: theme.textTheme.bodySmall)),
                 ],
               ),
             ),
@@ -262,6 +262,7 @@ class _MigrationOrderSection extends StatelessWidget {
 /// Production overview and stats panel widget
 class _ProductionPanel extends StatelessWidget {
   const _ProductionPanel({
+    this.dense = false,
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
     required this.assemblyInputPanelUi,
@@ -290,8 +291,10 @@ class _ProductionPanel extends StatelessWidget {
     required this.onOpenAssemblyDefaultsEditor,
     this.assemblyVersionManagerPanel,
     this.assemblyInputPanelKey,
+    this.onRefreshExportCheck,
   });
 
+  final bool dense;
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final AssemblyInputPanelUi assemblyInputPanelUi;
@@ -320,6 +323,7 @@ class _ProductionPanel extends StatelessWidget {
   final VoidCallback? onOpenAssemblyDefaultsEditor;
   final Widget? assemblyVersionManagerPanel;
   final Key? assemblyInputPanelKey;
+  final VoidCallback? onRefreshExportCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -335,17 +339,22 @@ class _ProductionPanel extends StatelessWidget {
     final latestExportCardTextColor = latestExportUi.isWarning
         ? theme.colorScheme.onErrorContainer
         : theme.colorScheme.onPrimaryContainer;
-    
+    final sectionSpacing = dense ? 12.0 : 16.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (assetsOverviewPanelUi.visible) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: sectionSpacing),
           _Panel(
+            dense: dense,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.shortVideoSpaceAssetsOverview, style: theme.textTheme.titleSmall),
+                Text(
+                  l10n.shortVideoSpaceAssetsOverview,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 if (assetsOverviewPanelUi.loading)
                   Text(
@@ -397,9 +406,10 @@ class _ProductionPanel extends StatelessWidget {
           ),
         ],
         if (assemblyInputPanelUi.visible) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: sectionSpacing),
           _Panel(
             key: assemblyInputPanelKey,
+            dense: dense,
             child: AssemblyInputPanel(
               ui: assemblyInputPanelUi,
               l10n: l10n,
@@ -414,12 +424,16 @@ class _ProductionPanel extends StatelessWidget {
           ),
         ],
         if (assemblyPanelUi.visible) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: sectionSpacing),
           _Panel(
+            dense: dense,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.shortVideoSpaceAssemblySnapshot, style: theme.textTheme.titleSmall),
+                Text(
+                  l10n.shortVideoSpaceAssemblySnapshot,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 if (assemblyPanelUi.loading)
                   Text(
@@ -498,7 +512,10 @@ class _ProductionPanel extends StatelessWidget {
                   ],
                   if (assemblyPanelUi.multiTrackDecisionLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    Text(l10n.shortVideoSpaceMultiTrackExportDecision, style: theme.textTheme.labelMedium),
+                    Text(
+                      l10n.shortVideoSpaceMultiTrackExportDecision,
+                      style: theme.textTheme.labelMedium,
+                    ),
                     const SizedBox(height: 6),
                     for (final line in assemblyPanelUi.multiTrackDecisionLines)
                       Padding(
@@ -540,7 +557,9 @@ class _ProductionPanel extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: onOpenProductionForAssemblyExport,
                         icon: const Icon(Icons.movie_creation_outlined),
-                        label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
+                        label: Text(
+                          l10n.shortVideoSpaceOpenProductionWorkspace,
+                        ),
                       ),
                       if (onOpenAssemblyClipDeskOps != null)
                         OutlinedButton.icon(
@@ -552,7 +571,9 @@ class _ProductionPanel extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: onOpenAssemblyDefaultsEditor,
                           icon: const Icon(Icons.subtitles_outlined),
-                          label: Text(l10n.shortVideoSpaceAssemblyStyleAdjustment),
+                          label: Text(
+                            l10n.shortVideoSpaceAssemblyStyleAdjustment,
+                          ),
                         ),
                     ],
                   ),
@@ -562,28 +583,40 @@ class _ProductionPanel extends StatelessWidget {
           ),
         ],
         if (assemblyVersionManagerPanel != null) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: sectionSpacing),
           assemblyVersionManagerPanel!,
         ],
         if (exportCheckPanelUi.visible) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: sectionSpacing),
           _Panel(
+            dense: dense,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.shortVideoSpaceExportPreCheck, style: theme.textTheme.titleSmall),
+                Text(
+                  l10n.shortVideoSpaceExportPreCheck,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 if (exportCheckPanelUi.loading)
                   Text(
                     exportCheckPanelUi.headline,
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
-                else if (exportCheckPanelUi.unavailable)
+                else if (exportCheckPanelUi.unavailable) ...<Widget>[
                   Text(
                     exportCheckPanelUi.headline,
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-                  )
-                else ...[
+                  ),
+                  if (onRefreshExportCheck != null) ...<Widget>[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: onRefreshExportCheck,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: Text(l10n.shortVideoSpaceExportCheckRefreshButton),
+                    ),
+                  ],
+                ] else ...[
                   Text(
                     exportCheckPanelUi.headline,
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
@@ -595,8 +628,7 @@ class _ProductionPanel extends StatelessWidget {
                       runSpacing: 8,
                       children: exportCheckPanelUi.metrics
                           .map(
-                            (m) =>
-                                _MetricChip(label: m.label, value: m.value),
+                            (m) => _MetricChip(label: m.label, value: m.value),
                           )
                           .toList(growable: false),
                     ),
@@ -608,7 +640,9 @@ class _ProductionPanel extends StatelessWidget {
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
-                  if (exportCheckPanelUi.qualityGateBlockingLines.isNotEmpty) ...[
+                  if (exportCheckPanelUi
+                      .qualityGateBlockingLines
+                      .isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
                       l10n.shortVideoSpaceQualityGateBlockingReasons,
@@ -618,7 +652,8 @@ class _ProductionPanel extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    for (final line in exportCheckPanelUi.qualityGateBlockingLines)
+                    for (final line
+                        in exportCheckPanelUi.qualityGateBlockingLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
@@ -727,9 +762,7 @@ class _ProductionPanel extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       l10n.shortVideoSpaceBlockingItems,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: muted,
-                      ),
+                      style: theme.textTheme.labelSmall?.copyWith(color: muted),
                     ),
                     const SizedBox(height: 6),
                     for (final line in exportCheckPanelUi.blockingLines)
@@ -747,9 +780,7 @@ class _ProductionPanel extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       l10n.shortVideoSpaceWarningItems,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: muted,
-                      ),
+                      style: theme.textTheme.labelSmall?.copyWith(color: muted),
                     ),
                     const SizedBox(height: 6),
                     for (final line in exportCheckPanelUi.warningLines)
@@ -776,9 +807,7 @@ class _ProductionPanel extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: latestExportCardFill,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: latestExportCardBorder,
-                      ),
+                      border: Border.all(color: latestExportCardBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -804,7 +833,9 @@ class _ProductionPanel extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if ((latestExportUi.statusLine ?? '').trim().isNotEmpty) ...[
+                        if ((latestExportUi.statusLine ?? '')
+                            .trim()
+                            .isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
                             latestExportUi.statusLine!,
@@ -814,15 +845,21 @@ class _ProductionPanel extends StatelessWidget {
                             ),
                           ),
                         ],
-                        if ((latestExportUi.activeTaskTitle ?? '').trim().isNotEmpty) ...[
+                        if ((latestExportUi.activeTaskTitle ?? '')
+                            .trim()
+                            .isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: latestExportCardTextColor.withValues(alpha: 0.08),
+                              color: latestExportCardTextColor.withValues(
+                                alpha: 0.08,
+                              ),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: latestExportCardTextColor.withValues(alpha: 0.14),
+                                color: latestExportCardTextColor.withValues(
+                                  alpha: 0.14,
+                                ),
                               ),
                             ),
                             child: Column(
@@ -850,24 +887,30 @@ class _ProductionPanel extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         latestExportUi.activeTaskTitle!,
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: latestExportCardTextColor,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: latestExportCardTextColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                if ((latestExportUi.activeTaskDetail ?? '').trim().isNotEmpty) ...[
+                                if ((latestExportUi.activeTaskDetail ?? '')
+                                    .trim()
+                                    .isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Text(
                                     latestExportUi.activeTaskDetail!,
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: latestExportCardTextColor.withValues(alpha: 0.9),
+                                      color: latestExportCardTextColor
+                                          .withValues(alpha: 0.9),
                                     ),
                                   ),
                                 ],
-                                if ((latestExportUi.activeTaskError ?? '').trim().isNotEmpty) ...[
+                                if ((latestExportUi.activeTaskError ?? '')
+                                    .trim()
+                                    .isNotEmpty) ...[
                                   const SizedBox(height: 6),
                                   Text(
                                     latestExportUi.activeTaskError!,
@@ -897,7 +940,9 @@ class _ProductionPanel extends StatelessWidget {
                               child: Text(
                                 line,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: latestExportCardTextColor.withValues(alpha: 0.88),
+                                  color: latestExportCardTextColor.withValues(
+                                    alpha: 0.88,
+                                  ),
                                 ),
                               ),
                             ),
@@ -907,14 +952,19 @@ class _ProductionPanel extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            if (latestExportUi.isWarning && onStartExport != null)
+                            if (latestExportUi.isWarning &&
+                                onStartExport != null)
                               FilledButton.icon(
-                                onPressed: exportActionBusy ? null : onStartExport,
+                                onPressed: exportActionBusy
+                                    ? null
+                                    : onStartExport,
                                 icon: exportActionBusy
                                     ? const SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : const Icon(Icons.refresh),
                                 label: Text(
@@ -926,13 +976,17 @@ class _ProductionPanel extends StatelessWidget {
                             FilledButton.tonalIcon(
                               onPressed: onDownloadLatestExport,
                               icon: const Icon(Icons.download_outlined),
-                              label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
+                              label: Text(
+                                l10n.shortVideoSpaceDialogExportHistoryDownload,
+                              ),
                             ),
                             if (onCancelLatestExportTask != null)
                               OutlinedButton.icon(
                                 onPressed: onCancelLatestExportTask,
                                 icon: const Icon(Icons.stop_circle_outlined),
-                                label: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
+                                label: Text(
+                                  l10n.shortVideoSpaceProductionAssemblyCancel,
+                                ),
                               ),
                             if (onRetryLatestExportTask != null)
                               (latestExportUi.recommendedAction ==
@@ -957,7 +1011,8 @@ class _ProductionPanel extends StatelessWidget {
                                       ShortVideoLatestExportAction
                                           .openProductionWorkspace)
                                   ? FilledButton.icon(
-                                      onPressed: onOpenProductionForAssemblyExport,
+                                      onPressed:
+                                          onOpenProductionForAssemblyExport,
                                       icon: const Icon(
                                         Icons.movie_creation_outlined,
                                       ),
@@ -966,7 +1021,8 @@ class _ProductionPanel extends StatelessWidget {
                                       ),
                                     )
                                   : OutlinedButton.icon(
-                                      onPressed: onOpenProductionForAssemblyExport,
+                                      onPressed:
+                                          onOpenProductionForAssemblyExport,
                                       icon: const Icon(
                                         Icons.movie_creation_outlined,
                                       ),
@@ -1034,23 +1090,29 @@ class _ProductionPanel extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.file_upload_outlined),
-                      label: Text(exportActionBusy ? l10n.shortVideoSpaceExporting : l10n.shortVideoSpaceStartExport),
+                      label: Text(
+                        exportActionBusy
+                            ? l10n.shortVideoSpaceExporting
+                            : l10n.shortVideoSpaceStartExport,
+                      ),
                     ),
                     Tooltip(
                       message: preAssemblyBlockedTooltip ?? '',
                       child: OutlinedButton.icon(
                         onPressed:
                             (exportActionBusy ||
-                                    preAssemblyActionBusy ||
-                                    localAssemblyBlockedHint != null ||
-                                    !assemblyInputPanelUi.gate.canPreAssembly)
-                                ? null
-                                : onStartPreAssembly,
+                                preAssemblyActionBusy ||
+                                localAssemblyBlockedHint != null ||
+                                !assemblyInputPanelUi.gate.canPreAssembly)
+                            ? null
+                            : onStartPreAssembly,
                         icon: preAssemblyActionBusy
                             ? const SizedBox(
                                 width: 14,
                                 height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.playlist_play_outlined),
                         label: Text(

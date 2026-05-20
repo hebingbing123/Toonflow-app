@@ -3,6 +3,7 @@ export 'compat.dart';
 export 'audit.dart';
 export 'export.dart';
 export 'members.dart';
+export 'model_routing.dart';
 export 'manuals.dart';
 export 'manuals_director.dart';
 export 'manuals_visual.dart';

@@ -231,6 +231,30 @@ ThemeData buildStudioDarkTheme({
         ),
       ),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: tokens.bgElevated,
+      surfaceTintColor: Colors.transparent,
+      elevation: 16,
+      shadowColor: tokens.panelGlow.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        side: BorderSide(color: tokens.surfaceHighlight),
+      ),
+      labelTextStyle: WidgetStatePropertyAll<TextStyle?>(
+        TextStyle(
+          color: tokens.textPrimary,
+          fontSize: typography.body,
+          height: 1.4,
+        ),
+      ),
+      textStyle: TextStyle(
+        color: tokens.textPrimary,
+        fontSize: typography.body,
+        height: 1.4,
+      ),
+      iconColor: tokens.textSecondary,
+    ),
+    canvasColor: tokens.bgElevated,
     dropdownMenuTheme: DropdownMenuThemeData(
       textStyle: TextStyle(
         color: tokens.textPrimary,

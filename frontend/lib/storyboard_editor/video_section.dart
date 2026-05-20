@@ -5,6 +5,7 @@ part of '../../home_page.dart';
 /// individual part files ≤800 lines.
 class _StoryboardVideoSection extends StatelessWidget {
   const _StoryboardVideoSection({
+    required this.projectId,
     required this.accessToken,
     required this.saving,
     required this.loadingWorkbench,
@@ -51,6 +52,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onDeleteCurrentVideo,
   });
 
+  final String projectId;
   final String accessToken;
   final bool saving;
   final bool loadingWorkbench;
@@ -423,6 +425,9 @@ class _StoryboardVideoSection extends StatelessWidget {
             Expanded(
               child: StudioModelCostControls(
                 accessToken: accessToken,
+                projectUuid: projectId,
+                studioStepSlug: 'storyboard',
+                modelSlot: 'video',
                 taskKind: 'storyboard_video',
                 typeFilter: 'video',
                 quantity: int.tryParse(videoDurationCtrl.text.trim()) ?? 5,

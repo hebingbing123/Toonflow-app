@@ -252,7 +252,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           SnackBar(
             content: Text(
               l10n.shortVideoPublishOpsCreateDraftFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
           ),
@@ -336,7 +336,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           SnackBar(
             content: Text(
               l10n.shortVideoPublishOpsEnqueueFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
           ),
@@ -384,7 +384,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               draft.id,
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           );
         }
@@ -446,7 +446,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               job.id.substring(0, 8),
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           );
         }
@@ -509,7 +509,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           SnackBar(
             content: Text(
               l10n.shortVideoPublishOpsConfirmFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
           ),

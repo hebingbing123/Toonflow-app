@@ -35,8 +35,33 @@ class ProjectsGridView extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        if (projects.length == 1) {
+          final card = _ProjectGridCard(
+            project: projects.first,
+            completedSteps: progressForProject?.call(projects.first) ?? 0,
+            selected: currentProjectNumericId == projects.first.numericId,
+            onSelect: onSelectProject == null
+                ? null
+                : () => onSelectProject!(projects.first),
+            onTap: () => onOpenProject(projects.first),
+          );
+          if (width >= 1100) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: width >= 1680 ? 860 : 760,
+                ),
+                child: AspectRatio(
+                  aspectRatio: width >= 1680 ? 1.34 : 1.22,
+                  child: card,
+                ),
+              ),
+            );
+          }
+          return AspectRatio(aspectRatio: 1.06, child: card);
+        }
         final crossAxisCount = switch (projects.length) {
-          <= 1 => 1,
           2 => width >= 840 ? 2 : 1,
           _ =>
             width >= 2100

@@ -178,7 +178,7 @@ class _AssetGenerationWorkbenchDialogState
     } catch (e) {
       if (mounted) {
         _updateWorkbenchState(
-          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed(describeUserVisibleApiError(l10n, e)),
+          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed(describeUserVisibleApiErrorResolved(context, e)),
         );
       }
     } finally {
@@ -195,9 +195,8 @@ class _AssetGenerationWorkbenchDialogState
       if (mounted) _updateWorkbenchState(() => _statusLine = e.message);
     } catch (e) {
       if (mounted) {
-        final loc = resolveAppLocalizationsForErrors(context);
         _updateWorkbenchState(
-          () => _statusLine = describeUserVisibleApiError(loc, e),
+          () => _statusLine = describeUserVisibleApiErrorResolved(context, e),
         );
       }
     } finally {
@@ -243,6 +242,7 @@ class _AssetGenerationWorkbenchDialogState
         batchNameCtrl: _ctrls.batchNameCtrl,
         batchLimitCtrl: _ctrls.batchLimitCtrl,
         accessToken: widget.token,
+        projectUuid: widget.project.id,
         batchAssetCount: selected.length.clamp(1, 999),
         onBatchEstimateChanged: (est) => _batchEstimate = est,
       ),

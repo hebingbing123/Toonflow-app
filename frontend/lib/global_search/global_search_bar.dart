@@ -11,6 +11,7 @@ import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 /// Global search bar component for the main navigation bar.
 ///
@@ -396,61 +397,54 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           color: tokens.textSecondary,
         ),
       ),
-      trailing: PopupMenuButton<_SavedViewAction>(
-        tooltip: l10n.globalSearchViewActions,
-        icon: const Icon(Icons.more_horiz, size: 18),
-        onSelected: (_SavedViewAction action) {
-          switch (action) {
-            case _SavedViewAction.rename:
-              unawaited(_renameSavedView(view));
-            case _SavedViewAction.togglePin:
-              unawaited(_toggleSavedViewPin(view));
-            case _SavedViewAction.delete:
-              unawaited(_deleteSavedView(view));
-          }
-        },
-        itemBuilder: (menuContext) => <PopupMenuEntry<_SavedViewAction>>[
-          PopupMenuItem<_SavedViewAction>(
-            value: _SavedViewAction.rename,
-            child: ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.edit_outlined, size: 18),
-              title: Text(l10n.globalSearchRename),
-            ),
+      trailing: StudioMenuAnchor(
+        menuChildren: <Widget>[
+          StudioSelectMenuItem(
+            label: l10n.globalSearchRename,
+            leading: const Icon(Icons.edit_outlined, size: 18),
+            selected: false,
+            showCheckmark: false,
+            onPressed: () => unawaited(_renameSavedView(view)),
           ),
-          PopupMenuItem<_SavedViewAction>(
-            value: _SavedViewAction.togglePin,
-            child: ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                view.pinned
-                    ? Icons.push_pin_outlined
-                    : Icons.bookmark_add_outlined,
-                size: 18,
-              ),
-              title: Text(pinActionLabel),
+          StudioSelectMenuItem(
+            label: pinActionLabel,
+            leading: Icon(
+              view.pinned
+                  ? Icons.push_pin_outlined
+                  : Icons.bookmark_add_outlined,
+              size: 18,
             ),
+            selected: false,
+            showCheckmark: false,
+            onPressed: () => unawaited(_toggleSavedViewPin(view)),
           ),
-          const PopupMenuDivider(),
-          PopupMenuItem<_SavedViewAction>(
-            value: _SavedViewAction.delete,
-            child: ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                Icons.delete_outline,
-                size: 18,
-                color: theme.colorScheme.error,
-              ),
-              title: Text(
-                l10n.globalSearchDeleteView,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
+          const StudioMenuDivider(),
+          StudioSelectMenuItem(
+            label: l10n.globalSearchDeleteView,
+            leading: Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: theme.colorScheme.error,
             ),
+            selected: false,
+            showCheckmark: false,
+            foregroundColor: theme.colorScheme.error,
+            onPressed: () => unawaited(_deleteSavedView(view)),
           ),
         ],
+        builder: (context, controller, child) {
+          return IconButton(
+            tooltip: l10n.globalSearchViewActions,
+            icon: const Icon(Icons.more_horiz, size: 18),
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+          );
+        },
       ),
       onTap: () => _openPinnedView(view),
     );
@@ -1145,7 +1139,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           SnackBar(
             content: Text(
               l10n.globalSearchClearHistoryFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
             duration: const Duration(seconds: 3),
@@ -1429,5 +1423,3 @@ class _QuickSearchTemplate {
   final Set<ResultType> resultTypes;
   final int? daysBack;
 }
-
-enum _SavedViewAction { rename, togglePin, delete }

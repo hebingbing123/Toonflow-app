@@ -96,13 +96,45 @@ pub(crate) async fn run_voiceover_generate(
         }
         let voice = resolve_tts_voice_name(&voice_cfg);
 
-        let openai_cfg = load_tts_llm_config_for_user(
-            state,
-            pool,
-            row.owner_user_id,
-            project_voice_model.as_deref(),
-        )
-        .await?;
+        let openai_cfg = if let Ok(Some(project_uuid)) =
+            crate::projects::model_routing::jobs::load_project_uuid_for_actor(
+                pool,
+                row.owner_user_id,
+                project_numeric_id,
+            )
+            .await
+        {
+            if let Ok(Some(cfg)) =
+                crate::projects::model_routing::jobs::try_build_routed_llm_config(
+                    state,
+                    pool,
+                    row.owner_user_id,
+                    project_uuid,
+                    crate::projects::model_routing::StudioStepSlug::Video,
+                    crate::projects::model_routing::ModelSlot::Voice,
+                    project_voice_model.as_deref(),
+                )
+                .await
+            {
+                cfg
+            } else {
+                load_tts_llm_config_for_user(
+                    state,
+                    pool,
+                    row.owner_user_id,
+                    project_voice_model.as_deref(),
+                )
+                .await?
+            }
+        } else {
+            load_tts_llm_config_for_user(
+                state,
+                pool,
+                row.owner_user_id,
+                project_voice_model.as_deref(),
+            )
+            .await?
+        };
         let root = state.local_voiceover_audio_dir.as_ref().ok_or_else(|| {
             JobRunError::Failed(
                 "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot persist voiceover artifact"
@@ -501,6 +533,7 @@ pub(crate) async fn load_tts_llm_config_for_user(
             api_key,
             base_url,
             model: model.to_string(),
+            protocol: crate::vendor::catalog::VendorProtocol::OpenAiCompatible,
         });
     }
 
@@ -513,6 +546,7 @@ pub(crate) async fn load_tts_llm_config_for_user(
         api_key: server_llm.api_key.clone(),
         base_url: server_llm.base_url.clone(),
         model: model.to_string(),
+        protocol: server_llm.protocol,
     })
 }
 

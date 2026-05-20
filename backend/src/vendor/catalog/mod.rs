@@ -8,14 +8,19 @@ use crate::state::AppState;
 
 mod data;
 mod handlers;
+pub(crate) mod llm_endpoint;
 pub(crate) mod pricing;
+pub(crate) mod protocol;
 mod query;
 pub(crate) mod types;
 
 #[cfg(test)]
 mod tests;
 
-pub(crate) use query::{lookup_vendor_catalog, vendor_catalog_summaries};
+pub(crate) use protocol::{resolve_video_provider_slug, CatalogVideoSlug, VendorProtocol};
+pub(crate) use query::{
+    first_catalog_model_for_kind, lookup_detail, lookup_vendor_catalog, vendor_catalog_summaries,
+};
 
 pub(crate) use types::{VendorCatalogLookup, VendorCatalogSummary};
 

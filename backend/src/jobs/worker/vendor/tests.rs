@@ -70,18 +70,20 @@ fn vendor_probe_credential_source_prefers_stored_credentials() {
     );
 }
 
-#[test]
-fn vendor_probe_llm_config_without_state_llm_returns_clear_error() {
+#[tokio::test]
+async fn vendor_probe_llm_config_without_state_llm_returns_clear_error() {
     let state = test_state_without_llm();
-    let err = match vendor_probe_llm_config(&state, None, "gpt-4o-mini") {
-        Ok(_) => panic!("text/image probe should require llm config or stored secret"),
+    let err = match vendor_probe_llm_config(&state, None, uuid::Uuid::nil(), 1, None, "gpt-4o-mini")
+        .await
+    {
+        Ok(_) => panic!("openai should require llm config or stored secret"),
         Err(err) => err,
     };
 
     match err {
         JobRunError::Failed(message) => {
             assert!(
-                message.contains("OPENAI_API_KEY") || message.contains("LLM_API_KEY"),
+                message.contains("API key required") || message.contains("OPENAI_API_KEY"),
                 "unexpected message: {message}"
             );
         }
@@ -90,4 +92,16 @@ fn vendor_probe_llm_config_without_state_llm_returns_clear_error() {
         }
         JobRunError::Cancelled => panic!("unexpected cancellation"),
     }
+}
+
+#[tokio::test]
+async fn ollama_probe_allows_missing_api_key() {
+    let state = test_state_without_llm();
+    let cfg =
+        match vendor_probe_llm_config(&state, None, uuid::Uuid::nil(), 5, None, "llama3.2").await {
+            Ok(cfg) => cfg,
+            Err(_) => panic!("ollama catalog vendor should not require server llm"),
+        };
+    assert!(cfg.base_url.contains("11434"));
+    assert_eq!(cfg.model, "llama3.2");
 }

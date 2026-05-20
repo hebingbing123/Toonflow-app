@@ -77,7 +77,7 @@ class ShortVideoErrorHandler {
       shouldRetry: false,
       userMessage: l10n.shortVideoSpaceErrorOperationFailed(
         contextStr,
-        describeUserVisibleApiError(l10n, error),
+        describeUserVisibleApiErrorResolved(context, error),
       ),
       severity: ErrorSeverity.error,
     );
@@ -182,7 +182,7 @@ class ShortVideoErrorHandler {
       shouldRetry: false,
       userMessage: l10n.shortVideoSpaceErrorDefaultMessage(
         contextStr,
-        describeUserVisibleApiError(l10n, error),
+        describeUserVisibleApiErrorResolved(context, error),
       ),
       severity: ErrorSeverity.error,
     );

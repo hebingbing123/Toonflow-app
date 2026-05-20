@@ -37,7 +37,7 @@ void main() {
           projectNumericId: 7,
           projectUuid: '00000000-0000-0000-0000-000000000099',
           accessToken: 'golden-token',
-          onOpenProductionWorkspace: () {},
+          onOpenProductionWorkspace: ({required String projectUuid}) {},
           debugScripts: const [
             ScriptWorkbenchDetailRow(
               numericId: 1,

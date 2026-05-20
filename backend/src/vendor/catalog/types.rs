@@ -77,6 +77,17 @@ pub(crate) struct VendorCatalogSummary {
     pub(crate) model_count: usize,
     /// Sorted unique **`type`** values from embedded catalog models.
     pub(crate) model_kinds: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) default_base_url: Option<String>,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) api_key_optional: bool,
+    /// Catalog wire protocol: `openai`, `volcengine_ark`, `anthropic`, `gemini_native`, …
+    pub(crate) protocol: String,
+    /// When set, video jobs can use native vendor API on this host (vs user gateway override).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) video_provider: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) official_api_host: Option<String>,
 }
 
 #[derive(Debug, Clone)]

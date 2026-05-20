@@ -79,6 +79,7 @@ import 'design_system/components/studio_model_cost_controls.dart';
 import 'design_system/ix/studio_cost_confirm_sheet.dart';
 import 'design_system/components/studio_dropdown_field.dart';
 import 'design_system/components/studio_empty_state.dart';
+import 'design_system/components/studio_onboarding_coach.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
 import 'design_system/components/studio_text_styles.dart';
@@ -89,6 +90,9 @@ import 'design_system/ix/studio_job_tray.dart';
 import 'design_system/ix/studio_snackbar.dart';
 import 'design_system/tokens.dart';
 import 'product_shell/login_page.dart';
+import 'settings/model_vendors/domestic_vendor_setup_prefs.dart';
+import 'settings/model_vendors/domestic_vendors.dart';
+import 'settings/model_vendors/vendor_setup_loader.dart';
 import 'product_shell/navigation.dart';
 import 'product_shell/studio_shell_header.dart';
 import 'product_shell/studio_shell_layout.dart';
@@ -290,6 +294,8 @@ class _HomePageState extends State<HomePage> {
   _sessionMeV2; // Task 6.2: Store v2 response for workspace billing
   String? _lastSessionAccessToken;
   bool _loadingSessionMe = false;
+  int _settingsHubInitialTabIndex = 0;
+  bool _vendorSetupSnackShown = false;
   PlatformConfigToggleSetV1 _platformConfig =
       PlatformConfigToggleSetV1.defaults;
   Listenable? _studioRouteListenerTarget;
@@ -1169,6 +1175,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         unawaited(_projectsController.loadProjects());
         _ensureProductPaneData(_shellNavigationController.productWorkspacePane);
+        unawaited(_maybeNudgeDomesticVendorSetup(token));
       }
     } catch (error) {
       if (_lastSessionAccessToken != token) {

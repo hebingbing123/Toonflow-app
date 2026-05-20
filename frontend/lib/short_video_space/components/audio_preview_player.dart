@@ -108,7 +108,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
         setState(() {
           _isLoading = false;
           _errorMessage = _l10n.shortVideoAudioPreviewLoadFailed(
-            describeUserVisibleApiError(_l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -132,7 +132,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         setState(() {
           _errorMessage = _l10n.shortVideoAudioPreviewPlaybackFailed(
-            describeUserVisibleApiError(_l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -149,7 +149,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         setState(() {
           _errorMessage = _l10n.shortVideoAudioPreviewStopFailed(
-            describeUserVisibleApiError(_l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -163,7 +163,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         setState(() {
           _errorMessage = _l10n.shortVideoAudioPreviewSeekFailed(
-            describeUserVisibleApiError(_l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }
@@ -180,7 +180,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         setState(() {
           _errorMessage = _l10n.shortVideoAudioPreviewVolumeFailed(
-            describeUserVisibleApiError(_l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           );
         });
       }

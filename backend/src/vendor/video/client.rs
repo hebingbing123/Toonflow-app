@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+pub use super::endpoint::{VideoApiRouting, VideoProviderCall};
+use super::endpoint::VideoProviderCall as Call;
 use super::types::{
     VideoExportRequest, VideoExportResponse, VideoExportStatus, VideoGenerationRequest,
     VideoGenerationResponse, VideoProvider,
@@ -20,12 +22,41 @@ impl VideoProviderClient {
         }
     }
 
-    /// Generate video using specified provider
     pub async fn generate_video(
         &self,
         req: &VideoGenerationRequest,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        self.generate_video_with_api_key(req, None).await
+        let call = Call::build(req.provider, None, None, None)?;
+        self.generate_video_with_call(req, &call).await
+    }
+
+    pub async fn generate_video_with_call(
+        &self,
+        req: &VideoGenerationRequest,
+        call: &Call,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        if call.routing == VideoApiRouting::OpenAiCompatible {
+            return self.generate_openai_video(req, call).await;
+        }
+        match call.provider {
+            VideoProvider::Runway => self.generate_runway(req, call).await,
+            VideoProvider::Pika => self.generate_pika(req, call).await,
+            VideoProvider::Kling => self.generate_kling(req, call).await,
+            VideoProvider::Doubao => self.generate_doubao(req, call).await,
+            VideoProvider::Hunyuan => self.generate_hunyuan(req, call).await,
+            VideoProvider::Minimax => self.generate_minimax(req, call).await,
+            VideoProvider::OpenAi => self.generate_openai_video(req, call).await,
+        }
+    }
+
+    /// Credentials only — API base from catalog / builtin (no Settings `base_url`).
+    pub async fn generate_video_with_credentials(
+        &self,
+        req: &VideoGenerationRequest,
+        creds: Option<&super::auth::VideoProviderCredentials>,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        let call = Call::build(req.provider, creds, None, None)?;
+        self.generate_video_with_call(req, &call).await
     }
 
     pub async fn generate_video_with_api_key(
@@ -33,42 +64,71 @@ impl VideoProviderClient {
         req: &VideoGenerationRequest,
         api_key_override: Option<&str>,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        let api_key = resolve_provider_api_key(req.provider, api_key_override)?;
-        match req.provider {
-            VideoProvider::Runway => self.generate_runway(req, &api_key).await,
-            VideoProvider::Pika => self.generate_pika(req, &api_key).await,
-            VideoProvider::Kling => self.generate_kling(req, &api_key).await,
-        }
+        let creds = api_key_override.map(|k| super::auth::VideoProviderCredentials {
+            api_key: Some(k.to_string()),
+            api_secret: None,
+        });
+        self.generate_video_with_credentials(req, creds.as_ref()).await
     }
 
-    /// Poll video generation status
     pub async fn poll_generation(
         &self,
         provider: VideoProvider,
         task_id: &str,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        if !provider.is_configured() {
-            return Err(anyhow::anyhow!(
-                "{} API key not configured",
-                provider.name()
-            ));
-        }
+        let call = Call::build(provider, None, None, None)?;
+        self.poll_generation_with_call(provider, task_id, &call).await
+    }
 
-        match provider {
-            VideoProvider::Runway => self.poll_runway(task_id).await,
-            VideoProvider::Pika => self.poll_pika(task_id).await,
-            VideoProvider::Kling => self.poll_kling(task_id).await,
+    pub async fn poll_generation_with_call(
+        &self,
+        provider: VideoProvider,
+        task_id: &str,
+        call: &Call,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        if call.routing == VideoApiRouting::OpenAiCompatible {
+            return self.poll_openai_video(task_id, call).await;
+        }
+        match call.provider {
+            VideoProvider::Runway => self.poll_runway(task_id, call).await,
+            VideoProvider::Pika => self.poll_pika(task_id, call).await,
+            VideoProvider::Kling => self.poll_kling(task_id, call).await,
+            VideoProvider::Doubao => self.poll_doubao(task_id, call).await,
+            VideoProvider::Hunyuan => self.poll_hunyuan(task_id, call).await,
+            VideoProvider::Minimax => self.poll_minimax(task_id, call).await,
+            VideoProvider::OpenAi => self.poll_openai_video(task_id, call).await,
         }
     }
 
-    /// Export video
+    pub async fn poll_generation_with_credentials(
+        &self,
+        provider: VideoProvider,
+        task_id: &str,
+        creds: Option<&super::auth::VideoProviderCredentials>,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        let call = Call::build(provider, creds, None, None)?;
+        self.poll_generation_with_call(provider, task_id, &call).await
+    }
+
+    pub async fn poll_generation_with_api_key(
+        &self,
+        provider: VideoProvider,
+        task_id: &str,
+        api_key_override: Option<&str>,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        let creds = api_key_override.map(|k| super::auth::VideoProviderCredentials {
+            api_key: Some(k.to_string()),
+            api_secret: None,
+        });
+        self.poll_generation_with_credentials(provider, task_id, creds.as_ref())
+            .await
+    }
+
     pub async fn export_video(
         &self,
         req: &VideoExportRequest,
     ) -> anyhow::Result<VideoExportResponse> {
         validate_export_request(req)?;
-        // Export is typically done via internal processing or a specific provider
-        // For now, we'll implement a placeholder that downloads and re-encodes
         tracing::info!(
             source_url = %req.source_url,
             format = %req.format,
@@ -88,23 +148,6 @@ impl Default for VideoProviderClient {
     fn default() -> Self {
         Self::new()
     }
-}
-
-fn resolve_provider_api_key(
-    provider: VideoProvider,
-    api_key_override: Option<&str>,
-) -> anyhow::Result<String> {
-    if let Some(value) = api_key_override.map(str::trim).filter(|s| !s.is_empty()) {
-        return Ok(value.to_string());
-    }
-
-    std::env::var(provider.api_key_env_var()).map_err(|_| {
-        anyhow::anyhow!(
-            "{} API key not configured (set {})",
-            provider.name(),
-            provider.api_key_env_var()
-        )
-    })
 }
 
 fn validate_export_request(req: &VideoExportRequest) -> anyhow::Result<()> {

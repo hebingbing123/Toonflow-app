@@ -5,6 +5,8 @@ use crate::llm::{
     chat_completion_assistant_text, images_generation_url, resolve_openai_image_model,
     resolve_openai_image_size,
 };
+use crate::vendor::catalog::resolve_video_provider_slug;
+use crate::vendor::video::credentials::load_video_provider_call;
 use crate::vendor::video::{
     VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
 };
@@ -44,7 +46,19 @@ pub(crate) async fn run_vendor_model_test(
 
     match kind {
         "text" => {
-            let cfg = vendor_probe_llm_config(state, stored_secret, model_name)?;
+            let vendor_numeric_id = vendor
+                .as_ref()
+                .map(|v| v.numeric_id)
+                .unwrap_or_else(|| raw_vendor_id.parse().unwrap_or(0));
+            let cfg = vendor_probe_llm_config(
+                state,
+                Some(pool),
+                row.owner_user_id,
+                vendor_numeric_id,
+                stored_secret,
+                model_name,
+            )
+            .await?;
             let text = chat_completion_assistant_text(
                 &cfg,
                 &state.http_client,
@@ -69,7 +83,19 @@ pub(crate) async fn run_vendor_model_test(
             }))
         }
         "image" => {
-            let cfg = vendor_probe_llm_config(state, stored_secret, model_name)?;
+            let vendor_numeric_id = vendor
+                .as_ref()
+                .map(|v| v.numeric_id)
+                .unwrap_or_else(|| raw_vendor_id.parse().unwrap_or(0));
+            let cfg = vendor_probe_llm_config(
+                state,
+                Some(pool),
+                row.owner_user_id,
+                vendor_numeric_id,
+                stored_secret,
+                model_name,
+            )
+            .await?;
             let resolved_model = resolve_openai_image_model(model_name);
             let size = resolve_openai_image_size(&resolved_model, "1024x1024");
             let (image_url, revised_prompt) = images_generation_url(
@@ -96,18 +122,31 @@ pub(crate) async fn run_vendor_model_test(
             }))
         }
         "video" => {
-            let provider = vendor
-                .as_ref()
-                .and_then(|v| v.slug.parse::<VideoProvider>().ok())
+            let provider = resolve_video_provider_slug(raw_vendor_id, model_name)
+                .map(VideoProvider::from_catalog_slug)
+                .or_else(|| {
+                    vendor
+                        .as_ref()
+                        .and_then(|v| v.slug.parse::<VideoProvider>().ok())
+                })
                 .or_else(|| raw_vendor_id.parse::<VideoProvider>().ok())
                 .ok_or_else(|| {
                     JobRunError::Failed(format!(
-                        "video vendor '{raw_vendor_id}' is not supported; expected Runway, Pika, or Kling"
+                        "video vendor '{raw_vendor_id}' is not supported; configure video_provider in models_catalog.json"
                     ))
                 })?;
 
+            let catalog_model_id = format!("{resolved_vendor_id}:{model_name}");
+            let (_video_creds, call) = load_video_provider_call(
+                pool,
+                row.owner_user_id,
+                provider,
+                Some(catalog_model_id.as_str()),
+            )
+            .await
+            .map_err(JobRunError::Failed)?;
             let response = VideoProviderClient::new()
-                .generate_video_with_api_key(
+                .generate_video_with_call(
                     &VideoGenerationRequest {
                         provider,
                         model: model_name.to_string(),
@@ -119,7 +158,7 @@ pub(crate) async fn run_vendor_model_test(
                         image_url: None,
                         seed: None,
                     },
-                    stored_secret.as_deref(),
+                    &call,
                 )
                 .await
                 .map_err(|e| JobRunError::Failed(e.to_string()))?;

@@ -63,6 +63,47 @@ extension _HomePageProductShell on _HomePageState {
     }
   }
 
+  void _openSettingsModelVendorsTab() {
+    if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    setState(() => _settingsHubInitialTabIndex = 2);
+    _selectProductUtilityPane(ProductWorkspacePane.account);
+  }
+
+  Future<void> _maybeNudgeDomesticVendorSetup(String token) async {
+    if (!mounted || _vendorSetupSnackShown) {
+      return;
+    }
+    if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    final dismissed = await DomesticVendorSetupPrefs.isDismissed();
+    if (dismissed) {
+      return;
+    }
+    final snapshot = await loadVendorCredentialSnapshot(token);
+    if (!mounted || snapshot == null) {
+      return;
+    }
+    if (isDomesticPrimarySetupComplete(
+      snapshot.vendors,
+      snapshot.credentialConfigured,
+    )) {
+      return;
+    }
+    _vendorSetupSnackShown = true;
+    final l10n =
+        _appL10n ?? lookupAppLocalizations(const Locale('en'));
+    showStudioSnackBar(
+      context,
+      message: l10n.studioVendorSetupSnackMessage,
+      icon: Icons.vpn_key_outlined,
+      actionLabel: l10n.studioVendorSetupSnackAction,
+      onAction: _openSettingsModelVendorsTab,
+    );
+  }
+
   void _goToProjectsHome() {
     _shellNavigationController.resetProductWorkspacePaneHistory();
     if (_shellNavigationController.productWorkspacePane ==
@@ -133,7 +174,9 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
-  Future<void> _handleProductPipelinePaneSelect(ProductWorkspacePane pane) async {
+  Future<void> _handleProductPipelinePaneSelect(
+    ProductWorkspacePane pane,
+  ) async {
     if (!_isProductPaneEnabledForConfig(pane, _platformConfig)) {
       return;
     }
@@ -353,7 +396,9 @@ extension _HomePageProductShell on _HomePageState {
                 Wrap(
                   spacing: columnGap,
                   runSpacing: 0,
-                  children: secondary.map(destinationTile).toList(growable: false),
+                  children: secondary
+                      .map(destinationTile)
+                      .toList(growable: false),
                 )
               else
                 ...secondary.map(destinationTile),
@@ -452,7 +497,7 @@ extension _HomePageProductShell on _HomePageState {
       context: anchorContext,
       barrierDismissible: true,
       barrierLabel: l10n.productShellMoreMenu,
-      barrierColor: Colors.black.withValues(alpha: width < 720 ? 0.32 : 0.18),
+      barrierColor: StudioTokens.of(anchorContext).overlay,
       transitionDuration: const Duration(milliseconds: 160),
       pageBuilder: (ctx, animation1, animation2) {
         final mediaQuery = MediaQuery.of(ctx);
@@ -636,9 +681,7 @@ extension _HomePageProductShell on _HomePageState {
       hoverColor: tokens.accentSoft.withValues(alpha: 0.94),
       highlightColor: tokens.primarySoft,
       fixedSize: const Size(44, 44),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
@@ -666,8 +709,9 @@ extension _HomePageProductShell on _HomePageState {
       currentPane: currentPane,
     );
     final width = MediaQuery.sizeOf(context).width;
-    final compactTopChrome = width < 720;
-    final showInlineWorkspaceContext = showPipeline && width >= 1280;
+    final compactTopChrome = width < 860;
+    final stackedTopChrome = width >= 860 && width < 1240;
+    final showInlineWorkspaceContext = showPipeline && width >= 1440;
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
@@ -686,7 +730,7 @@ extension _HomePageProductShell on _HomePageState {
       currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
       currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
       onNavigateToResults: _openGlobalSearchResults,
-      compact: compactTopChrome,
+      compact: compactTopChrome || stackedTopChrome,
       showLocalPrefsMenu: !compactTopChrome,
     );
     final moreMenuChrome = DecoratedBox(
@@ -719,22 +763,22 @@ extension _HomePageProductShell on _HomePageState {
             ),
             if (!compactTopChrome) ...<Widget>[
               const SizedBox(width: StudioSpacing.chromeActionGap),
-              PopupMenuButton<String>(
+              StudioIconMenuButton<String>(
                 style: _chromeIconButtonStyle(tokens),
                 tooltip: l10n.localeSectionTitle,
-                icon: const Icon(Icons.language_outlined),
-                itemBuilder: (ctx) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
+                icon: Icons.language_outlined,
+                entries: <StudioMenuEntry<String>>[
+                  StudioMenuEntry<String>(
                     value: 'system',
-                    child: Text(l10n.localeSystem),
+                    label: l10n.localeSystem,
                   ),
-                  PopupMenuItem<String>(
+                  StudioMenuEntry<String>(
                     value: 'en',
-                    child: Text(l10n.localeEnglish),
+                    label: l10n.localeEnglish,
                   ),
-                  PopupMenuItem<String>(
+                  StudioMenuEntry<String>(
                     value: 'zh',
-                    child: Text(l10n.localeChinese),
+                    label: l10n.localeChinese,
                   ),
                 ],
                 onSelected: AppLocaleNotifier.instance.setLocaleCode,
@@ -769,19 +813,81 @@ extension _HomePageProductShell on _HomePageState {
                 : 16,
           ),
           child: SizedBox(
-            height: desktopXWide
+            height: compactTopChrome
+                ? (width < 560 ? 112 : 118)
+                : stackedTopChrome
+                ? 112
+                : desktopXWide
                 ? 78
                 : desktopWide
                 ? 72
                 : 68,
-            child: Row(
-              children: compactTopChrome
-                  ? <Widget>[
-                      Expanded(child: globalSearchBar),
-                      const SizedBox(width: 8),
-                      moreMenuChrome,
-                    ]
-                  : <Widget>[
+            child: compactTopChrome
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: _buildStudioLogoHeader(
+                              context,
+                              appTitle,
+                              pageTitle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          moreMenuChrome,
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(children: <Widget>[Expanded(child: globalSearchBar)]),
+                    ],
+                  )
+                : stackedTopChrome
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: _buildStudioLogoHeader(
+                              context,
+                              appTitle,
+                              pageTitle,
+                            ),
+                          ),
+                          const StudioJobTray(),
+                          const SizedBox(width: 8),
+                          StudioAppBarActions(
+                            selectedPane: currentPane,
+                            unreadNotifications:
+                                _notificationsController.unreadCount,
+                            onSelectPane: _selectProductUtilityPane,
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          moreMenuChrome,
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: <Widget>[
+                          Expanded(child: globalSearchBar),
+                          if (width >= 1120) ...<Widget>[
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: 250,
+                              child: _buildWorkspaceContextSection(
+                                context,
+                                inline: true,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: <Widget>[
                       Expanded(
                         child: _buildStudioLogoHeader(
                           context,
@@ -827,7 +933,7 @@ extension _HomePageProductShell on _HomePageState {
                       const SizedBox(width: StudioSpacing.xs),
                       moreMenuChrome,
                     ],
-            ),
+                  ),
           ),
         ),
         Expanded(
@@ -929,7 +1035,7 @@ extension _HomePageProductShell on _HomePageState {
         accessToken: accessToken,
         child: StudioCommandPaletteShortcuts(
           actions: _studioCommandActions(l10n),
-          child: shell,
+          child: StudioOnboardingCoach(child: shell),
         ),
       ),
     );

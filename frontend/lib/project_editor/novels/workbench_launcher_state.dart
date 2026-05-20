@@ -28,4 +28,5 @@ class _NovelWorkbenchLocalState {
   List<ParsedNovelChapter> importPreviewRows;
   String infoLine;
   bool localBusy;
+  NovelCrawlAuthOverride? crawlAuthOverride;
 }

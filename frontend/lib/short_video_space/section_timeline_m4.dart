@@ -108,7 +108,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
       if (!mounted) {
         return;
       }
-      await showModalBottomSheet<void>(
+      await showStudioBottomSheet<void>(
         context: context,
         showDragHandle: true,
         builder: (ctx) {
@@ -154,7 +154,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
         SnackBar(
           content: Text(
             l10n.shortVideoTimelineRevisionLoadFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),
@@ -189,7 +189,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
         SnackBar(
           content: Text(
             l10n.shortVideoTimelineRevisionRestoreFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),

@@ -209,7 +209,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
       setState(() {
         _error = l10n.globalSearchErrSearchFailed(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
         _isLoading = false;
       });
@@ -527,7 +527,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     if (!mounted) {
       return;
     }
-    await showModalBottomSheet<void>(
+    await showStudioBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) {
@@ -1307,7 +1307,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Show filter dialog
   Future<void> _showMobileFilterDrawer() async {
-    await showModalBottomSheet(
+    await showStudioBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => DraggableScrollableSheet(

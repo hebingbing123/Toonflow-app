@@ -55,9 +55,8 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     } catch (e) {
       if (!mounted) return;
 
-      final loc = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _error = describeUserVisibleApiError(loc, e);
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -112,7 +111,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       if (!mounted) return;
 
       final loc = resolveAppLocalizationsForErrors(context);
-      final msg = describeUserVisibleApiError(loc, e);
+      final msg = describeUserVisibleApiErrorResolved(context, e);
       setState(() {
         _error = msg;
         _loading = false;

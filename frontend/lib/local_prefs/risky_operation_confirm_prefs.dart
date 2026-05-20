@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../design_system/components/studio_dropdown_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -230,53 +232,33 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return PopupMenuButton<_RiskyPrefsOverflowValue>(
+    return StudioIconMenuButton<_RiskyPrefsOverflowValue>(
       tooltip: tooltip ?? l10n.riskyPrefsMenuDefaultTooltip,
-      icon: Icon(icon),
+      icon: icon,
+      entries: <StudioMenuEntry<_RiskyPrefsOverflowValue>>[
+        StudioMenuEntry<_RiskyPrefsOverflowValue>(
+          value: _RiskyPrefsOverflowValue.viewActiveSilences,
+          label: l10n.riskyPrefsMenuViewSilencesTitle,
+          subtitle: l10n.riskyPrefsMenuViewSilencesSubtitle,
+          leading: Icon(
+            Icons.visibility_outlined,
+            size: 22,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        StudioMenuEntry<_RiskyPrefsOverflowValue>(
+          value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
+          label: l10n.riskyPrefsMenuResetTitle,
+          subtitle: l10n.riskyPrefsMenuResetSubtitle,
+          leading: const Icon(Icons.notifications_active_outlined, size: 22),
+        ),
+      ],
       onSelected: (value) {
         if (value == _RiskyPrefsOverflowValue.viewActiveSilences) {
           unawaited(showActiveRiskyOperationConfirmPrefsSummary(context));
         } else if (value == _RiskyPrefsOverflowValue.resetDestructiveConfirms) {
           unawaited(runResetRiskyOperationConfirmPrefsFlow(context));
         }
-      },
-      itemBuilder: (menuContext) {
-        final ml10n = resolveAppLocalizationsForErrors(menuContext);
-        return [
-          PopupMenuItem(
-            value: _RiskyPrefsOverflowValue.viewActiveSilences,
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              leading: Icon(
-                Icons.visibility_outlined,
-                size: 22,
-                color: Theme.of(menuContext).colorScheme.primary,
-              ),
-              title: Text(ml10n.riskyPrefsMenuViewSilencesTitle),
-              subtitle: Text(
-                ml10n.riskyPrefsMenuViewSilencesSubtitle,
-                style: Theme.of(menuContext).textTheme.bodySmall,
-              ),
-            ),
-          ),
-          PopupMenuItem(
-            value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              leading: const Icon(
-                Icons.notifications_active_outlined,
-                size: 22,
-              ),
-              title: Text(ml10n.riskyPrefsMenuResetTitle),
-              subtitle: Text(
-                ml10n.riskyPrefsMenuResetSubtitle,
-                style: Theme.of(menuContext).textTheme.bodySmall,
-              ),
-            ),
-          ),
-        ];
       },
     );
   }

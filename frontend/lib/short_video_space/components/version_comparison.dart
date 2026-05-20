@@ -305,7 +305,7 @@ class _VersionComparisonState extends State<VersionComparison> {
           SnackBar(
             content: Text(
               l10n.shortVideoVersionComparisonExportFailed(
-                describeUserVisibleApiError(l10n, e),
+                describeUserVisibleApiErrorResolved(context, e),
               ),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,

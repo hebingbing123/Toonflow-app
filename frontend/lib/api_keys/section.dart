@@ -335,48 +335,90 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 420;
+
+        return Padding(
+          padding: EdgeInsets.only(top: compact ? 12 : 16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  l10n.apiKeysSectionTitle,
-                  style: theme.textTheme.titleMedium,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.apiKeysSectionTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                  RiskyOperationConfirmPrefsOverflowMenu(
+                    tooltip: l10n.apiKeysRiskyPrefsTooltip,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.apiKeysIntroBody,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.apiKeysRiskyPrefsTooltip,
-              ),
+              SizedBox(height: compact ? 10 : 12),
+              _buildCreatePanel(context, l10n, compact: compact),
+              SizedBox(height: compact ? 12 : 14),
+              _buildListPanel(context, l10n, compact: compact),
+              SizedBox(height: compact ? 12 : 14),
+              _buildAuditPanel(context, l10n, compact: compact),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.apiKeysIntroBody,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildCreatePanel(context, l10n),
-          const SizedBox(height: 14),
-          _buildListPanel(context, l10n),
-          const SizedBox(height: 14),
-          _buildAuditPanel(context, l10n),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildCreatePanel(BuildContext context, AppLocalizations l10n) {
+  Widget _buildCreatePanel(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool compact,
+  }) {
     final theme = Theme.of(context);
+    final panelPadding = compact ? 14.0 : 16.0;
+    final refreshButton = compact
+        ? IconButton(
+            tooltip: l10n.apiKeysRefresh,
+            onPressed: widget.controller.loading
+                ? null
+                : widget.controller.refresh,
+            icon: const Icon(Icons.refresh, size: 20),
+          )
+        : TextButton.icon(
+            onPressed: widget.controller.loading
+                ? null
+                : widget.controller.refresh,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: Text(l10n.apiKeysRefresh),
+          );
+    final createButton = FilledButton.tonalIcon(
+      onPressed: widget.controller.creating ? null : _createKey,
+      icon: widget.controller.creating
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.key_outlined),
+      label: Text(
+        widget.controller.creating
+            ? l10n.apiKeysCreating
+            : l10n.apiKeysCreateButton,
+      ),
+    );
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(panelPadding),
       decoration: BoxDecoration(
         border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
@@ -392,13 +434,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   style: theme.textTheme.titleSmall,
                 ),
               ),
-              TextButton.icon(
-                onPressed: widget.controller.loading
-                    ? null
-                    : widget.controller.refresh,
-                icon: const Icon(Icons.refresh, size: 18),
-                label: Text(l10n.apiKeysRefresh),
-              ),
+              refreshButton,
             ],
           ),
           const SizedBox(height: 8),
@@ -504,22 +540,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 ),
               ),
             ),
-          const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            onPressed: widget.controller.creating ? null : _createKey,
-            icon: widget.controller.creating
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.key_outlined),
-            label: Text(
-              widget.controller.creating
-                  ? l10n.apiKeysCreating
-                  : l10n.apiKeysCreateButton,
-            ),
-          ),
+          SizedBox(height: compact ? 10 : 12),
+          if (compact)
+            SizedBox(width: double.infinity, child: createButton)
+          else
+            createButton,
           if (widget.controller.latestPlaintextToken != null) ...[
             const SizedBox(height: 14),
             Container(
@@ -546,24 +571,46 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   const SizedBox(height: 10),
                   SelectableText(widget.controller.latestPlaintextToken!),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () => _copyText(
-                          widget.controller.latestPlaintextToken!,
-                          l10n.apiKeysCopiedPlaintextSnack,
+                  if (compact)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _copyText(
+                            widget.controller.latestPlaintextToken!,
+                            l10n.apiKeysCopiedPlaintextSnack,
+                          ),
+                          icon: const Icon(Icons.copy_outlined, size: 18),
+                          label: Text(l10n.apiKeysCopyPlaintext),
                         ),
-                        icon: const Icon(Icons.copy_outlined, size: 18),
-                        label: Text(l10n.apiKeysCopyPlaintext),
-                      ),
-                      TextButton(
-                        onPressed: widget.controller.clearLatestPlaintextToken,
-                        child: Text(l10n.apiKeysHidePlaintext),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed:
+                              widget.controller.clearLatestPlaintextToken,
+                          child: Text(l10n.apiKeysHidePlaintext),
+                        ),
+                      ],
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _copyText(
+                            widget.controller.latestPlaintextToken!,
+                            l10n.apiKeysCopiedPlaintextSnack,
+                          ),
+                          icon: const Icon(Icons.copy_outlined, size: 18),
+                          label: Text(l10n.apiKeysCopyPlaintext),
+                        ),
+                        TextButton(
+                          onPressed:
+                              widget.controller.clearLatestPlaintextToken,
+                          child: Text(l10n.apiKeysHidePlaintext),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -573,11 +620,15 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
   }
 
-  Widget _buildListPanel(BuildContext context, AppLocalizations l10n) {
+  Widget _buildListPanel(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool compact,
+  }) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(compact ? 14 : 16),
       decoration: BoxDecoration(
         border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
@@ -585,20 +636,29 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.apiKeysExistingKeysTitle, style: theme.textTheme.titleSmall),
+          Text(
+            l10n.apiKeysExistingKeysTitle,
+            style: theme.textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               Chip(
-                label: Text(l10n.apiKeysStatActive(widget.controller.activeCount)),
+                label: Text(
+                  l10n.apiKeysStatActive(widget.controller.activeCount),
+                ),
               ),
               Chip(
-                label: Text(l10n.apiKeysStatRevoked(widget.controller.revokedCount)),
+                label: Text(
+                  l10n.apiKeysStatRevoked(widget.controller.revokedCount),
+                ),
               ),
               Chip(
-                label: Text(l10n.apiKeysStatTotal(widget.controller.items.length)),
+                label: Text(
+                  l10n.apiKeysStatTotal(widget.controller.items.length),
+                ),
               ),
             ],
           ),
@@ -614,7 +674,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             )
           else
             ...widget.controller.items.map(
-              (item) => _buildKeyCard(context, l10n, item),
+              (item) => _buildKeyCard(context, l10n, item, compact: compact),
             ),
         ],
       ),
@@ -624,13 +684,70 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   Widget _buildKeyCard(
     BuildContext context,
     AppLocalizations l10n,
-    ApiKeyRecordV1 item,
-  ) {
+    ApiKeyRecordV1 item, {
+    required bool compact,
+  }) {
     final busy = widget.controller.busyKeyId == item.id;
     final theme = Theme.of(context);
+    final primaryAction = FilledButton.tonalIcon(
+      onPressed: busy ? null : () => _showRotateDialog(item),
+      icon: busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.refresh_outlined),
+      label: Text(l10n.apiKeysActionRotate),
+    );
+    final stateAction = item.isActive
+        ? OutlinedButton(
+            onPressed: busy ? null : () => _showRevokeDialog(item),
+            child: Text(l10n.apiKeysActionRevoke),
+          )
+        : OutlinedButton(
+            onPressed: busy || item.isExpired
+                ? null
+                : () => widget.controller.activateKey(item.id),
+            child: Text(
+              item.isExpired
+                  ? l10n.apiKeysExpiredNeedsRotate
+                  : l10n.apiKeysRestore,
+            ),
+          );
+    final deleteAction = OutlinedButton(
+      onPressed: busy
+          ? null
+          : () async {
+              final confirmed = await showStudioDialog<bool>(
+                context: context,
+                builder: (context) => StudioAlertDialog(
+                  title: Text(l10n.apiKeysDeleteTitle),
+                  content: SelectableText(
+                    l10n.apiKeysDeleteBody(item.displayName, item.keyHint),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(l10n.globalSearchCancel),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(l10n.apiKeysDelete),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true) {
+                await widget.controller.deleteKey(item.id);
+              }
+            },
+      child: Text(l10n.apiKeysDelete),
+    );
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(compact ? 10 : 12),
       decoration: BoxDecoration(
         border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
@@ -757,83 +874,37 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ),
             ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonalIcon(
-                onPressed: busy ? null : () => _showRotateDialog(item),
-                icon: busy
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.refresh_outlined),
-                label: Text(l10n.apiKeysActionRotate),
-              ),
-              if (item.isActive)
-                OutlinedButton(
-                  onPressed: busy ? null : () => _showRevokeDialog(item),
-                  child: Text(l10n.apiKeysActionRevoke),
-                )
-              else
-                OutlinedButton(
-                  onPressed: busy || item.isExpired
-                      ? null
-                      : () => widget.controller.activateKey(item.id),
-                  child: Text(
-                    item.isExpired
-                        ? l10n.apiKeysExpiredNeedsRotate
-                        : l10n.apiKeysRestore,
-                  ),
-                ),
-              OutlinedButton(
-                onPressed: busy
-                    ? null
-                    : () async {
-                        final confirmed = await showStudioDialog<bool>(
-                          context: context,
-                          builder: (context) => StudioAlertDialog(
-                            title: Text(l10n.apiKeysDeleteTitle),
-                            content: SelectableText(
-                              l10n.apiKeysDeleteBody(
-                                item.displayName,
-                                item.keyHint,
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: Text(l10n.globalSearchCancel),
-                              ),
-                              FilledButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: Text(l10n.apiKeysDelete),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirmed == true) {
-                          await widget.controller.deleteKey(item.id);
-                        }
-                      },
-                child: Text(l10n.apiKeysDelete),
-              ),
-            ],
-          ),
+          if (compact)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                primaryAction,
+                const SizedBox(height: 8),
+                stateAction,
+                const SizedBox(height: 8),
+                deleteAction,
+              ],
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [primaryAction, stateAction, deleteAction],
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildAuditPanel(BuildContext context, AppLocalizations l10n) {
+  Widget _buildAuditPanel(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool compact,
+  }) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(compact ? 14 : 16),
       decoration: BoxDecoration(
         border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
@@ -854,7 +925,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ...widget.controller.auditItems.map(
               (item) => Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(compact ? 10 : 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(8),

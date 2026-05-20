@@ -94,6 +94,406 @@
       "tier": "quality",
       "value_tier": "quality",
       "best_for": "Final-cut video quality"
+    },
+    "5:llama3.2": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — self-hosted"
+    },
+    "5:llama3.1:8b": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — self-hosted"
+    },
+    "5:qwen2.5:7b": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — Qwen family"
+    },
+    "5:mistral": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — Mistral"
+    },
+    "5:gemma2:2b": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — Gemma"
+    },
+    "5:phi3:mini": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Local Ollama — Phi-3"
+    },
+    "6:local-model": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "LM Studio — match loaded model id"
+    },
+    "6:llama-3.2-3b-instruct": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "LM Studio — local inference"
+    },
+    "6:qwen2.5-7b-instruct": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "LM Studio — Qwen instruct"
+    },
+    "6:mistral-7b-instruct-v0.3": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 0,
+      "cny_cents_per_unit": 0,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "LM Studio — Mistral instruct"
+    },
+    "7:qwen-turbo": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 8,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "DashScope — fast Qwen"
+    },
+    "7:qwen-plus": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 40,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "DashScope — balanced Qwen"
+    },
+    "7:qwen-max": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 10,
+      "cny_cents_per_unit": 100,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "DashScope — strongest Qwen"
+    },
+    "7:qwen-long": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 20,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "DashScope — long context"
+    },
+    "7:qwen2.5-72b-instruct": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 6,
+      "cny_cents_per_unit": 60,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "DashScope — Qwen2.5 72B"
+    },
+    "7:qwen2.5-7b-instruct": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 10,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "DashScope — Qwen2.5 7B"
+    },
+    "8:deepseek-chat": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 14,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "DeepSeek — general chat"
+    },
+    "8:deepseek-reasoner": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 55,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "DeepSeek — reasoning / R1"
+    },
+    "9:glm-4-flash": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 10,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Zhipu — fast GLM-4"
+    },
+    "9:glm-4-air": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 25,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Zhipu — balanced GLM-4"
+    },
+    "9:glm-4-plus": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 5,
+      "cny_cents_per_unit": 50,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Zhipu — flagship GLM-4"
+    },
+    "9:glm-4-long": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 30,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Zhipu — long context"
+    },
+    "10:moonshot-v1-8k": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 24,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Moonshot — short context"
+    },
+    "10:moonshot-v1-32k": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 3,
+      "cny_cents_per_unit": 36,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Moonshot — medium context"
+    },
+    "10:moonshot-v1-128k": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 5,
+      "cny_cents_per_unit": 60,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Moonshot — long context"
+    },
+    "10:kimi-latest": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 48,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Moonshot — Kimi latest"
+    },
+    "11:Baichuan4-Turbo": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 28,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Baichuan — fast generation"
+    },
+    "11:Baichuan4-Air": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 12,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Baichuan — lightweight"
+    },
+    "11:Baichuan3-Turbo": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 15,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Baichuan — legacy turbo"
+    },
+    "12:deepseek-ai/DeepSeek-V3": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 12,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "SiliconFlow — hosted DeepSeek V3"
+    },
+    "12:deepseek-ai/DeepSeek-R1": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 3,
+      "cny_cents_per_unit": 40,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "SiliconFlow — hosted DeepSeek R1"
+    },
+    "12:Qwen/Qwen2.5-72B-Instruct": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 22,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "SiliconFlow — hosted Qwen 72B"
+    },
+    "12:THUDM/glm-4-9b-chat": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 8,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "SiliconFlow — hosted GLM-4 9B"
+    },
+    "13:abab6.5s-chat": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 20,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "MiniMax — standard chat"
+    },
+    "13:abab6.5g-chat": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 3,
+      "cny_cents_per_unit": 35,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "MiniMax — enhanced chat"
+    },
+    "13:MiniMax-Text-01": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 45,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "MiniMax — text flagship"
+    },
+    "14:yi-lightning": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 7,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Yi — ultra fast"
+    },
+    "14:yi-medium": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 2,
+      "cny_cents_per_unit": 18,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Yi — balanced"
+    },
+    "14:yi-large": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 42,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Yi — large model"
+    },
+    "14:yi-large-turbo": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 3,
+      "cny_cents_per_unit": 32,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Yi — large turbo"
+    },
+    "15:gemini-2.0-flash": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 10,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Gemini — fast multimodal-capable flash"
+    },
+    "15:gemini-2.0-flash-lite": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 6,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Gemini — lowest cost flash"
+    },
+    "15:gemini-1.5-pro": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 6,
+      "cny_cents_per_unit": 70,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Gemini — pro quality"
+    },
+    "1:gpt-4o": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 5,
+      "cny_cents_per_unit": 50,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "OpenAI — vision-capable GPT-4o"
+    },
+    "1:sora-2": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 15,
+      "cny_cents_per_unit": 200,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "OpenAI Sora video"
+    },
+    "7:qwen-vl-max": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 4,
+      "cny_cents_per_unit": 35,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Qwen vision-language"
+    },
+    "16:claude-3-5-sonnet-20241022": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 6,
+      "cny_cents_per_unit": 60,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Anthropic Claude 3.5 Sonnet"
+    },
+    "18:doubao-pro-32k": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 12,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Volcengine Doubao chat"
+    },
+    "20:doubao-seedance-1-0-pro": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 8,
+      "cny_cents_per_unit": 120,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Doubao Seedance video"
+    },
+    "21:hunyuan-video": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 7,
+      "cny_cents_per_unit": 100,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Tencent Hunyuan video"
     }
   }
 }

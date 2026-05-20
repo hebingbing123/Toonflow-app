@@ -139,7 +139,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       setState(() {
         _confirmCandidatesBusy = false;
         _projectConfigLine = l10nErr.shortVideoProductionBatchFailed(
-          describeUserVisibleApiError(l10nErr, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -232,7 +232,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         _projectConfigLine = blocked != null && blocked.isNotEmpty
             ? blocked
             : l10nErr.shortVideoProductionBatchFailed(
-                describeUserVisibleApiError(l10nErr, e),
+                describeUserVisibleApiErrorResolved(context, e),
               );
       });
     } catch (e) {
@@ -243,7 +243,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       setState(() {
         _batchCandidateBusy = false;
         _projectConfigLine = l10nErr.shortVideoProductionBatchFailed(
-          describeUserVisibleApiError(l10nErr, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -573,7 +573,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = l10nErr.shortVideoProductionSetCurrentFailed(
-          describeUserVisibleApiError(l10nErr, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }
@@ -625,7 +625,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = l10nErr.shortVideoProductionSetCurrentFailed(
-          describeUserVisibleApiError(l10nErr, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     }

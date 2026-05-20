@@ -125,7 +125,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+          SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
         );
       }
     } finally {

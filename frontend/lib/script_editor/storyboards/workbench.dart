@@ -50,7 +50,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     } catch (e) {
       productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
-        describeUserVisibleApiError(l10n, e),
+        describeUserVisibleApiErrorResolved(context, e),
       );
     } finally {
       productionSummaryLoading[0] = false;
@@ -277,11 +277,10 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       );
     } catch (e) {
       if (mounted) {
-        final snackL10n = resolveAppLocalizationsForErrors(context);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(
-          SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+          SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
         );
       }
     }

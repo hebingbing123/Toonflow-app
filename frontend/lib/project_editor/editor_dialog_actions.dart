@@ -79,7 +79,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text(describeUserVisibleApiError(l10n, e)),
+                        content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
                       ),
                     );
                   }
@@ -174,7 +174,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text(describeUserVisibleApiError(l10n, e)),
+                        content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
                       ),
                     );
                   }

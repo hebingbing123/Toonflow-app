@@ -98,6 +98,16 @@ yarn refactor:agent --full
 
 完成以上设置后，**同一套** [`scripts/refactor-check.sh`](scripts/refactor-check.sh) 在本地与 Agent 终端里才能接近「改完即跑、少打断」。
 
+## 桌面 / Rust + Flutter skill（native-feel）
+
+涉及 **桌面架构、Flutter 桌面壳、Rust 桥接边界、desktop vs web 能力** 时：
+
+1. **优先**使用 **`native-feel-cross-platform-desktop`** skill（完整内容在 `~/.codex/skills/native-feel-cross-platform-desktop/`）。
+2. **本机 Cursor**：运行 `./scripts/link-cursor-skills.sh`（默认 symlink 到 `.cursor/skills/`），再用 `./scripts/verify-cursor-skills.sh` 确认。
+3. **无 symlink 时**：读 [`docs/agent-skills/native-feel-cross-platform-desktop.md`](docs/agent-skills/native-feel-cross-platform-desktop.md) 与 [`docs/agent-skills/README.md`](docs/agent-skills/README.md)。
+
+Symlink 与 copy 对比、验证命令见 `docs/agent-skills/README.md`。
+
 ## 与本地 `.cursor/rules` 的关系
 
-仓库根 `.cursor/` 可能被 `.gitignore` 忽略；**本文件是进 Git 的约定**，便于任何克隆本仓库的 Agent 行为一致。
+仓库根 `.cursor/` 可能被 `.gitignore` 忽略；**本文件是进 Git 的约定**，便于任何克隆本仓库的 Agent 行为一致。桌面 skill 的 **Git 内索引** 在 `docs/agent-skills/`；**Cursor 自动发现** 依赖本机执行 `scripts/link-cursor-skills.sh`。

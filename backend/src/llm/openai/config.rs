@@ -1,8 +1,11 @@
+use crate::vendor::catalog::VendorProtocol;
+
 #[derive(Clone, Debug)]
 pub struct LlmConfig {
     pub api_key: String,
     pub base_url: String,
     pub model: String,
+    pub protocol: VendorProtocol,
 }
 
 impl LlmConfig {
@@ -19,6 +22,7 @@ impl LlmConfig {
             api_key,
             base_url,
             model,
+            protocol: VendorProtocol::OpenAiCompatible,
         })
     }
 }

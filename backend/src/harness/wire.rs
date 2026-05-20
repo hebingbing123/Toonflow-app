@@ -78,6 +78,9 @@ pub struct HarnessAgentRunPayload {
     /// Until **`HARNESS_AGENT_STREAMING_TOOLS`** enables the server path, omit this field or use **`false`**.
     #[serde(default)]
     pub stream: Option<bool>,
+    /// Optional catalog composite id; overrides project step routing when set.
+    #[serde(default)]
+    pub model_id: Option<String>,
 }
 
 #[cfg(test)]

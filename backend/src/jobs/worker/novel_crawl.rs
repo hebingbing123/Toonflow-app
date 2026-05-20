@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 use crate::jobs::payload_project::payload_project_numeric_id;
 use crate::jobs::worker::common::{job_ok, JobRunError};
+use crate::narrative::novels::crawl_auth::resolve_stored_crawl_auth;
 use crate::narrative::novels::handlers::crawl_preview::{
     crawl_preview_adaptive, evaluate_novel_import_quality, insert_imported_novels_for_project,
     normalize_extracted_text_for_import, parse_whole_book_chapters_from_normalized,
@@ -62,6 +63,10 @@ pub(crate) async fn run_novel_crawl_import_batch(
         .await
         .map_err(|e| JobRunError::Failed(format!("project write scope check failed: {e:?}")))?;
 
+    let auth = resolve_stored_crawl_auth(state, pool, project_id)
+        .await
+        .map_err(|e| JobRunError::Failed(format!("crawl auth resolve failed: {e:?}")))?;
+
     let mut succeeded = 0i32;
     let mut failed = 0i32;
     let mut items = Vec::<serde_json::Value>::new();
@@ -77,7 +82,7 @@ pub(crate) async fn run_novel_crawl_import_batch(
         };
 
         let outcome = async {
-            let preview = crawl_preview_adaptive(state, &parsed).await?;
+            let preview = crawl_preview_adaptive(state, &parsed, &auth).await?;
             let normalized_for_import = normalize_extracted_text_for_import(&preview.body_text);
             let mut chapters: Vec<(i32, String, String)> =
                 parse_whole_book_chapters_from_normalized(&normalized_for_import, "导入章节");

@@ -158,9 +158,10 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
       if (ctx.mounted) {
         actionBusy[0] = false;
         setBoardsState(() {});
-        final snackL10n = resolveAppLocalizationsForErrors(ctx);
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+          SnackBar(
+            content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
+          ),
         );
       }
     } finally {

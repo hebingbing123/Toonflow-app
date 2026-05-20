@@ -71,6 +71,104 @@ class ListNovelsResponse {
   }
 }
 
+/// Optional per-request crawl auth override (merged with stored project config).
+class NovelCrawlAuthOverride {
+  const NovelCrawlAuthOverride({
+    this.cookie,
+    this.username,
+    this.password,
+  });
+
+  final String? cookie;
+  final String? username;
+  final String? password;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      if (cookie != null && cookie!.isNotEmpty) 'cookie': cookie,
+      if (username != null && username!.isNotEmpty) 'username': username,
+      if (password != null && password!.isNotEmpty) 'password': password,
+    };
+  }
+
+  bool get isEmpty =>
+      (cookie == null || cookie!.isEmpty) &&
+      (username == null || username!.isEmpty) &&
+      (password == null || password!.isEmpty);
+}
+
+/// Response for **`GET/PUT …/novels/crawl-auth`**.
+class NovelCrawlAuthGetResponse {
+  const NovelCrawlAuthGetResponse({
+    required this.authMode,
+    required this.hasCookie,
+    required this.hasUsername,
+    required this.hasPassword,
+    this.loginUrl,
+    required this.loginUsernameField,
+    required this.loginPasswordField,
+    required this.encryptionConfigured,
+    this.updatedAt,
+  });
+
+  final String authMode;
+  final bool hasCookie;
+  final bool hasUsername;
+  final bool hasPassword;
+  final String? loginUrl;
+  final String loginUsernameField;
+  final String loginPasswordField;
+  final bool encryptionConfigured;
+  final String? updatedAt;
+
+  factory NovelCrawlAuthGetResponse.fromJson(Map<String, dynamic> json) {
+    return NovelCrawlAuthGetResponse(
+      authMode: json['auth_mode'] as String? ?? 'none',
+      hasCookie: json['has_cookie'] as bool? ?? false,
+      hasUsername: json['has_username'] as bool? ?? false,
+      hasPassword: json['has_password'] as bool? ?? false,
+      loginUrl: json['login_url'] as String?,
+      loginUsernameField: json['login_username_field'] as String? ?? 'username',
+      loginPasswordField: json['login_password_field'] as String? ?? 'password',
+      encryptionConfigured: json['encryption_configured'] as bool? ?? false,
+      updatedAt: json['updated_at'] as String?,
+    );
+  }
+}
+
+/// Body for **`PUT …/novels/crawl-auth`**.
+class NovelCrawlAuthPutBody {
+  const NovelCrawlAuthPutBody({
+    required this.authMode,
+    this.cookie,
+    this.username,
+    this.password,
+    this.loginUrl,
+    this.loginUsernameField,
+    this.loginPasswordField,
+  });
+
+  final String authMode;
+  final String? cookie;
+  final String? username;
+  final String? password;
+  final String? loginUrl;
+  final String? loginUsernameField;
+  final String? loginPasswordField;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'auth_mode': authMode,
+      'cookie': cookie,
+      'username': username,
+      'password': password,
+      'login_url': loginUrl,
+      'login_username_field': loginUsernameField,
+      'login_password_field': loginPasswordField,
+    };
+  }
+}
+
 /// Response for **`POST …/novels/crawl-preview`** — OpenAPI **`NovelCrawlPreviewResponse`**.
 class NovelCrawlPreviewResponse {
   const NovelCrawlPreviewResponse({

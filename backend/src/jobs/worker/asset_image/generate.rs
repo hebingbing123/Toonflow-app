@@ -8,6 +8,8 @@ use crate::jobs::payload_project::{
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size};
+use crate::projects::model_routing::jobs::resolve_asset_image_llm_config;
+use crate::projects::model_routing::StudioStepSlug;
 use crate::state::AppState;
 
 use super::common::{generate_and_store_asset_image, AssetImageGenCtx};
@@ -18,19 +20,11 @@ pub(crate) async fn run_asset_generate_image(
     job_id: Uuid,
     row: &JobRow,
 ) -> Result<serde_json::Value, JobRunError> {
-    let Some(ref cfg) = state.llm else {
-        return Err(JobRunError::Failed(
-            "LLM not configured (set OPENAI_API_KEY or LLM_API_KEY)".into(),
-        ));
-    };
-
     if generation_job_is_cancelled(pool, job_id).await? {
         return Err(JobRunError::Cancelled);
     }
 
     let p = &row.payload;
-    let project_numeric_id =
-        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let asset_numeric_id = p
         .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
@@ -40,6 +34,17 @@ pub(crate) async fn run_asset_generate_image(
         .get("model")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing model".into()))?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
+    let cfg = resolve_asset_image_llm_config(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Assets,
+        model_in,
+    )
+    .await?;
     let resolution = p
         .get("resolution")
         .and_then(|x| x.as_str())
@@ -71,7 +76,7 @@ pub(crate) async fn run_asset_generate_image(
     );
 
     let ctx = AssetImageGenCtx {
-        cfg,
+        cfg: &cfg,
         http_client: &state.http_client,
         pool,
         job_id,

@@ -1,5 +1,25 @@
 part of '../../../home_page.dart';
 
+Map<String, String> _novelCrawlHttpHeaders(NovelCrawlAuthOverride? auth) {
+  final headers = <String, String>{
+    'User-Agent': 'OpenFlow/1.0 content-intake crawler',
+  };
+  final cookie = auth?.cookie?.trim();
+  if (cookie != null && cookie.isNotEmpty) {
+    headers['Cookie'] = cookie;
+  }
+  final username = auth?.username?.trim();
+  final password = auth?.password;
+  if (username != null &&
+      username.isNotEmpty &&
+      password != null &&
+      password.isNotEmpty) {
+    final token = base64Encode(utf8.encode('$username:$password'));
+    headers['Authorization'] = 'Basic $token';
+  }
+  return headers;
+}
+
 class _CrawlerPreviewPayload {
   const _CrawlerPreviewPayload({
     required this.title,
@@ -38,6 +58,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required void Function(String infoLine) applyInfoLine,
     required void Function(List<ParsedNovelChapter> rows, String message)
     applyImportPreview,
+    NovelCrawlAuthOverride? crawlAuth,
   }) async {
     final url = importUrlCtrl.text.trim();
     if (url.isEmpty) {
@@ -56,6 +77,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         token,
         project.id,
         url,
+        auth: crawlAuth,
       );
       payload = _CrawlerPreviewPayload(
         title: preview.title,
@@ -68,9 +90,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     } else {
       final response = await http.get(
         uri,
-        headers: const <String, String>{
-          'User-Agent': 'OpenFlow/1.0 content-intake crawler',
-        },
+        headers: _novelCrawlHttpHeaders(crawlAuth),
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw FormatException(
@@ -78,7 +98,12 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         );
       }
 
-      payload = await _crawlNovelSourceAdaptive(l10n, uri, response.body);
+      payload = await _crawlNovelSourceAdaptive(
+        l10n,
+        uri,
+        response.body,
+        crawlAuth: crawlAuth,
+      );
     }
 
     importRawTextCtrl.text = payload.bodyText;
@@ -110,8 +135,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   Future<_CrawlerPreviewPayload> _crawlNovelSourceAdaptive(
     AppLocalizations l10n,
     Uri seedUri,
-    String seedHtml,
-  ) async {
+    String seedHtml, {
+    NovelCrawlAuthOverride? crawlAuth,
+  }) async {
     final seed = extractCrawlerContentFromHtml(
       l10n,
       seedHtml,
@@ -122,7 +148,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       final chapterPages = seed.chapterUrls.take(20).toList(growable: false);
       final chunks = <String>[];
       for (var i = 0; i < chapterPages.length; i += 1) {
-        final body = await _fetchCrawlerBodyText(l10n, chapterPages[i]);
+        final body = await _fetchCrawlerBodyText(
+          l10n,
+          chapterPages[i],
+          crawlAuth: crawlAuth,
+        );
         if (body == null || body.bodyText.trim().isEmpty) {
           continue;
         }
@@ -149,7 +179,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         break;
       }
       visited.add(next);
-      final page = await _fetchCrawlerBodyText(l10n, next);
+      final page = await _fetchCrawlerBodyText(l10n, next, crawlAuth: crawlAuth);
       if (page == null || page.bodyText.trim().isEmpty) {
         break;
       }
@@ -169,17 +199,16 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
 
   Future<ExtractedCrawlerContent?> _fetchCrawlerBodyText(
     AppLocalizations l10n,
-    String rawUrl,
-  ) async {
+    String rawUrl, {
+    NovelCrawlAuthOverride? crawlAuth,
+  }) async {
     final uri = Uri.tryParse(rawUrl);
     if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
       return null;
     }
     final response = await http.get(
       uri,
-      headers: const <String, String>{
-        'User-Agent': 'OpenFlow/1.0 content-intake crawler',
-      },
+      headers: _novelCrawlHttpHeaders(crawlAuth),
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       return null;
@@ -208,7 +237,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       if (ctx.mounted) {
         final l10n = resolveAppLocalizationsForErrors(ctx);
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+          SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
         );
       }
     } finally {
@@ -386,6 +415,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
+    NovelCrawlAuthOverride? crawlAuth,
   }) async {
     final url = intakeSourceUrl.trim();
     if (url.isEmpty) {
@@ -397,6 +427,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       url,
       intakeStatus: intakeStatus,
       intakeNote: intakeNote,
+      auth: crawlAuth,
     );
     if (imported.qualityWarnings.isNotEmpty) {
       applyInfoLine(
@@ -428,6 +459,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
+    NovelCrawlAuthOverride? crawlAuth,
   }) async {
     final urls = batchUrls
         .split(RegExp(r'[\n\r]+'))
@@ -443,6 +475,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       urls,
       intakeStatus: intakeStatus,
       intakeNote: intakeNote,
+      auth: crawlAuth,
     );
     await refreshWorkbench(setLocalState);
     final sampleFailures = res.items

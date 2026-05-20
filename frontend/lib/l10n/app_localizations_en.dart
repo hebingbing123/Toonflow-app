@@ -1121,6 +1121,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your first project to start the script-to-video workflow.';
 
   @override
+  String get studioProjectsEmptyStep1 =>
+      'Tap Create project, name it, and pick a story premise.';
+
+  @override
+  String get studioProjectsEmptyStep2 =>
+      'Open the project — you land on Script to write or import your story.';
+
+  @override
+  String get studioProjectsEmptyStep3 =>
+      'Before AI generation, add models and API keys under Settings → Model vendors.';
+
+  @override
+  String studioGettingStartedStepSemantics(
+    int stepNumber,
+    int stepTotal,
+    String stepText,
+  ) {
+    return 'Step $stepNumber of $stepTotal: $stepText';
+  }
+
+  @override
   String get studioCreateProjectWizardTitle => 'Create project';
 
   @override
@@ -1496,7 +1517,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioOnboardingStep1 =>
-      'Use the left nav to start creating under Projects.';
+      'Open Projects from the app navigation to start creating.';
 
   @override
   String get studioOnboardingStep2 =>
@@ -22423,6 +22444,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsModelVendorsBaseUrlCloudHint =>
       'Override the default cloud endpoint if needed.';
+
+  @override
+  String get settingsDomesticVendorsSetupTitle =>
+      'Set up China-based model providers';
+
+  @override
+  String get settingsDomesticVendorsSetupSubtitle =>
+      'Add API keys for the providers you use. Project Studio model routing picks from enabled vendors here.';
+
+  @override
+  String settingsDomesticVendorsSetupProgress(int ready, int total) {
+    return '$ready of $total core providers ready';
+  }
+
+  @override
+  String get settingsDomesticVendorsSetupConfigureAction => 'Add API key';
+
+  @override
+  String get settingsDomesticVendorsSetupDismiss => 'Remind me later';
+
+  @override
+  String get settingsDomesticVendorsSetupShowExtended =>
+      'More China-based providers (video & others)';
+
+  @override
+  String get settingsDomesticVendorsSetupHideExtended =>
+      'Hide additional providers';
+
+  @override
+  String get settingsInternationalVendorsSetupTitle =>
+      'International model providers';
+
+  @override
+  String get settingsInternationalVendorsSetupSubtitle =>
+      'Optional: add keys for OpenAI, Gemini, Claude, and other global vendors you use.';
+
+  @override
+  String settingsInternationalVendorsSetupProgress(int ready, int total) {
+    return '$ready of $total global providers ready';
+  }
+
+  @override
+  String get settingsInternationalVendorsSetupShowExtended =>
+      'More global providers (video & Azure)';
+
+  @override
+  String get settingsInternationalVendorsSetupHideExtended =>
+      'Hide additional global providers';
+
+  @override
+  String get studioVendorSetupSnackMessage =>
+      'Configure a China-based model provider before generating with AI.';
+
+  @override
+  String get studioVendorSetupSnackAction => 'Open settings';
+
+  @override
+  String get studioVendorSetupProjectsNudgeTitle =>
+      'Add API keys for domestic model providers to start generating.';
+
+  @override
+  String get studioModelRoutingCatalogEmptyTitle =>
+      'No models available for this step';
+
+  @override
+  String get studioModelRoutingCatalogEmptyBody =>
+      'Enable model providers and save API keys under Settings → API & models. Domestic providers (Qwen, DeepSeek, etc.) are listed first.';
+
+  @override
+  String get studioModelRoutingOpenVendorSettings =>
+      'Configure model providers';
+
+  @override
+  String get settingsModelVendorsAggregationHint =>
+      'Unified gateway · OpenAI API';
+
+  @override
+  String get settingsModelVendorsProtocolArk => 'Ark';
+
+  @override
+  String get settingsModelVendorsProtocolAnthropic => 'Claude';
+
+  @override
+  String get settingsModelVendorsProtocolGemini => 'Gemini';
+
+  @override
+  String get settingsModelVendorsProtocolAzure => 'Azure';
 
   @override
   String get settingsModelVendorsSaveBaseUrl => 'Save base URL';

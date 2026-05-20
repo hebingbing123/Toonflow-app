@@ -73,7 +73,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiError(l10n, e)))),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );
     } finally {
       if (mounted) {
@@ -116,7 +116,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiError(l10n, e)))),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );
     } finally {
       if (mounted) {
@@ -245,7 +245,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiError(l10n, e)))),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );
     } finally {
       if (mounted) {
@@ -287,7 +287,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailed(describeUserVisibleApiError(l10n, e)))),
+          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailed(describeUserVisibleApiErrorResolved(context, e)))),
         );
       }
     } finally {

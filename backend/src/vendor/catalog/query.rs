@@ -4,9 +4,11 @@ use crate::error::ApiError;
 
 use super::data::CATALOG;
 use super::pricing::{lookup_pricing, ModelPricingPublic};
+use super::protocol::{vendor_video_slug, CatalogVideoSlug};
 use super::types::{
     ModelDetailResponse, ModelListEntry, VendorCatalogLookup, VendorCatalogSummary,
 };
+use crate::vendor::video::VideoProvider;
 
 fn attach_pricing(model_id: &str, include: bool) -> (Option<String>, Option<ModelPricingPublic>) {
     if !include {
@@ -23,9 +25,9 @@ pub(super) fn normalize_filter(raw: Option<String>) -> Result<String, ApiError> 
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "all".into());
     match s.as_str() {
-        "text" | "image" | "video" | "all" => Ok(s),
+        "text" | "image" | "video" | "multimodal" | "all" => Ok(s),
         _ => Err(ApiError::BadRequest(
-            "query parameter type must be text, image, video, or all".into(),
+            "query parameter type must be text, image, video, multimodal, or all".into(),
         )),
     }
 }
@@ -49,17 +51,48 @@ fn vendor_slug(name: &str) -> String {
     out.trim_matches('-').to_string()
 }
 
+fn video_provider_to_enum(slug: CatalogVideoSlug) -> VideoProvider {
+    match slug {
+        CatalogVideoSlug::Runway => VideoProvider::Runway,
+        CatalogVideoSlug::Pika => VideoProvider::Pika,
+        CatalogVideoSlug::Kling => VideoProvider::Kling,
+        CatalogVideoSlug::Doubao => VideoProvider::Doubao,
+        CatalogVideoSlug::Hunyuan => VideoProvider::Hunyuan,
+        CatalogVideoSlug::Minimax => VideoProvider::Minimax,
+        CatalogVideoSlug::OpenAi => VideoProvider::OpenAi,
+    }
+}
+
 pub(crate) fn vendor_catalog_summaries() -> Vec<VendorCatalogSummary> {
     let mut out = Vec::with_capacity(CATALOG.vendors.len());
     for v in &CATALOG.vendors {
         let mut kinds: Vec<String> = v.models.iter().map(|m| m.kind.clone()).collect();
         kinds.sort();
         kinds.dedup();
+        let protocol = v
+            .protocol
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .unwrap_or("openai")
+            .to_string();
+        let official_api_host = vendor_video_slug(v.id).map(|slug| {
+            video_provider_to_enum(slug).api_base_url()
+        });
         out.push(VendorCatalogSummary {
             id: v.id,
             name: v.name.clone(),
             model_count: v.models.len(),
             model_kinds: kinds,
+            default_base_url: v
+                .default_base_url
+                .as_ref()
+                .map(|s| s.trim().trim_end_matches('/').to_string())
+                .filter(|s| !s.is_empty()),
+            api_key_optional: v.api_key_optional,
+            protocol,
+            video_provider: v.video_provider.clone(),
+            official_api_host,
         });
     }
     out
@@ -103,6 +136,7 @@ pub(super) fn list_filtered(filter: &str, include_pricing: bool) -> Vec<ModelLis
         for m in &v.models {
             let include = match filter {
                 "all" => m.kind != "video",
+                "multimodal" => m.kind == "multimodal",
                 other => m.kind == other,
             };
             if !include {
@@ -124,7 +158,7 @@ pub(super) fn list_filtered(filter: &str, include_pricing: bool) -> Vec<ModelLis
     out
 }
 
-pub(super) fn lookup_detail(model_id: &str, include_pricing: bool) -> Option<ModelDetailResponse> {
+pub(crate) fn lookup_detail(model_id: &str, include_pricing: bool) -> Option<ModelDetailResponse> {
     let (vid_str, model_name) = model_id.split_once(':')?;
     let vendor_id: i32 = vid_str.parse().ok()?;
     let v = CATALOG.vendors.iter().find(|x| x.id == vendor_id)?;
@@ -164,4 +198,16 @@ pub(super) fn default_text_model_composite_id() -> String {
         }
     }
     first_text_model_composite_id()
+}
+
+/// First catalog composite id for a model **`kind`** (`text`, `image`, `video`, …).
+pub(crate) fn first_catalog_model_for_kind(kind: &str) -> String {
+    for v in &CATALOG.vendors {
+        for m in &v.models {
+            if m.kind == kind {
+                return format!("{}:{}", v.id, m.model_name);
+            }
+        }
+    }
+    default_text_model_composite_id()
 }

@@ -91,7 +91,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       } catch (e) {
         showFeedback(
           l10n.shortVideoBatchEnableFailedError(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -174,7 +174,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       } catch (e) {
         showFeedback(
           l10n.shortVideoBatchDisableFailedError(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(context, e),
           ),
           isSuccess: false,
         );
@@ -402,7 +402,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     } catch (e) {
       showFeedback(
         l10n.shortVideoBatchReplaceFailedError(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         ),
         isSuccess: false,
       );
@@ -588,13 +588,13 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage: describeUserVisibleApiError(l10n, e),
+            errorMessage: describeUserVisibleApiErrorResolved(context, e),
           ),
         );
       }
       showFeedback(
         l10n.shortVideoBatchVoiceoverGenFailedError(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         ),
         isSuccess: false,
       );
@@ -710,7 +710,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
       showFeedback(
         l10n.shortVideoBatchVoiceoverSingleFailedError(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         ),
         isSuccess: false,
       );
@@ -757,7 +757,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 } catch (e) {
                   failed++;
                   final storyboardId = operation['storyboardId'] as int;
-                  final errorMessage = describeUserVisibleApiError(l10n, e);
+                  final errorMessage = describeUserVisibleApiErrorResolved(context, e);
                   failedItems.add(
                     BatchOperationFailedItem(
                       shotId: storyboardId,

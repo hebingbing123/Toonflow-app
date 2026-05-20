@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../l10n/app_localizations.dart';
 
@@ -27,13 +28,13 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
   final colsCtrl = TextEditingController(text: initialCols.toString());
   final promptCtrl = TextEditingController();
 
-  final result = await showDialog<GridStoryboardDialogResult>(
+  final result = await showStudioDialog<GridStoryboardDialogResult>(
     context: context,
     builder: (ctx) {
       String? errorText;
       return StatefulBuilder(
         builder: (ctx, setState) {
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(l10n.studioGridStoryboardDialogTitle),
             content: SizedBox(
               width: 420,

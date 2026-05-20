@@ -33,7 +33,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                      SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                     );
                   }
                 } finally {
@@ -65,7 +65,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                      SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                     );
                   }
                 } finally {
@@ -102,7 +102,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                     );
                   } else {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                      SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                     );
                   }
                 } finally {
@@ -139,7 +139,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                     );
                   } else {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                      SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                     );
                   }
                 } finally {
@@ -179,7 +179,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                      SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                     );
                   }
                 } finally {

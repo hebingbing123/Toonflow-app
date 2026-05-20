@@ -9,14 +9,29 @@ pub(super) fn clip_prompt_chars(s: &str, max_chars: usize) -> String {
     s.chars().take(max_chars).collect()
 }
 
-/// Picks an OpenAI **`images/generations`** model id from the vendor catalog string (e.g. **`1:dall-e-3`**) or **`OPENFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
+/// API model id for image generation (strips catalog composite prefix when present).
 pub fn resolve_openai_image_model(request_model: &str) -> String {
-    let lower = request_model.to_lowercase();
+    let bare = request_model
+        .split_once(':')
+        .map(|(_, name)| name)
+        .unwrap_or(request_model)
+        .trim();
+    let lower = bare.to_lowercase();
     if lower.contains("dall-e-2") || lower.contains("dalle-2") {
         return "dall-e-2".into();
     }
     if lower.contains("dall-e-3") || lower.contains("dalle-3") {
         return "dall-e-3".into();
+    }
+    if lower.contains("seedream")
+        || lower.contains("wanx")
+        || lower.contains("imagen")
+        || lower.contains("cogview")
+    {
+        return bare.to_string();
+    }
+    if !bare.is_empty() && bare.contains('-') {
+        return bare.to_string();
     }
     std::env::var("OPENFLOW_IMAGE_MODEL")
         .ok()

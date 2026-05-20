@@ -194,7 +194,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
         _previewStatusIsError = true;
         _previewStatusLine = l10n.shortVideoCharactersPreviewFailed(
           voiceName,
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         );
       });
     } finally {

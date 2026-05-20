@@ -7,30 +7,14 @@ import '../design_system/ix/studio_conflict_banner.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'project_studio_cockpit_panel.dart';
 import 'project_studio_host.dart';
+import 'project_studio_model_routing_scope.dart';
+import 'studio_step_model_routing_bar.dart';
 import 'studio_agent_quick_bar.dart';
 import 'studio_step.dart';
 import 'studio_step_prefs.dart';
 import 'studio_step_progress_ring.dart';
-
-String projectStudioStepShortLabel(AppLocalizations l10n, StudioStep step) {
-  switch (step) {
-    case StudioStep.script:
-      return l10n.studioStepScriptShort;
-    case StudioStep.art:
-      return l10n.studioStepArtShort;
-    case StudioStep.assets:
-      return l10n.studioStepAssetsShort;
-    case StudioStep.storyboard:
-      return l10n.studioStepStoryboardShort;
-    case StudioStep.video:
-      return l10n.studioStepVideoShort;
-    case StudioStep.deliver:
-      return l10n.studioStepDeliverShort;
-    case StudioStep.quality:
-      return l10n.studioDeliverTabQuality;
-  }
-}
 
 /// In-project six-step SOP with lazy [IndexedStack] step bodies.
 class ProjectStudioPage extends StatefulWidget {
@@ -45,43 +29,132 @@ class ProjectStudioPage extends StatefulWidget {
 class _ProjectStudioPageState extends State<ProjectStudioPage> {
   late StudioStep _step = widget.host.initialStep;
   final Set<StudioStep> _visited = <StudioStep>{};
+  ProjectModelRoutingResponse? _modelRouting;
+
+  void _markStepVisited(StudioStep step) {
+    _visited.add(step);
+    if (step == StudioStep.quality) {
+      _visited.add(StudioStep.deliver);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _visited.add(_step);
-    _restoreLastStep();
+    _markStepVisited(_step);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _normalizeLegacyQualityRoute();
+      _restoreLastStep();
+    });
+    _loadModelRouting();
+  }
+
+  /// Canonical URL is `/deliver?tab=quality`; keep [StudioStep.quality] for body routing.
+  void _normalizeLegacyQualityRoute() {
+    if (GoRouter.maybeOf(context) == null) {
+      return;
+    }
+    final state = GoRouterState.of(context);
+    if (state.pathParameters['stepSlug'] != StudioStep.quality.slug) {
+      return;
+    }
+    final canonical = _uriForStudioStep(StudioStep.quality);
+    if (state.uri.path != canonical.path ||
+        state.uri.queryParameters['tab'] != 'quality') {
+      context.replace(canonical.toString());
+    }
+  }
+
+  Future<void> _loadModelRouting() async {
+    final token = widget.host.accessToken;
+    if (token == null || token.isEmpty) return;
+    try {
+      final routing = await fetchProjectModelRoutingV1(
+        token,
+        widget.host.projectUuid,
+      );
+      if (!mounted) return;
+      setState(() => _modelRouting = routing);
+    } catch (_) {
+      // Studio works without routing cache.
+    }
   }
 
   Future<void> _restoreLastStep() async {
+    final routeStep = _routeRequestedStepOrNull();
+    if (routeStep != null) {
+      return;
+    }
     final last = await StudioStepPrefs.loadLastStep(
       widget.host.projectNumericId,
     );
     if (!mounted || last == _step) return;
     setState(() {
       _step = last;
-      _visited.add(last);
+      _markStepVisited(last);
     });
     widget.host.onStepChanged(last);
     _syncRouteToStep(last);
   }
 
+  StudioStep? _routeRequestedStepOrNull() {
+    final router = GoRouter.maybeOf(context);
+    if (router == null) {
+      return null;
+    }
+    final state = GoRouterState.of(context);
+    final raw = state.pathParameters['stepSlug'];
+    final slug = raw?.trim();
+    if (slug == null || slug.isEmpty) {
+      return null;
+    }
+    if (slug == 'deliver') {
+      final tab = state.uri.queryParameters['tab']?.trim();
+      if (tab == 'quality') {
+        return StudioStep.quality;
+      }
+      return StudioStep.deliver;
+    }
+    for (final step in StudioStep.values) {
+      if (step.slug == slug) {
+        return step;
+      }
+    }
+    return null;
+  }
+
+  Uri _uriForStudioStep(StudioStep step) {
+    final base = '/projects/${widget.host.projectNumericId}';
+    if (step == StudioStep.quality) {
+      return Uri(
+        path: '$base/deliver',
+        queryParameters: const <String, String>{'tab': 'quality'},
+      );
+    }
+    return Uri(path: '$base/${step.slug}');
+  }
+
   void _syncRouteToStep(StudioStep step) {
-    final path = GoRouterState.of(context).uri.path;
-    final expectedPath = '/projects/${widget.host.projectNumericId}/${step.slug}';
-    if (path != expectedPath) {
-      context.go(expectedPath);
+    if (GoRouter.maybeOf(context) == null) {
+      return;
+    }
+    final expected = _uriForStudioStep(step);
+    final current = GoRouterState.of(context).uri;
+    if (current.path != expected.path ||
+        current.queryParameters['tab'] != expected.queryParameters['tab']) {
+      context.go(expected.toString());
     }
   }
 
   void _selectStep(StudioStep step) {
     setState(() {
       _step = step;
-      _visited.add(step);
+      _markStepVisited(step);
     });
     StudioStepPrefs.saveLastStep(widget.host.projectNumericId, step);
     widget.host.onStepChanged(step);
-    context.go('/projects/${widget.host.projectNumericId}/${step.slug}');
+    context.go(_uriForStudioStep(step).toString());
   }
 
   void _handleProjectHomeAction(ProjectHomeAction action) {
@@ -275,131 +348,221 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final visibleAgentActions = agentActionsForStep(_step);
     final title =
         widget.host.projectName ??
         l10n.projectsUnnamedProject(widget.host.projectNumericId);
     final storyboardReadiness = widget.host.readiness;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        StudioPaneHeader(
-          title: title,
-          subtitle: l10n.studioProjectStudioSubtitle,
-          onBack: widget.host.onExit,
-          titleStyle: studioProjectTitleStyle(context),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              StudioStepProgressRing(
-                completedSteps: widget.host.completedSteps,
-              ),
-              if (widget.host.runningJobCount > 0)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: TextButton.icon(
-                    onPressed: widget.host.onOpenTasks,
-                    icon: const Icon(Icons.pending_actions_outlined, size: 18),
-                    label: Text('${widget.host.runningJobCount}'),
-                  ),
+    final topChrome = <Widget>[
+      StudioPaneHeader(
+        title: title,
+        subtitle: l10n.studioProjectStudioSubtitle,
+        onBack: widget.host.onExit,
+        titleStyle: studioProjectTitleStyle(context),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            StudioStepProgressRing(completedSteps: widget.host.completedSteps),
+            if (widget.host.runningJobCount > 0)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: TextButton.icon(
+                  onPressed: widget.host.onOpenTasks,
+                  icon: const Icon(Icons.pending_actions_outlined, size: 18),
+                  label: Text('${widget.host.runningJobCount}'),
                 ),
-              const SizedBox(width: 4),
-              IconButton(
-                tooltip: l10n.studioAgentDrawerTitle,
-                onPressed: widget.host.onOpenAgentDrawer,
-                icon: const Icon(Icons.smart_toy_outlined),
               ),
-              TextButton(
-                onPressed: () => context.push(
-                  '/projects/${widget.host.projectNumericId}/console/1',
-                ),
-                child: Text(l10n.studioOpenEpisodeConsole),
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: l10n.studioAgentDrawerTitle,
+              onPressed: widget.host.onOpenAgentDrawer,
+              icon: const Icon(Icons.smart_toy_outlined),
+            ),
+            TextButton(
+              onPressed: () => context.push(
+                '/projects/${widget.host.projectNumericId}/console/1',
               ),
-            ],
+              child: Text(l10n.studioOpenEpisodeConsole),
+            ),
+          ],
+        ),
+      ),
+      if (widget.host.conflictMessage != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: StudioConflictBanner(
+            message: widget.host.conflictMessage!,
+            onRefresh: widget.host.onRefreshAfterConflict ?? () {},
           ),
         ),
-        Flexible(
-          fit: FlexFit.loose,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                if (widget.host.conflictMessage != null)
-                  StudioConflictBanner(
-                    message: widget.host.conflictMessage!,
-                    onRefresh: widget.host.onRefreshAfterConflict ?? () {},
-                  ),
-                if (widget.host.home != null) ...<Widget>[
-                  const SizedBox(height: 12),
-                  _ProjectCockpitCard(
-                    home: widget.host.home!,
-                    currentStep: _step,
-                    onSelectStep: _selectStep,
-                    onExecuteAction: _handleProjectHomeAction,
-                    metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
-                    onExecuteStarter: _handleStarterTemplate,
-                  ),
-
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: _StudioStepBar(current: _step, onSelect: _selectStep),
+      ),
+      if (widget.host.accessToken != null &&
+          widget.host.accessToken!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: StudioStepModelRoutingBar(
+            accessToken: widget.host.accessToken!,
+            projectId: widget.host.projectUuid,
+            step: _step,
+            onOpenProjectSettings: widget.host.onOpenProjectSettings,
+            onOpenGlobalModelVendorSettings:
+                widget.host.onOpenGlobalModelVendorSettings,
+            onRoutingUpdated: (routing) {
+              setState(() => _modelRouting = routing);
+            },
+          ),
+        ),
+      if (_step == StudioStep.script &&
+          widget.host.home != null &&
+          visibleAgentActions.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final shouldStack = constraints.maxWidth < 980;
+              final quickBar = StudioAgentQuickBar(
+                visibleActions: visibleAgentActions,
+                onRewriteScript: () =>
+                    widget.host.onRunHarnessAgent('script_rewriter'),
+                onExtractEntities: () =>
+                    widget.host.onRunHarnessAgent('extractor'),
+                onBreakStoryboard: () =>
+                    widget.host.onRunHarnessAgent('storyboard_breaker'),
+                onAssignVoices: () =>
+                    widget.host.onRunHarnessAgent('voice_assigner'),
+                onGridPrompts: () =>
+                    widget.host.onRunHarnessAgent('grid_prompt_generator'),
+                bottomPadding: 0,
+              );
+              final cockpit = ProjectStudioCockpitPanel(
+                home: widget.host.home!,
+                currentStep: _step,
+                onExecuteAction: _handleProjectHomeAction,
+                metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
+                onExecuteStarter: _handleStarterTemplate,
+              );
+              if (shouldStack) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    quickBar,
+                    const SizedBox(height: 8),
+                    cockpit,
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(flex: 3, child: quickBar),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 2, child: cockpit),
                 ],
-                if (_step == StudioStep.assets &&
-                    widget.host.assetsOverview != null) ...<Widget>[
-                  const SizedBox(height: 12),
-                  _ProjectAssetHubCard(
-                    overview: widget.host.assetsOverview!,
-                    onSelectStep: _selectStep,
-                    onOpenTasks: widget.host.onOpenTasks,
-                    runningJobCount: widget.host.runningJobCount,
-                    onOpenAssetEditor: widget.host.onOpenAssetEditor,
-                    onRunHarnessAgent: widget.host.onRunHarnessAgent,
-                  ),
-                ],
-                if (_step == StudioStep.storyboard &&
-                    storyboardReadiness != null &&
-                    widget.host.onOpenAssetEditor != null) ...<Widget>[
-                  const SizedBox(height: 12),
-                  _StoryboardAssetBridgeCard(
-                    readiness: storyboardReadiness,
-                    assetsOverview: widget.host.assetsOverview,
-                    onOpenAssetEditor: widget.host.onOpenAssetEditor!,
-                  ),
-                ],
-                const SizedBox(height: 12),
-                _StudioStepBar(current: _step, onSelect: _selectStep),
-                const SizedBox(height: 12),
-                StudioAgentQuickBar(
-                  visibleActions: agentActionsForStep(_step),
-                  onRewriteScript: () =>
-                      widget.host.onRunHarnessAgent('script_rewriter'),
-                  onExtractEntities: () =>
-                      widget.host.onRunHarnessAgent('extractor'),
-                  onBreakStoryboard: () =>
-                      widget.host.onRunHarnessAgent('storyboard_breaker'),
-                  onAssignVoices: () =>
-                      widget.host.onRunHarnessAgent('voice_assigner'),
-                  onGridPrompts: () =>
-                      widget.host.onRunHarnessAgent('grid_prompt_generator'),
-                ),
-              ],
+              );
+            },
+          ),
+        )
+      else ...<Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: StudioAgentQuickBar(
+            visibleActions: visibleAgentActions,
+            onRewriteScript: () =>
+                widget.host.onRunHarnessAgent('script_rewriter'),
+            onExtractEntities: () => widget.host.onRunHarnessAgent('extractor'),
+            onBreakStoryboard: () =>
+                widget.host.onRunHarnessAgent('storyboard_breaker'),
+            onAssignVoices: () =>
+                widget.host.onRunHarnessAgent('voice_assigner'),
+            onGridPrompts: () =>
+                widget.host.onRunHarnessAgent('grid_prompt_generator'),
+          ),
+        ),
+        if (widget.host.home != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: ProjectStudioCockpitPanel(
+              home: widget.host.home!,
+              currentStep: _step,
+              onExecuteAction: _handleProjectHomeAction,
+              metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
+              onExecuteStarter: _handleStarterTemplate,
             ),
           ),
-        ),
-        Expanded(
-          child: IndexedStack(
-            index: StudioStep.sopSteps.indexOf(_step),
-            children: StudioStep.sopSteps
-                .map((step) {
-                  if (!_visited.contains(step)) {
-                    return const SizedBox.shrink();
-                  }
-                  return KeyedSubtree(
-                    key: ValueKey<String>(step.slug),
-                    child: widget.host.buildStepBody(step),
-                  );
-                })
-                .toList(growable: false),
+      ],
+      if (_step == StudioStep.assets && widget.host.assetsOverview != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: _ProjectAssetHubCard(
+            overview: widget.host.assetsOverview!,
+            onSelectStep: _selectStep,
+            onOpenTasks: widget.host.onOpenTasks,
+            runningJobCount: widget.host.runningJobCount,
+            onOpenAssetEditor: widget.host.onOpenAssetEditor,
+            onRunHarnessAgent: widget.host.onRunHarnessAgent,
           ),
         ),
-      ],
+      if (_step == StudioStep.storyboard &&
+          storyboardReadiness != null &&
+          widget.host.onOpenAssetEditor != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: _StoryboardAssetBridgeCard(
+            readiness: storyboardReadiness,
+            assetsOverview: widget.host.assetsOverview,
+            onOpenAssetEditor: widget.host.onOpenAssetEditor!,
+          ),
+        ),
+    ];
+
+    return ProjectStudioModelRoutingScope(
+      routing: _modelRouting,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final topChromeMaxHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight * 0.42
+              : double.infinity;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: topChromeMaxHeight),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: topChrome,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: IndexedStack(
+                  index: _step.sopStackIndex,
+                  children: StudioStep.sopSteps
+                      .map((step) {
+                        if (!_visited.contains(step)) {
+                          return const SizedBox.shrink();
+                        }
+                        final bodyStep =
+                            step == StudioStep.deliver &&
+                                _step == StudioStep.quality
+                            ? StudioStep.quality
+                            : step;
+                        return KeyedSubtree(
+                          key: ValueKey<String>(bodyStep.slug),
+                          child: widget.host.buildStepBody(bodyStep),
+                        );
+                      })
+                      .toList(growable: false),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -464,11 +627,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
     }
     if (assetTarget.isNotEmpty && onOpenAssetEditor != null) {
       onOpenAssetEditor!(
-        _buildEditorTargetForAssetTarget(
-          l10n,
-          assetTarget,
-          notice: notice,
-        ),
+        _buildEditorTargetForAssetTarget(l10n, assetTarget, notice: notice),
       );
       return;
     }
@@ -826,7 +985,9 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                       row.storyboardNumericId,
                       row.sbIndex == null
                           ? ''
-                          : l10n.projectStudioStoryboardShotSuffix(row.sbIndex!),
+                          : l10n.projectStudioStoryboardShotSuffix(
+                              row.sbIndex!,
+                            ),
                     ),
                     detail: row.scriptNumericId == null
                         ? l10n.projectStudioStoryboardPendingBlocks
@@ -955,221 +1116,6 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
   }
 }
 
-class _ProjectCockpitCard extends StatelessWidget {
-  const _ProjectCockpitCard({
-    required this.home,
-    required this.currentStep,
-    required this.onSelectStep,
-    required this.onExecuteAction,
-    required this.metricActionBuilder,
-    required this.onExecuteStarter,
-  });
-
-  final ProjectHome home;
-  final StudioStep currentStep;
-  final ValueChanged<StudioStep> onSelectStep;
-  final ValueChanged<ProjectHomeAction> onExecuteAction;
-  final ProjectHomeAction? Function(ProjectHomeMetric metric)
-  metricActionBuilder;
-  final ValueChanged<ProjectHomeStarterTemplate> onExecuteStarter;
-
-  static const Set<String> _scriptMetricKeywords = <String>{
-    'script',
-    'scripts',
-    'novel',
-    'novels',
-    'chapter',
-    'chapters',
-    'event',
-    'events',
-    'character',
-    'characters',
-    'role',
-    'roles',
-    'scene',
-    'scenes',
-    'outline',
-    'story',
-    'entity',
-  };
-
-  static const Set<String> _scriptStepSlugs = <String>{'script', 'art', 'assets'};
-  static const Set<String> _deliverStepSlugs = <String>{
-    'storyboard',
-    'video',
-    'deliver',
-    'quality',
-  };
-
-  List<ProjectHomeMetric> _filterMetricsForStep(
-    List<ProjectHomeMetric> metrics,
-    StudioStep step,
-  ) {
-    if (step == StudioStep.deliver || step == StudioStep.quality) {
-      return metrics;
-    }
-    if (step != StudioStep.script) {
-      return metrics;
-    }
-    final filtered = metrics.where(_isScriptMetric).toList(growable: false);
-    return filtered.isNotEmpty ? filtered : metrics;
-  }
-
-  List<ProjectHomeAction> _filterActionsForStep(
-    List<ProjectHomeAction> actions,
-    StudioStep step,
-  ) {
-    if (step == StudioStep.deliver || step == StudioStep.quality) {
-      return actions;
-    }
-    if (step != StudioStep.script) {
-      return actions;
-    }
-    final filtered = actions
-        .where((action) => _isRelevantForStep(action.targetStep, step, text: action.title))
-        .toList(growable: false);
-    return filtered.isNotEmpty ? filtered : actions;
-  }
-
-  List<ProjectHomeStarterTemplate> _filterStartersForStep(
-    List<ProjectHomeStarterTemplate> starters,
-    StudioStep step,
-  ) {
-    if (step == StudioStep.deliver || step == StudioStep.quality) {
-      return starters;
-    }
-    if (step != StudioStep.script) {
-      return starters;
-    }
-    final filtered = starters
-        .where(
-          (starter) =>
-              _isRelevantForStep(starter.targetStep, step, text: starter.title) ||
-              _containsScriptKeyword(starter.detail),
-        )
-        .toList(growable: false);
-    return filtered.isNotEmpty ? filtered : starters;
-  }
-
-  bool _isScriptMetric(ProjectHomeMetric metric) {
-    final launchTarget = metric.launchIntent?.targetStep;
-    if (_isRelevantForStep(launchTarget, StudioStep.script, text: metric.label)) {
-      return true;
-    }
-    return _containsScriptKeyword('${metric.key} ${metric.label} ${metric.detail}');
-  }
-
-  bool _isRelevantForStep(String? targetStep, StudioStep step, {String? text}) {
-    final slug = (targetStep ?? '').trim().toLowerCase();
-    if (slug.isEmpty) {
-      return step == StudioStep.script && _containsScriptKeyword(text ?? '');
-    }
-    if (step == StudioStep.script) {
-      return _scriptStepSlugs.contains(slug);
-    }
-    if (step == StudioStep.deliver || step == StudioStep.quality) {
-      return _deliverStepSlugs.contains(slug);
-    }
-    return slug == step.slug;
-  }
-
-  bool _containsScriptKeyword(String text) {
-    final normalized = text.toLowerCase();
-    for (final keyword in _scriptMetricKeywords) {
-      if (normalized.contains(keyword)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
-    final cockpit = home.cockpit;
-    final stepMetrics = _filterMetricsForStep(cockpit.metrics, currentStep);
-    final stepActions = _filterActionsForStep(cockpit.secondaryActions, currentStep);
-    final stepStarters = _filterStartersForStep(
-      cockpit.starterTemplates,
-      currentStep,
-    );
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: tokens.borderSubtle),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            cockpit.headline,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            cockpit.subheadline,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _ActionButtonRow(
-            primaryAction: cockpit.primaryAction,
-            secondaryActions: stepActions,
-            onExecuteAction: onExecuteAction,
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const spacing = 12.0;
-              final maxWidth = constraints.maxWidth;
-              var columns = 1;
-              if (maxWidth >= 1520) {
-                columns = 4;
-              } else if (maxWidth >= 1080) {
-                columns = 3;
-              } else if (maxWidth >= 720) {
-                columns = 2;
-              }
-              final itemWidth =
-                  (maxWidth - spacing * (columns - 1)) / columns;
-              return Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
-                children: <Widget>[
-                  ...stepMetrics.map(
-                    (metric) => _MetricCard(
-                      width: itemWidth,
-                      metric: metric,
-                      action: metricActionBuilder(metric),
-                      onExecuteAction: onExecuteAction,
-                    ),
-                  ),
-                  ...stepStarters.map(
-                    (starter) => _StarterCard(
-                      width: itemWidth,
-                      starter: starter,
-                      onExecuteStarter: onExecuteStarter,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _AssetHubListCard extends StatelessWidget {
   const _AssetHubListCard({
     required this.title,
@@ -1259,113 +1205,6 @@ class _AssetHubLine extends StatelessWidget {
   }
 }
 
-class _ActionButtonRow extends StatelessWidget {
-  const _ActionButtonRow({
-    required this.primaryAction,
-    required this.secondaryActions,
-    required this.onExecuteAction,
-  });
-
-  final ProjectHomeAction primaryAction;
-  final List<ProjectHomeAction> secondaryActions;
-  final ValueChanged<ProjectHomeAction> onExecuteAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final secondary = secondaryActions.take(2).toList(growable: false);
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: <Widget>[
-        FilledButton(
-          onPressed: () => onExecuteAction(primaryAction),
-          child: Text(primaryAction.ctaLabel),
-        ),
-        ...secondary.map(
-          (action) => OutlinedButton(
-            onPressed: () => onExecuteAction(action),
-            child: Text(action.ctaLabel),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.metric,
-    required this.width,
-    this.action,
-    this.onExecuteAction,
-  });
-
-  final ProjectHomeMetric metric;
-  final double width;
-  final ProjectHomeAction? action;
-  final ValueChanged<ProjectHomeAction>? onExecuteAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
-    final card = Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: tokens.borderSubtle),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            metric.label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            metric.value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            metric.detail,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          if (action != null) ...<Widget>[
-            const SizedBox(height: 10),
-            Text(
-              action!.ctaLabel,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-    return SizedBox(
-      width: width,
-      child: action == null || onExecuteAction == null
-          ? card
-          : InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => onExecuteAction!(action!),
-              child: card,
-            ),
-    );
-  }
-}
-
 class _AssetsHubMetricCard extends StatelessWidget {
   const _AssetsHubMetricCard({
     required this.metric,
@@ -1438,59 +1277,6 @@ class _AssetsHubMetricCard extends StatelessWidget {
   }
 }
 
-class _StarterCard extends StatelessWidget {
-  const _StarterCard({
-    required this.starter,
-    required this.onExecuteStarter,
-    required this.width,
-  });
-
-  final ProjectHomeStarterTemplate starter;
-  final ValueChanged<ProjectHomeStarterTemplate> onExecuteStarter;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
-    return SizedBox(
-      width: width,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: tokens.bgInset,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: tokens.borderSubtle),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              starter.title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              starter.detail,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () => onExecuteStarter(starter),
-              child: Text(starter.ctaLabel),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _CockpitLaunchIntent {
   const _CockpitLaunchIntent({
     this.targetStep,
@@ -1531,7 +1317,7 @@ class _StudioStepBar extends StatelessWidget {
       child: Row(
         children: List<Widget>.generate(StudioStep.sopSteps.length, (i) {
           final step = StudioStep.sopSteps[i];
-          final selected = step == current;
+          final selected = current.highlightsSopStep(step);
           return Padding(
             padding: EdgeInsets.only(right: i < labels.length - 1 ? 8 : 0),
             child: FilterChip(

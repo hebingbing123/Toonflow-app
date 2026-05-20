@@ -61,7 +61,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(ctx, e),
           );
         });
       }
@@ -108,7 +108,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(ctx, e),
           );
         });
       }
@@ -155,7 +155,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
-            describeUserVisibleApiError(l10n, e),
+            describeUserVisibleApiErrorResolved(ctx, e),
           );
         });
       }
@@ -210,7 +210,7 @@ Widget buildProjectScriptsSection({
           ctx,
         ).showSnackBar(
           SnackBar(
-            content: Text(describeUserVisibleApiError(l10n, e)),
+            content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
           ),
         );
       }

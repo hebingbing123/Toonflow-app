@@ -17,7 +17,8 @@ class StudioSnapshotBus extends ChangeNotifier {
 
   final Set<StudioSnapshotKey> _pending = <StudioSnapshotKey>{};
 
-  Set<StudioSnapshotKey> get pendingKeys => Set<StudioSnapshotKey>.unmodifiable(_pending);
+  Set<StudioSnapshotKey> get pendingKeys =>
+      Set<StudioSnapshotKey>.unmodifiable(_pending);
 
   void invalidate(Iterable<StudioSnapshotKey> keys) {
     _pending.addAll(keys);

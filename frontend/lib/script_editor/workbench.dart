@@ -64,7 +64,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       if (!mounted) return;
       setState(
         () => _contextLine = l10n.projectEditorScriptsSingleWorkbenchContextReadFailed(
-          describeUserVisibleApiError(l10n, e),
+          describeUserVisibleApiErrorResolved(context, e),
         ),
       );
     } finally {
@@ -80,11 +80,10 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       await action();
     } catch (e) {
       if (!mounted) return;
-      final snackL10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
       );
     } finally {
       if (mounted) {

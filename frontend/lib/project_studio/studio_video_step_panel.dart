@@ -70,7 +70,10 @@ class _StudioVideoStepPanelState extends State<StudioVideoStepPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.studioVideoFrameModeTitle, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.studioVideoFrameModeTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         SegmentedButton<StudioVideoFrameMode>(
           segments: <ButtonSegment<StudioVideoFrameMode>>[

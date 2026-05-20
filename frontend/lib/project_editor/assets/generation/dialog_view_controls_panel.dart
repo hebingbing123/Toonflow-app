@@ -9,6 +9,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
     required this.selectedScriptNumericId,
     required this.selectedType,
     required this.accessToken,
+    required this.projectUuid,
     required this.batchAssetCount,
     required this.onBatchEstimateChanged,
     required this.modelCtrl,
@@ -27,6 +28,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
   final int selectedScriptNumericId;
   final String selectedType;
   final String accessToken;
+  final String projectUuid;
   final int batchAssetCount;
   final ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged;
   final TextEditingController modelCtrl;
@@ -100,6 +102,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
         const SizedBox(height: 8),
         StudioModelCostControls(
           accessToken: accessToken,
+          projectUuid: projectUuid,
+          studioStepSlug: 'assets',
+          modelSlot: 'image',
           taskKind: 'asset_image_batch',
           typeFilter: 'image',
           quantity: batchAssetCount,

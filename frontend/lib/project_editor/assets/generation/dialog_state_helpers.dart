@@ -51,6 +51,7 @@ AssetGenerationWorkbenchDialogViewModel _buildAssetGenerationWorkbenchViewModel(
   required TextEditingController batchNameCtrl,
   required TextEditingController batchLimitCtrl,
   required String accessToken,
+  required String projectUuid,
   required int batchAssetCount,
   required ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged,
 }) {
@@ -80,6 +81,7 @@ AssetGenerationWorkbenchDialogViewModel _buildAssetGenerationWorkbenchViewModel(
     batchNameCtrl: batchNameCtrl,
     batchLimitCtrl: batchLimitCtrl,
     accessToken: accessToken,
+    projectUuid: projectUuid,
     batchAssetCount: batchAssetCount,
     onBatchEstimateChanged: onBatchEstimateChanged,
   );

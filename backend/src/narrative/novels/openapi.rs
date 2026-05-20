@@ -5,6 +5,8 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        crate::narrative::novels::handlers::crawl_auth::get_novel_crawl_auth,
+        crate::narrative::novels::handlers::crawl_auth::put_novel_crawl_auth,
         crate::narrative::novels::handlers::crawl_preview::post_novel_crawl_preview,
         crate::narrative::novels::handlers::crawl_preview::post_novel_crawl_import,
         crate::narrative::novels::handlers::crawl_preview::post_novel_crawl_import_batch,
@@ -13,6 +15,9 @@ use utoipa::OpenApi;
         crate::narrative::novels::handlers::observability::get_novel_crawl_observability,
     ),
     components(schemas(
+        crate::narrative::novels::dto::NovelCrawlAuthOverride,
+        crate::narrative::novels::dto::NovelCrawlAuthPutBody,
+        crate::narrative::novels::dto::NovelCrawlAuthGetResponse,
         crate::narrative::novels::dto::NovelCrawlPreviewBody,
         crate::narrative::novels::dto::NovelCrawlPreviewResponse,
         crate::narrative::novels::dto::NovelCrawlImportBody,

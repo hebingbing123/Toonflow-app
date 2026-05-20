@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -13,15 +14,15 @@ Future<void> showStudioAgentDrawer(
     context: context,
     barrierDismissible: true,
     barrierLabel: 'agent-drawer',
-    barrierColor: StudioTokens.dark.overlay,
+    barrierColor: StudioTokens.of(context).overlay,
     transitionDuration: const Duration(milliseconds: 240),
     pageBuilder: (ctx, anim1, anim2) {
       return Align(
         alignment: Alignment.centerRight,
-        child: Material(
-          color: StudioTokens.of(ctx).bgElevated,
-          child: SizedBox(
-            width: 400,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
             child: SafeArea(
               child: _StudioAgentDrawerBody(onRunAgent: onRunAgent),
             ),
@@ -71,43 +72,121 @@ class _StudioAgentDrawerBody extends StatelessWidget {
       ),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(16),
+    return StudioDialogFrame(
+      maxWidth: 400,
+      maxHeightFactor: 0.92,
+      insetPadding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _StudioAgentDrawerHeader(title: l10n.studioAgentDrawerTitle),
+          const Divider(height: 1),
+          Flexible(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(StudioSpacing.sm),
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final agent = agents[index];
+                return _StudioAgentActionTile(
+                  icon: agent.$3,
+                  label: agent.$2,
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await onRunAgent(agent.$1);
+                  },
+                );
+              },
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
+              itemCount: agents.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudioAgentDrawerHeader extends StatelessWidget {
+  const _StudioAgentDrawerHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        StudioSpacing.sm,
+        StudioSpacing.sm,
+        StudioSpacing.xs,
+        StudioSpacing.xs,
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(title, style: studioDialogTitleStyle(context)),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            style: IconButton.styleFrom(
+              backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),
+              foregroundColor: tokens.textSecondary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: tokens.surfaceHighlight),
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudioAgentActionTile extends StatelessWidget {
+  const _StudioAgentActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        onTap: onTap,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: tokens.bgInset.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+            border: Border.all(color: tokens.borderSubtle),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StudioSpacing.sm,
+            vertical: 18,
+          ),
           child: Row(
             children: <Widget>[
-              Text(
-                l10n.studioAgentDrawerTitle,
-                style: studioDialogTitleStyle(context),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close),
+              Icon(icon, color: tokens.signal, size: 30),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(label, style: studioPaneTitleStyle(context)),
               ),
             ],
           ),
         ),
-        const Divider(height: 1),
-        Expanded(
-          child: ListView(
-            children: agents
-                .map(
-                  (a) => ListTile(
-                    leading: Icon(a.$3),
-                    title: Text(a.$2),
-                    onTap: () async {
-                      Navigator.of(context).pop();
-                      await onRunAgent(a.$1);
-                    },
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

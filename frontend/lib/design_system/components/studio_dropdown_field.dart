@@ -68,10 +68,7 @@ class StudioDropdownField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final field = MenuAnchor(
-      style: studioSelectMenuStyle(context),
-      alignmentOffset: const Offset(0, 6),
-      crossAxisUnconstrained: false,
+    final field = StudioMenuAnchor(
       menuChildren: entries
           .map(
             (entry) => StudioSelectMenuItem(
@@ -201,6 +198,293 @@ class StudioDropdownButton<T> extends StatelessWidget {
   }
 }
 
+/// Shared [MenuAnchor] wrapper — always applies [studioSelectMenuStyle].
+class StudioMenuAnchor extends StatelessWidget {
+  const StudioMenuAnchor({
+    super.key,
+    required this.menuChildren,
+    required this.builder,
+    this.alignmentOffset = const Offset(0, 6),
+    this.crossAxisUnconstrained = false,
+  });
+
+  final List<Widget> menuChildren;
+  final MenuAnchorChildBuilder builder;
+  final Offset alignmentOffset;
+  final bool crossAxisUnconstrained;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      style: studioSelectMenuStyle(context),
+      alignmentOffset: alignmentOffset,
+      crossAxisUnconstrained: crossAxisUnconstrained,
+      menuChildren: menuChildren,
+      builder: builder,
+    );
+  }
+}
+
+/// One action row in [StudioIconMenuButton] menus.
+@immutable
+class StudioMenuEntry<T> {
+  const StudioMenuEntry({
+    required this.value,
+    required this.label,
+    this.subtitle,
+    this.leading,
+    this.child,
+    this.enabled = true,
+    this.foregroundColor,
+  });
+
+  final T value;
+  final String label;
+  final String? subtitle;
+  final Widget? leading;
+  final Widget? child;
+  final bool enabled;
+  final Color? foregroundColor;
+}
+
+/// Icon-trigger action menu (locale, overflow, saved-view actions, etc.).
+class StudioIconMenuButton<T> extends StatelessWidget {
+  const StudioIconMenuButton({
+    super.key,
+    this.icon,
+    this.iconWidget,
+    this.tooltip,
+    this.style,
+    this.iconSize,
+    required this.entries,
+    required this.onSelected,
+  }) : assert(icon != null || iconWidget != null);
+
+  final IconData? icon;
+  final Widget? iconWidget;
+  final String? tooltip;
+  final ButtonStyle? style;
+  final double? iconSize;
+  final List<StudioMenuEntry<T>> entries;
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return StudioMenuAnchor(
+      menuChildren: entries
+          .map(
+            (entry) => Builder(
+              builder: (menuContext) {
+                final menuController = MenuController.maybeOf(menuContext);
+                return StudioSelectMenuItem(
+                  label: entry.label,
+                  subtitle: entry.subtitle,
+                  leading: entry.leading,
+                  child: entry.child,
+                  selected: false,
+                  showCheckmark: false,
+                  enabled: entry.enabled,
+                  foregroundColor: entry.foregroundColor,
+                  onPressed: entry.enabled
+                      ? () {
+                          menuController?.close();
+                          onSelected(entry.value);
+                        }
+                      : null,
+                );
+              },
+            ),
+          )
+          .toList(growable: false),
+      builder: (context, controller, child) {
+        return IconButton(
+          style: style,
+          tooltip: tooltip,
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          icon: iconWidget ?? Icon(icon, size: iconSize),
+        );
+      },
+    );
+  }
+}
+
+/// Multi-select field with the same menu chrome as [StudioDropdownField].
+class StudioMultiSelectField<T> extends StatefulWidget {
+  const StudioMultiSelectField({
+    super.key,
+    required this.entries,
+    required this.selectedValues,
+    required this.onChanged,
+    required this.valueLabel,
+    this.decoration,
+    this.enabled = true,
+    this.width,
+  });
+
+  final List<StudioDropdownEntry<T>> entries;
+  final Set<T> selectedValues;
+  final ValueChanged<Set<T>> onChanged;
+  final String valueLabel;
+  final InputDecoration? decoration;
+  final bool enabled;
+  final double? width;
+
+  @override
+  State<StudioMultiSelectField<T>> createState() =>
+      _StudioMultiSelectFieldState<T>();
+}
+
+class _StudioMultiSelectFieldState<T> extends State<StudioMultiSelectField<T>> {
+  late Set<T> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set<T>.from(widget.selectedValues);
+  }
+
+  @override
+  void didUpdateWidget(StudioMultiSelectField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedValues != widget.selectedValues) {
+      _selected = Set<T>.from(widget.selectedValues);
+    }
+  }
+
+  void _toggle(T value) {
+    setState(() {
+      if (_selected.contains(value)) {
+        _selected.remove(value);
+      } else {
+        _selected.add(value);
+      }
+    });
+    widget.onChanged(Set<T>.from(_selected));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final field = StudioMenuAnchor(
+      menuChildren: widget.entries
+          .map(
+            (entry) => _StudioMultiSelectMenuRow<T>(
+              label: entry.label,
+              child: entry.child,
+              selected: _selected.contains(entry.value),
+              enabled: widget.enabled && entry.enabled,
+              onPressed: widget.enabled && entry.enabled
+                  ? () => _toggle(entry.value)
+                  : null,
+            ),
+          )
+          .toList(growable: false),
+      builder: (context, controller, child) {
+        return StudioSelectFieldTrigger(
+          valueLabel: widget.valueLabel,
+          expanded: controller.isOpen,
+          labelText: widget.decoration?.labelText,
+          decoration: widget.decoration,
+          enabled: widget.enabled,
+          onTap: widget.enabled
+              ? () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                }
+              : null,
+        );
+      },
+    );
+    if (widget.width == null) {
+      return field;
+    }
+    return SizedBox(width: widget.width, child: field);
+  }
+}
+
+/// Toggle row that does not close the parent [MenuAnchor] (multi-select menus).
+class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
+  const _StudioMultiSelectMenuRow({
+    required this.label,
+    required this.selected,
+    this.child,
+    this.onPressed,
+    this.enabled = true,
+  });
+
+  final String label;
+  final Widget? child;
+  final bool selected;
+  final VoidCallback? onPressed;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      key: ValueKey<String>('studio_multi_select_$label'),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          onTap: enabled ? onPressed : null,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: selected
+                  ? tokens.primarySoft.withValues(alpha: 0.55)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: enabled ? tokens.textPrimary : tokens.textMuted,
+                        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                      child: child ?? Text(label),
+                    ),
+                  ),
+                  if (selected)
+                    Icon(Icons.check_rounded, size: 18, color: tokens.accent),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Divider between sections in a studio menu panel.
+class StudioMenuDivider extends StatelessWidget {
+  const StudioMenuDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Divider(height: 1, thickness: 1, color: tokens.borderSubtle),
+    );
+  }
+}
+
 MenuStyle studioSelectMenuStyle(BuildContext context) {
   final tokens = StudioTokens.of(context);
   return MenuStyle(
@@ -226,74 +510,136 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
   );
 }
 
-/// Menu row for studio select fields.
+ButtonStyle studioMenuItemButtonStyle(
+  BuildContext context, {
+  required bool enabled,
+  required bool selected,
+  Color? foregroundColor,
+}) {
+  final tokens = StudioTokens.of(context);
+  final theme = Theme.of(context);
+  final typography = theme.extension<StudioTypography>();
+  final resolvedForeground =
+      foregroundColor ?? (enabled ? tokens.textPrimary : tokens.textMuted);
+
+  return ButtonStyle(
+    minimumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 40)),
+    padding: const WidgetStatePropertyAll<EdgeInsets>(
+      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    ),
+    foregroundColor: WidgetStatePropertyAll<Color>(resolvedForeground),
+    backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (!enabled) {
+        return Colors.transparent;
+      }
+      if (states.contains(WidgetState.hovered) ||
+          states.contains(WidgetState.focused)) {
+        return tokens.primarySoft.withValues(alpha: 0.92);
+      }
+      if (selected) {
+        return tokens.primarySoft.withValues(alpha: 0.55);
+      }
+      return Colors.transparent;
+    }),
+    overlayColor: WidgetStatePropertyAll<Color>(
+      tokens.primary.withValues(alpha: 0.08),
+    ),
+    shape: WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+      ),
+    ),
+    textStyle: WidgetStatePropertyAll<TextStyle>(
+      TextStyle(
+        fontSize: typography?.body ?? 14,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        height: 1.35,
+        color: resolvedForeground,
+      ),
+    ),
+  );
+}
+
+/// Menu row for studio select / action menus.
 class StudioSelectMenuItem extends StatelessWidget {
   const StudioSelectMenuItem({
     super.key,
     required this.label,
     required this.selected,
     this.child,
+    this.subtitle,
+    this.leading,
     this.onPressed,
     this.enabled = true,
+    this.foregroundColor,
+    this.showCheckmark,
   });
 
   final String label;
   final Widget? child;
+  final String? subtitle;
+  final Widget? leading;
   final bool selected;
   final VoidCallback? onPressed;
   final bool enabled;
+  final Color? foregroundColor;
+  final bool? showCheckmark;
+
+  bool get _showsCheckmark => showCheckmark ?? selected;
 
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     final theme = Theme.of(context);
-    final typography = theme.extension<StudioTypography>();
+    final resolvedForeground =
+        foregroundColor ?? (enabled ? tokens.textPrimary : tokens.textMuted);
+    final title = DefaultTextStyle(
+      style: theme.textTheme.bodyMedium!.copyWith(
+        color: resolvedForeground,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+      ),
+      child: child ?? Text(label),
+    );
+    final content = leading != null || subtitle != null
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (leading != null) ...[leading!, const SizedBox(width: 10)],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    title,
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: tokens.textSecondary,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          )
+        : title;
 
     return MenuItemButton(
       onPressed: enabled ? onPressed : null,
-      style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll<Size>(
-          Size(double.infinity, 40),
-        ),
-        padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        ),
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          enabled ? tokens.textPrimary : tokens.textMuted,
-        ),
-        backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
-          if (!enabled) {
-            return Colors.transparent;
-          }
-          if (states.contains(WidgetState.hovered) ||
-              states.contains(WidgetState.focused)) {
-            return tokens.primarySoft.withValues(alpha: 0.92);
-          }
-          if (selected) {
-            return tokens.primarySoft.withValues(alpha: 0.55);
-          }
-          return Colors.transparent;
-        }),
-        overlayColor: WidgetStatePropertyAll<Color>(
-          tokens.primary.withValues(alpha: 0.08),
-        ),
-        shape: WidgetStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-          ),
-        ),
-        textStyle: WidgetStatePropertyAll<TextStyle>(
-          TextStyle(
-            fontSize: typography?.body ?? 14,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            height: 1.35,
-          ),
-        ),
+      style: studioMenuItemButtonStyle(
+        context,
+        enabled: enabled,
+        selected: selected,
+        foregroundColor: foregroundColor,
       ),
-      trailingIcon: selected
+      trailingIcon: _showsCheckmark && selected
           ? Icon(Icons.check_rounded, size: 18, color: tokens.accent)
           : null,
-      child: child ?? Text(label),
+      child: content,
     );
   }
 }

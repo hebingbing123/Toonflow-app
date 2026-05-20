@@ -22,6 +22,21 @@ part 'view_publish_audit.dart';
 
 enum ShortVideoMode { animated, liveAction }
 
+/// Panels visible when [ShortVideoSpaceSection] is embedded in Project Studio.
+enum ShortVideoSpaceEmbedScope {
+  /// Full short-video workspace (default pane).
+  full,
+
+  /// Assembly + export actions (Studio deliver「组装」tab).
+  assembly,
+
+  /// Publish drafts / calendar / jobs / audit (Studio deliver「发布」tab).
+  publish,
+
+  /// Quality overview + export gate (Studio deliver「质检」tab).
+  quality,
+}
+
 /// Display order for publish platform chips (full matrix; ids match backend).
 const List<String> kShortVideoPublishPlatformIdsInDisplayOrder = <String>[
   'douyin',
@@ -231,11 +246,7 @@ class ShortVideoLatestExportUi {
   final List<String> meta;
 }
 
-enum ShortVideoLatestExportAction {
-  none,
-  retry,
-  openProductionWorkspace,
-}
+enum ShortVideoLatestExportAction { none, retry, openProductionWorkspace }
 
 class ShortVideoReadinessItem {
   const ShortVideoReadinessItem({
@@ -770,6 +781,9 @@ class DeliveryModeBadge extends StatelessWidget {
 class ShortVideoSpaceView extends StatelessWidget {
   const ShortVideoSpaceView({
     super.key,
+    this.embedScope = ShortVideoSpaceEmbedScope.full,
+    this.publishSectionKey,
+    this.qualitySectionKey,
     this.desktopCapabilityPanel,
     required this.mode,
     required this.modeTitle,
@@ -839,6 +853,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     this.onOpenDesktopDownloads,
     this.onOpenAssemblyClipDeskOps,
     this.onOpenAssemblyDefaultsEditor,
+    this.onRefreshExportCheck,
     this.assemblyVersionManagerPanel,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
@@ -936,6 +951,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final VoidCallback? onOpenDesktopDownloads;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
+  final VoidCallback? onRefreshExportCheck;
   final Widget? assemblyVersionManagerPanel;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
@@ -964,6 +980,21 @@ class ShortVideoSpaceView extends StatelessWidget {
   /// Clears local destructive-confirm "don't show again" prefs (always available).
   final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
 
+  final ShortVideoSpaceEmbedScope embedScope;
+  final Key? publishSectionKey;
+  final Key? qualitySectionKey;
+
+  bool get _compactEmbed => embedScope != ShortVideoSpaceEmbedScope.full;
+
+  bool get _showAssemblyPanels =>
+      !_compactEmbed || embedScope == ShortVideoSpaceEmbedScope.assembly;
+
+  bool get _showPublishPanels =>
+      !_compactEmbed || embedScope == ShortVideoSpaceEmbedScope.publish;
+
+  bool get _showQualityPanels =>
+      !_compactEmbed || embedScope == ShortVideoSpaceEmbedScope.quality;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -972,334 +1003,425 @@ class ShortVideoSpaceView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        StudioPaneHeader(
-          title: l10n.shortVideoSpacePageTitle,
-          subtitle: l10n.shortVideoSpacePageSubtitle,
-          titleStyle: studioProjectTitleStyle(context),
-          onBack: onOpenProjects,
-          trailing: RiskyOperationConfirmPrefsOverflowMenu(
-            tooltip: l10n.notificationsRiskyPrefsTooltip,
-          ),
-        ),
-        if (desktopCapabilityPanel != null) ...[
+        if (!_compactEmbed) ...[
           const SizedBox(height: 16),
-          desktopCapabilityPanel!,
-        ],
-        const SizedBox(height: 16),
-        _Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.shortVideoSpaceSectionCreativeMode,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
-              const SizedBox(height: 12),
-              Text(modeTitle, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              Text(modeSummary, style: studioMutedBodyMedium(context)),
-              const SizedBox(height: 8),
-              Text(modeAdvice, style: theme.textTheme.bodySmall),
-            ],
+          StudioPaneHeader(
+            title: l10n.shortVideoSpacePageTitle,
+            subtitle: l10n.shortVideoSpacePageSubtitle,
+            titleStyle: studioProjectTitleStyle(context),
+            onBack: onOpenProjects,
+            trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.notificationsRiskyPrefsTooltip,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _ProjectSelectorPanel(
-          mode: mode,
-          onModeChanged: onModeChanged,
-          loadingProjects: loadingProjects,
-          projectOptions: projectOptions,
-          selectedProjectId: selectedProjectId,
-          onProjectChanged: onProjectChanged,
-          onRefreshProjects: onRefreshProjects,
-          videoRatio: videoRatio,
-          onVideoRatioChanged: onVideoRatioChanged,
-          targetMarket: targetMarket,
-          onTargetMarketChanged: onTargetMarketChanged,
-          targetPlatforms: targetPlatforms,
-          onPublishPlatformTapped: onPublishPlatformTapped,
-          durationStrategy: durationStrategy,
-          onDurationStrategyChanged: onDurationStrategyChanged,
-          voiceProfile: voiceProfile,
-          onVoiceProfileChanged: onVoiceProfileChanged,
-          subtitleStyle: subtitleStyle,
-          onSubtitleStyleChanged: onSubtitleStyleChanged,
-          bgmStrategy: bgmStrategy,
-          onBgmStrategyChanged: onBgmStrategyChanged,
-          creatingProject: creatingProject,
-          onCreateProject: onCreateProject,
-          savingProjectConfig: savingProjectConfig,
-          onSaveProjectConfig: onSaveProjectConfig,
-          onOpenProjects: onOpenProjects,
-          projectConfigLine: projectConfigLine,
-          operationFeedbackIsSuccess: operationFeedbackIsSuccess,
-          loadingProjectOverview: loadingProjectOverview,
-          projectReadinessSummary: projectReadinessSummary,
-          visualLabel: visualLabel,
-          directionLabel: directionLabel,
-          projectMetrics: projectMetrics,
-          onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
-        ),
-        const SizedBox(height: 16),
-        _Panel(
-          child: _OverviewMigrationPanel(
-            spaceOverviewSummary: spaceOverviewSummary,
-            overviewMetrics: overviewMetrics,
-            qualitySummaryLine: qualitySummaryLine,
-            badCaseMetrics: badCaseMetrics,
-            recentTaskLines: recentTaskLines,
-            migrationSummary: migrationSummary,
-            onOpenProjects: onOpenProjects,
-            onOpenScriptWorkspace: onOpenScriptWorkspace,
-            onOpenProductionWorkspace: onOpenProductionWorkspace,
-            onOpenTasks: onOpenTasks,
-            onOpenQuality: onOpenQuality,
-            runningJobCount: runningJobCount,
-          ),
-        ),
-        const SizedBox(height: 16),
-        _ProductionPanel(
-          assetsOverviewPanelUi: assetsOverviewPanelUi,
-          assemblyPanelUi: assemblyPanelUi,
-          assemblyInputPanelUi: assemblyInputPanelUi,
-          exportCheckPanelUi: exportCheckPanelUi,
-          latestExportUi: latestExportUi,
-          onStartExport: onStartExport,
-          onStartPreAssembly: onStartPreAssembly,
-          onOpenExportHistory: onOpenExportHistory,
-          onDownloadLatestExport: onDownloadLatestExport,
-          onCancelLatestExportTask: onCancelLatestExportTask,
-          onRetryLatestExportTask: onRetryLatestExportTask,
-          exportActionBusy: exportActionBusy,
-          preAssemblyActionBusy: preAssemblyActionBusy,
-          localAssemblyBlockedHint: localAssemblyBlockedHint,
-          onFixAssemblyStoryboard: onFixAssemblyStoryboard,
-          onFixAssemblyProduction: onFixAssemblyProduction,
-          onFixAssemblyClipDesk: onFixAssemblyClipDesk,
-          onOpenAssemblyTaskCenter: onOpenAssemblyTaskCenter,
-          onCancelAssemblyJob: onCancelAssemblyJob,
-          onRetryAssemblyJob: onRetryAssemblyJob,
-          onCreateDraftFromAssemblyJob: onCreateDraftFromAssemblyJob,
-          preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
-          onOpenProductionForAssemblyExport: onOpenProductionForAssemblyExport,
-          onOpenDesktopDownloads: onOpenDesktopDownloads,
-          onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
-          onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
-          assemblyVersionManagerPanel: assemblyVersionManagerPanel,
-          assemblyInputPanelKey: assemblyInputPanelKey,
-        ),
-        _PublishDraftsPanel(publishPanelUi: publishPanelUi),
-        _PublishCalendarPanel(publishPanelUi: publishPanelUi),
-        _PublishJobsPanel(publishPanelUi: publishPanelUi),
-        _PublishAuditPanel(publishPanelUi: publishPanelUi),
-        if (projectCharactersPanel != null) ...[
-          projectCharactersPanel!,
+          if (desktopCapabilityPanel != null) ...[
+            const SizedBox(height: 16),
+            desktopCapabilityPanel!,
+          ],
           const SizedBox(height: 16),
-        ],
-        if (shortVideoTimelinePanel != null) ...[
-          shortVideoTimelinePanel!,
-          const SizedBox(height: 16),
-        ],
-        _CandidateComparePanel(
-          candidateCardUi: candidateCardUi,
-          candidateComparePanelUi: candidateComparePanelUi,
-          onOpenProjectsForCandidateAssets: onOpenProjectsForCandidateAssets,
-        ),
-        const SizedBox(height: 16),
-        _Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.shortVideoSpaceSectionModeReadiness,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final inlineHeader =
-                      constraints.maxWidth >= kStudioCompactHeaderMinWidth;
-                  final intro = Text(
-                    readinessIntro,
-                    style: studioMutedBodyMedium(context),
-                  );
-                  final readyChip = _MetricChip(
-                    label: l10n.shortVideoSpaceReadinessReadyChip,
-                    value: readinessCountLabel,
-                  );
-                  if (inlineHeader) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(child: intro),
-                        const SizedBox(width: 12),
-                        readyChip,
-                      ],
-                    );
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[intro, const SizedBox(height: 8), readyChip],
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              Text(readinessGapSummary, style: studioMutedBodySmall(context)),
-              const SizedBox(height: 16),
-              _ReadinessFlowStrip(items: readinessItems),
-              const SizedBox(height: 16),
-              Text(
-                l10n.shortVideoSpaceSectionShotReadinessServer,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              if (shotReadinessUi.loading)
+          _Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  l10n.shortVideoSpaceShotReadinessLoading,
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                )
-              else if (shotReadinessUi.unavailable)
-                Text(
-                  l10n.shortVideoSpaceShotReadinessUnavailableHint,
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                )
-              else ...[
-                if (shotReadinessUi.headline != null)
-                  Text(
-                    shotReadinessUi.headline!,
-                    style: studioMutedBodyMedium(context),
-                  ),
-                if (shotReadinessUi.reasonLines.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  for (final line in shotReadinessUi.reasonLines)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.warning_amber_rounded,
-                            size: 16,
-                            color: theme.colorScheme.tertiary,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(line, style: theme.textTheme.bodySmall),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-                if (shotReadinessUi.shotDetailLines.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.shortVideoSpaceShotReadinessPriorityShots,
-                    style: theme.textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 6),
-                  for (final line in shotReadinessUi.shotDetailLines)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.movie_filter_outlined,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(line, style: theme.textTheme.bodySmall),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-                if (onOpenProductionForShotReadiness != null) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: onOpenProductionForShotReadiness,
-                    icon: const Icon(Icons.movie_creation_outlined),
-                    label: Text(l10n.shortVideoSpaceOpenProductionBoardButton),
-                  ),
-                ],
+                  l10n.shortVideoSpaceSectionCreativeMode,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
+                const SizedBox(height: 12),
+                Text(modeTitle, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 6),
+                Text(modeSummary, style: studioMutedBodyMedium(context)),
+                const SizedBox(height: 8),
+                Text(modeAdvice, style: theme.textTheme.bodySmall),
               ],
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _Panel(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final sideBySide = constraints.maxWidth >= kStudioTwoColumnMinWidth;
-              final nextStepBlock = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    l10n.shortVideoSpaceSectionSuggestedNext,
-                    style: theme.textTheme.titleSmall,
+          const SizedBox(height: 16),
+          _ProjectSelectorPanel(
+            mode: mode,
+            onModeChanged: onModeChanged,
+            loadingProjects: loadingProjects,
+            projectOptions: projectOptions,
+            selectedProjectId: selectedProjectId,
+            onProjectChanged: onProjectChanged,
+            onRefreshProjects: onRefreshProjects,
+            videoRatio: videoRatio,
+            onVideoRatioChanged: onVideoRatioChanged,
+            targetMarket: targetMarket,
+            onTargetMarketChanged: onTargetMarketChanged,
+            targetPlatforms: targetPlatforms,
+            onPublishPlatformTapped: onPublishPlatformTapped,
+            durationStrategy: durationStrategy,
+            onDurationStrategyChanged: onDurationStrategyChanged,
+            voiceProfile: voiceProfile,
+            onVoiceProfileChanged: onVoiceProfileChanged,
+            subtitleStyle: subtitleStyle,
+            onSubtitleStyleChanged: onSubtitleStyleChanged,
+            bgmStrategy: bgmStrategy,
+            onBgmStrategyChanged: onBgmStrategyChanged,
+            creatingProject: creatingProject,
+            onCreateProject: onCreateProject,
+            savingProjectConfig: savingProjectConfig,
+            onSaveProjectConfig: onSaveProjectConfig,
+            onOpenProjects: onOpenProjects,
+            projectConfigLine: projectConfigLine,
+            operationFeedbackIsSuccess: operationFeedbackIsSuccess,
+            loadingProjectOverview: loadingProjectOverview,
+            projectReadinessSummary: projectReadinessSummary,
+            visualLabel: visualLabel,
+            directionLabel: directionLabel,
+            projectMetrics: projectMetrics,
+            onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
+          ),
+        ],
+        if (_showQualityPanels) ...[
+          KeyedSubtree(
+            key: qualitySectionKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (!_compactEmbed) const SizedBox(height: 16),
+                _Panel(
+                  dense: _compactEmbed,
+                  child: _OverviewMigrationPanel(
+                    spaceOverviewSummary: spaceOverviewSummary,
+                    overviewMetrics: overviewMetrics,
+                    qualitySummaryLine: qualitySummaryLine,
+                    badCaseMetrics: badCaseMetrics,
+                    recentTaskLines: recentTaskLines,
+                    migrationSummary: migrationSummary,
+                    onOpenProjects: onOpenProjects,
+                    onOpenScriptWorkspace: onOpenScriptWorkspace,
+                    onOpenProductionWorkspace: onOpenProductionWorkspace,
+                    onOpenTasks: onOpenTasks,
+                    onOpenQuality: onOpenQuality,
+                    runningJobCount: runningJobCount,
                   ),
-                  const SizedBox(height: 8),
-                  Text(nextStepTitle, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 6),
-                  Text(nextStepDetail, style: studioMutedBodyMedium(context)),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: onNextStep,
-                    icon: const Icon(Icons.arrow_forward_outlined),
-                    label: Text(nextStepButtonLabel),
-                  ),
-                ],
-              );
-              final stageFlow = _StageFlowStrip(cards: stageCards);
-              if (sideBySide) {
-                return Row(
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (_showAssemblyPanels || _showQualityPanels) ...[
+          if (!_compactEmbed || _showQualityPanels) const SizedBox(height: 16),
+          _ProductionPanel(
+            dense: _compactEmbed,
+            assetsOverviewPanelUi: assetsOverviewPanelUi,
+            assemblyPanelUi: assemblyPanelUi,
+            assemblyInputPanelUi: assemblyInputPanelUi,
+            exportCheckPanelUi: exportCheckPanelUi,
+            latestExportUi: latestExportUi,
+            onStartExport: onStartExport,
+            onStartPreAssembly: onStartPreAssembly,
+            onOpenExportHistory: onOpenExportHistory,
+            onDownloadLatestExport: onDownloadLatestExport,
+            onCancelLatestExportTask: onCancelLatestExportTask,
+            onRetryLatestExportTask: onRetryLatestExportTask,
+            exportActionBusy: exportActionBusy,
+            preAssemblyActionBusy: preAssemblyActionBusy,
+            localAssemblyBlockedHint: localAssemblyBlockedHint,
+            onFixAssemblyStoryboard: onFixAssemblyStoryboard,
+            onFixAssemblyProduction: onFixAssemblyProduction,
+            onFixAssemblyClipDesk: onFixAssemblyClipDesk,
+            onOpenAssemblyTaskCenter: onOpenAssemblyTaskCenter,
+            onCancelAssemblyJob: onCancelAssemblyJob,
+            onRetryAssemblyJob: onRetryAssemblyJob,
+            onCreateDraftFromAssemblyJob: onCreateDraftFromAssemblyJob,
+            preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
+            onOpenProductionForAssemblyExport:
+                onOpenProductionForAssemblyExport,
+            onOpenDesktopDownloads: onOpenDesktopDownloads,
+            onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
+            onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
+            onRefreshExportCheck: onRefreshExportCheck,
+            assemblyVersionManagerPanel: assemblyVersionManagerPanel,
+            assemblyInputPanelKey: assemblyInputPanelKey,
+          ),
+        ],
+        if (_showPublishPanels) ...[
+          KeyedSubtree(
+            key: publishSectionKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _PublishDraftsPanel(publishPanelUi: publishPanelUi),
+                _PublishCalendarPanel(publishPanelUi: publishPanelUi),
+                _PublishJobsPanel(publishPanelUi: publishPanelUi),
+                _PublishAuditPanel(publishPanelUi: publishPanelUi),
+              ],
+            ),
+          ),
+        ],
+        if (!_compactEmbed) ...[
+          if (projectCharactersPanel != null) ...[
+            projectCharactersPanel!,
+            const SizedBox(height: 16),
+          ],
+          if (shortVideoTimelinePanel != null) ...[
+            shortVideoTimelinePanel!,
+            const SizedBox(height: 16),
+          ],
+          _CandidateComparePanel(
+            candidateCardUi: candidateCardUi,
+            candidateComparePanelUi: candidateComparePanelUi,
+            onOpenProjectsForCandidateAssets: onOpenProjectsForCandidateAssets,
+          ),
+          const SizedBox(height: 16),
+          _Panel(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final sideBySide =
+                    constraints.maxWidth >= kStudioTwoColumnMinWidth;
+
+                final modeReadinessBlock = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(flex: 4, child: nextStepBlock),
-                    const SizedBox(width: 28),
-                    Expanded(flex: 8, child: stageFlow),
+                    Text(
+                      l10n.shortVideoSpaceSectionModeReadiness,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    LayoutBuilder(
+                      builder: (context, innerConstraints) {
+                        final inlineHeader =
+                            innerConstraints.maxWidth >=
+                            kStudioCompactHeaderMinWidth;
+                        final intro = Text(
+                          readinessIntro,
+                          style: studioMutedBodyMedium(context),
+                        );
+                        final readyChip = _MetricChip(
+                          label: l10n.shortVideoSpaceReadinessReadyChip,
+                          value: readinessCountLabel,
+                        );
+                        if (inlineHeader) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(child: intro),
+                              const SizedBox(width: 12),
+                              readyChip,
+                            ],
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            intro,
+                            const SizedBox(height: 8),
+                            readyChip,
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      readinessGapSummary,
+                      style: studioMutedBodySmall(context),
+                    ),
+                    const SizedBox(height: 16),
+                    _ReadinessFlowStrip(items: readinessItems),
                   ],
                 );
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  nextStepBlock,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Divider(
-                      height: 1,
-                      color: theme.colorScheme.outlineVariant.withValues(
-                        alpha: 0.65,
+
+                final shotReadinessBlock = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.shortVideoSpaceSectionShotReadinessServer,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    if (shotReadinessUi.loading)
+                      Text(
+                        l10n.shortVideoSpaceShotReadinessLoading,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                        ),
+                      )
+                    else if (shotReadinessUi.unavailable)
+                      Text(
+                        l10n.shortVideoSpaceShotReadinessUnavailableHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                        ),
+                      )
+                    else ...[
+                      if (shotReadinessUi.headline != null)
+                        Text(
+                          shotReadinessUi.headline!,
+                          style: studioMutedBodyMedium(context),
+                        ),
+                      if (shotReadinessUi.reasonLines.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        for (final line in shotReadinessUi.reasonLines)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 16,
+                                  color: theme.colorScheme.tertiary,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    line,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                      if (shotReadinessUi.shotDetailLines.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.shortVideoSpaceShotReadinessPriorityShots,
+                          style: theme.textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 6),
+                        for (final line in shotReadinessUi.shotDetailLines)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Icon(
+                                  Icons.movie_filter_outlined,
+                                  size: 16,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    line,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                      if (onOpenProductionForShotReadiness != null) ...[
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          onPressed: onOpenProductionForShotReadiness,
+                          icon: const Icon(Icons.movie_creation_outlined),
+                          label: Text(
+                            l10n.shortVideoSpaceOpenProductionBoardButton,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ],
+                );
+
+                if (sideBySide) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 3, child: modeReadinessBlock),
+                      const SizedBox(width: 28),
+                      Expanded(flex: 2, child: shotReadinessBlock),
+                    ],
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    modeReadinessBlock,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Divider(
+                        height: 1,
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.65,
+                        ),
                       ),
                     ),
-                  ),
-                  stageFlow,
-                ],
-              );
-            },
+                    shotReadinessBlock,
+                  ],
+                );
+              },
+            ),
           ),
-        ),
+          const SizedBox(height: 16),
+          _Panel(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final sideBySide =
+                    constraints.maxWidth >= kStudioTwoColumnMinWidth;
+                final nextStepBlock = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.shortVideoSpaceSectionSuggestedNext,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(nextStepTitle, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    Text(nextStepDetail, style: studioMutedBodyMedium(context)),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: onNextStep,
+                      icon: const Icon(Icons.arrow_forward_outlined),
+                      label: Text(nextStepButtonLabel),
+                    ),
+                  ],
+                );
+                final stageFlow = _StageFlowStrip(cards: stageCards);
+                if (sideBySide) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 4, child: nextStepBlock),
+                      const SizedBox(width: 28),
+                      Expanded(flex: 8, child: stageFlow),
+                    ],
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    nextStepBlock,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Divider(
+                        height: 1,
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.65,
+                        ),
+                      ),
+                    ),
+                    stageFlow,
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ],
     );
   }
 }
 
 class _Panel extends StatelessWidget {
-  const _Panel({super.key, required this.child});
+  const _Panel({super.key, required this.child, this.dense = false});
 
   final Widget child;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(dense ? 12 : 16),
       decoration: BoxDecoration(
         border: Border.all(color: outline),
         borderRadius: BorderRadius.circular(8),

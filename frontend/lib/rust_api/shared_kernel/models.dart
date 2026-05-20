@@ -211,40 +211,136 @@ class VendorCatalogSummaryV1 {
     required this.name,
     required this.modelCount,
     required this.modelKinds,
+    this.defaultBaseUrl,
+    this.apiKeyOptional = false,
+    this.protocol = 'openai',
+    this.videoProvider,
+    this.officialApiHost,
   });
 
   final int id;
   final String name;
   final int modelCount;
   final List<String> modelKinds;
+  final String? defaultBaseUrl;
+  final bool apiKeyOptional;
+  final String protocol;
+  final String? videoProvider;
+  final String? officialApiHost;
 
   factory VendorCatalogSummaryV1.fromJson(Map<String, dynamic> json) {
-    final kinds = json['modelKinds'];
+    final kinds = json['modelKinds'] ?? json['model_kinds'];
+    final base =
+        json['defaultBaseUrl'] as String? ?? json['default_base_url'] as String?;
+    final video =
+        json['videoProvider'] as String? ?? json['video_provider'] as String?;
+    final official = json['officialApiHost'] as String? ??
+        json['official_api_host'] as String?;
     return VendorCatalogSummaryV1(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
-      modelCount: (json['modelCount'] as num).toInt(),
+      modelCount: ((json['modelCount'] ?? json['model_count']) as num).toInt(),
       modelKinds: (kinds is List)
           ? kinds.map((e) => e.toString()).toList()
           : <String>[],
+      defaultBaseUrl: base?.trim().isEmpty == true ? null : base?.trim(),
+      apiKeyOptional:
+          json['apiKeyOptional'] as bool? ??
+          json['api_key_optional'] as bool? ??
+          false,
+      protocol: (json['protocol'] as String?)?.trim().isNotEmpty == true
+          ? (json['protocol'] as String).trim()
+          : 'openai',
+      videoProvider: video?.trim().isEmpty == true ? null : video?.trim(),
+      officialApiHost:
+          official?.trim().isEmpty == true ? null : official?.trim(),
     );
   }
+}
+
+/// Per-user vendor configuration from `app_user_profile.vendor_config`.
+class VendorConfigEntryV1 {
+  const VendorConfigEntryV1({
+    required this.vendorId,
+    this.displayName,
+    this.enabled = false,
+    this.selectedModels = const <String>[],
+    this.settings = const <String, String>{},
+  });
+
+  final String vendorId;
+  final String? displayName;
+  final bool enabled;
+  final List<String> selectedModels;
+  final Map<String, String> settings;
+
+  factory VendorConfigEntryV1.fromJson(Map<String, dynamic> json) {
+    final models = json['selectedModels'] ?? json['selected_models'];
+    final settingsRaw = json['settings'];
+    final settings = <String, String>{};
+    if (settingsRaw is Map) {
+      for (final entry in settingsRaw.entries) {
+        settings[entry.key.toString()] = entry.value?.toString() ?? '';
+      }
+    }
+    return VendorConfigEntryV1(
+      vendorId: (json['vendorId'] ?? json['vendor_id']).toString(),
+      displayName: json['displayName'] as String? ?? json['display_name'] as String?,
+      enabled: json['enabled'] as bool? ?? false,
+      selectedModels: models is List
+          ? models.map((e) => e.toString()).toList()
+          : const <String>[],
+      settings: settings,
+    );
+  }
+
+  String? get baseUrl =>
+      settings['base_url']?.trim().isNotEmpty == true
+          ? settings['base_url']!.trim()
+          : settings['baseUrl']?.trim();
+}
+
+/// One vendor row in `GET /api/v1/settings/vendors/summary`.
+class VendorSummaryItemV1 {
+  const VendorSummaryItemV1({
+    required this.catalog,
+    this.userConfig,
+  });
+
+  final VendorCatalogSummaryV1 catalog;
+  final VendorConfigEntryV1? userConfig;
+
+  factory VendorSummaryItemV1.fromJson(Map<String, dynamic> json) {
+    final userRaw = json['userConfig'] ?? json['user_config'];
+    return VendorSummaryItemV1(
+      catalog: VendorCatalogSummaryV1.fromJson(json),
+      userConfig: userRaw is Map<String, dynamic>
+          ? VendorConfigEntryV1.fromJson(userRaw)
+          : null,
+    );
+  }
+
+  String get vendorId => catalog.id.toString();
+
+  bool get isEnabled => userConfig?.enabled ?? false;
+
+  List<String> get selectedModels => userConfig?.selectedModels ?? const <String>[];
 }
 
 /// OpenAPI **`VendorsSummaryResponse`**.
 class VendorsSummaryResponseV1 {
   const VendorsSummaryResponseV1({required this.vendors, required this.source});
 
-  final List<VendorCatalogSummaryV1> vendors;
+  final List<VendorSummaryItemV1> vendors;
   final String source;
 
   factory VendorsSummaryResponseV1.fromJson(Map<String, dynamic> json) {
     final raw = json['vendors'];
-    final list = <VendorCatalogSummaryV1>[];
+    final list = <VendorSummaryItemV1>[];
     if (raw is List) {
       for (final e in raw) {
         if (e is Map<String, dynamic>) {
-          list.add(VendorCatalogSummaryV1.fromJson(e));
+          list.add(VendorSummaryItemV1.fromJson(e));
         }
       }
     }

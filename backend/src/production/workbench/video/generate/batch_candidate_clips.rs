@@ -285,7 +285,9 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
             .await?;
 
     let resolved = resolve_batch_defaults(
+        &state,
         pool,
+        user_id,
         &scope_row,
         BatchEnqueueParamOverrides {
             track_id: track_override,
@@ -453,7 +455,9 @@ struct BatchEnqueueParamOverrides {
 }
 
 async fn resolve_batch_defaults(
+    state: &AppState,
     pool: &PgPool,
+    actor_user_id: Uuid,
     scope_row: &OwnedScriptInProject,
     overrides: BatchEnqueueParamOverrides,
 ) -> Result<ResolvedBatchDefaults, ApiError> {
@@ -470,7 +474,27 @@ async fn resolve_batch_defaults(
         .filter(|d| *d > 0)
         .unwrap_or_else(|| duration_from_project_strategy(pv_config.duration_strategy.as_deref()));
 
+    let routed_model = if crate::projects::model_routing::is_model_routing_enforced() {
+        crate::projects::model_routing::resolve_model_id(
+            crate::projects::model_routing::ResolveInput {
+                state,
+                pool,
+                actor_user_id,
+                project_id: Some(scope_row.project_id),
+                step: crate::projects::model_routing::StudioStepSlug::Video,
+                slot: crate::projects::model_routing::ModelSlot::Video,
+                request_override: None,
+            },
+        )
+        .await
+        .ok()
+        .map(|r| r.model_id)
+    } else {
+        None
+    };
+
     let model = trimmed_nonempty(overrides.model.as_deref())
+        .or(routed_model)
         .or_else(|| trimmed_nonempty(pv_config.video_model.as_deref()))
         .unwrap_or_else(|| "kling-v1".to_string());
 

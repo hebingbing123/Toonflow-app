@@ -3,15 +3,25 @@
 //! 每个提供商都有自己的 API 格式和认证方法。
 //! 此模块为视频生成提供统一接口。
 
+pub(crate) mod auth;
 mod client;
+pub(crate) mod credentials;
+pub(crate) mod endpoint;
+#[cfg(test)]
+pub(crate) mod doc_fixtures;
 mod providers;
 mod types;
 
 pub use client::VideoProviderClient;
+pub use credentials::{load_video_provider_call, resolve_video_api_base};
+pub use endpoint::{video_vendor_id_candidates, VideoApiRouting, VideoProviderCall};
 pub use types::{
     VideoExportRequest, VideoExportResponse, VideoExportStatus, VideoGenerationRequest,
     VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
 };
+
+#[cfg(test)]
+mod http_integration;
 
 #[cfg(test)]
 mod tests {
@@ -24,6 +34,11 @@ mod tests {
         assert_eq!("pika".parse::<VideoProvider>(), Ok(VideoProvider::Pika));
         assert_eq!("kling".parse::<VideoProvider>(), Ok(VideoProvider::Kling));
         assert_eq!("可灵".parse::<VideoProvider>(), Ok(VideoProvider::Kling));
+        assert_eq!("doubao".parse::<VideoProvider>(), Ok(VideoProvider::Doubao));
+        assert_eq!(
+            "hunyuan".parse::<VideoProvider>(),
+            Ok(VideoProvider::Hunyuan)
+        );
         assert!("unknown".parse::<VideoProvider>().is_err());
     }
 

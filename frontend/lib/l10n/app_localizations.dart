@@ -1996,6 +1996,34 @@ abstract class AppLocalizations {
   /// **'Create your first project to start the script-to-video workflow.'**
   String get studioProjectsEmptySubtitle;
 
+  /// No description provided for @studioProjectsEmptyStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Create project, name it, and pick a story premise.'**
+  String get studioProjectsEmptyStep1;
+
+  /// No description provided for @studioProjectsEmptyStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the project — you land on Script to write or import your story.'**
+  String get studioProjectsEmptyStep2;
+
+  /// No description provided for @studioProjectsEmptyStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Before AI generation, add models and API keys under Settings → Model vendors.'**
+  String get studioProjectsEmptyStep3;
+
+  /// No description provided for @studioGettingStartedStepSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {stepNumber} of {stepTotal}: {stepText}'**
+  String studioGettingStartedStepSemantics(
+    int stepNumber,
+    int stepTotal,
+    String stepText,
+  );
+
   /// No description provided for @studioCreateProjectWizardTitle.
   ///
   /// In en, this message translates to:
@@ -2689,7 +2717,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioOnboardingStep1.
   ///
   /// In en, this message translates to:
-  /// **'Use the left nav to start creating under Projects.'**
+  /// **'Open Projects from the app navigation to start creating.'**
   String get studioOnboardingStep1;
 
   /// No description provided for @studioOnboardingStep2.
@@ -34459,6 +34487,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Override the default cloud endpoint if needed.'**
   String get settingsModelVendorsBaseUrlCloudHint;
+
+  /// No description provided for @settingsDomesticVendorsSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up China-based model providers'**
+  String get settingsDomesticVendorsSetupTitle;
+
+  /// No description provided for @settingsDomesticVendorsSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add API keys for the providers you use. Project Studio model routing picks from enabled vendors here.'**
+  String get settingsDomesticVendorsSetupSubtitle;
+
+  /// No description provided for @settingsDomesticVendorsSetupProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} of {total} core providers ready'**
+  String settingsDomesticVendorsSetupProgress(int ready, int total);
+
+  /// No description provided for @settingsDomesticVendorsSetupConfigureAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add API key'**
+  String get settingsDomesticVendorsSetupConfigureAction;
+
+  /// No description provided for @settingsDomesticVendorsSetupDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me later'**
+  String get settingsDomesticVendorsSetupDismiss;
+
+  /// No description provided for @settingsDomesticVendorsSetupShowExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'More China-based providers (video & others)'**
+  String get settingsDomesticVendorsSetupShowExtended;
+
+  /// No description provided for @settingsDomesticVendorsSetupHideExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide additional providers'**
+  String get settingsDomesticVendorsSetupHideExtended;
+
+  /// No description provided for @settingsInternationalVendorsSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'International model providers'**
+  String get settingsInternationalVendorsSetupTitle;
+
+  /// No description provided for @settingsInternationalVendorsSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: add keys for OpenAI, Gemini, Claude, and other global vendors you use.'**
+  String get settingsInternationalVendorsSetupSubtitle;
+
+  /// No description provided for @settingsInternationalVendorsSetupProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} of {total} global providers ready'**
+  String settingsInternationalVendorsSetupProgress(int ready, int total);
+
+  /// No description provided for @settingsInternationalVendorsSetupShowExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'More global providers (video & Azure)'**
+  String get settingsInternationalVendorsSetupShowExtended;
+
+  /// No description provided for @settingsInternationalVendorsSetupHideExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide additional global providers'**
+  String get settingsInternationalVendorsSetupHideExtended;
+
+  /// No description provided for @studioVendorSetupSnackMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure a China-based model provider before generating with AI.'**
+  String get studioVendorSetupSnackMessage;
+
+  /// No description provided for @studioVendorSetupSnackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get studioVendorSetupSnackAction;
+
+  /// No description provided for @studioVendorSetupProjectsNudgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add API keys for domestic model providers to start generating.'**
+  String get studioVendorSetupProjectsNudgeTitle;
+
+  /// No description provided for @studioModelRoutingCatalogEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No models available for this step'**
+  String get studioModelRoutingCatalogEmptyTitle;
+
+  /// No description provided for @studioModelRoutingCatalogEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable model providers and save API keys under Settings → API & models. Domestic providers (Qwen, DeepSeek, etc.) are listed first.'**
+  String get studioModelRoutingCatalogEmptyBody;
+
+  /// No description provided for @studioModelRoutingOpenVendorSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure model providers'**
+  String get studioModelRoutingOpenVendorSettings;
+
+  /// No description provided for @settingsModelVendorsAggregationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified gateway · OpenAI API'**
+  String get settingsModelVendorsAggregationHint;
+
+  /// No description provided for @settingsModelVendorsProtocolArk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ark'**
+  String get settingsModelVendorsProtocolArk;
+
+  /// No description provided for @settingsModelVendorsProtocolAnthropic.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude'**
+  String get settingsModelVendorsProtocolAnthropic;
+
+  /// No description provided for @settingsModelVendorsProtocolGemini.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini'**
+  String get settingsModelVendorsProtocolGemini;
+
+  /// No description provided for @settingsModelVendorsProtocolAzure.
+  ///
+  /// In en, this message translates to:
+  /// **'Azure'**
+  String get settingsModelVendorsProtocolAzure;
 
   /// No description provided for @settingsModelVendorsSaveBaseUrl.
   ///

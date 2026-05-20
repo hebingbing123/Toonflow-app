@@ -1,6 +1,13 @@
 use serde_json::Value;
 
 pub(super) fn parse_images_response(v: &Value) -> Result<(String, Option<String>), String> {
+    if let Some(url) = v
+        .pointer("/output/results/0/url")
+        .and_then(|x| x.as_str())
+    {
+        return Ok((url.to_string(), None));
+    }
+
     let data0 = v
         .get("data")
         .and_then(|d| d.as_array())

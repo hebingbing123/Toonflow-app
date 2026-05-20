@@ -7,14 +7,17 @@
 //! - `envelope` — 消息信封处理
 
 mod agent_loop;
+pub mod anthropic;
 pub mod azure;
+mod dispatch;
 mod envelope;
+pub mod gemini;
 pub mod openai;
 
 pub use agent_loop::harness_agent_run;
 pub use agent_loop::harness_agent_run_streaming_tools;
+pub use dispatch::{chat_completion_assistant_text, chat_completion_with_usage};
 pub use openai::{
-    audio_speech_bytes, chat_completion_assistant_text, chat_completion_with_usage,
-    images_generation_or_edit_url, images_generation_url, resolve_openai_image_model,
-    resolve_openai_image_size, stream_chat_turn, LlmConfig, TokenUsage,
+    audio_speech_bytes, images_generation_or_edit_url, images_generation_url,
+    resolve_openai_image_model, resolve_openai_image_size, stream_chat_turn, LlmConfig, TokenUsage,
 };

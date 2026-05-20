@@ -14,6 +14,7 @@ class StudioAgentQuickBar extends StatelessWidget {
     this.onBreakStoryboard,
     this.onAssignVoices,
     this.onGridPrompts,
+    this.bottomPadding = 12,
   });
 
   final Set<StudioAgentAction> visibleActions;
@@ -22,6 +23,7 @@ class StudioAgentQuickBar extends StatelessWidget {
   final VoidCallback? onBreakStoryboard;
   final VoidCallback? onAssignVoices;
   final VoidCallback? onGridPrompts;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +43,36 @@ class StudioAgentQuickBar extends StatelessWidget {
       );
     }
 
-    add(StudioAgentAction.rewriteScript, l10n.studioAgentRewriteScript, onRewriteScript);
-    add(StudioAgentAction.extractEntities, l10n.studioAgentExtractEntities, onExtractEntities);
-    add(StudioAgentAction.breakStoryboard, l10n.studioAgentBreakStoryboard, onBreakStoryboard);
-    add(StudioAgentAction.assignVoices, l10n.studioAgentAssignVoices, onAssignVoices);
-    add(StudioAgentAction.gridPrompts, l10n.studioAgentGridPrompts, onGridPrompts);
+    add(
+      StudioAgentAction.rewriteScript,
+      l10n.studioAgentRewriteScript,
+      onRewriteScript,
+    );
+    add(
+      StudioAgentAction.extractEntities,
+      l10n.studioAgentExtractEntities,
+      onExtractEntities,
+    );
+    add(
+      StudioAgentAction.breakStoryboard,
+      l10n.studioAgentBreakStoryboard,
+      onBreakStoryboard,
+    );
+    add(
+      StudioAgentAction.assignVoices,
+      l10n.studioAgentAssignVoices,
+      onAssignVoices,
+    );
+    add(
+      StudioAgentAction.gridPrompts,
+      l10n.studioAgentGridPrompts,
+      onGridPrompts,
+    );
 
     if (chips.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: Wrap(spacing: 8, runSpacing: 8, children: chips),
     );
   }

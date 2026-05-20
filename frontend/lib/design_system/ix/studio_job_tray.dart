@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../studio/job_center.dart';
+import '../components/studio_dialog_shell.dart';
 import '../tokens.dart';
 
 /// Compact job indicator for the studio top bar (Wave 1.5).
@@ -41,7 +42,7 @@ class StudioJobTray extends StatelessWidget {
 
   void _showJobSheet(BuildContext context) {
     final jobs = StudioJobCenter.instance.activeJobs.toList(growable: false);
-    showModalBottomSheet<void>(
+    showStudioBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (ctx) {

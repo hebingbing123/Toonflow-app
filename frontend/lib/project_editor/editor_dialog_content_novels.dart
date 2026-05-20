@@ -91,7 +91,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
                   SnackBar(
-                    content: Text(describeUserVisibleApiError(l10n, e)),
+                    content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
                   ),
                 );
               }
@@ -134,7 +134,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
                   SnackBar(
-                    content: Text(describeUserVisibleApiError(l10n, e)),
+                    content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
                   ),
                 );
               }

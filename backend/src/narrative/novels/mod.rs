@@ -1,5 +1,6 @@
 //! 项目范围的 `app_novel` REST（遗留 `o_novel` 索引/列表/获取/更新/删除子集）。
 
+pub(crate) mod crawl_auth;
 mod dto;
 pub(crate) mod handlers;
 mod openapi;
@@ -22,6 +23,10 @@ use crate::state::AppState;
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route(
+            "/api/v1/projects/{project_id}/novels/crawl-auth",
+            get(handlers::get_novel_crawl_auth).put(handlers::put_novel_crawl_auth),
+        )
         .route(
             "/api/v1/projects/{project_id}/novels/crawl-preview",
             post(handlers::post_novel_crawl_preview),

@@ -64,6 +64,7 @@ async fn images_generation_or_edit_uses_generation_without_reference_image() {
         api_key: "test-key".to_string(),
         base_url,
         model: "gpt-4o-mini".to_string(),
+        protocol: crate::vendor::catalog::VendorProtocol::OpenAiCompatible,
     };
     let client = reqwest::Client::new();
     let (url, revised) = images_generation_or_edit_url(
@@ -92,6 +93,7 @@ async fn images_generation_or_edit_uses_edits_with_reference_image() {
         api_key: "test-key".to_string(),
         base_url,
         model: "gpt-4o-mini".to_string(),
+        protocol: crate::vendor::catalog::VendorProtocol::OpenAiCompatible,
     };
     let client = reqwest::Client::new();
     let (url, revised) = images_generation_or_edit_url(

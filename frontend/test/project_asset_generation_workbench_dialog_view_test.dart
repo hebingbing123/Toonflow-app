@@ -68,6 +68,7 @@ AssetGenerationWorkbenchDialogViewModel buildDialogModel({
     batchNameCtrl: batchNameCtrl,
     batchLimitCtrl: batchLimitCtrl,
     accessToken: 'test-token',
+    projectUuid: 'project-test-uuid',
     batchAssetCount: selectedIds.length.clamp(1, 999),
     onBatchEstimateChanged: (_) {},
   );

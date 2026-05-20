@@ -360,6 +360,7 @@ extension _HomePageBuildProductSections on _HomePageState {
                 final row = _studioProjectRowForNumericId(projectNumericId);
                 if (row != null) _openProjectDetail(row);
               },
+              onOpenGlobalModelVendorSettings: _openSettingsModelVendorsTab,
               buildStepBody: (step) => _buildProjectStudioStepBody(
                 context,
                 l10n,
@@ -624,9 +625,7 @@ extension _HomePageBuildProductSections on _HomePageState {
             artToken == null ||
             artToken.isEmpty ||
             artRow.id.isEmpty) {
-          return Center(
-            child: Text(l10n.studioScriptStepScopeMissing),
-          );
+          return Center(child: Text(l10n.studioScriptStepScopeMissing));
         }
         return ProjectStudioArtStepPanel(
           accessToken: artToken,
@@ -736,10 +735,13 @@ extension _HomePageBuildProductSections on _HomePageState {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           TabBar(
+            dividerColor: Colors.transparent,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            indicatorSize: TabBarIndicatorSize.label,
             tabs: <Tab>[
-              Tab(text: l10n.studioDeliverTabAssembly),
-              Tab(text: l10n.studioDeliverTabPublish),
-              Tab(text: l10n.studioDeliverTabQuality),
+              Tab(height: 40, text: l10n.studioDeliverTabAssembly),
+              Tab(height: 40, text: l10n.studioDeliverTabPublish),
+              Tab(height: 40, text: l10n.studioDeliverTabQuality),
             ],
           ),
           Expanded(
@@ -907,7 +909,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         SnackBar(
           content: Text(
             l10n.productComplianceOpenTargetFailed(
-              describeUserVisibleApiError(l10n, error),
+              describeUserVisibleApiErrorResolved(context, error),
             ),
           ),
         ),
@@ -1151,6 +1153,9 @@ extension _HomePageBuildProductSections on _HomePageState {
           onOpenProjectDetail: _openProjectDetail,
           onSelectProjectScope: _selectProjectScope,
           onOpenProjectStudio: _openProjectStudio,
+          onOpenModelVendorSettings: widget.shellMode == HomeShellMode.product
+              ? _openSettingsModelVendorsTab
+              : null,
           onOpenTeamWorkspaces: () {
             _shellNavigationController.selectProductWorkspacePane(
               ProductWorkspacePane.teamWorkspaces,
@@ -1167,6 +1172,7 @@ extension _HomePageBuildProductSections on _HomePageState {
                 onAccountDeleted: _handleAccountDeleted,
                 onWorkspaceContextChanged: _handleWorkspaceContextChanged,
                 currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+                initialTabIndex: _settingsHubInitialTabIndex,
               )
             : AccountSection(
                 controller: _accountController,
@@ -1681,10 +1687,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
@@ -1733,10 +1736,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -1789,10 +1789,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -1846,10 +1843,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -1906,10 +1900,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -2396,10 +2387,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _resp = null;
         _helpHubConfig = null;
       });
@@ -2508,10 +2496,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           _resp = HelpHubLinksResponseV1(items: resp.effectiveItems);
         });
       } catch (e) {
-        errorText = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        errorText = describeUserVisibleApiErrorResolved(context, e);
       } finally {
         if (mounted) {
           setState(() {
@@ -2797,10 +2782,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
         _webhooks = null;
       });
       _disposeAllWebhookWorkspaceDraftControllers();
@@ -2949,10 +2931,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _billingEventsError = describeUserVisibleApiErrorResolved(context, e);
         if (!append) {
           _billingEventsPage = null;
           _billingEvents.clear();
@@ -3044,10 +3023,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3127,10 +3103,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3179,10 +3152,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3253,10 +3223,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3310,10 +3277,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3417,10 +3381,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _webhooksError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {
@@ -3699,10 +3660,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeUserVisibleApiError(
-          resolveAppLocalizationsForErrors(context),
-          e,
-        );
+        _billingEventsError = describeUserVisibleApiErrorResolved(context, e);
       });
     } finally {
       if (mounted) {

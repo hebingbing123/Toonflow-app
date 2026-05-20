@@ -489,10 +489,11 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
         .into_iter()
         .map(|(storyboard_id, selection)| (storyboard_id, selection.prompt))
         .collect::<std::collections::HashMap<_, _>>();
-    let provider = infer_video_provider(&body.model);
+    let catalog_model = body.model.trim().to_string();
+    let provider = infer_video_provider(&catalog_model);
     let duration_label = format!("{}s", body.duration);
     let default_prompt = body.prompt.trim().to_string();
-    let model = body.model.trim().to_string();
+    let model = utils::video_api_model_name(&catalog_model);
     let resolution = body.resolution.trim().to_string();
     let mode = body.mode.trim().to_string();
     let mut dedup_candidates = Vec::with_capacity(upload_items.len());
@@ -563,6 +564,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
             "script_numeric_id": body.script_id,
             "storyboard_numeric_id": item.storyboard_id,
             "provider": provider,
+            "catalog_model_id": &catalog_model,
             "model": &model,
             "prompt_fingerprint": &prompt_fingerprint,
             "mode": &mode,

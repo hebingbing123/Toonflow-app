@@ -106,6 +106,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
     required this.accessToken,
     this.initialProjectUuid,
     this.initialFocus = ShortVideoSpaceInitialFocus.none,
+    this.embedScope = ShortVideoSpaceEmbedScope.full,
     this.snapshotBus,
     required this.onOpenProjects,
     required this.onSyncProjectContext,
@@ -118,6 +119,7 @@ class ShortVideoSpaceSection extends StatefulWidget {
   final String? accessToken;
   final String? initialProjectUuid;
   final ShortVideoSpaceInitialFocus initialFocus;
+  final ShortVideoSpaceEmbedScope embedScope;
   final StudioSnapshotBus? snapshotBus;
   final VoidCallback onOpenProjects;
   final ValueChanged<ShortVideoProjectScope?> onSyncProjectContext;
@@ -153,6 +155,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   Timer? _assemblyJobPollTimer;
   final PanelVersionManager _panelVersionManager = PanelVersionManager();
   final GlobalKey _assemblyInputPanelKey = GlobalKey();
+  final GlobalKey _publishSectionKey = GlobalKey();
+  final GlobalKey _qualitySectionKey = GlobalKey();
   StudioSnapshotBus get _snapshotBus => widget.snapshotBus ?? kStudioSnapshotBus;
   var _scopedRunningJobCount = 0;
   var _didScrollToInitialFocus = false;
@@ -301,10 +305,22 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     if (_didScrollToInitialFocus) {
       return;
     }
-    if (widget.initialFocus != ShortVideoSpaceInitialFocus.assembly) {
-      return;
+    GlobalKey? targetKey;
+    switch (widget.initialFocus) {
+      case ShortVideoSpaceInitialFocus.assembly:
+        targetKey = _assemblyInputPanelKey;
+      case ShortVideoSpaceInitialFocus.none:
+        switch (widget.embedScope) {
+          case ShortVideoSpaceEmbedScope.publish:
+            targetKey = _publishSectionKey;
+          case ShortVideoSpaceEmbedScope.quality:
+            targetKey = _qualitySectionKey;
+          case ShortVideoSpaceEmbedScope.full:
+          case ShortVideoSpaceEmbedScope.assembly:
+            return;
+        }
     }
-    final ctx = _assemblyInputPanelKey.currentContext;
+    final ctx = targetKey.currentContext;
     if (ctx == null) {
       return;
     }
@@ -428,8 +444,12 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   @override
   void didUpdateWidget(covariant ShortVideoSpaceSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialFocus == ShortVideoSpaceInitialFocus.assembly &&
-        oldWidget.initialFocus != ShortVideoSpaceInitialFocus.assembly) {
+    if ((widget.initialFocus != oldWidget.initialFocus ||
+            widget.embedScope != oldWidget.embedScope) &&
+        (widget.initialFocus == ShortVideoSpaceInitialFocus.assembly ||
+            widget.embedScope == ShortVideoSpaceEmbedScope.publish ||
+            widget.embedScope == ShortVideoSpaceEmbedScope.quality)) {
+      _didScrollToInitialFocus = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _maybeScrollToInitialFocus();
       });
@@ -1107,12 +1127,17 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PanelConsistencyAlert(
-              status: _panelVersionManager.checkConsistency(),
-              onRefresh: () => unawaited(_loadProjectOverview()),
-            ),
-            const SizedBox(height: 12),
+            if (widget.embedScope == ShortVideoSpaceEmbedScope.full)
+              PanelConsistencyAlert(
+                status: _panelVersionManager.checkConsistency(),
+                onRefresh: () => unawaited(_loadProjectOverview()),
+              ),
+            if (widget.embedScope == ShortVideoSpaceEmbedScope.full)
+              const SizedBox(height: 12),
             ShortVideoSpaceView(
+        embedScope: widget.embedScope,
+        publishSectionKey: _publishSectionKey,
+        qualitySectionKey: _qualitySectionKey,
         desktopCapabilityPanel: const ShortVideoDesktopCapabilityPanel(),
         mode: _mode,
         modeTitle: modeTitle,
@@ -1310,6 +1335,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             project == null || _shortVideoAssembly == null
             ? null
             : () => unawaited(_openAssemblyDefaultsEditor()),
+        onRefreshExportCheck: project == null
+            ? null
+            : () => unawaited(_loadProjectOverview()),
         assemblyVersionManagerPanel: assemblyVersionManagerPanel,
         candidateCardUi: candidateCardUi,
         candidateComparePanelUi: candidateComparePanelUi,

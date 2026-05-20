@@ -68,6 +68,34 @@ void main() {
 
       expect(snapshot.state, NativeBridgeStartupState.failed);
       expect(snapshot.error, isA<StateError>());
+      expect((snapshot.error! as StateError).message, 'fallback failed');
+    },
+  );
+
+  test(
+    'bootstrap surfaces the last candidate error when all fallbacks fail',
+    () async {
+      final bootstrap = NativeBridgeBootstrap(
+        platformSupport: _TestPlatformSupport(
+          supportsExplicitLibraryLoading: true,
+          candidatePaths: const [
+            'missing/libopenflow_core_bridge.dylib',
+            'debug/libopenflow_core_bridge.dylib',
+          ],
+        ),
+        initializeDefault: () async => throw StateError('default failed'),
+        initializeFromPath: (path) async {
+          throw StateError('failed $path');
+        },
+      );
+
+      final snapshot = await bootstrap.ensureStarted();
+
+      expect(snapshot.state, NativeBridgeStartupState.failed);
+      expect(
+        (snapshot.error! as StateError).message,
+        'failed debug/libopenflow_core_bridge.dylib',
+      );
     },
   );
 

@@ -131,7 +131,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
         SnackBar(
           content: Text(
             l10n.shortVideoTimelineSaveFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),
@@ -178,7 +178,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
         SnackBar(
           content: Text(
             l10n.shortVideoTimelinePreviewFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),
@@ -494,7 +494,7 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
         SnackBar(
           content: Text(
             l10n.shortVideoTimelineReorderFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),

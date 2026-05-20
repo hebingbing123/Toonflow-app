@@ -232,6 +232,8 @@ String studioModelPricingTypeLabel(AppLocalizations l10n, String type) {
       return l10n.studioModelPricingTypeImage;
     case 'video':
       return l10n.studioModelPricingTypeVideo;
+    case 'multimodal':
+      return l10n.studioModelPricingTypeMultimodal;
     default:
       return studioUnknownCodeLabel(l10n, type);
   }

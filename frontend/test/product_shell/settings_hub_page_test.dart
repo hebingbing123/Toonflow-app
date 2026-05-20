@@ -65,6 +65,13 @@ void main() {
     );
     expect(exportCard, findsOneWidget);
     expect(tester.getSize(exportCard).width, greaterThan(300));
+    final tabBar = find.byType(TabBar);
+    final accountTabLabel = find
+        .descendant(of: tabBar, matching: find.text('Account'))
+        .first;
+    final tabBarLeft = tester.getTopLeft(tabBar).dx;
+    final accountTabLeft = tester.getTopLeft(accountTabLabel).dx;
+    expect(accountTabLeft - tabBarLeft, lessThan(48));
     expect(tester.takeException(), isNull);
   });
 

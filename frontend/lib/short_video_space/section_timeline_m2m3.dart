@@ -1,4 +1,3 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 part of 'section.dart';
@@ -27,7 +26,7 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
         SnackBar(
           content: Text(
             l10n.shortVideoTimelineTemplateFailed(
-              describeUserVisibleApiError(l10n, e),
+              describeUserVisibleApiErrorResolved(context, e),
             ),
           ),
         ),
@@ -49,19 +48,23 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
           spacing: 8,
           runSpacing: 8,
           children: [
-            MenuAnchor(
+            StudioMenuAnchor(
               menuChildren: [
-                MenuItemButton(
+                StudioSelectMenuItem(
+                  label: l10n.shortVideoTimelineTemplateShortDrama,
+                  selected: false,
+                  enabled: !_templateBusy,
                   onPressed: _templateBusy
                       ? null
                       : () => _applyRoughCutTemplate('short_drama_default'),
-                  child: Text(l10n.shortVideoTimelineTemplateShortDrama),
                 ),
-                MenuItemButton(
+                StudioSelectMenuItem(
+                  label: l10n.shortVideoTimelineTemplateDialoguePunch,
+                  selected: false,
+                  enabled: !_templateBusy,
                   onPressed: _templateBusy
                       ? null
                       : () => _applyRoughCutTemplate('dialogue_punch'),
-                  child: Text(l10n.shortVideoTimelineTemplateDialoguePunch),
                 ),
               ],
               builder: (context, controller, child) {

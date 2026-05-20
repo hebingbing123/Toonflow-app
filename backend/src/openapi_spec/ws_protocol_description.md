@@ -78,6 +78,7 @@ Requires **`OPENAI_API_KEY` / `LLM_API_KEY`** (same as `agent.chat.send`). Requi
 | `schema_version` | `1` | yes |
 | `payload.content` | string | yes (user goal / instruction) |
 | `payload.max_tool_rounds` | integer | no (default **8**, clamped **1–32**; each “round” is one chat completion that may issue tool calls) |
+| `payload.model_id` | string | no (catalog composite id; overrides project **Studio step** model routing for this run) |
 | `payload.stream` | boolean | no — **WP‑E**：请求「流式输出 + 工具交错」时为 **`true`**；服务端当前在未设置 **`HARNESS_AGENT_STREAMING_TOOLS=1`** 时返回 **`error.occurred`**（`not_implemented`）。启用 env 后仍使用同一套非流式 completion + 工具循环（流式 token 事件后续里程碑补齐）。 |
 
 Shares **`agent.run.cancel`** with streaming chat: cancel aborts an in-flight `harness.agent.run`.

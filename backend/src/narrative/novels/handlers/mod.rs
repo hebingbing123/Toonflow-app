@@ -1,3 +1,4 @@
+pub mod crawl_auth;
 pub mod crawl_preview;
 pub mod crawl_schedule;
 mod create;
@@ -6,6 +7,7 @@ mod list;
 pub mod observability;
 mod update_delete;
 
+pub(super) use crawl_auth::{get_novel_crawl_auth, put_novel_crawl_auth};
 pub(super) use crawl_preview::post_novel_crawl_import;
 pub(super) use crawl_preview::post_novel_crawl_import_batch;
 pub(super) use crawl_preview::post_novel_crawl_preview;

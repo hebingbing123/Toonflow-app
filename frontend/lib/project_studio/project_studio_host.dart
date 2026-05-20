@@ -51,6 +51,8 @@ class ProjectStudioHost {
     this.failedJobCount = 0,
     this.conflictMessage,
     this.onRefreshAfterConflict,
+    this.onOpenProjectSettings,
+    this.onOpenGlobalModelVendorSettings,
   });
 
   final int projectNumericId;
@@ -68,6 +70,8 @@ class ProjectStudioHost {
   final int failedJobCount;
   final String? conflictMessage;
   final VoidCallback? onRefreshAfterConflict;
+  final VoidCallback? onOpenProjectSettings;
+  final VoidCallback? onOpenGlobalModelVendorSettings;
   final VoidCallback onExit;
   final ValueChanged<StudioStep> onStepChanged;
   final VoidCallback onOpenAgentDrawer;

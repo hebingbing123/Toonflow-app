@@ -8,6 +8,8 @@ use crate::jobs::payload_project::{
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size, LlmConfig};
+use crate::projects::model_routing::jobs::resolve_job_image_model_id;
+use crate::projects::model_routing::StudioStepSlug;
 use crate::state::AppState;
 
 use super::super::common::{
@@ -51,7 +53,16 @@ pub(crate) async fn run_production_assets_batch_generate(
     .ok_or_else(|| JobRunError::Failed("asset not linked to script or not accessible".into()))?;
 
     let body_text = asset_row.describe.as_deref().unwrap_or("");
-    let image_model = resolve_openai_image_model(model_in);
+    let routed_model = resolve_job_image_model_id(
+        state,
+        pool,
+        row.owner_user_id,
+        project_numeric_id,
+        StudioStepSlug::Assets,
+        model_in,
+    )
+    .await?;
+    let image_model = resolve_openai_image_model(routed_model.as_str());
     let size = resolve_openai_image_size(&image_model, resolution);
 
     tracing::info!(
