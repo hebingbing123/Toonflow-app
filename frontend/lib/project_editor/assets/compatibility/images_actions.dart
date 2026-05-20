@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsImagesProbeActions on _HomePageState {
   // Compatibility probes stay in a sibling part so this section file remains

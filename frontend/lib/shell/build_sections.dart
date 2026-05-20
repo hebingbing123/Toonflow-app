@@ -1,7 +1,6 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
-// ignore_for_file: invalid_use_of_protected_member
-
 part of '../../home_page.dart';
+
+// ignore_for_file: invalid_use_of_protected_member
 
 extension _HomePageBuildSections on _HomePageState {
   List<Widget> _buildHomePageSections(BuildContext context, Session? session) {

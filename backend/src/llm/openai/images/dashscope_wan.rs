@@ -2,6 +2,7 @@
 //!
 //! wanx2.1 / wan2.x T2I: `POST /api/v1/services/aigc/text2image/image-synthesis`
 //! + `X-DashScope-Async: enable`, poll `GET /api/v1/tasks/{task_id}`.
+//!
 //! Docs: https://help.aliyun.com/zh/model-studio/text-to-image-v2-api-reference
 
 use std::time::Duration;
@@ -13,8 +14,7 @@ use super::resolve::clip_prompt_chars;
 use super::resolve::DALLE3_MAX_PROMPT_CHARS;
 
 const IMAGE_SYNTHESIS_PATH: &str = "/api/v1/services/aigc/text2image/image-synthesis";
-const MULTIMODAL_GENERATION_PATH: &str =
-    "/api/v1/services/aigc/multimodal-generation/generation";
+const MULTIMODAL_GENERATION_PATH: &str = "/api/v1/services/aigc/multimodal-generation/generation";
 
 /// Catalog / request model ids for DashScope Wan image backends.
 pub fn is_dashscope_wan_image_model(model: &str) -> bool {
@@ -46,10 +46,7 @@ pub fn dashscope_api_root(base_url: &str) -> String {
 
 /// Openflow `1024x1024` → DashScope `1024*1024`.
 pub fn to_dashscope_size(size: &str) -> String {
-    size.trim()
-        .replace('×', "*")
-        .replace('x', "*")
-        .replace('X', "*")
+    size.trim().replace(['×', 'x', 'X'], "*")
 }
 
 pub async fn dashscope_wan_images_generation_url(
@@ -197,15 +194,15 @@ async fn poll_task_until_image(
 }
 
 fn extract_image_url(v: &Value) -> Result<String, String> {
-    if let Some(url) = v
-        .pointer("/output/results/0/url")
-        .and_then(|x| x.as_str())
-    {
+    if let Some(url) = v.pointer("/output/results/0/url").and_then(|x| x.as_str()) {
         return Ok(url.to_string());
     }
     if let Some(arr) = v.pointer("/output/choices").and_then(|c| c.as_array()) {
         for choice in arr {
-            if let Some(content) = choice.pointer("/message/content").and_then(|c| c.as_array()) {
+            if let Some(content) = choice
+                .pointer("/message/content")
+                .and_then(|c| c.as_array())
+            {
                 for item in content {
                     if let Some(url) = item.get("image").and_then(|i| i.as_str()) {
                         return Ok(url.to_string());

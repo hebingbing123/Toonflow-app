@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
     on _HomePageState {

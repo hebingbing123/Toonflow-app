@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
@@ -246,12 +247,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Script step hides cockpit headline (see ProjectStudioCockpitPanel.showHeadline).
       expect(
         find.text('Project Delta is ready for the next push.'),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.text('Enter video stage'), findsOneWidget);
-      expect(find.text('Sample-first route'), findsOneWidget);
       expect(find.text('72/100'), findsOneWidget);
     },
   );
@@ -347,22 +348,11 @@ void main() {
           ],
           starterTemplates: <ProjectHomeStarterTemplate>[
             ProjectHomeStarterTemplate(
-              key: 'starter_delivery',
-              title: 'Sample-first route',
-              detail: 'Get one clip out before broadening the scope.',
-              targetStep: 'video',
-              ctaLabel: 'Run sample route',
-              launchIntent: ProjectHomeLaunchIntent(
-                targetStep: 'video',
-                agentKind: 'grid_prompt_generator',
-              ),
-            ),
-            ProjectHomeStarterTemplate(
-              key: 'starter_script',
-              title: 'Script drafting route',
-              detail: 'Import a novel and generate the first script draft.',
+              key: 'starter_creator_plot',
+              title: 'Plot narrative',
+              detail: 'Fill brief and script first.',
               targetStep: 'script',
-              ctaLabel: 'Run script route',
+              ctaLabel: 'Start with script',
               launchIntent: ProjectHomeLaunchIntent(
                 targetStep: 'script',
                 agentKind: 'script_rewriter',
@@ -390,9 +380,8 @@ void main() {
 
       expect(find.text('Novel imports'), findsOneWidget);
       expect(find.text('Open script workspace'), findsOneWidget);
-      expect(find.text('Script drafting route'), findsOneWidget);
-      expect(find.text('Delivery risk'), findsNothing);
-      expect(find.text('Check storyboard state'), findsNothing);
+      expect(find.text('Quick-start templates'), findsOneWidget);
+      expect(find.text('Plot narrative'), findsOneWidget);
       expect(find.text('Sample-first route'), findsNothing);
     },
   );
@@ -514,7 +503,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Bad state: boom'), findsOneWidget);
+      expect(find.byType(StudioApiErrorCallout), findsOneWidget);
+      expect(find.textContaining('Something went wrong'), findsOneWidget);
       expect(find.text('Project Delta'), findsNothing);
     },
   );

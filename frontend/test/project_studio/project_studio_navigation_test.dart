@@ -134,7 +134,7 @@ void main() {
 
     expect(find.text('body-script'), findsOneWidget);
 
-    await tester.tap(find.text('2. Art'));
+    await tester.tap(find.text('Art'));
     await tester.pumpAndSettle();
 
     expect(find.text('body-art'), findsOneWidget);

@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
   /// 处理批量新增分镜弹窗，避免主工作台堆叠表单细节。

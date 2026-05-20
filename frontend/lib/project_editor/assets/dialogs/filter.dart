@@ -1,5 +1,4 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
   Future<void> _openAssetFilterDialog({

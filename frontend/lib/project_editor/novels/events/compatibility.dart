@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
   Widget _buildProjectNovelEventsCompatibilitySection({

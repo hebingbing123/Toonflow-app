@@ -1,7 +1,6 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
-// ignore_for_file: invalid_use_of_protected_member
-
 part of 'section.dart';
+
+// ignore_for_file: invalid_use_of_protected_member
 
 /// Assembly and clip desk operations for ShortVideoSpaceSection
 extension _ShortVideoSpaceSectionProductionAssemblyExtension

@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelsActions on _HomePageState {
   bool _novelsProbeDisabled({

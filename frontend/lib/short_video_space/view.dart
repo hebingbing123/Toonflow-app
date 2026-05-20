@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_pane_header.dart';

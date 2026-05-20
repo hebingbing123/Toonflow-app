@@ -1,4 +1,3 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'dialog_view.dart';
 
 class _AssetGenerationControlsPanel extends StatelessWidget {

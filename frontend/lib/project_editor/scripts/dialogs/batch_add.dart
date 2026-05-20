@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
   /// Opens the batch-add-scripts dialog so the scripts section stays thin.

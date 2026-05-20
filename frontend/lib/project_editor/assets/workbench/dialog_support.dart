@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_dropdown_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../project_studio/project_studio_host.dart';
 import '../../../../rust_api.dart';

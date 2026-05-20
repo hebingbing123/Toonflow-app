@@ -1,7 +1,6 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
-// ignore_for_file: library_private_types_in_public_api
-
 part of 'creative_manuals.dart';
+
+// ignore_for_file: library_private_types_in_public_api
 
 class CreativeManualsWorkbenchView extends StatelessWidget {
   const CreativeManualsWorkbenchView({

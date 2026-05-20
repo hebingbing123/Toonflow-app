@@ -1,4 +1,3 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'view.dart';
 
 /// Project selector and configuration panel widget
