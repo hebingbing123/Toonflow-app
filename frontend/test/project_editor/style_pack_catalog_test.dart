@@ -5,7 +5,7 @@ import 'package:openflow_app/rust_api.dart';
 
 void main() {
   test('buildStylePackCatalogFromResponses normalizes API style paths', () {
-    const l10n = AppLocalizationsEn();
+    final l10n = AppLocalizationsEn();
     final catalog = buildStylePackCatalogFromResponses(
       visualManual: VisualManualResponseV1(
         styles: <VisualManualStyleV1>[

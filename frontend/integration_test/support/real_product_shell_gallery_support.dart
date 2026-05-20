@@ -68,6 +68,7 @@ class RealProductShellGalleryHarness {
     await tester.pumpWidget(
       RepaintBoundary(key: repaintKey, child: const StudioProductApp()),
     );
+    await pumpFrames(count: 24);
   }
 
   Future<void> pumpFrames({
@@ -107,7 +108,15 @@ class RealProductShellGalleryHarness {
   }
 
   Future<void> login() async {
-    await waitFor(find.text('登录'));
+    final onLoginScreen = find.byKey(const Key('product-auth-email'));
+    final zhTab = find.text('登录');
+    final enTab = find.text('Sign In');
+    await waitFor(
+      onLoginScreen.evaluate().isNotEmpty
+          ? onLoginScreen
+          : (zhTab.evaluate().isNotEmpty ? zhTab : enTab),
+      maxTicks: 80,
+    );
     await tester.enterText(
       find.byKey(const Key('product-auth-email')),
       kDevAdminEmail,
