@@ -174,17 +174,13 @@ pub(crate) async fn patch_project_by_id(
     )?);
 
     let art_style_pack_patch = validate_art_style_pack_field_patch(trim_text_patch(
-        parse_optional_text_field(
-            normalize_patch_value(body.art_style_pack),
-            "art_style_pack",
-        )?,
+        parse_optional_text_field(normalize_patch_value(body.art_style_pack), "art_style_pack")?,
     ))?;
-    let story_style_pack_patch = validate_story_style_pack_field_patch(trim_text_patch(
-        parse_optional_text_field(
+    let story_style_pack_patch =
+        validate_story_style_pack_field_patch(trim_text_patch(parse_optional_text_field(
             normalize_patch_value(body.story_style_pack),
             "story_style_pack",
-        )?,
-    ))?;
+        )?))?;
 
     let target_market_patch = trim_text_patch(parse_optional_text_field(
         normalize_patch_value(body.target_market),

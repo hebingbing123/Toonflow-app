@@ -66,7 +66,7 @@ pub fn validate_story_style_pack_set(value: &str) -> Result<String, ApiError> {
     Ok(normalized)
 }
 
-pub fn validate_art_style_pack_field_patch(
+pub(crate) fn validate_art_style_pack_field_patch(
     patch: FieldPatch<String>,
 ) -> Result<FieldPatch<String>, ApiError> {
     match patch {
@@ -78,15 +78,15 @@ pub fn validate_art_style_pack_field_patch(
     }
 }
 
-pub fn validate_story_style_pack_field_patch(
+pub(crate) fn validate_story_style_pack_field_patch(
     patch: FieldPatch<String>,
 ) -> Result<FieldPatch<String>, ApiError> {
     match patch {
         FieldPatch::Absent => Ok(FieldPatch::Absent),
         FieldPatch::Set(None) => Ok(FieldPatch::Set(None)),
-        FieldPatch::Set(Some(value)) => {
-            Ok(FieldPatch::Set(Some(validate_story_style_pack_set(&value)?)))
-        }
+        FieldPatch::Set(Some(value)) => Ok(FieldPatch::Set(Some(validate_story_style_pack_set(
+            &value,
+        )?))),
     }
 }
 

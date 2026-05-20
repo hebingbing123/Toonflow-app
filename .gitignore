@@ -30,6 +30,20 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # IntelliJ based IDEs
 .idea
+.fleet/
+
+# Common editor generated files
+.history/
+.vs/
+*.code-workspace
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+*.swp
+*.swo
+*~
+*.orig
 
 # Finder (MacOS) folder config
 .DS_Store

@@ -49,8 +49,7 @@ impl VideoProviderClient {
     ) -> anyhow::Result<VideoGenerationResponse> {
         let cfg = call.auth.tencent_tc3()?;
         let body = json!({ "JobId": task_id });
-        let response =
-            call_vclm_action(&self.http, cfg, "DescribeHunyuanToVideoJob", body).await?;
+        let response = call_vclm_action(&self.http, cfg, "DescribeHunyuanToVideoJob", body).await?;
         let status_str = response["Status"].as_str().unwrap_or("WAIT");
         let (status, video_url, error_message) = match status_str {
             "DONE" => (

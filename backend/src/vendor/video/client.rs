@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-pub use super::endpoint::{VideoApiRouting, VideoProviderCall};
 use super::endpoint::VideoProviderCall as Call;
+pub use super::endpoint::{VideoApiRouting, VideoProviderCall};
 use super::types::{
     VideoExportRequest, VideoExportResponse, VideoExportStatus, VideoGenerationRequest,
     VideoGenerationResponse, VideoProvider,
@@ -68,7 +68,8 @@ impl VideoProviderClient {
             api_key: Some(k.to_string()),
             api_secret: None,
         });
-        self.generate_video_with_credentials(req, creds.as_ref()).await
+        self.generate_video_with_credentials(req, creds.as_ref())
+            .await
     }
 
     pub async fn poll_generation(
@@ -77,12 +78,13 @@ impl VideoProviderClient {
         task_id: &str,
     ) -> anyhow::Result<VideoGenerationResponse> {
         let call = Call::build(provider, None, None, None)?;
-        self.poll_generation_with_call(provider, task_id, &call).await
+        self.poll_generation_with_call(provider, task_id, &call)
+            .await
     }
 
     pub async fn poll_generation_with_call(
         &self,
-        provider: VideoProvider,
+        _provider: VideoProvider,
         task_id: &str,
         call: &Call,
     ) -> anyhow::Result<VideoGenerationResponse> {
@@ -107,7 +109,8 @@ impl VideoProviderClient {
         creds: Option<&super::auth::VideoProviderCredentials>,
     ) -> anyhow::Result<VideoGenerationResponse> {
         let call = Call::build(provider, creds, None, None)?;
-        self.poll_generation_with_call(provider, task_id, &call).await
+        self.poll_generation_with_call(provider, task_id, &call)
+            .await
     }
 
     pub async fn poll_generation_with_api_key(

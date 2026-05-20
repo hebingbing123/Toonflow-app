@@ -105,7 +105,7 @@ pub async fn load_stored_vendor_api_key(
     for vendor_id in vendor_id_candidates {
         let Some(stored) =
             load_stored_vendor_credentials(pool, owner_user_id, std::slice::from_ref(vendor_id))
-            .await?
+                .await?
         else {
             continue;
         };

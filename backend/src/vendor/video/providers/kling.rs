@@ -7,7 +7,7 @@ use serde_json::json;
 use crate::vendor::http_extract::{json_str, json_url};
 use crate::vendor::video::client::{VideoProviderCall, VideoProviderClient};
 use crate::vendor::video::types::{
-    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
+    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus,
 };
 
 fn kling_duration(req: &VideoGenerationRequest) -> String {

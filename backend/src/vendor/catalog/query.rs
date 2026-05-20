@@ -76,9 +76,8 @@ pub(crate) fn vendor_catalog_summaries() -> Vec<VendorCatalogSummary> {
             .filter(|s| !s.is_empty())
             .unwrap_or("openai")
             .to_string();
-        let official_api_host = vendor_video_slug(v.id).map(|slug| {
-            video_provider_to_enum(slug).api_base_url()
-        });
+        let official_api_host =
+            vendor_video_slug(v.id).map(|slug| video_provider_to_enum(slug).api_base_url());
         out.push(VendorCatalogSummary {
             id: v.id,
             name: v.name.clone(),

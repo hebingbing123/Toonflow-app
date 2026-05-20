@@ -4,7 +4,7 @@ use serde_json::json;
 
 use crate::vendor::video::client::{VideoProviderCall, VideoProviderClient};
 use crate::vendor::video::types::{
-    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
+    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus,
 };
 
 impl VideoProviderClient {
@@ -90,11 +90,7 @@ impl VideoProviderClient {
                 } else {
                     None
                 };
-                (
-                    VideoGenerationStatus::Completed,
-                    download_url,
-                    None,
-                )
+                (VideoGenerationStatus::Completed, download_url, None)
             }
             "Fail" | "failed" => (
                 VideoGenerationStatus::Failed,
@@ -132,7 +128,11 @@ impl VideoProviderClient {
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
-            return Err(anyhow::anyhow!("MiniMax file retrieve {}: {}", status, text));
+            return Err(anyhow::anyhow!(
+                "MiniMax file retrieve {}: {}",
+                status,
+                text
+            ));
         }
         let result: serde_json::Value = resp.json().await?;
         result

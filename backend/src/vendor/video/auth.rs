@@ -90,7 +90,9 @@ fn resolve_bearer(
     Ok(VideoProviderAuth::Bearer(env_key))
 }
 
-fn resolve_kling_bearer(creds: Option<&VideoProviderCredentials>) -> anyhow::Result<VideoProviderAuth> {
+fn resolve_kling_bearer(
+    creds: Option<&VideoProviderCredentials>,
+) -> anyhow::Result<VideoProviderAuth> {
     let (ak, sk) = kling_access_secret_pair(creds)?;
     let token = kling_bearer_token(&ak, &sk).map_err(anyhow::Error::msg)?;
     Ok(VideoProviderAuth::Bearer(token))
@@ -101,8 +103,14 @@ fn kling_access_secret_pair(
 ) -> anyhow::Result<(String, String)> {
     if let Some(c) = creds {
         if let (Some(ak), Some(sk)) = (
-            c.api_key.as_deref().map(str::trim).filter(|s| !s.is_empty()),
-            c.api_secret.as_deref().map(str::trim).filter(|s| !s.is_empty()),
+            c.api_key
+                .as_deref()
+                .map(str::trim)
+                .filter(|s| !s.is_empty()),
+            c.api_secret
+                .as_deref()
+                .map(str::trim)
+                .filter(|s| !s.is_empty()),
         ) {
             return Ok((ak.to_string(), sk.to_string()));
         }
@@ -128,16 +136,24 @@ fn resolve_hunyuan_tc3(
     api_base: &str,
 ) -> anyhow::Result<VideoProviderAuth> {
     let (id, key) = hunyuan_secret_pair(creds)?;
-    Ok(VideoProviderAuth::TencentTc3(TencentTc3Config::from_keys_and_base(
-        &id, &key, api_base,
-    )))
+    Ok(VideoProviderAuth::TencentTc3(
+        TencentTc3Config::from_keys_and_base(&id, &key, api_base),
+    ))
 }
 
-fn hunyuan_secret_pair(creds: Option<&VideoProviderCredentials>) -> anyhow::Result<(String, String)> {
+fn hunyuan_secret_pair(
+    creds: Option<&VideoProviderCredentials>,
+) -> anyhow::Result<(String, String)> {
     if let Some(c) = creds {
         if let (Some(id), Some(key)) = (
-            c.api_key.as_deref().map(str::trim).filter(|s| !s.is_empty()),
-            c.api_secret.as_deref().map(str::trim).filter(|s| !s.is_empty()),
+            c.api_key
+                .as_deref()
+                .map(str::trim)
+                .filter(|s| !s.is_empty()),
+            c.api_secret
+                .as_deref()
+                .map(str::trim)
+                .filter(|s| !s.is_empty()),
         ) {
             return Ok((id.to_string(), key.to_string()));
         }
@@ -186,8 +202,13 @@ mod tests {
             api_key: Some("ak_x".into()),
             api_secret: Some("sk_y".into()),
         };
-        let auth =
-            resolve_video_auth(VideoProvider::Kling, Some(&creds), "https://api.klingai.com", VideoApiRouting::NativeVendor).unwrap();
+        let auth = resolve_video_auth(
+            VideoProvider::Kling,
+            Some(&creds),
+            "https://api.klingai.com",
+            VideoApiRouting::NativeVendor,
+        )
+        .unwrap();
         match auth {
             VideoProviderAuth::Bearer(t) => assert_eq!(t.matches('.').count(), 2),
             _ => panic!("expected jwt bearer"),

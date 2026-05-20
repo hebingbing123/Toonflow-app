@@ -6,7 +6,10 @@ use super::video::VideoProvider;
 /// User points Settings `base_url` at a **unified gateway** (OpenAI-compatible `/v1/...`)
 /// instead of the vendor's official host — use standard protocol + model name only.
 pub fn is_aggregation_gateway(resolved_base: &str, official_base: &str) -> bool {
-    match (normalize_host_port(resolved_base), normalize_host_port(official_base)) {
+    match (
+        normalize_host_port(resolved_base),
+        normalize_host_port(official_base),
+    ) {
         (Some(a), Some(b)) => a != b,
         _ => true,
     }
@@ -83,9 +86,7 @@ mod tests {
 
     #[test]
     fn dashscope_compatible_mode_is_not_official_for_wan() {
-        assert!(!is_dashscope_official_host(
-            "https://api.siliconflow.cn/v1"
-        ));
+        assert!(!is_dashscope_official_host("https://api.siliconflow.cn/v1"));
         assert!(is_dashscope_official_host(
             "https://dashscope.aliyuncs.com/compatible-mode/v1"
         ));

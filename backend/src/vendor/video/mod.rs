@@ -6,9 +6,9 @@
 pub(crate) mod auth;
 mod client;
 pub(crate) mod credentials;
-pub(crate) mod endpoint;
 #[cfg(test)]
 pub(crate) mod doc_fixtures;
+pub(crate) mod endpoint;
 mod providers;
 mod types;
 

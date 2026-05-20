@@ -93,10 +93,7 @@ impl VideoProviderClient {
     ) -> anyhow::Result<VideoGenerationResponse> {
         let api_key = call.auth.bearer_token()?;
         let (endpoint, request_id) = parse_fal_task_id(task_id);
-        let status_url = format!(
-            "{}/{endpoint}/requests/{request_id}/status",
-            call.api_base
-        );
+        let status_url = format!("{}/{endpoint}/requests/{request_id}/status", call.api_base);
 
         let resp = self
             .http
@@ -115,12 +112,8 @@ impl VideoProviderClient {
         let status_str = result["status"].as_str().unwrap_or("IN_QUEUE");
         let (status, video_url, error_message) = match status_str {
             "COMPLETED" => {
-                let result_url =
-                    format!("{}/{endpoint}/requests/{request_id}", call.api_base);
-                let video_url = self
-                    .fetch_fal_video_url(&result_url, api_key)
-                    .await
-                    .ok();
+                let result_url = format!("{}/{endpoint}/requests/{request_id}", call.api_base);
+                let video_url = self.fetch_fal_video_url(&result_url, api_key).await.ok();
                 (VideoGenerationStatus::Completed, video_url, None)
             }
             "FAILED" => (

@@ -66,14 +66,9 @@ async fn vendor_credential_video_and_image_byok() {
     .expect("load video key");
     assert_eq!(loaded_video.as_deref(), Some(doubao_key));
 
-    let cfg = build_llm_config_for_model(
-        &state,
-        &pool,
-        sub,
-        "18:doubao-seedream-3-0-t2i",
-    )
-    .await
-    .expect("image llm config");
+    let cfg = build_llm_config_for_model(&state, &pool, sub, "18:doubao-seedream-3-0-t2i")
+        .await
+        .expect("image llm config");
     assert_eq!(cfg.api_key, seedream_key);
     assert_eq!(cfg.protocol, VendorProtocol::VolcengineArk);
     assert!(cfg.base_url.contains("volces.com"));

@@ -19,10 +19,19 @@ pub(super) fn openapi_shell() -> OpenApi {
         Paths::new(),
     );
 
-    api.servers = Some(vec![ServerBuilder::new()
-        .url("http://127.0.0.1:8666")
-        .description(Some("Local dev (default `PORT`; override with env)"))
-        .build()]);
+    // Prefer a relative base so the spec remains valid behind proxies / desktop shells.
+    api.servers = Some(vec![
+        ServerBuilder::new()
+            .url("/api/v1")
+            .description(Some(
+                "Default base path (host provided by current environment)",
+            ))
+            .build(),
+        ServerBuilder::new()
+            .url("http://127.0.0.1:8666/api/v1")
+            .description(Some("Local dev (default `PORT`; override with env)"))
+            .build(),
+    ]);
 
     api.tags = Some(vec![
         tag(

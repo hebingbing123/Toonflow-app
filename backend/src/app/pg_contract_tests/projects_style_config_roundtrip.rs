@@ -71,15 +71,17 @@ async fn projects_style_config_patch_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    r#"{"artStylePack":"__nonexistent_art_pack__"}"#,
-                ))
+                .body(Body::from(r#"{"artStylePack":"__nonexistent_art_pack__"}"#))
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, bad_pack) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "unknown pack: {bad_pack:?}");
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "unknown pack: {bad_pack:?}"
+    );
 
     let res = app
         .clone()

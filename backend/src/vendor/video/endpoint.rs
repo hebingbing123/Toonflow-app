@@ -69,7 +69,8 @@ impl VideoProviderCall {
         vendor_config: Option<&VendorConfig>,
     ) -> anyhow::Result<Self> {
         let api_base = resolve_video_api_base(provider, catalog_model_id, vendor_config);
-        let routing = resolve_video_api_routing(provider, catalog_model_id, vendor_config, &api_base);
+        let routing =
+            resolve_video_api_routing(provider, catalog_model_id, vendor_config, &api_base);
         let auth = resolve_video_auth(provider, credentials, &api_base, routing)?;
         Ok(Self {
             auth,
@@ -161,6 +162,7 @@ fn base_url_from_settings(settings: &HashMap<String, String>) -> Option<String> 
 }
 
 /// Host header and endpoint root for TC3 signing from an HTTPS base URL.
+#[allow(dead_code)] // kept for future TC3/canonical signing helpers
 pub fn api_base_host_and_root(api_base: &str) -> (String, String) {
     let trimmed = api_base.trim().trim_end_matches('/');
     if let Ok(url) = reqwest::Url::parse(trimmed) {
@@ -190,9 +192,12 @@ mod tests {
                 display_name: None,
                 enabled: true,
                 selected_models: vec![],
-                settings: [("base_url".to_string(), "https://proxy.example/volc".to_string())]
-                    .into_iter()
-                    .collect(),
+                settings: [(
+                    "base_url".to_string(),
+                    "https://proxy.example/volc".to_string(),
+                )]
+                .into_iter()
+                .collect(),
             },
         );
         let base = resolve_video_api_base(

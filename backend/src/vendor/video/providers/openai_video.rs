@@ -4,7 +4,7 @@ use serde_json::json;
 
 use crate::vendor::video::client::{VideoProviderCall, VideoProviderClient};
 use crate::vendor::video::types::{
-    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
+    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus,
 };
 
 impl VideoProviderClient {

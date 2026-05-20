@@ -10,9 +10,7 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 
 use super::auth::VideoProviderCredentials;
 use super::doc_fixtures::{fal_pika, hunyuan_vclm, kling, minimax, openai_sora, runway, seedance};
-use super::{
-    VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
-};
+use super::{VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient};
 
 static MOCK_VIDEO_ENV_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
@@ -23,9 +21,7 @@ struct MockVideoEnv {
 
 impl MockVideoEnv {
     async fn start() -> Self {
-        let lock = MOCK_VIDEO_ENV_LOCK
-            .lock()
-            .expect("mock video env lock");
+        let lock = MOCK_VIDEO_ENV_LOCK.lock().expect("mock video env lock");
         let mock = MockServer::start().await;
         std::env::set_var("OPENFLOW_TEST_VIDEO_API_BASE", mock.uri());
         Self { mock, _lock: lock }
@@ -69,11 +65,15 @@ async fn seedance_doc_shape_submit_poll_succeeded() {
         .await;
 
     Mock::given(method("GET"))
-        .and(path_regex(r"/api/v3/contents/generations/tasks/cgt-mock-seedance$"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(seedance::task_succeeded(
-            "cgt-mock-seedance",
-            "https://cdn.example.test/seedance.mp4",
-        )))
+        .and(path_regex(
+            r"/api/v3/contents/generations/tasks/cgt-mock-seedance$",
+        ))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(seedance::task_succeeded(
+                "cgt-mock-seedance",
+                "https://cdn.example.test/seedance.mp4",
+            )),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -88,7 +88,11 @@ async fn seedance_doc_shape_submit_poll_succeeded() {
     assert_eq!(queued.task_id, "cgt-mock-seedance");
 
     let done = client
-        .poll_generation_with_api_key(VideoProvider::Doubao, "cgt-mock-seedance", Some("mock-ark-key"))
+        .poll_generation_with_api_key(
+            VideoProvider::Doubao,
+            "cgt-mock-seedance",
+            Some("mock-ark-key"),
+        )
         .await
         .expect("poll done");
     assert_eq!(done.status, VideoGenerationStatus::Completed);
@@ -108,9 +112,7 @@ async fn minimax_doc_shape_query_then_file_retrieve() {
 
     Mock::given(method("POST"))
         .and(path(minimax::CREATE_PATH))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(minimax::task_created("mm-task-42")),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(minimax::task_created("mm-task-42")))
         .expect(1)
         .mount(&mock)
         .await;
@@ -128,10 +130,12 @@ async fn minimax_doc_shape_query_then_file_retrieve() {
     Mock::given(method("GET"))
         .and(path(minimax::FILE_RETRIEVE_PATH))
         .and(query_param("file_id", "file-mm-99"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(minimax::file_download(
-            "file-mm-99",
-            "https://cdn.example.test/hailuo.mp4",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(minimax::file_download(
+                "file-mm-99",
+                "https://cdn.example.test/hailuo.mp4",
+            )),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -146,7 +150,11 @@ async fn minimax_doc_shape_query_then_file_retrieve() {
     assert_eq!(queued.task_id, "mm-task-42");
 
     let done = client
-        .poll_generation_with_api_key(VideoProvider::Minimax, "mm-task-42", Some("mock-minimax-key"))
+        .poll_generation_with_api_key(
+            VideoProvider::Minimax,
+            "mm-task-42",
+            Some("mock-minimax-key"),
+        )
         .await
         .expect("poll");
     assert_eq!(done.status, VideoGenerationStatus::Completed);
@@ -192,7 +200,11 @@ async fn openai_sora_doc_shape_completed_content_url() {
     assert_eq!(queued.task_id, "video_mock_1");
 
     let done = client
-        .poll_generation_with_api_key(VideoProvider::OpenAi, "video_mock_1", Some("mock-openai-key"))
+        .poll_generation_with_api_key(
+            VideoProvider::OpenAi,
+            "video_mock_1",
+            Some("mock-openai-key"),
+        )
         .await
         .expect("poll");
     assert_eq!(done.status, VideoGenerationStatus::Completed);
@@ -212,9 +224,9 @@ async fn hunyuan_vclm_tc3_submit_and_describe() {
     Mock::given(method("POST"))
         .and(path("/"))
         .and(header("X-TC-Action", "SubmitHunyuanToVideoJob"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(hunyuan_vclm::submit_response(
-            "hy-task-7",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(hunyuan_vclm::submit_response("hy-task-7")),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -222,9 +234,11 @@ async fn hunyuan_vclm_tc3_submit_and_describe() {
     Mock::given(method("POST"))
         .and(path("/"))
         .and(header("X-TC-Action", "DescribeHunyuanToVideoJob"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(hunyuan_vclm::describe_done(
-            "https://cdn.example.test/hunyuan.mp4",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(hunyuan_vclm::describe_done(
+                "https://cdn.example.test/hunyuan.mp4",
+            )),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -263,19 +277,19 @@ async fn runway_doc_shape_text_to_video_and_poll() {
     Mock::given(method("POST"))
         .and(path("/v1/text_to_video"))
         .and(header("X-Runway-Version", "2024-11-06"))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(runway::task_created("rw-task-1")),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(runway::task_created("rw-task-1")))
         .expect(1)
         .mount(&mock)
         .await;
 
     Mock::given(method("GET"))
         .and(path("/v1/tasks/rw-task-1"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(runway::task_succeeded(
-            "rw-task-1",
-            "https://cdn.example.test/runway.mp4",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(runway::task_succeeded(
+                "rw-task-1",
+                "https://cdn.example.test/runway.mp4",
+            )),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -306,19 +320,19 @@ async fn kling_doc_shape_text2video_and_poll() {
 
     Mock::given(method("POST"))
         .and(path("/v1/videos/text2video"))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(kling::task_created("kl-88")),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(kling::task_created("kl-88")))
         .expect(1)
         .mount(&mock)
         .await;
 
     Mock::given(method("GET"))
         .and(path("/v1/videos/text2video/kl-88"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(kling::task_succeeded(
-            "kl-88",
-            "https://cdn.example.test/kling.mp4",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(kling::task_succeeded(
+                "kl-88",
+                "https://cdn.example.test/kling.mp4",
+            )),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -362,18 +376,17 @@ async fn fal_pika_queue_submit_poll_and_result() {
 
     Mock::given(method("GET"))
         .and(path(format!("/{endpoint}/requests/fal-req-1/status")))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(fal_pika::status_completed()),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(fal_pika::status_completed()))
         .expect(1)
         .mount(&mock)
         .await;
 
     Mock::given(method("GET"))
         .and(path(format!("/{endpoint}/requests/fal-req-1")))
-        .respond_with(ResponseTemplate::new(200).set_body_json(fal_pika::result_video(
-            "https://cdn.example.test/pika.mp4",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(fal_pika::result_video("https://cdn.example.test/pika.mp4")),
+        )
         .expect(1)
         .mount(&mock)
         .await;
@@ -404,18 +417,16 @@ async fn seedance_failed_status_surfaces_error() {
 
     Mock::given(method("POST"))
         .and(path(seedance::CREATE_PATH))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(seedance::task_created("cgt-fail")),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(seedance::task_created("cgt-fail")))
         .mount(&mock)
         .await;
 
     Mock::given(method("GET"))
         .and(path_regex(r"/api/v3/contents/generations/tasks/cgt-fail$"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(seedance::task_failed(
-            "cgt-fail",
-            "content policy",
-        )))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(seedance::task_failed("cgt-fail", "content policy")),
+        )
         .mount(&mock)
         .await;
 
@@ -431,12 +442,9 @@ async fn seedance_failed_status_surfaces_error() {
         .await
         .expect("poll");
     assert_eq!(failed.status, VideoGenerationStatus::Failed);
-    assert!(
-        failed
-            .error_message
-            .as_deref()
-            .unwrap_or("")
-            .contains("policy")
-    );
+    assert!(failed
+        .error_message
+        .as_deref()
+        .unwrap_or("")
+        .contains("policy"));
 }
-

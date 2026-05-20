@@ -83,13 +83,11 @@ fn tc3_authorization(
     let canonical_headers = format!("content-type:application/json\nhost:{}\n", cfg.host);
     let signed_headers = "content-type;host";
     let hashed_payload = sha256_hex(payload.as_bytes());
-    let canonical_request = format!(
-        "POST\n/\n\n{canonical_headers}{signed_headers}\n{hashed_payload}"
-    );
+    let canonical_request =
+        format!("POST\n/\n\n{canonical_headers}{signed_headers}\n{hashed_payload}");
     let hashed_canonical = sha256_hex(canonical_request.as_bytes());
-    let string_to_sign = format!(
-        "TC3-HMAC-SHA256\n{timestamp}\n{credential_scope}\n{hashed_canonical}"
-    );
+    let string_to_sign =
+        format!("TC3-HMAC-SHA256\n{timestamp}\n{credential_scope}\n{hashed_canonical}");
     let secret_date = hmac_sha256(format!("TC3{}", cfg.secret_key).as_bytes(), date.as_bytes());
     let secret_service = hmac_sha256(&secret_date, VCLM_SERVICE.as_bytes());
     let secret_signing = hmac_sha256(&secret_service, b"tc3_request");
@@ -151,7 +149,12 @@ mod tests {
     fn tc3_authorization_is_deterministic_for_fixture() {
         let cfg =
             TencentTc3Config::from_keys_and_base("AKID", "SECRET", &format!("https://{VCLM_HOST}"));
-        let auth = tc3_authorization(&cfg, "SubmitHunyuanToVideoJob", r#"{"Prompt":"hi"}"#, 1_700_000_000);
+        let auth = tc3_authorization(
+            &cfg,
+            "SubmitHunyuanToVideoJob",
+            r#"{"Prompt":"hi"}"#,
+            1_700_000_000,
+        );
         assert!(auth.starts_with("TC3-HMAC-SHA256 Credential=AKID/"));
         assert!(auth.contains("Signature="));
     }

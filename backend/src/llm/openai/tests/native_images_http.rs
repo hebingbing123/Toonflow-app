@@ -48,11 +48,9 @@ async fn gemini_native_protocol_hits_imagen_predict() {
     Mock::given(method("POST"))
         .and(path("/v1beta/models/imagen-3.0-generate-002:predict"))
         .and(query_param("key", "gemini-user-key"))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(json!({
-                "generatedImages": [{"imageUri": "https://cdn.example.test/imagen.png"}]
-            })),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "generatedImages": [{"imageUri": "https://cdn.example.test/imagen.png"}]
+        })))
         .expect(1)
         .mount(&mock)
         .await;

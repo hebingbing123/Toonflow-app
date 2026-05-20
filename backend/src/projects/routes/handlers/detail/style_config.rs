@@ -66,19 +66,13 @@ pub(crate) async fn patch_style_config(
     let has_art_style_pack = body.art_style_pack.is_some();
     let has_story_style_pack = body.story_style_pack.is_some();
 
-    let art_style_pack_patch = validate_art_style_pack_field_patch(
-        trim_text_patch(parse_optional_text_field(
-            body.art_style_pack,
-            "art_style_pack",
-        )?),
-    )?;
+    let art_style_pack_patch = validate_art_style_pack_field_patch(trim_text_patch(
+        parse_optional_text_field(body.art_style_pack, "art_style_pack")?,
+    ))?;
 
-    let story_style_pack_patch = validate_story_style_pack_field_patch(
-        trim_text_patch(parse_optional_text_field(
-            body.story_style_pack,
-            "story_style_pack",
-        )?),
-    )?;
+    let story_style_pack_patch = validate_story_style_pack_field_patch(trim_text_patch(
+        parse_optional_text_field(body.story_style_pack, "story_style_pack")?,
+    ))?;
 
     // 先读取当前记录（确认存在且属于当前用户）
     let current = sqlx::query_as::<_, ProjectRow>(

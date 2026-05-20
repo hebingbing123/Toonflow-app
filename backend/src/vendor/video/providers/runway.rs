@@ -7,7 +7,7 @@ use serde_json::json;
 use crate::vendor::http_extract::{json_str, json_url};
 use crate::vendor::video::client::{VideoProviderCall, VideoProviderClient};
 use crate::vendor::video::types::{
-    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
+    VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus,
 };
 
 const RUNWAY_VERSION: &str = "2024-11-06";
@@ -104,12 +104,7 @@ impl VideoProviderClient {
                 VideoGenerationStatus::Completed,
                 json_url(
                     &result,
-                    &[
-                        "/output/0",
-                        "/output/0/url",
-                        "/artifacts/0/url",
-                        "/url",
-                    ],
+                    &["/output/0", "/output/0/url", "/artifacts/0/url", "/url"],
                 ),
                 None,
             ),

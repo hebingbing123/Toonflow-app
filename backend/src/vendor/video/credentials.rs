@@ -47,9 +47,7 @@ pub async fn load_video_provider_call(
 ) -> Result<(Option<VideoProviderCredentials>, VideoProviderCall), String> {
     let credentials =
         load_video_provider_credentials(pool, owner_user_id, provider, catalog_model_id).await?;
-    let vendor_config = load_user_vendor_config(pool, owner_user_id)
-        .await
-        .ok();
+    let vendor_config = load_user_vendor_config(pool, owner_user_id).await.ok();
     let call = VideoProviderCall::build(
         provider,
         credentials.as_ref(),
@@ -61,6 +59,7 @@ pub async fn load_video_provider_call(
 }
 
 /// Build call when credentials are already loaded (avoids double DB read in workers).
+#[allow(dead_code)] // reserved for worker/external integration path
 pub async fn build_video_provider_call(
     pool: &PgPool,
     owner_user_id: Uuid,
@@ -68,9 +67,7 @@ pub async fn build_video_provider_call(
     catalog_model_id: Option<&str>,
     credentials: Option<&VideoProviderCredentials>,
 ) -> Result<VideoProviderCall, String> {
-    let vendor_config = load_user_vendor_config(pool, owner_user_id)
-        .await
-        .ok();
+    let vendor_config = load_user_vendor_config(pool, owner_user_id).await.ok();
     VideoProviderCall::build(
         provider,
         credentials,
@@ -80,6 +77,7 @@ pub async fn build_video_provider_call(
     .map_err(|e| e.to_string())
 }
 
+#[allow(dead_code)] // reserved for callsites with preloaded config + credentials
 pub fn build_video_provider_call_with_config(
     provider: VideoProvider,
     catalog_model_id: Option<&str>,

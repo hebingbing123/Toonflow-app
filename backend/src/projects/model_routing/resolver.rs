@@ -280,7 +280,10 @@ mod tests {
     #[test]
     fn enforce_off_for_falsey_env_values() {
         for v in ["0", "false", "no", "off", " FALSE "] {
-            assert!(!parse_model_routing_enforce(Some(v)), "expected off for {v:?}");
+            assert!(
+                !parse_model_routing_enforce(Some(v)),
+                "expected off for {v:?}"
+            );
         }
     }
 

@@ -1,15 +1,13 @@
 use super::super::config::LlmConfig;
 use super::ark::ark_images_generation_url;
-use super::dashscope_wan::{
-    dashscope_wan_images_generation_url, is_dashscope_wan_image_model,
-};
-use crate::vendor::gateway::{
-    is_dashscope_official_host, is_gemini_official_host, is_volcengine_ark_official_host,
-};
+use super::dashscope_wan::{dashscope_wan_images_generation_url, is_dashscope_wan_image_model};
 use super::edits::images_edit_url;
 use super::gemini_imagen::gemini_imagen_generation_url;
 use super::generations::images_generation_url;
 use crate::vendor::catalog::VendorProtocol;
+use crate::vendor::gateway::{
+    is_dashscope_official_host, is_gemini_official_host, is_volcengine_ark_official_host,
+};
 
 /// Uses **`images/edits`** when a reference image is provided; otherwise protocol-aware generation.
 pub async fn images_generation_or_edit_url(
