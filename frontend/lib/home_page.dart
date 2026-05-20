@@ -41,6 +41,9 @@ import 'project_editor/scripts/plan_workbench_view.dart';
 import 'project_editor/scripts/plan_workbench_support.dart';
 import 'project_editor/scripts/workbench/dialog_launcher.dart';
 import 'project_editor/project_members_panel.dart';
+import 'project_editor/step_model_routing_section.dart';
+import 'project_editor/style_pack_catalog.dart';
+import 'project_editor/style_pack_picker_field.dart';
 import 'project_editor/short_drama_targets_panel.dart';
 import 'script_editor/edit_image/workbench_view.dart';
 import 'script_editor/workbench_view.dart';
@@ -74,6 +77,7 @@ import 'shell/navigation_controller.dart';
 import 'design_system/components/openflow_brand.dart';
 import 'design_system/components/studio_model_cost_controls.dart';
 import 'design_system/ix/studio_cost_confirm_sheet.dart';
+import 'design_system/components/studio_dropdown_field.dart';
 import 'design_system/components/studio_empty_state.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
@@ -107,6 +111,9 @@ import 'project_studio/studio_merge_deliver_bar.dart';
 import 'project_studio/studio_overlay_mode.dart';
 import 'project_studio/studio_step.dart';
 import 'project_studio/studio_video_step_panel.dart';
+import 'project_studio/script_step_panel.dart';
+import 'project_studio/novel_crawl_auth_section.dart';
+import 'project_studio/art_step_panel.dart';
 import 'product_shell/studio_agent_drawer.dart';
 import 'episode_console/episode_console_page.dart';
 import 'storyboard_studio/storyboard_studio_page.dart';
@@ -276,6 +283,8 @@ class _HomePageState extends State<HomePage> {
   List<String> _recentProjectIds = const <String>[];
   ShortVideoSpaceInitialFocus _shortVideoSpaceInitialFocus =
       ShortVideoSpaceInitialFocus.none;
+  bool _pendingStudioNovelWorkbench = false;
+  int? _pendingStudioAssetNumericId;
   MeResponse? _sessionMe;
   MeV2Response?
   _sessionMeV2; // Task 6.2: Store v2 response for workspace billing
@@ -588,6 +597,47 @@ class _HomePageState extends State<HomePage> {
     _syncSessionContext();
   }
 
+  @override
+  void didUpdateWidget(covariant HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    if (widget.studioProjectNumericId != oldWidget.studioProjectNumericId &&
+        widget.studioProjectNumericId != null) {
+      _productScopedProjectNumericId = widget.studioProjectNumericId;
+    }
+    if (oldWidget.navigationShell != widget.navigationShell ||
+        oldWidget.studioOverlay != widget.studioOverlay ||
+        oldWidget.initialProductPane != widget.initialProductPane) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _attachStudioRouteListener();
+        if (widget.studioOverlay == StudioOverlayMode.none) {
+          if (GoRouter.maybeOf(context) != null) {
+            _syncStudioPaneFromRoute();
+          } else if (widget.initialProductPane != null &&
+              _shellNavigationController.productWorkspacePane !=
+                  widget.initialProductPane) {
+            _shellNavigationController.replaceProductWorkspacePane(
+              widget.initialProductPane!,
+            );
+          }
+          return;
+        }
+        if (widget.initialProductPane != null &&
+            _shellNavigationController.productWorkspacePane !=
+                widget.initialProductPane) {
+          _shellNavigationController.replaceProductWorkspacePane(
+            widget.initialProductPane!,
+          );
+        }
+      });
+    }
+  }
+
   void _applyInitialDeepLinkNavigation(Uri uri) {
     final searchLink = ProductSearchDeepLink.tryParse(uri);
     if (searchLink != null) {
@@ -737,17 +787,10 @@ class _HomePageState extends State<HomePage> {
         );
         break;
       case ResultType.script:
-        if ((projectNumeric != null && projectNumeric > 0) ||
-            (projectUuid != null && projectUuid.isNotEmpty)) {
+        if (projectNumeric != null && projectNumeric > 0) {
           setState(() {
-            _productScopedProjectNumericId =
-                projectNumeric != null && projectNumeric > 0
-                ? projectNumeric
-                : null;
+            _productScopedProjectNumericId = projectNumeric;
           });
-        }
-        if ((projectNumeric != null && projectNumeric > 0) ||
-            (projectUuid != null && projectUuid.isNotEmpty)) {
           _workspaceInputController.applyProjectScopeRef(
             projectNumericId: projectNumeric,
             scriptNumericId: scriptNumeric,
@@ -755,32 +798,97 @@ class _HomePageState extends State<HomePage> {
             scriptUuid: id,
             workspaceId: workspaceId,
           );
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+          context.go('/projects/$projectNumeric/${StudioStep.script.slug}');
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.globalSearchScriptStudioNavigated)),
+            );
+          }
+        } else {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
         }
-        _shellNavigationController.selectProductWorkspacePane(
-          ProductWorkspacePane.projects,
-        );
         break;
       case ResultType.asset:
-        goProjectsScoped();
+        final assetNumeric =
+            _intFromSearchMeta(metadata?['numeric_id']) ??
+            _intFromSearchMeta(metadata?['asset_numeric_id']) ??
+            int.tryParse(id);
+        if (projectNumeric != null && projectNumeric > 0) {
+          setState(() {
+            _productScopedProjectNumericId = projectNumeric;
+            _pendingStudioAssetNumericId = assetNumeric;
+          });
+          _workspaceInputController.applyProjectScopeRef(
+            projectNumericId: projectNumeric,
+            projectUuid: projectUuid,
+            workspaceId: workspaceId,
+          );
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+          context.go('/projects/$projectNumeric/${StudioStep.assets.slug}');
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  l10n.globalSearchAssetStudioNavigated(
+                    '${assetNumeric ?? id}',
+                  ),
+                ),
+              ),
+            );
+          }
+        } else {
+          goProjectsScoped();
+        }
         break;
       case ResultType.novel:
       case ResultType.novelEvent:
-        goProjectsScoped();
-        final l10n = AppLocalizations.of(context);
-        if (l10n != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                type == ResultType.novelEvent
-                    ? l10n.globalSearchNovelEventNavigated(
-                        '${_intFromSearchMeta(metadata?['event_numeric_id']) ?? '?'}',
-                      )
-                    : l10n.globalSearchNovelChapterNavigated(
-                        '${metadata?['chapter_index'] ?? '?'}',
-                      ),
-              ),
-            ),
+        if (projectNumeric != null && projectNumeric > 0) {
+          setState(() {
+            _productScopedProjectNumericId = projectNumeric;
+            _pendingStudioNovelWorkbench = true;
+          });
+          _workspaceInputController.applyProjectScopeRef(
+            projectNumericId: projectNumeric,
+            projectUuid: projectUuid,
+            workspaceId: workspaceId,
           );
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+          context.go('/projects/$projectNumeric/${StudioStep.script.slug}');
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.globalSearchNovelStudioNavigated)),
+            );
+          }
+        } else {
+          goProjectsScoped();
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  type == ResultType.novelEvent
+                      ? l10n.globalSearchNovelEventNavigated(
+                          '${_intFromSearchMeta(metadata?['event_numeric_id']) ?? '?'}',
+                        )
+                      : l10n.globalSearchNovelChapterNavigated(
+                          '${metadata?['chapter_index'] ?? '?'}',
+                        ),
+                ),
+              ),
+            );
+          }
         }
         break;
     }

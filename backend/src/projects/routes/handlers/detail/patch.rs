@@ -22,6 +22,9 @@ use super::super::super::validation::{
     validate_duration_strategy, validate_mode, validate_quality_gate_strategy,
     validate_target_market, validate_target_platforms,
 };
+use crate::projects::style_pack_paths::{
+    validate_art_style_pack_field_patch, validate_story_style_pack_field_patch,
+};
 
 #[derive(sqlx::FromRow)]
 struct ProjectPatchRow {
@@ -170,14 +173,18 @@ pub(crate) async fn patch_project_by_id(
         "video_ratio",
     )?);
 
-    let art_style_pack_patch = trim_text_patch(parse_optional_text_field(
-        normalize_patch_value(body.art_style_pack),
-        "art_style_pack",
-    )?);
-    let story_style_pack_patch = trim_text_patch(parse_optional_text_field(
-        normalize_patch_value(body.story_style_pack),
-        "story_style_pack",
-    )?);
+    let art_style_pack_patch = validate_art_style_pack_field_patch(trim_text_patch(
+        parse_optional_text_field(
+            normalize_patch_value(body.art_style_pack),
+            "art_style_pack",
+        )?,
+    ))?;
+    let story_style_pack_patch = validate_story_style_pack_field_patch(trim_text_patch(
+        parse_optional_text_field(
+            normalize_patch_value(body.story_style_pack),
+            "story_style_pack",
+        )?,
+    ))?;
 
     let target_market_patch = trim_text_patch(parse_optional_text_field(
         normalize_patch_value(body.target_market),

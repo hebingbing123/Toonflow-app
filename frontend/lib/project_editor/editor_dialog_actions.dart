@@ -139,13 +139,30 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                       continuityRules: splitLines(continuityCtrl.text),
                     ).toJsonOrNull(),
                   });
-                  if (selectedArtStylePack != p.artStylePack ||
-                      selectedStoryStylePack != p.storyStylePack) {
+                  final artPackToSave = _nullableNormalizedArtPack(
+                    selectedArtStylePack,
+                  );
+                  final storyPackToSave = _nullableNormalizedStoryPack(
+                    selectedStoryStylePack,
+                  );
+                  if (!artStylePackPathsMatch(artPackToSave, p.artStylePack) ||
+                      !storyStylePackPathsMatch(
+                        storyPackToSave,
+                        p.storyStylePack,
+                      )) {
                     await patchProjectStyleConfigByProjectId(
                       token,
                       p.id,
-                      artStylePack: selectedArtStylePack,
-                      storyStylePack: selectedStoryStylePack,
+                      artStylePack: artPackToSave,
+                      storyStylePack: storyPackToSave,
+                    );
+                  }
+                  final stepPatch = dialogState.stepModelsPatchRef[0];
+                  if (stepPatch.isNotEmpty) {
+                    await patchProjectModelRoutingV1(
+                      token,
+                      p.id,
+                      steps: stepPatch,
                     );
                   }
                   if (!ctx.mounted) return;

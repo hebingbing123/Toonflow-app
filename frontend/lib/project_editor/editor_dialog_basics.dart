@@ -1,76 +1,6 @@
-import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../home_page.dart';
 
 extension _HomePageProjectEditorDialogBasics on _HomePageState {
-  Widget _buildStylePackPickerField({
-    required BuildContext ctx,
-    required String label,
-    required List<_StylePackOption> options,
-    required String? selectedPath,
-    required ValueChanged<String?> onChanged,
-  }) {
-    final l10n = resolveAppLocalizationsForErrors(ctx);
-    _StylePackOption? selected;
-    for (final option in options) {
-      if (option.path == selectedPath) {
-        selected = option;
-        break;
-      }
-    }
-    final hasSelectedOutsideList =
-        selectedPath != null && selected == null && selectedPath.isNotEmpty;
-    final items = <DropdownMenuItem<String>>[
-      DropdownMenuItem<String>(
-        value: '',
-        child: Text(l10n.projectEditorBasicsStylePackPickerNone),
-      ),
-      ...options.map(
-        (option) => DropdownMenuItem<String>(
-          value: option.path,
-          child: Text(
-            l10n.projectEditorBasicsStylePackOptionDisplay(
-              option.name,
-              option.tag,
-            ),
-          ),
-        ),
-      ),
-      if (hasSelectedOutsideList)
-        DropdownMenuItem<String>(
-          value: selectedPath,
-          child: Text(
-            l10n.projectEditorBasicsStylePackPickerCurrentConfigRow(
-              selectedPath,
-            ),
-          ),
-        ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        StudioDropdownButtonFormField<String>(
-          initialValue: selectedPath ?? '',
-          decoration: InputDecoration(labelText: label),
-          isExpanded: true,
-          items: items,
-          onChanged: (value) =>
-              onChanged((value == null || value.isEmpty) ? null : value),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          selected?.description ??
-              (hasSelectedOutsideList
-                  ? l10n.projectEditorBasicsStylePackFootnoteLegacy
-                  : l10n.projectEditorBasicsStylePackFootnoteNone),
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.outline,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildProjectEditorBasicsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -218,59 +148,89 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         const SizedBox(height: 16),
         Text(
           l10n.projectEditorBasicsModelRoutingTitle,
-          style: Theme.of(ctx).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-        _buildProjectModelField(
-          l10n: l10n,
-          setDialogState: setDialogState,
-          controller: textModelCtrl,
-          label: l10n.projectEditorBasicsTextModelLabel,
-          helper: l10n.projectEditorBasicsTextModelHelper,
-          suggestions: dialogState.textModelOptionsRef[0],
-        ),
-        const SizedBox(height: 8),
-        _buildProjectModelField(
-          l10n: l10n,
-          setDialogState: setDialogState,
-          controller: multimodalModelCtrl,
-          label: l10n.projectEditorBasicsMultimodalModelLabel,
-          helper: l10n.projectEditorBasicsMultimodalModelHelper,
-          suggestions: dialogState.textModelOptionsRef[0],
-        ),
-        const SizedBox(height: 8),
-        _buildProjectModelField(
-          l10n: l10n,
-          setDialogState: setDialogState,
-          controller: imageModelCtrl,
-          label: l10n.projectEditorBasicsImageModelLabel,
-          suggestions: dialogState.imageModelOptionsRef[0],
-        ),
-        const SizedBox(height: 8),
-        _buildProjectModelField(
-          l10n: l10n,
-          setDialogState: setDialogState,
-          controller: videoModelCtrl,
-          label: l10n.projectEditorBasicsVideoModelLabel,
-          suggestions: dialogState.videoModelOptionsRef[0],
-        ),
-        const SizedBox(height: 8),
-        _buildProjectModelField(
-          l10n: l10n,
-          setDialogState: setDialogState,
-          controller: voiceModelCtrl,
-          label: l10n.projectEditorBasicsVoiceModelLabel,
-          helper: l10n.projectEditorBasicsVoiceModelHelper,
-          suggestions: dialogState.textModelOptionsRef[0],
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: voiceProfileCtrl,
-          maxLines: 2,
-          decoration: InputDecoration(
-            labelText: l10n.projectEditorBasicsVoiceProfileLabel,
-            helperText: l10n.projectEditorBasicsVoiceProfileHelper,
+          style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
           ),
+        ),
+        const SizedBox(height: 8),
+        StepModelRoutingSection(
+          accessToken: token,
+          projectId: p.id,
+          textModelOptions: dialogState.textModelOptionsRef[0],
+          imageModelOptions: dialogState.imageModelOptionsRef[0],
+          videoModelOptions: dialogState.videoModelOptionsRef[0],
+          onStepsChanged: (steps) {
+            dialogState.stepModelsPatchRef[0] = steps;
+          },
+        ),
+        const SizedBox(height: 8),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: Text(
+            l10n.projectEditorBasicsModalityDefaultsTitle,
+            style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          subtitle: Text(
+            l10n.projectEditorBasicsModalityDefaultsSubtitle,
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+              color: Theme.of(ctx).colorScheme.outline,
+            ),
+          ),
+          children: <Widget>[
+            _buildProjectModelField(
+              l10n: l10n,
+              setDialogState: setDialogState,
+              controller: textModelCtrl,
+              label: l10n.projectEditorBasicsTextModelLabel,
+              helper: l10n.projectEditorBasicsTextModelHelper,
+              suggestions: dialogState.textModelOptionsRef[0],
+            ),
+            const SizedBox(height: 8),
+            _buildProjectModelField(
+              l10n: l10n,
+              setDialogState: setDialogState,
+              controller: multimodalModelCtrl,
+              label: l10n.projectEditorBasicsMultimodalModelLabel,
+              helper: l10n.projectEditorBasicsMultimodalModelHelper,
+              suggestions: dialogState.textModelOptionsRef[0],
+            ),
+            const SizedBox(height: 8),
+            _buildProjectModelField(
+              l10n: l10n,
+              setDialogState: setDialogState,
+              controller: imageModelCtrl,
+              label: l10n.projectEditorBasicsImageModelLabel,
+              suggestions: dialogState.imageModelOptionsRef[0],
+            ),
+            const SizedBox(height: 8),
+            _buildProjectModelField(
+              l10n: l10n,
+              setDialogState: setDialogState,
+              controller: videoModelCtrl,
+              label: l10n.projectEditorBasicsVideoModelLabel,
+              suggestions: dialogState.videoModelOptionsRef[0],
+            ),
+            const SizedBox(height: 8),
+            _buildProjectModelField(
+              l10n: l10n,
+              setDialogState: setDialogState,
+              controller: voiceModelCtrl,
+              label: l10n.projectEditorBasicsVoiceModelLabel,
+              helper: l10n.projectEditorBasicsVoiceModelHelper,
+              suggestions: dialogState.textModelOptionsRef[0],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: voiceProfileCtrl,
+              maxLines: 2,
+              decoration: InputDecoration(
+                labelText: l10n.projectEditorBasicsVoiceProfileLabel,
+                helperText: l10n.projectEditorBasicsVoiceProfileHelper,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Text(
@@ -317,11 +277,11 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           ),
         ),
         const SizedBox(height: 12),
-        _buildStylePackPickerField(
-          ctx: ctx,
+        StylePackPickerField(
           label: l10n.projectEditorBasicsLabelArtStylePack,
           options: dialogState.artStylePackOptionsRef[0],
           selectedPath: dialogState.selectedArtStylePackRef[0],
+          isArtPack: true,
           onChanged: (value) {
             setDialogState(
               () => dialogState.selectedArtStylePackRef[0] = value,
@@ -329,11 +289,11 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           },
         ),
         const SizedBox(height: 12),
-        _buildStylePackPickerField(
-          ctx: ctx,
+        StylePackPickerField(
           label: l10n.projectEditorBasicsLabelStoryStylePack,
           options: dialogState.storyStylePackOptionsRef[0],
           selectedPath: dialogState.selectedStoryStylePackRef[0],
+          isArtPack: false,
           onChanged: (value) {
             setDialogState(
               () => dialogState.selectedStoryStylePackRef[0] = value,

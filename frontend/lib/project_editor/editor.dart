@@ -283,19 +283,19 @@ extension _HomePageProjectEditor on _HomePageState {
       } catch (_) {
         homeSnap = null;
       }
-      _StylePackCatalog stylePackCatalog = const _StylePackCatalog(
-        artPacks: <_StylePackOption>[],
-        storyPacks: <_StylePackOption>[],
+      StylePackCatalog stylePackCatalog = const StylePackCatalog(
+        artPacks: <StylePackOption>[],
+        storyPacks: <StylePackOption>[],
       );
       List<ModelListEntry> textModelOptions = const <ModelListEntry>[];
       List<ModelListEntry> imageModelOptions = const <ModelListEntry>[];
       List<ModelListEntry> videoModelOptions = const <ModelListEntry>[];
       try {
-        stylePackCatalog = await _loadProjectStylePackCatalog(token, l10n);
+        stylePackCatalog = await loadProjectStylePackCatalog(token, l10n);
       } catch (_) {
-        stylePackCatalog = const _StylePackCatalog(
-          artPacks: <_StylePackOption>[],
-          storyPacks: <_StylePackOption>[],
+        stylePackCatalog = const StylePackCatalog(
+          artPacks: <StylePackOption>[],
+          storyPacks: <StylePackOption>[],
         );
       }
       try {
@@ -394,8 +394,9 @@ extension _HomePageProjectEditor on _HomePageState {
         textModelOptions: textModelOptions,
         imageModelOptions: imageModelOptions,
         videoModelOptions: videoModelOptions,
-        selectedArtStylePack: detail.project.artStylePack,
-        selectedStoryStylePack: detail.project.storyStylePack,
+        selectedArtStylePack: _nullableNormalizedArtPack(detail.project.artStylePack),
+        selectedStoryStylePack:
+            _nullableNormalizedStoryPack(detail.project.storyStylePack),
       );
       await showStudioDialog<void>(
         context: context,
@@ -493,25 +494,14 @@ extension _HomePageProjectEditor on _HomePageState {
   }
 }
 
-class _StylePackOption {
-  const _StylePackOption({
-    required this.path,
-    required this.name,
-    required this.description,
-    required this.tag,
-  });
-
-  final String path;
-  final String name;
-  final String description;
-  final String tag;
+String? _nullableNormalizedArtPack(String? raw) {
+  final normalized = normalizeArtStylePackPath(raw);
+  return normalized.isEmpty ? null : normalized;
 }
 
-class _StylePackCatalog {
-  const _StylePackCatalog({required this.artPacks, required this.storyPacks});
-
-  final List<_StylePackOption> artPacks;
-  final List<_StylePackOption> storyPacks;
+String? _nullableNormalizedStoryPack(String? raw) {
+  final normalized = normalizeStoryStylePackPath(raw);
+  return normalized.isEmpty ? null : normalized;
 }
 
 class _ProjectEditorDialogState {
@@ -523,8 +513,8 @@ class _ProjectEditorDialogState {
     ListNovelsResponse? initialNovels,
     int? initialAssetsFilterScriptNumericId,
     String? initialAssetsFocusNotice,
-    List<_StylePackOption> artStylePackOptions = const <_StylePackOption>[],
-    List<_StylePackOption> storyStylePackOptions = const <_StylePackOption>[],
+    List<StylePackOption> artStylePackOptions = const <StylePackOption>[],
+    List<StylePackOption> storyStylePackOptions = const <StylePackOption>[],
     List<ModelListEntry> textModelOptions = const <ModelListEntry>[],
     List<ModelListEntry> imageModelOptions = const <ModelListEntry>[],
     List<ModelListEntry> videoModelOptions = const <ModelListEntry>[],
@@ -535,8 +525,8 @@ class _ProjectEditorDialogState {
        assetsRef = <ListAssetsResponse?>[initialAssets],
        novelsRef = <ListNovelsResponse?>[initialNovels],
        assetsFocusNotice = <String?>[initialAssetsFocusNotice],
-       artStylePackOptionsRef = <List<_StylePackOption>>[artStylePackOptions],
-       storyStylePackOptionsRef = <List<_StylePackOption>>[
+       artStylePackOptionsRef = <List<StylePackOption>>[artStylePackOptions],
+       storyStylePackOptionsRef = <List<StylePackOption>>[
          storyStylePackOptions,
        ],
        textModelOptionsRef = <List<ModelListEntry>>[textModelOptions],
@@ -572,13 +562,15 @@ class _ProjectEditorDialogState {
   final List<bool> generalProbeBusy = <bool>[false];
   final List<bool> tasksProbeBusy = <bool>[false];
   final List<bool> projectProbeBusy = <bool>[false];
-  final List<List<_StylePackOption>> artStylePackOptionsRef;
-  final List<List<_StylePackOption>> storyStylePackOptionsRef;
+  final List<List<StylePackOption>> artStylePackOptionsRef;
+  final List<List<StylePackOption>> storyStylePackOptionsRef;
   final List<List<ModelListEntry>> textModelOptionsRef;
   final List<List<ModelListEntry>> imageModelOptionsRef;
   final List<List<ModelListEntry>> videoModelOptionsRef;
   final List<String?> selectedArtStylePackRef;
   final List<String?> selectedStoryStylePackRef;
+  final List<Map<String, Map<String, String>>> stepModelsPatchRef =
+      <Map<String, Map<String, String>>>[{}];
 
   Future<void> reloadAssetsAndStats(
     String token,
@@ -626,72 +618,6 @@ class _ProjectEditorDialogState {
       novelEventsRef[0] = null;
     }
   }
-}
-
-Future<_StylePackCatalog> _loadProjectStylePackCatalog(
-  String token,
-  AppLocalizations l10n,
-) async {
-  final visualManual = await fetchVisualManualV1(token);
-  final directorManual = await postProjectQueryDirectorManual(token);
-
-  final artPacks =
-      visualManual.styles
-          .map(
-            (style) => _StylePackOption(
-              path: style.stylePath,
-              name: style.name,
-              description: _stylePackDescriptionFromSlots(
-                l10n,
-                style.data.map((slot) => slot.data),
-              ),
-              tag: l10n.projectEditorStylePackTagArt,
-            ),
-          )
-          .toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
-
-  final storyPacks =
-      directorManual.data
-          .map(
-            (style) => _StylePackOption(
-              path: 'story_skills/${style.directorManual}',
-              name: style.name,
-              description: _stylePackDescriptionFromSlots(
-                l10n,
-                style.data.map((slot) => slot.data),
-              ),
-              tag: l10n.projectEditorStylePackTagStory,
-            ),
-          )
-          .toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
-
-  return _StylePackCatalog(artPacks: artPacks, storyPacks: storyPacks);
-}
-
-String _stylePackDescriptionFromSlots(
-  AppLocalizations l10n,
-  Iterable<String> slots,
-) {
-  for (final raw in slots) {
-    final lines = raw
-        .split('\n')
-        .map((line) => line.trim())
-        .where(
-          (line) =>
-              line.isNotEmpty &&
-              !line.startsWith('#') &&
-              !line.startsWith('|') &&
-              !line.startsWith('```') &&
-              !line.startsWith('- ') &&
-              !line.startsWith('* '),
-        );
-    for (final line in lines) {
-      return line.length <= 48 ? line : '${line.substring(0, 48)}...';
-    }
-  }
-  return l10n.projectEditorStylePackNoDescriptionFallback;
 }
 
 // Project detail dialog widgets live in `editor_dialog_*.dart` parts to keep this file small.

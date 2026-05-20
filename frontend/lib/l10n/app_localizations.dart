@@ -2380,6 +2380,12 @@ abstract class AppLocalizations {
   /// **'Video'**
   String get studioModelPricingTypeVideo;
 
+  /// No description provided for @studioModelPricingTypeMultimodal.
+  ///
+  /// In en, this message translates to:
+  /// **'Multimodal'**
+  String get studioModelPricingTypeMultimodal;
+
   /// No description provided for @notificationsComplianceStageCriticalUnclaimed.
   ///
   /// In en, this message translates to:
@@ -2721,6 +2727,498 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write or import your script, then extract characters and scenes.'**
   String get studioStepScriptBody;
+
+  /// No description provided for @studioCockpitExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'View project progress'**
+  String get studioCockpitExpand;
+
+  /// No description provided for @studioCockpitCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get studioCockpitCollapse;
+
+  /// No description provided for @studioCockpitScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script step progress'**
+  String get studioCockpitScriptTitle;
+
+  /// No description provided for @studioScriptIntakeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content intake'**
+  String get studioScriptIntakeTitle;
+
+  /// No description provided for @studioScriptIntakeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a novel inline (URL, paste, or one chapter), then generate and write back with the agent on the right. Use Advanced workbench for batch hosted import and chapter CRUD.'**
+  String get studioScriptIntakeBody;
+
+  /// No description provided for @studioScriptIntakeNovels.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels & scripts'**
+  String get studioScriptIntakeNovels;
+
+  /// No description provided for @studioScriptStepTabContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get studioScriptStepTabContent;
+
+  /// No description provided for @studioScriptStepTabAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get studioScriptStepTabAgent;
+
+  /// No description provided for @studioScriptStepTabNovel.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel'**
+  String get studioScriptStepTabNovel;
+
+  /// No description provided for @studioScriptStepTabScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts'**
+  String get studioScriptStepTabScripts;
+
+  /// No description provided for @studioScriptStepTabExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract'**
+  String get studioScriptStepTabExtract;
+
+  /// No description provided for @studioScriptStepExtractBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll extract state and run asset extraction for scripts, then open the script editor to review characters and scenes.'**
+  String get studioScriptStepExtractBody;
+
+  /// No description provided for @studioEpisodeConsoleBetaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Beta'**
+  String get studioEpisodeConsoleBetaLabel;
+
+  /// No description provided for @studioEpisodeConsoleBetaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This compact episode console is still in preview. Use Full studio for the complete workflow.'**
+  String get studioEpisodeConsoleBetaBody;
+
+  /// No description provided for @projectEditorModelRoutingQualityStepHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver quality tab (URL alias /quality)'**
+  String get projectEditorModelRoutingQualityStepHint;
+
+  /// No description provided for @projectEditorNovelsWorkbenchImportStudioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For quick URL or paste import, use Studio → Script step inline import first.'**
+  String get projectEditorNovelsWorkbenchImportStudioHint;
+
+  /// No description provided for @shortVideoSpaceExportCheckRefreshButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh export pre-check'**
+  String get shortVideoSpaceExportCheckRefreshButton;
+
+  /// No description provided for @studioScriptStepNovelsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels & chapters'**
+  String get studioScriptStepNovelsSectionTitle;
+
+  /// No description provided for @studioScriptStepScriptsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts'**
+  String get studioScriptStepScriptsSectionTitle;
+
+  /// No description provided for @studioScriptStepEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No upstream content yet'**
+  String get studioScriptStepEmptyTitle;
+
+  /// No description provided for @studioScriptStepEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a novel or create scripts first, then generate and write back with the agent on the right.'**
+  String get studioScriptStepEmptyBody;
+
+  /// No description provided for @studioScriptStepLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load content'**
+  String get studioScriptStepLoadErrorTitle;
+
+  /// No description provided for @studioScriptStepRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get studioScriptStepRetry;
+
+  /// No description provided for @studioScriptStepScopeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid project before editing scripts.'**
+  String get studioScriptStepScopeMissing;
+
+  /// No description provided for @studioArtStepOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced project settings'**
+  String get studioArtStepOpenSettings;
+
+  /// No description provided for @studioArtStepEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose bundled art and story style packs for this project. Changes apply to the next image and script generation jobs.'**
+  String get studioArtStepEditSubtitle;
+
+  /// No description provided for @studioArtStepSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save art direction'**
+  String get studioArtStepSaveButton;
+
+  /// No description provided for @studioArtStepResetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get studioArtStepResetButton;
+
+  /// No description provided for @studioArtStepSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Art direction saved for this project.'**
+  String get studioArtStepSaveSuccess;
+
+  /// No description provided for @studioArtStepLegacyArtStyleHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional free-text art direction (legacy). Use style packs above when possible.'**
+  String get studioArtStepLegacyArtStyleHelper;
+
+  /// No description provided for @studioArtStepApplyFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Style packs drive prompts for assets, storyboards, and video. Save to persist.'**
+  String get studioArtStepApplyFootnote;
+
+  /// No description provided for @studioArtStepSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current selection'**
+  String get studioArtStepSummaryTitle;
+
+  /// No description provided for @studioArtStepNoStylePacks.
+  ///
+  /// In en, this message translates to:
+  /// **'No art or story style packs selected yet. Pick packs above and save.'**
+  String get studioArtStepNoStylePacks;
+
+  /// No description provided for @studioArtStepArtStyleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy art style (text)'**
+  String get studioArtStepArtStyleLabel;
+
+  /// No description provided for @studioScriptNovelInlineImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import novel'**
+  String get studioScriptNovelInlineImportTitle;
+
+  /// No description provided for @studioScriptNovelInlineImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl by URL, paste full text, or add one chapter — no dialog required.'**
+  String get studioScriptNovelInlineImportSubtitle;
+
+  /// No description provided for @studioScriptNovelInlineOpenFullWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced workbench'**
+  String get studioScriptNovelInlineOpenFullWorkbench;
+
+  /// No description provided for @studioScriptNovelInlineUrlSection.
+  ///
+  /// In en, this message translates to:
+  /// **'URL crawl'**
+  String get studioScriptNovelInlineUrlSection;
+
+  /// No description provided for @studioScriptNovelInlineImportFromUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl & import chapters'**
+  String get studioScriptNovelInlineImportFromUrl;
+
+  /// No description provided for @studioScriptNovelInlinePasteSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste full book'**
+  String get studioScriptNovelInlinePasteSection;
+
+  /// No description provided for @studioScriptNovelInlineImportParsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} chapters'**
+  String studioScriptNovelInlineImportParsed(int count);
+
+  /// No description provided for @studioScriptNovelInlineManualSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Single chapter'**
+  String get studioScriptNovelInlineManualSection;
+
+  /// No description provided for @studioScriptNovelInlineChapterFieldsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter chapter title and body'**
+  String get studioScriptNovelInlineChapterFieldsRequired;
+
+  /// No description provided for @studioNovelCrawlAuthSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Site auth (cookie / password)'**
+  String get studioNovelCrawlAuthSectionTitle;
+
+  /// No description provided for @studioNovelCrawlAuthSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For sites that require sign-in. On desktop, use in-app login to capture cookies automatically, or paste credentials manually.'**
+  String get studioNovelCrawlAuthSectionSubtitle;
+
+  /// No description provided for @studioNovelCrawlAuthCaptureCookieButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in in app & capture cookies'**
+  String get studioNovelCrawlAuthCaptureCookieButton;
+
+  /// No description provided for @studioNovelCrawlAuthCaptureCookieWebUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the macOS/Windows/Linux desktop app for one-click capture, or paste cookies manually in the browser build.'**
+  String get studioNovelCrawlAuthCaptureCookieWebUnavailable;
+
+  /// No description provided for @studioNovelCrawlAuthWebGuideCollapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Need sign-in for a novel site? Desktop app captures cookies in one tap — tap for details'**
+  String get studioNovelCrawlAuthWebGuideCollapsed;
+
+  /// No description provided for @studioNovelCrawlAuthWebGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One-click sign-in requires the desktop app'**
+  String get studioNovelCrawlAuthWebGuideTitle;
+
+  /// No description provided for @studioNovelCrawlAuthWebGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsers block reading novel-site login cookies from embedded pages. Download the OpenFlow desktop app (macOS / Windows / Linux) and use “Sign in in app & capture cookies” on the script step.'**
+  String get studioNovelCrawlAuthWebGuideBody;
+
+  /// No description provided for @studioNovelCrawlAuthWebGuideSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps:\n1. Tap “Download desktop app” below and install\n2. Sign in with the same account\n3. Open your project → Site auth → in-app sign-in → save, then crawl'**
+  String get studioNovelCrawlAuthWebGuideSteps;
+
+  /// No description provided for @studioNovelCrawlAuthWebGuideLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Release page'**
+  String get studioNovelCrawlAuthWebGuideLearnMore;
+
+  /// No description provided for @studioNovelCrawlAuthMobileGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app sign-in is not on mobile yet'**
+  String get studioNovelCrawlAuthMobileGuideTitle;
+
+  /// No description provided for @studioNovelCrawlAuthMobileGuideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS / Android builds do not include embedded login for cookie capture. Use the desktop app for one-click capture, or paste cookies manually here and save.'**
+  String get studioNovelCrawlAuthMobileGuideBody;
+
+  /// No description provided for @studioNovelCrawlAuthCaptureOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookies captured — save to project or start crawling.'**
+  String get studioNovelCrawlAuthCaptureOk;
+
+  /// No description provided for @studioNovelCrawlLoginDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to novel site'**
+  String get studioNovelCrawlLoginDialogTitle;
+
+  /// No description provided for @studioNovelCrawlLoginDialogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete sign-in below (including CAPTCHA if any), then tap Capture cookies.'**
+  String get studioNovelCrawlLoginDialogSubtitle;
+
+  /// No description provided for @studioNovelCrawlLoginDialogUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Site URL'**
+  String get studioNovelCrawlLoginDialogUrlLabel;
+
+  /// No description provided for @studioNovelCrawlLoginDialogGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get studioNovelCrawlLoginDialogGo;
+
+  /// No description provided for @studioNovelCrawlLoginDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture cookies'**
+  String get studioNovelCrawlLoginDialogConfirm;
+
+  /// No description provided for @studioNovelCrawlLoginDialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get studioNovelCrawlLoginDialogCancel;
+
+  /// No description provided for @studioNovelCrawlLoginDialogInvalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid http(s) URL'**
+  String get studioNovelCrawlLoginDialogInvalidUrl;
+
+  /// No description provided for @studioNovelCrawlLoginDialogNoCookies.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookies found — sign in first, then try again'**
+  String get studioNovelCrawlLoginDialogNoCookies;
+
+  /// No description provided for @studioNovelCrawlAuthModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Auth mode'**
+  String get studioNovelCrawlAuthModeLabel;
+
+  /// No description provided for @studioNovelCrawlAuthModeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get studioNovelCrawlAuthModeNone;
+
+  /// No description provided for @studioNovelCrawlAuthModeCookie.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie only'**
+  String get studioNovelCrawlAuthModeCookie;
+
+  /// No description provided for @studioNovelCrawlAuthModePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password only'**
+  String get studioNovelCrawlAuthModePassword;
+
+  /// No description provided for @studioNovelCrawlAuthModeBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie + password'**
+  String get studioNovelCrawlAuthModeBoth;
+
+  /// No description provided for @studioNovelCrawlAuthCookieLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie'**
+  String get studioNovelCrawlAuthCookieLabel;
+
+  /// No description provided for @studioNovelCrawlAuthCookieHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer in-app sign-in above; or paste e.g. sessionid=…; token=…'**
+  String get studioNovelCrawlAuthCookieHelper;
+
+  /// No description provided for @studioNovelCrawlAuthCookieStoredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted credentials saved; leave blank on save to keep existing, or paste to replace.'**
+  String get studioNovelCrawlAuthCookieStoredHint;
+
+  /// No description provided for @studioNovelCrawlAuthUsernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get studioNovelCrawlAuthUsernameLabel;
+
+  /// No description provided for @studioNovelCrawlAuthPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get studioNovelCrawlAuthPasswordLabel;
+
+  /// No description provided for @studioNovelCrawlAuthPasswordStoredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved; leave blank on save to keep existing.'**
+  String get studioNovelCrawlAuthPasswordStoredHint;
+
+  /// No description provided for @studioNovelCrawlAuthLoginUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Login URL'**
+  String get studioNovelCrawlAuthLoginUrlLabel;
+
+  /// No description provided for @studioNovelCrawlAuthLoginUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Form POST endpoint (urlencoded). If empty, HTTP Basic is used on chapter URLs.'**
+  String get studioNovelCrawlAuthLoginUrlHelper;
+
+  /// No description provided for @studioNovelCrawlAuthLoginUserFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username field'**
+  String get studioNovelCrawlAuthLoginUserFieldLabel;
+
+  /// No description provided for @studioNovelCrawlAuthLoginPassFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password field'**
+  String get studioNovelCrawlAuthLoginPassFieldLabel;
+
+  /// No description provided for @studioNovelCrawlAuthSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to project'**
+  String get studioNovelCrawlAuthSave;
+
+  /// No description provided for @studioNovelCrawlAuthReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get studioNovelCrawlAuthReload;
+
+  /// No description provided for @studioNovelCrawlAuthSaveOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Site auth saved'**
+  String get studioNovelCrawlAuthSaveOk;
+
+  /// No description provided for @studioNovelCrawlAuthEncryptionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'OPENFLOW_VENDOR_CREDENTIAL_KEY is not set on the server; credentials cannot be stored.'**
+  String get studioNovelCrawlAuthEncryptionMissing;
 
   /// No description provided for @studioStepArtTitle.
   ///
@@ -4923,6 +5421,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please open \"Project List\" from the home navigation, then use the novel workbench within the target project to view chapters and events.'**
   String get globalSearchNovelOrEventNavigatedHint;
+
+  /// No description provided for @globalSearchScriptStudioNavigated.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened Studio script step for this script.'**
+  String get globalSearchScriptStudioNavigated;
+
+  /// No description provided for @globalSearchAssetStudioNavigated.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened Studio assets step (asset #{assetId}).'**
+  String globalSearchAssetStudioNavigated(String assetId);
+
+  /// No description provided for @globalSearchNovelStudioNavigated.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened Studio script step — novel workbench will open when ready.'**
+  String get globalSearchNovelStudioNavigated;
 
   /// No description provided for @accountDeletedSummary.
   ///
@@ -13852,6 +14368,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supplement chapter {n}'**
   String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n);
+
+  /// No description provided for @projectEditorNovelsWorkbenchStudioCrossLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick intake lives on the Studio script step (inline import). This workbench is for search, chapter CRUD, hosted batch import, and events.'**
+  String get projectEditorNovelsWorkbenchStudioCrossLink;
 
   /// No description provided for @projectEditorNovelsWorkbenchCardSummaryEmptyHelp.
   ///
@@ -25256,7 +25778,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpacePublishExportCheckLoadingDetail.
   ///
   /// In en, this message translates to:
-  /// **'Aggregates storyboard blocking and warnings; quality gate observation fields are placeholder display only.'**
+  /// **'Aggregates storyboard blocking and warnings; quality gate stats below reflect server export-check when loaded.'**
   String get shortVideoSpacePublishExportCheckLoadingDetail;
 
   /// No description provided for @shortVideoSpacePublishExportCheckUnavailableHeadline.
@@ -25559,7 +26081,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpacePublishPanelUnavailableExportGateMissing.
   ///
   /// In en, this message translates to:
-  /// **'Export check data missing, publish panel shows placeholder only.'**
+  /// **'Export check data not loaded yet — publish prep uses draft rules only until pre-check returns.'**
   String get shortVideoSpacePublishPanelUnavailableExportGateMissing;
 
   /// No description provided for @shortVideoSpacePublishPanelUnavailableExportGateNoBlocking.
@@ -25625,7 +26147,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpacePublishPanelPrepareCheckOk.
   ///
   /// In en, this message translates to:
-  /// **'Validation: ✓ Current draft meets placeholder rules (still needs real final reference to actually go live).'**
+  /// **'Validation: ✓ Current draft passes local prep checks (confirm final assets in production before go-live).'**
   String get shortVideoSpacePublishPanelPrepareCheckOk;
 
   /// No description provided for @shortVideoSpacePublishPanelPrepareCheckMultipleDrafts.
@@ -27512,13 +28034,13 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoPublishPanelMatrixDomesticLabel.
   ///
   /// In en, this message translates to:
-  /// **'Domestic platform matrix (placeholder constraints)'**
+  /// **'Domestic platform matrix (reference constraints)'**
   String get shortVideoPublishPanelMatrixDomesticLabel;
 
   /// No description provided for @shortVideoPublishPanelMatrixOverseasLabel.
   ///
   /// In en, this message translates to:
-  /// **'Overseas platform matrix (placeholder constraints)'**
+  /// **'Overseas platform matrix (reference constraints)'**
   String get shortVideoPublishPanelMatrixOverseasLabel;
 
   /// No description provided for @shortVideoPublishPanelPrepareChecks.
@@ -33709,6 +34231,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Model routing'**
   String get projectEditorBasicsModelRoutingTitle;
+
+  /// No description provided for @projectEditorBasicsStepModelRoutingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio step models'**
+  String get projectEditorBasicsStepModelRoutingTitle;
+
+  /// No description provided for @projectEditorBasicsStepModelRoutingHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary configuration: pick models for each Studio step. Unset slots fall back to advanced modality defaults below.'**
+  String get projectEditorBasicsStepModelRoutingHelper;
+
+  /// No description provided for @projectEditorBasicsModalityDefaultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced: project modality defaults'**
+  String get projectEditorBasicsModalityDefaultsTitle;
+
+  /// No description provided for @projectEditorBasicsModalityDefaultsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback when a step slot is not set. Configure per-step models above first.'**
+  String get projectEditorBasicsModalityDefaultsSubtitle;
+
+  /// No description provided for @studioModelRoutingPrimaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Step model routing'**
+  String get studioModelRoutingPrimaryTitle;
+
+  /// No description provided for @studioModelRoutingPrimarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review which model each slot will use for this step.'**
+  String get studioModelRoutingPrimarySubtitle;
+
+  /// No description provided for @studioModelRoutingPrimaryFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes here affect only this studio step and save immediately.'**
+  String get studioModelRoutingPrimaryFootnote;
+
+  /// No description provided for @studioModelRoutingOpenAdvancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced settings'**
+  String get studioModelRoutingOpenAdvancedSettings;
+
+  /// No description provided for @studioModelRoutingSourceStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step override'**
+  String get studioModelRoutingSourceStep;
+
+  /// No description provided for @studioModelRoutingSourceModality.
+  ///
+  /// In en, this message translates to:
+  /// **'Modality default'**
+  String get studioModelRoutingSourceModality;
+
+  /// No description provided for @studioModelRoutingSourceUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User preference'**
+  String get studioModelRoutingSourceUser;
+
+  /// No description provided for @studioModelRoutingSourceLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy deploy'**
+  String get studioModelRoutingSourceLegacy;
+
+  /// No description provided for @studioModelRoutingSourceCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog default'**
+  String get studioModelRoutingSourceCatalog;
+
+  /// No description provided for @studioModelRoutingSourceOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Request override'**
+  String get studioModelRoutingSourceOverride;
+
+  /// No description provided for @studioModelRoutingDeliverInherit.
+  ///
+  /// In en, this message translates to:
+  /// **'This step inherits the project\'s delivery routing.'**
+  String get studioModelRoutingDeliverInherit;
+
+  /// No description provided for @studioModelRoutingCollapsedLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading step models…'**
+  String get studioModelRoutingCollapsedLoading;
+
+  /// No description provided for @studioModelRoutingCollapsedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to configure models for this step'**
+  String get studioModelRoutingCollapsedEmpty;
+
+  /// No description provided for @settingsModelVendorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model providers'**
+  String get settingsModelVendorsTitle;
+
+  /// No description provided for @settingsModelVendorsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable vendors, store API keys, and choose which catalog models to use. Project Studio step routing picks from these models.'**
+  String get settingsModelVendorsSubtitle;
+
+  /// No description provided for @settingsModelVendorsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No model providers in the catalog.'**
+  String get settingsModelVendorsEmpty;
+
+  /// No description provided for @settingsModelVendorsVendorMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} models · {kinds}'**
+  String settingsModelVendorsVendorMeta(int count, String kinds);
+
+  /// No description provided for @settingsModelVendorsCredentialConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'API key stored'**
+  String get settingsModelVendorsCredentialConfigured;
+
+  /// No description provided for @settingsModelVendorsCredentialMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No API key — add one to use this vendor'**
+  String get settingsModelVendorsCredentialMissing;
+
+  /// No description provided for @settingsModelVendorsManageCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get settingsModelVendorsManageCredential;
+
+  /// No description provided for @settingsModelVendorsModelsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Models to use'**
+  String get settingsModelVendorsModelsHeading;
+
+  /// No description provided for @settingsModelVendorsTestAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Test model'**
+  String get settingsModelVendorsTestAction;
+
+  /// No description provided for @settingsModelVendorsTestQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Connectivity test queued — check Task Center for results'**
+  String get settingsModelVendorsTestQueued;
+
+  /// No description provided for @settingsModelVendorsTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test request failed (HTTP {status})'**
+  String settingsModelVendorsTestFailed(int status);
+
+  /// No description provided for @settingsModelVendorsCredentialDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{vendor} API credentials'**
+  String settingsModelVendorsCredentialDialogTitle(String vendor);
+
+  /// No description provided for @settingsModelVendorsCredentialDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keys are encrypted server-side and never returned in full after save.'**
+  String get settingsModelVendorsCredentialDialogBody;
+
+  /// No description provided for @settingsModelVendorsCredentialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Current key hint: {hint}'**
+  String settingsModelVendorsCredentialHint(String hint);
+
+  /// No description provided for @settingsModelVendorsFieldApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get settingsModelVendorsFieldApiKey;
+
+  /// No description provided for @settingsModelVendorsFieldApiSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'API secret (optional)'**
+  String get settingsModelVendorsFieldApiSecret;
+
+  /// No description provided for @settingsModelVendorsFieldApiToken.
+  ///
+  /// In en, this message translates to:
+  /// **'API token (optional)'**
+  String get settingsModelVendorsFieldApiToken;
+
+  /// No description provided for @settingsModelVendorsCredentialRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stored key'**
+  String get settingsModelVendorsCredentialRemove;
+
+  /// No description provided for @settingsModelVendorsBaseUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'API base URL'**
+  String get settingsModelVendorsBaseUrlLabel;
+
+  /// No description provided for @settingsModelVendorsBaseUrlLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible endpoint for Ollama / LM Studio on this machine.'**
+  String get settingsModelVendorsBaseUrlLocalHint;
+
+  /// No description provided for @settingsModelVendorsBaseUrlCloudHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Override the default cloud endpoint if needed.'**
+  String get settingsModelVendorsBaseUrlCloudHint;
+
+  /// No description provided for @settingsModelVendorsSaveBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Save base URL'**
+  String get settingsModelVendorsSaveBaseUrl;
+
+  /// No description provided for @settingsModelVendorsCredentialOptionalLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'API key optional for local server'**
+  String get settingsModelVendorsCredentialOptionalLocal;
+
+  /// No description provided for @settingsModelVendorsCredentialDialogBodyLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local servers often need no key. Leave fields empty unless your proxy requires one.'**
+  String get settingsModelVendorsCredentialDialogBodyLocal;
+
+  /// No description provided for @settingsAgentDeployDeprecatedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Script and production models are now configured per project under Studio step model routing. Agent deploy below applies only when no project is attached.'**
+  String get settingsAgentDeployDeprecatedBanner;
 
   /// No description provided for @projectEditorBasicsTextModelLabel.
   ///

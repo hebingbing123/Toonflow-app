@@ -54,6 +54,19 @@ class ProjectsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  /// Replaces one project row in the cached list and notifies listeners.
+  void applyProjectRow(ProjectRow updated) {
+    final list = projects;
+    if (list == null) {
+      return;
+    }
+    projects = <ProjectRow>[
+      for (final row in list)
+        if (row.id == updated.id) updated else row,
+    ];
+    notifyListeners();
+  }
+
   void reset() {
     loadingProjects = false;
     loadingProjectsSummary = false;

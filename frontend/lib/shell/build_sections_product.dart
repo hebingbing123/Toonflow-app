@@ -16,11 +16,34 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (widget.shellMode != HomeShellMode.product) {
       return;
     }
-    if (_productScopedProjectNumericId != null) {
-      return;
-    }
     final projects = _projectsController.projects;
     if (projects == null || projects.isEmpty) {
+      return;
+    }
+
+    final scopedNumericId =
+        widget.studioProjectNumericId ?? _productScopedProjectNumericId;
+    if (scopedNumericId != null && scopedNumericId > 0) {
+      final scopedUuid = _workspaceInputController.projectUuidController.text
+          .trim();
+      if (scopedUuid.isEmpty) {
+        ProjectRow? row;
+        for (final candidate in projects) {
+          if (candidate.numericId == scopedNumericId) {
+            row = candidate;
+            break;
+          }
+        }
+        if (row != null) {
+          await _selectProjectScope(row);
+          return;
+        }
+      } else if (_productScopedProjectNumericId != null) {
+        return;
+      }
+    }
+
+    if (_productScopedProjectNumericId != null) {
       return;
     }
 
@@ -216,6 +239,18 @@ extension _HomePageBuildProductSections on _HomePageState {
 
     final token = _effectiveAccessToken ?? '';
     final l10n = resolveAppLocalizationsForErrors(context);
+    final needsProjectUuid =
+        widget.studioOverlay == StudioOverlayMode.storyboardStudio ||
+        widget.studioOverlay == StudioOverlayMode.episodeConsole;
+    if (needsProjectUuid && effectiveProjectUuid.trim().isEmpty) {
+      if (_projectsController.projects == null) {
+        unawaited(_projectsController.loadProjects());
+      }
+      return <Widget>[const Center(child: CircularProgressIndicator())];
+    }
+    if (needsProjectUuid && token.isEmpty) {
+      return <Widget>[const Center(child: CircularProgressIndicator())];
+    }
 
     return buildStudioOverlayChildren(
       resolved: resolved,
@@ -224,19 +259,24 @@ extension _HomePageBuildProductSections on _HomePageState {
         projectNumericId: projectNumericId,
         projectUuid: effectiveProjectUuid,
         accessToken: token,
-        onOpenProductionWorkspace: () {
+        onClose: () => context.go('/projects/$projectNumericId/script'),
+        onOpenProductionWorkspace: ({required String projectUuid}) {
           _openShellPaneFromStudioOverlay(
             ProductWorkspacePane.productionWorkspace,
             projectNumericId: projectNumericId,
-            projectUuid: effectiveProjectUuid,
+            projectUuid: projectUuid,
           );
         },
         onOpenShotEditor:
-            ({required int scriptNumericId, required int storyboardNumericId}) {
+            ({
+              required String projectUuid,
+              required int scriptNumericId,
+              required int storyboardNumericId,
+            }) {
               return _openStoryboardEditor(
                 token,
                 storyboardNumericId,
-                projectId: effectiveProjectUuid,
+                projectId: projectUuid,
                 scriptNumericId: scriptNumericId,
               );
             },
@@ -316,6 +356,10 @@ extension _HomePageBuildProductSections on _HomePageState {
               onOpenAgentDrawer: () =>
                   showStudioAgentDrawer(context, onRunAgent: _runStudioAgent),
               onRunHarnessAgent: _runStudioAgent,
+              onOpenProjectSettings: () {
+                final row = _studioProjectRowForNumericId(projectNumericId);
+                if (row != null) _openProjectDetail(row);
+              },
               buildStepBody: (step) => _buildProjectStudioStepBody(
                 context,
                 l10n,
@@ -354,6 +398,216 @@ extension _HomePageBuildProductSections on _HomePageState {
     }
   }
 
+  ProjectRow? _studioProjectRowForNumericId(int projectNumericId) {
+    final existing = _studioProjectRow();
+    if (existing != null) {
+      return existing;
+    }
+    final uuid = _workspaceInputController.projectUuidController.text.trim();
+    if (uuid.isEmpty) {
+      return null;
+    }
+    return ProjectRow(
+      id: uuid,
+      numericId: projectNumericId,
+      name: widget.debugStudioProjectName,
+      intro: null,
+      projectType: null,
+      imageModel: null,
+      imageQuality: null,
+      videoModel: null,
+      artStyle: null,
+      directorManual: null,
+      mode: null,
+      videoRatio: null,
+      createTimeMs: null,
+      artStylePack: null,
+      storyStylePack: null,
+      targetMarket: null,
+      targetPlatforms: null,
+      durationStrategy: null,
+      voiceProfile: null,
+      subtitleStyle: null,
+      bgmStrategy: null,
+      projectAccessMode: 'restricted',
+      projectAccessRole: 'editor',
+    );
+  }
+
+  Future<void> _studioScriptOpenNovelWorkbench(
+    ProjectRow project,
+    List<ListNovelsResponse?> novelsRef,
+    List<bool> novelsBusy,
+    Future<void> Function() reloadAssetsAndStats,
+  ) async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final l10n = resolveAppLocalizationsForErrors(context);
+    await openNovelWorkbenchDialog(
+      ctx: context,
+      l10n: l10n,
+      setDialogState: (fn) {
+        if (mounted) setState(fn);
+      },
+      token: token,
+      project: project,
+      novelsRef: novelsRef,
+      novelsBusy: novelsBusy,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+      parseNumericIdList: parseNumericIdList,
+      buildSearchSection: _buildNovelWorkbenchSearchSection,
+      buildImportSection: _buildNovelWorkbenchImportSection,
+      buildCreateSection: _buildNovelWorkbenchCreateSection,
+      buildEditSection: _buildNovelWorkbenchEditSection,
+      buildDeleteSection: _buildNovelWorkbenchDeleteSection,
+      buildSnapshotSection: _buildNovelWorkbenchSnapshotSection,
+    );
+    await reloadAssetsAndStats();
+    kStudioSnapshotBus.invalidate(StudioSnapshotInvalidation.workbenchMedia);
+  }
+
+  Future<void> _studioScriptOpenScriptsWorkbench(
+    ProjectRow project,
+    List<ScriptBrief> scriptList,
+    List<bool> saving,
+    List<bool> scriptTaskBusy,
+    List<String?> scriptTaskLine,
+    List<ProjectStats?> statsRef,
+    Future<void> Function() reloadScripts,
+  ) async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final l10n = resolveAppLocalizationsForErrors(context);
+    await openProjectScriptsWorkbenchDialog(
+      ctx: context,
+      l10n: l10n,
+      setDialogState: (fn) {
+        if (mounted) setState(fn);
+      },
+      token: token,
+      project: project,
+      saving: saving,
+      scriptTaskBusy: scriptTaskBusy,
+      scriptTaskLine: scriptTaskLine,
+      scriptList: scriptList,
+      statsRef: statsRef,
+    );
+    await reloadScripts();
+    kStudioSnapshotBus.invalidate(StudioSnapshotInvalidation.workbenchMedia);
+  }
+
+  Widget _buildProjectStudioScriptStepBody(
+    BuildContext context,
+    int projectNumericId,
+  ) {
+    final token = _effectiveAccessToken;
+    final project = _studioProjectRowForNumericId(projectNumericId);
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        project.id.isEmpty) {
+      return Center(
+        child: Text(
+          resolveAppLocalizationsForErrors(
+            context,
+          ).studioScriptStepScopeMissing,
+        ),
+      );
+    }
+
+    final openNovelWorkbenchOnMount = _pendingStudioNovelWorkbench;
+    if (openNovelWorkbenchOnMount) {
+      _pendingStudioNovelWorkbench = false;
+    }
+
+    return ProjectStudioScriptStepPanel(
+      accessToken: token,
+      project: project,
+      openNovelWorkbenchOnMount: openNovelWorkbenchOnMount,
+      onOpenNovelWorkbench: (novelsRef, novelsBusy, reload) =>
+          _studioScriptOpenNovelWorkbench(
+            project,
+            novelsRef,
+            novelsBusy,
+            reload,
+          ),
+      onOpenScriptsWorkbench:
+          (
+            scriptList,
+            saving,
+            scriptTaskBusy,
+            scriptTaskLine,
+            statsRef,
+            reload,
+          ) => _studioScriptOpenScriptsWorkbench(
+            project,
+            scriptList,
+            saving,
+            scriptTaskBusy,
+            scriptTaskLine,
+            statsRef,
+            reload,
+          ),
+      onOpenPlanWorkbench: () => _openProjectScriptPlanWorkbenchDialog(
+        ctx: context,
+        token: token,
+        project: project,
+      ),
+      onOpenBatchAddScripts: () async {
+        final saving = <bool>[false];
+        final scriptTaskLine = <String?>[null];
+        final statsRef = <ProjectStats?>[null];
+        final scriptList = <ScriptBrief>[];
+        await _openBatchAddScriptsDialog(
+          ctx: context,
+          setDialogState: (fn) {
+            if (mounted) setState(fn);
+          },
+          token: token,
+          p: project,
+          saving: saving,
+          scriptTaskLine: scriptTaskLine,
+          scriptList: scriptList,
+          statsRef: statsRef,
+        );
+        kStudioSnapshotBus.invalidate(
+          StudioSnapshotInvalidation.workbenchMedia,
+        );
+      },
+      onOpenScriptEditor: (script) => _openScriptEditor(
+        token,
+        script.numericId,
+        projectId: project.id,
+        onScriptTreeMutated: () async {
+          kStudioSnapshotBus.invalidate(
+            StudioSnapshotInvalidation.workbenchMedia,
+          );
+        },
+      ),
+      onScriptSelected: (script) {
+        _workspaceInputController.applyProjectScope(
+          project.numericId,
+          scriptNumericId: script.numericId,
+          projectUuid: project.id,
+        );
+      },
+      onContentChanged: () {
+        kStudioSnapshotBus.invalidate(
+          StudioSnapshotInvalidation.workbenchMedia,
+        );
+      },
+      agentWorkspace: _buildAgentWorkspacePane(
+        initialPane: AgentWorkspacePane.script,
+        sectionTitle: resolveAppLocalizationsForErrors(
+          context,
+        ).productAgentScriptWorkspaceTitle,
+        sectionDescription: resolveAppLocalizationsForErrors(
+          context,
+        ).productAgentScriptWorkspaceSubtitle,
+      ),
+    );
+  }
+
   Widget _buildProjectStudioStepBody(
     BuildContext context,
     AppLocalizations l10n,
@@ -362,18 +616,57 @@ extension _HomePageBuildProductSections on _HomePageState {
   ) {
     switch (step) {
       case StudioStep.script:
-        return _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.script,
-          sectionTitle: l10n.productAgentScriptWorkspaceTitle,
-          sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
-        );
+        return _buildProjectStudioScriptStepBody(context, projectNumericId);
       case StudioStep.art:
-        return _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.script,
-          sectionTitle: l10n.studioStepArtTitle,
-          sectionDescription: l10n.studioStepArtBody,
+        final artRow = _studioProjectRowForNumericId(projectNumericId);
+        final artToken = _effectiveAccessToken;
+        if (artRow == null ||
+            artToken == null ||
+            artToken.isEmpty ||
+            artRow.id.isEmpty) {
+          return Center(
+            child: Text(l10n.studioScriptStepScopeMissing),
+          );
+        }
+        return ProjectStudioArtStepPanel(
+          accessToken: artToken,
+          project: artRow,
+          onProjectUpdated: (updated) {
+            if (_projectsController.projects == null) {
+              unawaited(_projectsController.loadProjects());
+            } else {
+              _projectsController.applyProjectRow(updated);
+            }
+            setState(() {});
+          },
+          onOpenProjectSettings: () => _openProjectDetail(artRow),
         );
       case StudioStep.assets:
+        final pendingAssetId = _pendingStudioAssetNumericId;
+        if (pendingAssetId != null) {
+          _pendingStudioAssetNumericId = null;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final row = _studioProjectRowForNumericId(projectNumericId);
+            if (row == null || !mounted) return;
+            _openProjectAssetsWorkbenchFromStudio(
+              row,
+              ProjectStudioAssetEditorTarget(
+                kind: ProjectStudioAssetEditorTargetKind.confirmCandidates,
+                preferredAssetNumericId: pendingAssetId,
+              ),
+              onProjectSnapshotChanged: () async {
+                kStudioSnapshotBus.invalidate(
+                  StudioSnapshotInvalidation.workbenchMedia,
+                );
+              },
+            );
+          });
+        }
+        return _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.production,
+          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
+          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+        );
       case StudioStep.storyboard:
         return _buildAgentWorkspacePane(
           initialPane: AgentWorkspacePane.production,
@@ -384,9 +677,13 @@ extension _HomePageBuildProductSections on _HomePageState {
         return StudioVideoStepPanel(
           projectNumericId: projectNumericId,
           onOpenProduction: () {
+            final row = _studioProjectRowForNumericId(projectNumericId);
             _openShellPaneFromStudioOverlay(
               ProductWorkspacePane.productionWorkspace,
               projectNumericId: projectNumericId,
+              projectUuid:
+                  row?.id ??
+                  _workspaceInputController.projectUuidController.text.trim(),
             );
           },
           embeddedChild: _buildAgentWorkspacePane(
@@ -396,56 +693,101 @@ extension _HomePageBuildProductSections on _HomePageState {
           ),
         );
       case StudioStep.deliver:
-        return DefaultTabController(
-          length: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TabBar(
-                tabs: <Tab>[
-                  Tab(text: l10n.studioDeliverTabAssembly),
-                  Tab(text: l10n.studioDeliverTabPublish),
-                  Tab(text: l10n.studioDeliverTabQuality),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        StudioMergeDeliverBar(
-                          onMergeAndPreview: () {
-                            setState(() {
-                              _shortVideoSpaceInitialFocus =
-                                  ShortVideoSpaceInitialFocus.assembly;
-                            });
-                            _openShellPaneFromStudioOverlay(
-                              ProductWorkspacePane.shortVideoSpace,
-                              projectNumericId: projectNumericId,
-                            );
-                          },
-                        ),
-                        Expanded(child: _buildShortVideoSpaceSection()),
-                      ],
-                    ),
-                    Center(child: Text(l10n.studioDeliverPublishHint)),
-                    Center(child: Text(l10n.studioDeliverQualityHint)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        return _buildProjectStudioDeliverStepBody(
+          context,
+          l10n,
+          projectNumericId: projectNumericId,
+          initialTabIndex: 0,
         );
       case StudioStep.quality:
-        return Center(child: Text(l10n.studioDeliverQualityHint));
+        return _buildProjectStudioDeliverStepBody(
+          context,
+          l10n,
+          projectNumericId: projectNumericId,
+          initialTabIndex: 2,
+        );
     }
   }
 
-  Widget _buildShortVideoSpaceSection() {
+  int _deliverTabIndexFromRoute(BuildContext context, {int fallback = 0}) {
+    final tab = GoRouterState.of(context).uri.queryParameters['tab']?.trim();
+    return switch (tab) {
+      'quality' => 2,
+      'publish' => 1,
+      'assembly' => 0,
+      _ => fallback,
+    };
+  }
+
+  Widget _buildProjectStudioDeliverStepBody(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required int projectNumericId,
+    int initialTabIndex = 0,
+  }) {
+    final tabIndex = _deliverTabIndexFromRoute(
+      context,
+      fallback: initialTabIndex,
+    ).clamp(0, 2);
+    return DefaultTabController(
+      initialIndex: tabIndex,
+      length: 3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          TabBar(
+            tabs: <Tab>[
+              Tab(text: l10n.studioDeliverTabAssembly),
+              Tab(text: l10n.studioDeliverTabPublish),
+              Tab(text: l10n.studioDeliverTabQuality),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    StudioMergeDeliverBar(
+                      onMergeAndPreview: () {
+                        setState(() {
+                          _shortVideoSpaceInitialFocus =
+                              ShortVideoSpaceInitialFocus.assembly;
+                        });
+                        _openShellPaneFromStudioOverlay(
+                          ProductWorkspacePane.shortVideoSpace,
+                          projectNumericId: projectNumericId,
+                        );
+                      },
+                    ),
+                    Expanded(
+                      child: _buildShortVideoSpaceSection(
+                        embedScope: ShortVideoSpaceEmbedScope.assembly,
+                      ),
+                    ),
+                  ],
+                ),
+                _buildShortVideoSpaceSection(
+                  embedScope: ShortVideoSpaceEmbedScope.publish,
+                ),
+                _buildShortVideoSpaceSection(
+                  embedScope: ShortVideoSpaceEmbedScope.quality,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShortVideoSpaceSection({
+    ShortVideoSpaceEmbedScope embedScope = ShortVideoSpaceEmbedScope.full,
+  }) {
     return ShortVideoSpaceSection(
       accessToken: _session?.accessToken,
       initialFocus: _shortVideoSpaceInitialFocus,
+      embedScope: embedScope,
       initialProjectUuid:
           _workspaceInputController.projectUuidController.text.trim().isEmpty
           ? null
@@ -661,9 +1003,8 @@ extension _HomePageBuildProductSections on _HomePageState {
             icon: icon,
             actionLabel: projectId != null ? l10n.studioEnterStudio : null,
             onAction: projectId != null
-                ? () => context.go(
-                    '/projects/$projectId/${enterStudioStep.slug}',
-                  )
+                ? () =>
+                      context.go('/projects/$projectId/${enterStudioStep.slug}')
                 : null,
           ),
         ),
@@ -2901,8 +3242,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _appendWebhookActivity(
           action: 'deleted',
           webhookId: id,
-          summary: resolveAppLocalizationsForErrors(context)
-              .opsWhActivitySummaryDeleted,
+          summary: resolveAppLocalizationsForErrors(
+            context,
+          ).opsWhActivitySummaryDeleted,
         );
       });
       await _loadWebhooks();
@@ -3215,7 +3557,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   Future<void> _copyBillingEventsQuerySummary() async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    await Clipboard.setData(ClipboardData(text: _billingEventsQuerySummary(l10n)));
+    await Clipboard.setData(
+      ClipboardData(text: _billingEventsQuerySummary(l10n)),
+    );
     if (!mounted) {
       return;
     }

@@ -1324,6 +1324,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioModelPricingTypeVideo => 'Video';
 
   @override
+  String get studioModelPricingTypeMultimodal => 'Multimodal';
+
+  @override
   String get notificationsComplianceStageCriticalUnclaimed =>
       'Critical unclaimed';
 
@@ -1517,6 +1520,288 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get studioStepScriptBody =>
       'Write or import your script, then extract characters and scenes.';
+
+  @override
+  String get studioCockpitExpand => 'View project progress';
+
+  @override
+  String get studioCockpitCollapse => 'Collapse';
+
+  @override
+  String get studioCockpitScriptTitle => 'Script step progress';
+
+  @override
+  String get studioScriptIntakeTitle => 'Content intake';
+
+  @override
+  String get studioScriptIntakeBody =>
+      'Import a novel inline (URL, paste, or one chapter), then generate and write back with the agent on the right. Use Advanced workbench for batch hosted import and chapter CRUD.';
+
+  @override
+  String get studioScriptIntakeNovels => 'Novels & scripts';
+
+  @override
+  String get studioScriptStepTabContent => 'Content';
+
+  @override
+  String get studioScriptStepTabAgent => 'Generate';
+
+  @override
+  String get studioScriptStepTabNovel => 'Novel';
+
+  @override
+  String get studioScriptStepTabScripts => 'Scripts';
+
+  @override
+  String get studioScriptStepTabExtract => 'Extract';
+
+  @override
+  String get studioScriptStepExtractBody =>
+      'Poll extract state and run asset extraction for scripts, then open the script editor to review characters and scenes.';
+
+  @override
+  String get studioEpisodeConsoleBetaLabel => 'Beta';
+
+  @override
+  String get studioEpisodeConsoleBetaBody =>
+      'This compact episode console is still in preview. Use Full studio for the complete workflow.';
+
+  @override
+  String get projectEditorModelRoutingQualityStepHint =>
+      'Deliver quality tab (URL alias /quality)';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportStudioHint =>
+      'For quick URL or paste import, use Studio → Script step inline import first.';
+
+  @override
+  String get shortVideoSpaceExportCheckRefreshButton =>
+      'Refresh export pre-check';
+
+  @override
+  String get studioScriptStepNovelsSectionTitle => 'Novels & chapters';
+
+  @override
+  String get studioScriptStepScriptsSectionTitle => 'Scripts';
+
+  @override
+  String get studioScriptStepEmptyTitle => 'No upstream content yet';
+
+  @override
+  String get studioScriptStepEmptyBody =>
+      'Import a novel or create scripts first, then generate and write back with the agent on the right.';
+
+  @override
+  String get studioScriptStepLoadErrorTitle => 'Failed to load content';
+
+  @override
+  String get studioScriptStepRetry => 'Retry';
+
+  @override
+  String get studioScriptStepScopeMissing =>
+      'Select a valid project before editing scripts.';
+
+  @override
+  String get studioArtStepOpenSettings => 'Advanced project settings';
+
+  @override
+  String get studioArtStepEditSubtitle =>
+      'Choose bundled art and story style packs for this project. Changes apply to the next image and script generation jobs.';
+
+  @override
+  String get studioArtStepSaveButton => 'Save art direction';
+
+  @override
+  String get studioArtStepResetButton => 'Reset';
+
+  @override
+  String get studioArtStepSaveSuccess =>
+      'Art direction saved for this project.';
+
+  @override
+  String get studioArtStepLegacyArtStyleHelper =>
+      'Optional free-text art direction (legacy). Use style packs above when possible.';
+
+  @override
+  String get studioArtStepApplyFootnote =>
+      'Style packs drive prompts for assets, storyboards, and video. Save to persist.';
+
+  @override
+  String get studioArtStepSummaryTitle => 'Current selection';
+
+  @override
+  String get studioArtStepNoStylePacks =>
+      'No art or story style packs selected yet. Pick packs above and save.';
+
+  @override
+  String get studioArtStepArtStyleLabel => 'Legacy art style (text)';
+
+  @override
+  String get studioScriptNovelInlineImportTitle => 'Import novel';
+
+  @override
+  String get studioScriptNovelInlineImportSubtitle =>
+      'Crawl by URL, paste full text, or add one chapter — no dialog required.';
+
+  @override
+  String get studioScriptNovelInlineOpenFullWorkbench => 'Advanced workbench';
+
+  @override
+  String get studioScriptNovelInlineUrlSection => 'URL crawl';
+
+  @override
+  String get studioScriptNovelInlineImportFromUrl => 'Crawl & import chapters';
+
+  @override
+  String get studioScriptNovelInlinePasteSection => 'Paste full book';
+
+  @override
+  String studioScriptNovelInlineImportParsed(int count) {
+    return 'Import $count chapters';
+  }
+
+  @override
+  String get studioScriptNovelInlineManualSection => 'Single chapter';
+
+  @override
+  String get studioScriptNovelInlineChapterFieldsRequired =>
+      'Enter chapter title and body';
+
+  @override
+  String get studioNovelCrawlAuthSectionTitle =>
+      'Site auth (cookie / password)';
+
+  @override
+  String get studioNovelCrawlAuthSectionSubtitle =>
+      'For sites that require sign-in. On desktop, use in-app login to capture cookies automatically, or paste credentials manually.';
+
+  @override
+  String get studioNovelCrawlAuthCaptureCookieButton =>
+      'Sign in in app & capture cookies';
+
+  @override
+  String get studioNovelCrawlAuthCaptureCookieWebUnavailable =>
+      'Use the macOS/Windows/Linux desktop app for one-click capture, or paste cookies manually in the browser build.';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideCollapsed =>
+      'Need sign-in for a novel site? Desktop app captures cookies in one tap — tap for details';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideTitle =>
+      'One-click sign-in requires the desktop app';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideBody =>
+      'Browsers block reading novel-site login cookies from embedded pages. Download the OpenFlow desktop app (macOS / Windows / Linux) and use “Sign in in app & capture cookies” on the script step.';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideSteps =>
+      'Steps:\n1. Tap “Download desktop app” below and install\n2. Sign in with the same account\n3. Open your project → Site auth → in-app sign-in → save, then crawl';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideLearnMore => 'Release page';
+
+  @override
+  String get studioNovelCrawlAuthMobileGuideTitle =>
+      'In-app sign-in is not on mobile yet';
+
+  @override
+  String get studioNovelCrawlAuthMobileGuideBody =>
+      'iOS / Android builds do not include embedded login for cookie capture. Use the desktop app for one-click capture, or paste cookies manually here and save.';
+
+  @override
+  String get studioNovelCrawlAuthCaptureOk =>
+      'Cookies captured — save to project or start crawling.';
+
+  @override
+  String get studioNovelCrawlLoginDialogTitle => 'Sign in to novel site';
+
+  @override
+  String get studioNovelCrawlLoginDialogSubtitle =>
+      'Complete sign-in below (including CAPTCHA if any), then tap Capture cookies.';
+
+  @override
+  String get studioNovelCrawlLoginDialogUrlLabel => 'Site URL';
+
+  @override
+  String get studioNovelCrawlLoginDialogGo => 'Open';
+
+  @override
+  String get studioNovelCrawlLoginDialogConfirm => 'Capture cookies';
+
+  @override
+  String get studioNovelCrawlLoginDialogCancel => 'Cancel';
+
+  @override
+  String get studioNovelCrawlLoginDialogInvalidUrl =>
+      'Enter a valid http(s) URL';
+
+  @override
+  String get studioNovelCrawlLoginDialogNoCookies =>
+      'No cookies found — sign in first, then try again';
+
+  @override
+  String get studioNovelCrawlAuthModeLabel => 'Auth mode';
+
+  @override
+  String get studioNovelCrawlAuthModeNone => 'None';
+
+  @override
+  String get studioNovelCrawlAuthModeCookie => 'Cookie only';
+
+  @override
+  String get studioNovelCrawlAuthModePassword => 'Password only';
+
+  @override
+  String get studioNovelCrawlAuthModeBoth => 'Cookie + password';
+
+  @override
+  String get studioNovelCrawlAuthCookieLabel => 'Cookie';
+
+  @override
+  String get studioNovelCrawlAuthCookieHelper =>
+      'Prefer in-app sign-in above; or paste e.g. sessionid=…; token=…';
+
+  @override
+  String get studioNovelCrawlAuthCookieStoredHint =>
+      'Encrypted credentials saved; leave blank on save to keep existing, or paste to replace.';
+
+  @override
+  String get studioNovelCrawlAuthUsernameLabel => 'Username';
+
+  @override
+  String get studioNovelCrawlAuthPasswordLabel => 'Password';
+
+  @override
+  String get studioNovelCrawlAuthPasswordStoredHint =>
+      'Saved; leave blank on save to keep existing.';
+
+  @override
+  String get studioNovelCrawlAuthLoginUrlLabel => 'Login URL';
+
+  @override
+  String get studioNovelCrawlAuthLoginUrlHelper =>
+      'Form POST endpoint (urlencoded). If empty, HTTP Basic is used on chapter URLs.';
+
+  @override
+  String get studioNovelCrawlAuthLoginUserFieldLabel => 'Username field';
+
+  @override
+  String get studioNovelCrawlAuthLoginPassFieldLabel => 'Password field';
+
+  @override
+  String get studioNovelCrawlAuthSave => 'Save to project';
+
+  @override
+  String get studioNovelCrawlAuthReload => 'Reload';
+
+  @override
+  String get studioNovelCrawlAuthSaveOk => 'Site auth saved';
+
+  @override
+  String get studioNovelCrawlAuthEncryptionMissing =>
+      'OPENFLOW_VENDOR_CREDENTIAL_KEY is not set on the server; credentials cannot be stored.';
 
   @override
   String get studioStepArtTitle => 'Art direction';
@@ -2819,6 +3104,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get globalSearchNovelOrEventNavigatedHint =>
       'Please open \"Project List\" from the home navigation, then use the novel workbench within the target project to view chapters and events.';
+
+  @override
+  String get globalSearchScriptStudioNavigated =>
+      'Opened Studio script step for this script.';
+
+  @override
+  String globalSearchAssetStudioNavigated(String assetId) {
+    return 'Opened Studio assets step (asset #$assetId).';
+  }
+
+  @override
+  String get globalSearchNovelStudioNavigated =>
+      'Opened Studio script step — novel workbench will open when ready.';
 
   @override
   String accountDeletedSummary(
@@ -8557,6 +8855,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n) {
     return 'Supplement chapter $n';
   }
+
+  @override
+  String get projectEditorNovelsWorkbenchStudioCrossLink =>
+      'Quick intake lives on the Studio script step (inline import). This workbench is for search, chapter CRUD, hosted batch import, and events.';
 
   @override
   String get projectEditorNovelsWorkbenchCardSummaryEmptyHelp =>
@@ -16240,7 +16542,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishExportCheckLoadingDetail =>
-      'Aggregates storyboard blocking and warnings; quality gate observation fields are placeholder display only.';
+      'Aggregates storyboard blocking and warnings; quality gate stats below reflect server export-check when loaded.';
 
   @override
   String get shortVideoSpacePublishExportCheckUnavailableHeadline =>
@@ -16454,7 +16756,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelUnavailableExportGateMissing =>
-      'Export check data missing, publish panel shows placeholder only.';
+      'Export check data not loaded yet — publish prep uses draft rules only until pre-check returns.';
 
   @override
   String get shortVideoSpacePublishPanelUnavailableExportGateNoBlocking =>
@@ -16502,7 +16804,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelPrepareCheckOk =>
-      'Validation: ✓ Current draft meets placeholder rules (still needs real final reference to actually go live).';
+      'Validation: ✓ Current draft passes local prep checks (confirm final assets in production before go-live).';
 
   @override
   String get shortVideoSpacePublishPanelPrepareCheckMultipleDrafts =>
@@ -17770,11 +18072,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoPublishPanelMatrixDomesticLabel =>
-      'Domestic platform matrix (placeholder constraints)';
+      'Domestic platform matrix (reference constraints)';
 
   @override
   String get shortVideoPublishPanelMatrixOverseasLabel =>
-      'Overseas platform matrix (placeholder constraints)';
+      'Overseas platform matrix (reference constraints)';
 
   @override
   String get shortVideoPublishPanelPrepareChecks => 'Publish prep validation';
@@ -21986,6 +22288,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorBasicsModelRoutingTitle => 'Model routing';
+
+  @override
+  String get projectEditorBasicsStepModelRoutingTitle => 'Studio step models';
+
+  @override
+  String get projectEditorBasicsStepModelRoutingHelper =>
+      'Primary configuration: pick models for each Studio step. Unset slots fall back to advanced modality defaults below.';
+
+  @override
+  String get projectEditorBasicsModalityDefaultsTitle =>
+      'Advanced: project modality defaults';
+
+  @override
+  String get projectEditorBasicsModalityDefaultsSubtitle =>
+      'Fallback when a step slot is not set. Configure per-step models above first.';
+
+  @override
+  String get studioModelRoutingPrimaryTitle => 'Step model routing';
+
+  @override
+  String get studioModelRoutingPrimarySubtitle =>
+      'Review which model each slot will use for this step.';
+
+  @override
+  String get studioModelRoutingPrimaryFootnote =>
+      'Changes here affect only this studio step and save immediately.';
+
+  @override
+  String get studioModelRoutingOpenAdvancedSettings => 'Advanced settings';
+
+  @override
+  String get studioModelRoutingSourceStep => 'Step override';
+
+  @override
+  String get studioModelRoutingSourceModality => 'Modality default';
+
+  @override
+  String get studioModelRoutingSourceUser => 'User preference';
+
+  @override
+  String get studioModelRoutingSourceLegacy => 'Legacy deploy';
+
+  @override
+  String get studioModelRoutingSourceCatalog => 'Catalog default';
+
+  @override
+  String get studioModelRoutingSourceOverride => 'Request override';
+
+  @override
+  String get studioModelRoutingDeliverInherit =>
+      'This step inherits the project\'s delivery routing.';
+
+  @override
+  String get studioModelRoutingCollapsedLoading => 'Loading step models…';
+
+  @override
+  String get studioModelRoutingCollapsedEmpty =>
+      'Tap to configure models for this step';
+
+  @override
+  String get settingsModelVendorsTitle => 'Model providers';
+
+  @override
+  String get settingsModelVendorsSubtitle =>
+      'Enable vendors, store API keys, and choose which catalog models to use. Project Studio step routing picks from these models.';
+
+  @override
+  String get settingsModelVendorsEmpty => 'No model providers in the catalog.';
+
+  @override
+  String settingsModelVendorsVendorMeta(int count, String kinds) {
+    return '$count models · $kinds';
+  }
+
+  @override
+  String get settingsModelVendorsCredentialConfigured => 'API key stored';
+
+  @override
+  String get settingsModelVendorsCredentialMissing =>
+      'No API key — add one to use this vendor';
+
+  @override
+  String get settingsModelVendorsManageCredential => 'API key';
+
+  @override
+  String get settingsModelVendorsModelsHeading => 'Models to use';
+
+  @override
+  String get settingsModelVendorsTestAction => 'Test model';
+
+  @override
+  String get settingsModelVendorsTestQueued =>
+      'Connectivity test queued — check Task Center for results';
+
+  @override
+  String settingsModelVendorsTestFailed(int status) {
+    return 'Test request failed (HTTP $status)';
+  }
+
+  @override
+  String settingsModelVendorsCredentialDialogTitle(String vendor) {
+    return '$vendor API credentials';
+  }
+
+  @override
+  String get settingsModelVendorsCredentialDialogBody =>
+      'Keys are encrypted server-side and never returned in full after save.';
+
+  @override
+  String settingsModelVendorsCredentialHint(String hint) {
+    return 'Current key hint: $hint';
+  }
+
+  @override
+  String get settingsModelVendorsFieldApiKey => 'API key';
+
+  @override
+  String get settingsModelVendorsFieldApiSecret => 'API secret (optional)';
+
+  @override
+  String get settingsModelVendorsFieldApiToken => 'API token (optional)';
+
+  @override
+  String get settingsModelVendorsCredentialRemove => 'Remove stored key';
+
+  @override
+  String get settingsModelVendorsBaseUrlLabel => 'API base URL';
+
+  @override
+  String get settingsModelVendorsBaseUrlLocalHint =>
+      'OpenAI-compatible endpoint for Ollama / LM Studio on this machine.';
+
+  @override
+  String get settingsModelVendorsBaseUrlCloudHint =>
+      'Override the default cloud endpoint if needed.';
+
+  @override
+  String get settingsModelVendorsSaveBaseUrl => 'Save base URL';
+
+  @override
+  String get settingsModelVendorsCredentialOptionalLocal =>
+      'API key optional for local server';
+
+  @override
+  String get settingsModelVendorsCredentialDialogBodyLocal =>
+      'Local servers often need no key. Leave fields empty unless your proxy requires one.';
+
+  @override
+  String get settingsAgentDeployDeprecatedBanner =>
+      'Script and production models are now configured per project under Studio step model routing. Agent deploy below applies only when no project is attached.';
 
   @override
   String get projectEditorBasicsTextModelLabel => 'Text model';

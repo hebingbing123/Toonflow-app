@@ -18,6 +18,8 @@ mod production_suite;
 mod project_dashboard_surface_roundtrip;
 mod project_quality_gate_strategy_roundtrip;
 mod projects_create_stats_roundtrip;
+mod projects_model_routing_roundtrip;
+mod projects_style_config_roundtrip;
 mod projects_numeric_crud_roundtrip;
 mod projects_partial_patch_roundtrip;
 mod publish_quality_gate_job_roundtrip;

@@ -1245,6 +1245,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioModelPricingTypeVideo => '视频';
 
   @override
+  String get studioModelPricingTypeMultimodal => '多模态';
+
+  @override
   String get notificationsComplianceStageCriticalUnclaimed => '严重未认领';
 
   @override
@@ -1426,6 +1429,268 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioStepScriptBody => '编写或导入剧本，并提取角色与场景。';
+
+  @override
+  String get studioCockpitExpand => '查看项目进度';
+
+  @override
+  String get studioCockpitCollapse => '收起';
+
+  @override
+  String get studioCockpitScriptTitle => '剧本阶段进度';
+
+  @override
+  String get studioScriptIntakeTitle => '内容入口';
+
+  @override
+  String get studioScriptIntakeBody =>
+      '在左侧内联导入小说（链接爬取、粘贴或单章），右侧 Agent 生成并回写；批量托管导入与章节管理请用「高级工作台」。';
+
+  @override
+  String get studioScriptIntakeNovels => '小说与剧本';
+
+  @override
+  String get studioScriptStepTabContent => '内容';
+
+  @override
+  String get studioScriptStepTabAgent => '生成';
+
+  @override
+  String get studioScriptStepTabNovel => '小说';
+
+  @override
+  String get studioScriptStepTabScripts => '剧本';
+
+  @override
+  String get studioScriptStepTabExtract => '提取';
+
+  @override
+  String get studioScriptStepExtractBody => '轮询剧本提取状态并批量提取角色/场景素材，随后在剧本编辑器中核对。';
+
+  @override
+  String get studioEpisodeConsoleBetaLabel => 'Beta';
+
+  @override
+  String get studioEpisodeConsoleBetaBody => '精简版单集控制台仍在预览中。完整流程请使用「完整工作室」。';
+
+  @override
+  String get projectEditorModelRoutingQualityStepHint =>
+      '交付步质检 Tab（URL 别名 /quality）';
+
+  @override
+  String get projectEditorNovelsWorkbenchImportStudioHint =>
+      '快速链接/粘贴导入请优先使用工作室「剧本」步的内联导入。';
+
+  @override
+  String get shortVideoSpaceExportCheckRefreshButton => '刷新导出预检';
+
+  @override
+  String get studioScriptStepNovelsSectionTitle => '小说与章节';
+
+  @override
+  String get studioScriptStepScriptsSectionTitle => '剧本列表';
+
+  @override
+  String get studioScriptStepEmptyTitle => '还没有上游内容';
+
+  @override
+  String get studioScriptStepEmptyBody => '先导入小说或新建剧本，再在右侧用 Agent 生成与回写。';
+
+  @override
+  String get studioScriptStepLoadErrorTitle => '内容加载失败';
+
+  @override
+  String get studioScriptStepRetry => '重试';
+
+  @override
+  String get studioScriptStepScopeMissing => '请先选择有效项目后再编辑剧本。';
+
+  @override
+  String get studioArtStepOpenSettings => '高级项目设定';
+
+  @override
+  String get studioArtStepEditSubtitle => '为项目选择内置画风包与故事风格包，保存后作用于后续图像与剧本生成。';
+
+  @override
+  String get studioArtStepSaveButton => '保存美术设定';
+
+  @override
+  String get studioArtStepResetButton => '还原';
+
+  @override
+  String get studioArtStepSaveSuccess => '已保存本项目的美术设定。';
+
+  @override
+  String get studioArtStepLegacyArtStyleHelper =>
+      '可选：自由文本画风说明（遗留字段）。优先使用上方风格包。';
+
+  @override
+  String get studioArtStepApplyFootnote => '风格包会参与资产、分镜与视频提示词。修改后请保存。';
+
+  @override
+  String get studioArtStepSummaryTitle => '当前选择';
+
+  @override
+  String get studioArtStepNoStylePacks => '尚未选择画风或故事风格包，请在上方选择后保存。';
+
+  @override
+  String get studioArtStepArtStyleLabel => '遗留画风（文本）';
+
+  @override
+  String get studioScriptNovelInlineImportTitle => '导入小说';
+
+  @override
+  String get studioScriptNovelInlineImportSubtitle => '链接抓取、粘贴全书或单章录入，无需弹窗。';
+
+  @override
+  String get studioScriptNovelInlineOpenFullWorkbench => '高级工作台';
+
+  @override
+  String get studioScriptNovelInlineUrlSection => '链接抓取';
+
+  @override
+  String get studioScriptNovelInlineImportFromUrl => '抓取并导入章节';
+
+  @override
+  String get studioScriptNovelInlinePasteSection => '粘贴全书';
+
+  @override
+  String studioScriptNovelInlineImportParsed(int count) {
+    return '导入 $count 章';
+  }
+
+  @override
+  String get studioScriptNovelInlineManualSection => '单章录入';
+
+  @override
+  String get studioScriptNovelInlineChapterFieldsRequired => '请填写章节标题与正文';
+
+  @override
+  String get studioNovelCrawlAuthSectionTitle => '站点认证（Cookie / 账号密码）';
+
+  @override
+  String get studioNovelCrawlAuthSectionSubtitle =>
+      '用于需登录的小说站链接抓取。桌面端可「应用内登录」自动获取 Cookie；也可手动粘贴或配置账号密码登录接口。';
+
+  @override
+  String get studioNovelCrawlAuthCaptureCookieButton => '应用内登录并获取 Cookie';
+
+  @override
+  String get studioNovelCrawlAuthCaptureCookieWebUnavailable =>
+      '浏览器版请使用 macOS/Windows/Linux 桌面客户端一键获取，或手动粘贴 Cookie。';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideCollapsed =>
+      '需登录的小说站？桌面版可一键获取 Cookie，点此查看';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideTitle => '一键登录请使用桌面客户端';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideBody =>
+      '浏览器受安全策略限制，无法在内嵌页面读取小说站登录 Cookie。请下载 OpenFlow 桌面版（macOS / Windows / Linux），在剧本步使用「应用内登录并获取 Cookie」。';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideSteps =>
+      '操作步骤：\n1. 点击下方「下载桌面版」并安装\n2. 使用同一账号登录 OpenFlow\n3. 打开项目 → 展开「站点认证」→ 应用内登录 → 保存后即可抓取';
+
+  @override
+  String get studioNovelCrawlAuthWebGuideLearnMore => '查看发布页';
+
+  @override
+  String get studioNovelCrawlAuthMobileGuideTitle => '手机端暂不支持应用内登录';
+
+  @override
+  String get studioNovelCrawlAuthMobileGuideBody =>
+      'iOS / Android 客户端尚未提供内嵌登录抓 Cookie。请使用桌面版一键获取，或在本页手动粘贴 Cookie 后保存。';
+
+  @override
+  String get studioNovelCrawlAuthCaptureOk => '已获取 Cookie，可保存到项目或直接抓取。';
+
+  @override
+  String get studioNovelCrawlLoginDialogTitle => '登录小说站点';
+
+  @override
+  String get studioNovelCrawlLoginDialogSubtitle =>
+      '在下方页面完成登录（含验证码），然后点击「获取 Cookie」。';
+
+  @override
+  String get studioNovelCrawlLoginDialogUrlLabel => '站点地址';
+
+  @override
+  String get studioNovelCrawlLoginDialogGo => '打开';
+
+  @override
+  String get studioNovelCrawlLoginDialogConfirm => '获取 Cookie';
+
+  @override
+  String get studioNovelCrawlLoginDialogCancel => '取消';
+
+  @override
+  String get studioNovelCrawlLoginDialogInvalidUrl => '请输入有效的 http(s) 地址';
+
+  @override
+  String get studioNovelCrawlLoginDialogNoCookies => '未读取到 Cookie，请确认已登录成功后再试';
+
+  @override
+  String get studioNovelCrawlAuthModeLabel => '认证方式';
+
+  @override
+  String get studioNovelCrawlAuthModeNone => '无';
+
+  @override
+  String get studioNovelCrawlAuthModeCookie => '仅 Cookie';
+
+  @override
+  String get studioNovelCrawlAuthModePassword => '仅账号密码';
+
+  @override
+  String get studioNovelCrawlAuthModeBoth => 'Cookie + 账号密码';
+
+  @override
+  String get studioNovelCrawlAuthCookieLabel => 'Cookie';
+
+  @override
+  String get studioNovelCrawlAuthCookieHelper =>
+      '推荐用上方「应用内登录」自动填充；也可手动粘贴 sessionid=…; token=…';
+
+  @override
+  String get studioNovelCrawlAuthCookieStoredHint => '已保存加密凭据；留空保存表示不修改，填写则覆盖。';
+
+  @override
+  String get studioNovelCrawlAuthUsernameLabel => '用户名';
+
+  @override
+  String get studioNovelCrawlAuthPasswordLabel => '密码';
+
+  @override
+  String get studioNovelCrawlAuthPasswordStoredHint => '已保存；留空保存表示不修改。';
+
+  @override
+  String get studioNovelCrawlAuthLoginUrlLabel => '登录 URL';
+
+  @override
+  String get studioNovelCrawlAuthLoginUrlHelper =>
+      '接受 application/x-www-form-urlencoded 的登录接口；留空则对章节 URL 使用 HTTP Basic。';
+
+  @override
+  String get studioNovelCrawlAuthLoginUserFieldLabel => '用户名字段名';
+
+  @override
+  String get studioNovelCrawlAuthLoginPassFieldLabel => '密码字段名';
+
+  @override
+  String get studioNovelCrawlAuthSave => '保存到项目';
+
+  @override
+  String get studioNovelCrawlAuthReload => '重新加载';
+
+  @override
+  String get studioNovelCrawlAuthSaveOk => '站点认证已保存';
+
+  @override
+  String get studioNovelCrawlAuthEncryptionMissing =>
+      '服务端未配置 OPENFLOW_VENDOR_CREDENTIAL_KEY，无法加密保存凭据。';
 
   @override
   String get studioStepArtTitle => '美术';
@@ -2683,6 +2948,17 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get globalSearchNovelOrEventNavigatedHint =>
       '请从首页主导航打开「项目列表」，在目标项目内使用小说工作台查看章节与事件。';
+
+  @override
+  String get globalSearchScriptStudioNavigated => '已打开工作室剧本步。';
+
+  @override
+  String globalSearchAssetStudioNavigated(String assetId) {
+    return '已打开工作室资产步（资产 #$assetId）。';
+  }
+
+  @override
+  String get globalSearchNovelStudioNavigated => '已打开工作室剧本步，就绪后将打开小说工作台。';
 
   @override
   String accountDeletedSummary(
@@ -8214,6 +8490,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n) {
     return '补充章节 $n';
   }
+
+  @override
+  String get projectEditorNovelsWorkbenchStudioCrossLink =>
+      '快速导入在工作室「剧本」步（内联导入）；本工作台用于搜索、章节增删改、托管批量导入与事件。';
 
   @override
   String get projectEditorNovelsWorkbenchCardSummaryEmptyHelp =>
@@ -15464,7 +15744,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishExportCheckLoadingDetail =>
-      '聚合分镜阻塞与提醒；质量门禁观测字段仅占位展示。';
+      '聚合分镜阻塞与提醒；下方质量门禁统计在导出预检加载后来自服务端。';
 
   @override
   String get shortVideoSpacePublishExportCheckUnavailableHeadline =>
@@ -15669,7 +15949,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelUnavailableExportGateMissing =>
-      '导出检查数据缺失，发布面板仅提示占位。';
+      '导出预检尚未加载 — 发布准备暂仅按草稿规则校验。';
 
   @override
   String get shortVideoSpacePublishPanelUnavailableExportGateNoBlocking =>
@@ -15716,7 +15996,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelPrepareCheckOk =>
-      '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。';
+      '校验：✓ 当前草稿通过本地发布准备检查（上线前请在制作工作区确认成片）。';
 
   @override
   String get shortVideoSpacePublishPanelPrepareCheckMultipleDrafts =>
@@ -16934,10 +17214,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoPublishPanelResetDontShowAgain => '重置「不再提示」';
 
   @override
-  String get shortVideoPublishPanelMatrixDomesticLabel => '国内平台矩阵（占位约束）';
+  String get shortVideoPublishPanelMatrixDomesticLabel => '国内平台矩阵（参考约束）';
 
   @override
-  String get shortVideoPublishPanelMatrixOverseasLabel => '海外平台矩阵（占位约束）';
+  String get shortVideoPublishPanelMatrixOverseasLabel => '海外平台矩阵（参考约束）';
 
   @override
   String get shortVideoPublishPanelPrepareChecks => '发布准备校验';
@@ -20983,6 +21263,147 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectEditorBasicsModelRoutingTitle => '模型路由';
+
+  @override
+  String get projectEditorBasicsStepModelRoutingTitle => 'Studio 步骤模型';
+
+  @override
+  String get projectEditorBasicsStepModelRoutingHelper =>
+      '主配置：为各 Studio 步骤选择模型；未设置的槽位将使用下方「高级」中的模态默认。';
+
+  @override
+  String get projectEditorBasicsModalityDefaultsTitle => '高级：项目级模态默认';
+
+  @override
+  String get projectEditorBasicsModalityDefaultsSubtitle =>
+      '步骤未单独指定时的回退；请优先在上方配置各步骤模型。';
+
+  @override
+  String get studioModelRoutingPrimaryTitle => '步骤模型路由';
+
+  @override
+  String get studioModelRoutingPrimarySubtitle => '查看这个步骤各个槽位最终会使用哪一个模型。';
+
+  @override
+  String get studioModelRoutingPrimaryFootnote => '这里的改动只影响当前工作室步骤，并会立即保存。';
+
+  @override
+  String get studioModelRoutingOpenAdvancedSettings => '高级设置';
+
+  @override
+  String get studioModelRoutingSourceStep => '步骤覆盖';
+
+  @override
+  String get studioModelRoutingSourceModality => '模态默认';
+
+  @override
+  String get studioModelRoutingSourceUser => '用户偏好';
+
+  @override
+  String get studioModelRoutingSourceLegacy => '旧版部署';
+
+  @override
+  String get studioModelRoutingSourceCatalog => '模型目录默认';
+
+  @override
+  String get studioModelRoutingSourceOverride => '请求覆盖';
+
+  @override
+  String get studioModelRoutingDeliverInherit => '这个步骤沿用项目的交付路由配置。';
+
+  @override
+  String get studioModelRoutingCollapsedLoading => '正在加载本步骤模型…';
+
+  @override
+  String get studioModelRoutingCollapsedEmpty => '点击展开，配置本步骤模型';
+
+  @override
+  String get settingsModelVendorsTitle => '模型厂商';
+
+  @override
+  String get settingsModelVendorsSubtitle =>
+      '启用厂商、保存 API 密钥，并勾选要使用的目录模型。Studio 步骤模型路由会从中解析。';
+
+  @override
+  String get settingsModelVendorsEmpty => '目录中暂无模型厂商。';
+
+  @override
+  String settingsModelVendorsVendorMeta(int count, String kinds) {
+    return '$count 个模型 · $kinds';
+  }
+
+  @override
+  String get settingsModelVendorsCredentialConfigured => '已保存 API 密钥';
+
+  @override
+  String get settingsModelVendorsCredentialMissing => '未配置 API 密钥，启用前请先添加';
+
+  @override
+  String get settingsModelVendorsManageCredential => 'API 密钥';
+
+  @override
+  String get settingsModelVendorsModelsHeading => '使用的模型';
+
+  @override
+  String get settingsModelVendorsTestAction => '测试连通性';
+
+  @override
+  String get settingsModelVendorsTestQueued => '连通性测试已入队，请在任务中心查看结果';
+
+  @override
+  String settingsModelVendorsTestFailed(int status) {
+    return '测试请求失败（HTTP $status）';
+  }
+
+  @override
+  String settingsModelVendorsCredentialDialogTitle(String vendor) {
+    return '$vendor API 凭证';
+  }
+
+  @override
+  String get settingsModelVendorsCredentialDialogBody =>
+      '密钥在服务端加密保存，保存后不会完整回显。';
+
+  @override
+  String settingsModelVendorsCredentialHint(String hint) {
+    return '当前密钥提示：$hint';
+  }
+
+  @override
+  String get settingsModelVendorsFieldApiKey => 'API Key';
+
+  @override
+  String get settingsModelVendorsFieldApiSecret => 'API Secret（可选）';
+
+  @override
+  String get settingsModelVendorsFieldApiToken => 'API Token（可选）';
+
+  @override
+  String get settingsModelVendorsCredentialRemove => '删除已保存的密钥';
+
+  @override
+  String get settingsModelVendorsBaseUrlLabel => 'API 基础地址';
+
+  @override
+  String get settingsModelVendorsBaseUrlLocalHint =>
+      '本机 Ollama / LM Studio 的 OpenAI 兼容地址。';
+
+  @override
+  String get settingsModelVendorsBaseUrlCloudHint => '如需覆盖默认云端地址，可在此填写。';
+
+  @override
+  String get settingsModelVendorsSaveBaseUrl => '保存地址';
+
+  @override
+  String get settingsModelVendorsCredentialOptionalLocal => '本地服务通常无需 API Key';
+
+  @override
+  String get settingsModelVendorsCredentialDialogBodyLocal =>
+      '本地推理多数情况可留空；仅当你的代理要求鉴权时再填写。';
+
+  @override
+  String get settingsAgentDeployDeprecatedBanner =>
+      '剧本与制作模型请在各项目的「Studio 步骤模型」中配置。下方 Agent 部署仅在未 attach 项目时作为兜底。';
 
   @override
   String get projectEditorBasicsTextModelLabel => '文本模型';
