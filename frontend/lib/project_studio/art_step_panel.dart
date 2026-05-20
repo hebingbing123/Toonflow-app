@@ -13,6 +13,16 @@ typedef StylePackCatalogLoader =
       AppLocalizations l10n,
     );
 
+/// Persists draft style packs and legacy art-style text (tests may inject a fake).
+typedef ArtStepPanelSaver =
+    Future<ProjectRow> Function({
+      required String accessToken,
+      required ProjectRow project,
+      required String? artStylePack,
+      required String? storyStylePack,
+      required String artStyleText,
+    });
+
 class ProjectStudioArtStepPanel extends StatefulWidget {
   const ProjectStudioArtStepPanel({
     super.key,
@@ -21,6 +31,7 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
     required this.onProjectUpdated,
     required this.onOpenProjectSettings,
     this.catalogLoader,
+    this.saver,
   });
 
   final String accessToken;
@@ -31,6 +42,10 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
   /// Overrides catalog HTTP for tests; production uses [loadProjectStylePackCatalog].
   @visibleForTesting
   final StylePackCatalogLoader? catalogLoader;
+
+  /// Overrides PATCH calls for tests; production uses REST APIs in [_save].
+  @visibleForTesting
+  final ArtStepPanelSaver? saver;
 
   @override
   State<ProjectStudioArtStepPanel> createState() =>
@@ -147,24 +162,35 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       ProjectRow updated = widget.project;
       final artStyleText = _draftArtStyle.trim();
 
-      if (!artStylePackPathsMatch(_draftArtPack, _savedArtPack) ||
-          !storyStylePackPathsMatch(_draftStoryPack, _savedStoryPack)) {
-        updated = await patchProjectStyleConfigByProjectId(
-          widget.accessToken,
-          widget.project.id,
+      final saver = widget.saver;
+      if (saver != null) {
+        updated = await saver(
+          accessToken: widget.accessToken,
+          project: widget.project,
           artStylePack: _draftArtPack,
           storyStylePack: _draftStoryPack,
+          artStyleText: artStyleText,
         );
-      }
+      } else {
+        if (!artStylePackPathsMatch(_draftArtPack, _savedArtPack) ||
+            !storyStylePackPathsMatch(_draftStoryPack, _savedStoryPack)) {
+          updated = await patchProjectStyleConfigByProjectId(
+            widget.accessToken,
+            widget.project.id,
+            artStylePack: _draftArtPack,
+            storyStylePack: _draftStoryPack,
+          );
+        }
 
-      if (artStyleText != (_savedArtStyle ?? '').trim()) {
-        updated = await updateProjectByProjectId(
-          widget.accessToken,
-          widget.project.id,
-          <String, dynamic>{
-            'artStyle': artStyleText.isEmpty ? null : artStyleText,
-          },
-        );
+        if (artStyleText != (_savedArtStyle ?? '').trim()) {
+          updated = await updateProjectByProjectId(
+            widget.accessToken,
+            widget.project.id,
+            <String, dynamic>{
+              'artStyle': artStyleText.isEmpty ? null : artStyleText,
+            },
+          );
+        }
       }
 
       if (!mounted) return;
@@ -283,7 +309,8 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                           labelText: l10n.studioArtStepArtStyleLabel,
                           helperText: l10n.studioArtStepLegacyArtStyleHelper,
                         ),
-                        onChanged: (value) => _draftArtStyle = value,
+                        onChanged: (value) =>
+                            setState(() => _draftArtStyle = value),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -312,6 +339,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                 runSpacing: 8,
                 children: <Widget>[
                   FilledButton.icon(
+                    key: const Key('studio_art_step_save'),
                     onPressed: _saving || !_dirty || _loadingCatalog
                         ? null
                         : _save,
