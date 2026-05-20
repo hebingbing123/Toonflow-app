@@ -47,6 +47,7 @@ Logs: `OPENFLOW_UI_E2E_LOG_DIR=/tmp/my-e2e bash scripts/run-ui-e2e.sh`
 | default `--smoke` | `integration_test/real_product_shell_auth_smoke_test.dart` | `StudioProductApp`, Supabase login, shell chrome |
 | `--gallery` | `integration_test/real_product_shell_auth_gallery_test.dart` | Smoke paths + 7 PNGs (notifications, settings, tasks, compliance) |
 | `--full-gallery` | `integration_test/real_product_shell_full_gallery_test.dart` | ≥30 PNGs: utility panes, settings tabs, pipeline/more menu, create-project wizard, project studio steps |
+| (optional) | `integration_test/real_product_shell_art_step_test.dart` | Dev login only → studio art step smoke (live visual-manual APIs) |
 
 Dart defines: `frontend/dart_defines.dev.json` (`API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`).
 
@@ -63,8 +64,8 @@ Dart defines: `frontend/dart_defines.dev.json` (`API_BASE_URL`, `SUPABASE_URL`, 
 | 10–19 | tasks, quality, jobs, short video, team/API/compliance/status/config, script/production panes | Secondary panes via «更多» |
 | 20–22 | `create_project_wizard_*` | Create-project wizard steps (no persist) |
 | 23 | `projects_with_seed_project` | Grid after creating one project |
-| 24–26 | `studio_step_script`, `studio_step_art`, `storyboard_studio_step` | Project studio (live API) |
-| 26 | `product_shell_chrome` | Return to shell home |
+| 24–26 | `studio_step_script`, `studio_step_art`, `storyboard_studio_step` | Project studio (live API; login `admin@openflow.local`) |
+| 27 | `product_shell_chrome` | Return to shell home |
 
 **Runtime (typical):** smoke ~2–4 min; compact gallery ~4–8 min; full gallery ~8–15 min (cold stack + `db reset` adds several minutes).
 

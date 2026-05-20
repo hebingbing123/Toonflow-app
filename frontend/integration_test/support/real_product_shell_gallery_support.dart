@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/config.dart';
 import 'package:openflow_app/design_system/components/openflow_brand.dart';
+import 'package:openflow_app/design_system/components/studio_primary_button.dart';
 import 'package:openflow_app/design_system/components/studio_onboarding_coach.dart';
 import 'package:openflow_app/locale/app_locale_notifier.dart';
 import 'package:openflow_app/product_shell/studio_app.dart';
@@ -279,5 +280,136 @@ class RealProductShellGalleryHarness {
         .where((f) => f.path.endsWith('.png'))
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  Future<void> tapWizardAction(String label) async {
+    final inSheet = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.text(label),
+    );
+    final target = inSheet.evaluate().isNotEmpty ? inSheet.last : find.text(label).last;
+    await tester.tap(target, warnIfMissed: false);
+    await pumpFrames(count: 12);
+  }
+
+  Future<void> createProjectViaWizard(String projectName) async {
+    final create = find.text('新建项目');
+    expect(create, findsWidgets);
+    await tester.tap(create.last, warnIfMissed: false);
+    await waitFor(find.text('创建项目'));
+    final fields = find.byType(TextField);
+    expect(fields, findsWidgets);
+    await tester.enterText(fields.first, projectName);
+    await tester.tap(find.text('下一步'));
+    await pumpFrames();
+    await tapWizardAction('下一步');
+    await tapWizardAction('下一步');
+    final createButton = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.widgetWithText(StudioPrimaryButton, '创建'),
+    );
+    await waitFor(createButton);
+    await tester.tap(createButton, warnIfMissed: false);
+    await pumpFrames(count: 16);
+    for (var i = 0; i < 48; i++) {
+      await pumpFrames(count: 1);
+      if (find.byType(BottomSheet).evaluate().isEmpty) {
+        break;
+      }
+    }
+    await waitFor(find.text(projectName), maxTicks: 80);
+    await pumpFrames(count: 16);
+  }
+
+  Future<bool> tryCreateProjectViaWizard(String projectName) async {
+    try {
+      await createProjectViaWizard(projectName);
+      return true;
+    } catch (_) {
+      await closeOverlay();
+      await goProjectsHome();
+      return false;
+    }
+  }
+
+  Future<void> openProjectByName(String projectName) async {
+    final title = find.text(projectName);
+    await waitFor(title);
+    await tester.ensureVisible(title);
+    final card = find.ancestor(
+      of: title.first,
+      matching: find.byType(InkWell),
+    );
+    final enterStudio = find.descendant(
+      of: card,
+      matching: find.widgetWithText(TextButton, '进入工作室'),
+    );
+    await tester.tap(enterStudio, warnIfMissed: false);
+    await waitFor(find.text('剧本'), maxTicks: 80);
+    await pumpFrames(count: 24);
+  }
+
+  Future<bool> tryOpenProjectByName(String projectName) async {
+    try {
+      await openProjectByName(projectName);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> tryCaptureStudioStep(String stepLabel, String scenarioId) async {
+    final step = find.text(stepLabel);
+    if (step.evaluate().isEmpty) {
+      return false;
+    }
+    await tester.tap(step.first);
+    await pumpFrames(count: 20);
+    await capture(scenarioId);
+    return true;
+  }
+
+  /// Uses dev seed login ([kDevAdminEmail] / [kDevAdminPassword]) then real style-pack APIs.
+  Future<bool> tryCaptureStudioArtStep() async {
+    const chipLabels = <String>['2. 美术', '2. Art'];
+    Finder? chip;
+    for (final label in chipLabels) {
+      final candidate = find.text(label);
+      if (candidate.evaluate().isNotEmpty) {
+        chip = candidate;
+        break;
+      }
+    }
+    if (chip == null) {
+      return false;
+    }
+    await tester.tap(chip.first);
+    await pumpFrames(count: 24);
+    final loaded = find.byKey(const Key('studio_art_step_panel'));
+    final saveZh = find.text('保存美术设定');
+    final saveEn = find.text('Save art direction');
+    await waitFor(
+      loaded.evaluate().isNotEmpty
+          ? loaded
+          : (saveZh.evaluate().isNotEmpty ? saveZh : saveEn),
+      maxTicks: 80,
+    );
+    await pumpFrames(count: 12);
+    await capture('studio_step_art');
+    return true;
+  }
+
+  Future<void> exitProjectStudio() async {
+    final closeIcons = find.byIcon(Icons.close);
+    if (closeIcons.evaluate().isNotEmpty) {
+      await tester.tap(closeIcons.first);
+      await pumpFrames(count: 20);
+      return;
+    }
+    final back = find.byType(BackButton);
+    if (back.evaluate().isNotEmpty) {
+      await tester.tap(back.first);
+      await pumpFrames(count: 20);
+    }
   }
 }

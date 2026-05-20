@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:openflow_app/design_system/components/studio_primary_button.dart';
 import 'package:openflow_app/design_system/google_fonts_runtime.dart';
 
 import 'support/real_product_shell_gallery_support.dart';
 
 /// Full-stack PNG gallery: Supabase login + Rust API + real [StudioProductApp] navigation.
+///
+/// Dev login: `admin@openflow.local` / `admin123` ([kDevAdminEmail] in config.dart).
 ///
 /// Run: `OPENFLOW_UI_E2E_SKIP_RESET=1 bash scripts/run-ui-e2e.sh --full-gallery`
 void main() {
@@ -87,7 +88,6 @@ void main() {
     await harness.tapTooltip('帮助');
     await harness.capture('help_hub_webhooks');
 
-    // Create-project wizard (dialog) — capture steps, then dismiss without persisting.
     await harness.goProjectsHome();
     await harness.tapCreateProjectWizard(openOnly: true);
     await harness.capture('create_project_wizard_step_basics');
@@ -97,14 +97,14 @@ void main() {
     await harness.capture('create_project_wizard_step_review');
     await harness.closeOverlay();
 
-    // Persist one project for in-studio subflows (optional — needs live POST /projects).
     final projectName = 'E2E全量图库-${DateTime.now().millisecondsSinceEpoch}';
     await harness.goProjectsHome();
     if (await harness.tryCreateProjectViaWizard(projectName)) {
       await harness.capture('projects_with_seed_project');
       if (await harness.tryOpenProjectByName(projectName)) {
         await harness.capture('studio_step_script');
-        await harness.tryCaptureStudioStep('分镜', 'storyboard_studio_step');
+        await harness.tryCaptureStudioArtStep();
+        await harness.tryCaptureStudioStep('4. 分镜', 'storyboard_studio_step');
         await harness.exitProjectStudio();
       }
     }
@@ -119,10 +119,7 @@ void main() {
       reason: 'expected ≥25 PNGs under ${harness.outputDir}, got ${pngs.length}',
     );
     expect(pngs.last.existsSync(), isTrue);
-    // Host runner copies from this path (macOS sandbox cannot write under frontend/build/).
-    // ignore: avoid_print
     print('E2E_GALLERY_DIR=${harness.outputDir}');
-    // ignore: avoid_print
     print('E2E_GALLERY_COUNT=${pngs.length}');
   });
 }
@@ -149,101 +146,5 @@ extension _RealProductShellGalleryFlows on RealProductShellGalleryHarness {
     await tester.enterText(fields.first, projectName);
     await tapText('下一步');
     await pumpFrames();
-  }
-
-  Future<void> tapWizardAction(String label) async {
-    final inSheet = find.descendant(
-      of: find.byType(BottomSheet),
-      matching: find.text(label),
-    );
-    final target = inSheet.evaluate().isNotEmpty ? inSheet.last : find.text(label).last;
-    await tester.tap(target, warnIfMissed: false);
-    await pumpFrames(count: 12);
-  }
-
-  Future<void> createProjectViaWizard(String projectName) async {
-    await tapCreateProjectWizard();
-    await advanceWizardBasics(projectName: projectName);
-    await tapWizardAction('下一步');
-    await tapWizardAction('下一步');
-    final createButton = find.descendant(
-      of: find.byType(BottomSheet),
-      matching: find.widgetWithText(StudioPrimaryButton, '创建'),
-    );
-    await waitFor(createButton);
-    await tester.tap(createButton, warnIfMissed: false);
-    await pumpFrames(count: 16);
-    for (var i = 0; i < 48; i++) {
-      await pumpFrames(count: 1);
-      if (find.byType(BottomSheet).evaluate().isEmpty) {
-        break;
-      }
-    }
-    await waitFor(find.text(projectName), maxTicks: 80);
-    await pumpFrames(count: 16);
-  }
-
-  Future<bool> tryCreateProjectViaWizard(String projectName) async {
-    try {
-      await createProjectViaWizard(projectName);
-      return true;
-    } catch (_) {
-      await closeOverlay();
-      await goProjectsHome();
-      return false;
-    }
-  }
-
-  Future<bool> tryOpenProjectByName(String projectName) async {
-    try {
-      await openProjectByName(projectName);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<void> openProjectByName(String projectName) async {
-    final title = find.text(projectName);
-    await waitFor(title);
-    await tester.ensureVisible(title);
-    // Card tap only sets scope; open studio via the project card's TextButton.
-    final card = find.ancestor(
-      of: title.first,
-      matching: find.byType(InkWell),
-    );
-    final enterStudio = find.descendant(
-      of: card,
-      matching: find.widgetWithText(TextButton, '进入工作室'),
-    );
-    await tester.tap(enterStudio, warnIfMissed: false);
-    await waitFor(find.text('剧本'), maxTicks: 80);
-    expect(find.text('你的项目'), findsNothing);
-    await pumpFrames(count: 24);
-  }
-
-  Future<bool> tryCaptureStudioStep(String stepLabel, String scenarioId) async {
-    final step = find.text(stepLabel);
-    if (step.evaluate().isEmpty) {
-      return false;
-    }
-    await tester.tap(step.first);
-    await pumpFrames(count: 20);
-    await capture(scenarioId);
-    return true;
-  }
-
-  Future<void> exitProjectStudio() async {
-    final closeIcons = find.byIcon(Icons.close);
-    if (closeIcons.evaluate().isNotEmpty) {
-      await tester.tap(closeIcons.first);
-      await pumpFrames(count: 20);
-      return;
-    }
-    final back = find.byType(BackButton);
-    if (back.evaluate().isNotEmpty) {
-      await tester.tap(back.first);
-      await pumpFrames(count: 20);
-    }
   }
 }
