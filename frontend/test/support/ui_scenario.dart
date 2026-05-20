@@ -72,6 +72,7 @@ const List<UiScenario> kUiGalleryWave1 = <UiScenario>[
     dataState: UiDataState.empty,
   ),
   UiScenario(id: 'studio_step_script', pane: UiScenarioPane.studioScript),
+  UiScenario(id: 'studio_step_art', pane: UiScenarioPane.studioArt),
   UiScenario(id: 'storyboard_studio', pane: UiScenarioPane.studioStoryboard),
   UiScenario(id: 'episode_console', pane: UiScenarioPane.studioDeliver),
 ];

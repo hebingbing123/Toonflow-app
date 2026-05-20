@@ -63,7 +63,7 @@ Dart defines: `frontend/dart_defines.dev.json` (`API_BASE_URL`, `SUPABASE_URL`, 
 | 10–19 | tasks, quality, jobs, short video, team/API/compliance/status/config, script/production panes | Secondary panes via «更多» |
 | 20–22 | `create_project_wizard_*` | Create-project wizard steps (no persist) |
 | 23 | `projects_with_seed_project` | Grid after creating one project |
-| 24–25 | `studio_step_script`, `storyboard_studio_step` | Project studio (live API) |
+| 24–26 | `studio_step_script`, `studio_step_art`, `storyboard_studio_step` | Project studio (live API) |
 | 26 | `product_shell_chrome` | Return to shell home |
 
 **Runtime (typical):** smoke ~2–4 min; compact gallery ~4–8 min; full gallery ~8–15 min (cold stack + `db reset` adds several minutes).
@@ -82,7 +82,7 @@ See [`docs/product/ux/ui-surface-inventory.md`](../product/ux/ui-surface-invento
 | tasks / quality / jobs / short_video / team / api_keys / compliance / platform_* | yes | «更多» menu (`scrollUntilVisible`) |
 | script_workspace / production_workspace | yes | «更多» (may show select-project hint without scope) |
 | create_project (wizard) | yes | 新建项目 |
-| studio_step_script / storyboard_studio_step | yes | open grid project → studio steps |
+| studio_step_script / studio_step_art / storyboard_studio_step | yes | open grid project → studio steps |
 | benchmark_default | **no** | no entry in 4-icon studio shell (harness chips only) |
 | episode_console | **no** | needs script numeric id + `/projects/:id/console/:scriptId` |
 | storyboard_studio (full page overlay) | **no** | route exists; no shell menu entry without in-project CTA |

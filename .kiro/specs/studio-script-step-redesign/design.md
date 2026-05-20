@@ -15,7 +15,7 @@
 | 剧本步主区 | [`ProjectStudioScriptStepPanel`](../../../frontend/lib/project_studio/script_step_panel.dart)：宽屏左轨为 **小说 / 剧本 / 提取** 三 Tab；窄屏仍为「内容 + Agent」双 Tab |
 | 小说采集 | [`StudioScriptNovelInlineImport`](../../../frontend/lib/project_studio/novel_inline_import_section.dart) 内嵌于内容轨；完整能力在 **Advanced workbench** 对话框（`openNovelWorkbenchDialog`） |
 | 爬取鉴权 | [`StudioNovelCrawlAuthSection`](../../../frontend/lib/project_studio/novel_crawl_auth_section.dart) |
-| 美术步 | [`ProjectStudioArtStepPanel`](../../../frontend/lib/project_studio/art_step_panel.dart)：内联编辑画风/故事风格包 + 遗留 `artStyle` 文本，`PATCH …/style-config` 与 `PATCH …/projects/{id}` 保存；目录来自 `visual-manual` / `query-director-manual`；后端 [`style_pack_paths`](../../../backend/src/projects/style_pack_paths.rs) 校验路径 |
+| 美术步 | [`ProjectStudioArtStepPanel`](../../../frontend/lib/project_studio/art_step_panel.dart)：内联编辑画风/故事风格包 + 遗留 `artStyle` 文本，`PATCH …/style-config` 与 `PATCH …/projects/{id}` 保存；目录来自 `visual-manual` / `query-director-manual`（[`buildStylePackCatalogFromResponses`](../../../frontend/lib/project_editor/style_pack_catalog.dart)）；后端 [`style_pack_paths`](../../../backend/src/projects/style_pack_paths.rs) 校验路径；测试：`art_step_panel_test`、`studio_step_art_test`、golden `studio_step_art.png`、`project_studio_art_scope_test` |
 | 交付 / 质检 | `StudioStep.deliver` 内 **组装 / 发布 / 质检** 三 Tab，嵌入 `ShortVideoSpaceEmbedScope`；`StudioStep.quality` 为 **交付质检 Tab 的 URL 别名**（`/projects/:id/quality`），不在六步 SOP 条中 |
 | 路由同步 | `_restoreLastStep` / `_selectStep` 已 `context.go` 同步 `stepSlug` |
 

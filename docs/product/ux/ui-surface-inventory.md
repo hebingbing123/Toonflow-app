@@ -24,6 +24,7 @@
 | settings_plan_usage | SettingsHub plan tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/06a_settings_plan_usage.png | yes | 2 | done |
 | short_video_overview | ShortVideoSpaceView overview | widget + golden | test/ui/short_video_overview_test.dart | test/goldens/ui_gallery/short_video_overview.png | yes | 2 | done |
 | studio_step_script | ProjectStudio script | widget + golden | test/ui/studio_step_script_test.dart | test/goldens/ui_gallery/studio_step_script.png | yes | 2 | done |
+| studio_step_art | ProjectStudio art direction | widget + golden | test/ui/studio_step_art_test.dart, test/project_studio/project_studio_art_scope_test.dart | test/goldens/ui_gallery/studio_step_art.png | yes | 2 | done |
 | studio_load_error | ProjectStudioScope error | widget | test/ui/project_studio_scope_test.dart | — | no | 2 | done |
 | storyboard_studio | StoryboardStudioPage | widget + golden | test/storyboard_studio/storyboard_studio_page_test.dart | test/goldens/ui_gallery/storyboard_studio.png | partial | 2 | done |
 | episode_console | EpisodeConsolePage | widget + golden | test/episode_console/episode_console_page_test.dart | test/goldens/ui_gallery/episode_console.png | no | 2 | done |

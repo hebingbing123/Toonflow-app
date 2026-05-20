@@ -70,6 +70,34 @@ void main() {
     );
   });
 
+  testWidgets('studio_step_art golden', (tester) async {
+    final zh = AppLocalizationsZh();
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'studio_last_step_7': 'art',
+    });
+
+    await tester.binding.setSurfaceSize(const Size(1280, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ProjectStudioPage(host: buildArtStepStudioHost(l10n: zh)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byKey(const Key('studio_art_step_panel')),
+      matchesGoldenFile(goldenPathForScenario('studio_step_art')),
+    );
+  });
+
   testWidgets('studio_step_script golden', (tester) async {
     final zh = AppLocalizationsZh();
     SharedPreferences.setMockInitialValues(<String, Object>{

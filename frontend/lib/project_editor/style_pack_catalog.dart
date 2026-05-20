@@ -94,13 +94,12 @@ StylePackOption? findStoryStylePackOption(
   return null;
 }
 
-Future<StylePackCatalog> loadProjectStylePackCatalog(
-  String accessToken,
-  AppLocalizations l10n,
-) async {
-  final visualManual = await fetchVisualManualV1(accessToken);
-  final directorManual = await postProjectQueryDirectorManual(accessToken);
-
+/// Builds picker options from visual-manual + director-manual API payloads.
+StylePackCatalog buildStylePackCatalogFromResponses({
+  required VisualManualResponseV1 visualManual,
+  required DirectorManualListResponse directorManual,
+  required AppLocalizations l10n,
+}) {
   final artPacks =
       visualManual.styles
           .map(
@@ -135,6 +134,19 @@ Future<StylePackCatalog> loadProjectStylePackCatalog(
         ..sort((a, b) => a.name.compareTo(b.name));
 
   return StylePackCatalog(artPacks: artPacks, storyPacks: storyPacks);
+}
+
+Future<StylePackCatalog> loadProjectStylePackCatalog(
+  String accessToken,
+  AppLocalizations l10n,
+) async {
+  final visualManual = await fetchVisualManualV1(accessToken);
+  final directorManual = await postProjectQueryDirectorManual(accessToken);
+  return buildStylePackCatalogFromResponses(
+    visualManual: visualManual,
+    directorManual: directorManual,
+    l10n: l10n,
+  );
 }
 
 String _stylePackDescriptionFromSlots(

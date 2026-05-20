@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/style_pack_catalog.dart';
@@ -41,6 +42,12 @@ Future<StylePackCatalog> _sampleCatalog(
         path: 'story_skills/narrative_warm',
         name: 'Warm narrative',
         description: 'Test story pack',
+        tag: l10n.projectEditorStylePackTagStory,
+      ),
+      StylePackOption(
+        path: 'story_skills/cool_thriller',
+        name: 'Cool thriller',
+        description: 'Alternate story pack',
         tag: l10n.projectEditorStylePackTagStory,
       ),
     ],
@@ -165,6 +172,59 @@ void main() {
       find.text('Art direction saved for this project.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('changing story pack enables save and invokes saver', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    ProjectRow? savedRow;
+    String? savedStoryPack;
+
+    await tester.pumpWidget(
+      _artPanelApp(
+        catalogLoader: _sampleCatalog,
+        project: _testProject.copyWith(
+          artStylePack: 'art_skills/anime_v2',
+          storyStylePack: 'story_skills/narrative_warm',
+        ),
+        saver: ({
+          required String accessToken,
+          required ProjectRow project,
+          required String? artStylePack,
+          required String? storyStylePack,
+          required String artStyleText,
+        }) async {
+          savedStoryPack = storyStylePack;
+          return ProjectRow(
+            id: project.id,
+            numericId: project.numericId,
+            artStylePack: artStylePack,
+            storyStylePack: storyStylePack,
+            artStyle: artStyleText.isEmpty ? null : artStyleText,
+            projectAccessMode: project.projectAccessMode,
+            projectAccessRole: project.projectAccessRole,
+          );
+        },
+        onProjectUpdated: (row) => savedRow = row,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(StudioDropdownButtonFormField<String>).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Cool thriller'));
+    await tester.pumpAndSettle();
+
+    final saveKey = find.byKey(const Key('studio_art_step_save'));
+    expect(tester.widget<FilledButton>(saveKey).onPressed, isNotNull);
+    await tester.tap(saveKey);
+    await tester.pumpAndSettle();
+
+    expect(savedStoryPack, 'story_skills/cool_thriller');
+    expect(savedRow?.storyStylePack, 'story_skills/cool_thriller');
   });
 }
 

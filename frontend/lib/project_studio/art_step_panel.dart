@@ -223,6 +223,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     final catalog = _catalog;
 
     return Align(
+      key: const Key('studio_art_step_panel'),
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720),
