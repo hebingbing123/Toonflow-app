@@ -10,6 +10,8 @@ List<Widget> buildStudioOverlayChildren({
   episodeConsoleBuilder,
   required Widget Function(int projectNumericId, String projectUuid)
   projectStudioBuilder,
+  required Widget Function(int projectNumericId, String projectUuid)
+  reviewPackBuilder,
 }) {
   switch (resolved.kind) {
     case ResolvedStudioOverlayKind.none:
@@ -32,6 +34,15 @@ List<Widget> buildStudioOverlayChildren({
       return <Widget>[
         Expanded(
           child: projectStudioBuilder(
+            resolved.projectNumericId!,
+            resolved.projectUuid!,
+          ),
+        ),
+      ];
+    case ResolvedStudioOverlayKind.reviewPack:
+      return <Widget>[
+        Expanded(
+          child: reviewPackBuilder(
             resolved.projectNumericId!,
             resolved.projectUuid!,
           ),

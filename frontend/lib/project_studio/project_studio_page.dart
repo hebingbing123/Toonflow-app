@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_conflict_banner.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'creator_journey_menu.dart';
+import 'creator_journey_strip.dart';
+import 'creator_journey_telemetry.dart';
+import 'creator_starter_templates.dart';
+import 'creator_starter_templates_strip.dart';
 import 'project_studio_cockpit_panel.dart';
 import 'project_studio_host.dart';
 import 'project_studio_model_routing_scope.dart';
@@ -30,6 +36,15 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
   late StudioStep _step = widget.host.initialStep;
   final Set<StudioStep> _visited = <StudioStep>{};
   ProjectModelRoutingResponse? _modelRouting;
+  StudioStep? _lastDispatchedHostStep;
+
+  /// Avoid duplicate [ProjectStudioHost.onStepChanged] when routes rebuild Studio
+  /// (e.g. prefs restore fires again after `go` swaps the nested route widget).
+  void _dispatchHostStepChanged(StudioStep step) {
+    if (_lastDispatchedHostStep == step) return;
+    _lastDispatchedHostStep = step;
+    widget.host.onStepChanged(step);
+  }
 
   void _markStepVisited(StudioStep step) {
     _visited.add(step);
@@ -94,7 +109,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       _step = last;
       _markStepVisited(last);
     });
-    widget.host.onStepChanged(last);
+    _dispatchHostStepChanged(last);
     _syncRouteToStep(last);
   }
 
@@ -147,14 +162,47 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     }
   }
 
-  void _selectStep(StudioStep step) {
+  void _selectStep(StudioStep step, {String? telemetrySource}) {
+    CreatorJourneyTelemetry.record(
+      CreatorJourneyEvent(
+        'step_selected',
+        <String, Object?>{
+          'step': step.slug,
+          if (telemetrySource != null) 'source': telemetrySource,
+          'project_id': widget.host.projectNumericId,
+        },
+      ),
+    );
     setState(() {
       _step = step;
       _markStepVisited(step);
     });
     StudioStepPrefs.saveLastStep(widget.host.projectNumericId, step);
-    widget.host.onStepChanged(step);
-    context.go(_uriForStudioStep(step).toString());
+    _dispatchHostStepChanged(step);
+    if (GoRouter.maybeOf(context) != null) {
+      context.go(_uriForStudioStep(step).toString());
+    }
+  }
+
+  void _openReviewPack({required String source}) {
+    CreatorJourneyTelemetry.record(
+      CreatorJourneyEvent(
+        'review_pack_open',
+        <String, Object?>{
+          'source': source,
+          'project_id': widget.host.projectNumericId,
+        },
+      ),
+    );
+    context.go('/projects/${widget.host.projectNumericId}/review-pack');
+  }
+
+  void _handleWorkspaceMenuSelection(CreatorWorkspaceMenuTarget target) {
+    if (target.isReviewPack) {
+      _openReviewPack(source: 'workspace_menu');
+      return;
+    }
+    _selectStep(target.step!, telemetrySource: 'workspace_menu');
   }
 
   void _handleProjectHomeAction(ProjectHomeAction action) {
@@ -162,6 +210,16 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
   }
 
   void _handleStarterTemplate(ProjectHomeStarterTemplate starter) {
+    CreatorJourneyTelemetry.record(
+      CreatorJourneyEvent(
+        'starter_apply',
+        <String, Object?>{
+          'key': starter.key,
+          'target_step': starter.targetStep,
+          'project_id': widget.host.projectNumericId,
+        },
+      ),
+    );
     _executeLaunchIntent(_starterLaunchIntent(starter));
   }
 
@@ -187,6 +245,12 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     }
     if (intent.agentKind != null) {
       widget.host.onRunHarnessAgent(intent.agentKind!);
+    }
+    final notice = intent.notice?.trim();
+    if (notice != null && notice.isNotEmpty && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(notice)));
     }
   }
 
@@ -345,9 +409,39 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     };
   }
 
+  Widget _buildCreatorNextFooter(AppLocalizations l10n) {
+    final nextStep = _step.next;
+    final tokens = StudioTokens.of(context);
+    final button = StudioPrimaryButton(
+      icon: Icons.arrow_forward_rounded,
+      label: l10n.studioCreatorJourneyNext,
+      onPressed: nextStep == null
+          ? null
+          : () => _selectStep(nextStep, telemetrySource: 'next_cta'),
+    );
+    return Material(
+      elevation: 12,
+      shadowColor: Colors.black.withValues(alpha: 0.35),
+      color: tokens.bgSurface.withValues(alpha: 0.96),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: nextStep != null
+              ? button
+              : Tooltip(
+                  message: l10n.studioCreatorJourneyNextDoneHint,
+                  child: button,
+                ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final tokens = StudioTokens.of(context);
     final visibleAgentActions = agentActionsForStep(_step);
     final title =
         widget.host.projectName ??
@@ -395,9 +489,119 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
             onRefresh: widget.host.onRefreshAfterConflict ?? () {},
           ),
         ),
+      if (widget.host.failedJobCount > 0)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Semantics(
+            button: true,
+            label: '${l10n.studioFailedJobsHint} ${l10n.studioFailedJobsOpenTasks}',
+            child: Material(
+              color: Theme.of(
+                context,
+              ).colorScheme.errorContainer.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  CreatorJourneyTelemetry.record(
+                    CreatorJourneyEvent(
+                      'failed_jobs_open_tasks',
+                      <String, Object?>{
+                        'failed_count': widget.host.failedJobCount,
+                        'step': _step.slug,
+                        'project_id': widget.host.projectNumericId,
+                      },
+                    ),
+                  );
+                  widget.host.onOpenTasks?.call();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              l10n.studioFailedJobsHint,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.studioFailedJobsOpenTasks,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: tokens.primary,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        child: _StudioStepBar(current: _step, onSelect: _selectStep),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CreatorJourneyStrip(
+              currentStep: _step,
+              failedJobCount: widget.host.failedJobCount,
+              onSelectMilestone: (StudioStep step) =>
+                  _selectStep(step, telemetrySource: 'milestone'),
+              onOpenReviewPackMilestone: () =>
+                  _openReviewPack(source: 'milestone'),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: PopupMenuButton<CreatorWorkspaceMenuTarget>(
+                tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
+                itemBuilder: (BuildContext context) =>
+                    buildCreatorWorkspaceMenuEntries(l10n),
+                onSelected: _handleWorkspaceMenuSelection,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Icon(
+                        Icons.tune_rounded,
+                        size: 18,
+                        color: tokens.textSecondary.withValues(alpha: 0.85),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.studioCreatorJourneyMoreSteps,
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(
+                              color: tokens.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       if (widget.host.accessToken != null &&
           widget.host.accessToken!.isNotEmpty)
@@ -413,6 +617,16 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
             onRoutingUpdated: (routing) {
               setState(() => _modelRouting = routing);
             },
+          ),
+        ),
+      if (_step == StudioStep.script && widget.host.home != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: CreatorStarterTemplatesStrip(
+            starters: creatorStarterTemplatesForScript(
+              widget.host.home!.cockpit.starterTemplates,
+            ),
+            onApply: _handleStarterTemplate,
           ),
         ),
       if (_step == StudioStep.script &&
@@ -523,41 +737,55 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final topChromeMaxHeight = constraints.maxHeight.isFinite
-              ? constraints.maxHeight * 0.42
+              ? constraints.maxHeight * 0.50
               : double.infinity;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          return Stack(
+            clipBehavior: Clip.none,
             children: <Widget>[
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: topChromeMaxHeight),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: topChrome,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: topChromeMaxHeight),
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: topChrome,
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 72),
+                      child: IndexedStack(
+                        index: _step.sopStackIndex,
+                        children: StudioStep.sopSteps
+                            .map((step) {
+                              if (!_visited.contains(step)) {
+                                return const SizedBox.shrink();
+                              }
+                              final bodyStep =
+                                  step == StudioStep.deliver &&
+                                      _step == StudioStep.quality
+                                  ? StudioStep.quality
+                                  : step;
+                              return KeyedSubtree(
+                                key: ValueKey<String>(bodyStep.slug),
+                                child: widget.host.buildStepBody(bodyStep),
+                              );
+                            })
+                            .toList(growable: false),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: IndexedStack(
-                  index: _step.sopStackIndex,
-                  children: StudioStep.sopSteps
-                      .map((step) {
-                        if (!_visited.contains(step)) {
-                          return const SizedBox.shrink();
-                        }
-                        final bodyStep =
-                            step == StudioStep.deliver &&
-                                _step == StudioStep.quality
-                            ? StudioStep.quality
-                            : step;
-                        return KeyedSubtree(
-                          key: ValueKey<String>(bodyStep.slug),
-                          child: widget.host.buildStepBody(bodyStep),
-                        );
-                      })
-                      .toList(growable: false),
-                ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildCreatorNextFooter(l10n),
               ),
             ],
           );
@@ -1291,45 +1519,4 @@ class _CockpitLaunchIntent {
   final ProjectStudioAssetEditorTargetKind? assetEditorKind;
   final bool opensTasks;
   final String? notice;
-}
-
-class _StudioStepBar extends StatelessWidget {
-  const _StudioStepBar({required this.current, required this.onSelect});
-
-  final StudioStep current;
-  final ValueChanged<StudioStep> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final tokens = StudioTokens.of(context);
-    final labels = <String>[
-      l10n.studioStepScriptShort,
-      l10n.studioStepArtShort,
-      l10n.studioStepAssetsShort,
-      l10n.studioStepStoryboardShort,
-      l10n.studioStepVideoShort,
-      l10n.studioStepDeliverShort,
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List<Widget>.generate(StudioStep.sopSteps.length, (i) {
-          final step = StudioStep.sopSteps[i];
-          final selected = current.highlightsSopStep(step);
-          return Padding(
-            padding: EdgeInsets.only(right: i < labels.length - 1 ? 8 : 0),
-            child: FilterChip(
-              label: Text('${i + 1}. ${labels[i]}'),
-              selected: selected,
-              onSelected: (_) => onSelect(step),
-              selectedColor: tokens.primary.withValues(alpha: 0.25),
-              checkmarkColor: tokens.primary,
-            ),
-          );
-        }),
-      ),
-    );
-  }
 }

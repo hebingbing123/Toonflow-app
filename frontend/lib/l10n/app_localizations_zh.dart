@@ -1762,6 +1762,199 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioStepDeliverShort => '成片';
 
   @override
+  String get studioCreatorJourneyProject => '项目';
+
+  @override
+  String get studioCreatorJourneyScript => '剧本';
+
+  @override
+  String get studioCreatorJourneyArtPhase => '美术';
+
+  @override
+  String get studioCreatorJourneyStoryboardPhase => '分镜';
+
+  @override
+  String get studioCreatorJourneyReviewPack => '评审预览';
+
+  @override
+  String get studioCreatorJourneyMoreSteps => '工作台';
+
+  @override
+  String get studioCreatorJourneyMoreStepsTooltip => '跳转到工作台步骤或打开评审预览集';
+
+  @override
+  String get studioCreatorJourneyMenuPrimary => '主链路';
+
+  @override
+  String get studioCreatorJourneyMenuAdvanced => '工作台工具';
+
+  @override
+  String get studioCreatorJourneyMenuReviewPack => '打开评审预览集';
+
+  @override
+  String get studioReviewPackLoading => '正在加载镜头就绪状态…';
+
+  @override
+  String get studioCreatorStartersTitle => '快速起步模板';
+
+  @override
+  String get studioCreatorStartersSubtitle => '选一条路线，跳过空白页设置，直接进入主链路。';
+
+  @override
+  String get studioCreatorStarterApply => '一键应用';
+
+  @override
+  String get studioCreatorStarterPlotTitle => '剧情叙事';
+
+  @override
+  String get studioCreatorStarterPlotDetail => '先补 brief 与剧本，再沿「下一步」进入美术与分镜。';
+
+  @override
+  String get studioCreatorStarterPlotCta => '从剧本开始';
+
+  @override
+  String get studioCreatorStarterRhythmTitle => '镜头节奏样片';
+
+  @override
+  String get studioCreatorStarterRhythmDetail => '已有剧本时，优先拆出第一批分镜，跑出可预览的镜头节奏。';
+
+  @override
+  String get studioCreatorStarterRhythmCta => '进入分镜节奏';
+
+  @override
+  String get studioCreatorJourneyNext => '下一步';
+
+  @override
+  String get studioCreatorJourneyNextDoneHint => '已进入成片与评审阶段，请在上方完成合成与预览。';
+
+  @override
+  String get studioCreatorJourneyStatusCompleted => '已完成';
+
+  @override
+  String get studioCreatorJourneyStatusInProgress => '进行中';
+
+  @override
+  String get studioCreatorJourneyStatusNotStarted => '未开始';
+
+  @override
+  String get studioCreatorJourneyStatusBlocked => '受阻 — 请查看任务队列';
+
+  @override
+  String get studioReviewPackTitle => '评审预览集';
+
+  @override
+  String get studioReviewPackSubtitle => '按镜头汇总短视频就绪状态，便于在合成预览前快速过一遍。';
+
+  @override
+  String get studioReviewPackEmpty => '暂无分镜行数据。请先在制作台创建分镜，再下拉刷新本页。';
+
+  @override
+  String get studioReviewPackOpenAssembly => '打开成片与合成';
+
+  @override
+  String get studioReviewPackCopyLink => '复制本页链接';
+
+  @override
+  String get studioReviewPackLinkCopied => '页面链接已复制到剪贴板';
+
+  @override
+  String studioReviewPackRollupLine(int ready, int total) {
+    return '短视频就绪 $ready / $total 个分镜';
+  }
+
+  @override
+  String studioReviewPackStoryboardId(int id) {
+    return '分镜 #$id';
+  }
+
+  @override
+  String studioReviewPackScriptLine(int id) {
+    return '剧本 #$id';
+  }
+
+  @override
+  String get studioReviewPackFromDeliverLink => '镜头评审列表';
+
+  @override
+  String get studioReviewPackExportReadyTitle => '可以导出成片';
+
+  @override
+  String get studioReviewPackExportReadyDetail => '服务端预检未发现阻塞项，可进入发布页导出或排期。';
+
+  @override
+  String get studioReviewPackExportBlockedTitle => '暂不可导出成片';
+
+  @override
+  String studioReviewPackExportBlockedDetail(int count) {
+    return '仍有 $count 项阻塞，请先在合成工作台补齐缺口。';
+  }
+
+  @override
+  String get studioReviewPackExportOpenPublish => '打开发布与导出';
+
+  @override
+  String get studioReviewPackExportFixInAssembly => '去合成补齐缺口';
+
+  @override
+  String get studioReviewPackExportViewChecklist => '查看完整导出检查单';
+
+  @override
+  String get studioReviewPackExportCheckUnavailable =>
+      '导出预检暂不可用，请先在合成工作台手动确认缺口。';
+
+  @override
+  String studioReviewPackTeamSummaryLine(
+    int approved,
+    int needsChanges,
+    int flagged,
+    int pending,
+  ) {
+    return '团队评审：$approved 已通过 · $needsChanges 待修改 · $flagged 已标记 · $pending 待审';
+  }
+
+  @override
+  String get studioReviewPackFeedbackPending => '待评审';
+
+  @override
+  String get studioReviewPackFeedbackApproved => '已通过';
+
+  @override
+  String get studioReviewPackFeedbackNeedsChanges => '需修改';
+
+  @override
+  String get studioReviewPackFeedbackFlagged => '已标记问题';
+
+  @override
+  String get studioReviewPackFeedbackMenuTooltip => '设置团队评审状态';
+
+  @override
+  String get studioReviewPackFeedbackSetApproved => '标记通过';
+
+  @override
+  String get studioReviewPackFeedbackSetNeedsChanges => '要求修改';
+
+  @override
+  String get studioReviewPackFeedbackSetFlagged => '标记问题';
+
+  @override
+  String get studioReviewPackFeedbackCommentDialogTitle => '评审备注（可选）';
+
+  @override
+  String get studioReviewPackFeedbackCommentHint => '团队成员在此镜头可见';
+
+  @override
+  String get studioReviewPackFeedbackSave => '保存反馈';
+
+  @override
+  String get studioReviewPackFeedbackSaved => '团队反馈已保存';
+
+  @override
+  String get studioFailedJobsHint => '部分生成任务失败。打开任务中心可重试或处理阻塞项。';
+
+  @override
+  String get studioFailedJobsOpenTasks => '打开任务中心';
+
+  @override
   String get studioDeliverTabAssembly => '成片';
 
   @override

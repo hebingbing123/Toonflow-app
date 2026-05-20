@@ -24,6 +24,7 @@ void main() {
       storyboardBuilder: (_) => const Text('storyboard'),
       episodeConsoleBuilder: (_, _) => const Text('console'),
       projectStudioBuilder: (_, _) => const Text('studio'),
+      reviewPackBuilder: (_, _) => const Text('review-pack'),
     );
 
     await tester.pumpWidget(wrapChildren(children));
@@ -44,6 +45,7 @@ void main() {
           Text('storyboard-$projectNumericId'),
       episodeConsoleBuilder: (_, _) => const Text('console'),
       projectStudioBuilder: (_, _) => const Text('studio'),
+      reviewPackBuilder: (_, _) => const Text('review-pack'),
     );
 
     await tester.pumpWidget(wrapChildren(children));
@@ -65,6 +67,7 @@ void main() {
       episodeConsoleBuilder: (projectNumericId, scriptNumericId) =>
           Text('console-$projectNumericId-$scriptNumericId'),
       projectStudioBuilder: (_, _) => const Text('studio'),
+      reviewPackBuilder: (_, _) => const Text('review-pack'),
     );
 
     await tester.pumpWidget(wrapChildren(children));
@@ -86,11 +89,34 @@ void main() {
       episodeConsoleBuilder: (_, _) => const Text('console'),
       projectStudioBuilder: (projectNumericId, projectUuid) =>
           Text('studio-$projectNumericId-$projectUuid'),
+      reviewPackBuilder: (_, _) => const Text('review-pack'),
     );
 
     await tester.pumpWidget(wrapChildren(children));
 
     expect(find.byType(Expanded), findsOneWidget);
     expect(find.text('studio-7-project-7'), findsOneWidget);
+  });
+
+  testWidgets('buildStudioOverlayChildren passes review pack ids through', (
+    tester,
+  ) async {
+    final children = buildStudioOverlayChildren(
+      resolved: const ResolvedStudioOverlay.reviewPack(
+        projectNumericId: 7,
+        projectUuid: 'project-7',
+      ),
+      loadingChild: const SizedBox(),
+      storyboardBuilder: (_) => const Text('storyboard'),
+      episodeConsoleBuilder: (_, _) => const Text('console'),
+      projectStudioBuilder: (_, _) => const Text('studio'),
+      reviewPackBuilder: (projectNumericId, projectUuid) =>
+          Text('review-pack-$projectNumericId-$projectUuid'),
+    );
+
+    await tester.pumpWidget(wrapChildren(children));
+
+    expect(find.byType(Expanded), findsOneWidget);
+    expect(find.text('review-pack-7-project-7'), findsOneWidget);
   });
 }

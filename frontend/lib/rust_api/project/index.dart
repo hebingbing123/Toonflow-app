@@ -1,5 +1,6 @@
 export 'characters.dart';
 export 'compat.dart';
+export 'creator_journey_api.dart';
 export 'audit.dart';
 export 'export.dart';
 export 'members.dart';

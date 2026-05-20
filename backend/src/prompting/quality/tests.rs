@@ -79,6 +79,21 @@ fn validate_create_review_body_rejects_invalid_source() {
 }
 
 #[test]
+fn validate_create_review_body_accepts_review_pack_storyboard_feedback() {
+    let body = CreateQualityReviewBody {
+        target_type: "storyboard".to_string(),
+        project_id: Some(42),
+        target_id: Some("7".to_string()),
+        source: Some("review_pack".to_string()),
+        stage: Some("review_pack".to_string()),
+        passed: Some(true),
+        comments: Some("Looks good for review.".to_string()),
+        ..Default::default()
+    };
+    validate_create_review_body(&body).expect("review_pack feedback should validate");
+}
+
+#[test]
 fn validate_create_review_body_rejects_invalid_target_type() {
     let body = CreateQualityReviewBody {
         target_type: "chapter".to_string(),

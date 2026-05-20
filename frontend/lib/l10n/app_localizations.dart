@@ -3350,6 +3350,365 @@ abstract class AppLocalizations {
   /// **'Deliver'**
   String get studioStepDeliverShort;
 
+  /// No description provided for @studioCreatorJourneyProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get studioCreatorJourneyProject;
+
+  /// No description provided for @studioCreatorJourneyScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get studioCreatorJourneyScript;
+
+  /// No description provided for @studioCreatorJourneyArtPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get studioCreatorJourneyArtPhase;
+
+  /// No description provided for @studioCreatorJourneyStoryboardPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get studioCreatorJourneyStoryboardPhase;
+
+  /// No description provided for @studioCreatorJourneyReviewPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pack'**
+  String get studioCreatorJourneyReviewPack;
+
+  /// No description provided for @studioCreatorJourneyMoreSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get studioCreatorJourneyMoreSteps;
+
+  /// No description provided for @studioCreatorJourneyMoreStepsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to a workspace tab or open the review pack'**
+  String get studioCreatorJourneyMoreStepsTooltip;
+
+  /// No description provided for @studioCreatorJourneyMenuPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Main path'**
+  String get studioCreatorJourneyMenuPrimary;
+
+  /// No description provided for @studioCreatorJourneyMenuAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace tools'**
+  String get studioCreatorJourneyMenuAdvanced;
+
+  /// No description provided for @studioCreatorJourneyMenuReviewPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Open review pack'**
+  String get studioCreatorJourneyMenuReviewPack;
+
+  /// No description provided for @studioReviewPackLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading shot readiness…'**
+  String get studioReviewPackLoading;
+
+  /// No description provided for @studioCreatorStartersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick-start templates'**
+  String get studioCreatorStartersTitle;
+
+  /// No description provided for @studioCreatorStartersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a route to skip blank-page setup and jump into the main journey.'**
+  String get studioCreatorStartersSubtitle;
+
+  /// No description provided for @studioCreatorStarterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply template'**
+  String get studioCreatorStarterApply;
+
+  /// No description provided for @studioCreatorStarterPlotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot narrative'**
+  String get studioCreatorStarterPlotTitle;
+
+  /// No description provided for @studioCreatorStarterPlotDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill brief and script first, then follow Next step through art and storyboard.'**
+  String get studioCreatorStarterPlotDetail;
+
+  /// No description provided for @studioCreatorStarterPlotCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with script'**
+  String get studioCreatorStarterPlotCta;
+
+  /// No description provided for @studioCreatorStarterRhythmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot rhythm sample'**
+  String get studioCreatorStarterRhythmTitle;
+
+  /// No description provided for @studioCreatorStarterRhythmDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When script exists, break the first storyboard batch for a watchable rhythm.'**
+  String get studioCreatorStarterRhythmDetail;
+
+  /// No description provided for @studioCreatorStarterRhythmCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open storyboard rhythm'**
+  String get studioCreatorStarterRhythmCta;
+
+  /// No description provided for @studioCreatorJourneyNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get studioCreatorJourneyNext;
+
+  /// No description provided for @studioCreatorJourneyNextDoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review stage — finish merge & preview above.'**
+  String get studioCreatorJourneyNextDoneHint;
+
+  /// No description provided for @studioCreatorJourneyStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get studioCreatorJourneyStatusCompleted;
+
+  /// No description provided for @studioCreatorJourneyStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get studioCreatorJourneyStatusInProgress;
+
+  /// No description provided for @studioCreatorJourneyStatusNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get studioCreatorJourneyStatusNotStarted;
+
+  /// No description provided for @studioCreatorJourneyStatusBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked — check tasks'**
+  String get studioCreatorJourneyStatusBlocked;
+
+  /// No description provided for @studioReviewPackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pack'**
+  String get studioReviewPackTitle;
+
+  /// No description provided for @studioReviewPackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot-level readiness for a quick review before merge and preview.'**
+  String get studioReviewPackSubtitle;
+
+  /// No description provided for @studioReviewPackEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboard rows yet. Create storyboards in production, then refresh this page.'**
+  String get studioReviewPackEmpty;
+
+  /// No description provided for @studioReviewPackOpenAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Open assembly & merge'**
+  String get studioReviewPackOpenAssembly;
+
+  /// No description provided for @studioReviewPackCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy page link'**
+  String get studioReviewPackCopyLink;
+
+  /// No description provided for @studioReviewPackLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Page link copied to clipboard'**
+  String get studioReviewPackLinkCopied;
+
+  /// No description provided for @studioReviewPackRollupLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} / {total} storyboards ready for short video'**
+  String studioReviewPackRollupLine(int ready, int total);
+
+  /// No description provided for @studioReviewPackStoryboardId.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{id}'**
+  String studioReviewPackStoryboardId(int id);
+
+  /// No description provided for @studioReviewPackScriptLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{id}'**
+  String studioReviewPackScriptLine(int id);
+
+  /// No description provided for @studioReviewPackFromDeliverLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot review list'**
+  String get studioReviewPackFromDeliverLink;
+
+  /// No description provided for @studioReviewPackExportReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for final export'**
+  String get studioReviewPackExportReadyTitle;
+
+  /// No description provided for @studioReviewPackExportReadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Server pre-check found no blocking gaps. Open publish to export or schedule.'**
+  String get studioReviewPackExportReadyDetail;
+
+  /// No description provided for @studioReviewPackExportBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export not ready yet'**
+  String get studioReviewPackExportBlockedTitle;
+
+  /// No description provided for @studioReviewPackExportBlockedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} blocking items — finish assembly gaps first.'**
+  String studioReviewPackExportBlockedDetail(int count);
+
+  /// No description provided for @studioReviewPackExportOpenPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Open publish & export'**
+  String get studioReviewPackExportOpenPublish;
+
+  /// No description provided for @studioReviewPackExportFixInAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix gaps in assembly'**
+  String get studioReviewPackExportFixInAssembly;
+
+  /// No description provided for @studioReviewPackExportViewChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'View full export checklist'**
+  String get studioReviewPackExportViewChecklist;
+
+  /// No description provided for @studioReviewPackExportCheckUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Export pre-check is unavailable right now. Use assembly to verify gaps manually.'**
+  String get studioReviewPackExportCheckUnavailable;
+
+  /// No description provided for @studioReviewPackTeamSummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Team review: {approved} approved · {needsChanges} need changes · {flagged} flagged · {pending} pending'**
+  String studioReviewPackTeamSummaryLine(
+    int approved,
+    int needsChanges,
+    int flagged,
+    int pending,
+  );
+
+  /// No description provided for @studioReviewPackFeedbackPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
+  String get studioReviewPackFeedbackPending;
+
+  /// No description provided for @studioReviewPackFeedbackApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get studioReviewPackFeedbackApproved;
+
+  /// No description provided for @studioReviewPackFeedbackNeedsChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs changes'**
+  String get studioReviewPackFeedbackNeedsChanges;
+
+  /// No description provided for @studioReviewPackFeedbackFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged'**
+  String get studioReviewPackFeedbackFlagged;
+
+  /// No description provided for @studioReviewPackFeedbackMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Set team review status'**
+  String get studioReviewPackFeedbackMenuTooltip;
+
+  /// No description provided for @studioReviewPackFeedbackSetApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark approved'**
+  String get studioReviewPackFeedbackSetApproved;
+
+  /// No description provided for @studioReviewPackFeedbackSetNeedsChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Request changes'**
+  String get studioReviewPackFeedbackSetNeedsChanges;
+
+  /// No description provided for @studioReviewPackFeedbackSetFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag issue'**
+  String get studioReviewPackFeedbackSetFlagged;
+
+  /// No description provided for @studioReviewPackFeedbackCommentDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review note (optional)'**
+  String get studioReviewPackFeedbackCommentDialogTitle;
+
+  /// No description provided for @studioReviewPackFeedbackCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to your team on this shot'**
+  String get studioReviewPackFeedbackCommentHint;
+
+  /// No description provided for @studioReviewPackFeedbackSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save feedback'**
+  String get studioReviewPackFeedbackSave;
+
+  /// No description provided for @studioReviewPackFeedbackSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Team feedback saved'**
+  String get studioReviewPackFeedbackSaved;
+
+  /// No description provided for @studioFailedJobsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Some generation tasks failed. Open the task center to retry or clear blockers.'**
+  String get studioFailedJobsHint;
+
+  /// No description provided for @studioFailedJobsOpenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open task center'**
+  String get studioFailedJobsOpenTasks;
+
   /// No description provided for @studioDeliverTabAssembly.
   ///
   /// In en, this message translates to:

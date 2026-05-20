@@ -52,6 +52,16 @@ HomePage buildProjectStudioHomePage({
   );
 }
 
+HomePage buildReviewPackHomePage({required int projectNumericId}) {
+  return HomePage(
+    key: ValueKey<String>('review-pack-$projectNumericId'),
+    shellMode: HomeShellMode.product,
+    initialProductPane: ProductWorkspacePane.projects,
+    studioOverlay: StudioOverlayMode.reviewPack,
+    studioProjectNumericId: projectNumericId,
+  );
+}
+
 String studioProjectRootRedirectLocation(String projectNumericId) {
   return '/projects/$projectNumericId/${StudioStep.script.slug}';
 }
@@ -120,6 +130,13 @@ GoRouter createStudioRouter() {
             projectNumericId: id,
             scriptNumericId: scriptId,
           );
+        },
+      ),
+      GoRoute(
+        path: '/projects/:projectNumericId/review-pack',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['projectNumericId']!);
+          return buildReviewPackHomePage(projectNumericId: id);
         },
       ),
       GoRoute(

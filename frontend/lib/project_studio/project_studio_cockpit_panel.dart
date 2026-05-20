@@ -29,7 +29,13 @@ class ProjectStudioCockpitPanel extends StatefulWidget {
 }
 
 class _ProjectStudioCockpitPanelState extends State<ProjectStudioCockpitPanel> {
-  late bool _expanded = false;
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.currentStep == StudioStep.script;
+  }
 
   @override
   void didUpdateWidget(covariant ProjectStudioCockpitPanel oldWidget) {
@@ -119,17 +125,12 @@ class _CockpitStepFilter {
     );
   }
 
-  static const Set<String> _scriptMetricKeys = <String>{'content', 'readiness'};
-
   static List<ProjectHomeMetric> _filterMetrics(
     List<ProjectHomeMetric> metrics,
     StudioStep step,
   ) {
     if (step == StudioStep.script) {
-      final filtered = metrics
-          .where((m) => _scriptMetricKeys.contains(m.key.trim().toLowerCase()))
-          .toList(growable: false);
-      return filtered.isNotEmpty ? filtered : metrics.take(2).toList();
+      return metrics;
     }
     if (step == StudioStep.deliver || step == StudioStep.quality) {
       return metrics;
@@ -145,7 +146,7 @@ class _CockpitStepFilter {
     StudioStep step,
   ) {
     if (step == StudioStep.script) {
-      return const <ProjectHomeAction>[];
+      return actions;
     }
     if (step == StudioStep.deliver || step == StudioStep.quality) {
       return actions;
@@ -161,10 +162,8 @@ class _CockpitStepFilter {
     StudioStep step,
   ) {
     if (step == StudioStep.script) {
-      final filtered = starters
-          .where((s) => s.targetStep.trim().toLowerCase() == 'script')
-          .toList(growable: false);
-      return filtered;
+      // Shown in [CreatorStarterTemplatesStrip] on the script step (T6).
+      return const <ProjectHomeStarterTemplate>[];
     }
     if (step == StudioStep.deliver || step == StudioStep.quality) {
       return starters;
@@ -239,8 +238,9 @@ class _CompactCockpitBar extends StatelessWidget {
                 vertical: dense ? 6 : 8,
               ),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity:
-                  dense ? VisualDensity.compact : VisualDensity.standard,
+              visualDensity: dense
+                  ? VisualDensity.compact
+                  : VisualDensity.standard,
             ),
             child: Text(expandLabel),
           );
@@ -253,8 +253,9 @@ class _CompactCockpitBar extends StatelessWidget {
                 vertical: dense ? 8 : 10,
               ),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity:
-                  dense ? VisualDensity.compact : VisualDensity.standard,
+              visualDensity: dense
+                  ? VisualDensity.compact
+                  : VisualDensity.standard,
             ),
             child: Text(primaryAction.ctaLabel),
           );
@@ -360,15 +361,12 @@ class _ExpandedCockpitCard extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          if (currentStep != StudioStep.script ||
-              secondaryActions.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 12),
-            _CockpitActionRow(
-              primaryAction: cockpit.primaryAction,
-              secondaryActions: secondaryActions,
-              onExecuteAction: onExecuteAction,
-            ),
-          ],
+          const SizedBox(height: 12),
+          _CockpitActionRow(
+            primaryAction: cockpit.primaryAction,
+            secondaryActions: secondaryActions,
+            onExecuteAction: onExecuteAction,
+          ),
           if (filtered.metrics.isNotEmpty ||
               filtered.starters.isNotEmpty) ...<Widget>[
             const SizedBox(height: 12),
@@ -431,11 +429,10 @@ class _CockpitActionRow extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: <Widget>[
-        if (primaryAction.targetStep.trim().toLowerCase() != 'script')
-          FilledButton(
-            onPressed: () => onExecuteAction(primaryAction),
-            child: Text(primaryAction.ctaLabel),
-          ),
+        FilledButton(
+          onPressed: () => onExecuteAction(primaryAction),
+          child: Text(primaryAction.ctaLabel),
+        ),
         ...secondaryActions
             .take(2)
             .map(

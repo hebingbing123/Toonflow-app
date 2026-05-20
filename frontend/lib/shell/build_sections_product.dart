@@ -88,6 +88,10 @@ extension _HomePageBuildProductSections on _HomePageState {
   }
 
   void _applyDomainDeepLink(TaskCenterDomainDeepLink link) {
+    final hasProductProjectRoute =
+        widget.shellMode == HomeShellMode.product &&
+        link.projectNumericId != null &&
+        link.projectNumericId! > 0;
     if (link.projectNumericId != null || link.projectUuid != null) {
       setState(() {
         _productScopedProjectNumericId = link.projectNumericId;
@@ -112,9 +116,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         suggestedAction: link.suggestedAction,
       );
     }
-    if (widget.shellMode == HomeShellMode.product &&
-        link.projectNumericId != null &&
-        link.projectNumericId! > 0) {
+    if (hasProductProjectRoute) {
       switch (link.target) {
         case TaskCenterDomainDeepLinkTarget.script:
           context.go(
@@ -139,9 +141,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         );
         break;
       case TaskCenterDomainDeepLinkTarget.script:
-        if (widget.shellMode == HomeShellMode.product &&
-            link.projectNumericId != null &&
-            link.projectNumericId! > 0) {
+        if (hasProductProjectRoute) {
           context.go(
             '/projects/${link.projectNumericId}/${StudioStep.script.slug}',
           );
@@ -152,9 +152,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         }
         break;
       case TaskCenterDomainDeepLinkTarget.storyboard:
-        if (widget.shellMode == HomeShellMode.product &&
-            link.projectNumericId != null &&
-            link.projectNumericId! > 0) {
+        if (hasProductProjectRoute) {
           context.go(
             '/projects/${link.projectNumericId}/${StudioStep.storyboard.slug}',
           );
@@ -314,30 +312,10 @@ extension _HomePageBuildProductSections on _HomePageState {
               },
               onOpenAssetEditor: (target) =>
                   _openProjectAssetsWorkbenchFromStudio(
-                    ProjectRow(
-                      id: projectUuid,
-                      numericId: projectNumericId,
-                      name: effectiveProjectName,
-                      intro: null,
-                      projectType: null,
-                      imageModel: null,
-                      imageQuality: null,
-                      videoModel: null,
-                      artStyle: null,
-                      directorManual: null,
-                      mode: null,
-                      videoRatio: null,
-                      createTimeMs: null,
-                      artStylePack: null,
-                      storyStylePack: null,
-                      targetMarket: null,
-                      targetPlatforms: null,
-                      durationStrategy: null,
-                      voiceProfile: null,
-                      subtitleStyle: null,
-                      bgmStrategy: null,
-                      projectAccessMode: 'restricted',
-                      projectAccessRole: 'editor',
+                    _buildReadonlyProjectScopeRow(
+                      projectNumericId: projectNumericId,
+                      projectUuid: projectUuid,
+                      projectName: effectiveProjectName,
                     ),
                     target,
                     onProjectSnapshotChanged: () async {
@@ -368,6 +346,13 @@ extension _HomePageBuildProductSections on _HomePageState {
                 projectNumericId,
               ),
             ),
+          ),
+      reviewPackBuilder: (projectNumericId, projectUuid) =>
+          StudioReviewPackScope(
+            accessToken: token,
+            projectNumericId: projectNumericId,
+            projectUuid: projectUuid,
+            projectName: effectiveProjectName,
           ),
     );
   }
@@ -408,10 +393,22 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (uuid.isEmpty) {
       return null;
     }
+    return _buildReadonlyProjectScopeRow(
+      projectNumericId: projectNumericId,
+      projectUuid: uuid,
+      projectName: widget.debugStudioProjectName,
+    );
+  }
+
+  ProjectRow _buildReadonlyProjectScopeRow({
+    required int projectNumericId,
+    required String projectUuid,
+    required String? projectName,
+  }) {
     return ProjectRow(
-      id: uuid,
+      id: projectUuid,
       numericId: projectNumericId,
-      name: widget.debugStudioProjectName,
+      name: projectName,
       intro: null,
       projectType: null,
       imageModel: null,
@@ -761,6 +758,9 @@ extension _HomePageBuildProductSections on _HomePageState {
                           projectNumericId: projectNumericId,
                         );
                       },
+                      onOpenReviewPack: () => context.go(
+                        '/projects/$projectNumericId/review-pack',
+                      ),
                     ),
                     Expanded(
                       child: _buildShortVideoSpaceSection(
@@ -905,6 +905,9 @@ extension _HomePageBuildProductSections on _HomePageState {
       );
       await _openProjectDetail(row);
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -2308,6 +2311,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   HelpHubConfigResponseV1? _helpHubConfig;
   bool _savingHelpHubLinks = false;
   bool _loadingWebhooks = false;
+  bool _creatingWebhook = false;
   String? _webhooksError;
   OutboundWebhookListResponseV1? _webhooks;
   OutboundWebhookCreatedResponseV1? _latestCreatedWebhook;
@@ -2327,7 +2331,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   final _helpHubNewIdController = TextEditingController();
   final _helpHubNewTitleController = TextEditingController();
   final _helpHubNewUrlController = TextEditingController();
-  String? _webhookBusyId;
+  String _helpHubSearchQuery = '';
+  String _webhookSearchQuery = '';
+  Timer? _helpHubSearchDebounce;
+  Timer? _webhookSearchDebounce;
+  String? _webhookMutatingId;
   final Map<String, OutboundWebhookTestResponseV1> _webhookLastTestResultById =
       <String, OutboundWebhookTestResponseV1>{};
   final Map<String, OutboundWebhookDeliveryListResponseV1> _webhookDeliveries =
@@ -2425,6 +2433,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   @override
   void dispose() {
+    _helpHubSearchDebounce?.cancel();
+    _webhookSearchDebounce?.cancel();
     _webhookUrlController.dispose();
     _webhookSecretController.dispose();
     _webhookSearchController.dispose();
@@ -2448,6 +2458,30 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     }
     _webhookWorkspaceDraftControllers.clear();
     super.dispose();
+  }
+
+  void _onHelpHubSearchChanged(String value) {
+    _helpHubSearchDebounce?.cancel();
+    _helpHubSearchDebounce = Timer(const Duration(milliseconds: 180), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _helpHubSearchQuery = value;
+      });
+    });
+  }
+
+  void _onWebhookSearchChanged(String value) {
+    _webhookSearchDebounce?.cancel();
+    _webhookSearchDebounce = Timer(const Duration(milliseconds: 180), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webhookSearchQuery = value;
+      });
+    });
   }
 
   Future<void> _openHelpHubManageDialog() async {
@@ -2797,7 +2831,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   List<HelpHubLinkItemV1> _filteredHelpHubLinks() {
     final items = _resp?.items ?? const <HelpHubLinkItemV1>[];
-    final needle = _helpHubSearchController.text.trim().toLowerCase();
+    final needle = _helpHubSearchQuery.trim().toLowerCase();
     if (needle.isEmpty) {
       return items;
     }
@@ -2829,9 +2863,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     return 'general';
   }
 
-  String _helpHubInventorySummary(AppLocalizations l10n) {
+  String _helpHubInventorySummary(
+    AppLocalizations l10n,
+    List<HelpHubLinkItemV1> filtered,
+  ) {
     final items = _resp?.items ?? const <HelpHubLinkItemV1>[];
-    final filtered = _filteredHelpHubLinks();
     final counts = <String, int>{};
     for (final item in filtered) {
       final slug = _helpHubCategorySlug(item);
@@ -2972,7 +3008,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       workspaceId = wsRaw;
     }
     setState(() {
-      _loadingWebhooks = true;
+      _creatingWebhook = true;
       _webhooksError = null;
     });
     try {
@@ -3028,7 +3064,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     } finally {
       if (mounted) {
         setState(() {
-          _loadingWebhooks = false;
+          _creatingWebhook = false;
         });
       }
     }
@@ -3043,9 +3079,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final draft = ctrl?.text.trim() ?? '';
 
     setState(() {
-      _loadingWebhooks = true;
       _webhooksError = null;
-      _webhookBusyId = webhookId;
+      _webhookMutatingId = webhookId;
     });
     try {
       if (draft.isNotEmpty && !outboundWebhookWorkspaceIdLooksValid(draft)) {
@@ -3108,8 +3143,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     } finally {
       if (mounted) {
         setState(() {
-          _loadingWebhooks = false;
-          _webhookBusyId = null;
+          _webhookMutatingId = null;
         });
       }
     }
@@ -3124,9 +3158,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       return;
     }
     setState(() {
-      _loadingWebhooks = true;
       _webhooksError = null;
-      _webhookBusyId = wh.id;
+      _webhookMutatingId = wh.id;
     });
     try {
       await patchSettingsOutboundWebhookV1(
@@ -3157,8 +3190,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     } finally {
       if (mounted) {
         setState(() {
-          _loadingWebhooks = false;
-          _webhookBusyId = null;
+          _webhookMutatingId = null;
         });
       }
     }
@@ -3193,9 +3225,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       return;
     }
     setState(() {
-      _loadingWebhooks = true;
       _webhooksError = null;
-      _webhookBusyId = id;
+      _webhookMutatingId = id;
     });
     try {
       await deleteSettingsOutboundWebhookV1(token, id);
@@ -3228,8 +3259,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     } finally {
       if (mounted) {
         setState(() {
-          _loadingWebhooks = false;
-          _webhookBusyId = null;
+          _webhookMutatingId = null;
         });
       }
     }
@@ -3237,7 +3267,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   List<OutboundWebhookListItemV1> _filteredWebhooks() {
     final items = _webhooks?.items ?? const <OutboundWebhookListItemV1>[];
-    final needle = _webhookSearchController.text.trim().toLowerCase();
+    final needle = _webhookSearchQuery.trim().toLowerCase();
     if (needle.isEmpty) {
       return items;
     }
@@ -3295,11 +3325,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     );
   }
 
-  String _webhookInventorySummary(AppLocalizations l10n) {
+  String _webhookInventorySummary(
+    AppLocalizations l10n,
+    List<OutboundWebhookListItemV1> filtered,
+  ) {
     return buildWebhookInventorySummary(
       l10n,
       total: _webhooks?.items.length ?? 0,
-      filtered: _filteredWebhooks().length,
+      filtered: filtered.length,
       sessionTestOkCount: _countWebhookActivity('test_success'),
       sessionTestFailedCount: _countWebhookActivity('test_failed'),
       latestWebhookId: _latestCreatedWebhook?.id,
@@ -3331,9 +3364,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       return;
     }
     setState(() {
-      _loadingWebhooks = true;
       _webhooksError = null;
-      _webhookBusyId = id;
+      _webhookMutatingId = id;
     });
     try {
       final res = await postSettingsOutboundWebhookTestV1(
@@ -3386,8 +3418,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     } finally {
       if (mounted) {
         setState(() {
-          _loadingWebhooks = false;
-          _webhookBusyId = null;
+          _webhookMutatingId = null;
         });
       }
     }
@@ -3674,12 +3705,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final filteredHelpHubLinks = _filteredHelpHubLinks();
+    final filteredWebhooks = _filteredWebhooks();
     final outboundWebhookEmptyMsg = _webhooks == null
         ? null
         : describeOutboundWebhookEmptyState(
             l10n,
             total: _webhooks!.items.length,
-            filtered: _filteredWebhooks().length,
+            filtered: filteredWebhooks.length,
           );
     final billingWebhookEmptyMsg = describeBillingWebhookEmptyState(
       l10n,
@@ -3742,10 +3775,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _helpHubSearchController,
             decoration: InputDecoration(labelText: l10n.helpHubSearchLabel),
-            onChanged: (_) => setState(() {}),
+            onChanged: _onHelpHubSearchChanged,
           ),
           const SizedBox(height: 8),
-          if (_resp != null) Text(_helpHubInventorySummary(l10n)),
+          if (_resp != null)
+            Text(_helpHubInventorySummary(l10n, filteredHelpHubLinks)),
           if (_resp != null && _resp!.items.isEmpty)
             Text(
               l10n.helpHubNoEffectiveLinks,
@@ -3753,79 +3787,87 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             ),
           if (_resp != null &&
               _resp!.items.isNotEmpty &&
-              _filteredHelpHubLinks().isEmpty)
+              filteredHelpHubLinks.isEmpty)
             Text(
               l10n.helpHubSearchEmpty,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          if (_resp != null)
-            ..._filteredHelpHubLinks().map(
-              (item) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Chip(
-                        label: Text(
-                          _helpHubCategoryLabelForSlug(
-                            _helpHubCategorySlug(item),
-                            l10n,
-                          ),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      const SizedBox(height: 4),
-                      SelectableText(item.url),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+          if (_resp != null && filteredHelpHubLinks.isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: ListView.builder(
+                primary: false,
+                itemCount: filteredHelpHubLinks.length,
+                itemBuilder: (context, index) {
+                  final item = filteredHelpHubLinks[index];
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          IconButton(
-                            tooltip: l10n.helpHubCopyLinkTooltip,
-                            onPressed: () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: item.url),
-                              );
-                              if (!context.mounted) {
-                                return;
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.helpHubCopied)),
-                              );
-                            },
-                            icon: const Icon(Icons.copy),
+                          Text(
+                            item.title,
+                            style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          IconButton(
-                            tooltip: l10n.helpHubCopyTitleUrlTooltip,
-                            onPressed: () async {
-                              await Clipboard.setData(
-                                ClipboardData(
-                                  text: '${item.title}\n${item.url}',
-                                ),
-                              );
-                              if (!context.mounted) {
-                                return;
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.helpHubCopiedHandoff),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.copy_all_outlined),
+                          const SizedBox(height: 4),
+                          Chip(
+                            label: Text(
+                              _helpHubCategoryLabelForSlug(
+                                _helpHubCategorySlug(item),
+                                l10n,
+                              ),
+                            ),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(height: 4),
+                          SelectableText(item.url),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              IconButton(
+                                tooltip: l10n.helpHubCopyLinkTooltip,
+                                onPressed: () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(text: item.url),
+                                  );
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(l10n.helpHubCopied)),
+                                  );
+                                },
+                                icon: const Icon(Icons.copy),
+                              ),
+                              IconButton(
+                                tooltip: l10n.helpHubCopyTitleUrlTooltip,
+                                onPressed: () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(
+                                      text: '${item.title}\n${item.url}',
+                                    ),
+                                  );
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.helpHubCopiedHandoff),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.copy_all_outlined),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           const SizedBox(height: 16),
@@ -3955,9 +3997,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
             runSpacing: 8,
             children: [
               FilledButton.tonal(
-                onPressed: _loadingWebhooks ? null : _createWebhook,
+                onPressed: _creatingWebhook ? null : _createWebhook,
                 child: Text(
-                  _loadingWebhooks ? l10n.opsWhCreating : l10n.opsWhCreate,
+                  _creatingWebhook ? l10n.opsWhCreating : l10n.opsWhCreate,
                 ),
               ),
               OutlinedButton(
@@ -3970,7 +4012,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _webhookSearchController,
             decoration: InputDecoration(labelText: l10n.opsWhSearchLabel),
-            onChanged: (_) => setState(() {}),
+            onChanged: _onWebhookSearchChanged,
           ),
           const SizedBox(height: 8),
           if (_loadingWebhooks) Text(l10n.opsWhLoading),
@@ -3981,7 +4023,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   : _webhooksError!,
               style: const TextStyle(color: Colors.red),
             ),
-          if (_webhooks != null) Text(_webhookInventorySummary(l10n)),
+          if (_webhooks != null)
+            Text(_webhookInventorySummary(l10n, filteredWebhooks)),
           if (_webhookActivity.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -4023,9 +4066,16 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               outboundWebhookEmptyMsg,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          if (_webhooks != null)
-            ..._filteredWebhooks().map(
-              (wh) => Card(
+          if (_webhooks != null && filteredWebhooks.isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 560),
+              child: ListView.builder(
+                primary: false,
+                itemCount: filteredWebhooks.length,
+                itemBuilder: (context, index) {
+                  final wh = filteredWebhooks[index];
+                  final rowBusy = _webhookMutatingId == wh.id;
+                  return Card(
                 color: _latestCreatedWebhook?.id == wh.id
                     ? Theme.of(context).colorScheme.primaryContainer
                     : null,
@@ -4074,8 +4124,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               selected: outboundWebhookEffectiveSelection(
                                 wh.eventTypes,
                               ),
-                              enabled:
-                                  !_loadingWebhooks && _webhookBusyId == null,
+                              enabled: !_loadingWebhooks && !rowBusy,
                               onSelectionChanged: (next) {
                                 unawaited(
                                   _patchWebhookEventSubscription(wh, next),
@@ -4113,7 +4162,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                 isDense: true,
                               ),
                               enabled:
-                                  !_loadingWebhooks && _webhookBusyId == null,
+                                  !_loadingWebhooks && !rowBusy,
                             ),
                             const SizedBox(height: 6),
                             Wrap(
@@ -4122,19 +4171,19 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                               children: [
                                 OutlinedButton(
                                   onPressed:
-                                      _loadingWebhooks || _webhookBusyId != null
+                                      _loadingWebhooks || rowBusy
                                       ? null
                                       : () =>
                                             _patchWebhookWorkspaceScope(wh.id),
                                   child: Text(
-                                    _webhookBusyId == wh.id
+                                    rowBusy
                                         ? l10n.opsWhSavingScope
                                         : l10n.opsWhSaveScope,
                                   ),
                                 ),
                                 TextButton(
                                   onPressed:
-                                      _loadingWebhooks || _webhookBusyId != null
+                                      _loadingWebhooks || rowBusy
                                       ? null
                                       : () {
                                           _webhookWorkspaceDraftControllers[wh
@@ -4205,11 +4254,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           ),
                           OutlinedButton(
                             onPressed:
-                                _loadingWebhooks || _webhookBusyId != null
+                                _loadingWebhooks || rowBusy
                                 ? null
                                 : () => _testWebhook(wh.id),
                             child: Text(
-                              _webhookBusyId == wh.id
+                              rowBusy
                                   ? l10n.opsWhBusy
                                   : l10n.opsWhTestDeliver,
                             ),
@@ -4217,7 +4266,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           OutlinedButton(
                             onPressed:
                                 _loadingWebhooks ||
-                                    _webhookBusyId != null ||
+                                    rowBusy ||
                                     _loadingDeliveriesId != null
                                 ? null
                                 : () => _loadWebhookDeliveries(wh.id),
@@ -4229,11 +4278,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           ),
                           OutlinedButton(
                             onPressed:
-                                _loadingWebhooks || _webhookBusyId != null
+                                _loadingWebhooks || rowBusy
                                 ? null
                                 : () => _deleteWebhook(wh.id),
                             child: Text(
-                              _webhookBusyId == wh.id
+                              rowBusy
                                   ? l10n.opsWhBusy
                                   : l10n.opsWhDelete,
                             ),
@@ -4243,6 +4292,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     ],
                   ),
                 ),
+                  );
+                },
               ),
             ),
           const SizedBox(height: 16),

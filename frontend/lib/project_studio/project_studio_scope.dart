@@ -6,6 +6,7 @@ import '../design_system/ix/studio_api_error_callout.dart';
 import '../rust_api.dart';
 import 'project_studio_host.dart';
 import 'project_studio_page.dart';
+import 'creator_journey_telemetry.dart';
 import 'studio_readiness.dart';
 import 'studio_step.dart';
 
@@ -55,12 +56,18 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
   @override
   void initState() {
     super.initState();
+    CreatorJourneyTelemetry.bindProject(
+      accessToken: widget.accessToken,
+      projectUuid: widget.projectUuid,
+      projectNumericId: widget.projectNumericId,
+    );
     _load();
   }
 
   @override
   void dispose() {
     _jobPollTimer?.cancel();
+    CreatorJourneyTelemetry.clearProject();
     super.dispose();
   }
 
@@ -113,7 +120,7 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
           child: StudioApiErrorCallout(
             error: _error!,
             onRetry: _load,
-            showDiagnostic: true,
+            showDiagnostic: false,
           ),
         ),
       );

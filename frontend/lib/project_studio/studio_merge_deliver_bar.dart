@@ -9,10 +9,12 @@ class StudioMergeDeliverBar extends StatelessWidget {
   const StudioMergeDeliverBar({
     super.key,
     required this.onMergeAndPreview,
+    this.onOpenReviewPack,
     this.busy = false,
   });
 
   final VoidCallback? onMergeAndPreview;
+  final VoidCallback? onOpenReviewPack;
   final bool busy;
 
   @override
@@ -28,35 +30,55 @@ class StudioMergeDeliverBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: tokens.borderSubtle),
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final stacked = constraints.maxWidth < 760;
-            final summary = Text(
-              l10n.studioDeliverTabAssembly,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            );
-            final action = StudioPrimaryButton(
-              label: l10n.studioMergeAndPreview,
-              icon: Icons.movie_filter_outlined,
-              loading: busy,
-              onPressed: busy ? null : onMergeAndPreview,
-            );
-            if (stacked) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[summary, const SizedBox(height: 10), action],
-              );
-            }
-            return Row(
-              children: <Widget>[
-                Expanded(child: summary),
-                const SizedBox(width: 12),
-                Flexible(child: action),
-              ],
-            );
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stacked = constraints.maxWidth < 760;
+                final summary = Text(
+                  l10n.studioDeliverTabAssembly,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                );
+                final action = StudioPrimaryButton(
+                  label: l10n.studioMergeAndPreview,
+                  icon: Icons.movie_filter_outlined,
+                  loading: busy,
+                  onPressed: busy ? null : onMergeAndPreview,
+                );
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      summary,
+                      const SizedBox(height: 10),
+                      action,
+                    ],
+                  );
+                }
+                return Row(
+                  children: <Widget>[
+                    Expanded(child: summary),
+                    const SizedBox(width: 12),
+                    Flexible(child: action),
+                  ],
+                );
+              },
+            ),
+            if (onOpenReviewPack != null) ...<Widget>[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: onOpenReviewPack,
+                  child: Text(l10n.studioReviewPackFromDeliverLink),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

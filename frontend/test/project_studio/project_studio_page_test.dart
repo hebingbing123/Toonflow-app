@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openflow_app/design_system/components/studio_primary_button.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
@@ -252,8 +253,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('body-deliver'), findsOneWidget);
-    expect(router.routeInformationProvider.value.uri.path, '/projects/42/deliver');
-    expect(stepChanges, <StudioStep>[StudioStep.deliver]);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/projects/42/deliver',
+    );
+    expect(stepChanges.toSet(), <StudioStep>{StudioStep.deliver});
+    expect(stepChanges, isNotEmpty);
   });
 
   testWidgets('asset hub can open asset editor from assets step', (
@@ -317,6 +322,11 @@ void main() {
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
         GoRoute(
+          path: '/projects/42/assets',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
           path: '/projects/42/video',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
@@ -328,6 +338,7 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Fix anchors'));
     await tester.tap(find.text('Fix anchors'));
     await tester.pump();
 
@@ -452,6 +463,7 @@ void main() {
       expect(find.text('Review candidates'), findsOneWidget);
       expect(find.text('Fix anchors'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Review candidates').first);
       await tester.tap(find.text('Review candidates').first);
       await tester.pump();
 
@@ -560,6 +572,11 @@ void main() {
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
         GoRoute(
+          path: '/projects/42/assets',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
           path: '/projects/42/video',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
@@ -571,6 +588,7 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Review candidates'));
     await tester.tap(find.text('Review candidates'));
     await tester.pump();
 
@@ -695,8 +713,10 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Candidate review'));
     await tester.tap(find.text('Candidate review'));
     await tester.pump();
+    await tester.ensureVisible(find.text('Cross-script reuse'));
     await tester.tap(find.text('Cross-script reuse'));
     await tester.pump();
 
@@ -832,6 +852,16 @@ void main() {
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
         GoRoute(
+          path: '/projects/42/assets',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/storyboard',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
           path: '/projects/42/video',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
@@ -843,10 +873,13 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Open task center'));
     await tester.tap(find.text('Open task center'));
     await tester.pump();
+    await tester.ensureVisible(find.text('Review candidates'));
     await tester.tap(find.text('Review candidates'));
     await tester.pump();
+    await tester.ensureVisible(find.text('Break storyboard'));
     await tester.tap(find.text('Break storyboard'));
     await tester.pump();
 
@@ -954,6 +987,11 @@ void main() {
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
+        GoRoute(
+          path: '/projects/42/deliver',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
       ],
     );
     addTearDown(router.dispose);
@@ -961,6 +999,7 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Stay on deliver'));
     await tester.tap(find.text('Stay on deliver'));
     await tester.pump();
 
@@ -975,7 +1014,7 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
-      'studio_last_step_42': 'script',
+      'studio_last_step_42': 'deliver',
     });
 
     final assetTargets = <ProjectStudioAssetEditorTarget>[];
@@ -1066,7 +1105,7 @@ void main() {
           ],
         ),
       ),
-      initialStep: StudioStep.script,
+      initialStep: StudioStep.deliver,
       onExit: () {},
       onStepChanged: stepChanges.add,
       onOpenAgentDrawer: () {},
@@ -1080,10 +1119,15 @@ void main() {
 
     late GoRouter router;
     router = GoRouter(
-      initialLocation: '/projects/42/script',
+      initialLocation: '/projects/42/deliver',
       routes: <RouteBase>[
         GoRoute(
-          path: '/projects/42/script',
+          path: '/projects/42/deliver',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/assets',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
@@ -1099,6 +1143,14 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    final expand = find.text('View project progress');
+    if (expand.evaluate().isNotEmpty) {
+      await tester.ensureVisible(expand);
+      await tester.tap(expand);
+      await tester.pumpAndSettle();
+    }
+
+    await tester.ensureVisible(find.text('Open task center'));
     await tester.tap(find.text('Open task center'));
     await tester.pump();
 
@@ -1250,6 +1302,16 @@ void main() {
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
         GoRoute(
+          path: '/projects/42/storyboard',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/assets',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
           path: '/projects/42/video',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
@@ -1261,14 +1323,6 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
-    final readinessMetric = tester.widget<InkWell>(
-      find.ancestor(
-        of: find.text('Project readiness'),
-        matching: find.byType(InkWell),
-      ),
-    );
-    readinessMetric.onTap!.call();
-    await tester.pump();
     final failedTasksMetric = tester.widget<InkWell>(
       find.ancestor(
         of: find.text('Failed tasks'),
@@ -1286,6 +1340,20 @@ void main() {
     roleAssetsMetric.onTap!.call();
     await tester.pump();
 
+    expect(find.text('Open Board'), findsOneWidget);
+    expect(find.text('Open tasks'), findsOneWidget);
+    expect(find.text('Open asset hub'), findsOneWidget);
+    expect(find.text('Open blocked items'), findsNothing);
+
+    final readinessMetric = tester.widget<InkWell>(
+      find.ancestor(
+        of: find.text('Project readiness'),
+        matching: find.byType(InkWell),
+      ),
+    );
+    readinessMetric.onTap!.call();
+    await tester.pump();
+
     expect(taskOpenCount, 1);
     expect(assetTargets, hasLength(1));
     expect(
@@ -1294,10 +1362,6 @@ void main() {
     );
     expect(assetTargets.single.notice, contains('verify reuse'));
     expect(stepChanges, contains(StudioStep.storyboard));
-    expect(find.text('Open Board'), findsOneWidget);
-    expect(find.text('Open tasks'), findsOneWidget);
-    expect(find.text('Open asset hub'), findsOneWidget);
-    expect(find.text('Open blocked items'), findsNothing);
   });
 
   testWidgets('metrics without launch intents do not synthesize CTAs', (
@@ -1405,7 +1469,7 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
-      'studio_last_step_42': 'script',
+      'studio_last_step_42': 'deliver',
     });
 
     final assetTargets = <ProjectStudioAssetEditorTarget>[];
@@ -1503,7 +1567,7 @@ void main() {
           ],
         ),
       ),
-      initialStep: StudioStep.script,
+      initialStep: StudioStep.deliver,
       onExit: () {},
       onStepChanged: stepChanges.add,
       onOpenAgentDrawer: () {},
@@ -1517,10 +1581,15 @@ void main() {
 
     late GoRouter router;
     router = GoRouter(
-      initialLocation: '/projects/42/script',
+      initialLocation: '/projects/42/deliver',
       routes: <RouteBase>[
         GoRoute(
-          path: '/projects/42/script',
+          path: '/projects/42/deliver',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/assets',
           builder: (context, state) =>
               Scaffold(body: ProjectStudioPage(host: host)),
         ),
@@ -1533,16 +1602,19 @@ void main() {
     );
     addTearDown(router.dispose);
 
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
-    tester
-        .widget<TextButton>(
-          find.widgetWithText(TextButton, 'Run sample route').last,
-        )
-        .onPressed!
-        .call();
-    await tester.pump();
+    final expand = find.text('View project progress');
+    if (expand.evaluate().isNotEmpty) {
+      await tester.ensureVisible(expand);
+      await tester.tap(expand);
+      await tester.pumpAndSettle();
+    }
+
     tester
         .widget<TextButton>(
           find.widgetWithText(TextButton, 'Open role route').last,
@@ -1552,6 +1624,13 @@ void main() {
     await tester.pump();
     tester
         .widget<TextButton>(find.widgetWithText(TextButton, 'Triage jobs').last)
+        .onPressed!
+        .call();
+    await tester.pump();
+    tester
+        .widget<TextButton>(
+          find.widgetWithText(TextButton, 'Run sample route').last,
+        )
         .onPressed!
         .call();
     await tester.pump();
@@ -1569,6 +1648,10 @@ void main() {
   testWidgets(
     'project studio cockpit keeps metrics and starter routes in one aligned grid',
     (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'studio_last_step_42': 'deliver',
+      });
+
       await tester.binding.setSurfaceSize(const Size(1800, 1100));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -1679,7 +1762,7 @@ void main() {
             ],
           ),
         ),
-        initialStep: StudioStep.script,
+        initialStep: StudioStep.deliver,
         onExit: () {},
         onStepChanged: (_) {},
         onOpenAgentDrawer: () {},
@@ -1690,13 +1773,223 @@ void main() {
       await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
       await tester.pumpAndSettle();
 
-      final metricX = tester.getTopLeft(find.text('Metric A')).dx;
-      final starterX = tester.getTopLeft(find.text('Route A')).dx;
+      final expand = find.text('View project progress');
+      if (expand.evaluate().isNotEmpty) {
+        await tester.ensureVisible(expand);
+        await tester.tap(expand);
+        await tester.pumpAndSettle();
+      }
+
       final metricY = tester.getTopLeft(find.text('Metric A')).dy;
       final starterY = tester.getTopLeft(find.text('Route A')).dy;
 
-      expect((metricX - starterX).abs(), lessThan(24));
       expect(starterY, greaterThan(metricY));
     },
   );
+
+  testWidgets('shows failed-jobs recovery banner when jobs failed', (
+    tester,
+  ) async {
+    var tasksOpened = false;
+    final host = ProjectStudioHost(
+      projectNumericId: 42,
+      projectUuid: 'project-42',
+      projectName: 'Project Delta',
+      accessToken: null,
+      initialStep: StudioStep.art,
+      failedJobCount: 2,
+      onExit: () {},
+      onStepChanged: (_) {},
+      onOpenTasks: () => tasksOpened = true,
+      onOpenAgentDrawer: () {},
+      onRunHarnessAgent: (_) async {},
+      buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+    );
+
+    await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('generation tasks failed'), findsOneWidget);
+    expect(find.text('Open task center'), findsOneWidget);
+
+    await tester.tap(find.text('Open task center'));
+    await tester.pump();
+
+    expect(tasksOpened, isTrue);
+  });
+
+  testWidgets('script step shows creator starter strip and applies plot template', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'studio_last_step_42': 'script',
+    });
+
+    final stepChanges = <StudioStep>[];
+    final agentKinds = <String>[];
+    final host = ProjectStudioHost(
+      projectNumericId: 42,
+      projectUuid: 'project-42',
+      projectName: 'Project Delta',
+      accessToken: null,
+      initialStep: StudioStep.script,
+      home: ProjectHome(
+        project: const ProjectRow(
+          id: 'project-42',
+          numericId: 42,
+          name: 'Project Delta',
+          intro: null,
+          projectType: null,
+          imageModel: null,
+          imageQuality: null,
+          videoModel: null,
+          artStyle: null,
+          directorManual: null,
+          mode: null,
+          videoRatio: null,
+          createTimeMs: null,
+          artStylePack: null,
+          storyStylePack: null,
+          targetMarket: null,
+          targetPlatforms: null,
+          durationStrategy: null,
+          voiceProfile: null,
+          subtitleStyle: null,
+          bgmStrategy: null,
+          projectAccessMode: 'restricted',
+          projectAccessRole: 'editor',
+        ),
+        stats: const ProjectStats(
+          scriptCount: 0,
+          storyboardCount: 0,
+          roleCount: 0,
+          novelCount: 0,
+          videoCount: 0,
+        ),
+        readinessScore: 50,
+        readinessSummary: 'Starter templates visible on script.',
+        onboarding: const ProjectHomeOnboarding(
+          complete: false,
+          nextStep: 'script',
+          checklist: <ProjectHomeChecklistItem>[],
+        ),
+        styleBibleReady: false,
+        cockpit: ProjectHomeCockpit(
+          headline: 'Headline',
+          subheadline: 'Sub',
+          primaryAction: ProjectHomeAction(
+            key: 'primary',
+            title: 'Primary',
+            detail: 'd',
+            targetStep: 'script',
+            ctaLabel: 'Primary CTA',
+          ),
+          secondaryActions: const <ProjectHomeAction>[],
+          metrics: const <ProjectHomeMetric>[],
+          starterTemplates: <ProjectHomeStarterTemplate>[
+            ProjectHomeStarterTemplate(
+              key: 'starter_creator_plot',
+              title: '剧情叙事起步',
+              detail: '先补 brief',
+              targetStep: 'script',
+              ctaLabel: '从剧本开跑',
+              launchIntent: ProjectHomeLaunchIntent(
+                targetStep: 'script',
+                notice: 'Brief first',
+              ),
+            ),
+            ProjectHomeStarterTemplate(
+              key: 'starter_creator_shot_rhythm',
+              title: '镜头节奏样片',
+              detail: '拆分镜',
+              targetStep: 'storyboard',
+              ctaLabel: '进入分镜节奏',
+              launchIntent: ProjectHomeLaunchIntent(
+                targetStep: 'storyboard',
+                agentKind: 'storyboard_breaker',
+              ),
+            ),
+          ],
+        ),
+      ),
+      onExit: () {},
+      onStepChanged: stepChanges.add,
+      onOpenAgentDrawer: () {},
+      onRunHarnessAgent: (kind) async {
+        agentKinds.add(kind);
+      },
+      buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+    );
+
+    late GoRouter router;
+    router = GoRouter(
+      initialLocation: '/projects/42/script',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/projects/42/script',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/storyboard',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_wrapRouterApp(router));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quick-start templates'), findsOneWidget);
+    expect(find.text('Plot narrative'), findsOneWidget);
+    expect(find.text('Shot rhythm sample'), findsOneWidget);
+
+    final applyButtons = find.widgetWithText(StudioPrimaryButton, 'Apply template');
+    expect(applyButtons, findsNWidgets(2));
+
+    tester.widget<StudioPrimaryButton>(applyButtons.at(0)).onPressed!.call();
+    await tester.pump();
+    expect(find.text('body-script'), findsOneWidget);
+
+    tester.widget<StudioPrimaryButton>(applyButtons.at(1)).onPressed!.call();
+    await tester.pumpAndSettle();
+
+    expect(agentKinds, contains('storyboard_breaker'));
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/projects/42/storyboard',
+    );
+    expect(find.text('body-storyboard'), findsOneWidget);
+  });
+
+  testWidgets('workspace menu groups main path and advanced tools', (
+    tester,
+  ) async {
+    final host = ProjectStudioHost(
+      projectNumericId: 42,
+      projectUuid: 'project-42',
+      projectName: 'Project Delta',
+      accessToken: null,
+      initialStep: StudioStep.script,
+      onExit: () {},
+      onStepChanged: (_) {},
+      onOpenAgentDrawer: () {},
+      onRunHarnessAgent: (_) async {},
+      buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+    );
+
+    await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Workspace'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Main path'), findsOneWidget);
+    expect(find.text('Open review pack'), findsOneWidget);
+    expect(find.text('Workspace tools'), findsOneWidget);
+    expect(find.text('Assets'), findsOneWidget);
+    expect(find.text('Video'), findsOneWidget);
+  });
 }

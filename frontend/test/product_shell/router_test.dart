@@ -36,6 +36,11 @@ void main() {
     expect(studio.studioProjectNumericId, 7);
     expect(studio.studioStepSlug, 'deliver');
     expect(studio.initialProductPane, ProductWorkspacePane.projects);
+
+    final review = buildReviewPackHomePage(projectNumericId: 7);
+    expect(review.studioOverlay, StudioOverlayMode.reviewPack);
+    expect(review.studioProjectNumericId, 7);
+    expect(review.initialProductPane, ProductWorkspacePane.projects);
   });
 
   test('project root redirect resolves to script step', () {

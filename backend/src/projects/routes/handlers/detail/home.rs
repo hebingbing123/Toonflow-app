@@ -387,28 +387,26 @@ fn build_cockpit(
 
     let starter_templates = vec![
         ProjectHomeStarterTemplate {
-            key: "starter_manga".into(),
-            title: "漫剧改编起步线".into(),
-            detail: "先补 brief，再导入原著和剧本，把第一轮分镜尽快拆出来。".into(),
+            key: "starter_creator_plot".into(),
+            title: "剧情叙事起步".into(),
+            detail: "先补 brief 与剧本梗概，再沿主链路推进到分镜与评审预览。".into(),
             target_step: "script".into(),
-            cta_label: "从脚本开跑".into(),
-            launch_intent: step_intent("script"),
+            cta_label: "从剧本开跑".into(),
+            launch_intent: ProjectHomeLaunchIntent {
+                action: None,
+                target_step: Some("script".into()),
+                agent_kind: None,
+                asset_target: None,
+                notice: Some("先完成立项 brief 与剧本梗概，再用「下一步」进入美术与分镜。".into()),
+            },
         },
         ProjectHomeStarterTemplate {
-            key: "starter_trailer".into(),
-            title: "样片先行路线".into(),
-            detail: "如果目标是先打样，先盯住最少一批可出图镜头，尽快跑出第一条视频结果。".into(),
-            target_step: "video".into(),
-            cta_label: "先出第一条样片".into(),
-            launch_intent: step_agent_intent("video", "grid_prompt_generator"),
-        },
-        ProjectHomeStarterTemplate {
-            key: "starter_delivery".into(),
-            title: "交付检查路线".into(),
-            detail: "适合已有视频结果的项目，优先收口质量问题、导出阻塞和发布前检查。".into(),
-            target_step: "deliver".into(),
-            cta_label: "转入交付阶段".into(),
-            launch_intent: step_intent("deliver"),
+            key: "starter_creator_shot_rhythm".into(),
+            title: "镜头节奏样片".into(),
+            detail: "已有剧本时，优先拆出第一批分镜并跑出可预览的镜头节奏。".into(),
+            target_step: "storyboard".into(),
+            cta_label: "进入分镜节奏".into(),
+            launch_intent: step_agent_intent("storyboard", "storyboard_breaker"),
         },
     ];
 
@@ -844,8 +842,15 @@ mod tests {
             cockpit
                 .starter_templates
                 .get(1)
+                .map(|starter| starter.key.as_str()),
+            Some("starter_creator_shot_rhythm")
+        );
+        assert_eq!(
+            cockpit
+                .starter_templates
+                .get(1)
                 .and_then(|starter| starter.launch_intent.agent_kind.as_deref()),
-            Some("grid_prompt_generator")
+            Some("storyboard_breaker")
         );
     }
 

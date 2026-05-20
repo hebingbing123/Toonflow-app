@@ -6,7 +6,7 @@ use super::dimension::validate_dimension_scores;
 use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
 
 const VALID_TARGET_TYPES: &[&str] = &["storyboard", "script", "video", "asset", "output"];
-const VALID_SOURCES: &[&str] = &["manual", "auto"];
+const VALID_SOURCES: &[&str] = &["manual", "auto", "review_pack"];
 const VALID_BAD_CASE_CATEGORIES: &[&str] = &[
     "plot_hole",
     "character_break",
@@ -24,6 +24,7 @@ const VALID_STAGES: &[&str] = &[
     "storyboard_table",
     "storyboard_panel",
     "video_prompt",
+    "review_pack",
 ];
 /// 评分等级合法值（需求 6.3）
 const VALID_GRADES: &[&str] = &["A", "B", "C", "D"];

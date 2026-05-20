@@ -3,6 +3,7 @@
 pub(crate) mod assembly_query;
 pub(crate) mod assets_overview;
 pub(crate) mod audit;
+pub(crate) mod creator_journey;
 pub(crate) mod delete;
 pub(crate) mod get;
 pub(crate) mod home;
@@ -22,6 +23,9 @@ pub(crate) mod style_config;
 
 pub(crate) use assets_overview::project_assets_overview_by_id;
 pub(crate) use audit::list_project_audit;
+pub(crate) use creator_journey::{
+    get_project_creator_journey_summary, post_project_creator_journey_events,
+};
 pub(crate) use delete::delete_project_by_id;
 pub(crate) use get::get_project_by_id;
 pub(crate) use home::project_home_by_id;

@@ -127,4 +127,34 @@ void main() {
       expect(resolved.projectUuid, 'project-9');
     },
   );
+
+  test('resolveStudioOverlay waits for review pack prerequisites', () {
+    final resolved = resolveStudioOverlay(
+      overlayMode: StudioOverlayMode.reviewPack,
+      widgetProjectNumericId: 9,
+      productScopedProjectNumericId: null,
+      widgetScriptNumericId: null,
+      rowProjectUuid: null,
+      workspaceProjectUuid: '   ',
+      accessToken: 'token',
+    );
+
+    expect(resolved.kind, ResolvedStudioOverlayKind.loading);
+  });
+
+  test('resolveStudioOverlay resolves review pack', () {
+    final resolved = resolveStudioOverlay(
+      overlayMode: StudioOverlayMode.reviewPack,
+      widgetProjectNumericId: 9,
+      productScopedProjectNumericId: null,
+      widgetScriptNumericId: null,
+      rowProjectUuid: 'pack-9',
+      workspaceProjectUuid: null,
+      accessToken: 'token',
+    );
+
+    expect(resolved.kind, ResolvedStudioOverlayKind.reviewPack);
+    expect(resolved.projectNumericId, 9);
+    expect(resolved.projectUuid, 'pack-9');
+  });
 }

@@ -21,10 +21,11 @@ use crate::state::AppState;
 
 use handlers::{
     create_project, create_project_member, delete_project_by_id, delete_project_member,
-    get_project_by_id, get_project_model_routing, list_project_audit, list_project_members,
-    list_projects, patch_project_by_id, patch_project_member, patch_project_model_routing,
-    patch_style_config, project_assets_overview_by_id, project_home_by_id, project_overview_by_id,
-    project_production_overview_by_id, project_short_video_assembly_by_id,
+    get_project_by_id, get_project_creator_journey_summary, get_project_model_routing,
+    list_project_audit, list_project_members, list_projects, patch_project_by_id,
+    patch_project_member, patch_project_model_routing, patch_style_config,
+    post_project_creator_journey_events, project_assets_overview_by_id, project_home_by_id,
+    project_overview_by_id, project_production_overview_by_id, project_short_video_assembly_by_id,
     project_short_video_export_by_id, project_short_video_export_check_by_id,
     project_short_video_pre_assembly_by_id, project_short_video_readiness_by_id,
     project_short_video_timeline_apply_template, project_short_video_timeline_by_id,
@@ -88,6 +89,14 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/audit",
             get(list_project_audit),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/creator-journey-events",
+            axum::routing::post(post_project_creator_journey_events),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/creator-journey-summary",
+            get(get_project_creator_journey_summary),
         )
         .route(
             "/api/v1/projects/{project_id}/members/{user_id}",

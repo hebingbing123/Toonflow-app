@@ -1879,6 +1879,211 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioStepDeliverShort => 'Deliver';
 
   @override
+  String get studioCreatorJourneyProject => 'Project';
+
+  @override
+  String get studioCreatorJourneyScript => 'Script';
+
+  @override
+  String get studioCreatorJourneyArtPhase => 'Art';
+
+  @override
+  String get studioCreatorJourneyStoryboardPhase => 'Storyboard';
+
+  @override
+  String get studioCreatorJourneyReviewPack => 'Review pack';
+
+  @override
+  String get studioCreatorJourneyMoreSteps => 'Workspace';
+
+  @override
+  String get studioCreatorJourneyMoreStepsTooltip =>
+      'Jump to a workspace tab or open the review pack';
+
+  @override
+  String get studioCreatorJourneyMenuPrimary => 'Main path';
+
+  @override
+  String get studioCreatorJourneyMenuAdvanced => 'Workspace tools';
+
+  @override
+  String get studioCreatorJourneyMenuReviewPack => 'Open review pack';
+
+  @override
+  String get studioReviewPackLoading => 'Loading shot readiness…';
+
+  @override
+  String get studioCreatorStartersTitle => 'Quick-start templates';
+
+  @override
+  String get studioCreatorStartersSubtitle =>
+      'Pick a route to skip blank-page setup and jump into the main journey.';
+
+  @override
+  String get studioCreatorStarterApply => 'Apply template';
+
+  @override
+  String get studioCreatorStarterPlotTitle => 'Plot narrative';
+
+  @override
+  String get studioCreatorStarterPlotDetail =>
+      'Fill brief and script first, then follow Next step through art and storyboard.';
+
+  @override
+  String get studioCreatorStarterPlotCta => 'Start with script';
+
+  @override
+  String get studioCreatorStarterRhythmTitle => 'Shot rhythm sample';
+
+  @override
+  String get studioCreatorStarterRhythmDetail =>
+      'When script exists, break the first storyboard batch for a watchable rhythm.';
+
+  @override
+  String get studioCreatorStarterRhythmCta => 'Open storyboard rhythm';
+
+  @override
+  String get studioCreatorJourneyNext => 'Next step';
+
+  @override
+  String get studioCreatorJourneyNextDoneHint =>
+      'Review stage — finish merge & preview above.';
+
+  @override
+  String get studioCreatorJourneyStatusCompleted => 'Completed';
+
+  @override
+  String get studioCreatorJourneyStatusInProgress => 'In progress';
+
+  @override
+  String get studioCreatorJourneyStatusNotStarted => 'Not started';
+
+  @override
+  String get studioCreatorJourneyStatusBlocked => 'Blocked — check tasks';
+
+  @override
+  String get studioReviewPackTitle => 'Review pack';
+
+  @override
+  String get studioReviewPackSubtitle =>
+      'Shot-level readiness for a quick review before merge and preview.';
+
+  @override
+  String get studioReviewPackEmpty =>
+      'No storyboard rows yet. Create storyboards in production, then refresh this page.';
+
+  @override
+  String get studioReviewPackOpenAssembly => 'Open assembly & merge';
+
+  @override
+  String get studioReviewPackCopyLink => 'Copy page link';
+
+  @override
+  String get studioReviewPackLinkCopied => 'Page link copied to clipboard';
+
+  @override
+  String studioReviewPackRollupLine(int ready, int total) {
+    return '$ready / $total storyboards ready for short video';
+  }
+
+  @override
+  String studioReviewPackStoryboardId(int id) {
+    return 'Storyboard #$id';
+  }
+
+  @override
+  String studioReviewPackScriptLine(int id) {
+    return 'Script #$id';
+  }
+
+  @override
+  String get studioReviewPackFromDeliverLink => 'Shot review list';
+
+  @override
+  String get studioReviewPackExportReadyTitle => 'Ready for final export';
+
+  @override
+  String get studioReviewPackExportReadyDetail =>
+      'Server pre-check found no blocking gaps. Open publish to export or schedule.';
+
+  @override
+  String get studioReviewPackExportBlockedTitle => 'Export not ready yet';
+
+  @override
+  String studioReviewPackExportBlockedDetail(int count) {
+    return '$count blocking items — finish assembly gaps first.';
+  }
+
+  @override
+  String get studioReviewPackExportOpenPublish => 'Open publish & export';
+
+  @override
+  String get studioReviewPackExportFixInAssembly => 'Fix gaps in assembly';
+
+  @override
+  String get studioReviewPackExportViewChecklist =>
+      'View full export checklist';
+
+  @override
+  String get studioReviewPackExportCheckUnavailable =>
+      'Export pre-check is unavailable right now. Use assembly to verify gaps manually.';
+
+  @override
+  String studioReviewPackTeamSummaryLine(
+    int approved,
+    int needsChanges,
+    int flagged,
+    int pending,
+  ) {
+    return 'Team review: $approved approved · $needsChanges need changes · $flagged flagged · $pending pending';
+  }
+
+  @override
+  String get studioReviewPackFeedbackPending => 'Pending review';
+
+  @override
+  String get studioReviewPackFeedbackApproved => 'Approved';
+
+  @override
+  String get studioReviewPackFeedbackNeedsChanges => 'Needs changes';
+
+  @override
+  String get studioReviewPackFeedbackFlagged => 'Flagged';
+
+  @override
+  String get studioReviewPackFeedbackMenuTooltip => 'Set team review status';
+
+  @override
+  String get studioReviewPackFeedbackSetApproved => 'Mark approved';
+
+  @override
+  String get studioReviewPackFeedbackSetNeedsChanges => 'Request changes';
+
+  @override
+  String get studioReviewPackFeedbackSetFlagged => 'Flag issue';
+
+  @override
+  String get studioReviewPackFeedbackCommentDialogTitle =>
+      'Review note (optional)';
+
+  @override
+  String get studioReviewPackFeedbackCommentHint =>
+      'Visible to your team on this shot';
+
+  @override
+  String get studioReviewPackFeedbackSave => 'Save feedback';
+
+  @override
+  String get studioReviewPackFeedbackSaved => 'Team feedback saved';
+
+  @override
+  String get studioFailedJobsHint =>
+      'Some generation tasks failed. Open the task center to retry or clear blockers.';
+
+  @override
+  String get studioFailedJobsOpenTasks => 'Open task center';
+
+  @override
   String get studioDeliverTabAssembly => 'Assembly';
 
   @override

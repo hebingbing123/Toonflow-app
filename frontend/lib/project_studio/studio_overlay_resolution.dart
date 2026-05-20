@@ -6,6 +6,7 @@ enum ResolvedStudioOverlayKind {
   storyboardStudio,
   episodeConsole,
   projectStudio,
+  reviewPack,
 }
 
 class ResolvedStudioOverlay {
@@ -42,6 +43,15 @@ class ResolvedStudioOverlay {
     required String projectUuid,
   }) : this._(
          kind: ResolvedStudioOverlayKind.projectStudio,
+         projectNumericId: projectNumericId,
+         projectUuid: projectUuid,
+       );
+
+  const ResolvedStudioOverlay.reviewPack({
+    required int projectNumericId,
+    required String projectUuid,
+  }) : this._(
+         kind: ResolvedStudioOverlayKind.reviewPack,
          projectNumericId: projectNumericId,
          projectUuid: projectUuid,
        );
@@ -89,6 +99,13 @@ ResolvedStudioOverlay resolveStudioOverlay({
   final token = accessToken?.trim() ?? '';
   if (token.isEmpty) {
     return const ResolvedStudioOverlay.loading();
+  }
+
+  if (overlayMode == StudioOverlayMode.reviewPack) {
+    return ResolvedStudioOverlay.reviewPack(
+      projectNumericId: numericId,
+      projectUuid: projectUuid,
+    );
   }
 
   return ResolvedStudioOverlay.projectStudio(

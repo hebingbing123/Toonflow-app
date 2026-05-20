@@ -4,16 +4,17 @@ pub(crate) mod detail;
 pub(crate) use create_list::{create_project, list_projects, projects_summary};
 pub(crate) use detail::{
     create_project_member, delete_project_by_id, delete_project_member, get_project_by_id,
-    get_project_model_routing, list_project_audit, list_project_members, patch_project_by_id,
-    patch_project_member, patch_project_model_routing, patch_style_config,
-    project_assets_overview_by_id, project_home_by_id, project_overview_by_id,
-    project_production_overview_by_id, project_short_video_assembly_by_id,
-    project_short_video_export_by_id, project_short_video_export_check_by_id,
-    project_short_video_pre_assembly_by_id, project_short_video_readiness_by_id,
-    project_short_video_timeline_apply_template, project_short_video_timeline_by_id,
-    project_short_video_timeline_preview, project_short_video_timeline_put,
-    project_short_video_timeline_reorder, project_short_video_timeline_restore,
-    project_short_video_timeline_revisions, project_stats_by_id, resolve_project_model_routing,
+    get_project_creator_journey_summary, get_project_model_routing, list_project_audit,
+    list_project_members, patch_project_by_id, patch_project_member, patch_project_model_routing,
+    patch_style_config, post_project_creator_journey_events, project_assets_overview_by_id,
+    project_home_by_id, project_overview_by_id, project_production_overview_by_id,
+    project_short_video_assembly_by_id, project_short_video_export_by_id,
+    project_short_video_export_check_by_id, project_short_video_pre_assembly_by_id,
+    project_short_video_readiness_by_id, project_short_video_timeline_apply_template,
+    project_short_video_timeline_by_id, project_short_video_timeline_preview,
+    project_short_video_timeline_put, project_short_video_timeline_reorder,
+    project_short_video_timeline_restore, project_short_video_timeline_revisions,
+    project_stats_by_id, resolve_project_model_routing,
 };
 
 #[cfg(test)]
