@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_surfaces.dart';
-import '../../../design_system/components/studio_text_styles.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../../script_editor/support.dart';
@@ -142,28 +141,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper,
                 ),
               ),
-              const SizedBox(height: StudioLayoutSpacing.listItem),
-              StudioWorkbenchSection(
-                title: model.diagnosis.summary,
-                subtitle: model.diagnosis.detail,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(
-                    StudioLayoutSpacing.cardInner - 4,
-                  ),
-                  decoration: studioRecessedPanelDecoration(context),
-                  child: FilledButton.tonal(
-                    key: const Key(
-                      'project-scripts-workbench-recommended-action',
-                    ),
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onRunRecommendedAction,
-                    child: Text(model.recommendedActionLabel),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               TextField(
                 controller: model.groupSizeCtrl,
                 keyboardType: TextInputType.number,
@@ -278,12 +256,33 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
               if ((model.scriptTaskLine ?? '').trim().isNotEmpty) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioLayoutSpacing.listItem),
                 Text(
                   model.scriptTaskLine!,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
+              const SizedBox(height: StudioLayoutSpacing.listItem),
+              StudioWorkbenchSection(
+                title: model.diagnosis.summary,
+                subtitle: model.diagnosis.detail,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(
+                    StudioLayoutSpacing.cardInner - 4,
+                  ),
+                  decoration: studioRecessedPanelDecoration(context),
+                  child: FilledButton.tonal(
+                    key: const Key(
+                      'project-scripts-workbench-recommended-action',
+                    ),
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onRunRecommendedAction,
+                    child: Text(model.recommendedActionLabel),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

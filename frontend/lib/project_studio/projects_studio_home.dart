@@ -162,10 +162,10 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.16),
-                blurRadius: 18,
-                spreadRadius: -12,
-                offset: const Offset(0, 8),
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -490,7 +490,7 @@ class _RecentProjectChip extends StatelessWidget {
               width: selected ? 1.5 : 1,
             ),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -499,7 +499,11 @@ class _RecentProjectChip extends StatelessWidget {
                   Expanded(
                     child: Text(
                       l10n.studioContinueCreating,
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: tokens.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
                   if (selected)

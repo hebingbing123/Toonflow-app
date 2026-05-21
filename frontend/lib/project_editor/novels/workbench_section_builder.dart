@@ -19,6 +19,7 @@ Widget buildProjectNovelsWorkbenchSection({
   required VoidCallback openWorkbench,
   required Future<void> Function() refreshNovels,
   required Future<void> Function() generateEvents,
+  bool showTitle = true,
 }) {
   final first = novels.isNotEmpty ? novels.first : null;
   final last = novels.isNotEmpty ? novels.last : null;
@@ -34,15 +35,19 @@ Widget buildProjectNovelsWorkbenchSection({
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-    decoration: studioInsetPanelDecoration(ctx),
+    decoration: showTitle
+        ? studioInsetPanelDecoration(ctx)
+        : studioRecessedPanelDecoration(ctx),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.projectEditorNovelsChapterWorkbenchTitle,
-          style: Theme.of(ctx).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 4),
+        if (showTitle) ...<Widget>[
+          Text(
+            l10n.projectEditorNovelsChapterWorkbenchTitle,
+            style: Theme.of(ctx).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+        ],
         Text(
           l10n.projectEditorNovelsWorkbenchStudioCrossLink,
           style: studioHintStyle(ctx),

@@ -46,18 +46,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _StoryboardWorkbenchPanel(
-                          token: token,
-                          projectId: projectId,
-                          storyNumericId: storyNumericId,
-                          scriptNumericId: scriptNumericId,
-                          scriptStoryboard: row,
-                          readPromptText: () => promptCtrl.text,
-                          readVideoDescriptionText: () => videoCtrl.text,
-                          videoDescriptionCtrl: videoCtrl,
-                          onStoryboardMutated: onStoryboardTreeMutated,
-                        ),
-                        const SizedBox(height: 16),
                         TextField(
                           controller: promptCtrl,
                           maxLines: 4,
@@ -66,14 +54,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             alignLabelWithHint: true,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         TextField(
                           controller: stateCtrl,
                           decoration: InputDecoration(
                             labelText: l10n.storyboardEditorStateLabelClearEmpty,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         TextField(
                           controller: videoCtrl,
                           maxLines: 3,
@@ -83,7 +71,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             alignLabelWithHint: true,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         Row(
                           children: [
                             Expanded(
@@ -96,7 +84,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: StudioLayoutSpacing.listItem),
                             Expanded(
                               child: TextField(
                                 controller: sgiCtrl,
@@ -108,6 +96,18 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+                        _StoryboardWorkbenchPanel(
+                          token: token,
+                          projectId: projectId,
+                          storyNumericId: storyNumericId,
+                          scriptNumericId: scriptNumericId,
+                          scriptStoryboard: row,
+                          readPromptText: () => promptCtrl.text,
+                          readVideoDescriptionText: () => videoCtrl.text,
+                          videoDescriptionCtrl: videoCtrl,
+                          onStoryboardMutated: onStoryboardTreeMutated,
                         ),
                       ],
                     ),

@@ -80,6 +80,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return ExpansionTile(
+      initiallyExpanded: false,
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
       title: Text(l10n.taskCenterCompatibilityCheck),

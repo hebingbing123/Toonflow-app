@@ -40,28 +40,13 @@ extension _HomePageScriptEditor on _HomePageState {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _ScriptWorkbenchPanel(
-                          token: token,
-                          projectId: projectId,
-                          scriptNumericId: scriptNumericId,
-                          onExtractStateSynced: (extractState) {
-                            stateCtrl.text = extractState?.toString() ?? '';
-                          },
-                          onOpenEditImageWorkbench: () =>
-                              _openScriptEditImageWorkbenchDialog(
-                                token: token,
-                                projectId: projectId,
-                                scriptNumericId: scriptNumericId,
-                              ),
-                        ),
-                        const SizedBox(height: 16),
                         TextField(
                           controller: nameCtrl,
                           decoration: InputDecoration(
                             labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: StudioLayoutSpacing.listItem),
                         TextField(
                           controller: contentCtrl,
                           minLines: 4,
@@ -71,7 +56,7 @@ extension _HomePageScriptEditor on _HomePageState {
                             alignLabelWithHint: true,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: StudioLayoutSpacing.listItem),
                         TextField(
                           controller: stateCtrl,
                           keyboardType: TextInputType.number,
@@ -92,6 +77,21 @@ extension _HomePageScriptEditor on _HomePageState {
                                   ),
                             child: Text(l10n.scriptEditorOpenStoryboards),
                           ),
+                        ),
+                        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+                        _ScriptWorkbenchPanel(
+                          token: token,
+                          projectId: projectId,
+                          scriptNumericId: scriptNumericId,
+                          onExtractStateSynced: (extractState) {
+                            stateCtrl.text = extractState?.toString() ?? '';
+                          },
+                          onOpenEditImageWorkbench: () =>
+                              _openScriptEditImageWorkbenchDialog(
+                                token: token,
+                                projectId: projectId,
+                                scriptNumericId: scriptNumericId,
+                              ),
                         ),
                       ],
                     ),

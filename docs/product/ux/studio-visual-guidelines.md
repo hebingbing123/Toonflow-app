@@ -84,12 +84,13 @@
 
 ## 巡检收尾说明（2026-05）
 
-主路径 **P0/P1**、阶段 6 polish 与 **工作台 IA**（`StudioWorkbenchSection`、驾驶舱/诊断默认折叠）已在应用代码中落地。仍可能保留：
+主路径 **P0/P1**、阶段 6–9 与 **UX Comfort Phase 1–2**（设计系统组件 + 项目首页）已在应用代码中落地。视觉竖切可收尾；以下为 **有意保留** 或 **非视觉** 项：
 
-- **登录 Hero** 营销区白字/半透明（品牌层，非工作台 token 规则）
+- **登录 Hero** 营销区白字/半透明（品牌层；阶段 9 已降噪动效/舞台，非 token 规则）
 - **`pipeline_step_chip`** 在 `useStudioTokens: false` 时回退 M3 `outlineVariant` / `onSurfaceVariant`
 - **`tokens.panelGlow`** 字段仍在 `tokens.dart` 供渐变定义，运行时 UI 基本不再引用
 - 表单内 **单行 hint**（如工作台空下拉提示）仍可用 `studioHintStyle`，不必一律换成 `StudioEmptyState`
+- **路由级「整页仅主编辑区」** 需产品/导航决策；对话框与工作台已「主字段/主区优先 + 诊断折叠」
 
 新增 UI 请按上文 PR 自检清单执行；可选对照 [`studio-visual-debt.md`](studio-visual-debt.md) 中的 grep 基线。黄金图目录：
 
@@ -150,3 +151,6 @@
 | 阶段 6：收尾 polish | `VisualDensity.compact` 清零、`studioChromeIconButtonStyle`、间距 token、CI `studio-visual-debt-check.sh` |
 | 阶段 7：工作台 IA | `StudioWorkbenchSection`；驾驶舱/入门模板/诊断默认折叠；短剧预检 gap 默认收起；设置 Hero 与 Next CTA 降噪 |
 | 阶段 8：体验扫尾 | 命令面板 token/空状态文案；业务层 `10/14` 间距清零；项目脚本建议区与 Agent 诊断区可折叠 |
+| 阶段 9：编辑器 IA + Hero | 脚本/分镜编辑对话框主字段优先、批量工作台诊断置底；脚本步小说区可折叠；`ExpansionTile` 默认收起；登录 Hero 动效/舞台略降噪；登录错误文案修复 |
+| UX Comfort Phase 1–2 | `StudioPrimaryButton` / `StudioEmptyState` / `StudioGettingStartedSteps`；项目首页标题区阴影降噪、空状态+入门步骤并排、最近项目 chip 层级 |
+| UX Comfort Phase 3 | 目标测试 + `studio-visual-debt-check` + 黄金图（`projects_empty` / `01_login` / desktop_layouts） |

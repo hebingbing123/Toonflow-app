@@ -90,7 +90,7 @@ class StudioGettingStartedSteps extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: StudioLayoutSpacing.stackMedium),
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(top: 4),

@@ -62,4 +62,10 @@ flutter test test/ui/help_hub_studio_test.dart --update-goldens
 - 桌面 / ui_gallery 黄金图：已与 token、光晕、空状态对齐
 - 命令面板：`studioInsetPanelDecoration` + `studioCommandPaletteNoResults*` 文案
 - 工作台 IA 扩展：项目脚本建议区、Agent 脚本/生产诊断区默认 `StudioWorkbenchSection` 折叠
-- 工作台 IA：`StudioWorkbenchSection` 默认可折叠；驾驶舱默认收起（测试用 `project_studio_cockpit_expand` / `studio_workbench_section_toggle`）（改登录 Hero 后需再跑 `--update-goldens`）
+- 工作台 IA：`StudioWorkbenchSection` 默认可折叠；驾驶舱默认收起（测试用 `project_studio_cockpit_expand` / `studio_workbench_section_toggle`）
+- 编辑器对话框：脚本/分镜单条编辑主字段置顶，工作台诊断在底部；批量脚本工作台诊断区置底
+- 脚本步小说摘要区：`StudioWorkbenchSection` 默认折叠（`showTitle: false` 内层卡片）
+- 次要 `ExpansionTile`（通知高级、项目基础模态默认、预览/兼容块等）默认 `initiallyExpanded: false`
+- 登录 Hero：背景网格/舞台阴影略减、动画周期 24s（品牌白字保留）；`01_login` golden 已同步
+- UX Comfort：项目首页标题阴影/最近 chip/栅格间距；`studio_getting_started_steps` 间距 token；`export_history_dialog` part 文件 import 修复
+- 业务层 `SizedBox(10/14)` / `width: 10|14`：**0**（typography 定义层除外）

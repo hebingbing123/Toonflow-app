@@ -94,8 +94,8 @@ class ProjectsGridView extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            mainAxisSpacing: StudioSpacing.sm + 4,
-            crossAxisSpacing: StudioSpacing.sm + 4,
+            mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+            crossAxisSpacing: StudioLayoutSpacing.stackMedium,
             childAspectRatio: childAspectRatio,
           ),
           itemCount: projects.length,

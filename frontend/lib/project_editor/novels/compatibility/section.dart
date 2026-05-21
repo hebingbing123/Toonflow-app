@@ -18,6 +18,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
   }) {
     final l10n = resolveAppLocalizationsForErrors(ctx);
     return ExpansionTile(
+      initiallyExpanded: false,
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
       title: Text(l10n.projectEditorNovelsCompatibilitySectionTitle),

@@ -258,7 +258,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           ),
         ),
         if (_productionError != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Text(
             _productionError!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -266,7 +266,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioLayoutSpacing.listItem),
         _StoryboardCharacterSection(
           saving: _saving,
           loadingCharacters: _loadingCharacters,
@@ -276,7 +276,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
               _runDialogAction(() => _saveStoryboardCharacter(characterId)),
           onReloadCharacters: _loadWorkbenchCharacters,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
         _StoryboardImageSection(
           saving: _saving,
           loadingProduction: _loadingProduction,
@@ -286,7 +286,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onClearFrame: () => _runDialogAction(_clearCurrentFrame),
           onRefreshProductionData: _refreshProductionInputsAction,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
         _StoryboardVideoSection(
           projectId: widget.projectId,
           accessToken: widget.token,

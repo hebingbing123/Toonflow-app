@@ -259,6 +259,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (widget.studioPresentation)
             ExpansionTile(
+              initiallyExpanded: false,
               tilePadding: EdgeInsets.zero,
               childrenPadding: const EdgeInsets.only(bottom: 8),
               title: Text(l10n.studioNotificationsAdvanced),

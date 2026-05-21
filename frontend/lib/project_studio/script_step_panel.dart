@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/novels/support.dart';
@@ -273,40 +274,43 @@ class _ProjectStudioScriptStepPanelState
               _reloadAssetsAndStats,
             ),
           ),
-          if (novels.isNotEmpty) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
-            Text(
-              l10n.studioScriptStepNovelsSectionTitle,
-              style: studioInsetSectionTitleStyle(context),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-            buildProjectNovelsWorkbenchSection(
-              ctx: context,
-              l10n: l10n,
-              novels: novels,
-              novelsLoading: _novelsLoading,
-              novelsBusy: _novelsBusy,
-              assetsBusy: _assetsBusy,
-              assetsLoading: _assetsLoading,
-              assetsScriptFilterLoading: _assetsScriptFilterLoading,
-              openWorkbench: () => widget.onOpenNovelWorkbench(
-                _novelsRef,
-                _novelsBusy,
-                _reloadAssetsAndStats,
+          if (novels.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(
+                top: StudioLayoutSpacing.cardInner - 4,
               ),
-              refreshNovels: () async {
-                setState(() => _novelsLoading[0] = true);
-                try {
-                  await _reloadAssetsAndStats();
-                } finally {
-                  if (mounted) {
-                    setState(() => _novelsLoading[0] = false);
-                  }
-                }
-              },
-              generateEvents: _generateTopNovelEvents,
+              child: StudioWorkbenchSection(
+                title: l10n.studioScriptStepNovelsSectionTitle,
+                subtitle: summarizeNovelRows(l10n, novels),
+                child: buildProjectNovelsWorkbenchSection(
+                  ctx: context,
+                  l10n: l10n,
+                  showTitle: false,
+                  novels: novels,
+                  novelsLoading: _novelsLoading,
+                  novelsBusy: _novelsBusy,
+                  assetsBusy: _assetsBusy,
+                  assetsLoading: _assetsLoading,
+                  assetsScriptFilterLoading: _assetsScriptFilterLoading,
+                  openWorkbench: () => widget.onOpenNovelWorkbench(
+                    _novelsRef,
+                    _novelsBusy,
+                    _reloadAssetsAndStats,
+                  ),
+                  refreshNovels: () async {
+                    setState(() => _novelsLoading[0] = true);
+                    try {
+                      await _reloadAssetsAndStats();
+                    } finally {
+                      if (mounted) {
+                        setState(() => _novelsLoading[0] = false);
+                      }
+                    }
+                  },
+                  generateEvents: _generateTopNovelEvents,
+                ),
+              ),
             ),
-          ],
         ],
       ),
     );

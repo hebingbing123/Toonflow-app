@@ -38,7 +38,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _sceneController = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 18),
+    duration: const Duration(seconds: 24),
   );
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -116,6 +116,11 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     if (_mode == _AuthMode.signUp &&
         widget.authController.passwordController.text !=
             _confirmPasswordController.text) {
+      setState(() {
+        _localErrorMessage = AppLocalizations.of(
+          context,
+        )!.productLoginPasswordMismatch;
+      });
       return;
     }
     if (_mode == _AuthMode.signIn) {
@@ -130,6 +135,10 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     final l10n = AppLocalizations.of(context)!;
     final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
+    final authError = widget.errorMessage?.trim();
+    final panelError = (authError != null && authError.isNotEmpty)
+        ? authError
+        : _localErrorMessage;
 
     return Scaffold(
       body: DecoratedBox(
@@ -144,9 +153,9 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                     return CustomPaint(
                       painter: _BackdropGridPainter(
                         progress: _sceneController.value,
-                        lineColor: tokens.borderDefault.withValues(alpha: 0.20),
-                        accentColor: tokens.primary.withValues(alpha: 0.22),
-                        accentColorTwo: tokens.accent.withValues(alpha: 0.18),
+                        lineColor: tokens.borderDefault.withValues(alpha: 0.16),
+                        accentColor: tokens.primary.withValues(alpha: 0.18),
+                        accentColorTwo: tokens.accent.withValues(alpha: 0.14),
                       ),
                     );
                   },
@@ -185,7 +194,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                               ),
                             ),
                           ),
-                          const SizedBox(width: StudioSpacing.md + 4),
+                          const SizedBox(width: StudioLayoutSpacing.insetComfortable),
                           SizedBox(
                             width: authPanelWidth,
                             child: Align(
@@ -195,6 +204,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                                   l10n: l10n,
                                   authController: widget.authController,
                                   mode: _mode,
+                                  errorMessage: panelError,
                                   confirmPasswordController:
                                       _confirmPasswordController,
                                   onModeChanged: _setMode,
@@ -218,7 +228,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           title: l10n.appTitle,
                           eyebrow: l10n.productPipelineStripTitle,
                         ),
-                        const SizedBox(height: StudioSpacing.sm + 4),
+                        const SizedBox(height: StudioLayoutSpacing.stackMedium),
                         if (ultraCompact)
                           Text(
                             l10n.productShellLoginTagline,
@@ -235,11 +245,12 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                               compact: true,
                             ),
                           ),
-                        const SizedBox(height: StudioSpacing.sm + 4),
+                        const SizedBox(height: StudioLayoutSpacing.stackMedium),
                         _AuthPanel(
                           l10n: l10n,
                           authController: widget.authController,
                           mode: _mode,
+                          errorMessage: panelError,
                           confirmPasswordController: _confirmPasswordController,
                           onModeChanged: _setMode,
                           onSubmit: _handleSubmit,
@@ -282,7 +293,7 @@ class _HeroStage extends StatelessWidget {
             title: l10n.appTitle,
             eyebrow: l10n.productPipelineStripTitle,
           ),
-          const SizedBox(height: StudioSpacing.md + 4),
+          const SizedBox(height: StudioLayoutSpacing.insetComfortable),
         ],
         ConstrainedBox(
           constraints: BoxConstraints(
@@ -335,7 +346,7 @@ class _HeroStage extends StatelessWidget {
         if (!compact) const SizedBox(height: StudioSpacing.md),
         if (compact)
           SizedBox(
-            height: 200,
+            height: 176,
             child: _AiStagePanel(
               l10n: l10n,
               compact: compact,
@@ -345,7 +356,7 @@ class _HeroStage extends StatelessWidget {
         else
           Expanded(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 300, maxHeight: 360),
+              constraints: const BoxConstraints(minHeight: 272, maxHeight: 320),
               child: _AiStagePanel(
                 l10n: l10n,
                 compact: compact,
@@ -428,8 +439,8 @@ class _AiStagePanel extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -861,7 +872,6 @@ class _AuthPanel extends StatelessWidget {
     required this.l10n,
     required this.authController,
     required this.mode,
-    // ignore: unused_element_parameter
     this.errorMessage,
     required this.confirmPasswordController,
     required this.onModeChanged,

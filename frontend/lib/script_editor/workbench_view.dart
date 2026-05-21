@@ -126,7 +126,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             if (model.scriptContext != null) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap - 4),
               Text(
                 l10n.projectEditorScriptsExtractStateLine(
                   model.scriptContext?.extractState ?? 0,
@@ -142,10 +142,10 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
               ),
             ],
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.listItem),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               FilledButton.tonal(
                 onPressed: callbacks.onExportCurrentScript,
@@ -166,20 +166,20 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             ],
           ),
           if (model.exportLine != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(model.exportLine!, style: theme.textTheme.bodySmall),
           ],
           if (model.extractStateLine != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(model.extractStateLine!, style: theme.textTheme.bodySmall),
           ],
           if (model.extractAssetsLine != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(model.extractAssetsLine!, style: theme.textTheme.bodySmall),
           ],
           if (model.extractStateRow != null &&
               (model.extractStateRow!.errorReason ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(
               l10n.projectEditorScriptsSingleWorkbenchRecentExtractError(
                 model.extractStateRow!.errorReason!.trim(),

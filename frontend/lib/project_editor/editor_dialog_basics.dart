@@ -157,6 +157,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         ),
         const SizedBox(height: 8),
         ExpansionTile(
+          initiallyExpanded: false,
           tilePadding: EdgeInsets.zero,
           title: Text(
             l10n.projectEditorBasicsModalityDefaultsTitle,
