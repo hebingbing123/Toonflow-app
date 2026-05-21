@@ -7,6 +7,7 @@ import '../auth/controller.dart';
 import '../config.dart'
     show kDevAdminEmail, kDevAdminPassword, kSupabaseConfigured;
 import '../design_system/components/openflow_brand.dart';
+import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
@@ -56,6 +57,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
   @override
   void initState() {
     super.initState();
+    StudioToastOverlay.hide();
     widget.authController.passwordController.addListener(_clearLocalError);
     _confirmPasswordController.addListener(_clearLocalError);
     if (_ambientAnimationEnabled) {
@@ -68,6 +70,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
   @override
   void didUpdateWidget(covariant ProductLoginPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    StudioToastOverlay.hide();
     if (!identical(oldWidget.authController, widget.authController)) {
       oldWidget.authController.passwordController.removeListener(
         _clearLocalError,
@@ -166,8 +169,12 @@ class _ProductLoginPageState extends State<ProductLoginPage>
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final contentWidth = constraints.maxWidth;
+                  final contentHeight = constraints.maxHeight;
                   final wide = contentWidth >= 1120;
                   final ultraCompact = contentWidth < 480;
+                  // Short windows (split pane, small flutter-view): keep auth above the fold.
+                  final shortViewport = contentHeight < 560;
+                  final simplifiedHero = ultraCompact || shortViewport;
                   final pagePadding = EdgeInsets.all(
                     wide
                         ? StudioSpacing.lg - 4
@@ -229,7 +236,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           eyebrow: l10n.productPipelineStripTitle,
                         ),
                         const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                        if (ultraCompact)
+                        if (simplifiedHero)
                           Text(
                             l10n.productShellLoginTagline,
                             style: studioSectionIntroStyle(context)?.copyWith(

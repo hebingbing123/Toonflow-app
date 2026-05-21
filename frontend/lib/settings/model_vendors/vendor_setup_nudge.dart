@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../design_system/ix/studio_snackbar.dart';
+import '../../design_system/ix/studio_toast_overlay.dart';
 import '../../l10n/app_localizations.dart';
 import '../../product_shell/studio_shell_branches.dart';
 import '../../shell/navigation_controller.dart';
@@ -38,6 +39,9 @@ class DomesticVendorSetupNudge {
     required VendorSetupNudgeTrigger trigger,
     required VoidCallback onOpenSettings,
   }) {
+    if (!context.mounted) {
+      return;
+    }
     final l10n = AppLocalizations.of(context)!;
     showStudioSnackBar(
       context,

@@ -17,24 +17,36 @@ class StudioScaffoldMessengerState extends ScaffoldMessengerState {
     SnackBar snackBar, {
     AnimationStyle? snackBarAnimationStyle,
   }) {
+    clearSnackBars();
+
     final message = studioToastMessageFromSnackBarContent(snackBar.content);
+    final duration = snackBar.duration;
     if (message != null && message.isNotEmpty && mounted) {
-      final tone = _toneFromSnackBar(snackBar);
       showStudioToast(
         context,
         message: message,
-        tone: tone,
-        duration: snackBar.duration,
+        tone: _toneFromSnackBar(snackBar),
+        duration: duration,
         actionLabel: snackBar.action?.label,
         onAction: snackBar.action?.onPressed,
       );
     }
-    final controller = super.showSnackBar(
-      _invisibleSnackBar(snackBar.duration),
+
+    // Never paint a bottom [SnackBar] bar — satisfy the messenger API off-screen only.
+    return super.showSnackBar(
+      SnackBar(
+        content: const SizedBox.shrink(),
+        duration: duration,
+        behavior: SnackBarBehavior.floating,
+        width: 1,
+        margin: const EdgeInsets.only(left: 100000, bottom: 100000),
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        clipBehavior: Clip.none,
+      ),
       snackBarAnimationStyle: snackBarAnimationStyle,
     );
-    hideCurrentSnackBar();
-    return controller;
   }
 
   StudioToastTone _toneFromSnackBar(SnackBar snackBar) {
@@ -45,16 +57,5 @@ class StudioScaffoldMessengerState extends ScaffoldMessengerState {
       }
     }
     return StudioToastTone.info;
-  }
-
-  SnackBar _invisibleSnackBar(Duration duration) {
-    return SnackBar(
-      content: const SizedBox.shrink(),
-      duration: duration,
-      behavior: SnackBarBehavior.fixed,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      padding: EdgeInsets.zero,
-    );
   }
 }
