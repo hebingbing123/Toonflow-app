@@ -149,3 +149,4 @@
 | 阶段 6：failures 忽略 | `frontend/.gitignore` → `test/ui/failures/` |
 | 阶段 6：收尾 polish | `VisualDensity.compact` 清零、`studioChromeIconButtonStyle`、间距 token、CI `studio-visual-debt-check.sh` |
 | 阶段 7：工作台 IA | `StudioWorkbenchSection`；驾驶舱/入门模板/诊断默认折叠；短剧预检 gap 默认收起；设置 Hero 与 Next CTA 降噪 |
+| 阶段 8：体验扫尾 | 命令面板 token/空状态文案；业务层 `10/14` 间距清零；项目脚本建议区与 Agent 诊断区可折叠 |

@@ -1531,6 +1531,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioCommandPaletteSearchHint => 'Search commands…';
 
   @override
+  String get studioCommandPaletteNoResultsTitle => 'No matching commands';
+
+  @override
+  String get studioCommandPaletteNoResultsHint => 'Try a different search term';
+
+  @override
   String studioAgentSubmitted(String kind) {
     return 'Agent \"$kind\" — open the matching workspace to continue';
   }

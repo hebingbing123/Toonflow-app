@@ -38,11 +38,18 @@ class StudioPrimaryButton extends StatelessWidget {
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              if (icon != null) ...<Widget>[
-                Icon(icon, size: 18),
-                const SizedBox(width: 8),
-              ],
-              Text(label),
+              Flexible(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: <Widget>[
+                    if (icon != null) Icon(icon, size: 18),
+                    Text(label, textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
             ],
           );
 
@@ -50,55 +57,71 @@ class StudioPrimaryButton extends StatelessWidget {
         ? Colors.white
         : tokens.textSecondary.withValues(alpha: 0.88);
 
-    return Material(
-      color: Colors.transparent,
-      borderRadius: borderRadius,
-      child: Ink(
-        decoration: BoxDecoration(
-          gradient: enabled
-              ? studio.primaryGradient
-              : LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[
-                    tokens.bgElevated,
-                    tokens.bgSurface.withValues(alpha: 0.94),
-                  ],
-                ),
-          borderRadius: borderRadius,
-          border: Border.all(
-            color: enabled
-                ? tokens.primary.withValues(alpha: 0.48)
-                : tokens.borderSubtle,
-          ),
-          boxShadow: enabled
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: tokens.primary.withValues(alpha: 0.18),
-                    blurRadius: 10,
-                    spreadRadius: -4,
-                    offset: const Offset(0, 3),
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: borderRadius,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: enabled
+                ? studio.primaryGradient
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      tokens.bgElevated,
+                      tokens.bgSurface.withValues(alpha: 0.94),
+                    ],
                   ),
-                ]
-              : const <BoxShadow>[],
-        ),
-        child: InkWell(
-          onTap: enabled ? onPressed : null,
-          borderRadius: borderRadius,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 46),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: StudioLayoutSpacing.insetComfortable,
-                vertical: StudioLayoutSpacing.insetDense,
-              ),
-              child: Center(
-                child: IconTheme(
-                  data: IconThemeData(size: 18, color: foregroundColor),
-                  child: DefaultTextStyle(
-                    style: (theme.textTheme.labelLarge ?? const TextStyle())
-                        .copyWith(color: foregroundColor),
-                    child: child,
+            borderRadius: borderRadius,
+            border: Border.all(
+              color: enabled
+                  ? tokens.primary.withValues(alpha: 0.58)
+                  : tokens.borderSubtle.withValues(alpha: 0.92),
+            ),
+            boxShadow: enabled
+                ? <BoxShadow>[
+                    BoxShadow(
+                      color: tokens.primary.withValues(alpha: 0.22),
+                      blurRadius: 14,
+                      spreadRadius: -8,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 12,
+                      spreadRadius: -10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          ),
+          child: InkWell(
+            onTap: enabled ? onPressed : null,
+            borderRadius: borderRadius,
+            splashColor: tokens.accent.withValues(alpha: 0.12),
+            highlightColor: tokens.primary.withValues(alpha: 0.10),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 46, minWidth: 120),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: StudioLayoutSpacing.insetComfortable,
+                  vertical: 11,
+                ),
+                child: Center(
+                  child: IconTheme(
+                    data: IconThemeData(size: 18, color: foregroundColor),
+                    child: DefaultTextStyle(
+                      style: (theme.textTheme.labelLarge ?? const TextStyle())
+                          .copyWith(
+                            color: foregroundColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                      child: child,
+                    ),
                   ),
                 ),
               ),

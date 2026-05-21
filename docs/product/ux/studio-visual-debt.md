@@ -60,4 +60,6 @@ flutter test test/ui/help_hub_studio_test.dart --update-goldens
 - 主路径 `primaryContainer` / `secondaryContainer`：已改为 `StudioTokens.primarySoft` / `accentSoft`（`pipeline_step_chip` 非 Studio 回退除外）
 - 主路径空状态：**StudioEmptyState** 三类工厂
 - 桌面 / ui_gallery 黄金图：已与 token、光晕、空状态对齐
+- 命令面板：`studioInsetPanelDecoration` + `studioCommandPaletteNoResults*` 文案
+- 工作台 IA 扩展：项目脚本建议区、Agent 脚本/生产诊断区默认 `StudioWorkbenchSection` 折叠
 - 工作台 IA：`StudioWorkbenchSection` 默认可折叠；驾驶舱默认收起（测试用 `project_studio_cockpit_expand` / `studio_workbench_section_toggle`）（改登录 Hero 后需再跑 `--update-goldens`）

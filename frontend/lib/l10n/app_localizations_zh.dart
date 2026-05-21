@@ -1438,6 +1438,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioCommandPaletteSearchHint => '搜索命令…';
 
   @override
+  String get studioCommandPaletteNoResultsTitle => '没有匹配的命令';
+
+  @override
+  String get studioCommandPaletteNoResultsHint => '请换一组关键词试试';
+
+  @override
   String studioAgentSubmitted(String kind) {
     return '已提交 Agent「$kind」，请在对应工作区继续';
   }

@@ -94,7 +94,7 @@ class _InternationalVendorsSetupBannerState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Icon(Icons.public_outlined, size: 22, color: tokens.primary),
-                const SizedBox(width: 10),
+                const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +214,7 @@ class _IntlVendorSetupRow extends StatelessWidget {
                 size: 20,
                 color: ready ? tokens.primary : tokens.textMuted,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: StudioLayoutSpacing.inlineGap),
               Expanded(
                 child: Text(
                   vendor.catalog.name,

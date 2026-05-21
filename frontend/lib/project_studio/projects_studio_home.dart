@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_getting_started_steps.dart';
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -144,6 +145,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     AppLocalizations l10n,
     bool stacked,
   ) {
+    final tokens = StudioTokens.of(context);
     final action = StudioPrimaryButton(
       label: widget.controller.creatingProject
           ? l10n.projectsCreating
@@ -152,45 +154,113 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
       loading: widget.controller.creatingProject,
       onPressed: widget.controller.creatingProject ? null : _createProject,
     );
-    if (stacked) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            l10n.studioProjectsHomeTitle,
-            style: studioPageTitleStyle(context),
-          ),
-          const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-          Text(
-            l10n.studioProjectsHomeSubtitle,
-            style: studioSectionIntroStyle(context),
-          ),
-          const SizedBox(height: StudioLayoutSpacing.section - 6),
-          action,
-        ],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                l10n.studioProjectsHomeTitle,
-                style: studioPageTitleStyle(context),
-              ),
-              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-              Text(
-                l10n.studioProjectsHomeSubtitle,
-                style: studioSectionIntroStyle(context),
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.16),
+                blurRadius: 18,
+                spreadRadius: -12,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-        ),
-        const SizedBox(width: StudioSpacing.sm),
-        action,
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: stacked
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    l10n.studioProjectsHomeTitle,
+                    style: studioPageTitleStyle(context),
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                  Text(
+                    l10n.studioProjectsHomeSubtitle,
+                    style: studioSectionIntroStyle(context),
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.section - 6),
+                  action,
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          l10n.studioProjectsHomeTitle,
+                          style: studioPageTitleStyle(context),
+                        ),
+                        const SizedBox(
+                          height: StudioLayoutSpacing.titleSubtitle,
+                        ),
+                        Text(
+                          l10n.studioProjectsHomeSubtitle,
+                          style: studioSectionIntroStyle(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: StudioSpacing.sm),
+                  action,
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyProjectsOverview(
+    BuildContext context,
+    AppLocalizations l10n,
+    double width,
+  ) {
+    final showSecondaryAction = widget.onOpenModelVendorSettings != null;
+    final emptyState = StudioEmptyState.firstUse(
+      title: l10n.studioProjectsEmptyTitle,
+      subtitle: l10n.studioProjectsEmptySubtitle,
+      icon: Icons.folder_open_outlined,
+      actionLabel: l10n.studioCreateProject,
+      onAction: _createProject,
+      secondaryActionLabel: showSecondaryAction
+          ? l10n.studioModelRoutingOpenVendorSettings
+          : null,
+      onSecondaryAction: showSecondaryAction
+          ? widget.onOpenModelVendorSettings
+          : null,
+    );
+    final gettingStarted = StudioGettingStartedSteps(
+      steps: <String>[
+        l10n.studioProjectsEmptyStep1,
+        l10n.studioProjectsEmptyStep2,
+        l10n.studioProjectsEmptyStep3,
+      ],
+      maxWidth: width >= 1080 ? 420 : 560,
+    );
+
+    if (width >= 1080) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(flex: 6, child: emptyState),
+          const SizedBox(width: StudioSpacing.md),
+          Expanded(flex: 5, child: gettingStarted),
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        emptyState,
+        const SizedBox(height: StudioLayoutSpacing.section + 4),
+        gettingStarted,
       ],
     );
   }
@@ -271,8 +341,9 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         final recent = _resolveRecent(projects);
         final width = MediaQuery.sizeOf(context).width;
         final stackedHeader = width < 760;
+        final showRecentRail = recent.isNotEmpty && projects.length > 2;
         final useSplitOverview =
-            width >= 1360 && recent.isNotEmpty && projects.isNotEmpty;
+            width >= 1360 && showRecentRail && projects.isNotEmpty;
         final contentMaxWidth = width >= 2200
             ? 1980.0
             : width >= 1800
@@ -353,7 +424,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                       ],
                     ),
                   ] else ...<Widget>[
-                    if (recent.isNotEmpty) ...<Widget>[
+                    if (showRecentRail) ...<Widget>[
                       const SizedBox(height: StudioLayoutSpacing.section + 4),
                       _buildRecentRail(
                         context,
@@ -365,26 +436,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                     ],
                     const SizedBox(height: StudioLayoutSpacing.section + 4),
                     if (projects.isEmpty && !widget.controller.loadingProjects)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          StudioEmptyState.firstUse(
-                            title: l10n.studioProjectsEmptyTitle,
-                            subtitle: l10n.studioProjectsEmptySubtitle,
-                            icon: Icons.folder_open_outlined,
-                            actionLabel: l10n.studioCreateProject,
-                            onAction: _createProject,
-                          ),
-                          const SizedBox(height: StudioLayoutSpacing.section + 4),
-                          StudioGettingStartedSteps(
-                            steps: <String>[
-                              l10n.studioProjectsEmptyStep1,
-                              l10n.studioProjectsEmptyStep2,
-                              l10n.studioProjectsEmptyStep3,
-                            ],
-                          ),
-                        ],
-                      )
+                      _buildEmptyProjectsOverview(context, l10n, width)
                     else
                       ProjectsGridView(
                         projects: projects,
@@ -489,9 +541,9 @@ class _EnterpriseEmptyBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
       decoration: BoxDecoration(
-        color: tokens.bgInset,
+        color: tokens.primarySoft.withValues(alpha: 0.44),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton + 2),
-        border: Border.all(color: tokens.borderSubtle),
+        border: Border.all(color: tokens.primary.withValues(alpha: 0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,9 +590,9 @@ class _SelectProjectHintBanner extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: tokens.bgInset,
+        color: tokens.primarySoft.withValues(alpha: 0.44),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: tokens.borderSubtle),
+        border: Border.all(color: tokens.primary.withValues(alpha: 0.22)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -550,12 +602,14 @@ class _SelectProjectHintBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(Icons.touch_app_outlined, size: 18, color: tokens.textMuted),
+            Icon(Icons.touch_app_outlined, size: 18, color: tokens.primary),
             const SizedBox(width: StudioSpacing.sm - 6),
             Expanded(
               child: Text(
                 message,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: tokens.textPrimary),
               ),
             ),
           ],

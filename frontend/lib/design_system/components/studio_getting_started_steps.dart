@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
 /// Numbered checklist for first-run empty states (projects home, etc.).
@@ -31,68 +32,89 @@ class StudioGettingStartedSteps extends StatelessWidget {
         child: Semantics(
           container: true,
           explicitChildNodes: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              for (var i = 0; i < steps.length; i++) ...<Widget>[
-                if (i > 0) const SizedBox(height: 12),
-                Semantics(
-                  label: l10n.studioGettingStartedStepSemantics(
-                    i + 1,
-                    stepTotal,
-                    steps[i],
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: tokens.bgInset.withValues(alpha: 0.72),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: tokens.borderSubtle),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
+          child: DecoratedBox(
+            decoration: studioInsetPanelDecoration(
+              context,
+              backgroundColor: tokens.bgSurface.withValues(alpha: 0.92),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(
+                StudioLayoutSpacing.insetComfortable,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  for (var i = 0; i < steps.length; i++) ...<Widget>[
+                    Semantics(
+                      label: l10n.studioGettingStartedStepSemantics(
+                        i + 1,
+                        stepTotal,
+                        steps[i],
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           ExcludeSemantics(
-                            child: Container(
-                              width: 26,
-                              height: 26,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: tokens.primarySoft,
-                                border: Border.all(
-                                  color: tokens.primary.withValues(alpha: 0.35),
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: tokens.primarySoft,
+                                    border: Border.all(
+                                      color: tokens.primary.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${i + 1}',
+                                    style: theme.labelLarge?.copyWith(
+                                      color: tokens.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                '${i + 1}',
-                                style: theme.labelLarge?.copyWith(
-                                  color: tokens.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                                if (i != steps.length - 1)
+                                  Container(
+                                    width: 1,
+                                    height: 22,
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                    ),
+                                    color: tokens.borderSubtle,
+                                  ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 14),
                           Expanded(
-                            child: ExcludeSemantics(
-                              child: Text(
-                                steps[i],
-                                style: studioSectionIntroStyle(context),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: ExcludeSemantics(
+                                child: Text(
+                                  steps[i],
+                                  style: studioSectionIntroStyle(context)
+                                      ?.copyWith(
+                                        color: tokens.textPrimary,
+                                        height: 1.45,
+                                      ),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ],
+                    if (i != steps.length - 1)
+                      const SizedBox(height: StudioSpacing.xs),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

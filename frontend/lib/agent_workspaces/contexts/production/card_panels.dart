@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
@@ -186,23 +187,22 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
       recipes,
       l10n,
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text(
-          l10n.agentWorkspaceProductionDiagnosisTitle,
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
-        if (diagnosisHeadline.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 6),
-          Text(diagnosisHeadline, style: Theme.of(context).textTheme.bodySmall),
-        ],
-        const SizedBox(height: 6),
-        ...recipes.map(
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: StudioLayoutSpacing.listItem),
+      child: StudioWorkbenchSection(
+        title: l10n.agentWorkspaceProductionDiagnosisTitle,
+        subtitle: diagnosisHeadline.isEmpty ? null : diagnosisHeadline,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: recipes.map(
           (ProductionWorkspaceRecipe recipe) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.listItem),
+            color: tokens.bgInset,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+              side: BorderSide(color: tokens.borderSubtle),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
               child: Column(
@@ -279,8 +279,9 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
               ),
             ),
           ),
+        ).toList(growable: false),
         ),
-      ],
+      ),
     );
   }
 }

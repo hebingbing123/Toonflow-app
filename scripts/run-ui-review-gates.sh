@@ -8,6 +8,9 @@ FRONTEND="$ROOT/frontend"
 cd "$FRONTEND"
 flutter pub get
 
+echo "== Studio visual debt baseline =="
+bash "$ROOT/scripts/studio-visual-debt-check.sh"
+
 echo "== UI widget + dialog tests =="
 flutter test test/ui/ test/support/ test/dialogs/
 

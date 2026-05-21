@@ -972,7 +972,7 @@ class _AuthPanel extends StatelessWidget {
                 autofillHints: const <String>[AutofillHints.email],
                 textInputAction: TextInputAction.next,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: StudioLayoutSpacing.stackMedium),
               TextField(
                 key: const Key('product-auth-password'),
                 controller: authController.passwordController,
@@ -993,7 +993,7 @@ class _AuthPanel extends StatelessWidget {
                 },
               ),
               if (mode == _AuthMode.signUp) ...<Widget>[
-                const SizedBox(height: 14),
+                const SizedBox(height: StudioLayoutSpacing.stackMedium),
                 TextField(
                   key: const Key('product-auth-password-confirm'),
                   controller: confirmPasswordController,
@@ -1011,7 +1011,7 @@ class _AuthPanel extends StatelessWidget {
                 ),
               ],
               if (errorMessage != null && errorMessage!.isNotEmpty) ...<Widget>[
-                const SizedBox(height: 14),
+                const SizedBox(height: StudioLayoutSpacing.stackMedium),
                 Container(
                   padding: const EdgeInsets.all(StudioSpacing.sm),
                   decoration: BoxDecoration(

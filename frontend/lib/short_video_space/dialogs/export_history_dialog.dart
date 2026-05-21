@@ -1,3 +1,4 @@
+import '../../design_system/tokens.dart';
 part of '../section.dart';
 
 /// Export history dialog for viewing past export tasks
@@ -776,7 +777,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 : Icons.task_alt,
             color: theme.colorScheme.onSecondaryContainer,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: StudioLayoutSpacing.inlineGap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

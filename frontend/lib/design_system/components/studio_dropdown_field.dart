@@ -603,7 +603,7 @@ class StudioSelectMenuItem extends StatelessWidget {
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 10)],
+              if (leading != null) ...[leading!, const SizedBox(width: StudioLayoutSpacing.inlineGap)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

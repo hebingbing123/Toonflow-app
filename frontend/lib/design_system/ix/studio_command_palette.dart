@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/app_localizations.dart';
 import '../components/studio_dialog_shell.dart';
 import '../components/studio_empty_state.dart';
+import '../components/studio_surfaces.dart';
 import '../tokens.dart';
 
 /// Command palette action (⌘K / Ctrl+K).
@@ -104,6 +105,7 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     final items = _filtered;
 
@@ -113,18 +115,7 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
         child: Material(
           color: Colors.transparent,
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: tokens.bgSurface.withValues(alpha: 0.98),
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-              border: Border.all(color: tokens.borderSubtle),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.22),
-                  blurRadius: 24,
-                  offset: const Offset(0, 14),
-                ),
-              ],
-            ),
+            decoration: studioInsetPanelDecoration(context),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
               child: Column(
@@ -136,9 +127,11 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                       controller: _query,
                       autofocus: true,
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!
-                            .studioCommandPaletteSearchHint,
-                        prefixIcon: Icon(Icons.search, color: tokens.signal),
+                        hintText: l10n.studioCommandPaletteSearchHint,
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: tokens.textMuted,
+                        ),
                       ),
                       onChanged: (v) => setState(() => _filter = v),
                       onSubmitted: (_) {
@@ -155,20 +148,28 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                         ? Padding(
                             padding: const EdgeInsets.all(StudioSpacing.sm),
                             child: StudioEmptyState.noResults(
-                              title: AppLocalizations.of(context)!
-                                  .globalSearchNoResultsTitle,
-                              subtitle: AppLocalizations.of(context)!
-                                  .globalSearchNoResultsHint,
+                              title: l10n.studioCommandPaletteNoResultsTitle,
+                              subtitle: l10n.studioCommandPaletteNoResultsHint,
                             ),
                           )
                         : ListView.builder(
+                            shrinkWrap: true,
                             itemCount: items.length,
                             itemBuilder: (context, index) {
                               final action = items[index];
                               return ListTile(
-                                leading:
-                                    Icon(action.icon ?? Icons.chevron_right),
-                                title: Text(action.label),
+                                minVerticalPadding: 10,
+                                leading: Icon(
+                                  action.icon ?? Icons.chevron_right,
+                                  color: tokens.textSecondary,
+                                ),
+                                title: Text(
+                                  action.label,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(color: tokens.textPrimary),
+                                ),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   action.onInvoke();

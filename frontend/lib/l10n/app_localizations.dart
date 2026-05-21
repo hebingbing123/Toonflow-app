@@ -2738,6 +2738,18 @@ abstract class AppLocalizations {
   /// **'Search commands…'**
   String get studioCommandPaletteSearchHint;
 
+  /// No description provided for @studioCommandPaletteNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching commands'**
+  String get studioCommandPaletteNoResultsTitle;
+
+  /// No description provided for @studioCommandPaletteNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get studioCommandPaletteNoResultsHint;
+
   /// No description provided for @studioAgentSubmitted.
   ///
   /// In en, this message translates to:

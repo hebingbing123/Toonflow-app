@@ -113,43 +113,6 @@ class _StoryboardPreviewCard extends StatelessWidget {
   }
 }
 
-/// Renders the workbench diagnosis summary and the recommended next action.
-class _StoryboardDiagnosisCard extends StatelessWidget {
-  const _StoryboardDiagnosisCard({
-    required this.diagnosis,
-    required this.recommendedAction,
-    required this.recommendedActionLabel,
-  });
-
-  final StoryboardWorkbenchDiagnosis diagnosis;
-  final VoidCallback? recommendedAction;
-  final String recommendedActionLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: studioRecessedPanelDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            diagnosis.summary,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 6),
-          Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: recommendedAction,
-            child: Text(recommendedActionLabel),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Read-only checklist aligned with **`GET …/short-video-readiness`** (C11 / MP-W3).
 class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
   const _StoryboardShortVideoReadinessStrip({required this.readiness});

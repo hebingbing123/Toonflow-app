@@ -157,7 +157,6 @@ class _AccountSectionState extends State<AccountSection> {
   }
 
   Widget _buildExportPanel(BuildContext context, {required bool comfortable}) {
-    final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
 
     return StudioCard(
@@ -172,7 +171,7 @@ class _AccountSectionState extends State<AccountSection> {
                 l10n.accountExportTitle,
                 style: studioCardTitleStyle(context),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -228,7 +227,7 @@ class _AccountSectionState extends State<AccountSection> {
             children: <Widget>[
               if (stackHeader) ...<Widget>[
                 headerDetails,
-                const SizedBox(height: 14),
+                const SizedBox(height: StudioLayoutSpacing.stackMedium),
                 actions,
               ] else
                 Row(
@@ -316,7 +315,7 @@ class _AccountSectionState extends State<AccountSection> {
                         style: studioCardTitleStyle(context),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: StudioLayoutSpacing.inlineGap),
                     Chip(label: Text(_statusLabel(item.status))),
                   ],
                 ),
@@ -351,7 +350,7 @@ class _AccountSectionState extends State<AccountSection> {
                   ),
                 ),
               ],
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -440,7 +439,7 @@ class _AccountSectionState extends State<AccountSection> {
               ),
             ),
             if (widget.controller.lastDeleteResponse != null) ...<Widget>[
-              const SizedBox(height: 14),
+              const SizedBox(height: StudioLayoutSpacing.stackMedium),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -566,7 +565,7 @@ class _AccountSectionState extends State<AccountSection> {
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[summary, const SizedBox(height: 14), form],
+                  children: <Widget>[summary, const SizedBox(height: StudioLayoutSpacing.stackMedium), form],
                 ),
         );
       },

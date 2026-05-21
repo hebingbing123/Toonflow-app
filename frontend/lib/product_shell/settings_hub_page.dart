@@ -386,7 +386,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                   ),
                   child: Icon(module.icon, size: 18, color: tokens.textSecondary),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
                   child: Text(
                     module.label,
@@ -494,7 +494,7 @@ class _SettingsModuleTab extends StatelessWidget {
             size: compact ? 18 : 19,
             color: selected ? tokens.textPrimary : tokens.textSecondary,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: StudioLayoutSpacing.inlineGap),
           if (expand) Expanded(child: label) else label,
         ],
       ),

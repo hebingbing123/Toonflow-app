@@ -231,7 +231,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           if (result != null) ...[
             _buildSearchGroup(
               context,
@@ -268,7 +268,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   .map((item) => _jobTile(context, item))
                   .toList(growable: false),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
           ],
           if (widget.controller.loadingDetail)
             const Center(child: CircularProgressIndicator())
@@ -1806,7 +1806,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 .map((item) => Chip(label: Text(item)))
                 .toList(growable: false),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           ...sections
               .expand((widget) => [widget, const SizedBox(height: 12)])
               .toList()

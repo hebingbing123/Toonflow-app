@@ -339,7 +339,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -425,7 +425,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               color: StudioTokens.of(context).textSecondary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Row(
             children: [
               Expanded(
@@ -451,7 +451,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (_loadingWorkspaceMembers)
             Row(
               children: [
@@ -529,7 +529,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 ],
               ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Row(
             children: [
               Expanded(
@@ -576,7 +576,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               color: StudioTokens.of(context).textSecondary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (_projectRows.isEmpty)
             StudioEmptyState.emptyData(
               title: l10n.projectMembersExplicitEmptyState,
@@ -642,7 +642,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Row(
               children: [
                 Expanded(

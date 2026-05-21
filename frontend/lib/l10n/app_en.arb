@@ -712,6 +712,8 @@
   "studioOnboardingStep2": "Inside a project, follow the six steps from script to delivery.",
   "studioOnboardingStep3": "Press ⌘K to jump between steps and settings quickly.",
   "studioCommandPaletteSearchHint": "Search commands…",
+  "studioCommandPaletteNoResultsTitle": "No matching commands",
+  "studioCommandPaletteNoResultsHint": "Try a different search term",
   "studioAgentSubmitted": "Agent \"{kind}\" — open the matching workspace to continue",
   "@studioAgentSubmitted": {"placeholders": {"kind": {"type": "String"}}},
   "studioStepScriptTitle": "Script",

@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
@@ -118,82 +119,101 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     if (recipes.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text(
-          l10n.agentWorkspaceScriptDiagnosisTitle,
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
-        const SizedBox(height: 6),
-        ...recipes.map(
-          (ScriptWorkspaceRecipe recipe) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    recipe.title,
-                    style: Theme.of(context).textTheme.labelLarge,
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: StudioLayoutSpacing.listItem),
+      child: StudioWorkbenchSection(
+        title: l10n.agentWorkspaceScriptDiagnosisTitle,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: recipes
+              .map(
+                (ScriptWorkspaceRecipe recipe) => Card(
+                  margin: const EdgeInsets.only(
+                    bottom: StudioLayoutSpacing.listItem,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    recipe.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  color: tokens.bgInset,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      StudioSpacing.radiusButton,
+                    ),
+                    side: BorderSide(color: tokens.borderSubtle),
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      if (recipe.domainTool != null)
-                        Chip(
-                          label: Text(
-                            agentWorkspaceScriptDomainToolLabel(
-                              l10n,
-                              recipe.domainTool!,
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      StudioLayoutSpacing.cardInner - 4,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          recipe.title,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          recipe.detail,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            if (recipe.domainTool != null)
+                              Chip(
+                                label: Text(
+                                  agentWorkspaceScriptDomainToolLabel(
+                                    l10n,
+                                    recipe.domainTool!,
+                                  ),
+                                ),
+                              ),
+                            if (recipe.subAgentTool != null)
+                              Chip(
+                                label: Text(
+                                  agentWorkspaceScriptSubAgentLabel(
+                                    l10n,
+                                    recipe.subAgentTool!,
+                                  ),
+                                ),
+                              ),
+                            OutlinedButton(
+                              onPressed: busy
+                                  ? null
+                                  : () => onApplyRecipe(recipe),
+                              child: Text(
+                                l10n.agentWorkspaceScriptApplySuggestion,
+                              ),
                             ),
-                          ),
+                            if (recipe.domainTool != null)
+                              FilledButton.tonal(
+                                onPressed: busy
+                                    ? null
+                                    : () => onRunRecipeDomainTool(recipe),
+                                child: Text(
+                                  l10n.agentWorkspaceScriptReadContext,
+                                ),
+                              ),
+                            if (recipe.subAgentTool != null)
+                              FilledButton(
+                                onPressed: busy
+                                    ? null
+                                    : () => onRunRecipeSubAgent(recipe),
+                                child: Text(
+                                  l10n.agentWorkspaceScriptRunSubAgent,
+                                ),
+                              ),
+                          ],
                         ),
-                      if (recipe.subAgentTool != null)
-                        Chip(
-                          label: Text(
-                            agentWorkspaceScriptSubAgentLabel(
-                              l10n,
-                              recipe.subAgentTool!,
-                            ),
-                          ),
-                        ),
-                      OutlinedButton(
-                        onPressed: busy ? null : () => onApplyRecipe(recipe),
-                        child: Text(l10n.agentWorkspaceScriptApplySuggestion),
-                      ),
-                      if (recipe.domainTool != null)
-                        FilledButton.tonal(
-                          onPressed: busy
-                              ? null
-                              : () => onRunRecipeDomainTool(recipe),
-                          child: Text(l10n.agentWorkspaceScriptReadContext),
-                        ),
-                      if (recipe.subAgentTool != null)
-                        FilledButton(
-                          onPressed: busy
-                              ? null
-                              : () => onRunRecipeSubAgent(recipe),
-                          child: Text(l10n.agentWorkspaceScriptRunSubAgent),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
+              )
+              .toList(growable: false),
         ),
-      ],
+      ),
     );
   }
 }

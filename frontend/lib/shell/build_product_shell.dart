@@ -281,7 +281,7 @@ extension _HomePageProductShell on _HomePageState {
                   size: 18,
                   color: selected ? tokens.accent : tokens.textSecondary,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
                   child: Text(
                     label,
@@ -835,7 +835,7 @@ extension _HomePageProductShell on _HomePageState {
                           moreMenuChrome,
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       Row(children: <Widget>[Expanded(child: globalSearchBar)]),
                     ],
                   )
@@ -864,12 +864,12 @@ extension _HomePageProductShell on _HomePageState {
                           moreMenuChrome,
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       Row(
                         children: <Widget>[
                           Expanded(child: globalSearchBar),
                           if (width >= 1120) ...<Widget>[
-                            const SizedBox(width: 10),
+                            const SizedBox(width: StudioLayoutSpacing.inlineGap),
                             SizedBox(
                               width: 250,
                               child: _buildWorkspaceContextSection(
@@ -904,7 +904,7 @@ extension _HomePageProductShell on _HomePageState {
                         child: globalSearchBar,
                       ),
                       if (showInlineWorkspaceContext) ...<Widget>[
-                        const SizedBox(width: 10),
+                        const SizedBox(width: StudioLayoutSpacing.inlineGap),
                         ConstrainedBox(
                           constraints: BoxConstraints(
                             maxWidth: desktopXWide
@@ -988,7 +988,7 @@ extension _HomePageProductShell on _HomePageState {
                                     onDismiss: () =>
                                         setState(() => _error = null),
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                                 ],
                                 ..._buildActiveProductPaneWidgets(context),
                               ],

@@ -206,7 +206,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextField(
             controller: _searchCtrl,
             onChanged: (_) => setState(() {}),
@@ -216,7 +216,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               isDense: true,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),

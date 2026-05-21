@@ -712,6 +712,8 @@
   "studioOnboardingStep2": "进入项目后按六步完成剧本到成片。",
   "studioOnboardingStep3": "按 ⌘K 可快速跳转步骤与设置。",
   "studioCommandPaletteSearchHint": "搜索命令…",
+  "studioCommandPaletteNoResultsTitle": "没有匹配的命令",
+  "studioCommandPaletteNoResultsHint": "请换一组关键词试试",
   "studioAgentSubmitted": "已提交 Agent「{kind}」，请在对应工作区继续",
   "studioStepScriptTitle": "剧本",
   "studioStepScriptBody": "编写或导入剧本，并提取角色与场景。",

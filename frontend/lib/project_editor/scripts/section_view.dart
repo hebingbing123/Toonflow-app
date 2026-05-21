@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_workbench_section.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
@@ -117,23 +118,12 @@ class ProjectScriptsSectionView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: StudioSpacing.xs),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-          decoration: studioRecessedPanelDecoration(context),
+        StudioWorkbenchSection(
+          title: l10n.projectEditorScriptsSectionSuggestionsTitle,
+          subtitle: model.overviewDiagnosis.summary,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l10n.projectEditorScriptsSectionSuggestionsTitle,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                model.overviewDiagnosis.summary,
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 4),
               Text(
                 model.overviewDiagnosis.detail,
                 style: studioHintStyle(context),

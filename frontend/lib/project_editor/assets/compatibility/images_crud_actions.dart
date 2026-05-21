@@ -69,7 +69,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: StudioLayoutSpacing.inlineGap),
                           ],
                           Expanded(
                             child: Text(cornerText),

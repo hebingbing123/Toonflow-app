@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -28,7 +29,7 @@ class ProjectsGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading && projects.isEmpty) {
-      return _LoadingGrid();
+      return const _LoadingGrid();
     }
 
     return LayoutBuilder(
@@ -58,7 +59,10 @@ class ProjectsGridView extends StatelessWidget {
               ),
             );
           }
-          return AspectRatio(aspectRatio: 1.06, child: card);
+          return AspectRatio(
+            aspectRatio: width < 620 ? 0.92 : 1.0,
+            child: card,
+          );
         }
         final crossAxisCount = switch (projects.length) {
           2 => width >= 840 ? 2 : 1,
@@ -76,10 +80,14 @@ class ProjectsGridView extends StatelessWidget {
         final childAspectRatio = width >= 2100
             ? 1.18
             : width >= 1680
-            ? 1.14
+            ? 1.12
             : width >= 1280
-            ? 1.1
-            : 1.16;
+            ? 1.04
+            : width >= 920
+            ? 1.0
+            : width >= 620
+            ? 0.96
+            : 0.9;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -111,19 +119,28 @@ class ProjectsGridView extends StatelessWidget {
 }
 
 class _LoadingGrid extends StatelessWidget {
+  const _LoadingGrid();
+
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: StudioSpacing.sm,
-      crossAxisSpacing: StudioSpacing.sm,
-      childAspectRatio: 1.15,
-      children: List<Widget>.generate(
-        4,
-        (_) => const StudioSkeleton(height: 220, borderRadius: 14),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final crossAxisCount = width >= 920 ? 2 : 1;
+        final childAspectRatio = width >= 920 ? 1.05 : 0.9;
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: StudioSpacing.sm,
+          crossAxisSpacing: StudioSpacing.sm,
+          childAspectRatio: childAspectRatio,
+          children: List<Widget>.generate(
+            crossAxisCount == 1 ? 2 : 4,
+            (_) => const StudioSkeleton(height: 220, borderRadius: 14),
+          ),
+        );
+      },
     );
   }
 }
@@ -149,6 +166,9 @@ class _ProjectGridCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final title =
         project.name ?? l10n.projectsUnnamedProject(project.numericId);
+    final summary = (project.intro ?? '').trim();
+    final focusLabel = _projectFocusLabel(l10n, completedSteps);
+    final fallbackSummary = _projectFocusSummary(l10n, completedSteps);
 
     return Material(
       color: Colors.transparent,
@@ -189,96 +209,109 @@ class _ProjectGridCard extends StatelessWidget {
                   StudioStepProgressRing(completedSteps: completedSteps),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
-                l10n.studioEnterStudio,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
-              ),
-              const Spacer(),
-              if ((project.intro ?? '').isNotEmpty)
-                Text(
-                  project.intro!,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: tokens.textSecondary),
+                summary.isNotEmpty ? summary : fallbackSummary,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: tokens.textSecondary,
+                  height: 1.45,
                 ),
-              const SizedBox(height: 16),
-              Row(
+              ),
+              const SizedBox(height: StudioSpacing.sm),
+              Wrap(
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StudioSpacing.xs + 2,
-                      vertical: StudioSpacing.xs - 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: tokens.bgInset.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: tokens.surfaceHighlight.withValues(alpha: 0.9),
-                      ),
-                    ),
-                    child: Text(
-                      '#${project.numericId}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: tokens.textSecondary,
-                      ),
-                    ),
+                  _ProjectMetaChip(
+                    label: '#${project.numericId}',
+                    color: tokens.textSecondary,
                   ),
-                  const Spacer(),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? tokens.primary
-                          : tokens.primarySoft.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: selected
-                            ? tokens.primary.withValues(alpha: 0.42)
-                            : tokens.borderSubtle,
-                      ),
-                    ),
-                    child: InkWell(
-                      onTap: onTap,
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: StudioSpacing.sm,
-                          vertical: StudioSpacing.xs,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              l10n.studioEnterStudio,
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    color: selected
-                                        ? Colors.white
-                                        : tokens.textPrimary,
-                                  ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.arrow_outward,
-                              size: 16,
-                              color: selected
-                                  ? Colors.white
-                                  : tokens.textPrimary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  _ProjectMetaChip(
+                    label: focusLabel,
+                    color: selected ? tokens.textPrimary : tokens.primary,
+                    backgroundColor: selected
+                        ? tokens.primarySoft.withValues(alpha: 0.84)
+                        : tokens.bgInset.withValues(alpha: 0.9),
+                    borderColor: selected
+                        ? tokens.primary.withValues(alpha: 0.4)
+                        : tokens.surfaceHighlight.withValues(alpha: 0.9),
                   ),
                 ],
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: StudioPrimaryButton(
+                  label: l10n.studioEnterStudio,
+                  icon: Icons.arrow_outward,
+                  onPressed: onTap,
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  String _projectFocusLabel(AppLocalizations l10n, int completedSteps) {
+    final clamped = completedSteps.clamp(0, 5);
+    return switch (clamped) {
+      0 => l10n.studioStepScriptShort,
+      1 => l10n.studioStepArtShort,
+      2 => l10n.studioStepAssetsShort,
+      3 => l10n.studioStepStoryboardShort,
+      4 => l10n.studioStepVideoShort,
+      _ => l10n.studioStepDeliverShort,
+    };
+  }
+
+  String _projectFocusSummary(AppLocalizations l10n, int completedSteps) {
+    final clamped = completedSteps.clamp(0, 5);
+    return switch (clamped) {
+      0 => l10n.studioStepScriptBody,
+      1 => l10n.studioStepArtBody,
+      2 => l10n.studioStepAssetsBody,
+      3 => l10n.studioStepStoryboardBody,
+      4 => l10n.studioStepVideoBody,
+      _ => l10n.studioContinueCreating,
+    };
+  }
+}
+
+class _ProjectMetaChip extends StatelessWidget {
+  const _ProjectMetaChip({
+    required this.label,
+    required this.color,
+    this.backgroundColor,
+    this.borderColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color? backgroundColor;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.xs + 2,
+        vertical: StudioSpacing.xs - 2,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? tokens.bgInset.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: borderColor ?? tokens.surfaceHighlight.withValues(alpha: 0.9),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
       ),
     );
   }
