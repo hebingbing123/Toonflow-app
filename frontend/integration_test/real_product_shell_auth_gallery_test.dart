@@ -100,7 +100,7 @@ void main() {
     final submitFinder = find.byKey(const Key('product-auth-submit'));
     await tester.ensureVisible(submitFinder);
     await tester.tap(submitFinder);
-    await waitFor(tester, find.byTooltip('通知'));
+    await waitFor(tester, find.byKey(const Key('studio-app-bar-notifications')));
     await pumpFrames(tester, count: 20);
     await captureShot(
       tester,
@@ -108,7 +108,7 @@ void main() {
       name: 'regular_02_projects',
     );
 
-    await tester.tap(find.byTooltip('通知'));
+    await tester.tap(find.byKey(const Key('studio-app-bar-notifications')));
     await pumpFrames(tester);
     await captureShot(
       tester,

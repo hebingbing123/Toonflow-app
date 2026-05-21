@@ -110,3 +110,16 @@ bool isDomesticPrimarySetupComplete(
     ),
   );
 }
+
+/// At least one core domestic vendor has a key (or optional-key vendor is enabled).
+bool isDomesticVendorReadyForAiGeneration(
+  List<VendorSummaryItemV1> vendors,
+  Map<String, bool> credentialConfigured,
+) {
+  return countDomesticVendorsReady(
+        vendors,
+        credentialConfigured,
+        primaryOnly: true,
+      ) >
+      0;
+}

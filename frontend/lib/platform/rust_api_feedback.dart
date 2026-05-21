@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/ix/studio_toast.dart';
+import '../design_system/ix/studio_toast_overlay.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
@@ -63,21 +65,20 @@ void reportRustOrDescribeApiError(
   }
 }
 
-/// Shows a SnackBar using [describeRustApiError] (delegates to [describeUserVisibleApiError]).
+/// Shows a top-right toast using [describeRustApiError].
 void showRustApiErrorSnackBar(Object error) {
   final messenger = kRustApiRootScaffoldMessengerKey.currentState;
-  if (messenger == null) {
+  final context = messenger?.context;
+  if (context == null || !context.mounted) {
     return;
   }
   final text = describeRustApiError(error);
   final isRate = isRustApiQuotaOrRateError(error);
-  messenger.showSnackBar(
-    SnackBar(
-      behavior: SnackBarBehavior.floating,
-      showCloseIcon: true,
-      content: Text(text),
-      duration: Duration(seconds: isRate ? 8 : 5),
-    ),
+  showStudioToast(
+    context,
+    message: text,
+    tone: isRate ? StudioToastTone.warning : StudioToastTone.error,
+    duration: Duration(seconds: isRate ? 8 : 5),
   );
 }
 

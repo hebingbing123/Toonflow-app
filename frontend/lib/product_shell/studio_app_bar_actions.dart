@@ -34,6 +34,7 @@ class StudioAppBarActions extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _UtilityIconButton(
+              key: const Key('studio-app-bar-notifications'),
               tooltip: l10n.studioAppBarNotifications,
               icon: Icons.notifications_outlined,
               selected: selectedPane == ProductWorkspacePane.notifications,
@@ -63,10 +64,11 @@ class StudioAppBarActions extends StatelessWidget {
 
 class _UtilityIconButton extends StatelessWidget {
   const _UtilityIconButton({
+    super.key,
     required this.tooltip,
     required this.icon,
-    required this.selected,
     required this.onPressed,
+    required this.selected,
     this.badge,
   });
 

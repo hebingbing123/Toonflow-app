@@ -12,6 +12,7 @@ import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_studio/grid_storyboard_panel.dart';
 import '../rust_api.dart';
+import '../settings/model_vendors/vendor_setup_nudge.dart';
 import 'grid_storyboard_dialog.dart';
 import 'storyboard_frame_image.dart';
 
@@ -268,6 +269,12 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
 
   Future<void> _runGridGenerate() async {
     final l10n = resolveAppLocalizationsForErrors(context);
+    if (!await DomesticVendorSetupNudge.guardBeforeAiGenerate(
+      context,
+      accessToken: widget.accessToken,
+    )) {
+      return;
+    }
     final scriptId = _scriptNumericId;
     if (scriptId == null || _shots.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

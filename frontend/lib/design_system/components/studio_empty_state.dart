@@ -251,9 +251,10 @@ class StudioEmptyState extends StatelessWidget {
                         child: Text(
                           subtitle!,
                           textAlign: TextAlign.center,
-                          style: studioHintStyle(
-                            context,
-                          )?.copyWith(height: 1.55),
+                          style: studioHintStyle(context)?.copyWith(
+                            color: tokens.textSecondary,
+                            height: 1.55,
+                          ),
                         ),
                       ),
                     ],

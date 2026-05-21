@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config.dart';
+import 'design_system/ix/studio_scaffold_messenger.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'home_page.dart';
 import 'l10n/app_localizations.dart';
@@ -41,43 +42,48 @@ class OpenFlowHarnessApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: AppLocaleNotifier.instance,
       builder: (context, _) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          onGenerateTitle: (ctx) =>
-              AppLocalizations.of(ctx)?.appTitle ??
-              lookupAppLocalizations(const Locale('en')).appTitle,
-          locale: AppLocaleNotifier.instance.localeOrNull,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          localeResolutionCallback: (locale, supportedLocales) {
-            if (locale == null) {
-              return supportedLocales.first;
-            }
-            for (final supported in supportedLocales) {
-              if (supported.languageCode == locale.languageCode) {
-                return supported;
+        return StudioScaffoldMessenger(
+          key: kRustApiRootScaffoldMessengerKey,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            onGenerateTitle: (ctx) =>
+                AppLocalizations.of(ctx)?.appTitle ??
+                lookupAppLocalizations(const Locale('en')).appTitle,
+            locale: AppLocaleNotifier.instance.localeOrNull,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localeResolutionCallback: (locale, supportedLocales) {
+              if (locale == null) {
+                return supportedLocales.first;
               }
-            }
-            return supportedLocales.first;
-          },
-          scaffoldMessengerKey: kRustApiRootScaffoldMessengerKey,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-            useMaterial3: true,
-          ),
-          home: home,
-          routes: {
-            '/search': (context) {
-              final args =
-                  ModalRoute.of(context)?.settings.arguments
-                      as Map<String, dynamic>?;
-              final query = args?['query'] as String? ?? '';
-              final accessToken = kSupabaseConfigured
-                  ? Supabase.instance.client.auth.currentSession?.accessToken
-                  : null;
-              return SearchResultsPage(query: query, accessToken: accessToken);
+              for (final supported in supportedLocales) {
+                if (supported.languageCode == locale.languageCode) {
+                  return supported;
+                }
+              }
+              return supportedLocales.first;
             },
-          },
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+              useMaterial3: true,
+            ),
+            home: home,
+            routes: {
+              '/search': (context) {
+                final args =
+                    ModalRoute.of(context)?.settings.arguments
+                        as Map<String, dynamic>?;
+                final query = args?['query'] as String? ?? '';
+                final accessToken = kSupabaseConfigured
+                    ? Supabase.instance.client.auth.currentSession?.accessToken
+                    : null;
+                return SearchResultsPage(
+                  query: query,
+                  accessToken: accessToken,
+                );
+              },
+            },
+          ),
         );
       },
     );

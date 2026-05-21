@@ -41,6 +41,24 @@ void main() {
     );
   });
 
+  test('isDomesticVendorReadyForAiGeneration needs at least one primary', () {
+    final vendors = <VendorSummaryItemV1>[
+      _vendor(7, 'Qwen'),
+      _vendor(8, 'DeepSeek'),
+    ];
+    expect(
+      isDomesticVendorReadyForAiGeneration(vendors, <String, bool>{}),
+      isFalse,
+    );
+    expect(
+      isDomesticVendorReadyForAiGeneration(
+        vendors,
+        <String, bool>{'7': true},
+      ),
+      isTrue,
+    );
+  });
+
   test('filterDomesticVendorsForSetup primaryOnly excludes Kling', () {
     final vendors = <VendorSummaryItemV1>[
       _vendor(7, 'Qwen'),

@@ -67,40 +67,30 @@ extension _HomePageProductShell on _HomePageState {
     if (widget.shellMode != HomeShellMode.product) {
       return;
     }
+    StudioSettingsHubNavigation.requestApiModelsTab();
     setState(() => _settingsHubInitialTabIndex = 2);
     _selectProductUtilityPane(ProductWorkspacePane.account);
   }
 
-  Future<void> _maybeNudgeDomesticVendorSetup(String token) async {
-    if (!mounted || _vendorSetupSnackShown) {
+  Future<void> _maybeNudgeDomesticVendorOnProjectsHome() async {
+    if (!mounted || widget.shellMode != HomeShellMode.product) {
       return;
     }
-    if (widget.shellMode != HomeShellMode.product) {
+    if (widget.studioOverlay != StudioOverlayMode.none) {
       return;
     }
-    final dismissed = await DomesticVendorSetupPrefs.isDismissed();
-    if (dismissed) {
+    if (_shellNavigationController.productWorkspacePane !=
+        ProductWorkspacePane.projects) {
       return;
     }
-    final snapshot = await loadVendorCredentialSnapshot(token);
-    if (!mounted || snapshot == null) {
+    final token = _effectiveAccessToken?.trim();
+    if (token == null || token.isEmpty) {
       return;
     }
-    if (isDomesticPrimarySetupComplete(
-      snapshot.vendors,
-      snapshot.credentialConfigured,
-    )) {
-      return;
-    }
-    _vendorSetupSnackShown = true;
-    final l10n =
-        _appL10n ?? lookupAppLocalizations(const Locale('en'));
-    showStudioSnackBar(
+    await DomesticVendorSetupNudge.maybeShowOnProjectsHome(
       context,
-      message: l10n.studioVendorSetupSnackMessage,
-      icon: Icons.vpn_key_outlined,
-      actionLabel: l10n.studioVendorSetupSnackAction,
-      onAction: _openSettingsModelVendorsTab,
+      accessToken: token,
+      onOpenSettings: _openSettingsModelVendorsTab,
     );
   }
 
@@ -684,6 +674,7 @@ extension _HomePageProductShell on _HomePageState {
 
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
+      StudioToastOverlay.hide();
       return ProductLoginPage(
         authController: _authController,
         errorMessage: _error,
@@ -1015,7 +1006,12 @@ extension _HomePageProductShell on _HomePageState {
         accessToken: accessToken,
         child: StudioCommandPaletteShortcuts(
           actions: _studioCommandActions(l10n),
-          child: StudioOnboardingCoach(child: shell),
+          child: StudioOnboardingCoach(
+            enabled:
+                currentPane == ProductWorkspacePane.projects &&
+                widget.studioOverlay == StudioOverlayMode.none,
+            child: shell,
+          ),
         ),
       ),
     );

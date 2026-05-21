@@ -10,6 +10,7 @@ import 'novel_inline_import_section.dart';
 import '../project_editor/novels/workbench_section_builder.dart';
 import '../project_editor/scripts/section_builder.dart';
 import '../rust_api.dart';
+import '../settings/model_vendors/vendor_setup_nudge.dart';
 
 /// Opens the full novel workbench dialog; panel supplies mutable [novelsRef].
 typedef StudioScriptOpenNovelWorkbench =
@@ -157,6 +158,12 @@ class _ProjectStudioScriptStepPanelState
 
   Future<void> _generateTopNovelEvents() async {
     final l10n = AppLocalizations.of(context)!;
+    if (!await DomesticVendorSetupNudge.guardBeforeAiGenerate(
+      context,
+      accessToken: widget.accessToken,
+    )) {
+      return;
+    }
     setState(() => _novelsBusy[0] = true);
     try {
       final ids = pickEventGeneratableNovelIds(

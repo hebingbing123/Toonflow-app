@@ -90,11 +90,11 @@ import 'design_system/ix/studio_api_error_callout.dart';
 import 'design_system/ix/studio_command_palette.dart';
 import 'design_system/ix/studio_job_tray.dart';
 import 'design_system/ix/studio_snackbar.dart';
+import 'design_system/ix/studio_toast_overlay.dart';
 import 'design_system/tokens.dart';
 import 'product_shell/login_page.dart';
-import 'settings/model_vendors/domestic_vendor_setup_prefs.dart';
-import 'settings/model_vendors/domestic_vendors.dart';
-import 'settings/model_vendors/vendor_setup_loader.dart';
+import 'settings/model_vendors/vendor_setup_nudge.dart';
+import 'shell/studio_settings_hub_navigation.dart';
 import 'product_shell/navigation.dart';
 import 'product_shell/studio_shell_header.dart';
 import 'product_shell/studio_shell_layout.dart';
@@ -327,7 +327,6 @@ class _HomePageState extends State<HomePage> {
   String? _lastSessionAccessToken;
   bool _loadingSessionMe = false;
   int _settingsHubInitialTabIndex = 0;
-  bool _vendorSetupSnackShown = false;
   PlatformConfigToggleSetV1 _platformConfig =
       PlatformConfigToggleSetV1.defaults;
   Listenable? _studioRouteListenerTarget;
@@ -1103,6 +1102,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleAuthChanged() {
+    if (!_authController.signedIn) {
+      StudioToastOverlay.hide();
+    }
     _syncSessionContext();
     if (!mounted) return;
     setState(() {});
@@ -1207,7 +1209,10 @@ class _HomePageState extends State<HomePage> {
       } else {
         unawaited(_projectsController.loadProjects());
         _ensureProductPaneData(_shellNavigationController.productWorkspacePane);
-        unawaited(_maybeNudgeDomesticVendorSetup(token));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          unawaited(_maybeNudgeDomesticVendorOnProjectsHome());
+        });
       }
     } catch (error) {
       if (_lastSessionAccessToken != token) {
@@ -1283,6 +1288,10 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     if (widget.shellMode == HomeShellMode.product) {
       _ensureProductPaneData(_shellNavigationController.productWorkspacePane);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(_maybeNudgeDomesticVendorOnProjectsHome());
+      });
     }
     setState(() {});
   }
@@ -1318,6 +1327,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleSignedOut() async {
+    StudioToastOverlay.hide();
     _skillsHarnessController.stopAutoSessionWs();
     await _skillsHarnessController.closeChannel();
     _accountProbesController.reset();

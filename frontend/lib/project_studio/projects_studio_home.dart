@@ -12,7 +12,6 @@ import '../rust_api.dart';
 import '../studio/recent_projects_prefs.dart';
 import '../team_workspaces/strings.dart';
 import 'studio_readiness.dart';
-import '../settings/model_vendors/vendor_setup_projects_nudge.dart';
 import 'create_project_wizard.dart';
 import 'projects_grid_view.dart';
 
@@ -371,12 +370,6 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   _buildHeader(context, l10n, stackedHeader),
-                  if (widget.onOpenModelVendorSettings != null)
-                    VendorSetupProjectsNudge(
-                      accessToken: widget.accessToken,
-                      onOpenModelVendorSettings:
-                          widget.onOpenModelVendorSettings!,
-                    ),
                   if (_enterpriseEmpty) ...<Widget>[
                     const SizedBox(height: StudioLayoutSpacing.section - 4),
                     _EnterpriseEmptyBanner(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,9 +8,16 @@ import '../tokens.dart';
 
 /// First-run coach marks (Wave 0b).
 class StudioOnboardingCoach extends StatefulWidget {
-  const StudioOnboardingCoach({super.key, required this.child});
+  const StudioOnboardingCoach({
+    super.key,
+    required this.child,
+    this.enabled = true,
+  });
 
   final Widget child;
+
+  /// When false, coach marks are suppressed (e.g. login / non-projects panes).
+  final bool enabled;
 
   static const _seenKey = 'studio_onboarding_seen_v1';
 
@@ -36,7 +45,22 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
     _init();
   }
 
+  @override
+  void didUpdateWidget(covariant StudioOnboardingCoach oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.enabled && _visible) {
+      setState(() => _visible = false);
+    } else if (widget.enabled && !oldWidget.enabled) {
+      unawaited(_init());
+    }
+  }
+
   Future<void> _init() async {
+    if (!widget.enabled) {
+      if (!mounted) return;
+      setState(() => _visible = false);
+      return;
+    }
     final show = await StudioOnboardingCoach.shouldShow();
     if (!mounted) return;
     setState(() {

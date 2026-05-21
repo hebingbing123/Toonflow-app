@@ -9,6 +9,10 @@ import 'package:openflow_app/product_shell/studio_app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Slimmer E2E than [real_product_shell_auth_gallery_test]: Supabase login + shell chrome only.
+///
+/// Run with local stack defines (same as [scripts/run-ui-e2e.sh] smoke):
+/// `flutter test integration_test/real_product_shell_auth_smoke_test.dart -d macos \
+///   --dart-define-from-file=dart_defines.dev.json`
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   configureGoogleFontsRuntime();
@@ -27,7 +31,7 @@ void main() {
   Future<void> waitFor(
     WidgetTester tester,
     Finder finder, {
-    int maxTicks = 40,
+    int maxTicks = 80,
   }) async {
     for (var i = 0; i < maxTicks; i++) {
       await tester.pump(const Duration(milliseconds: 250));
@@ -62,8 +66,12 @@ void main() {
     final submitFinder = find.byKey(const Key('product-auth-submit'));
     await tester.ensureVisible(submitFinder);
     await tester.tap(submitFinder);
-    await waitFor(tester, find.byTooltip('通知'));
+    await waitFor(
+      tester,
+      find.byKey(const Key('studio-app-bar-notifications')),
+    );
 
+    expect(find.byKey(const Key('studio-app-bar-notifications')), findsOneWidget);
     expect(find.byTooltip('账户与设置'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

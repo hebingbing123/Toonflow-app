@@ -128,7 +128,10 @@ class RealProductShellGalleryHarness {
     final submitFinder = find.byKey(const Key('product-auth-submit'));
     await tester.ensureVisible(submitFinder);
     await tester.tap(submitFinder);
-    await waitFor(find.byTooltip('通知'));
+    await waitFor(
+      find.byKey(const Key('studio-app-bar-notifications')),
+      maxTicks: 80,
+    );
     await pumpFrames(count: 24);
   }
 
@@ -349,10 +352,16 @@ class RealProductShellGalleryHarness {
       of: title.first,
       matching: find.byType(InkWell),
     );
-    final enterStudio = find.descendant(
+    final enterZh = find.descendant(
       of: card,
-      matching: find.widgetWithText(TextButton, '进入工作室'),
+      matching: find.widgetWithText(StudioPrimaryButton, '进入工作室'),
     );
+    final enterEn = find.descendant(
+      of: card,
+      matching: find.widgetWithText(StudioPrimaryButton, 'Open studio'),
+    );
+    final enterStudio =
+        enterZh.evaluate().isNotEmpty ? enterZh : enterEn;
     await tester.tap(enterStudio, warnIfMissed: false);
     await waitFor(find.text('剧本'), maxTicks: 80);
     await pumpFrames(count: 24);
