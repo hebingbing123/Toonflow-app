@@ -32,6 +32,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(zh.notificationsCenterTitle), findsOneWidget);
+    expect(find.text(zh.studioFilterToolbarTitle), findsOneWidget);
     expect(find.text(zh.notificationsEmptyFiltered), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

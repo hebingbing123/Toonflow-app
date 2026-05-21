@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
-import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import 'navigation_controller.dart';
@@ -96,11 +95,6 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
           Text(
             l10n.productPipelineStripTitle,
             style: theme.textTheme.labelLarge,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.productPipelineStripSubtitle,
-            style: studioMutedBodySmall(context),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           SingleChildScrollView(

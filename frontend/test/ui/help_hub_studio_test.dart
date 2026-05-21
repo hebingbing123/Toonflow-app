@@ -52,6 +52,20 @@ void main() {
     );
     expect(find.textContaining('upstream timeout after retry'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text(zh.billingAuditTitle));
+    await tester.pumpAndSettle();
+
+    expect(find.text('evt_101'), findsOneWidget);
+    expect(find.text(zh.billingAuditCurrentLoadTitle), findsOneWidget);
+    expect(find.text(zh.studioFilterToolbarTitle), findsOneWidget);
+
+    await tester.tap(find.text(zh.studioFilterToolbarTitle));
+    await tester.pumpAndSettle();
+
+    expect(find.text(zh.billingAuditQuery), findsOneWidget);
+    expect(find.text(zh.billingAuditLoadMore), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('help_hub desktop layout golden', (tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
@@ -20,6 +21,74 @@ Widget buildTestApp(Widget child) {
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('zh'),
     home: Scaffold(body: child),
+  );
+}
+
+List<ExportHistoryItem> _mockExportHistoryItems() {
+  final now = DateTime.now();
+  return <ExportHistoryItem>[
+    ExportHistoryItem(
+      taskId: 'export-completed',
+      status: ExportTaskStatus.completed,
+      format: 'mp4',
+      resolution: '1080p',
+      bitrate: 'medium',
+      framerate: 30,
+      createdAt: now.subtract(const Duration(hours: 2, minutes: 5)),
+      completedAt: now.subtract(const Duration(hours: 2)),
+      outputUrl: 'https://example.com/export-completed.mp4',
+      fileSize: 24 * 1024 * 1024,
+    ),
+    ExportHistoryItem(
+      taskId: 'export-failed',
+      status: ExportTaskStatus.failed,
+      format: 'mp4',
+      resolution: '720p',
+      bitrate: 'low',
+      framerate: 24,
+      createdAt: now.subtract(const Duration(hours: 5)),
+      errorMessage: 'mock failure',
+      failureCode: 'mock_failure',
+    ),
+    ExportHistoryItem(
+      taskId: 'export-cancelled',
+      status: ExportTaskStatus.cancelled,
+      format: 'mov',
+      resolution: '1080p',
+      bitrate: 'high',
+      framerate: 60,
+      createdAt: now.subtract(const Duration(days: 10)),
+    ),
+  ];
+}
+
+Future<List<ExportHistoryItem>> _fakeFetchExportHistory({
+  required String projectId,
+  required ExportHistoryStatusFilter statusFilter,
+  required ExportHistoryTimeFilter timeFilter,
+  String? focusedTaskId,
+}) async {
+  final startDate = timeFilter.startDate;
+  final filtered = _mockExportHistoryItems()
+      .where((item) {
+        if (!statusFilter.matches(item.status)) {
+          return false;
+        }
+        if (startDate != null && item.createdAt.isBefore(startDate)) {
+          return false;
+        }
+        return true;
+      })
+      .toList(growable: true);
+  filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  return filtered;
+}
+
+ExportHistoryDialog buildHistoryDialog() {
+  return ExportHistoryDialog(
+    projectId: 'project-123',
+    accessToken: 'test-token',
+    fetchHistoryOverride: _fakeFetchExportHistory,
   );
 }
 
@@ -74,8 +143,7 @@ void main() {
       );
 
       expect(
-        ExportHistoryStatusFilter.completed
-            .matches(ExportTaskStatus.completed),
+        ExportHistoryStatusFilter.completed.matches(ExportTaskStatus.completed),
         isTrue,
       );
       expect(
@@ -93,8 +161,7 @@ void main() {
       );
 
       expect(
-        ExportHistoryStatusFilter.cancelled
-            .matches(ExportTaskStatus.cancelled),
+        ExportHistoryStatusFilter.cancelled.matches(ExportTaskStatus.cancelled),
         isTrue,
       );
       expect(
@@ -154,9 +221,7 @@ void main() {
     });
 
     test('uses defaults for missing fields', () {
-      final json = <String, dynamic>{
-        'status': 'queued',
-      };
+      final json = <String, dynamic>{'status': 'queued'};
 
       final item = ExportHistoryItem.fromJson(json);
 
@@ -286,14 +351,7 @@ void main() {
         find.text('下载').evaluate().isNotEmpty;
 
     testWidgets('renders with filters and empty state', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       // Should show loading initially
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -303,20 +361,13 @@ void main() {
 
       // Should show title and filters
       expect(find.text('导出历史'), findsOneWidget);
-      expect(find.text('全部状态'), findsOneWidget);
-      expect(find.text('全部时间'), findsOneWidget);
+      expect(find.text('状态'), findsOneWidget);
+      expect(find.text('时间'), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsAtLeastNWidgets(1));
     });
 
     testWidgets('displays history items correctly', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -331,19 +382,12 @@ void main() {
     });
 
     testWidgets('filters by status', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
       // Change status filter to "completed"
-      await tester.tap(find.text('全部状态'));
+      await tester.tap(find.byType(StudioSelectFieldTrigger).first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('已完成').last);
       await tester.pump();
@@ -356,19 +400,12 @@ void main() {
     });
 
     testWidgets('filters by time', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
       // Change time filter to "today"
-      await tester.tap(find.text('全部时间'));
+      await tester.tap(find.byType(StudioSelectFieldTrigger).last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('今天').last);
       await tester.pump();
@@ -377,16 +414,10 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('refreshes history when refresh button is tapped',
-        (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+    testWidgets('refreshes history when refresh button is tapped', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -395,8 +426,10 @@ void main() {
       await tester.pump();
 
       // Under test bindings, HTTP may resolve in the same frame as setState(loading).
-      final hasSpinner =
-          find.byType(CircularProgressIndicator).evaluate().isNotEmpty;
+      final hasSpinner = find
+          .byType(CircularProgressIndicator)
+          .evaluate()
+          .isNotEmpty;
       final hasError = find.textContaining('加载导出历史失败').evaluate().isNotEmpty;
       final hasEmpty = find.text('暂无导出记录').evaluate().isNotEmpty;
       final hasRows = find.text('下载').evaluate().isNotEmpty;
@@ -412,14 +445,7 @@ void main() {
     });
 
     testWidgets('shows download button for completed exports', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -432,11 +458,16 @@ void main() {
     });
 
     testWidgets('handles download action', (tester) async {
+      final downloads = <String>[];
       await tester.pumpWidget(
         buildTestApp(
-          const ExportHistoryDialog(
+          ExportHistoryDialog(
             projectId: 'project-123',
             accessToken: 'test-token',
+            fetchHistoryOverride: _fakeFetchExportHistory,
+            downloadOverride: (url, taskId) async {
+              downloads.add('$taskId|$url');
+            },
           ),
         ),
       );
@@ -448,20 +479,18 @@ void main() {
         return;
       }
       await tester.tap(find.text('下载').first);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
 
-      expect(find.textContaining('已复制下载链接'), findsOneWidget);
+      expect(downloads, hasLength(1));
+      expect(
+        downloads.first,
+        contains('export-completed|https://example.com/export-completed.mp4'),
+      );
     });
 
     testWidgets('displays error message correctly', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -470,14 +499,7 @@ void main() {
     });
 
     testWidgets('shows status icons correctly', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -490,14 +512,7 @@ void main() {
     });
 
     testWidgets('displays export settings information', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -511,14 +526,7 @@ void main() {
     });
 
     testWidgets('shows file size for completed exports', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -531,14 +539,7 @@ void main() {
     });
 
     testWidgets('shows duration for completed exports', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -559,10 +560,7 @@ void main() {
                 onPressed: () async {
                   await showStudioDialog<void>(
                     context: context,
-                    builder: (_) => const ExportHistoryDialog(
-                      projectId: 'project-123',
-                      accessToken: 'test-token',
-                    ),
+                    builder: (_) => buildHistoryDialog(),
                   );
                 },
                 child: const Text('Open'),
@@ -584,14 +582,7 @@ void main() {
     });
 
     testWidgets('formats relative time correctly', (tester) async {
-      await tester.pumpWidget(
-        buildTestApp(
-          const ExportHistoryDialog(
-            projectId: 'project-123',
-            accessToken: 'test-token',
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
       await tester.pumpAndSettle();
 
@@ -607,11 +598,16 @@ void main() {
     });
 
     testWidgets('prevents multiple simultaneous downloads', (tester) async {
+      final downloads = <String>[];
       await tester.pumpWidget(
         buildTestApp(
-          const ExportHistoryDialog(
+          ExportHistoryDialog(
             projectId: 'project-123',
             accessToken: 'test-token',
+            fetchHistoryOverride: _fakeFetchExportHistory,
+            downloadOverride: (url, taskId) async {
+              downloads.add('$taskId|$url');
+            },
           ),
         ),
       );
@@ -628,9 +624,9 @@ void main() {
       // Button text should change to "下载中..." during download
       // In tests, the download completes very quickly, so we just verify
       // that the download was triggered (snackbar appears)
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 250));
 
-      expect(find.textContaining('已复制下载链接'), findsOneWidget);
+      expect(downloads, hasLength(1));
     });
   });
 }

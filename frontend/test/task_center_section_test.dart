@@ -185,6 +185,46 @@ void main() {
     expect(find.text(zh.taskCenterCompatibilityCheck), findsNothing);
   });
 
+  testWidgets('product studio autoloads task summary on first frame', (
+    WidgetTester tester,
+  ) async {
+    var loadCount = 0;
+    await tester.pumpWidget(
+      _taskCenterTestApp(
+        TaskCenterSection(
+          studioPresentation: true,
+          accessToken: 'token',
+          initialProjectNumericId: null,
+          initialProjectUuid: null,
+          loadingTaskProjects: false,
+          loadingTaskCategories: false,
+          loadingTaskApi: false,
+          loadingTaskDetailsByNumericId: false,
+          loadingTaskDetailsUuid: false,
+          taskDetailJobIdController: TextEditingController(),
+          taskProjects: null,
+          taskCategoriesLine: null,
+          taskApiSummaryLine: null,
+          taskDetailNumericIdLine: null,
+          taskDetailUuidLine: null,
+          taskApiJobs: null,
+          taskApiLoadState: StudioLoadState.initial,
+          onTaskDetailJobIdChanged: (_) {},
+          onLoadTaskProjects: () {},
+          onLoadTaskCategories: () {},
+          onLoadTaskApi: () => loadCount++,
+          onProbeTaskDetailByNumericId: () {},
+          onProbeTaskDetailUuid: () {},
+          onSelectTaskJob: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(loadCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('product studio shows loaded-empty state with bottom count', (
     WidgetTester tester,
   ) async {
@@ -223,7 +263,8 @@ void main() {
 
     expect(find.text(zh.taskCenterJobsEmpty), findsOneWidget);
     expect(find.text(zh.taskCenterJobsCount(0)), findsOneWidget);
-    expect(find.text(zh.taskCenterRefreshSummary), findsOneWidget);
+    expect(find.text(zh.taskCenterRefreshSummary), findsWidgets);
+    expect(find.text(zh.taskCenterOpenWorkbench), findsOneWidget);
     expect(loadRequested, isFalse);
   });
 }

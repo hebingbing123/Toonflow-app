@@ -416,6 +416,13 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final billingWebhookEmptyMsg = describeBillingWebhookEmptyState(
+      l10n,
+      hasPage: _billingEventsPage != null,
+      loaded: _billingEvents.length,
+      isLoading: _loadingBillingEvents,
+      error: _billingEventsError,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
@@ -424,184 +431,487 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
           final viewportWidth = MediaQuery.sizeOf(context).width;
           final billingDropdownWidth = viewportWidth < 1320 ? 220.0 : 240.0;
           final billingDateFieldWidth = viewportWidth < 1320 ? 240.0 : 280.0;
+          final filterSummary = _billingEventsQuerySummary(l10n)
+              .split('\n')
+              .where((line) => line.trim().isNotEmpty)
+              .take(2)
+              .join(' · ');
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Text(
-                    l10n.billingAuditTitle,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      SizedBox(
-                        width: billingDropdownWidth,
-                        child: DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          initialValue: _billingProvider,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditProviderLabel,
+                l10n.billingAuditTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              StudioCollapsibleFilterPanel(
+                subtitle: filterSummary.isEmpty ? null : filterSummary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    StudioFilterRow(
+                      wideLayout: StudioFilterWideLayout.wrap,
+                      wideBreakpoint: 720,
+                      children: <Widget>[
+                        SizedBox(
+                          width: billingDropdownWidth,
+                          child: DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            initialValue: _billingProvider,
+                            decoration: InputDecoration(
+                              labelText: l10n.billingAuditProviderLabel,
+                              isDense: true,
+                            ),
+                            items: <DropdownMenuItem<String>>[
+                              DropdownMenuItem(
+                                value: '',
+                                child: Text(l10n.billingAuditAll),
+                              ),
+                              DropdownMenuItem(
+                                value: 'stripe',
+                                child: Text(l10n.billingAuditProviderStripe),
+                              ),
+                              DropdownMenuItem(
+                                value: 'alipay',
+                                child: Text(l10n.billingAuditProviderAlipay),
+                              ),
+                              DropdownMenuItem(
+                                value: 'paddle',
+                                child: Text(l10n.billingAuditProviderPaddle),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _billingProvider = value ?? '';
+                              });
+                            },
                           ),
-                          items: [
-                            DropdownMenuItem(
-                              value: '',
-                              child: Text(l10n.billingAuditAll),
+                        ),
+                        SizedBox(
+                          width: billingDropdownWidth,
+                          child: DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            initialValue: _billingSort,
+                            decoration: InputDecoration(
+                              labelText: l10n.billingAuditSortLabel,
+                              isDense: true,
                             ),
-                            DropdownMenuItem(
-                              value: 'stripe',
-                              child: Text(l10n.billingAuditProviderStripe),
-                            ),
-                            DropdownMenuItem(
-                              value: 'alipay',
-                              child: Text(l10n.billingAuditProviderAlipay),
-                            ),
-                            DropdownMenuItem(
-                              value: 'paddle',
-                              child: Text(l10n.billingAuditProviderPaddle),
-                            ),
-                          ],
-                          onChanged: (value) {
+                            items: <DropdownMenuItem<String>>[
+                              DropdownMenuItem(
+                                value: 'id_desc',
+                                child: Text(l10n.billingAuditSortNewest),
+                              ),
+                              DropdownMenuItem(
+                                value: 'id_asc',
+                                child: Text(l10n.billingAuditSortOldest),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _billingSort = value ?? 'id_desc';
+                              });
+                            },
+                          ),
+                        ),
+                        FilterChip(
+                          label: Text(l10n.billingAuditOnlyInformational),
+                          selected: _billingInformationalOnly == true,
+                          onSelected: (selected) {
                             setState(() {
-                              _billingProvider = value ?? '';
+                              _billingInformationalOnly = selected
+                                  ? true
+                                  : null;
                             });
                           },
                         ),
-                      ),
-                      SizedBox(
-                        width: billingDropdownWidth,
-                        child: DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          initialValue: _billingSort,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditSortLabel,
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: 'id_desc',
-                              child: Text(l10n.billingAuditSortNewest),
-                            ),
-                            DropdownMenuItem(
-                              value: 'id_asc',
-                              child: Text(l10n.billingAuditSortOldest),
-                            ),
-                          ],
-                          onChanged: (value) {
+                        FilterChip(
+                          label: Text(l10n.billingAuditOnlyStateful),
+                          selected: _billingInformationalOnly == false,
+                          onSelected: (selected) {
                             setState(() {
-                              _billingSort = value ?? 'id_desc';
+                              _billingInformationalOnly = selected
+                                  ? false
+                                  : null;
                             });
                           },
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _billingEventTypeController,
+                      decoration: InputDecoration(
+                        labelText: l10n.billingAuditEventTypeLabel,
+                        hintText: l10n.billingAuditEventTypeHint,
+                        isDense: true,
                       ),
-                      FilterChip(
-                        label: Text(l10n.billingAuditOnlyInformational),
-                        selected: _billingInformationalOnly == true,
-                        onSelected: (selected) {
-                          setState(() {
-                            _billingInformationalOnly = selected ? true : null;
-                          });
-                        },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _billingProviderEventIdController,
+                      decoration: InputDecoration(
+                        labelText: l10n.billingAuditProviderEventIdLabel,
+                        hintText: l10n.billingAuditProviderEventIdHint,
+                        isDense: true,
                       ),
-                      FilterChip(
-                        label: Text(l10n.billingAuditOnlyStateful),
-                        selected: _billingInformationalOnly == false,
-                        onSelected: (selected) {
-                          setState(() {
-                            _billingInformationalOnly = selected ? false : null;
-                          });
-                        },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _billingRawEventIdController,
+                      decoration: InputDecoration(
+                        labelText: l10n.billingAuditRawEventIdLabel,
+                        hintText: l10n.billingAuditRawEventIdHint,
+                        isDense: true,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _billingEventTypeController,
-                    decoration: InputDecoration(
-                      labelText: l10n.billingAuditEventTypeLabel,
-                      hintText: l10n.billingAuditEventTypeHint,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _billingProviderEventIdController,
-                    decoration: InputDecoration(
-                      labelText: l10n.billingAuditProviderEventIdLabel,
-                      hintText: l10n.billingAuditProviderEventIdHint,
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _billingProviderEventIdPrefixController,
+                      decoration: InputDecoration(
+                        labelText: l10n.billingAuditProviderEventIdPrefixLabel,
+                        hintText: l10n.billingAuditProviderPrefixHint,
+                        isDense: true,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _billingRawEventIdController,
-                    decoration: InputDecoration(
-                      labelText: l10n.billingAuditRawEventIdLabel,
-                      hintText: l10n.billingAuditRawEventIdHint,
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _billingRawEventIdPrefixController,
+                      decoration: InputDecoration(
+                        labelText: l10n.billingAuditRawEventIdPrefixLabel,
+                        hintText: l10n.billingAuditRawPrefixHint,
+                        isDense: true,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _billingProviderEventIdPrefixController,
-                    decoration: InputDecoration(
-                      labelText: l10n.billingAuditProviderEventIdPrefixLabel,
-                      hintText: l10n.billingAuditProviderPrefixHint,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _billingRawEventIdPrefixController,
-                    decoration: InputDecoration(
-                      labelText: l10n.billingAuditRawEventIdPrefixLabel,
-                      hintText: l10n.billingAuditRawPrefixHint,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      SizedBox(
-                        width: billingDateFieldWidth,
-                        child: TextField(
-                          controller: _billingEventCreatedFromController,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditEventCreatedFromLabel,
-                            hintText: l10n.billingAuditEventCreatedFromHint,
+                    const SizedBox(height: 8),
+                    StudioFilterRow(
+                      wideLayout: StudioFilterWideLayout.wrap,
+                      wideBreakpoint: 720,
+                      children: <Widget>[
+                        SizedBox(
+                          width: billingDateFieldWidth,
+                          child: TextField(
+                            controller: _billingEventCreatedFromController,
+                            decoration: InputDecoration(
+                              labelText:
+                                  l10n.billingAuditEventCreatedFromLabel,
+                              hintText: l10n.billingAuditEventCreatedFromHint,
+                              isDense: true,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: billingDateFieldWidth,
-                        child: TextField(
-                          controller: _billingEventCreatedToController,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditEventCreatedToLabel,
-                            hintText: l10n.billingAuditEventCreatedToHint,
+                        SizedBox(
+                          width: billingDateFieldWidth,
+                          child: TextField(
+                            controller: _billingEventCreatedToController,
+                            decoration: InputDecoration(
+                              labelText: l10n.billingAuditEventCreatedToLabel,
+                              hintText: l10n.billingAuditEventCreatedToHint,
+                              isDense: true,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: billingDateFieldWidth,
-                        child: TextField(
-                          controller: _billingCreatedFromController,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditCreatedFromLabel,
-                            hintText: l10n.billingAuditEventCreatedFromHint,
+                        SizedBox(
+                          width: billingDateFieldWidth,
+                          child: TextField(
+                            controller: _billingCreatedFromController,
+                            decoration: InputDecoration(
+                              labelText: l10n.billingAuditCreatedFromLabel,
+                              hintText: l10n.billingAuditEventCreatedFromHint,
+                              isDense: true,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: billingDateFieldWidth,
-                        child: TextField(
-                          controller: _billingCreatedToController,
-                          decoration: InputDecoration(
-                            labelText: l10n.billingAuditCreatedToLabel,
-                            hintText: l10n.billingAuditEventCreatedToHint,
+                        SizedBox(
+                          width: billingDateFieldWidth,
+                          child: TextField(
+                            controller: _billingCreatedToController,
+                            decoration: InputDecoration(
+                              labelText: l10n.billingAuditCreatedToLabel,
+                              hintText: l10n.billingAuditEventCreatedToHint,
+                              isDense: true,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    StudioFilterRow(
+                      wideLayout: StudioFilterWideLayout.wrap,
+                      wideBreakpoint: 560,
+                      children: <Widget>[
+                        FilledButton.tonal(
+                          onPressed: _loadingBillingEvents
+                              ? null
+                              : _loadBillingEvents,
+                          child: Text(
+                            _loadingBillingEvents
+                                ? l10n.billingAuditQuerying
+                                : l10n.billingAuditQuery,
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed:
+                              _loadingBillingEvents || _loadingMoreBillingEvents
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _billingProvider = '';
+                                    _billingInformationalOnly = null;
+                                    _billingSort = 'id_desc';
+                                    _billingEventTypeController.clear();
+                                    _billingProviderEventIdController.clear();
+                                    _billingProviderEventIdPrefixController
+                                        .clear();
+                                    _billingRawEventIdController.clear();
+                                    _billingRawEventIdPrefixController.clear();
+                                    _billingEventCreatedFromController.clear();
+                                    _billingEventCreatedToController.clear();
+                                    _billingCreatedFromController.clear();
+                                    _billingCreatedToController.clear();
+                                  });
+                                  unawaited(_loadBillingEvents());
+                                },
+                          child: Text(l10n.billingAuditResetRefresh),
+                        ),
+                        OutlinedButton(
+                          onPressed: _billingEvents.isEmpty
+                              ? null
+                              : () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(text: _buildBillingEventsCsv()),
+                                  );
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.billingAuditCsvCopiedSnack,
+                                      ),
+                                    ),
+                                  );
+                                },
+                          child: Text(l10n.billingAuditCopyCsv),
+                        ),
+                        OutlinedButton(
+                          onPressed: _copyBillingEventsQuerySummary,
+                          child: Text(l10n.billingAuditCopyQuerySummary),
+                        ),
+                        OutlinedButton(
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(
+                                text: _billingEventsUri().toString(),
+                              ),
+                            );
+                            if (!context.mounted) {
+                              return;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.billingAuditQueryUrlCopiedSnack,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(l10n.billingAuditCopyQueryUrl),
+                        ),
+                        OutlinedButton(
+                          onPressed: _exportingAllBillingEvents
+                              ? null
+                              : _copyAllBillingEventsCsv,
+                          child: Text(
+                            _exportingAllBillingEvents
+                                ? l10n.billingAuditExporting
+                                : l10n.billingAuditCopyFullCsv,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_loadingBillingEvents) Text(l10n.billingAuditLoading),
+              if (_billingEventsError != null)
+                Text(
+                  _billingEventsError == kProductShellSignInErrorPlaceholder
+                      ? l10n.platformConfigPleaseSignIn
+                      : _billingEventsError!,
+                  style: TextStyle(color: StudioTokens.of(context).danger),
+                ),
+              if (_billingEventsPage != null)
+                Text(
+                  l10n.billingAuditPageStats(
+                    _billingEventsPage!.total,
+                    _billingEvents.length,
+                    '${_billingEventsPage!.hasMore}',
                   ),
+                ),
+              if (billingWebhookEmptyMsg != null)
+                Text(
+                  billingWebhookEmptyMsg,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              if (_billingEvents.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.billingAuditCurrentLoadTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: <Widget>[
+                    ...(_billingEventCountsByProvider(l10n).entries.toList()
+                          ..sort((a, b) => b.value.compareTo(a.value)))
+                        .map(
+                          (entry) => Chip(
+                            label: Text(
+                              l10n.billingChipCount(entry.key, entry.value),
+                            ),
+                          ),
+                        ),
+                    Chip(
+                      label: Text(
+                        l10n.billingSnapInformational(
+                          _billingEvents
+                              .where((e) => e.isInformationalEvent)
+                              .length,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.billingSnapStateful(
+                          _billingEvents
+                              .where((e) => !e.isInformationalEvent)
+                              .length,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: <Widget>[
+                    ...(_billingEventCountsByType(l10n).entries.toList()
+                          ..sort((a, b) => b.value.compareTo(a.value)))
+                        .take(8)
+                        .map(
+                          (entry) => Chip(
+                            label: Text(
+                              l10n.billingChipCount(entry.key, entry.value),
+                            ),
+                          ),
+                        ),
+                    OutlinedButton(
+                      onPressed: _copyBillingEventsSnapshotSummary,
+                      child: Text(l10n.billingAuditCopySnapshot),
+                    ),
+                  ],
+                ),
+              ],
+              ..._billingEvents.map(
+                (item) => Card(
+                  margin: const EdgeInsets.only(top: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          item.providerEventId,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        SelectableText(_formatBillingEventMeta(l10n, item)),
+                        if (item.rawEventId != null &&
+                            item.rawEventId!.isNotEmpty)
+                          SelectableText(
+                            l10n.billingRowRawEventId(item.rawEventId!),
+                          ),
+                        SelectableText(l10n.billingRowId('${item.id}')),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            OutlinedButton(
+                              onPressed: () => _copyBillingAuditText(
+                                item.providerEventId,
+                                'provider_event_id',
+                              ),
+                              child: Text(l10n.billingAuditCopyProviderEventId),
+                            ),
+                            if (item.rawEventId != null &&
+                                item.rawEventId!.isNotEmpty)
+                              OutlinedButton(
+                                onPressed: () => _copyBillingAuditText(
+                                  item.rawEventId!,
+                                  'raw_event_id',
+                                ),
+                                child: Text(l10n.billingAuditCopyRawEventId),
+                              ),
+                            if (item.provider != null &&
+                                item.provider!.trim().isNotEmpty)
+                              FilledButton.tonal(
+                                onPressed: () => _applyBillingRowFilters(
+                                  provider: item.provider,
+                                ),
+                                child: Text(
+                                  l10n.billingAuditFilterByProvider(
+                                    item.provider!.trim(),
+                                  ),
+                                ),
+                              ),
+                            if (item.eventType != null &&
+                                item.eventType!.trim().isNotEmpty)
+                              FilledButton.tonal(
+                                onPressed: () => _applyBillingRowFilters(
+                                  eventType: item.eventType,
+                                ),
+                                child: Text(
+                                  l10n.billingAuditFilterByEventType(
+                                    item.eventType!.trim(),
+                                  ),
+                                ),
+                              ),
+                            FilledButton.tonal(
+                              onPressed: () => _applyBillingRowFilters(
+                                providerEventId: item.providerEventId,
+                                rawEventId: item.rawEventId,
+                              ),
+                              child: Text(l10n.billingAuditOnlyThisEvent),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (_billingEventsPage?.hasMore == true) ...<Widget>[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton(
+                    onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
+                        ? null
+                        : () => _loadBillingEvents(append: true),
+                    child: Text(
+                      _loadingMoreBillingEvents
+                          ? l10n.opsWhLoading
+                          : l10n.billingAuditLoadMore,
+                    ),
+                  ),
+                ),
+              ],
             ],
           );
         },

@@ -8,7 +8,10 @@ import '../config.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_pane_scaffold.dart';
+import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../platform/studio_load_state.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -126,6 +129,31 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
     );
   }
 
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: DecoratedBox(
+          decoration: studioInsetPanelDecoration(context),
+          child: const Padding(
+            padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioSkeleton(height: 18),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStudioMainBody(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.taskApiLoadState == StudioLoadState.error) {
@@ -134,23 +162,76 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
     if (widget.taskApiLoadState == StudioLoadState.initial ||
         widget.taskApiLoadState == StudioLoadState.loading ||
         widget.loadingTaskApi) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildStudioLoadingBody(context);
     }
     final jobs = widget.taskApiJobs ?? const <JobRow>[];
     if (jobs.isEmpty) {
       return Center(
-        child: StudioEmptyState(
-          title: l10n.taskCenterJobsEmpty,
-          subtitle: l10n.taskCenterSectionIntro,
-          icon: Icons.cloud_download_outlined,
+        child: SingleChildScrollView(
+          child: StudioEmptyState.emptyData(
+            title: l10n.taskCenterJobsEmpty,
+            subtitle: l10n.taskCenterSectionIntro,
+            icon: Icons.cloud_download_outlined,
+            actionLabel: l10n.taskCenterRefreshSummary,
+            onAction: widget.onLoadTaskApi,
+          ),
         ),
       );
     }
     return SingleChildScrollView(
-      child: TaskCenterJobsPreview(
-        jobs: jobs,
-        showCountHeader: false,
-        onSelectTaskJob: widget.onSelectTaskJob,
+      child: DecoratedBox(
+        decoration: studioInsetPanelDecoration(context),
+        child: Padding(
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+          child: TaskCenterJobsPreview(
+            jobs: jobs,
+            showCountHeader: false,
+            onSelectTaskJob: widget.onSelectTaskJob,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioHeader(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioPaneHeader(
+              title: l10n.productNavTasks,
+              subtitle: l10n.taskCenterSectionIntro,
+              showBack: widget.studioPresentation,
+              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.taskCenterLocalClientPrefs,
+              ),
+            ),
+            const SizedBox(height: StudioLayoutSpacing.section - 6),
+            TaskCenterActionsBar(
+              loadingTaskApi: widget.loadingTaskApi,
+              onOpenWorkbench: () => _openTaskWorkbench(context),
+              onLoadTaskApi: widget.onLoadTaskApi,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -164,11 +245,17 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
     }
     final count = widget.taskApiJobs?.length ?? 0;
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      padding: const EdgeInsets.only(
+        top: StudioLayoutSpacing.titleSubtitle,
+        bottom: StudioSpacing.sm,
+      ),
       child: Center(
         child: Text(
           l10n.taskCenterJobsCount(count),
-          style: Theme.of(context).textTheme.labelLarge,
+          style: studioHintStyle(context)?.copyWith(
+            color: StudioTokens.of(context).textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -195,30 +282,12 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
             taskCategoriesLine: widget.taskCategoriesLine,
           );
 
-    final header = <Widget>[
-      const SizedBox(height: 8),
-      StudioPaneHeader(
-        title: l10n.productNavTasks,
-        subtitle: l10n.taskCenterSectionIntro,
-        showBack: widget.studioPresentation,
-        trailing: RiskyOperationConfirmPrefsOverflowMenu(
-          tooltip: l10n.taskCenterLocalClientPrefs,
-        ),
-      ),
-      const SizedBox(height: 12),
-      TaskCenterActionsBar(
-        loadingTaskApi: widget.loadingTaskApi,
-        onOpenWorkbench: () => _openTaskWorkbench(context),
-        onLoadTaskApi: widget.onLoadTaskApi,
-      ),
-    ];
-
     if (widget.studioPresentation) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ...header,
-          const SizedBox(height: 8),
+          _buildStudioHeader(context),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           if (widget.taskApiLoadState == StudioLoadState.error &&
               widget.taskApiLastError != null)
             StudioApiErrorCallout(
@@ -233,6 +302,24 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
         ],
       );
     }
+
+    final header = <Widget>[
+      const SizedBox(height: StudioSpacing.sm),
+      StudioPaneHeader(
+        title: l10n.productNavTasks,
+        subtitle: l10n.taskCenterSectionIntro,
+        showBack: widget.studioPresentation,
+        trailing: RiskyOperationConfirmPrefsOverflowMenu(
+          tooltip: l10n.taskCenterLocalClientPrefs,
+        ),
+      ),
+      const SizedBox(height: StudioLayoutSpacing.stackMedium),
+      TaskCenterActionsBar(
+        loadingTaskApi: widget.loadingTaskApi,
+        onOpenWorkbench: () => _openTaskWorkbench(context),
+        onLoadTaskApi: widget.onLoadTaskApi,
+      ),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

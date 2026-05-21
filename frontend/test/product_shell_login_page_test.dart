@@ -127,4 +127,30 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('product login page simplifies hero on short viewports', (
+    WidgetTester tester,
+  ) async {
+    final authController = buildAuthController();
+    addTearDown(authController.dispose);
+
+    await tester.binding.setSurfaceSize(const Size(799, 452));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      buildTestApp(
+        authController: authController,
+        onSignIn: () {},
+        onSignUp: () {},
+        size: const Size(799, 452),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SingleChildScrollView), findsWidgets);
+    expect(find.byKey(const Key('product-auth-submit')), findsOneWidget);
+    // Tall marketing stage is omitted when height < 560px.
+    expect(find.text('OpenFlow'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

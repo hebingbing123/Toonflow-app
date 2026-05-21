@@ -648,52 +648,76 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          TextField(
-            controller: _webhookUrlController,
-            decoration: InputDecoration(
-              labelText: l10n.opsWhUrlLabel,
-              hintText: l10n.opsWhUrlHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _webhookSecretController,
-            decoration: InputDecoration(labelText: l10n.opsWhSecretLabel),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _webhookWorkspaceIdController,
-            decoration: InputDecoration(
-              labelText: l10n.opsWhWorkspaceIdLabel,
-              hintText: l10n.opsWhWorkspaceIdHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              l10n.opsWhSubscribeHint,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-          ),
-          const SizedBox(height: 4),
-          OutboundWebhookEventChips(
-            selected: _createWebhookEventTypes,
-            enabled: !_loadingWebhooks,
-            onSelectionChanged: (next) {
-              setState(() {
-                _createWebhookEventTypes
-                  ..clear()
-                  ..addAll(next);
-              });
-            },
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _webhookTestEventTypeController,
-            decoration: InputDecoration(
-              labelText: l10n.opsWhTestEventTypeLabel,
-              hintText: l10n.opsWhTestEventTypeHint,
+          StudioCollapsibleFilterPanel(
+            title: l10n.opsWhCreate,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  controller: _webhookUrlController,
+                  decoration: InputDecoration(
+                    labelText: l10n.opsWhUrlLabel,
+                    hintText: l10n.opsWhUrlHint,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _webhookSecretController,
+                  decoration: InputDecoration(
+                    labelText: l10n.opsWhSecretLabel,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _webhookWorkspaceIdController,
+                  decoration: InputDecoration(
+                    labelText: l10n.opsWhWorkspaceIdLabel,
+                    hintText: l10n.opsWhWorkspaceIdHint,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.opsWhSubscribeHint,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                OutboundWebhookEventChips(
+                  selected: _createWebhookEventTypes,
+                  enabled: !_loadingWebhooks,
+                  onSelectionChanged: (next) {
+                    setState(() {
+                      _createWebhookEventTypes
+                        ..clear()
+                        ..addAll(next);
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _webhookTestEventTypeController,
+                  decoration: InputDecoration(
+                    labelText: l10n.opsWhTestEventTypeLabel,
+                    hintText: l10n.opsWhTestEventTypeHint,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilledButton.tonal(
+                    onPressed: _creatingWebhook ? null : _createWebhook,
+                    child: Text(
+                      _creatingWebhook ? l10n.opsWhCreating : l10n.opsWhCreate,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           if (_latestCreatedWebhook != null) ...[
@@ -766,27 +790,30 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
             ),
           ],
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonal(
-                onPressed: _creatingWebhook ? null : _createWebhook,
-                child: Text(
-                  _creatingWebhook ? l10n.opsWhCreating : l10n.opsWhCreate,
+          StudioCollapsibleFilterPanel(
+            subtitle: _webhookSearchQuery.trim().isEmpty
+                ? null
+                : '${l10n.opsWhSearchLabel}: ${_webhookSearchQuery.trim()}',
+            child: StudioFilterRow(
+              wideLayout: StudioFilterWideLayout.toolbarRow,
+              wideBreakpoint: 560,
+              children: <Widget>[
+                OutlinedButton(
+                  onPressed: _loadingWebhooks ? null : _loadWebhooks,
+                  child: Text(l10n.opsWhRefreshList),
                 ),
-              ),
-              OutlinedButton(
-                onPressed: _loadingWebhooks ? null : _loadWebhooks,
-                child: Text(l10n.opsWhRefreshList),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _webhookSearchController,
-            decoration: InputDecoration(labelText: l10n.opsWhSearchLabel),
-            onChanged: _onWebhookSearchChanged,
+                Expanded(
+                  child: TextField(
+                    controller: _webhookSearchController,
+                    decoration: InputDecoration(
+                      labelText: l10n.opsWhSearchLabel,
+                      isDense: true,
+                    ),
+                    onChanged: _onWebhookSearchChanged,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           if (_loadingWebhooks) Text(l10n.opsWhLoading),

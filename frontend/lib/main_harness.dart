@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config.dart';
 import 'design_system/ix/studio_scaffold_messenger.dart';
+import 'design_system/ix/studio_toast_overlay.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'home_page.dart';
 import 'l10n/app_localizations.dart';
@@ -67,6 +68,8 @@ class OpenFlowHarnessApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
               useMaterial3: true,
             ),
+            builder: (context, child) =>
+                StudioToastHost(child: child ?? const SizedBox.shrink()),
             home: home,
             routes: {
               '/search': (context) {

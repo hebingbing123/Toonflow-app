@@ -9,6 +9,7 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/tokens.dart';
 import '../utils/localized_formatting.dart';
@@ -277,15 +278,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           else
             _buildComplianceAdminPanel(context, theme, l10n),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          if (widget.studioPresentation)
-            StudioFilterRow(children: _notificationListFilterChildren(l10n))
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: _notificationListFilterChildren(l10n),
-            ),
+          _buildNotificationListFilters(l10n),
           const SizedBox(height: 12),
           if (widget.controller.loading)
             const Padding(
@@ -327,7 +320,121 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
   }
 
-  List<Widget> _notificationListFilterChildren(AppLocalizations l10n) {
+  Widget _buildNotificationListFilters(AppLocalizations l10n) {
+    final filters = StudioFilterRow(
+      wideLayout: widget.studioPresentation
+          ? StudioFilterWideLayout.toolbarRow
+          : StudioFilterWideLayout.wrap,
+      children: _notificationListFilterChildren(
+        l10n,
+        toolbar: widget.studioPresentation,
+      ),
+    );
+    if (!widget.studioPresentation) {
+      return filters;
+    }
+    return StudioCollapsibleFilterPanel(
+      subtitle: _notificationListFilterSummary(l10n),
+      child: filters,
+    );
+  }
+
+  String? _notificationListFilterSummary(AppLocalizations l10n) {
+    final parts = <String>[];
+    if (_unreadOnly) {
+      parts.add(l10n.notificationsFilterUnread(widget.controller.unreadCount));
+    }
+    if (_typeFilter != 'all') {
+      parts.add(_notificationFilterTypeLabel(l10n, _typeFilter));
+    }
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      parts.add('${l10n.notificationsSearchLabel}: $query');
+    }
+    if (parts.isEmpty) {
+      return null;
+    }
+    return parts.join(' · ');
+  }
+
+  String _notificationFilterTypeLabel(AppLocalizations l10n, String type) {
+    switch (type) {
+      case 'job':
+        return l10n.notificationsTypeJob;
+      case 'workspace':
+        return l10n.notificationsTypeWorkspace;
+      case 'skill':
+        return l10n.notificationsTypeSkill;
+      case 'compliance':
+        return l10n.notificationsTypeCompliance;
+      default:
+        return l10n.notificationsTypeAll;
+    }
+  }
+
+  List<Widget> _notificationListFilterChildren(
+    AppLocalizations l10n, {
+    required bool toolbar,
+  }) {
+    final typeField = SizedBox(
+      width: toolbar ? 200 : 220,
+      child: StudioDropdownButtonFormField<String>(
+        initialValue: _typeFilter,
+        decoration: InputDecoration(
+          labelText: l10n.notificationsTypeFilterLabel,
+          isDense: true,
+        ),
+        items: [
+          DropdownMenuItem(
+            value: 'all',
+            child: Text(l10n.notificationsTypeAll),
+          ),
+          DropdownMenuItem(
+            value: 'job',
+            child: Text(l10n.notificationsTypeJob),
+          ),
+          DropdownMenuItem(
+            value: 'workspace',
+            child: Text(l10n.notificationsTypeWorkspace),
+          ),
+          DropdownMenuItem(
+            value: 'skill',
+            child: Text(l10n.notificationsTypeSkill),
+          ),
+          DropdownMenuItem(
+            value: 'compliance',
+            child: Text(l10n.notificationsTypeCompliance),
+          ),
+        ],
+        onChanged: (value) {
+          if (value == null) {
+            return;
+          }
+          setState(() {
+            _typeFilter = value;
+          });
+        },
+      ),
+    );
+
+    final searchField = TextField(
+      controller: _searchController,
+      onChanged: (_) => setState(() {}),
+      decoration: InputDecoration(
+        labelText: l10n.notificationsSearchLabel,
+        prefixIcon: const Icon(Icons.search),
+        isDense: true,
+      ),
+    );
+
+    final refreshButton = TextButton.icon(
+      onPressed: widget.controller.loading
+          ? null
+          : widget.controller.refresh,
+      icon: const Icon(Icons.refresh, size: 18),
+      label: Text(l10n.notificationsRefresh),
+    );
+
     return <Widget>[
       FilterChip(
         selected: _unreadOnly,
@@ -340,70 +447,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           l10n.notificationsFilterUnread(widget.controller.unreadCount),
         ),
       ),
-      SizedBox(
-        width: widget.studioPresentation ? double.infinity : 220,
-        child: StudioDropdownButtonFormField<String>(
-          initialValue: _typeFilter,
-          decoration: InputDecoration(
-            labelText: l10n.notificationsTypeFilterLabel,
-            isDense: true,
-          ),
-          items: [
-            DropdownMenuItem(
-              value: 'all',
-              child: Text(l10n.notificationsTypeAll),
-            ),
-            DropdownMenuItem(
-              value: 'job',
-              child: Text(l10n.notificationsTypeJob),
-            ),
-            DropdownMenuItem(
-              value: 'workspace',
-              child: Text(l10n.notificationsTypeWorkspace),
-            ),
-            DropdownMenuItem(
-              value: 'skill',
-              child: Text(l10n.notificationsTypeSkill),
-            ),
-            DropdownMenuItem(
-              value: 'compliance',
-              child: Text(l10n.notificationsTypeCompliance),
-            ),
-          ],
-          onChanged: (value) {
-            if (value == null) {
-              return;
-            }
-            setState(() {
-              _typeFilter = value;
-            });
-          },
-        ),
-      ),
-      SizedBox(
-        width: widget.studioPresentation ? double.infinity : 280,
-        child: TextField(
-          controller: _searchController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: l10n.notificationsSearchLabel,
-            prefixIcon: const Icon(Icons.search),
-            isDense: true,
-          ),
-        ),
-      ),
-      Align(
-        alignment: widget.studioPresentation
-            ? Alignment.centerLeft
-            : Alignment.center,
-        child: TextButton.icon(
-          onPressed: widget.controller.loading
-              ? null
-              : widget.controller.refresh,
-          icon: const Icon(Icons.refresh, size: 18),
-          label: Text(l10n.notificationsRefresh),
-        ),
-      ),
+      typeField,
+      if (toolbar) Expanded(child: searchField) else SizedBox(width: 280, child: searchField),
+      refreshButton,
     ];
   }
 

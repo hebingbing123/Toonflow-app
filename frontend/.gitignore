@@ -46,3 +46,4 @@ app.*.map.json
 
 # Golden test failure diffs (local only)
 /test/ui/failures/
+/test/design_system/failures/

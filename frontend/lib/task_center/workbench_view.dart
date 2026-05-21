@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -161,13 +162,13 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _WorkbenchDialogSection(
+          StudioWorkbenchSection(
             title: l10n.taskCenterWorkbenchFilterAndList,
-            icon: Icons.tune_rounded,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
                   wideBreakpoint: 520,
                   children: <Widget>[
                     _WorkbenchToolbarButton(
@@ -204,37 +205,51 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 StudioDialogInsetPanel(lines: statusLines),
                 const SizedBox(height: 12),
                 StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
                   wideBreakpoint: 480,
                   children: <Widget>[
-                    TextField(
-                      controller: model.pageCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldPage,
+                    Expanded(
+                      child: TextField(
+                        controller: model.pageCtrl,
+                        decoration: InputDecoration(
+                          labelText: l10n.taskCenterFieldPage,
+                          isDense: true,
+                        ),
                       ),
                     ),
-                    TextField(
-                      controller: model.limitCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldPageSize,
+                    Expanded(
+                      child: TextField(
+                        controller: model.limitCtrl,
+                        decoration: InputDecoration(
+                          labelText: l10n.taskCenterFieldPageSize,
+                          isDense: true,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
                   wideBreakpoint: 560,
                   children: <Widget>[
-                    TextField(
-                      controller: model.projectIdCtrl,
-                      decoration: InputDecoration(
-                        labelText:
-                            l10n.taskCenterFieldProjectNumericIdOptional,
+                    Expanded(
+                      child: TextField(
+                        controller: model.projectIdCtrl,
+                        decoration: InputDecoration(
+                          labelText:
+                              l10n.taskCenterFieldProjectNumericIdOptional,
+                          isDense: true,
+                        ),
                       ),
                     ),
-                    TextField(
-                      controller: model.projectUuidCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldProjectUuidOptional,
+                    Expanded(
+                      child: TextField(
+                        controller: model.projectUuidCtrl,
+                        decoration: InputDecoration(
+                          labelText: l10n.taskCenterFieldProjectUuidOptional,
+                          isDense: true,
+                        ),
                       ),
                     ),
                   ],

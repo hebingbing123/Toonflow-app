@@ -1918,6 +1918,18 @@ abstract class AppLocalizations {
   /// **'More'**
   String get productShellMoreMenu;
 
+  /// No description provided for @productShellMoreMenuSectionWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Production & tasks'**
+  String get productShellMoreMenuSectionWorkflow;
+
+  /// No description provided for @productShellMoreMenuSectionPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Team & platform'**
+  String get productShellMoreMenuSectionPlatform;
+
   /// No description provided for @studioAppBarNotifications.
   ///
   /// In en, this message translates to:
@@ -1983,6 +1995,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open studio'**
   String get studioEnterStudio;
+
+  /// No description provided for @studioProjectCardTapToSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the card to set project scope'**
+  String get studioProjectCardTapToSelect;
 
   /// No description provided for @studioProjectsEmptyTitle.
   ///
@@ -2779,6 +2797,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collapse'**
   String get studioCockpitCollapse;
+
+  /// No description provided for @studioFilterToolbarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get studioFilterToolbarTitle;
 
   /// No description provided for @studioCockpitScriptTitle.
   ///

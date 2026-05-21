@@ -113,3 +113,59 @@ List<ProductShellDestination> studioShellSecondaryDestinations(
     ),
   ];
 }
+
+/// Grouped destinations for the product-shell «更多» overlay.
+class ProductShellMoreMenuGrouping {
+  const ProductShellMoreMenuGrouping({
+    this.quickAccess = const <ProductShellDestination>[],
+    this.workflow = const <ProductShellDestination>[],
+    this.platform = const <ProductShellDestination>[],
+  });
+
+  final List<ProductShellDestination> quickAccess;
+  final List<ProductShellDestination> workflow;
+  final List<ProductShellDestination> platform;
+
+  int get tileCount =>
+      quickAccess.length + workflow.length + platform.length;
+}
+
+const Set<ProductWorkspacePane> _kMoreMenuWorkflowPanes = <ProductWorkspacePane>{
+  ProductWorkspacePane.shortVideoSpace,
+  ProductWorkspacePane.scriptWorkspace,
+  ProductWorkspacePane.productionWorkspace,
+  ProductWorkspacePane.tasks,
+  ProductWorkspacePane.quality,
+  ProductWorkspacePane.jobs,
+};
+
+const Set<ProductWorkspacePane> _kMoreMenuPlatformPanes = <ProductWorkspacePane>{
+  ProductWorkspacePane.teamWorkspaces,
+  ProductWorkspacePane.apiKeys,
+  ProductWorkspacePane.contentCompliance,
+  ProductWorkspacePane.platformStatus,
+  ProductWorkspacePane.platformConfig,
+};
+
+ProductShellMoreMenuGrouping groupProductShellMoreMenuDestinations(
+  List<ProductShellDestination> destinations, {
+  List<ProductShellDestination> quickAccess = const <ProductShellDestination>[],
+}) {
+  final workflow = <ProductShellDestination>[];
+  final platform = <ProductShellDestination>[];
+  final other = <ProductShellDestination>[];
+  for (final dest in destinations) {
+    if (_kMoreMenuWorkflowPanes.contains(dest.pane)) {
+      workflow.add(dest);
+    } else if (_kMoreMenuPlatformPanes.contains(dest.pane)) {
+      platform.add(dest);
+    } else {
+      other.add(dest);
+    }
+  }
+  return ProductShellMoreMenuGrouping(
+    quickAccess: <ProductShellDestination>[...quickAccess, ...other],
+    workflow: workflow,
+    platform: platform,
+  );
+}

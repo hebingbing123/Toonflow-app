@@ -1078,6 +1078,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productShellMoreMenu => 'More';
 
   @override
+  String get productShellMoreMenuSectionWorkflow => 'Production & tasks';
+
+  @override
+  String get productShellMoreMenuSectionPlatform => 'Team & platform';
+
+  @override
   String get studioAppBarNotifications => 'Notifications';
 
   @override
@@ -1112,6 +1118,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioEnterStudio => 'Open studio';
+
+  @override
+  String get studioProjectCardTapToSelect =>
+      'Tap the card to set project scope';
 
   @override
   String get studioProjectsEmptyTitle => 'No projects yet';
@@ -1553,6 +1563,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioCockpitCollapse => 'Collapse';
+
+  @override
+  String get studioFilterToolbarTitle => 'Filters';
 
   @override
   String get studioCockpitScriptTitle => 'Script step progress';

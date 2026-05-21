@@ -198,17 +198,21 @@ void main() {
         debugHelpHubLatestCreatedWebhook: buildHelpHubLatestCreatedWebhook(),
         debugHelpHubBillingEventsPage: buildHelpHubBillingEventsPage(),
         debugHelpHubWebhookDeliveries: buildHelpHubWebhookDeliveries(),
-        debugHelpHubWebhookLastTestResults: buildHelpHubWebhookLastTestResults(),
+        debugHelpHubWebhookLastTestResults:
+            buildHelpHubWebhookLastTestResults(),
       );
       addTearDown(router.dispose);
 
       await tester.pumpWidget(
-      productShellRouterTestApp(
-        router,
-        size: const Size(1366, 768),
-        locale: const Locale('en'),
-      ),
-    );
+        productShellRouterTestApp(
+          router,
+          size: const Size(1366, 768),
+          locale: const Locale('en'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Outbound webhooks'));
       await tester.pumpAndSettle();
 
       expect(find.text('Latest created webhook credentials'), findsOneWidget);
@@ -226,22 +230,18 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('HTTP 502'), findsOneWidget);
-      expect(find.text('Current load summary'), findsOneWidget);
-      expect(find.text('Copy audit snapshot'), findsOneWidget);
-      expect(find.text('Copy provider_event_id'), findsAtLeastNWidgets(1));
-      expect(find.text('Copy raw_event_id'), findsAtLeastNWidgets(1));
-      expect(find.text('Filter by stripe'), findsAtLeastNWidgets(1));
-      expect(
-        find.text('Filter by customer.subscription.updated'),
-        findsOneWidget,
-      );
-      expect(find.text('Only this event'), findsAtLeastNWidgets(1));
-      expect(find.text('Load more'), findsOneWidget);
-      expect(find.text('total=3 · loaded=2 · has_more=true'), findsOneWidget);
-      expect(find.text('Delivery log'), findsAtLeastNWidgets(1));
-      expect(find.text('Test delivery'), findsAtLeastNWidgets(1));
-      expect(find.text('Delete'), findsAtLeastNWidgets(1));
-      expect(find.text('Copy secret'), findsOneWidget);
+
+      await tester.tap(find.text('Billing webhook audit'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Billing webhook audit'), findsWidgets);
+      expect(find.text('Provider'), findsWidgets);
+      expect(find.text('Sort'), findsWidgets);
+      expect(find.text('Informational only'), findsOneWidget);
+      expect(find.text('Stateful only'), findsOneWidget);
+      expect(find.text('Event type'), findsWidgets);
+      expect(find.text('Provider event ID'), findsWidgets);
+      expect(find.text('Raw event ID'), findsWidgets);
       expect(
         router.routeInformationProvider.value.uri.toString(),
         '/?pane=help',

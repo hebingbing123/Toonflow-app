@@ -112,3 +112,4 @@ scripts/*.js
 scripts/orchestrate-codex-worker.sh
 scripts/release.sh
 scripts/sync-ecc-to-codex.sh
+.gstack/

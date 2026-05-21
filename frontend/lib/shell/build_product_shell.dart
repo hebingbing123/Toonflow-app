@@ -250,10 +250,10 @@ extension _HomePageProductShell on _HomePageState {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               color: selected
                   ? tokens.primarySoft.withValues(alpha: 0.72)
                   : tokens.bgSurface.withValues(alpha: 0.42),
@@ -263,7 +263,10 @@ extension _HomePageProductShell on _HomePageState {
                     : tokens.surfaceHighlight.withValues(alpha: 0.85),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 9),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioLayoutSpacing.inlineGap,
+              vertical: StudioLayoutSpacing.inlineGap - 1,
+            ),
             child: Row(
               children: <Widget>[
                 Icon(
@@ -293,7 +296,7 @@ extension _HomePageProductShell on _HomePageState {
   Widget _buildProductShellMoreMenuContent(
     BuildContext ctx, {
     required AppLocalizations l10n,
-    required List<ProductShellDestination> secondary,
+    required ProductShellMoreMenuGrouping grouping,
     required bool compactActions,
     required double panelWidth,
   }) {
@@ -304,17 +307,17 @@ extension _HomePageProductShell on _HomePageState {
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
     );
-    final useTwoColumns = panelWidth >= 360 && secondary.length >= 6;
-    final columnGap = 8.0;
-    final itemWidth = useTwoColumns
-        ? (panelWidth - 24 - columnGap) / 2
-        : panelWidth - 24;
+    const columnGap = StudioSpacing.sm;
 
-    Widget destinationTile(ProductShellDestination dest) {
+    Widget destinationTile(
+      ProductShellDestination dest, {
+      required bool useTwoColumns,
+      required double itemWidth,
+    }) {
       final selected =
           _shellNavigationController.productWorkspacePane == dest.pane;
       return SizedBox(
-        width: itemWidth,
+        width: useTwoColumns ? itemWidth : double.infinity,
         child: _buildProductShellMoreMenuRow(
           ctx,
           label: dest.label(l10n),
@@ -325,34 +328,66 @@ extension _HomePageProductShell on _HomePageState {
       );
     }
 
+    Widget destinationSection({
+      String? sectionLabel,
+      required List<ProductShellDestination> destinations,
+    }) {
+      if (destinations.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      final useTwoColumns = panelWidth >= 360 && destinations.length >= 4;
+      final itemWidth = useTwoColumns
+          ? (panelWidth - (StudioLayoutSpacing.insetDense * 2) - columnGap) / 2
+          : panelWidth - (StudioLayoutSpacing.insetDense * 2);
+      final tiles = destinations
+          .map(
+            (dest) => destinationTile(
+              dest,
+              useTwoColumns: useTwoColumns,
+              itemWidth: itemWidth,
+            ),
+          )
+          .toList(growable: false);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          if (sectionLabel != null) ...<Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
+              child: Text(sectionLabel, style: sectionLabelStyle),
+            ),
+          ],
+          if (useTwoColumns)
+            Wrap(spacing: columnGap, runSpacing: 0, children: tiles)
+          else
+            ...tiles,
+        ],
+      );
+    }
+
     Widget sectionDivider() {
       return Padding(
         padding: const EdgeInsets.fromLTRB(2, 6, 2, 8),
-        child: Divider(
-          height: 1,
-          color: tokens.surfaceHighlight.withValues(alpha: 0.9),
-        ),
+        child: Divider(height: 1, color: tokens.borderSubtle),
       );
     }
 
     return Material(
       color: Colors.transparent,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: tokens.bgSurface.withValues(alpha: 0.98),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: tokens.borderSubtle),
+        decoration: studioInsetPanelDecoration(ctx).copyWith(
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.20),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: Colors.black.withValues(alpha: 0.16),
+              blurRadius: 16,
+              spreadRadius: -6,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+          child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               StudioLayoutSpacing.insetDense,
               StudioLayoutSpacing.inlineGap,
@@ -360,90 +395,118 @@ extension _HomePageProductShell on _HomePageState {
               StudioLayoutSpacing.insetDense,
             ),
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        l10n.productShellMoreMenu,
-                        style: studioPaneTitleStyle(ctx),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: l10n.studioDismiss,
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(
-                          StudioSpacing.iconTouchTarget,
-                          StudioSpacing.iconTouchTarget,
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.padded,
-                        visualDensity: VisualDensity.standard,
-                        foregroundColor: tokens.textSecondary,
-                      ),
-                      icon: const Icon(Icons.close_rounded, size: 18),
-                    ),
-                  ],
-                ),
-              ),
-              if (useTwoColumns)
-                Wrap(
-                  spacing: columnGap,
-                  runSpacing: 0,
-                  children: secondary
-                      .map(destinationTile)
-                      .toList(growable: false),
-                )
-              else
-                ...secondary.map(destinationTile),
-              if (compactActions) ...<Widget>[
-                sectionDivider(),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
-                  child: Text(
-                    l10n.localeSectionTitle,
-                    style: sectionLabelStyle,
+                  padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          l10n.productShellMoreMenu,
+                          style: studioPaneTitleStyle(ctx),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.studioDismiss,
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: studioUtilityIconButtonStyle(ctx),
+                        icon: const Icon(Icons.close_rounded, size: 18),
+                      ),
+                    ],
                   ),
                 ),
-                for (final option in <(String, String)>[
-                  ('system', l10n.localeSystem),
-                  ('en', l10n.localeEnglish),
-                  ('zh', l10n.localeChinese),
-                ])
+                destinationSection(destinations: grouping.quickAccess),
+                if (grouping.workflow.isNotEmpty) ...<Widget>[
+                  if (grouping.quickAccess.isNotEmpty) sectionDivider(),
+                  destinationSection(
+                    sectionLabel: l10n.productShellMoreMenuSectionWorkflow,
+                    destinations: grouping.workflow,
+                  ),
+                ],
+                if (grouping.platform.isNotEmpty) ...<Widget>[
+                  sectionDivider(),
+                  destinationSection(
+                    sectionLabel: l10n.productShellMoreMenuSectionPlatform,
+                    destinations: grouping.platform,
+                  ),
+                ],
+                if (compactActions) ...<Widget>[
+                  sectionDivider(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+                    child: Text(
+                      l10n.localeSectionTitle,
+                      style: sectionLabelStyle,
+                    ),
+                  ),
+                  for (final option in <(String, String)>[
+                    ('system', l10n.localeSystem),
+                    ('en', l10n.localeEnglish),
+                    ('zh', l10n.localeChinese),
+                  ])
+                    _buildProductShellMoreMenuRow(
+                      ctx,
+                      label: option.$2,
+                      icon: Icons.language_outlined,
+                      selected: localeCode == option.$1,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        unawaited(
+                          AppLocaleNotifier.instance.setLocaleCode(option.$1),
+                        );
+                      },
+                    ),
+                  sectionDivider(),
                   _buildProductShellMoreMenuRow(
                     ctx,
-                    label: option.$2,
-                    icon: Icons.language_outlined,
-                    selected: localeCode == option.$1,
+                    label: l10n.authSignOut,
+                    icon: Icons.logout_outlined,
+                    selected: false,
+                    showCheckWhenSelected: false,
                     onTap: () {
                       Navigator.of(ctx).pop();
-                      unawaited(
-                        AppLocaleNotifier.instance.setLocaleCode(option.$1),
-                      );
+                      unawaited(_authController.signOut());
                     },
                   ),
-                sectionDivider(),
-                _buildProductShellMoreMenuRow(
-                  ctx,
-                  label: l10n.authSignOut,
-                  icon: Icons.logout_outlined,
-                  selected: false,
-                  showCheckWhenSelected: false,
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    unawaited(_authController.signOut());
-                  },
-                ),
+                ],
               ],
-            ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  double _estimateMoreMenuPanelHeight({
+    required double panelWidth,
+    required ProductShellMoreMenuGrouping grouping,
+    required bool compactActions,
+  }) {
+    int rowsFor(List<ProductShellDestination> list) {
+      if (list.isEmpty) {
+        return 0;
+      }
+      return panelWidth >= 360 && list.length >= 4
+          ? (list.length / 2).ceil()
+          : list.length;
+    }
+
+    var height = 56.0;
+    if (grouping.quickAccess.isNotEmpty) {
+      height += 8 + rowsFor(grouping.quickAccess) * 44;
+    }
+    if (grouping.workflow.isNotEmpty) {
+      height += 28 + rowsFor(grouping.workflow) * 44;
+    }
+    if (grouping.platform.isNotEmpty) {
+      height += 28 + rowsFor(grouping.platform) * 44;
+    }
+    if (compactActions) {
+      height += 220;
+    }
+    return height;
   }
 
   Future<void> _openProductShellMoreMenu(BuildContext anchorContext) async {
@@ -491,6 +554,8 @@ extension _HomePageProductShell on _HomePageState {
     final secondary = secondaryRaw
         .where((dest) => seenPanes.add(dest.pane))
         .toList(growable: false);
+    final grouping = groupProductShellMoreMenuDestinations(secondary);
+    final compactActions = width < 720;
     final selected = await showGeneralDialog<ProductWorkspacePane>(
       context: anchorContext,
       barrierDismissible: true,
@@ -514,11 +579,11 @@ extension _HomePageProductShell on _HomePageState {
           desiredWidth,
           screenSize.width - (horizontalMargin * 2),
         );
-        final rowCount = panelWidth >= 360 && secondary.length >= 6
-            ? (secondary.length / 2).ceil()
-            : secondary.length;
-        final estimatedHeight =
-            58.0 + (rowCount * 46.0) + (width < 720 ? 220.0 : 0.0);
+        final estimatedHeight = _estimateMoreMenuPanelHeight(
+          panelWidth: panelWidth,
+          grouping: grouping,
+          compactActions: compactActions,
+        );
         final panelHeight = math.min(
           estimatedHeight,
           screenSize.height - safeTop - safeBottom,
@@ -549,8 +614,8 @@ extension _HomePageProductShell on _HomePageState {
                 child: _buildProductShellMoreMenuContent(
                   ctx,
                   l10n: l10n,
-                  secondary: secondary,
-                  compactActions: width < 720,
+                  grouping: grouping,
+                  compactActions: compactActions,
                   panelWidth: panelWidth,
                 ),
               ),
@@ -698,7 +763,10 @@ extension _HomePageProductShell on _HomePageState {
     final width = MediaQuery.sizeOf(context).width;
     final compactTopChrome = width < 860;
     final stackedTopChrome = width >= 860 && width < 1240;
-    final showInlineWorkspaceContext = showPipeline && width >= 1440;
+    // Header chip when wide row (≥1440) or stacked second row (≥1120); block only if neither.
+    final showHeaderWorkspaceContext = showPipeline &&
+        !compactTopChrome &&
+        (width >= 1440 || (stackedTopChrome && width >= 1120));
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
@@ -859,7 +927,7 @@ extension _HomePageProductShell on _HomePageState {
                       Row(
                         children: <Widget>[
                           Expanded(child: globalSearchBar),
-                          if (width >= 1120) ...<Widget>[
+                          if (showHeaderWorkspaceContext) ...<Widget>[
                             const SizedBox(width: StudioLayoutSpacing.inlineGap),
                             SizedBox(
                               width: 250,
@@ -894,7 +962,7 @@ extension _HomePageProductShell on _HomePageState {
                         ),
                         child: globalSearchBar,
                       ),
-                      if (showInlineWorkspaceContext) ...<Widget>[
+                      if (showHeaderWorkspaceContext) ...<Widget>[
                         const SizedBox(width: StudioLayoutSpacing.inlineGap),
                         ConstrainedBox(
                           constraints: BoxConstraints(
@@ -935,7 +1003,7 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (showPipeline) ...<Widget>[
-                  if (!showInlineWorkspaceContext) ...<Widget>[
+                  if (!showHeaderWorkspaceContext) ...<Widget>[
                     _buildWorkspaceContextSection(
                       context,
                       compact: useCompactStudio,

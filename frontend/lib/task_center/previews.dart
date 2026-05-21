@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import 'support.dart';
@@ -24,10 +26,10 @@ class TaskCenterActionsBar extends StatelessWidget {
     return StudioFilterRow(
       wideBreakpoint: 560,
       children: [
-        FilledButton.icon(
+        StudioPrimaryButton(
+          label: l10n.taskCenterOpenWorkbench,
+          icon: Icons.dashboard_customize_outlined,
           onPressed: onOpenWorkbench,
-          icon: const Icon(Icons.open_in_new, size: 16),
-          label: Text(l10n.taskCenterOpenWorkbench),
         ),
         OutlinedButton.icon(
           onPressed: loadingTaskApi ? null : onLoadTaskApi,
@@ -189,10 +191,10 @@ class TaskCenterJobsPreview extends StatelessWidget {
       final phaseLabel = taskCenterShortVideoStageLabel(l10n, phaseJobs.first);
       tiles.add(
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: StudioLayoutSpacing.stackMedium),
           child: Text(
             '$phaseLabel (${phaseJobs.length})',
-            style: Theme.of(context).textTheme.labelLarge,
+            style: studioPaneTitleStyle(context),
           ),
         ),
       );
@@ -211,35 +213,73 @@ class TaskCenterJobsPreview extends StatelessWidget {
           if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
             l10n.taskCenterFailureReason(job.errorMessage!),
         ];
+        final tokens = StudioTokens.of(context);
         tiles.add(
-          ListTile(
-            dense: !compact,
-            contentPadding: EdgeInsets.zero,
-            minVerticalPadding: compact ? 10 : 6,
-            title: Text(
-              title,
-              maxLines: compact ? 2 : 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                    if (i > 0) const SizedBox(height: 4),
-                    Text(
-                      detailLines[i],
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: detailStyle,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => onSelectTaskJob(job),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+              child: Container(
+                margin: const EdgeInsets.only(top: StudioSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: StudioLayoutSpacing.cardInner - 4,
+                  vertical: StudioSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: tokens.bgSurface.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(
+                    StudioSpacing.radiusButton,
+                  ),
+                  border: Border.all(color: tokens.borderSubtle),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            title,
+                            maxLines: compact ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: studioCardTitleStyle(context),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var i = 0; i < detailLines.length; i++)
+                                  ...<Widget>[
+                                    if (i > 0)
+                                      const SizedBox(height: 4),
+                                    Text(
+                                      detailLines[i],
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: detailStyle,
+                                    ),
+                                  ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    if (!compact) ...<Widget>[
+                      const SizedBox(width: StudioSpacing.xs),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 20,
+                        color: tokens.textMuted,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-            trailing: compact ? null : const Icon(Icons.chevron_right),
-            onTap: () => onSelectTaskJob(job),
           ),
         );
       }

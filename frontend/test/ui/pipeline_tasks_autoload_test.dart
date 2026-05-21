@@ -25,9 +25,11 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.apps_outlined));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
     await tester.tap(find.text(zh.productNavTasks));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(TaskCenterSection), findsOneWidget);
     expect(find.text(zh.productNavTasks), findsWidgets);

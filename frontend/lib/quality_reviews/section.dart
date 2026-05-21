@@ -8,6 +8,7 @@ import 'support.dart';
 import 'workbench_view.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_pane_scaffold.dart';
 import '../design_system/components/studio_empty_state.dart';
@@ -69,8 +70,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
     if (!mounted) {
       return;
     }
-    if (widget.controller.qualityReviewsLoadState ==
-        StudioLoadState.initial) {
+    if (widget.controller.qualityReviewsLoadState == StudioLoadState.initial) {
       await widget.controller.loadQualityReviews();
     }
     if (!mounted || !widget.platformConfig.qualityDashboardEnabled) {
@@ -182,6 +182,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final muted = qualityReviewsMutedColor(context);
     final c = widget.controller;
+    final showDashboard = widget.platformConfig.qualityDashboardEnabled;
 
     if (c.qualityReviewsLoadState == StudioLoadState.error &&
         c.qualityReviewsLastError != null) {
@@ -195,11 +196,47 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
 
     final reviews = c.qualityReviews ?? const <QualityReview>[];
     if (reviews.isEmpty) {
-      return Center(
-        child: StudioEmptyState(
-          title: l10n.qualityReviewsEmptyForCurrentFilters,
-          subtitle: l10n.qualityReviewsSectionIntro,
-          icon: Icons.fact_check_outlined,
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (showDashboard) ...<Widget>[
+              Text(
+                l10n.qualityReviewsOpsDashboardTitle,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 6),
+              QualityReviewsOpsDashboardPreview(
+                mutedColor: muted,
+                studioPresentation: true,
+                dashboardSummary: c.qualityDashboardLine,
+                refreshControlsEnabled:
+                    widget.platformConfig.qualityRefreshControlsEnabled,
+                refreshSummary:
+                    widget.platformConfig.qualityRefreshControlsEnabled
+                    ? c.qualityDashboardRefreshLine
+                    : null,
+                freshnessMeta: c.qualityDashboardMeta,
+                dashboardLoadState: c.qualityDashboardLoadState,
+                dashboardLoadError: c.qualityDashboardLastError,
+                loadingDashboard: c.loadingQualityDashboard,
+                onRefreshDashboard: _loadQualityDashboard,
+                qualityStatsRows: c.qualityStatsRows,
+                stageGradeRows: c.qualityStageGradeRows,
+                scopeInsightRows: c.qualityScopeInsightRows,
+                tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
+                badCaseStats: c.qualityBadCaseStatItems,
+              ),
+              const SizedBox(height: 12),
+            ],
+            Center(
+              child: StudioEmptyState(
+                title: l10n.qualityReviewsEmptyForCurrentFilters,
+                subtitle: l10n.qualityReviewsSectionIntro,
+                icon: Icons.fact_check_outlined,
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -208,7 +245,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (widget.platformConfig.qualityDashboardEnabled) ...<Widget>[
+          if (showDashboard) ...<Widget>[
             Text(
               l10n.qualityReviewsOpsDashboardTitle,
               style: Theme.of(context).textTheme.titleSmall,
@@ -220,7 +257,8 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
               dashboardSummary: c.qualityDashboardLine,
               refreshControlsEnabled:
                   widget.platformConfig.qualityRefreshControlsEnabled,
-              refreshSummary: widget.platformConfig.qualityRefreshControlsEnabled
+              refreshSummary:
+                  widget.platformConfig.qualityRefreshControlsEnabled
                   ? c.qualityDashboardRefreshLine
                   : null,
               freshnessMeta: c.qualityDashboardMeta,
@@ -278,6 +316,29 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
     return AnimatedBuilder(
       animation: c,
       builder: (context, _) {
+        final actionsBar = QualityReviewsActionsBar(
+          studioPresentation: widget.studioPresentation,
+          showDashboardControls:
+              widget.platformConfig.qualityDashboardEnabled,
+          showRefreshControls:
+              widget.platformConfig.qualityRefreshControlsEnabled,
+          loadingQualityDashboard: c.loadingQualityDashboard,
+          refreshingQualityDashboardReadModel:
+              c.refreshingQualityDashboardReadModel,
+          loadingQualityReviews: c.loadingQualityReviews,
+          loadingQualityBadCases: c.loadingQualityBadCases,
+          loadingQualityStats: c.loadingQualityStats,
+          loadingQualityStagePassRate: c.loadingQualityStagePassRate,
+          onOpenWorkbench: () => _openQualityWorkbench(context),
+          onLoadQualityDashboard: _loadQualityDashboard,
+          onRefreshQualityDashboardReadModel:
+              _refreshQualityDashboardReadModel,
+          onLoadQualityReviews: c.loadQualityReviews,
+          onLoadQualityBadCases: c.loadQualityBadCases,
+          onLoadQualityStats: c.loadQualityStats,
+          onLoadQualityStagePassRate: c.loadQualityStagePassRate,
+        );
+
         final header = <Widget>[
           StudioPaneHeader(
             title: l10n.productNavQuality,
@@ -287,27 +348,10 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
               tooltip: l10n.taskCenterLocalClientPrefs,
             ),
           ),
-          const SizedBox(height: 8),
-          QualityReviewsActionsBar(
-            studioPresentation: widget.studioPresentation,
-            showDashboardControls: widget.platformConfig.qualityDashboardEnabled,
-            showRefreshControls:
-                widget.platformConfig.qualityRefreshControlsEnabled,
-            loadingQualityDashboard: c.loadingQualityDashboard,
-            refreshingQualityDashboardReadModel:
-                c.refreshingQualityDashboardReadModel,
-            loadingQualityReviews: c.loadingQualityReviews,
-            loadingQualityBadCases: c.loadingQualityBadCases,
-            loadingQualityStats: c.loadingQualityStats,
-            loadingQualityStagePassRate: c.loadingQualityStagePassRate,
-            onOpenWorkbench: () => _openQualityWorkbench(context),
-            onLoadQualityDashboard: _loadQualityDashboard,
-            onRefreshQualityDashboardReadModel: _refreshQualityDashboardReadModel,
-            onLoadQualityReviews: c.loadQualityReviews,
-            onLoadQualityBadCases: c.loadQualityBadCases,
-            onLoadQualityStats: c.loadQualityStats,
-            onLoadQualityStagePassRate: c.loadQualityStagePassRate,
-          ),
+          if (!widget.studioPresentation) ...<Widget>[
+            const SizedBox(height: 8),
+            actionsBar,
+          ],
         ];
 
         if (widget.studioPresentation) {
@@ -315,8 +359,18 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               ...header,
-              const SizedBox(height: 12),
-              _buildReviewIdLookupRow(context),
+              const SizedBox(height: 8),
+              StudioCollapsibleFilterPanel(
+                title: l10n.qualityReviewsFilterAndReadSection,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    actionsBar,
+                    const SizedBox(height: 8),
+                    _buildReviewIdLookupRow(context),
+                  ],
+                ),
+              ),
               if (c.qualityReviewByIdLine != null) ...<Widget>[
                 const SizedBox(height: 8),
                 SelectableText(
@@ -429,7 +483,9 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
               if (c.qualityStageGradeLine != null) ...<Widget>[
                 const SizedBox(height: 8),
                 SelectableText(
-                  l10n.qualityReviewsSummaryStageGrade(c.qualityStageGradeLine!),
+                  l10n.qualityReviewsSummaryStageGrade(
+                    c.qualityStageGradeLine!,
+                  ),
                 ),
               ],
               if (c.qualityScopeInsightsLine != null) ...<Widget>[

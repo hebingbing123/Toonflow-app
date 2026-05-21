@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -186,48 +188,6 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   style: theme.textTheme.titleMedium,
                 ),
               ),
-              StudioDropdownButton<int>(
-                value: _windowMinutes,
-                width: 132,
-                onChanged: _loading
-                    ? null
-                    : (next) {
-                        if (next == null || next == _windowMinutes) {
-                          return;
-                        }
-                        setState(() {
-                          _windowMinutes = next;
-                        });
-                        _refresh();
-                      },
-                items: <DropdownMenuItem<int>>[
-                  DropdownMenuItem(
-                    value: 15,
-                    child: Text(l10n.platformStatusWindowMinutes(15)),
-                  ),
-                  DropdownMenuItem(
-                    value: 60,
-                    child: Text(l10n.platformStatusWindowMinutes(60)),
-                  ),
-                  DropdownMenuItem(
-                    value: 180,
-                    child: Text(l10n.platformStatusWindowHours(3)),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: _loading ? null : _refresh,
-                icon: _loading
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.refresh),
-                label: Text(l10n.platformStatusRefreshAction),
-              ),
-              const SizedBox(width: 4),
               RiskyOperationConfirmPrefsOverflowMenu(
                 tooltip: l10n.taskCenterLocalClientPrefs,
               ),
@@ -236,29 +196,88 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           const SizedBox(height: 8),
           Text(l10n.platformStatusIntro, style: theme.textTheme.bodySmall),
           const SizedBox(height: 8),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  l10n.platformStatusLastRefreshed(
-                    _lastUpdatedAt == null
-                        ? l10n.platformStatusNotRefreshed
-                        : _formatUpdatedAt(_lastUpdatedAt),
-                  ),
-                  style: theme.textTheme.bodySmall,
+          StudioCollapsibleFilterPanel(
+            subtitle: l10n.platformStatusLastRefreshed(
+              _lastUpdatedAt == null
+                  ? l10n.platformStatusNotRefreshed
+                  : _formatUpdatedAt(_lastUpdatedAt),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
+                  wideBreakpoint: 560,
+                  children: <Widget>[
+                    StudioDropdownButton<int>(
+                      value: _windowMinutes,
+                      width: 132,
+                      onChanged: _loading
+                          ? null
+                          : (next) {
+                              if (next == null || next == _windowMinutes) {
+                                return;
+                              }
+                              setState(() {
+                                _windowMinutes = next;
+                              });
+                              _refresh();
+                            },
+                      items: <DropdownMenuItem<int>>[
+                        DropdownMenuItem(
+                          value: 15,
+                          child: Text(l10n.platformStatusWindowMinutes(15)),
+                        ),
+                        DropdownMenuItem(
+                          value: 60,
+                          child: Text(l10n.platformStatusWindowMinutes(60)),
+                        ),
+                        DropdownMenuItem(
+                          value: 180,
+                          child: Text(l10n.platformStatusWindowHours(3)),
+                        ),
+                      ],
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _loading ? null : _refresh,
+                      icon: _loading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.refresh),
+                      label: Text(l10n.platformStatusRefreshAction),
+                    ),
+                  ],
                 ),
-              ),
-              Switch(
-                value: _autoRefreshEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _autoRefreshEnabled = value;
-                  });
-                  _startAutoRefreshTimer();
-                },
-              ),
-              Text(l10n.platformStatusAutoRefresh),
-            ],
+                const SizedBox(height: 8),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        l10n.platformStatusLastRefreshed(
+                          _lastUpdatedAt == null
+                              ? l10n.platformStatusNotRefreshed
+                              : _formatUpdatedAt(_lastUpdatedAt),
+                        ),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    Switch(
+                      value: _autoRefreshEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _autoRefreshEnabled = value;
+                        });
+                        _startAutoRefreshTimer();
+                      },
+                    ),
+                    Text(l10n.platformStatusAutoRefresh),
+                  ],
+                ),
+              ],
+            ),
           ),
           if (_error != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),

@@ -154,6 +154,7 @@ class RealProductShellGalleryHarness {
 
   Future<void> openMoreMenu() async {
     await tapTooltip('更多');
+    await waitFor(find.text('制片与任务'));
     await waitFor(find.text('多平台分发'));
   }
 
@@ -213,19 +214,20 @@ class RealProductShellGalleryHarness {
   }
 
   Future<void> closeMoreMenuIfOpen() async {
-    if (find.byType(BottomSheet).evaluate().isEmpty) {
+    final close = find.byIcon(Icons.close_rounded);
+    if (close.evaluate().isNotEmpty) {
+      await tester.tap(close.first, warnIfMissed: false);
+      await pumpFrames();
       return;
     }
-    await tester.tapAt(const Offset(12, 12));
-    await pumpFrames();
+    if (find.byType(ModalBarrier).evaluate().isNotEmpty) {
+      await tester.tapAt(const Offset(12, 12));
+      await pumpFrames();
+    }
   }
 
   Finder _moreMenuItem(String label) {
-    final sheet = find.byType(BottomSheet);
-    if (sheet.evaluate().isEmpty) {
-      return find.text(label);
-    }
-    return find.descendant(of: sheet, matching: find.text(label));
+    return find.text(label);
   }
 
   Future<void> selectMoreMenuItem(
@@ -235,10 +237,7 @@ class RealProductShellGalleryHarness {
     if (!menuAlreadyOpen) {
       await openMoreMenu();
     }
-    final menuScroll = find.descendant(
-      of: find.byType(BottomSheet),
-      matching: find.byType(Scrollable),
-    );
+    final menuScroll = find.byType(Scrollable);
     for (var attempt = 0; attempt < 10; attempt++) {
       final matches = _moreMenuItem(label);
       if (matches.evaluate().isNotEmpty) {
@@ -249,7 +248,7 @@ class RealProductShellGalleryHarness {
       if (menuScroll.evaluate().isEmpty) {
         break;
       }
-      await tester.drag(menuScroll.first, const Offset(0, -220));
+      await tester.drag(menuScroll.last, const Offset(0, -220));
       await pumpFrames(count: 6);
     }
     expect(_moreMenuItem(label), findsWidgets, reason: 'Missing «更多» item: $label');
@@ -348,22 +347,59 @@ class RealProductShellGalleryHarness {
     final title = find.text(projectName);
     await waitFor(title);
     await tester.ensureVisible(title);
-    final card = find.ancestor(
-      of: title.first,
-      matching: find.byType(InkWell),
+
+    final numericId = _numericIdForProjectTitle(projectName);
+    final enterByKey = numericId > 0
+        ? find.byKey(Key('project_enter_studio_$numericId'))
+        : find.byKey(const Key('project_enter_studio_0'));
+    if (numericId > 0 && enterByKey.evaluate().isNotEmpty) {
+      await tester.tap(enterByKey.first, warnIfMissed: false);
+    } else {
+      final card = find.ancestor(
+        of: title.first,
+        matching: find.byType(Material),
+      );
+      final enterZh = find.descendant(
+        of: card,
+        matching: find.widgetWithText(StudioPrimaryButton, '进入工作室'),
+      );
+      final enterEn = find.descendant(
+        of: card,
+        matching: find.widgetWithText(StudioPrimaryButton, 'Open studio'),
+      );
+      final enterStudio = enterZh.evaluate().isNotEmpty ? enterZh : enterEn;
+      await tester.tap(enterStudio, warnIfMissed: false);
+    }
+
+    await assertProjectStudioEntered();
+  }
+
+  int _numericIdForProjectTitle(String projectName) {
+    final title = find.text(projectName);
+    if (title.evaluate().isEmpty) {
+      return 0;
+    }
+    final idChip = find.descendant(
+      of: find.ancestor(of: title.first, matching: find.byType(Material)),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            widget.data != null &&
+            RegExp(r'^#\d+$').hasMatch(widget.data!),
+      ),
     );
-    final enterZh = find.descendant(
-      of: card,
-      matching: find.widgetWithText(StudioPrimaryButton, '进入工作室'),
-    );
-    final enterEn = find.descendant(
-      of: card,
-      matching: find.widgetWithText(StudioPrimaryButton, 'Open studio'),
-    );
-    final enterStudio =
-        enterZh.evaluate().isNotEmpty ? enterZh : enterEn;
-    await tester.tap(enterStudio, warnIfMissed: false);
+    if (idChip.evaluate().isEmpty) {
+      return 0;
+    }
+    final label = (idChip.evaluate().first.widget as Text).data!;
+    return int.tryParse(label.replaceFirst('#', '')) ?? 0;
+  }
+
+  /// Confirms product-shell project studio route (not projects home grid).
+  Future<void> assertProjectStudioEntered() async {
     await waitFor(find.text('剧本'), maxTicks: 80);
+    expect(find.text('你的项目'), findsNothing);
+    expect(find.text('新建项目'), findsNothing);
     await pumpFrames(count: 24);
   }
 

@@ -30,15 +30,21 @@ const String kDevSupabaseAnonKey =
 const String kDevAdminEmail = 'admin@openflow.local';
 const String kDevAdminPassword = 'admin123';
 
-/// Resolved Supabase URL (dart-define, else local CLI defaults in debug).
+/// Local Supabase CLI defaults when no `SUPABASE_*` dart-define (debug/profile only).
+bool get kApplyLocalSupabaseDefaults =>
+    kSupabaseUrl.isEmpty &&
+    kSupabaseAnonKey.isEmpty &&
+    (kDebugMode || kProfileMode);
+
+/// Resolved Supabase URL (dart-define, else local CLI defaults in debug/profile).
 String get effectiveSupabaseUrl => kSupabaseUrl.isNotEmpty
     ? kSupabaseUrl
-    : (kDebugMode ? kDevSupabaseUrl : '');
+    : (kApplyLocalSupabaseDefaults ? kDevSupabaseUrl : '');
 
-/// Resolved anon key (dart-define, else local CLI defaults in debug).
+/// Resolved anon key (dart-define, else local CLI defaults in debug/profile).
 String get effectiveSupabaseAnonKey => kSupabaseAnonKey.isNotEmpty
     ? kSupabaseAnonKey
-    : (kDebugMode ? kDevSupabaseAnonKey : '');
+    : (kApplyLocalSupabaseDefaults ? kDevSupabaseAnonKey : '');
 
 bool get kSupabaseConfigured =>
     effectiveSupabaseUrl.isNotEmpty && effectiveSupabaseAnonKey.isNotEmpty;

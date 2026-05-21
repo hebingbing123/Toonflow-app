@@ -1007,6 +1007,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productShellMoreMenu => '更多';
 
   @override
+  String get productShellMoreMenuSectionWorkflow => '制片与任务';
+
+  @override
+  String get productShellMoreMenuSectionPlatform => '团队与平台';
+
+  @override
   String get studioAppBarNotifications => '通知';
 
   @override
@@ -1039,6 +1045,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioEnterStudio => '进入工作室';
+
+  @override
+  String get studioProjectCardTapToSelect => '点击卡片选择项目范围';
 
   @override
   String get studioProjectsEmptyTitle => '还没有项目';
@@ -1459,6 +1468,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioCockpitCollapse => '收起';
+
+  @override
+  String get studioFilterToolbarTitle => '筛选';
 
   @override
   String get studioCockpitScriptTitle => '剧本阶段进度';

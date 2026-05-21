@@ -102,6 +102,7 @@ void main() {
     if (await harness.tryCreateProjectViaWizard(projectName)) {
       await harness.capture('projects_with_seed_project');
       if (await harness.tryOpenProjectByName(projectName)) {
+        await harness.assertProjectStudioEntered();
         await harness.capture('studio_step_script');
         await harness.tryCaptureStudioArtStep();
         await harness.tryCaptureStudioStep('4. 分镜', 'storyboard_studio_step');

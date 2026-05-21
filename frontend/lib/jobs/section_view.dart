@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
+import '../../design_system/components/studio_collapsible_filter_panel.dart';
 import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
@@ -263,19 +264,23 @@ class JobsSectionView extends StatelessWidget {
       ),
       const SizedBox(height: 12),
       if (studioPresentation)
-        StudioFilterRow(
-          children: <Widget>[
-            FilledButton.tonal(
-              onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
-              child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
-            ),
-            FilledButton.tonal(
-              onPressed: model.loadingJobs
-                  ? null
-                  : callbacks.onLoadJobsStatusFailed,
-              child: Text(l10n.jobsLoadFailed),
-            ),
-          ],
+        StudioCollapsibleFilterPanel(
+          child: StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            wideBreakpoint: 480,
+            children: <Widget>[
+              FilledButton.tonal(
+                onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+                child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
+              ),
+              FilledButton.tonal(
+                onPressed: model.loadingJobs
+                    ? null
+                    : callbacks.onLoadJobsStatusFailed,
+                child: Text(l10n.jobsLoadFailed),
+              ),
+            ],
+          ),
         )
       else
         Wrap(

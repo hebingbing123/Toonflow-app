@@ -68,7 +68,7 @@
 
 | # | 优先级 | 项 | 文件/区域 |
 |---|--------|-----|-----------|
-| 1 | P0 | E2E：按项目名找到卡片并点「进入工作室」，等待工作室标题/六步条 | `integration_test/real_product_shell_full_gallery_test.dart` |
+| 1 | P0 | E2E：按项目名点 `project_enter_studio_*` /「进入工作室」，`assertProjectStudioEntered` | `integration_test/support/real_product_shell_gallery_support.dart`（2026-05-21 已接线） |
 | 2 | P0 | 重命名/补拍 `storyboard_studio_step`（与 `production_workspace` 脱钩） | 同上 |
 | 3 | P1 | 修复 `jobs empty value` 未翻译 | `jobs/section.dart`, `app_zh.arb` |
 | 4 | P1 | 合规举报下拉：宽度与 l10n 显示名 | `content_compliance/section.dart` |
@@ -97,8 +97,8 @@
 | 多平台分发 | ✅ `short_video_overview` | ✅ 读配置/项目 | ✅ |
 | 团队/API 密钥/合规/平台状态/配置 | ✅ 各 1 张 | ✅ | ✅ |
 | 剧本/制作工作区 | ✅ `script_workspace` / `production_workspace` | ✅ 需已选项目；制作张实为分镜 | ✅ |
-| **项目工作室·剧本步** | ⚠️ `studio_step_script` **画面错误** | ❌ 未进入路由 | ✅ |
-| **分镜步** | ⚠️ 仅在 `production_workspace` 错位 | 部分 | ✅ |
+| **项目工作室·剧本步** | ✅ 图库用 `assertProjectStudioEntered` + `project_enter_studio_*`（2026-05-21） | ✅ 进 `/projects/:id/script` | ✅ |
+| **分镜步** | ✅ `storyboard_studio_step` 在项目内步骤条拍摄；`production_workspace` 为工具页 | 部分 | ✅ |
 | 帮助/Webhook | ✅ `help_hub_webhooks` | ✅ 种子文档 | ✅ |
 | 导出对话框 | ❌ | ❌ 需短视频上下文 | 文档阻塞 |
 | Benchmark | ❌ | ❌ 无导航入口 | 文档阻塞 |

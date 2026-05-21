@@ -5,6 +5,46 @@ part of 'section.dart';
 
 /// Helper methods for ContentComplianceSection
 extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
+  String? _queueFilterSummary(
+    AppLocalizations l10n,
+    ContentComplianceQueueResponseV1 queue,
+  ) {
+    final parts = <String>[];
+    if (_queueStatus != 'all') {
+      parts.add(_statusLabel(l10n, _queueStatus));
+    }
+    if (_queueCategory != 'all') {
+      parts.add(_categoryLabel(l10n, _queueCategory));
+    }
+    if (_queueTargetType != 'all') {
+      parts.add(_targetTypeLabel(l10n, _queueTargetType));
+    }
+    if (_queueClaimedOnly) {
+      parts.add(l10n.contentComplianceClaimedOnly);
+    }
+    if ((_queueWorkspaceName ?? _queueWorkspaceId ?? '').isNotEmpty) {
+      parts.add(_queueWorkspaceName ?? _queueWorkspaceId!);
+    }
+    if ((_queueClaimedByLabel ?? '').isNotEmpty) {
+      parts.add(
+        _queueClaimedByLabel == 'unclaimed'
+            ? l10n.contentComplianceOwnerChipUnclaimed
+            : l10n.contentComplianceOwnerChip(_queueClaimedByLabel!),
+      );
+    }
+    if ((_queueSlaBucket ?? '').isNotEmpty) {
+      parts.add(_slaBucketLabel(l10n, _queueSlaBucket!));
+    }
+    if ((_queueEscalationStage ?? '').isNotEmpty) {
+      parts.add(_escalationStageLabel(l10n, _queueEscalationStage!));
+    }
+    if (parts.isEmpty) {
+      return l10n.contentComplianceMetricPending(queue.summary.pending);
+    }
+    return '${parts.join(' · ')} · '
+        '${l10n.contentComplianceMetricPending(queue.summary.pending)}';
+  }
+
   void _syncFilterStateFromController() {
     _queueStatus = widget.controller.queueStatusFilter ?? 'all';
     _queueCategory = widget.controller.queueCategoryFilter ?? 'all';
@@ -350,7 +390,6 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
 
   Color _alertBorderColor(BuildContext context, String level) {
     final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
     switch (level) {
       case 'critical':
         return theme.colorScheme.error;

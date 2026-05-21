@@ -21,7 +21,9 @@ extension _ShortVideoSpaceSectionExportHistoryDialog
   }) async {
     final initialTaskId =
         currentTaskId ??
-        (_activeAssemblyJob?.kind == 'video.export' ? _activeAssemblyJob?.id : null);
+        (_activeAssemblyJob?.kind == 'video.export'
+            ? _activeAssemblyJob?.id
+            : null);
     final result = await showStudioDialog<ExportHistoryDialogResult>(
       context: context,
       builder: (dialogContext) {
@@ -56,6 +58,17 @@ class ExportHistoryDialogResult {
   final bool shouldTrackFocusedTask;
   final bool openProductionWorkspaceRequested;
 }
+
+typedef ExportHistoryFetchOverride =
+    Future<List<ExportHistoryItem>> Function({
+      required String projectId,
+      required ExportHistoryStatusFilter statusFilter,
+      required ExportHistoryTimeFilter timeFilter,
+      String? focusedTaskId,
+    });
+
+typedef ExportHistoryDownloadOverride =
+    Future<void> Function(String url, String taskId);
 
 /// Time filter options for export history
 enum ExportHistoryTimeFilter {
@@ -167,32 +180,44 @@ class ExportHistoryItem {
       bitrate: json['bitrate'] as String? ?? 'medium',
       framerate: (json['framerate'] as num?)?.toInt() ?? 30,
       createdAt: DateTime.parse(
-        json['created_at'] as String? ?? json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+        json['created_at'] as String? ??
+            json['createdAt'] as String? ??
+            DateTime.now().toIso8601String(),
       ),
       completedAt: json['completed_at'] != null || json['completedAt'] != null
           ? DateTime.parse(
-              json['completed_at'] as String? ?? json['completedAt'] as String? ?? DateTime.now().toIso8601String(),
+              json['completed_at'] as String? ??
+                  json['completedAt'] as String? ??
+                  DateTime.now().toIso8601String(),
             )
           : null,
-      outputUrl:
-          json['output_url'] as String? ?? json['outputUrl'] as String?,
-      errorMessage: json['error_message'] as String? ??
-          json['errorMessage'] as String?,
-      failureCode: json['failure_code'] as String? ?? json['failureCode'] as String?,
-      fileSize: (json['file_size'] as num?)?.toInt() ??
+      outputUrl: json['output_url'] as String? ?? json['outputUrl'] as String?,
+      errorMessage:
+          json['error_message'] as String? ?? json['errorMessage'] as String?,
+      failureCode:
+          json['failure_code'] as String? ?? json['failureCode'] as String?,
+      fileSize:
+          (json['file_size'] as num?)?.toInt() ??
           (json['fileSize'] as num?)?.toInt(),
     );
   }
 
   String formattedFileSize(AppLocalizations l10n) {
-    if (fileSize == null) return l10n.shortVideoSpaceDialogExportHistoryFileSizeUnknown;
+    if (fileSize == null)
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeUnknown;
     final sizeInMB = fileSize! / (1024 * 1024);
     if (sizeInMB < 1) {
-      return l10n.shortVideoSpaceDialogExportHistoryFileSizeKB((fileSize! / 1024).toStringAsFixed(0));
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeKB(
+        (fileSize! / 1024).toStringAsFixed(0),
+      );
     } else if (sizeInMB < 1024) {
-      return l10n.shortVideoSpaceDialogExportHistoryFileSizeMB(sizeInMB.toStringAsFixed(1));
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeMB(
+        sizeInMB.toStringAsFixed(1),
+      );
     } else {
-      return l10n.shortVideoSpaceDialogExportHistoryFileSizeGB((sizeInMB / 1024).toStringAsFixed(2));
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeGB(
+        (sizeInMB / 1024).toStringAsFixed(2),
+      );
     }
   }
 
@@ -202,11 +227,18 @@ class ExportHistoryItem {
     }
     final duration = completedAt!.difference(createdAt);
     if (duration.inMinutes < 1) {
-      return l10n.shortVideoSpaceDialogExportHistoryDurationSeconds(duration.inSeconds);
+      return l10n.shortVideoSpaceDialogExportHistoryDurationSeconds(
+        duration.inSeconds,
+      );
     } else if (duration.inHours < 1) {
-      return l10n.shortVideoSpaceDialogExportHistoryDurationMinutes(duration.inMinutes);
+      return l10n.shortVideoSpaceDialogExportHistoryDurationMinutes(
+        duration.inMinutes,
+      );
     } else {
-      return l10n.shortVideoSpaceDialogExportHistoryDurationHours(duration.inHours, duration.inMinutes % 60);
+      return l10n.shortVideoSpaceDialogExportHistoryDurationHours(
+        duration.inHours,
+        duration.inMinutes % 60,
+      );
     }
   }
 }
@@ -244,10 +276,12 @@ ExportHistoryItem exportHistoryItemFromJob(JobRow job) {
       payload['resolution'] as String? ??
       quality?['resolution'] as String? ??
       '1080p';
-  final bitrate = payload['bitrate_label'] as String? ??
+  final bitrate =
+      payload['bitrate_label'] as String? ??
       (quality == null ? null : _bitrateLabelFromQualityMap(quality)) ??
       'medium';
-  final framerate = (payload['framerate'] as num?)?.toInt() ??
+  final framerate =
+      (payload['framerate'] as num?)?.toInt() ??
       (quality?['fps'] as num?)?.toInt() ??
       30;
   final result = job.result;
@@ -285,12 +319,16 @@ class ExportHistoryDialog extends StatefulWidget {
     required this.accessToken,
     this.currentTaskId,
     this.onOpenProductionWorkspace,
+    this.fetchHistoryOverride,
+    this.downloadOverride,
   });
 
   final String projectId;
   final String? accessToken;
   final String? currentTaskId;
   final VoidCallback? onOpenProductionWorkspace;
+  final ExportHistoryFetchOverride? fetchHistoryOverride;
+  final ExportHistoryDownloadOverride? downloadOverride;
 
   @override
   State<ExportHistoryDialog> createState() => _ExportHistoryDialogState();
@@ -349,7 +387,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(describeUserVisibleApiErrorResolved(context, e));
+        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(
+          describeUserVisibleApiErrorResolved(context, e),
+        );
         _loading = false;
       });
       _syncAutoRefresh(const <ExportHistoryItem>[]);
@@ -362,27 +402,42 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     required ExportHistoryStatusFilter statusFilter,
     required ExportHistoryTimeFilter timeFilter,
   }) async {
+    final fetchOverride = widget.fetchHistoryOverride;
+    if (fetchOverride != null) {
+      return fetchOverride(
+        projectId: projectId,
+        statusFilter: statusFilter,
+        timeFilter: timeFilter,
+        focusedTaskId: _focusedTaskId,
+      );
+    }
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
       if (!mounted) {
-        throw StateError('ExportHistoryDialog._fetchExportHistory: not mounted');
+        throw StateError(
+          'ExportHistoryDialog._fetchExportHistory: not mounted',
+        );
       }
       throw Exception(
-        resolveAppLocalizationsForErrors(context).shortVideoSpaceDialogExportHistorySessionExpired,
+        resolveAppLocalizationsForErrors(
+          context,
+        ).shortVideoSpaceDialogExportHistorySessionExpired,
       );
     }
     final jobs = await fetchJobs(token, kind: 'video.export', limit: 100);
     final projectJobs = jobs
         .where((j) => j.payload['project_uuid']?.toString() == projectId)
         .toList(growable: false);
-    final items = projectJobs.map(exportHistoryItemFromJob).toList(growable: true);
+    final items = projectJobs
+        .map(exportHistoryItemFromJob)
+        .toList(growable: true);
     final currentTaskId = _focusedTaskId;
     if (currentTaskId != null &&
         currentTaskId.isNotEmpty &&
         items.every((item) => item.taskId != currentTaskId)) {
       final currentJob = await fetchJob(token, currentTaskId);
       if (currentJob.payload['project_uuid']?.toString() == projectId &&
-        currentJob.kind == 'video.export') {
+          currentJob.kind == 'video.export') {
         items.add(exportHistoryItemFromJob(currentJob));
       }
     }
@@ -467,7 +522,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(describeUserVisibleApiErrorResolved(context, e))),
+          content: Text(
+            l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(
+              describeUserVisibleApiErrorResolved(context, e),
+            ),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 3),
         ),
@@ -518,6 +577,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   Future<void> _triggerDownload(String url, String taskId) async {
+    final downloadOverride = widget.downloadOverride;
+    if (downloadOverride != null) {
+      await downloadOverride(url, taskId);
+      return;
+    }
     await Clipboard.setData(ClipboardData(text: url));
     debugPrint('Export download url for task $taskId: $url');
   }
@@ -558,81 +622,87 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            if (_focusedTaskId != null && _focusedTaskId!.isNotEmpty) ...[
-              _buildCurrentTaskBanner(theme),
-              const SizedBox(height: 16),
-            ],
-            if (_errorMessage == null && !_loading) ...<Widget>[
-              Row(
-                children: [
-                  // Status filter
-                  Expanded(
-                    child: StudioDropdownButtonFormField<ExportHistoryStatusFilter>(
-                    initialValue: _statusFilter,
-                    decoration: InputDecoration(
-                      labelText: l10n.shortVideoSpaceDialogExportHistoryStatusLabel,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                if (_focusedTaskId != null && _focusedTaskId!.isNotEmpty) ...[
+                  _buildCurrentTaskBanner(theme),
+                  const SizedBox(height: 16),
+                ],
+                if (_errorMessage == null && !_loading) ...<Widget>[
+                  Row(
+                    children: [
+                      // Status filter
+                      Expanded(
+                        child:
+                            StudioDropdownButtonFormField<
+                              ExportHistoryStatusFilter
+                            >(
+                              initialValue: _statusFilter,
+                              decoration: InputDecoration(
+                                labelText: l10n
+                                    .shortVideoSpaceDialogExportHistoryStatusLabel,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              items: ExportHistoryStatusFilter.values
+                                  .map(
+                                    (filter) => DropdownMenuItem(
+                                      value: filter,
+                                      child: Text(filter.displayName(l10n)),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value == null) return;
+                                setState(() {
+                                  _statusFilter = value;
+                                });
+                                _loadHistory();
+                              },
+                            ),
                       ),
-                    ),
-                    items: ExportHistoryStatusFilter.values
-                        .map(
-                          (filter) => DropdownMenuItem(
-                            value: filter,
-                            child: Text(filter.displayName(l10n)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        _statusFilter = value;
-                      });
-                      _loadHistory();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Time filter
-                Expanded(
-                  child: StudioDropdownButtonFormField<ExportHistoryTimeFilter>(
-                    initialValue: _timeFilter,
-                    decoration: InputDecoration(
-                      labelText: l10n.shortVideoSpaceDialogExportHistoryTimeLabel,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                      const SizedBox(width: 16),
+                      // Time filter
+                      Expanded(
+                        child:
+                            StudioDropdownButtonFormField<
+                              ExportHistoryTimeFilter
+                            >(
+                              initialValue: _timeFilter,
+                              decoration: InputDecoration(
+                                labelText: l10n
+                                    .shortVideoSpaceDialogExportHistoryTimeLabel,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              items: ExportHistoryTimeFilter.values
+                                  .map(
+                                    (filter) => DropdownMenuItem(
+                                      value: filter,
+                                      child: Text(filter.displayName(l10n)),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value == null) return;
+                                setState(() {
+                                  _timeFilter = value;
+                                });
+                                _loadHistory();
+                              },
+                            ),
                       ),
-                    ),
-                    items: ExportHistoryTimeFilter.values
-                        .map(
-                          (filter) => DropdownMenuItem(
-                            value: filter,
-                            child: Text(filter.displayName(l10n)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        _timeFilter = value;
-                      });
-                      _loadHistory();
-                    },
+                    ],
                   ),
-                ),
-              ],
-            ),
-              const SizedBox(height: 16),
-            ],
+                  const SizedBox(height: 16),
+                ],
 
-            // History list
-            Expanded(
-              child: _buildHistoryList(theme),
-            ),
+                // History list
+                Expanded(child: _buildHistoryList(theme)),
               ],
             ),
           );
@@ -657,9 +727,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     final tokens = StudioTokens.of(context);
 
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -696,11 +764,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: tokens.textSecondary,
-            ),
+            Icon(Icons.inbox_outlined, size: 64, color: tokens.textSecondary),
             const SizedBox(height: 16),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryNoRecords,
@@ -818,8 +882,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     final failureCodeLabel = failureCode.isEmpty
         ? null
         : videoExportFailureCodeLabel(l10n, failureCode);
-    final structuredFailureLine =
-        (failureCodeLabel ?? '').trim().isEmpty
+    final structuredFailureLine = (failureCodeLabel ?? '').trim().isEmpty
         ? null
         : l10n.taskCenterStructuredFailure(failureCodeLabel!);
     final rawErrorLine = (item.errorMessage ?? '').trim().isEmpty
@@ -831,16 +894,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       decoration: BoxDecoration(
         color: isFocused ? tokens.primarySoft.withValues(alpha: 0.55) : null,
         border: isFocused
-            ? Border(
-                left: BorderSide(color: tokens.primary, width: 3),
-              )
+            ? Border(left: BorderSide(color: tokens.primary, width: 3))
             : null,
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: _buildStatusIcon(item.status, theme),
         title: Row(
           children: [
@@ -872,7 +930,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _getStatusColor(item.status, theme).withValues(alpha: 0.1),
+                color: _getStatusColor(
+                  item.status,
+                  theme,
+                ).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -891,7 +952,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           children: [
             const SizedBox(height: 4),
             Text(
-              l10n.shortVideoSpaceDialogExportHistoryCreatedAt(_formatDateTime(item.createdAt)),
+              l10n.shortVideoSpaceDialogExportHistoryCreatedAt(
+                _formatDateTime(item.createdAt),
+              ),
               style: theme.textTheme.bodySmall,
             ),
             if (item.completedAt != null)
@@ -910,7 +973,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             ),
             if (item.fileSize != null)
               Text(
-                l10n.shortVideoSpaceDialogExportHistoryFileSize(item.formattedFileSize(l10n)),
+                l10n.shortVideoSpaceDialogExportHistoryFileSize(
+                  item.formattedFileSize(l10n),
+                ),
                 style: theme.textTheme.bodySmall,
               ),
             if (structuredFailureLine != null || rawErrorLine != null) ...[
@@ -1019,7 +1084,8 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         icon: const Icon(Icons.movie_creation_outlined),
         label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
       );
-      if (recommendedAction == ShortVideoLatestExportAction.openProductionWorkspace &&
+      if (recommendedAction ==
+              ShortVideoLatestExportAction.openProductionWorkspace &&
           widget.onOpenProductionWorkspace != null) {
         return FilledButton.icon(
           onPressed: _openProductionWorkspace,
@@ -1099,11 +1165,17 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     if (difference.inMinutes < 1) {
       return l10n.shortVideoSpaceDialogExportHistoryTimeJustNow;
     } else if (difference.inHours < 1) {
-      return l10n.shortVideoSpaceDialogExportHistoryTimeMinutesAgo(difference.inMinutes);
+      return l10n.shortVideoSpaceDialogExportHistoryTimeMinutesAgo(
+        difference.inMinutes,
+      );
     } else if (difference.inDays < 1) {
-      return l10n.shortVideoSpaceDialogExportHistoryTimeHoursAgo(difference.inHours);
+      return l10n.shortVideoSpaceDialogExportHistoryTimeHoursAgo(
+        difference.inHours,
+      );
     } else if (difference.inDays < 7) {
-      return l10n.shortVideoSpaceDialogExportHistoryTimeDaysAgo(difference.inDays);
+      return l10n.shortVideoSpaceDialogExportHistoryTimeDaysAgo(
+        difference.inDays,
+      );
     } else {
       final localeName = Localizations.localeOf(context).toString();
       return DateFormat.yMMMd(localeName).add_Hm().format(dateTime);

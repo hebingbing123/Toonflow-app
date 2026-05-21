@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_code_dropdown_field.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_surfaces.dart';
@@ -608,7 +609,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 ],
                 const SizedBox(height: 8),
-                Wrap(
+                StudioCollapsibleFilterPanel(
+                  subtitle: _queueFilterSummary(l10n, queue),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
@@ -1085,6 +1091,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         .toList(growable: false),
                   ),
                 ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
                 if (queue.items.isEmpty)
                   Padding(

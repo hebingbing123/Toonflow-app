@@ -7,8 +7,9 @@
 ```bash
 cd frontend
 flutter pub get
-flutter run -d chrome          # Web（开发 Harness，探针 + 产品面板）
-flutter run -d macos           # macOS 桌面
+# 产品登录页需要 Supabase（debug/profile 会自动用本地 CLI 默认；release 须带 dart-define）
+flutter run -d chrome --dart-define-from-file=dart_defines.dev.json
+flutter run -d macos --dart-define-from-file=dart_defines.dev.json
 ```
 
 **产品级 Studio 壳**（侧栏导航 + 登录页，类似 [waoowaoo](https://github.com/waooAI/waoowaoo) 的信息架构，不再嵌在长页 Harness 里）：

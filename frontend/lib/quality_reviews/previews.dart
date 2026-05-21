@@ -128,7 +128,10 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
     ];
     return StudioFilterRow(
-      wideBreakpoint: studioPresentation ? 620 : 760,
+      wideBreakpoint: studioPresentation ? 560 : 760,
+      wideLayout: studioPresentation
+          ? StudioFilterWideLayout.toolbarRow
+          : StudioFilterWideLayout.wrap,
       children: actionButtons,
     );
   }

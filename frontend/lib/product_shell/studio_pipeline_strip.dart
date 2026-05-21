@@ -162,37 +162,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  if (narrow)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        _buildTitleBadge(context, tokens, studio, l10n),
-                        const SizedBox(height: StudioSpacing.xs),
-                        Text(
-                          l10n.productPipelineStripSubtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: tokens.textSecondary),
-                        ),
-                      ],
-                    )
-                  else
-                    Row(
-                      children: <Widget>[
-                        _buildTitleBadge(context, tokens, studio, l10n),
-                        const SizedBox(width: StudioSpacing.xs + 2),
-                        Expanded(
-                          child: Text(
-                            l10n.productPipelineStripSubtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: tokens.textSecondary),
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildTitleBadge(context, tokens, studio, l10n),
                   SizedBox(height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4),
                   _buildStepChipsRail(
                     context,
@@ -218,17 +188,6 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         _buildTitleBadge(context, tokens, studio, l10n),
-        const SizedBox(width: StudioSpacing.xs + 2),
-        Expanded(
-          child: Text(
-            l10n.productPipelineStripSubtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
-          ),
-        ),
         const SizedBox(width: StudioSpacing.xs + 4),
         Flexible(
           child: _buildStepChipsRail(

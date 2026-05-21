@@ -155,7 +155,9 @@ extension _HomePageProductPanesBuilder on _HomePageState {
                 onAccountDeleted: _handleAccountDeleted,
                 onWorkspaceContextChanged: _handleWorkspaceContextChanged,
                 currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
-                initialTabIndex: _settingsHubInitialTabIndex,
+                initialTabIndex: StudioSettingsHubNavigation.consumePending(
+                  fallback: _settingsHubInitialTabIndex,
+                ),
               )
             : AccountSection(
                 controller: _accountController,

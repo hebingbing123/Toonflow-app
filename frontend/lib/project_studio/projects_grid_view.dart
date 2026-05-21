@@ -132,8 +132,8 @@ class _LoadingGrid extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: crossAxisCount,
-          mainAxisSpacing: StudioSpacing.sm,
-          crossAxisSpacing: StudioSpacing.sm,
+          mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+          crossAxisSpacing: StudioLayoutSpacing.stackMedium,
           childAspectRatio: childAspectRatio,
           children: List<Widget>.generate(
             crossAxisCount == 1 ? 2 : 4,
@@ -170,87 +170,124 @@ class _ProjectGridCard extends StatelessWidget {
     final focusLabel = _projectFocusLabel(l10n, completedSteps);
     final fallbackSummary = _projectFocusSummary(l10n, completedSteps);
 
+    final scopeSelectionEnabled = onSelect != null;
+    final cardRadius = BorderRadius.circular(StudioSpacing.radiusCard);
+
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-      child: InkWell(
-        onTap: onSelect ?? onTap,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        child: Container(
-          decoration: BoxDecoration(
-            color: tokens.bgSurface.withValues(alpha: 0.96),
-            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-            border: Border.all(
-              color: selected ? tokens.primary : tokens.borderSubtle,
-              width: selected ? 1.5 : 1,
-            ),
-            boxShadow: null,
+      borderRadius: cardRadius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: tokens.bgSurface.withValues(alpha: 0.96),
+          borderRadius: cardRadius,
+          border: Border.all(
+            color: selected ? tokens.primary : tokens.borderSubtle,
+            width: selected ? 1.5 : 1,
           ),
-          padding: const EdgeInsets.all(StudioLayoutSpacing.section - 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: studioCardTitleStyle(context),
+        ),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.section - 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  key: Key('project_select_scope_${project.numericId}'),
+                  onTap: onSelect ?? onTap,
+                  borderRadius: BorderRadius.circular(
+                    StudioSpacing.radiusButton,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: studioCardTitleStyle(context),
+                              ),
+                            ),
+                            if (selected) ...<Widget>[
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.check_circle,
+                                size: 18,
+                                color: tokens.primary,
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            StudioStepProgressRing(
+                              completedSteps: completedSteps,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: StudioSpacing.sm),
+                        Text(
+                          summary.isNotEmpty ? summary : fallbackSummary,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: tokens.textSecondary,
+                                height: 1.45,
+                              ),
+                        ),
+                        const SizedBox(height: StudioSpacing.sm),
+                        Wrap(
+                          spacing: StudioSpacing.xs,
+                          runSpacing: StudioSpacing.xs,
+                          children: <Widget>[
+                            _ProjectMetaChip(
+                              label: '#${project.numericId}',
+                              color: tokens.textSecondary,
+                            ),
+                            _ProjectMetaChip(
+                              label: focusLabel,
+                              color: selected
+                                  ? tokens.textPrimary
+                                  : tokens.primary,
+                              backgroundColor: selected
+                                  ? tokens.primarySoft.withValues(alpha: 0.84)
+                                  : tokens.bgInset.withValues(alpha: 0.9),
+                              borderColor: selected
+                                  ? tokens.primary.withValues(alpha: 0.4)
+                                  : tokens.surfaceHighlight.withValues(
+                                      alpha: 0.9,
+                                    ),
+                            ),
+                          ],
+                        ),
+                        if (scopeSelectionEnabled && !selected) ...<Widget>[
+                          const SizedBox(height: StudioSpacing.xs),
+                          Text(
+                            l10n.studioProjectCardTapToSelect,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: tokens.textMuted),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  if (selected) ...<Widget>[
-                    const SizedBox(width: 8),
-                    Icon(Icons.check_circle, size: 18, color: tokens.primary),
-                    const SizedBox(width: 8),
-                  ],
-                  StudioStepProgressRing(completedSteps: completedSteps),
-                ],
-              ),
-              const SizedBox(height: StudioSpacing.sm),
-              Text(
-                summary.isNotEmpty ? summary : fallbackSummary,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: tokens.textSecondary,
-                  height: 1.45,
                 ),
               ),
-              const SizedBox(height: StudioSpacing.sm),
-              Wrap(
-                spacing: StudioSpacing.xs,
-                runSpacing: StudioSpacing.xs,
-                children: <Widget>[
-                  _ProjectMetaChip(
-                    label: '#${project.numericId}',
-                    color: tokens.textSecondary,
-                  ),
-                  _ProjectMetaChip(
-                    label: focusLabel,
-                    color: selected ? tokens.textPrimary : tokens.primary,
-                    backgroundColor: selected
-                        ? tokens.primarySoft.withValues(alpha: 0.84)
-                        : tokens.bgInset.withValues(alpha: 0.9),
-                    borderColor: selected
-                        ? tokens.primary.withValues(alpha: 0.4)
-                        : tokens.surfaceHighlight.withValues(alpha: 0.9),
-                  ),
-                ],
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: StudioPrimaryButton(
+                key: Key('project_enter_studio_${project.numericId}'),
+                label: l10n.studioEnterStudio,
+                icon: Icons.arrow_outward,
+                onPressed: onTap,
               ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: StudioPrimaryButton(
-                  label: l10n.studioEnterStudio,
-                  icon: Icons.arrow_outward,
-                  onPressed: onTap,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
