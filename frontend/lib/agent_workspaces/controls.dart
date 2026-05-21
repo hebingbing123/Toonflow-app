@@ -29,6 +29,7 @@ InputDecoration agentWorkspaceFieldDecoration(
   BuildContext context, {
   String? labelText,
   String? helperText,
+  String? hintText,
 }) {
   final tokens = StudioTokens.of(context);
   final theme = Theme.of(context);
@@ -57,6 +58,7 @@ InputDecoration agentWorkspaceFieldDecoration(
         ? FloatingLabelBehavior.never
         : FloatingLabelBehavior.auto,
     labelStyle: labelStyle,
+    hintText: hintText,
     hintStyle: TextStyle(color: tokens.textMuted),
   );
 }
@@ -77,6 +79,7 @@ Widget agentWorkspaceLabeledField(
   required String label,
   required TextEditingController controller,
   TextInputType? keyboardType,
+  String? hintText,
 }) {
   final tokens = StudioTokens.of(context);
   return Column(
@@ -96,7 +99,7 @@ Widget agentWorkspaceLabeledField(
           controller: controller,
           keyboardType: keyboardType,
           style: agentWorkspaceFieldTextStyle(context),
-          decoration: agentWorkspaceFieldDecoration(context),
+          decoration: agentWorkspaceFieldDecoration(context, hintText: hintText),
         ),
       ),
     ],
@@ -134,18 +137,22 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
           required String rightLabel,
           TextInputType? leftKeyboard,
           TextInputType? rightKeyboard,
+          String? leftHint,
+          String? rightHint,
         }) {
           final leftField = agentWorkspaceLabeledField(
             context,
             label: leftLabel,
             controller: left,
             keyboardType: leftKeyboard,
+            hintText: leftHint,
           );
           final rightField = agentWorkspaceLabeledField(
             context,
             label: rightLabel,
             controller: right,
             keyboardType: rightKeyboard,
+            hintText: rightHint,
           );
           if (narrow) {
             return Column(
@@ -182,14 +189,17 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
             pair(
               left: projectUuidController,
               leftLabel: l10n.agentWorkspaceScopeProjectUuidLabel,
+              leftHint: l10n.agentWorkspaceScopeProjectUuidHint,
               right: scriptUuidController,
               rightLabel: l10n.agentWorkspaceScopeScriptUuidLabel,
+              rightHint: l10n.agentWorkspaceScopeScriptUuidHint,
             ),
             const SizedBox(height: 16),
             agentWorkspaceLabeledField(
               context,
               label: l10n.agentWorkspaceScopeWorkspaceUuidLabel,
               controller: workspaceUuidController,
+              hintText: l10n.agentWorkspaceScopeWorkspaceUuidHint,
             ),
           ],
         );

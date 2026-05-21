@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'app_localizations.dart';
 
 String subscriptionStatusLabel(AppLocalizations l10n, String? status) {
-  switch (status?.trim().toLowerCase()) {
+  final normalized = status?.trim();
+  if (normalized == null || normalized.isEmpty) {
+    return l10n.billingSubscriptionStatusNotSet;
+  }
+  switch (normalized.toLowerCase()) {
     case 'active':
       return l10n.billingSubscriptionStatusActive;
     case 'past_due':

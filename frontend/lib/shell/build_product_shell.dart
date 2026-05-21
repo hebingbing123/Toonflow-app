@@ -777,6 +777,20 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
+  /// Start dragging the window (macOS only)
+  Future<void> _startWindowDragging() async {
+    if (!Platform.isMacOS) {
+      return;
+    }
+    try {
+      const channel = MethodChannel('com.openflow.app/window');
+      await channel.invokeMethod('startDragging');
+    } catch (e) {
+      // Silently fail if method channel is not available
+      debugPrint('Failed to start window dragging: $e');
+    }
+  }
+
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
       StudioToastOverlay.hide();
@@ -891,33 +905,38 @@ extension _HomePageProductShell on _HomePageState {
       ),
     );
 
+    final isMacOS = Platform.isMacOS;
+    final titleBarHeight = compactTopChrome
+        ? (width < 560 ? 112.0 : 118.0)
+        : stackedTopChrome
+        ? 112.0
+        : desktopXWide
+        ? 78.0
+        : desktopWide
+        ? 72.0
+        : 68.0;
+
     final mainColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        StudioGlassPanel(
-          border: Border(
-            bottom: BorderSide(
-              color: tokens.surfaceHighlight.withValues(alpha: 0.84),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: isMacOS ? (_) => _startWindowDragging() : null,
+          child: StudioGlassPanel(
+            border: Border(
+              bottom: BorderSide(
+                color: tokens.surfaceHighlight.withValues(alpha: 0.84),
+              ),
             ),
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: desktopXWide
-                ? 24
-                : desktopWide
-                ? 20
-                : 16,
-          ),
-          child: SizedBox(
-            height: compactTopChrome
-                ? (width < 560 ? 112 : 118)
-                : stackedTopChrome
-                ? 112
-                : desktopXWide
-                ? 78
-                : desktopWide
-                ? 72
-                : 68,
-            child: compactTopChrome
+            padding: EdgeInsets.only(
+              left: isMacOS && !compactTopChrome ? 78 : (desktopXWide ? 24 : desktopWide ? 20 : 16),
+              right: desktopXWide ? 24 : desktopWide ? 20 : 16,
+              top: isMacOS ? 8 : 0,
+              bottom: 0,
+            ),
+            child: SizedBox(
+              height: titleBarHeight,
+              child: compactTopChrome
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -1032,6 +1051,7 @@ extension _HomePageProductShell on _HomePageState {
                       moreMenuChrome,
                     ],
                   ),
+            ),
           ),
         ),
         Expanded(

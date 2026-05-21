@@ -114,6 +114,7 @@ extension _HomePageProductStudioSteps on _HomePageState {
         sectionDescription: resolveAppLocalizationsForErrors(
           context,
         ).productAgentScriptWorkspaceSubtitle,
+        suppressSectionHeader: true,
       ),
     );
   }

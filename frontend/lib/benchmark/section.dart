@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -256,69 +258,101 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             style: studioHintStyle(context),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonal(
-                onPressed: _busy
-                    ? null
-                    : () => _runAction(l10n, l10n.benchmarkActionFetchSamplePool, (token) async {
-                        _cases = await fetchBenchmarkCases(
-                          token,
-                          projectId: projectId,
-                        );
-                      }),
-                child: Text(l10n.benchmarkActionFetchSamplePool),
-              ),
-              FilledButton.tonal(
-                onPressed: _busy
-                    ? null
-                    : () => _runAction(l10n, l10n.benchmarkActionFetchExperiments, (token) async {
-                        _experiments = await fetchBenchmarkExperiments(token);
-                      }),
-                child: Text(l10n.benchmarkActionFetchExperiments),
-              ),
-              FilledButton.tonal(
-                onPressed: _busy
-                    ? null
-                    : () => _runAction(l10n, l10n.benchmarkActionFetchReviewQueue, (token) async {
-                        _reviewQueue = await fetchBenchmarkReviewQueue(token);
-                      }),
-                child: Text(l10n.benchmarkActionFetchReviewQueue),
-              ),
-              FilledButton.tonal(
-                onPressed: _busy
-                    ? null
-                    : () => _runAction(l10n, l10n.benchmarkActionFetchMemoryTier, (token) async {
-                        _memoryProfiles = await fetchBenchmarkMemoryProfiles(
-                          token,
-                        );
-                      }),
-                child: Text(l10n.benchmarkActionFetchMemoryTier),
-              ),
-              FilledButton.tonal(
-                onPressed: _busy
-                    ? null
-                    : () => _runAction(l10n, l10n.benchmarkActionFetchTrends, (token) async {
-                        _trends = await fetchBenchmarkTrends(token);
-                      }),
-                child: Text(l10n.benchmarkActionFetchTrends),
-              ),
-            ],
+          StudioCollapsibleFilterPanel(
+            subtitle: _projectIdCtrl.text.trim().isEmpty
+                ? null
+                : '${l10n.benchmarkProjectIdOptional}: ${_projectIdCtrl.text.trim()}',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  controller: _projectIdCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.benchmarkProjectIdOptional,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.wrap,
+                  wideBreakpoint: 720,
+                  children: <Widget>[
+                    FilledButton.tonal(
+                      onPressed: _busy
+                          ? null
+                          : () => _runAction(
+                              l10n,
+                              l10n.benchmarkActionFetchSamplePool,
+                              (token) async {
+                                _cases = await fetchBenchmarkCases(
+                                  token,
+                                  projectId: projectId,
+                                );
+                              },
+                            ),
+                      child: Text(l10n.benchmarkActionFetchSamplePool),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _busy
+                          ? null
+                          : () => _runAction(
+                              l10n,
+                              l10n.benchmarkActionFetchExperiments,
+                              (token) async {
+                                _experiments =
+                                    await fetchBenchmarkExperiments(token);
+                              },
+                            ),
+                      child: Text(l10n.benchmarkActionFetchExperiments),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _busy
+                          ? null
+                          : () => _runAction(
+                              l10n,
+                              l10n.benchmarkActionFetchReviewQueue,
+                              (token) async {
+                                _reviewQueue =
+                                    await fetchBenchmarkReviewQueue(token);
+                              },
+                            ),
+                      child: Text(l10n.benchmarkActionFetchReviewQueue),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _busy
+                          ? null
+                          : () => _runAction(
+                              l10n,
+                              l10n.benchmarkActionFetchMemoryTier,
+                              (token) async {
+                                _memoryProfiles =
+                                    await fetchBenchmarkMemoryProfiles(token);
+                              },
+                            ),
+                      child: Text(l10n.benchmarkActionFetchMemoryTier),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _busy
+                          ? null
+                          : () => _runAction(
+                              l10n,
+                              l10n.benchmarkActionFetchTrends,
+                              (token) async {
+                                _trends = await fetchBenchmarkTrends(token);
+                              },
+                            ),
+                      child: Text(l10n.benchmarkActionFetchTrends),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           if (_statusLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(_statusLine!),
           ],
-          const SizedBox(height: 12),
-          TextField(
-            controller: _projectIdCtrl,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: l10n.benchmarkProjectIdOptional,
-            ),
-          ),
           const SizedBox(height: 12),
           _buildPromoteCard(context, l10n),
           const SizedBox(height: 12),

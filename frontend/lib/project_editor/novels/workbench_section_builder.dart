@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_collapsible_filter_panel.dart';
+import '../../../design_system/components/studio_filter_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/components/studio_text_styles.dart';
 import '../../../design_system/tokens.dart';
@@ -75,31 +77,33 @@ Widget buildProjectNovelsWorkbenchSection({
           ),
         ],
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: disabled ? null : openWorkbench,
-              child: Text(l10n.projectEditorNovelsWorkbenchCardOpenButton),
-            ),
-            OutlinedButton(
-              onPressed: disabled ? null : () => refreshNovels(),
-              child: Text(
-                novelsLoading[0]
-                    ? l10n.projectEditorNovelsWorkbenchCardRefreshChaptersBusy
-                    : l10n.projectEditorNovelsWorkbenchCardRefreshChapters,
+        StudioCollapsibleFilterPanel(
+          child: StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            wideBreakpoint: 560,
+            children: <Widget>[
+              FilledButton.tonal(
+                onPressed: disabled ? null : openWorkbench,
+                child: Text(l10n.projectEditorNovelsWorkbenchCardOpenButton),
               ),
-            ),
-            OutlinedButton(
-              onPressed: disabled || novels.isEmpty
-                  ? null
-                  : () => generateEvents(),
-              child: Text(
-                l10n.projectEditorNovelsWorkbenchCardGenerateEventsForTopThree,
+              OutlinedButton(
+                onPressed: disabled ? null : () => refreshNovels(),
+                child: Text(
+                  novelsLoading[0]
+                      ? l10n.projectEditorNovelsWorkbenchCardRefreshChaptersBusy
+                      : l10n.projectEditorNovelsWorkbenchCardRefreshChapters,
+                ),
               ),
-            ),
-          ],
+              OutlinedButton(
+                onPressed: disabled || novels.isEmpty
+                    ? null
+                    : () => generateEvents(),
+                child: Text(
+                  l10n.projectEditorNovelsWorkbenchCardGenerateEventsForTopThree,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     ),

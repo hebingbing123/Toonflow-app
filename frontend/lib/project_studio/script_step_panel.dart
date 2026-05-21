@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
@@ -34,6 +35,10 @@ typedef StudioScriptOpenPlanWorkbench = Future<void> Function();
 typedef StudioScriptOpenBatchAddScripts = Future<void> Function();
 typedef StudioScriptOpenScriptEditor =
     Future<void> Function(ScriptBrief script);
+
+/// Breakpoints for script step split layout (web / desktop / tablet).
+const double _kScriptSplitBreakpoint = 1040;
+const double _kScriptStackBreakpoint = 720;
 
 /// Script studio step: embedded novel/script intake (left or tab) + agent workspace.
 class ProjectStudioScriptStepPanel extends StatefulWidget {
@@ -95,6 +100,10 @@ class _ProjectStudioScriptStepPanelState
       _pendingNovelWorkbenchOpen = true;
     }
   }
+
+  int get _novelCount => _novelsRef[0]?.items.length ?? 0;
+
+  int get _scriptCount => _scriptList.length;
 
   Future<void> _reloadContent() async {
     setState(() {
@@ -219,6 +228,49 @@ class _ProjectStudioScriptStepPanelState
     if (mounted) setState(fn);
   }
 
+  Future<void> _createEmptyScript() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _saving[0] = true);
+    try {
+      final script = await createScriptUnderProject(
+        widget.accessToken,
+        widget.project.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _saving[0] = false;
+        _scriptList.add(
+          ScriptBrief(
+            numericId: script.numericId,
+            name: script.name,
+            extractState: script.extractState,
+          ),
+        );
+        _selectedScriptId = script.numericId;
+      });
+      widget.onScriptSelected?.call(_scriptList.last);
+      widget.onContentChanged?.call();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.projectEditorScriptsWorkbenchCreatedScriptSnackBar(
+              script.numericId,
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving[0] = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(describeUserVisibleApiErrorResolved(context, e)),
+          ),
+        );
+      }
+    }
+  }
+
   bool _pendingNovelWorkbenchOpen = false;
 
   Future<void> _maybeOpenPendingNovelWorkbench() async {
@@ -234,6 +286,21 @@ class _ProjectStudioScriptStepPanelState
   }
 
   Widget _buildScriptsSection(BuildContext context, AppLocalizations l10n) {
+    if (_scriptList.isEmpty) {
+      return StudioEmptyState.firstUse(
+        icon: Icons.description_outlined,
+        title: l10n.studioScriptStepEmptyTitle,
+        subtitle: l10n.studioScriptStepEmptyBody,
+        actionLabel: l10n.projectEditorScriptsSectionCreateEmpty,
+        onAction: _saving[0] ? null : _createEmptyScript,
+        secondaryActionLabel: l10n.studioScriptNovelInlineOpenFullWorkbench,
+        onSecondaryAction: () => widget.onOpenNovelWorkbench(
+          _novelsRef,
+          _novelsBusy,
+          _reloadAssetsAndStats,
+        ),
+      );
+    }
     return buildProjectScriptsSection(
       ctx: context,
       l10n: l10n,
@@ -283,9 +350,7 @@ class _ProjectStudioScriptStepPanelState
           ),
           if (novels.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(
-                top: StudioLayoutSpacing.cardInner - 4,
-              ),
+              padding: const EdgeInsets.only(top: StudioLayoutSpacing.stackMedium),
               child: StudioWorkbenchSection(
                 title: l10n.studioScriptStepNovelsSectionTitle,
                 subtitle: summarizeNovelRows(l10n, novels),
@@ -338,8 +403,61 @@ class _ProjectStudioScriptStepPanelState
             l10n.studioScriptStepExtractBody,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           _buildScriptsSection(context, l10n),
+        ],
+      ),
+    );
+  }
+
+  TabBar _buildContentTabBar(AppLocalizations l10n) {
+    return TabBar(
+      isScrollable: true,
+      dividerColor: Colors.transparent,
+      labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+      indicatorSize: TabBarIndicatorSize.label,
+      tabAlignment: TabAlignment.start,
+      tabs: <Tab>[
+        Tab(text: l10n.studioScriptStepTabNovel),
+        Tab(text: l10n.studioScriptStepTabScripts),
+        Tab(text: l10n.studioScriptStepTabExtract),
+      ],
+    );
+  }
+
+  Widget _buildContentRailHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        StudioLayoutSpacing.cardInner - 4,
+        StudioLayoutSpacing.stackMedium,
+        StudioLayoutSpacing.cardInner - 4,
+        StudioLayoutSpacing.inlineGap,
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              l10n.studioScriptIntakeNovels,
+              style: studioControlLabelStyle(context),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: tokens.bgSurface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: tokens.borderSubtle),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                l10n.studioScriptStepContentCounts(_novelCount, _scriptCount),
+                style: studioHintStyle(context)?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -365,20 +483,16 @@ class _ProjectStudioScriptStepPanelState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          TabBar(
-            isScrollable: true,
-            tabs: <Tab>[
-              Tab(text: l10n.studioScriptStepTabNovel),
-              Tab(text: l10n.studioScriptStepTabScripts),
-              Tab(text: l10n.studioScriptStepTabExtract),
-            ],
-          ),
+          _buildContentRailHeader(context, l10n),
+          _buildContentTabBar(l10n),
           Expanded(
             child: TabBarView(
               children: <Widget>[
                 _buildNovelTab(context, l10n),
                 SingleChildScrollView(
-                  padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                  padding: const EdgeInsets.all(
+                    StudioLayoutSpacing.cardInner - 4,
+                  ),
                   child: _buildScriptsSection(context, l10n),
                 ),
                 _buildExtractTab(context, l10n),
@@ -390,76 +504,116 @@ class _ProjectStudioScriptStepPanelState
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildAgentColumn(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            StudioLayoutSpacing.cardInner - 4,
+            StudioLayoutSpacing.stackMedium,
+            StudioLayoutSpacing.cardInner - 4,
+            StudioLayoutSpacing.inlineGap,
+          ),
+          child: StudioPaneHeader(
+            showBack: false,
+            title: l10n.productAgentScriptWorkspaceTitle,
+            subtitle: l10n.productAgentScriptWorkspaceSubtitle,
+          ),
+        ),
+        Expanded(child: widget.agentWorkspace),
+      ],
+    );
+  }
+
+  Widget _buildSplitLayout(
+    BuildContext context,
+    BoxConstraints constraints, {
+    required bool stackVertically,
+  }) {
     final tokens = StudioTokens.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final rail = _buildContentRail(context);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 1080;
-        if (wide) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(
-                width: 380,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: tokens.bgInset,
-                    border: Border(
-                      right: BorderSide(color: tokens.borderSubtle),
-                    ),
-                  ),
-                  child: _buildContentRail(context),
-                ),
+    if (stackVertically) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            height: (constraints.maxHeight * 0.46).clamp(280.0, 420.0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: tokens.bgInset,
+                border: Border(bottom: BorderSide(color: tokens.borderSubtle)),
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        StudioLayoutSpacing.cardInner - 4,
-                        StudioSpacing.xs,
-                        StudioLayoutSpacing.cardInner - 4,
-                        0,
-                      ),
-                      child: Text(
-                        l10n.productAgentScriptWorkspaceTitle,
-                        style: studioPaneTitleStyle(context),
-                      ),
-                    ),
-                    Expanded(child: widget.agentWorkspace),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }
+              child: rail,
+            ),
+          ),
+          Expanded(child: _buildAgentColumn(context, l10n)),
+        ],
+      );
+    }
 
-        return DefaultTabController(
-          length: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TabBar(
-                tabs: <Tab>[
-                  Tab(text: l10n.studioScriptStepTabContent),
-                  Tab(text: l10n.studioScriptStepTabAgent),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: <Widget>[
-                    _buildContentRail(context),
-                    widget.agentWorkspace,
-                  ],
-                ),
-              ),
+    final railWidth = (constraints.maxWidth * 0.36).clamp(300.0, 420.0);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          width: railWidth,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: tokens.bgInset,
+              border: Border(right: BorderSide(color: tokens.borderSubtle)),
+            ),
+            child: rail,
+          ),
+        ),
+        Expanded(child: _buildAgentColumn(context, l10n)),
+      ],
+    );
+  }
+
+  Widget _buildNarrowTabbedLayout(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          TabBar(
+            dividerColor: Colors.transparent,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            indicatorSize: TabBarIndicatorSize.label,
+            tabs: <Tab>[
+              Tab(text: l10n.studioScriptStepTabContent),
+              Tab(text: l10n.studioScriptStepTabAgent),
             ],
           ),
-        );
+          Expanded(
+            child: TabBarView(
+              children: <Widget>[
+                _buildContentRail(context),
+                _buildAgentColumn(context, l10n),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= _kScriptSplitBreakpoint) {
+          return _buildSplitLayout(context, constraints, stackVertically: false);
+        }
+        if (constraints.maxWidth >= _kScriptStackBreakpoint) {
+          return _buildSplitLayout(context, constraints, stackVertically: true);
+        }
+        return _buildNarrowTabbedLayout(context);
       },
     );
   }

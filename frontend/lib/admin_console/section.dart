@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -192,43 +194,48 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               border: Border.all(color: studioPanelBorderColor(context)),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                SizedBox(
-                  width: 420,
-                  child: TextField(
-                    controller: _searchController,
-                    onSubmitted: widget.controller.search,
-                    decoration: InputDecoration(
-                      labelText: l10n.adminConsoleSearchLabel,
-                      hintText: l10n.adminConsoleSearchHint,
-                      prefixIcon: Icon(Icons.search),
+            child: StudioCollapsibleFilterPanel(
+              title: l10n.adminConsoleSearchLabel,
+              subtitle: _searchController.text.trim().isNotEmpty
+                  ? _searchController.text.trim()
+                  : null,
+              child: StudioFilterRow(
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (_) => setState(() {}),
+                      onSubmitted: widget.controller.search,
+                      decoration: InputDecoration(
+                        labelText: l10n.adminConsoleSearchLabel,
+                        hintText: l10n.adminConsoleSearchHint,
+                        prefixIcon: const Icon(Icons.search),
+                      ),
                     ),
                   ),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: widget.controller.searching
-                      ? null
-                      : () => widget.controller.search(_searchController.text),
-                  icon: widget.controller.searching
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.travel_explore_outlined),
-                  label: Text(l10n.adminConsoleSearchAction),
-                ),
-                if (widget.controller.selectedKind != null)
-                  TextButton.icon(
-                    onPressed: widget.controller.clearDetail,
-                    icon: const Icon(Icons.layers_clear_outlined),
-                    label: Text(l10n.adminConsoleClearDetailAction),
+                  FilledButton.tonalIcon(
+                    onPressed: widget.controller.searching
+                        ? null
+                        : () =>
+                              widget.controller.search(_searchController.text),
+                    icon: widget.controller.searching
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.travel_explore_outlined),
+                    label: Text(l10n.adminConsoleSearchAction),
                   ),
-              ],
+                  if (widget.controller.selectedKind != null)
+                    TextButton.icon(
+                      onPressed: widget.controller.clearDetail,
+                      icon: const Icon(Icons.layers_clear_outlined),
+                      label: Text(l10n.adminConsoleClearDetailAction),
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),

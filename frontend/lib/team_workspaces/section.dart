@@ -9,8 +9,10 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -326,28 +328,30 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         const SizedBox(height: 8),
         Text(l10n.teamWorkspaceIntro, style: theme.textTheme.bodySmall),
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.teamWorkspaceEnterpriseNameLabel,
-                  border: OutlineInputBorder(),
+        StudioCollapsibleFilterPanel(
+          title: l10n.teamWorkspaceCreateAction,
+          child: StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.teamWorkspaceEnterpriseNameLabel,
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            FilledButton(
-              onPressed: _creating ? null : _create,
-              child: Text(
-                _creating
-                    ? l10n.teamWorkspaceCreating
-                    : l10n.teamWorkspaceCreateAction,
+              FilledButton(
+                onPressed: _creating ? null : _create,
+                child: Text(
+                  _creating
+                      ? l10n.teamWorkspaceCreating
+                      : l10n.teamWorkspaceCreateAction,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (shouldShowInviteTokenHint(
           tokenAutoFilledFromUri: _inviteTokenFromUri,
@@ -362,28 +366,34 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ),
         ],
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                controller: _acceptInviteTokenController,
-                decoration: InputDecoration(
-                  labelText: l10n.teamWorkspaceInviteTokenInputLabel,
-                  border: OutlineInputBorder(),
+        StudioCollapsibleFilterPanel(
+          title: l10n.teamWorkspaceAcceptInviteAction,
+          subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
+              ? l10n.teamWorkspaceInviteTokenInputLabel
+              : null,
+          child: StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  controller: _acceptInviteTokenController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.teamWorkspaceInviteTokenInputLabel,
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            FilledButton.tonal(
-              onPressed: _acceptingInvite ? null : _acceptInvite,
-              child: Text(
-                _acceptingInvite
-                    ? l10n.teamWorkspaceJoining
-                    : l10n.teamWorkspaceAcceptInviteAction,
+              FilledButton.tonal(
+                onPressed: _acceptingInvite ? null : _acceptInvite,
+                child: Text(
+                  _acceptingInvite
+                      ? l10n.teamWorkspaceJoining
+                      : l10n.teamWorkspaceAcceptInviteAction,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         SwitchListTile(

@@ -145,6 +145,20 @@ This pass will prioritize shared design-system surfaces plus the projects home i
 - 内容合规队列：状态/分类/指标/审核人热点等筛选区默认收起，subtitle 显示当前筛选与待处理数。
 - 任务工作台对话框：`StudioWorkbenchSection` 替换固定展开的筛选卡片；分页/项目 ID 行 `toolbarRow`。
 
+**2026-05-21 续（第三批，含项目内）**：
+
+- 平台状态、内容合规举报表单、Help Hub 文档、Benchmark 运维操作。
+- 项目内：剧本批量工作台区/对话框、小说章节工作台卡片、小说工作台搜索、素材高级筛选对话框、项目审计日志筛选。
+
+**2026-05-21 续（第四批）**：
+
+- 短视频镜头筛选：`StudioCollapsibleFilterPanel` + 宽屏 `toolbarRow`（搜索/状态/质量/预设同一行）。
+- 团队工作区：创建企业、接受邀请表单可折叠 + `toolbarRow`。
+- 管理控制台：全局搜索条可折叠 + `toolbarRow`。
+- API 密钥：创建密钥面板可折叠（subtitle 显示显示名）。
+- 分镜批量工作台对话框：`StudioWorkbenchSection`（同步/提示词/模型/批量操作）+ `toolbarRow`。
+- 通知合规内层：节流策略、阶段覆盖、共享审计筛选、导出历史筛选分块可折叠；审计/导出筛选宽屏 `toolbarRow`。
+
 **接上实现（同批未提交竖切）**：
 
 - 登录页：`contentHeight < 560` 时简化 Hero（分屏/矮窗口不把营销区挤出视口）；`product_shell_login_page_test` 覆盖。

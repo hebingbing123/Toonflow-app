@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -138,82 +140,85 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.projectEditorAuditTitle, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.projectEditorAuditSubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: StudioTokens.of(context).textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 180,
-                child: StudioDropdownButtonFormField<String>(
-                  initialValue: _actionFilter ?? '',
-                  decoration: InputDecoration(
-                    labelText: l10n.projectEditorAuditActionFilterLabel,
-                    isDense: true,
-                  ),
-                  items: [
-                    DropdownMenuItem<String>(
-                      value: '',
-                      child: Text(l10n.projectEditorAuditActionAll),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_updated',
-                      child: Text(l10n.projectEditorAuditActionProjectUpdated),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_member_added',
-                      child: Text(l10n.projectEditorAuditActionMemberAdded),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_member_role_changed',
-                      child: Text(l10n.projectEditorAuditActionMemberRoleChanged),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_member_removed',
-                      child: Text(l10n.projectEditorAuditActionMemberRemoved),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_created',
-                      child: Text(l10n.projectEditorAuditActionProjectCreated),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'project_deleted',
-                      child: Text(l10n.projectEditorAuditActionProjectDeleted),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _actionFilter = (value == null || value.isEmpty)
-                          ? null
-                          : value;
-                    });
-                    _reload();
-                  },
-                ),
-              ),
-            ],
+          Text(l10n.projectEditorAuditTitle, style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            l10n.projectEditorAuditSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: StudioTokens.of(context).textSecondary,
+            ),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          TextField(
-            controller: _searchCtrl,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: l10n.projectEditorAuditSearchLabel,
-              prefixIcon: const Icon(Icons.search),
-              isDense: true,
+          StudioCollapsibleFilterPanel(
+            subtitle: _searchCtrl.text.trim().isEmpty
+                ? null
+                : '${l10n.projectEditorAuditSearchLabel}: ${_searchCtrl.text.trim()}',
+            child: StudioFilterRow(
+              wideLayout: StudioFilterWideLayout.toolbarRow,
+              wideBreakpoint: 640,
+              children: <Widget>[
+                SizedBox(
+                  width: 200,
+                  child: StudioDropdownButtonFormField<String>(
+                    initialValue: _actionFilter ?? '',
+                    decoration: InputDecoration(
+                      labelText: l10n.projectEditorAuditActionFilterLabel,
+                      isDense: true,
+                    ),
+                    items: <DropdownMenuItem<String>>[
+                      DropdownMenuItem<String>(
+                        value: '',
+                        child: Text(l10n.projectEditorAuditActionAll),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_updated',
+                        child: Text(l10n.projectEditorAuditActionProjectUpdated),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_member_added',
+                        child: Text(l10n.projectEditorAuditActionMemberAdded),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_member_role_changed',
+                        child: Text(
+                          l10n.projectEditorAuditActionMemberRoleChanged,
+                        ),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_member_removed',
+                        child: Text(l10n.projectEditorAuditActionMemberRemoved),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_created',
+                        child: Text(l10n.projectEditorAuditActionProjectCreated),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'project_deleted',
+                        child: Text(l10n.projectEditorAuditActionProjectDeleted),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _actionFilter = (value == null || value.isEmpty)
+                            ? null
+                            : value;
+                      });
+                      _reload();
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: l10n.projectEditorAuditSearchLabel,
+                      prefixIcon: const Icon(Icons.search),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),

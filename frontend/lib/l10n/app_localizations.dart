@@ -2936,6 +2936,24 @@ abstract class AppLocalizations {
   /// **'Select a valid project before editing scripts.'**
   String get studioScriptStepScopeMissing;
 
+  /// No description provided for @studioScriptStepContentCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels {novelCount} · Scripts {scriptCount}'**
+  String studioScriptStepContentCounts(int novelCount, int scriptCount);
+
+  /// No description provided for @studioScriptStepSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Step setup'**
+  String get studioScriptStepSetupTitle;
+
+  /// No description provided for @studioScriptStepSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.'**
+  String get studioScriptStepSetupSubtitle;
+
   /// No description provided for @studioArtStepOpenSettings.
   ///
   /// In en, this message translates to:
@@ -33427,6 +33445,24 @@ abstract class AppLocalizations {
   /// **'Workspace UUID (optional, WS workspaceUuid)'**
   String get agentWorkspaceScopeWorkspaceUuidLabel;
 
+  /// No description provided for @agentWorkspaceScopeProjectUuidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty when no project is selected'**
+  String get agentWorkspaceScopeProjectUuidHint;
+
+  /// No description provided for @agentWorkspaceScopeScriptUuidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty when no script is bound'**
+  String get agentWorkspaceScopeScriptUuidHint;
+
+  /// No description provided for @agentWorkspaceScopeWorkspaceUuidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty when no workspace is bound'**
+  String get agentWorkspaceScopeWorkspaceUuidHint;
+
   /// No description provided for @agentWorkspacePaneScript.
   ///
   /// In en, this message translates to:
@@ -37804,6 +37840,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown status'**
   String get billingSubscriptionStatusUnknown;
+
+  /// No description provided for @billingSubscriptionStatusNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No paid subscription'**
+  String get billingSubscriptionStatusNotSet;
 
   /// No description provided for @billingQuotaExceededTitle.
   ///

@@ -41,6 +41,7 @@ void main() {
     await harness.capture('more_menu');
 
     await harness.selectMoreMenuItem('任务中心', menuAlreadyOpen: true);
+    await harness.refreshTaskCenterIfPossible();
     await harness.pumpFrames(count: 24);
     await harness.capture('tasks_default');
 

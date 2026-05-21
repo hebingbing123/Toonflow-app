@@ -745,6 +745,15 @@
   "studioScriptStepLoadErrorTitle": "内容加载失败",
   "studioScriptStepRetry": "重试",
   "studioScriptStepScopeMissing": "请先选择有效项目后再编辑剧本。",
+  "studioScriptStepContentCounts": "小说 {novelCount} · 剧本 {scriptCount}",
+  "@studioScriptStepContentCounts": {
+    "placeholders": {
+      "novelCount": { "type": "int" },
+      "scriptCount": { "type": "int" }
+    }
+  },
+  "studioScriptStepSetupTitle": "步骤准备区",
+  "studioScriptStepSetupSubtitle": "模型路由、快速模板与项目进度；默认收起，主工作区优先。",
   "studioArtStepOpenSettings": "高级项目设定",
   "studioArtStepEditSubtitle": "为项目选择内置画风包与故事风格包，保存后作用于后续图像与剧本生成。",
   "studioArtStepSaveButton": "保存美术设定",
@@ -14984,6 +14993,9 @@
   "agentWorkspaceScopeProjectUuidLabel": "项目 UUID（可选，与 WS projectUuid 对齐）",
   "agentWorkspaceScopeScriptUuidLabel": "剧本 UUID（可选，制作 attach）",
   "agentWorkspaceScopeWorkspaceUuidLabel": "工作区 UUID（可选，WS workspaceUuid）",
+  "agentWorkspaceScopeProjectUuidHint": "未选择项目时留空",
+  "agentWorkspaceScopeScriptUuidHint": "未绑定剧本时留空",
+  "agentWorkspaceScopeWorkspaceUuidHint": "未绑定工作区时留空",
   "agentWorkspacePaneScript": "执行动态",
   "agentWorkspacePaneProduction": "执行动态",
   "agentWorkspacePaneActivity": "执行动态",
@@ -17878,6 +17890,7 @@
   "billingSubscriptionStatusPaused": "已暂停",
   "billingSubscriptionStatusUnpaid": "未付款",
   "billingSubscriptionStatusUnknown": "未知状态",
+  "billingSubscriptionStatusNotSet": "无付费订阅",
   "billingQuotaExceededTitle": "每日配额已用尽",
   "billingQuotaExceededFree": "您已达到 {plan} 套餐的每日限额，升级以继续使用。",
   "@billingQuotaExceededFree": {

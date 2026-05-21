@@ -80,6 +80,50 @@ Widget _artStepPanelBody({
   );
 }
 
+/// Minimal [ProjectHome] for script-step chrome tests (cockpit + quick bar).
+ProjectHome fixtureScriptStepProjectHome({AppLocalizations? l10n}) {
+  final zh = l10n?.localeName.startsWith('zh') == true;
+  return ProjectHome(
+    project: fixtureArtStepProject(l10n: l10n),
+    stats: const ProjectStats(
+      scriptCount: 0,
+      storyboardCount: 0,
+      roleCount: 0,
+      novelCount: 0,
+      videoCount: 0,
+    ),
+    readinessScore: 10,
+    readinessSummary: zh ? '先导入内容' : 'Import content first',
+    onboarding: const ProjectHomeOnboarding(
+      complete: false,
+      checklist: <ProjectHomeChecklistItem>[],
+    ),
+    styleBibleReady: false,
+    cockpit: ProjectHomeCockpit(
+      headline: zh ? '演示项目' : 'Demo project',
+      subheadline: zh ? '小说 0 / 剧本 0' : 'Novels 0 / Scripts 0',
+      primaryAction: ProjectHomeAction(
+        key: 'view_progress',
+        title: zh ? '查看进度' : 'View progress',
+        detail: zh ? '打开任务中心' : 'Open task center',
+        targetStep: 'tasks',
+        ctaLabel: zh ? '查看项目进度' : 'View project progress',
+        launchIntent: const ProjectHomeLaunchIntent(action: 'open_tasks'),
+      ),
+      secondaryActions: const <ProjectHomeAction>[],
+      metrics: const <ProjectHomeMetric>[
+        ProjectHomeMetric(
+          key: 'content',
+          label: 'Content',
+          value: 'Novels 0 / Scripts 0',
+          detail: '',
+        ),
+      ],
+      starterTemplates: const <ProjectHomeStarterTemplate>[],
+    ),
+  );
+}
+
 /// Minimal [ProjectStudioHost] on the script step for widget/golden tests.
 ProjectStudioHost buildScriptStepStudioHost({
   AppLocalizations? l10n,
@@ -90,6 +134,7 @@ ProjectStudioHost buildScriptStepStudioHost({
     projectUuid: _fixtureProjectUuid,
     projectName: l10n?.localeName.startsWith('zh') == true ? '演示项目' : 'Demo project',
     accessToken: 'token',
+    home: fixtureScriptStepProjectHome(l10n: l10n),
     initialStep: StudioStep.script,
     completedSteps: 1,
     onExit: () {},

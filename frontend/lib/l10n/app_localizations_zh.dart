@@ -1542,6 +1542,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioScriptStepScopeMissing => '请先选择有效项目后再编辑剧本。';
 
   @override
+  String studioScriptStepContentCounts(int novelCount, int scriptCount) {
+    return '小说 $novelCount · 剧本 $scriptCount';
+  }
+
+  @override
+  String get studioScriptStepSetupTitle => '步骤准备区';
+
+  @override
+  String get studioScriptStepSetupSubtitle => '模型路由、快速模板与项目进度；默认收起，主工作区优先。';
+
+  @override
   String get studioArtStepOpenSettings => '高级项目设定';
 
   @override
@@ -20729,6 +20740,15 @@ class AppLocalizationsZh extends AppLocalizations {
       '工作区 UUID（可选，WS workspaceUuid）';
 
   @override
+  String get agentWorkspaceScopeProjectUuidHint => '未选择项目时留空';
+
+  @override
+  String get agentWorkspaceScopeScriptUuidHint => '未绑定剧本时留空';
+
+  @override
+  String get agentWorkspaceScopeWorkspaceUuidHint => '未绑定工作区时留空';
+
+  @override
   String get agentWorkspacePaneScript => '执行动态';
 
   @override
@@ -23496,6 +23516,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get billingSubscriptionStatusUnknown => '未知状态';
+
+  @override
+  String get billingSubscriptionStatusNotSet => '无付费订阅';
 
   @override
   String get billingQuotaExceededTitle => '每日配额已用尽';

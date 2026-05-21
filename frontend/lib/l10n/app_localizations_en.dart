@@ -1642,6 +1642,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select a valid project before editing scripts.';
 
   @override
+  String studioScriptStepContentCounts(int novelCount, int scriptCount) {
+    return 'Novels $novelCount · Scripts $scriptCount';
+  }
+
+  @override
+  String get studioScriptStepSetupTitle => 'Step setup';
+
+  @override
+  String get studioScriptStepSetupSubtitle =>
+      'Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.';
+
+  @override
   String get studioArtStepOpenSettings => 'Advanced project settings';
 
   @override
@@ -21747,6 +21759,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Workspace UUID (optional, WS workspaceUuid)';
 
   @override
+  String get agentWorkspaceScopeProjectUuidHint =>
+      'Leave empty when no project is selected';
+
+  @override
+  String get agentWorkspaceScopeScriptUuidHint =>
+      'Leave empty when no script is bound';
+
+  @override
+  String get agentWorkspaceScopeWorkspaceUuidHint =>
+      'Leave empty when no workspace is bound';
+
+  @override
   String get agentWorkspacePaneScript => 'Script activity';
 
   @override
@@ -24615,6 +24639,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get billingSubscriptionStatusUnknown => 'Unknown status';
+
+  @override
+  String get billingSubscriptionStatusNotSet => 'No paid subscription';
 
   @override
   String get billingQuotaExceededTitle => 'Daily quota reached';

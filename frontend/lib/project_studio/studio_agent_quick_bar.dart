@@ -29,16 +29,26 @@ class StudioAgentQuickBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
+    final theme = Theme.of(context);
     final chips = <Widget>[];
 
     void add(StudioAgentAction action, String label, VoidCallback? fn) {
       if (!visibleActions.contains(action) || fn == null) return;
       chips.add(
-        ActionChip(
-          label: Text(label),
+        FilledButton.tonal(
           onPressed: fn,
-          backgroundColor: tokens.bgInset,
-          side: BorderSide(color: tokens.borderSubtle),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, StudioSpacing.iconTouchTarget),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            backgroundColor: tokens.bgInset,
+            foregroundColor: tokens.textPrimary,
+            side: BorderSide(color: tokens.borderDefault),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: theme.textTheme.labelLarge,
+          ),
+          child: Text(label),
         ),
       );
     }

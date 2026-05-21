@@ -6,7 +6,6 @@ import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
-import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
 

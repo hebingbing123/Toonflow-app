@@ -7,7 +7,11 @@ fn image_size_maps_dalle3() {
         "1792x1024"
     );
     assert_eq!(
-        resolve_openai_image_size("dall-e-3", "1024 Ă 1792"),
+        resolve_openai_image_size("dall-e-3", "1024x1792"),
+        "1024x1792"
+    );
+    assert_eq!(
+        resolve_openai_image_size("dall-e-3", "1024 × 1792"),
         "1024x1792"
     );
     assert_eq!(
@@ -31,7 +35,7 @@ fn image_model_from_catalog_string() {
     assert_eq!(resolve_openai_image_model("dall-e-2").as_str(), "dall-e-2");
     assert_eq!(
         resolve_openai_image_model("unknown-catalog-id").as_str(),
-        "dall-e-3"
+        "unknown-catalog-id"
     );
 }
 

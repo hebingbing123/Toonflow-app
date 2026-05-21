@@ -70,12 +70,12 @@
 |---|--------|-----|-----------|
 | 1 | P0 | E2E：按项目名点 `project_enter_studio_*` /「进入工作室」，`assertProjectStudioEntered` | `integration_test/support/real_product_shell_gallery_support.dart`（2026-05-21 已接线） |
 | 2 | P0 | 重命名/补拍 `storyboard_studio_step`（与 `production_workspace` 脱钩） | 同上 |
-| 3 | P1 | 修复 `jobs empty value` 未翻译 | `jobs/section.dart`, `app_zh.arb` |
-| 4 | P1 | 合规举报下拉：宽度与 l10n 显示名 | `content_compliance/section.dart` |
-| 5 | P1 | `studio_step_script` 截图断言：必须含六步条而非「你的项目」 | E2E assert |
-| 6 | P2 | 套餐页订阅状态映射 | settings billing |
-| 7 | P2 | 任务中心 E2E 自动点「刷新任务摘要」 | gallery harness |
-| 8 | P2 | 剧本工作区空 UUID 字段占位 | `project_studio_page.dart` |
+| 3 | P1 | 修复 `jobs empty value` 未翻译 | `jobs/section_view.dart` + `jobsEmptyValue` l10n（2026-05-21） |
+| 4 | P1 | 合规举报下拉：宽度与 l10n 显示名 | `content_compliance/section.dart` 下拉 `width: 280` + `labelForValue`（2026-05-21） |
+| 5 | P1 | `studio_step_script` 截图断言：必须含六步条而非「你的项目」 | `assertProjectStudioEntered` 校验五步条标签（2026-05-21） |
+| 6 | P2 | 套餐页订阅状态映射 | `subscriptionStatusLabel` → `billingSubscriptionStatusNotSet` 当 API 为空（2026-05-21） |
+| 7 | P2 | 任务中心 E2E 自动点「刷新任务摘要」 | `refreshTaskCenterIfPossible` in gallery harness（2026-05-21） |
+| 8 | P2 | 剧本工作区空 UUID 字段占位 | `AgentWorkspaceScopeInputs` UUID 字段 hint（2026-05-21） |
 | 9 | — | 导出对话框 / benchmark：仍 **无壳层入口** | 见下方矩阵 |
 | 10 | — | 全量跑前 `db reset` 或清理 `E2E全量图库-*` 项目 | `run-ui-e2e.sh` 文档 |
 

@@ -481,21 +481,23 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton(
-                onPressed: _loading ? null : _load,
-                child: Text(l10n.helpHubRefresh),
-              ),
-              OutlinedButton(
-                onPressed: (_loading || _helpHubConfig == null)
-                    ? null
-                    : _openHelpHubManageDialog,
-                child: Text(l10n.helpHubManageEntries),
-              ),
-            ],
+          StudioCollapsibleFilterPanel(
+            child: StudioFilterRow(
+              wideLayout: StudioFilterWideLayout.toolbarRow,
+              wideBreakpoint: 480,
+              children: <Widget>[
+                OutlinedButton(
+                  onPressed: _loading ? null : _load,
+                  child: Text(l10n.helpHubRefresh),
+                ),
+                OutlinedButton(
+                  onPressed: (_loading || _helpHubConfig == null)
+                      ? null
+                      : _openHelpHubManageDialog,
+                  child: Text(l10n.helpHubManageEntries),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           if (_loading) Text(l10n.helpHubLoading),

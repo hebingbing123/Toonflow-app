@@ -42,6 +42,11 @@ void main() {
 
     expect(find.text('演示项目'), findsOneWidget);
     expect(find.text(zh.studioStepScriptBody), findsOneWidget);
+    expect(find.text(zh.studioScriptStepSetupTitle), findsOneWidget);
+
+    await tester.tap(find.text(zh.studioScriptStepSetupTitle));
+    await tester.pumpAndSettle();
+
     expect(find.text(zh.studioAgentRewriteScript), findsOneWidget);
     expect(find.text(zh.studioAgentExtractEntities), findsOneWidget);
     expect(find.byType(StudioAgentQuickBar), findsOneWidget);

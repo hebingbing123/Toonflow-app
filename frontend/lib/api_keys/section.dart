@@ -6,6 +6,7 @@ import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
+import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
@@ -426,24 +427,20 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.apiKeysCreateNewTitle,
-                  style: theme.textTheme.titleSmall,
-                ),
-              ),
-              refreshButton,
-            ],
-          ),
-          const SizedBox(height: 8),
+      child: StudioCollapsibleFilterPanel(
+        title: l10n.apiKeysCreateNewTitle,
+        subtitle: _displayNameController.text.trim().isNotEmpty
+            ? _displayNameController.text.trim()
+            : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(alignment: Alignment.centerRight, child: refreshButton),
+            const SizedBox(height: 8),
           TextField(
             controller: _displayNameController,
             maxLength: 80,
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: l10n.apiKeysDisplayNameLabel,
               hintText: l10n.apiKeysDisplayNameHint,
@@ -619,6 +616,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ),
           ],
         ],
+        ),
       ),
     );
   }

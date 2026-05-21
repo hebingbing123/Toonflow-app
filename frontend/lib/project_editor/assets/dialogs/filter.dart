@@ -28,73 +28,86 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                 title: Text(l10n.projectEditorAssetFilterDialogTitle),
                 content: SizedBox(
                   width: 520,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      StudioDropdownButtonFormField<int?>(
-                        initialValue: selectedScriptNumericId,
-                        decoration: InputDecoration(
-                          labelText: l10n.projectEditorAssetFilterByScript,
-                        ),
-                        items: [
-                          DropdownMenuItem<int?>(
-                            value: null,
-                            child: Text(l10n.projectEditorAssetFilterAllScripts),
+                  child: StudioCollapsibleFilterPanel(
+                    title: l10n.projectEditorAssetFilterDialogTitle,
+                    initiallyExpanded: true,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        StudioDropdownButtonFormField<int?>(
+                          initialValue: selectedScriptNumericId,
+                          decoration: InputDecoration(
+                            labelText: l10n.projectEditorAssetFilterByScript,
+                            isDense: true,
                           ),
-                          ...scriptList.map(
-                            (script) => DropdownMenuItem<int?>(
-                              value: script.numericId,
-                              child: Text(
-                                '#${script.numericId} ${script.name ?? ""}',
-                                overflow: TextOverflow.ellipsis,
+                          items: <DropdownMenuItem<int?>>[
+                            DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text(l10n.projectEditorAssetFilterAllScripts),
+                            ),
+                            ...scriptList.map(
+                              (script) => DropdownMenuItem<int?>(
+                                value: script.numericId,
+                                child: Text(
+                                  '#${script.numericId} ${script.name ?? ""}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
+                          ],
+                          onChanged: (v) => setState(() {
+                            selectedScriptNumericId = v;
+                          }),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: typeCtrl,
+                          decoration: InputDecoration(
+                            labelText:
+                                l10n.projectEditorAssetFilterAssetTypeOptional,
+                            hintText: l10n.projectEditorAssetFilterAssetTypeHint,
+                            isDense: true,
                           ),
-                        ],
-                        onChanged: (v) => setState(() {
-                          selectedScriptNumericId = v;
-                        }),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: typeCtrl,
-                        decoration: InputDecoration(
-                          labelText: l10n.projectEditorAssetFilterAssetTypeOptional,
-                          hintText: l10n.projectEditorAssetFilterAssetTypeHint,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: nameCtrl,
-                        decoration: InputDecoration(
-                          labelText: l10n.projectEditorAssetFilterNameContainsOptional,
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: nameCtrl,
+                          decoration: InputDecoration(
+                            labelText:
+                                l10n.projectEditorAssetFilterNameContainsOptional,
+                            isDense: true,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: pageCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: l10n.projectEditorAssetFilterPage,
+                        const SizedBox(height: 8),
+                        StudioFilterRow(
+                          wideLayout: StudioFilterWideLayout.toolbarRow,
+                          wideBreakpoint: 400,
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                controller: pageCtrl,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  labelText: l10n.projectEditorAssetFilterPage,
+                                  isDense: true,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: limitCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: l10n.projectEditorAssetFilterLimit,
+                            Expanded(
+                              child: TextField(
+                                controller: limitCtrl,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  labelText: l10n.projectEditorAssetFilterLimit,
+                                  isDense: true,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 actions: [

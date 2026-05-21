@@ -746,6 +746,15 @@
   "studioScriptStepLoadErrorTitle": "Failed to load content",
   "studioScriptStepRetry": "Retry",
   "studioScriptStepScopeMissing": "Select a valid project before editing scripts.",
+  "studioScriptStepContentCounts": "Novels {novelCount} · Scripts {scriptCount}",
+  "@studioScriptStepContentCounts": {
+    "placeholders": {
+      "novelCount": { "type": "int" },
+      "scriptCount": { "type": "int" }
+    }
+  },
+  "studioScriptStepSetupTitle": "Step setup",
+  "studioScriptStepSetupSubtitle": "Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.",
   "studioArtStepOpenSettings": "Advanced project settings",
   "studioArtStepEditSubtitle": "Choose bundled art and story style packs for this project. Changes apply to the next image and script generation jobs.",
   "studioArtStepSaveButton": "Save art direction",
@@ -14989,6 +14998,9 @@
   "agentWorkspaceScopeProjectUuidLabel": "Project UUID (optional)",
   "agentWorkspaceScopeScriptUuidLabel": "Script UUID (optional, production attach)",
   "agentWorkspaceScopeWorkspaceUuidLabel": "Workspace UUID (optional, WS workspaceUuid)",
+  "agentWorkspaceScopeProjectUuidHint": "Leave empty when no project is selected",
+  "agentWorkspaceScopeScriptUuidHint": "Leave empty when no script is bound",
+  "agentWorkspaceScopeWorkspaceUuidHint": "Leave empty when no workspace is bound",
   "agentWorkspacePaneScript": "Script activity",
   "agentWorkspacePaneProduction": "Production activity",
   "agentWorkspacePaneActivity": "Activity",
@@ -17883,6 +17895,7 @@
   "billingSubscriptionStatusPaused": "Paused",
   "billingSubscriptionStatusUnpaid": "Unpaid",
   "billingSubscriptionStatusUnknown": "Unknown status",
+  "billingSubscriptionStatusNotSet": "No paid subscription",
   "billingQuotaExceededTitle": "Daily quota reached",
   "billingQuotaExceededFree": "You've reached the daily limit for the {plan} plan. Upgrade to continue.",
   "@billingQuotaExceededFree": {

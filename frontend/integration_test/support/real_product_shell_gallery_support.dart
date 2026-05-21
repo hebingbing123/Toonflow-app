@@ -152,6 +152,18 @@ class RealProductShellGalleryHarness {
     await pumpFrames(count: 28);
   }
 
+  /// Loads task-center summary when the empty-state CTA is visible.
+  Future<void> refreshTaskCenterIfPossible() async {
+    final refreshZh = find.text('刷新任务摘要');
+    final refreshEn = find.text('Refresh task summary');
+    final refresh = refreshZh.evaluate().isNotEmpty ? refreshZh : refreshEn;
+    if (refresh.evaluate().isEmpty) {
+      return;
+    }
+    await tester.tap(refresh.first, warnIfMissed: false);
+    await pumpFrames(count: 32);
+  }
+
   Future<void> openMoreMenu() async {
     await tapTooltip('更多');
     await waitFor(find.text('制片与任务'));
@@ -400,6 +412,9 @@ class RealProductShellGalleryHarness {
     await waitFor(find.text('剧本'), maxTicks: 80);
     expect(find.text('你的项目'), findsNothing);
     expect(find.text('新建项目'), findsNothing);
+    for (final step in <String>['美术', '资产', '分镜', '视频', '成片']) {
+      expect(find.text(step), findsWidgets);
+    }
     await pumpFrames(count: 24);
   }
 

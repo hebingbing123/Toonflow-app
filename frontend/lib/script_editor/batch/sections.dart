@@ -6,80 +6,88 @@ extension _StoryboardBatchWorkbenchSections
     on _StoryboardBatchWorkbenchDialogState {
   Widget _buildBatchWorkbenchTopActions() {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilledButton.tonal(
-          onPressed: _loadingProduction || _busyMutation
-              ? null
-              : _refreshProduction,
-          child: Text(
-            _loadingProduction
-                ? l10n.scriptEditorStoryboardBatchSyncing
-                : l10n.scriptEditorStoryboardBatchRecommendSyncProduction,
+    return StudioWorkbenchSection(
+      title: l10n.scriptEditorStoryboardBatchDialogTitle,
+      child: StudioFilterRow(
+        wideLayout: StudioFilterWideLayout.toolbarRow,
+        children: <Widget>[
+          FilledButton.tonal(
+            onPressed: _loadingProduction || _busyMutation
+                ? null
+                : _refreshProduction,
+            child: Text(
+              _loadingProduction
+                  ? l10n.scriptEditorStoryboardBatchSyncing
+                  : l10n.scriptEditorStoryboardBatchRecommendSyncProduction,
+            ),
           ),
-        ),
-        TextButton(
-          onPressed: _busyMutation ? null : _selectReadyStoryboards,
-          child: Text(l10n.scriptEditorStoryboardBatchRecommendSelectReady),
-        ),
-        TextButton(
-          onPressed: _busyMutation ? null : _clearSelection,
-          child: Text(l10n.scriptEditorStoryboardBatchClearSelectionButton),
-        ),
-      ],
+          TextButton(
+            onPressed: _busyMutation ? null : _selectReadyStoryboards,
+            child: Text(l10n.scriptEditorStoryboardBatchRecommendSelectReady),
+          ),
+          TextButton(
+            onPressed: _busyMutation ? null : _clearSelection,
+            child: Text(l10n.scriptEditorStoryboardBatchClearSelectionButton),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildBatchWorkbenchPromptSection() {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _ctrls.promptSuffixCtrl,
-            decoration: InputDecoration(
-              labelText: l10n.scriptEditorStoryboardBatchPromptSuffixLabel,
-              helperText: l10n.scriptEditorStoryboardBatchPromptSuffixHelper,
+    return StudioWorkbenchSection(
+      title: l10n.scriptEditorStoryboardBatchPromptSuffixLabel,
+      child: StudioFilterRow(
+        wideLayout: StudioFilterWideLayout.toolbarRow,
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: _ctrls.promptSuffixCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.scriptEditorStoryboardBatchPromptSuffixLabel,
+                helperText: l10n.scriptEditorStoryboardBatchPromptSuffixHelper,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: TextField(
-            controller: _ctrls.negativePromptCtrl,
-            decoration: InputDecoration(
-              labelText: l10n.scriptEditorStoryboardBatchNegativePromptLabel,
+          Expanded(
+            child: TextField(
+              controller: _ctrls.negativePromptCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.scriptEditorStoryboardBatchNegativePromptLabel,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildBatchWorkbenchModelSection() {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _ctrls.modelCtrl,
-            decoration: InputDecoration(
-              labelText: l10n.scriptEditorStoryboardBatchModelLabel,
+    return StudioWorkbenchSection(
+      title: l10n.scriptEditorStoryboardBatchModelLabel,
+      child: StudioFilterRow(
+        wideLayout: StudioFilterWideLayout.toolbarRow,
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: _ctrls.modelCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.scriptEditorStoryboardBatchModelLabel,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: TextField(
-            controller: _ctrls.resolutionCtrl,
-            decoration: InputDecoration(
-              labelText: l10n.scriptEditorStoryboardBatchResolutionLabel,
+          Expanded(
+            child: TextField(
+              controller: _ctrls.resolutionCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.scriptEditorStoryboardBatchResolutionLabel,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -90,51 +98,59 @@ extension _StoryboardBatchWorkbenchSections
     final l10n = resolveAppLocalizationsForErrors(context);
     final canQuickGenerate =
         _selectedIds.isNotEmpty || _readyStoryboardIds().isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton(
-              onPressed: _busyMutation || !canQuickGenerate
-                  ? null
-                  : () => _runMutation(_batchGenerate),
-              child: Text(
-                _busyMutation
-                    ? l10n.scriptEditorStoryboardsBusy
-                    : l10n.scriptEditorStoryboardBatchRecommendGenerateSelected,
+    return StudioWorkbenchSection(
+      title: l10n.scriptEditorStoryboardBatchRecommendGenerateSelected,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            children: <Widget>[
+              FilledButton(
+                onPressed: _busyMutation || !canQuickGenerate
+                    ? null
+                    : () => _runMutation(_batchGenerate),
+                child: Text(
+                  _busyMutation
+                      ? l10n.scriptEditorStoryboardsBusy
+                      : l10n
+                            .scriptEditorStoryboardBatchRecommendGenerateSelected,
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: _busyMutation || singleSelectedId == null
-                  ? null
-                  : () =>
-                        _runMutation(() => _loadCurrentPreview(singleSelectedId)),
-              child: Text(l10n.scriptEditorStoryboardBatchRecommendPreviewSelected),
-            ),
-            TextButton(
-              onPressed: _busyMutation || singleSelectedId == null
-                  ? null
-                  : () =>
-                        _runMutation(() => _loadDownloadUrl(singleSelectedId)),
-              child: Text(l10n.scriptEditorStoryboardBatchReadDownloadLink),
-            ),
-            TextButton(
-              onPressed: _busyMutation || _selectedIds.isEmpty
-                  ? null
-                  : () => _runMutation(() => _exportSelectedZip(selected)),
-              child: Text(l10n.scriptEditorStoryboardBatchRecommendExportSelected),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.scriptEditorStoryboardBatchQuickGenerateHint,
-          style: studioHintStyle(context),
-        ),
-      ],
+              TextButton(
+                onPressed: _busyMutation || singleSelectedId == null
+                    ? null
+                    : () => _runMutation(
+                        () => _loadCurrentPreview(singleSelectedId),
+                      ),
+                child: Text(
+                  l10n.scriptEditorStoryboardBatchRecommendPreviewSelected,
+                ),
+              ),
+              TextButton(
+                onPressed: _busyMutation || singleSelectedId == null
+                    ? null
+                    : () =>
+                          _runMutation(() => _loadDownloadUrl(singleSelectedId)),
+                child: Text(l10n.scriptEditorStoryboardBatchReadDownloadLink),
+              ),
+              TextButton(
+                onPressed: _busyMutation || _selectedIds.isEmpty
+                    ? null
+                    : () => _runMutation(() => _exportSelectedZip(selected)),
+                child: Text(
+                  l10n.scriptEditorStoryboardBatchRecommendExportSelected,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.scriptEditorStoryboardBatchQuickGenerateHint,
+            style: studioHintStyle(context),
+          ),
+        ],
+      ),
     );
   }
 

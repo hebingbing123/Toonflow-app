@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_filter_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -91,44 +92,59 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: model.filterCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.projectEditorScriptsWorkbenchDialogNameFilterLabel,
-                  helperText:
-                      l10n.projectEditorScriptsWorkbenchDialogNameFilterHelper,
+              StudioWorkbenchSection(
+                title: l10n.projectEditorScriptsWorkbenchDialogNameFilterLabel,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    TextField(
+                      controller: model.filterCtrl,
+                      decoration: InputDecoration(
+                        labelText:
+                            l10n.projectEditorScriptsWorkbenchDialogNameFilterLabel,
+                        helperText: l10n
+                            .projectEditorScriptsWorkbenchDialogNameFilterHelper,
+                        isDense: true,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    StudioFilterRow(
+                      wideLayout: StudioFilterWideLayout.toolbarRow,
+                      wideBreakpoint: 560,
+                      children: <Widget>[
+                        FilledButton.tonal(
+                          onPressed:
+                              model.localBusy ? null : callbacks.onReadContext,
+                          child: Text(
+                            l10n
+                                .projectEditorScriptsWorkbenchDialogReadScriptContext,
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: model.localBusy
+                              ? null
+                              : callbacks.onUsePreviewOrAll,
+                          child: Text(
+                            model.previewRows.isNotEmpty
+                                ? l10n
+                                    .projectEditorScriptsWorkbenchDialogUseCurrentPreview
+                                : l10n
+                                    .projectEditorScriptsWorkbenchDialogUseAllScripts,
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: model.localBusy
+                              ? null
+                              : callbacks.onReloadScripts,
+                          child: Text(
+                            l10n
+                                .projectEditorScriptsWorkbenchDialogReloadProjectScripts,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: model.localBusy ? null : callbacks.onReadContext,
-                    child: Text(
-                      l10n.projectEditorScriptsWorkbenchDialogReadScriptContext,
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onUsePreviewOrAll,
-                    child: Text(
-                      model.previewRows.isNotEmpty
-                          ? l10n.projectEditorScriptsWorkbenchDialogUseCurrentPreview
-                          : l10n.projectEditorScriptsWorkbenchDialogUseAllScripts,
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onReloadScripts,
-                    child: Text(
-                      l10n.projectEditorScriptsWorkbenchDialogReloadProjectScripts,
-                    ),
-                  ),
-                ],
               ),
               const SizedBox(height: 16),
               TextField(
@@ -153,29 +169,34 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton(
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onExportSelected,
-                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendExportSelected),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onPollSelected,
-                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendPollSelected),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.localBusy
-                        ? null
-                        : callbacks.onExtractSelected,
-                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendExtractSelected),
-                  ),
-                ],
+              StudioWorkbenchSection(
+                title: l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel,
+                child: StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
+                  wideBreakpoint: 520,
+                  children: <Widget>[
+                    FilledButton(
+                      onPressed:
+                          model.localBusy ? null : callbacks.onExportSelected,
+                      child: Text(
+                        l10n.projectEditorScriptsWorkbenchRecommendExportSelected,
+                      ),
+                    ),
+                    OutlinedButton(
+                      onPressed: model.localBusy ? null : callbacks.onPollSelected,
+                      child: Text(
+                        l10n.projectEditorScriptsWorkbenchRecommendPollSelected,
+                      ),
+                    ),
+                    OutlinedButton(
+                      onPressed:
+                          model.localBusy ? null : callbacks.onExtractSelected,
+                      child: Text(
+                        l10n.projectEditorScriptsWorkbenchRecommendExtractSelected,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               Text(

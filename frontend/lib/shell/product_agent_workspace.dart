@@ -9,12 +9,14 @@ extension _HomePageProductAgentWorkspace on _HomePageState {
     required AgentWorkspacePane initialPane,
     required String sectionTitle,
     required String sectionDescription,
+    bool suppressSectionHeader = false,
   }) {
     return AgentWorkspacesSection(
       initialPane: initialPane,
       showPaneSelector: false,
       sectionTitle: sectionTitle,
       sectionDescription: sectionDescription,
+      suppressSectionHeader: suppressSectionHeader,
       projectIdController: _workspaceInputController.projectIdController,
       scriptIdController: _workspaceInputController.scriptIdController,
       projectUuidController: _workspaceInputController.projectUuidController,

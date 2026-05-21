@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/novels/import_parser.dart';
@@ -200,7 +201,7 @@ class _StudioScriptNovelInlineImportState
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: tokens.primary.withValues(alpha: 0.35)),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -218,26 +219,25 @@ class _StudioScriptNovelInlineImportState
               Expanded(
                 child: Text(
                   l10n.studioScriptNovelInlineImportTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: tokens.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: studioCardTitleStyle(context),
                 ),
               ),
               TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, StudioSpacing.iconTouchTarget),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
                 onPressed: _busy ? null : widget.onOpenFullWorkbench,
                 child: Text(l10n.studioScriptNovelInlineOpenFullWorkbench),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Text(
             l10n.studioScriptNovelInlineImportSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: tokens.textSecondary,
-            ),
+            style: studioHintStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           StudioNovelCrawlAuthSection(
             accessToken: widget.accessToken,
             projectId: widget.project.id,
@@ -249,12 +249,12 @@ class _StudioScriptNovelInlineImportState
               setState(() => _crawlAuthOverride = value);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           Text(
             l10n.studioScriptNovelInlineUrlSection,
-            style: theme.textTheme.labelLarge,
+            style: studioControlLabelStyle(context),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextField(
             controller: _urlCtrl,
             enabled: !_busy,
@@ -263,18 +263,21 @@ class _StudioScriptNovelInlineImportState
               isDense: true,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           FilledButton.icon(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, StudioSpacing.iconTouchTarget + 4),
+            ),
             onPressed: _busy ? null : () => _runAction(_importFromUrl),
             icon: const Icon(Icons.link, size: 18),
             label: Text(l10n.studioScriptNovelInlineImportFromUrl),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           Text(
             l10n.studioScriptNovelInlinePasteSection,
-            style: theme.textTheme.labelLarge,
+            style: studioControlLabelStyle(context),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextField(
             controller: _pasteCtrl,
             enabled: !_busy,
@@ -316,12 +319,12 @@ class _StudioScriptNovelInlineImportState
               style: theme.textTheme.bodySmall?.copyWith(color: tokens.primary),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           Text(
             l10n.studioScriptNovelInlineManualSection,
-            style: theme.textTheme.labelLarge,
+            style: studioControlLabelStyle(context),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextField(
             controller: _chapterTitleCtrl,
             enabled: !_busy,

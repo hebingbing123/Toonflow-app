@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_primary_button.dart';
-import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_conflict_banner.dart';
@@ -12,9 +11,8 @@ import '../rust_api.dart';
 import 'creator_journey_menu.dart';
 import 'creator_journey_strip.dart';
 import 'creator_journey_telemetry.dart';
-import 'creator_starter_templates.dart';
-import 'creator_starter_templates_strip.dart';
 import 'project_studio_cockpit_panel.dart';
+import 'project_studio_script_step_setup.dart';
 import 'project_studio_host.dart';
 import 'project_studio_model_routing_scope.dart';
 import 'studio_step_model_routing_bar.dart';
@@ -604,7 +602,47 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
           ],
         ),
       ),
-      if (widget.host.accessToken != null &&
+      if (_step == StudioStep.script &&
+          widget.host.accessToken != null &&
+          widget.host.accessToken!.isNotEmpty &&
+          widget.host.home != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: ProjectStudioScriptStepSetupPanel(
+            accessToken: widget.host.accessToken!,
+            projectUuid: widget.host.projectUuid,
+            home: widget.host.home!,
+            visibleAgentActions: visibleAgentActions,
+            onRoutingUpdated: (routing) {
+              setState(() => _modelRouting = routing);
+            },
+            onOpenProjectSettings: widget.host.onOpenProjectSettings,
+            onOpenGlobalModelVendorSettings:
+                widget.host.onOpenGlobalModelVendorSettings,
+            onRunHarnessAgent: widget.host.onRunHarnessAgent,
+            onExecuteHomeAction: _handleProjectHomeAction,
+            metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
+            onExecuteStarter: _handleStarterTemplate,
+          ),
+        )
+      else if (_step == StudioStep.script &&
+          widget.host.accessToken != null &&
+          widget.host.accessToken!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: StudioStepModelRoutingBar(
+            accessToken: widget.host.accessToken!,
+            projectId: widget.host.projectUuid,
+            step: StudioStep.script,
+            onOpenProjectSettings: widget.host.onOpenProjectSettings,
+            onOpenGlobalModelVendorSettings:
+                widget.host.onOpenGlobalModelVendorSettings,
+            onRoutingUpdated: (routing) {
+              setState(() => _modelRouting = routing);
+            },
+          ),
+        )
+      else if (widget.host.accessToken != null &&
           widget.host.accessToken!.isNotEmpty)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -620,73 +658,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
             },
           ),
         ),
-      if (_step == StudioStep.script && widget.host.home != null)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: StudioWorkbenchSection(
-            title: l10n.studioCreatorStartersTitle,
-            subtitle: l10n.studioCreatorStartersSubtitle,
-            expandTooltip: l10n.studioCockpitExpand,
-            collapseTooltip: l10n.studioCockpitCollapse,
-            child: CreatorStarterTemplatesStrip(
-              starters: creatorStarterTemplatesForScript(
-                widget.host.home!.cockpit.starterTemplates,
-              ),
-              onApply: _handleStarterTemplate,
-            ),
-          ),
-        ),
-      if (_step == StudioStep.script &&
-          widget.host.home != null &&
-          visibleAgentActions.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final shouldStack = constraints.maxWidth < 980;
-              final quickBar = StudioAgentQuickBar(
-                visibleActions: visibleAgentActions,
-                onRewriteScript: () =>
-                    widget.host.onRunHarnessAgent('script_rewriter'),
-                onExtractEntities: () =>
-                    widget.host.onRunHarnessAgent('extractor'),
-                onBreakStoryboard: () =>
-                    widget.host.onRunHarnessAgent('storyboard_breaker'),
-                onAssignVoices: () =>
-                    widget.host.onRunHarnessAgent('voice_assigner'),
-                onGridPrompts: () =>
-                    widget.host.onRunHarnessAgent('grid_prompt_generator'),
-                bottomPadding: 0,
-              );
-              final cockpit = ProjectStudioCockpitPanel(
-                home: widget.host.home!,
-                currentStep: _step,
-                onExecuteAction: _handleProjectHomeAction,
-                metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
-                onExecuteStarter: _handleStarterTemplate,
-              );
-              if (shouldStack) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    quickBar,
-                    const SizedBox(height: 8),
-                    cockpit,
-                  ],
-                );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(flex: 3, child: quickBar),
-                  const SizedBox(width: 12),
-                  Expanded(flex: 2, child: cockpit),
-                ],
-              );
-            },
-          ),
-        )
-      else ...<Widget>[
+      if (_step != StudioStep.script) ...<Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: StudioAgentQuickBar(

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_code_dropdown_field.dart';
+import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
@@ -170,89 +171,100 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              l10n.contentComplianceSubmitReportTitle,
-              style: theme.textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                StudioCodeDropdownField(
-                  value: _targetType,
-                  labelText: l10n.contentComplianceFieldTargetType,
-                  codes: _reportTargetTypeCodes,
-                  labelForValue: (code) => _targetTypeLabel(l10n, code),
-                  onChanged: (value) {
-                    setState(() {
-                      _targetType = value;
-                    });
-                  },
-                ),
-                StudioCodeDropdownField(
-                  value: _category,
-                  labelText: l10n.contentComplianceFieldCategory,
-                  codes: _categoryCodes,
-                  labelForValue: (code) => _categoryLabel(l10n, code),
-                  onChanged: (value) {
-                    setState(() {
-                      _category = value;
-                    });
-                  },
-                ),
-                StudioCodeDropdownField(
-                  value: _severity,
-                  labelText: l10n.contentComplianceFieldSeverity,
-                  codes: _severityCodes,
-                  labelForValue: (code) => _severityLabel(l10n, code),
-                  onChanged: (value) {
-                    setState(() {
-                      _severity = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _targetIdController,
-              decoration: InputDecoration(
-                labelText: l10n.contentComplianceFieldTargetUuid,
-                hintText: l10n.contentComplianceTargetUuidHint,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _detailController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: l10n.contentComplianceDetailLabel,
-                hintText: l10n.contentComplianceDetailHint,
-              ),
-            ),
-            const SizedBox(height: 12),
-            FilledButton.tonalIcon(
-              onPressed: widget.controller.submittingReport
-                  ? null
-                  : () => widget.controller.submitReport(
-                      targetType: _targetType,
-                      targetId: _targetIdController.text,
-                      category: _category,
-                      severity: _severity,
-                      detail: _detailController.text,
+            StudioCollapsibleFilterPanel(
+              title: l10n.contentComplianceSubmitReportTitle,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  StudioFilterRow(
+                    wideLayout: StudioFilterWideLayout.wrap,
+                    wideBreakpoint: 720,
+                    children: <Widget>[
+                      StudioCodeDropdownField(
+                        value: _targetType,
+                        labelText: l10n.contentComplianceFieldTargetType,
+                        width: 280,
+                        codes: _reportTargetTypeCodes,
+                        labelForValue: (code) => _targetTypeLabel(l10n, code),
+                        onChanged: (value) {
+                          setState(() {
+                            _targetType = value;
+                          });
+                        },
+                      ),
+                      StudioCodeDropdownField(
+                        value: _category,
+                        labelText: l10n.contentComplianceFieldCategory,
+                        width: 280,
+                        codes: _categoryCodes,
+                        labelForValue: (code) => _categoryLabel(l10n, code),
+                        onChanged: (value) {
+                          setState(() {
+                            _category = value;
+                          });
+                        },
+                      ),
+                      StudioCodeDropdownField(
+                        value: _severity,
+                        labelText: l10n.contentComplianceFieldSeverity,
+                        width: 280,
+                        codes: _severityCodes,
+                        labelForValue: (code) => _severityLabel(l10n, code),
+                        onChanged: (value) {
+                          setState(() {
+                            _severity = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _targetIdController,
+                    decoration: InputDecoration(
+                      labelText: l10n.contentComplianceFieldTargetUuid,
+                      hintText: l10n.contentComplianceTargetUuidHint,
+                      isDense: true,
                     ),
-              icon: widget.controller.submittingReport
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.report_outlined),
-              label: Text(
-                widget.controller.submittingReport
-                    ? l10n.contentComplianceSubmitting
-                    : l10n.contentComplianceSubmitReport,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _detailController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: l10n.contentComplianceDetailLabel,
+                      hintText: l10n.contentComplianceDetailHint,
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      onPressed: widget.controller.submittingReport
+                          ? null
+                          : () => widget.controller.submitReport(
+                              targetType: _targetType,
+                              targetId: _targetIdController.text,
+                              category: _category,
+                              severity: _severity,
+                              detail: _detailController.text,
+                            ),
+                      icon: widget.controller.submittingReport
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.report_outlined),
+                      label: Text(
+                        widget.controller.submittingReport
+                            ? l10n.contentComplianceSubmitting
+                            : l10n.contentComplianceSubmitReport,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (widget.controller.queueEnabled) ...[

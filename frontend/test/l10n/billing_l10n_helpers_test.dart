@@ -28,6 +28,29 @@ void main() {
       );
     });
 
+    testWidgets('null subscription status uses not-set label', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              expect(
+                subscriptionStatusLabel(l10n, null),
+                l10n.billingSubscriptionStatusNotSet,
+              );
+              expect(
+                subscriptionStatusLabel(l10n, '  '),
+                l10n.billingSubscriptionStatusNotSet,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+    });
+
     testWidgets('unknown subscription status uses generic label', (
       tester,
     ) async {

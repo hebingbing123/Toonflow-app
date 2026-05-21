@@ -503,11 +503,16 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          StudioFilterRow(
-            wideBreakpoint: 640,
-            children: <Widget>[
-              Text(
-                l10n.notificationsComplianceClearedThrottleTitle,
+          StudioCollapsibleFilterPanel(
+            title: l10n.notificationsComplianceClearedThrottleTitle,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioFilterRow(
+                  wideBreakpoint: 640,
+                  children: <Widget>[
+                    Text(
+                      l10n.notificationsComplianceClearedThrottleTitle,
                 style: theme.textTheme.bodyMedium,
               ),
               SizedBox(
@@ -713,43 +718,58 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   .toList(),
             ),
           ],
-          const SizedBox(height: 12),
-          StudioFilterRow(
-            wideBreakpoint: 720,
-            children: _complianceStages
-                .map(
-                  (stage) => SizedBox(
-                    width: 200,
-                    child: _complianceLabeledField(
-                      context,
-                      label: l10n.notificationsComplianceStageOverrideLabel(
-                        studioNotificationsComplianceStageLabel(l10n, stage),
-                      ),
-                      width: 200,
-                      child: TextField(
-                        controller: _stageThrottleControllers[stage],
-                        focusNode: _stageThrottleFocusNodes[stage],
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          hintText:
-                              l10n.notificationsComplianceStageOverrideHint,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _buildPreferencesAuditText(
-              l10n,
-              widget.controller.preferencesAudit,
+              ],
             ),
-            style: muted,
           ),
-          const SizedBox(height: 12),
+          StudioCollapsibleFilterPanel(
+            title: l10n.studioFilterToolbarTitle,
+            subtitle: l10n.notificationsComplianceStageOverrideHint,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioFilterRow(
+                  wideBreakpoint: 720,
+                  wideLayout: StudioFilterWideLayout.wrap,
+                  children: _complianceStages
+                      .map(
+                        (stage) => SizedBox(
+                          width: 200,
+                          child: _complianceLabeledField(
+                            context,
+                            label:
+                                l10n.notificationsComplianceStageOverrideLabel(
+                              studioNotificationsComplianceStageLabel(
+                                l10n,
+                                stage,
+                              ),
+                            ),
+                            width: 200,
+                            child: TextField(
+                              controller: _stageThrottleControllers[stage],
+                              focusNode: _stageThrottleFocusNodes[stage],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: l10n
+                                    .notificationsComplianceStageOverrideHint,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _buildPreferencesAuditText(
+                    l10n,
+                    widget.controller.preferencesAudit,
+                  ),
+                  style: muted,
+                ),
+              ],
+            ),
+          ),
           _buildWorkspaceSharedAuditSection(context, theme, l10n),
         ],
       ),
@@ -765,14 +785,18 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.notificationsComplianceSharedAuditTitle, style: muted),
-        const SizedBox(height: 8),
-        StudioFilterRow(
-          wideBreakpoint: 720,
-          children: <Widget>[
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceFilterTemplateId,
+        StudioCollapsibleFilterPanel(
+          title: l10n.notificationsComplianceSharedAuditTitle,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              StudioFilterRow(
+                wideBreakpoint: 720,
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                children: <Widget>[
+                  _complianceLabeledField(
+                    context,
+                    label: l10n.notificationsComplianceFilterTemplateId,
               child: TextField(
                 controller: _workspaceAuditTemplateFilterController,
                 decoration: const InputDecoration(isDense: true),
@@ -822,18 +846,19 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 decoration: const InputDecoration(isDense: true),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        StudioFilterRow(
-          wideBreakpoint: 480,
-          children: <Widget>[
-            OutlinedButton(
-              onPressed: widget.controller.loadingWorkspaceSharedAudit
-                  ? null
-                  : _reloadWorkspaceAuditWithFilters,
-              child: Text(l10n.notificationsComplianceApplyFilters),
-            ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              StudioFilterRow(
+                wideBreakpoint: 480,
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                children: <Widget>[
+                  OutlinedButton(
+                    onPressed: widget.controller.loadingWorkspaceSharedAudit
+                        ? null
+                        : _reloadWorkspaceAuditWithFilters,
+                    child: Text(l10n.notificationsComplianceApplyFilters),
+                  ),
             OutlinedButton.icon(
               onPressed: widget.controller.loadingWorkspaceSharedAudit
                   ? null
@@ -870,7 +895,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               icon: const Icon(Icons.hourglass_empty_outlined),
               label: Text(l10n.notificationsComplianceAsyncCsv),
             ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
         if ((widget.controller.workspaceSharedAsyncExportInfo ?? '')
             .trim()
@@ -898,14 +926,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ),
         ],
         const SizedBox(height: 16),
-        Text(l10n.notificationsComplianceExportHistoryTitle, style: muted),
-        const SizedBox(height: 8),
-        StudioFilterRow(
-          wideBreakpoint: 720,
-          children: <Widget>[
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceExportFormatFilter,
+        StudioCollapsibleFilterPanel(
+          title: l10n.notificationsComplianceExportHistoryTitle,
+          child: StudioFilterRow(
+            wideBreakpoint: 720,
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            children: <Widget>[
+              _complianceLabeledField(
+                context,
+                label: l10n.notificationsComplianceExportFormatFilter,
               width: 180,
               child: StudioDropdownButtonFormField<String>(
                 // Controlled by _exportHistoryFormat via setState.
@@ -965,7 +994,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     : Text(l10n.notificationsComplianceFilterExports),
               ),
             ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         ...widget.controller.workspaceSharedAuditExports.map(

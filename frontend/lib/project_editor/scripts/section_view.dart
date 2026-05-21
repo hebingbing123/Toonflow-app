@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
-import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_workbench_section.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
@@ -79,40 +79,24 @@ class ProjectScriptsSectionView extends StatelessWidget {
           style: studioHintStyle(context),
         ),
         const SizedBox(height: StudioSpacing.xs),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-          decoration: studioInsetPanelDecoration(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.projectEditorScriptsSectionBatchWorkbenchTitle,
-                style: theme.textTheme.titleSmall,
+        StudioWorkbenchSection(
+          title: l10n.projectEditorScriptsSectionBatchWorkbenchTitle,
+          subtitle: l10n.projectEditorScriptsSectionBatchWorkbenchDescription,
+          child: StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            wideBreakpoint: 480,
+            children: <Widget>[
+              FilledButton.tonal(
+                onPressed: model.saving || model.scriptTaskBusy
+                    ? null
+                    : callbacks.onOpenWorkbench,
+                child: Text(l10n.projectEditorScriptsSectionOpenBatchWorkbench),
               ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.projectEditorScriptsSectionBatchWorkbenchDescription,
-                style: studioHintStyle(context),
-              ),
-              const SizedBox(height: StudioSpacing.xs),
-              Wrap(
-                spacing: StudioSpacing.xs,
-                runSpacing: StudioSpacing.xs,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: model.saving || model.scriptTaskBusy
-                        ? null
-                        : callbacks.onOpenWorkbench,
-                    child: Text(l10n.projectEditorScriptsSectionOpenBatchWorkbench),
-                  ),
-                  OutlinedButton(
-                    onPressed: model.saving || model.scriptTaskBusy
-                        ? null
-                        : callbacks.onOpenPlanWorkbench,
-                    child: Text(l10n.projectEditorScriptsSectionOpenPlanWorkbench),
-                  ),
-                ],
+              OutlinedButton(
+                onPressed: model.saving || model.scriptTaskBusy
+                    ? null
+                    : callbacks.onOpenPlanWorkbench,
+                child: Text(l10n.projectEditorScriptsSectionOpenPlanWorkbench),
               ),
             ],
           ),

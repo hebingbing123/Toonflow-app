@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
@@ -22,6 +24,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     this.showPaneSelector = true,
     this.sectionTitle,
     this.sectionDescription,
+    this.suppressSectionHeader = false,
     required this.projectIdController,
     required this.scriptIdController,
     this.projectUuidController,
@@ -77,6 +80,9 @@ class AgentWorkspacesSection extends StatefulWidget {
   final bool showPaneSelector;
   final String? sectionTitle;
   final String? sectionDescription;
+
+  /// When true, omits the pane title block (parent shell already shows it).
+  final bool suppressSectionHeader;
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
 

@@ -18,149 +18,177 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
     required void Function(String value) updateInfoLine,
     required void Function(List<NovelRow> rows, String infoLine) applyResult,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: searchCtrl,
-          decoration: InputDecoration(
-            labelText: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
-            helperText: l10n.projectEditorNovelsWorkbenchSearchKeywordHelper,
+    return StudioCollapsibleFilterPanel(
+      title: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
+      subtitle: searchCtrl.text.trim().isEmpty
+          ? null
+          : '${l10n.projectEditorNovelsWorkbenchSearchKeywordLabel}: ${searchCtrl.text.trim()}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          TextField(
+            controller: searchCtrl,
+            decoration: InputDecoration(
+              labelText: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
+              helperText: l10n.projectEditorNovelsWorkbenchSearchKeywordHelper,
+              isDense: true,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: StudioDropdownButtonFormField<String>(
-                initialValue: searchIntakeStatusCtrl.text.isEmpty
-                    ? ''
-                    : searchIntakeStatusCtrl.text,
-                decoration: InputDecoration(
-                  labelText: l10n.projectEditorNovelsWorkbenchSearchIntakeStatusLabel,
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeStatusAll),
+          const SizedBox(height: 8),
+          StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            wideBreakpoint: 560,
+            children: <Widget>[
+              Expanded(
+                child: StudioDropdownButtonFormField<String>(
+                  initialValue: searchIntakeStatusCtrl.text.isEmpty
+                      ? ''
+                      : searchIntakeStatusCtrl.text,
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n.projectEditorNovelsWorkbenchSearchIntakeStatusLabel,
+                    isDense: true,
                   ),
-                  DropdownMenuItem(
-                    value: 'draft',
-                    child: Text(l10n.projectEditorNovelsIntakeStatusValueDraft),
-                  ),
-                  DropdownMenuItem(
-                    value: 'pending_review',
-                    child: Text(l10n.projectEditorNovelsIntakeStatusValuePendingReview),
-                  ),
-                  DropdownMenuItem(
-                    value: 'admitted',
-                    child: Text(l10n.projectEditorNovelsIntakeStatusValueAdmitted),
-                  ),
-                  DropdownMenuItem(
-                    value: 'rejected',
-                    child: Text(l10n.projectEditorNovelsIntakeStatusValueRejected),
-                  ),
-                ],
-                onChanged: (value) {
-                  searchIntakeStatusCtrl.text = value ?? '';
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: StudioDropdownButtonFormField<String>(
-                initialValue: searchIntakeSourceCtrl.text.isEmpty
-                    ? ''
-                    : searchIntakeSourceCtrl.text,
-                decoration: InputDecoration(
-                  labelText: l10n.projectEditorNovelsWorkbenchSearchIntakeSourceLabel,
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeSourceAll),
-                  ),
-                  DropdownMenuItem(
-                    value: 'manual',
-                    child: Text(l10n.projectEditorNovelsIntakeSourceValueManual),
-                  ),
-                  DropdownMenuItem(
-                    value: 'whole_book_import',
-                    child: Text(l10n.projectEditorNovelsIntakeSourceValueWholeBookImport),
-                  ),
-                  DropdownMenuItem(
-                    value: 'crawler_client',
-                    child: Text(l10n.projectEditorNovelsIntakeSourceValueCrawlerClient),
-                  ),
-                  DropdownMenuItem(
-                    value: 'crawler_server',
-                    child: Text(l10n.projectEditorNovelsIntakeSourceValueCrawlerServer),
-                  ),
-                ],
-                onChanged: (value) {
-                  searchIntakeSourceCtrl.text = value ?? '';
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: localBusy
-                  ? null
-                  : () => _runNovelWorkbenchAction(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      setLocalState: setLocalState,
-                      novelsBusy: novelsBusy,
-                      setLocalBusy: setLocalBusy,
-                      action: () => _searchNovelWorkbenchRows(
-                        l10n: l10n,
-                        token: token,
-                        project: project,
-                        searchCtrl: searchCtrl,
-                        searchIntakeStatusCtrl: searchIntakeStatusCtrl,
-                        searchIntakeSourceCtrl: searchIntakeSourceCtrl,
-                        applyResult: applyResult,
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(
+                        l10n.projectEditorNovelsWorkbenchSearchIntakeStatusAll,
                       ),
                     ),
-              child: Text(l10n.projectEditorNovelsWorkbenchSearchButton),
-            ),
-            OutlinedButton(
-              onPressed: localBusy
-                  ? null
-                  : () {
-                      setLocalState(() {
-                        searchCtrl.clear();
-                        searchIntakeStatusCtrl.clear();
-                        searchIntakeSourceCtrl.clear();
-                      });
-                      updateInfoLine(
-                        l10n.projectEditorNovelsActionSearchFiltersCleared,
-                      );
-                    },
-              child: Text(l10n.projectEditorNovelsWorkbenchSearchClearFilters),
-            ),
-            OutlinedButton(
-              onPressed: localBusy
-                  ? null
-                  : () => _runNovelWorkbenchAction(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      setLocalState: setLocalState,
-                      novelsBusy: novelsBusy,
-                      setLocalBusy: setLocalBusy,
-                      action: () => refreshWorkbench(setLocalState),
+                    DropdownMenuItem(
+                      value: 'draft',
+                      child: Text(l10n.projectEditorNovelsIntakeStatusValueDraft),
                     ),
-              child: Text(l10n.projectEditorNovelsWorkbenchSearchRefreshList),
-            ),
-          ],
-        ),
-      ],
+                    DropdownMenuItem(
+                      value: 'pending_review',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeStatusValuePendingReview,
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'admitted',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeStatusValueAdmitted,
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'rejected',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeStatusValueRejected,
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    searchIntakeStatusCtrl.text = value ?? '';
+                  },
+                ),
+              ),
+              Expanded(
+                child: StudioDropdownButtonFormField<String>(
+                  initialValue: searchIntakeSourceCtrl.text.isEmpty
+                      ? ''
+                      : searchIntakeSourceCtrl.text,
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n.projectEditorNovelsWorkbenchSearchIntakeSourceLabel,
+                    isDense: true,
+                  ),
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(
+                        l10n.projectEditorNovelsWorkbenchSearchIntakeSourceAll,
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'manual',
+                      child: Text(l10n.projectEditorNovelsIntakeSourceValueManual),
+                    ),
+                    DropdownMenuItem(
+                      value: 'whole_book_import',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeSourceValueWholeBookImport,
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'crawler_client',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeSourceValueCrawlerClient,
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'crawler_server',
+                      child: Text(
+                        l10n.projectEditorNovelsIntakeSourceValueCrawlerServer,
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    searchIntakeSourceCtrl.text = value ?? '';
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          StudioFilterRow(
+            wideLayout: StudioFilterWideLayout.toolbarRow,
+            wideBreakpoint: 520,
+            children: <Widget>[
+              FilledButton.tonal(
+                onPressed: localBusy
+                    ? null
+                    : () => _runNovelWorkbenchAction(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        novelsBusy: novelsBusy,
+                        setLocalBusy: setLocalBusy,
+                        action: () => _searchNovelWorkbenchRows(
+                          l10n: l10n,
+                          token: token,
+                          project: project,
+                          searchCtrl: searchCtrl,
+                          searchIntakeStatusCtrl: searchIntakeStatusCtrl,
+                          searchIntakeSourceCtrl: searchIntakeSourceCtrl,
+                          applyResult: applyResult,
+                        ),
+                      ),
+                child: Text(l10n.projectEditorNovelsWorkbenchSearchButton),
+              ),
+              OutlinedButton(
+                onPressed: localBusy
+                    ? null
+                    : () {
+                        setLocalState(() {
+                          searchCtrl.clear();
+                          searchIntakeStatusCtrl.clear();
+                          searchIntakeSourceCtrl.clear();
+                        });
+                        updateInfoLine(
+                          l10n.projectEditorNovelsActionSearchFiltersCleared,
+                        );
+                      },
+                child: Text(l10n.projectEditorNovelsWorkbenchSearchClearFilters),
+              ),
+              OutlinedButton(
+                onPressed: localBusy
+                    ? null
+                    : () => _runNovelWorkbenchAction(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        novelsBusy: novelsBusy,
+                        setLocalBusy: setLocalBusy,
+                        action: () => refreshWorkbench(setLocalState),
+                      ),
+                child: Text(l10n.projectEditorNovelsWorkbenchSearchRefreshList),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

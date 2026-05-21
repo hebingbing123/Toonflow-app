@@ -535,18 +535,26 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     final description =
         widget.sectionDescription ?? l10n.agentWorkspaceSectionDescription;
     final header = <Widget>[
-      const SizedBox(height: 16),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Text(title, style: Theme.of(context).textTheme.titleSmall),
-          ),
-          const RiskyOperationConfirmPrefsOverflowMenu(),
-        ],
-      ),
-      const SizedBox(height: 4),
-      Text(description, style: Theme.of(context).textTheme.bodySmall),
+      if (!widget.suppressSectionHeader) ...<Widget>[
+        const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(title, style: studioPaneTitleStyle(context)),
+                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle - 2),
+                  Text(description, style: studioHintStyle(context)),
+                ],
+              ),
+            ),
+            const RiskyOperationConfirmPrefsOverflowMenu(),
+          ],
+        ),
+        const SizedBox(height: StudioLayoutSpacing.stackMedium),
+      ],
     ];
 
     final scrollableBody = <Widget>[
