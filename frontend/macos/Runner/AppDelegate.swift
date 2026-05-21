@@ -22,7 +22,9 @@ class AppDelegate: FlutterAppDelegate {
       windowChannel.setMethodCallHandler { [weak window] (call, result) in
         switch call.method {
         case "startDragging":
-          window?.performDrag(withEvent: NSApp.currentEvent!)
+          if let event = NSApp.currentEvent {
+            window?.performDrag(with: event)
+          }
           result(nil)
         default:
           result(FlutterMethodNotImplemented)
