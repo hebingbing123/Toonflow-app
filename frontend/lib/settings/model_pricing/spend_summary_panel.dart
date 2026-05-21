@@ -131,7 +131,6 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
                                 row.tokenEfficiencyRoiBand,
                               ),
                             ),
-                            visualDensity: VisualDensity.compact,
                           ),
                         ),
                     ],

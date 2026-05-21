@@ -213,7 +213,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             ),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
             ScriptWorkspaceControlsPanel(

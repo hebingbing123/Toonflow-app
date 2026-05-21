@@ -21,13 +21,11 @@ class ValueTierBadge extends StatelessWidget {
     if (!sampleSufficient) {
       return Chip(
         label: Text(l10n.studioValueTierSampleLow),
-        visualDensity: VisualDensity.compact,
       );
     }
     if (showSameTierCheaper) {
       return Chip(
         label: Text(l10n.studioValueTierSameTierCheaper),
-        visualDensity: VisualDensity.compact,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       );
     }
@@ -35,7 +33,6 @@ class ValueTierBadge extends StatelessWidget {
     if (label.isEmpty) return const SizedBox.shrink();
     return Chip(
       label: Text(label),
-      visualDensity: VisualDensity.compact,
     );
   }
 }

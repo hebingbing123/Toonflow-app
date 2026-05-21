@@ -57,7 +57,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
     final steps = isWeb ? l10n.studioNovelCrawlAuthWebGuideSteps : null;
 
     final foreground = theme.colorScheme.onSecondaryContainer;
-    final background = theme.colorScheme.secondaryContainer;
+    final background = StudioTokens.of(context).accentSoft;
 
     return Container(
       width: double.infinity,
@@ -78,7 +78,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
                 color: tokens.primary,
                 size: 22,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: StudioLayoutSpacing.inlineGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,14 +103,14 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
             ],
           ),
           if (steps != null) ...<Widget>[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
                 child: Text(
                   steps,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -178,7 +178,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
             child: Row(
               children: <Widget>[
                 Icon(

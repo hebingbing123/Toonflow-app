@@ -498,9 +498,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
+                            color: StudioTokens.of(context).primarySoft,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

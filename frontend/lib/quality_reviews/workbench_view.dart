@@ -10,6 +10,9 @@ import 'dimension_score_form.dart';
 import 'field_styling.dart';
 import 'support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 part 'workbench_view/review_widgets.dart';
 
@@ -1019,7 +1022,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
                               label: Text(l10n.qualityReviewsDeliveryTag),
-                              visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if (review.source == 'auto')
@@ -1027,7 +1029,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
                               label: Text(l10n.qualityReviewsAutoTag),
-                              visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if ((review.grade ?? '').trim().isNotEmpty)
@@ -1039,7 +1040,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                 context,
                                 review.grade!.trim(),
                               ),
-                              visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if ((review.suggestedAction ?? '').trim().isNotEmpty)
@@ -1052,7 +1052,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                   l10n,
                                 ),
                               ),
-                              visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if (hasDimensionRisk(review.dimensionScores))
@@ -1060,7 +1059,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             padding: const EdgeInsets.only(right: 8),
                             child: Chip(
                               label: Text(l10n.qualityReviewsDimensionRiskBadge),
-                              visualDensity: VisualDensity.compact,
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.errorContainer,
@@ -1071,13 +1069,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             padding: EdgeInsets.only(right: 8),
                             child: Chip(
                               label: Text(l10n.qualityReviewsMemoryTag),
-                              visualDensity: VisualDensity.compact,
                             ),
                           ),
                         if ((review.suggestedAction ?? '').trim().isNotEmpty)
                           IconButton(
+                            style: studioUtilityIconButtonStyle(context),
                             tooltip: l10n.qualityReviewsApplySuggestedActionTooltip,
-                            visualDensity: VisualDensity.compact,
                             onPressed: () =>
                                 callbacks.onApplySuggestedAction(review),
                             icon: const Icon(Icons.open_in_new_rounded),
@@ -1089,12 +1086,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   );
                 }),
               ] else if (activeFilters.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  l10n.qualityReviewsEmptyForCurrentFilters,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: muted),
+                const SizedBox(height: StudioLayoutSpacing.listItem),
+                StudioEmptyState.noResults(
+                  title: l10n.qualityReviewsEmptyForCurrentFilters,
                 ),
               ],
             ],

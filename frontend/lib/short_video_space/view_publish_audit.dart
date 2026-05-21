@@ -23,7 +23,7 @@ class _PublishAuditPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
         Text(
           l10n.shortVideoPublishAuditOverviewTitle,
           style: theme.textTheme.labelSmall?.copyWith(

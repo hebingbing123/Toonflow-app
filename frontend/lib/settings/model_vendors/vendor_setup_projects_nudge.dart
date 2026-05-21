@@ -94,7 +94,7 @@ class _VendorSetupProjectsNudgeState extends State<VendorSetupProjectsNudge> {
           border: Border.all(color: tokens.primary.withValues(alpha: 0.28)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

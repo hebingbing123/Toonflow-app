@@ -533,7 +533,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       SizedBox(
                         height: 120,
                         child: ListView.builder(
-                          shrinkWrap: true,
                           itemCount: failedItems.length,
                           itemBuilder: (ctx, idx) {
                             final item = failedItems[idx];

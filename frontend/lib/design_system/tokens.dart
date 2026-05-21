@@ -207,4 +207,16 @@ abstract final class StudioLayoutSpacing {
   static const double titleSubtitle = StudioSpacing.xs;
   static const double actionRow = StudioSpacing.sm;
   static const double listItem = StudioSpacing.xs;
+
+  /// Tight stack gap (replaces legacy `10` in cards and forms).
+  static const double inlineGap = 10;
+
+  /// Between title and body in compact panels (replaces legacy `14`).
+  static const double stackMedium = 14;
+
+  /// Inset padding for dense tool rows (replaces legacy `10`/`12` padding).
+  static const double insetDense = 12;
+
+  /// Comfortable card / section inset (replaces legacy `18`).
+  static const double insetComfortable = 18;
 }

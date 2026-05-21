@@ -255,7 +255,6 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                         row.totalReviews,
                       ),
                     ),
-                    visualDensity: VisualDensity.compact,
                   ),
                 )
                 .toList(growable: false),
@@ -278,7 +277,6 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                     label: Text(
                       '${row.stage} A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount}',
                     ),
-                    visualDensity: VisualDensity.compact,
                   ),
                 )
                 .toList(growable: false),
@@ -304,7 +302,6 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                         row.count,
                       ),
                     ),
-                    visualDensity: VisualDensity.compact,
                   ),
                 )
                 .toList(growable: false),

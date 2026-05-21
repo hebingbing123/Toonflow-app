@@ -48,8 +48,8 @@ class StudioJobTray extends StatelessWidget {
       builder: (ctx) {
         final sheetL10n = AppLocalizations.of(ctx)!;
         return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),

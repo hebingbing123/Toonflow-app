@@ -4,6 +4,7 @@ import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 /// Side-by-side comparison for 2–4 [PublishDraftRow] (title, copy, schedule, assets).
 Future<void> showPublishDraftCompareDialog(
@@ -300,7 +301,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
                 }
               }
               return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

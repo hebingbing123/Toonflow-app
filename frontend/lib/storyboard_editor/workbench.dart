@@ -237,17 +237,25 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           productionRow: _productionRow,
           metaLine: _storyboardProductionMetaLine(l10n, _productionRow),
         ),
-        if (_storyboardShotReadiness != null) ...[
-          const SizedBox(height: 12),
-          _StoryboardShortVideoReadinessStrip(
-            readiness: _storyboardShotReadiness!,
+        const SizedBox(height: StudioLayoutSpacing.listItem),
+        StudioWorkbenchSection(
+          title: viewState.diagnosis.summary,
+          subtitle: viewState.diagnosis.detail,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (_storyboardShotReadiness != null) ...<Widget>[
+                _StoryboardShortVideoReadinessStrip(
+                  readiness: _storyboardShotReadiness!,
+                ),
+                const SizedBox(height: StudioLayoutSpacing.listItem),
+              ],
+              FilledButton.tonal(
+                onPressed: viewState.recommendedAction,
+                child: Text(viewState.recommendedActionLabel),
+              ),
+            ],
           ),
-        ],
-        const SizedBox(height: 12),
-        _StoryboardDiagnosisCard(
-          diagnosis: viewState.diagnosis,
-          recommendedAction: viewState.recommendedAction,
-          recommendedActionLabel: viewState.recommendedActionLabel,
         ),
         if (_productionError != null) ...[
           const SizedBox(height: 8),

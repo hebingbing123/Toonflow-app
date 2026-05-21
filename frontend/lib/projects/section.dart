@@ -13,8 +13,10 @@ import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 part 'workbenches/art_styles.dart';
 part 'workbenches/art_styles_helpers.dart';
@@ -209,52 +211,21 @@ class ProjectsSection extends StatelessWidget {
             ),
           ],
           if (_showEnterpriseProjectEmptyState) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: studioPanelBorderColor(context)),
+            const SizedBox(height: StudioLayoutSpacing.listItem),
+            StudioEmptyState.firstUse(
+              title: l10n.projectsEnterpriseEmptyTitle,
+              subtitle: buildEnterpriseProjectsEmptyStateBody(
+                l10n,
+                currentWorkspaceName,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.projectsEnterpriseEmptyTitle,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    buildEnterpriseProjectsEmptyStateBody(
-                      l10n,
-                      currentWorkspaceName,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton.tonal(
-                        onPressed: controller.creatingProject
-                            ? null
-                            : () => _createEmptyProject(context),
-                        child: Text(
-                          controller.creatingProject
-                              ? l10n.projectsCreating
-                              : l10n.projectsCreateFirstEmpty,
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: onOpenTeamWorkspaces,
-                        child: Text(l10n.projectsOpenTeamWorkspaces),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              actionLabel: controller.creatingProject
+                  ? l10n.projectsCreating
+                  : l10n.projectsCreateFirstEmpty,
+              onAction: controller.creatingProject
+                  ? null
+                  : () => _createEmptyProject(context),
+              secondaryActionLabel: l10n.projectsOpenTeamWorkspaces,
+              onSecondaryAction: onOpenTeamWorkspaces,
             ),
           ],
           ProjectsOverviewPreview(

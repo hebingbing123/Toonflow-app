@@ -306,7 +306,6 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                       children: <Widget>[
                         for (final entry in inherited)
                           Chip(
-                            visualDensity: VisualDensity.compact,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.padded,
                             label: Text(
@@ -376,7 +375,6 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                           ),
                           if (effective != null)
                             Chip(
-                              visualDensity: VisualDensity.compact,
                               label: Text(
                                 _sourceLabel(l10n, effective.source),
                                 style: Theme.of(context).textTheme.labelSmall,
@@ -529,7 +527,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: tokens.bgSurface.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),

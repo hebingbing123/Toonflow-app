@@ -112,7 +112,7 @@ class StudioPaneHeader extends StatelessWidget {
                 Expanded(child: titleBlock),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Align(alignment: Alignment.centerRight, child: trailing),
           ],
         );

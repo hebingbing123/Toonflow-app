@@ -24,7 +24,7 @@ class StudioBatchBar extends StatelessWidget {
       color: tokens.bgElevated,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.inlineGap),
         child: Row(
           children: <Widget>[
             Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 import 'package:flutter/services.dart';
 
 import '../../rust_api.dart';
@@ -165,7 +166,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: hasSelection
-                  ? Theme.of(context).colorScheme.primaryContainer
+                  ? StudioTokens.of(context).primarySoft
                   : Theme.of(context).colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(16),
             ),
@@ -454,7 +455,6 @@ class BatchOperationProgressDialog extends StatelessWidget {
               const SizedBox(height: 8),
               Flexible(
                 child: ListView.builder(
-                  shrinkWrap: true,
                   itemCount: failedItems.length,
                   itemBuilder: (context, index) {
                     final item = failedItems[index];

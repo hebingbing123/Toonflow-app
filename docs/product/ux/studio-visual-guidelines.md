@@ -77,13 +77,14 @@
 | 主题 | `frontend/lib/design_system/theme.dart` |
 | 排版 | `frontend/lib/design_system/studio_typography.dart` |
 | 文本样式 | `frontend/lib/design_system/components/studio_text_styles.dart` |
-| 面板装饰 / 工具钮样式 | `frontend/lib/design_system/components/studio_surfaces.dart`（含 `studioUtilityIconButtonStyle`） |
+| 面板装饰 / 工具钮样式 | `frontend/lib/design_system/components/studio_surfaces.dart`（含 `studioUtilityIconButtonStyle` / `studioChromeIconButtonStyle`） |
+| 工作台折叠区 | `frontend/lib/design_system/components/studio_workbench_section.dart` |
 | 空状态 | `frontend/lib/design_system/components/studio_empty_state.dart` |
 | Token 色值表 | [`design-tokens.md`](design-tokens.md) |
 
 ## 巡检收尾说明（2026-05）
 
-主路径 **P0/P1**（token 色、光晕降噪、热区、空状态、导航选中态）已在应用代码中落地。仍可能保留：
+主路径 **P0/P1**、阶段 6 polish 与 **工作台 IA**（`StudioWorkbenchSection`、驾驶舱/诊断默认折叠）已在应用代码中落地。仍可能保留：
 
 - **登录 Hero** 营销区白字/半透明（品牌层，非工作台 token 规则）
 - **`pipeline_step_chip`** 在 `useStudioTokens: false` 时回退 M3 `outlineVariant` / `onSurfaceVariant`
@@ -141,3 +142,10 @@
 | 阶段 5：空状态补漏 | 版本管理、时间轴、Help 有效链接、账户导出、审计、资产角标、管理台 ACL、团队邀请筛选、脚本预览 |
 | 阶段 5：空状态图标 | `StudioEmptyState` 强调态改为 `primary` 平面圆（去掉 `signalGradient`） |
 | 维护文档 | [`studio-visual-debt.md`](studio-visual-debt.md) 基线 grep 与黄金图命令 |
+| 阶段 6：间距 token 扫尾 | `StudioLayoutSpacing.inlineGap/stackMedium/insetComfortable` 替换业务层 `10/14/18` padding |
+| 阶段 6：ListView shrinkWrap | 搜索/团队/Shell 菜单/命令面板/操作历史等改为 `Column` 或 bounded 列表 |
+| 阶段 6：M3 容器色 | 通知/搜索/短剧/导出/模型供应商等 `primaryContainer` → `primarySoft` |
+| 阶段 6：登录 Hero 降噪 | 缩舞台高度与光环；宽屏保留 pipeline chips，紧凑布局隐藏 chips |
+| 阶段 6：failures 忽略 | `frontend/.gitignore` → `test/ui/failures/` |
+| 阶段 6：收尾 polish | `VisualDensity.compact` 清零、`studioChromeIconButtonStyle`、间距 token、CI `studio-visual-debt-check.sh` |
+| 阶段 7：工作台 IA | `StudioWorkbenchSection`；驾驶舱/入门模板/诊断默认折叠；短剧预检 gap 默认收起；设置 Hero 与 Next CTA 降噪 |

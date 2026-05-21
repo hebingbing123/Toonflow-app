@@ -161,7 +161,7 @@ class _AccountSectionState extends State<AccountSection> {
     final l10n = resolveAppLocalizationsForErrors(context);
 
     return StudioCard(
-      padding: EdgeInsets.all(comfortable ? 18 : 16),
+      padding: EdgeInsets.all(comfortable ? StudioLayoutSpacing.insetComfortable : StudioSpacing.sm),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final stackHeader = constraints.maxWidth < 720;
@@ -282,7 +282,7 @@ class _AccountSectionState extends State<AccountSection> {
     final downloading = widget.controller.isDownloading(item.id);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: studioInsetPanelDecoration(
         context,
@@ -528,7 +528,7 @@ class _AccountSectionState extends State<AccountSection> {
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.all(comfortable ? 18 : 16),
+          padding: EdgeInsets.all(comfortable ? StudioLayoutSpacing.insetComfortable : StudioSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
@@ -591,7 +591,7 @@ class _AccountSectionState extends State<AccountSection> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -664,7 +664,7 @@ class _AccountSectionState extends State<AccountSection> {
               ),
             ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               border: Border.all(

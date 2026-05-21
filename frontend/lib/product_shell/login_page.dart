@@ -38,7 +38,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _sceneController = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 15),
+    duration: const Duration(seconds: 18),
   );
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -161,10 +161,10 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                   final ultraCompact = contentWidth < 480;
                   final pagePadding = EdgeInsets.all(
                     wide
-                        ? 28
+                        ? StudioSpacing.lg - 4
                         : ultraCompact
-                        ? 16
-                        : 20,
+                        ? StudioSpacing.sm
+                        : StudioSpacing.sm + 4,
                   );
                   if (wide) {
                     final authPanelWidth = (constraints.maxWidth * 0.34)
@@ -185,7 +185,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                               ),
                             ),
                           ),
-                          const SizedBox(width: 28),
+                          const SizedBox(width: StudioSpacing.md + 4),
                           SizedBox(
                             width: authPanelWidth,
                             child: Align(
@@ -218,7 +218,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           title: l10n.appTitle,
                           eyebrow: l10n.productPipelineStripTitle,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: StudioSpacing.sm + 4),
                         if (ultraCompact)
                           Text(
                             l10n.productShellLoginTagline,
@@ -235,7 +235,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                               compact: true,
                             ),
                           ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: StudioSpacing.sm + 4),
                         _AuthPanel(
                           l10n: l10n,
                           authController: widget.authController,
@@ -282,11 +282,11 @@ class _HeroStage extends StatelessWidget {
             title: l10n.appTitle,
             eyebrow: l10n.productPipelineStripTitle,
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: StudioSpacing.md + 4),
         ],
         ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: compact ? double.infinity : 640,
+            maxWidth: compact ? double.infinity : 560,
           ),
           child: Text(
             l10n.productShellLoginHeroTitle,
@@ -299,10 +299,10 @@ class _HeroStage extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: StudioLayoutSpacing.stackMedium),
         ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: compact ? double.infinity : 560,
+            maxWidth: compact ? double.infinity : 520,
           ),
           child: Text(
             l10n.productShellLoginTagline,
@@ -312,29 +312,30 @@ class _HeroStage extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 18),
-        Wrap(
-          spacing: StudioSpacing.xs + 2,
-          runSpacing: StudioSpacing.xs + 2,
-          children: <Widget>[
-            _SignalChip(
-              icon: Icons.auto_stories_outlined,
-              label: l10n.productPipelineStripScripts,
-            ),
-            _SignalChip(
-              icon: Icons.theaters_outlined,
-              label: l10n.productPipelineStripProduction,
-            ),
-            _SignalChip(
-              icon: Icons.movie_creation_outlined,
-              label: l10n.productPipelineStripShortVideo,
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+        if (!compact)
+          Wrap(
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
+            children: <Widget>[
+              _SignalChip(
+                icon: Icons.auto_stories_outlined,
+                label: l10n.productPipelineStripScripts,
+              ),
+              _SignalChip(
+                icon: Icons.theaters_outlined,
+                label: l10n.productPipelineStripProduction,
+              ),
+              _SignalChip(
+                icon: Icons.movie_creation_outlined,
+                label: l10n.productPipelineStripShortVideo,
+              ),
+            ],
+          ),
+        if (!compact) const SizedBox(height: StudioSpacing.md),
         if (compact)
           SizedBox(
-            height: 300,
+            height: 200,
             child: _AiStagePanel(
               l10n: l10n,
               compact: compact,
@@ -344,7 +345,7 @@ class _HeroStage extends StatelessWidget {
         else
           Expanded(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 420),
+              constraints: const BoxConstraints(minHeight: 300, maxHeight: 360),
               child: _AiStagePanel(
                 l10n: l10n,
                 compact: compact,
@@ -369,8 +370,8 @@ class _BrandBanner extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        const OpenFlowBrandMark(size: 54),
-        const SizedBox(width: 14),
+        const OpenFlowBrandMark(size: 48),
+        const SizedBox(width: StudioLayoutSpacing.stackMedium),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,7 +418,7 @@ class _AiStagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     final typography = StudioTypography.of(context);
-    final ringSize = compact ? 124.0 : 156.0;
+    final ringSize = compact ? 96.0 : 120.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -46,7 +46,6 @@ class EpisodeConsolePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: Chip(
-              visualDensity: VisualDensity.compact,
               label: Text(l10n.studioEpisodeConsoleBetaLabel),
             ),
           ),

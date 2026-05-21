@@ -878,7 +878,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Chip(
                                 label: Text(l10n.opsWhChipLatestCreated),
-                                visualDensity: VisualDensity.compact,
                               ),
                             ),
                           Text(l10n.opsWhFieldId(wh.id)),
@@ -893,7 +892,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                               padding: const EdgeInsets.only(top: 4),
                               child: Chip(
                                 label: Text(l10n.opsWhChipDisabled),
-                                visualDensity: VisualDensity.compact,
                               ),
                             ),
                           Padding(

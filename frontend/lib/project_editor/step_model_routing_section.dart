@@ -168,7 +168,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                 final catalog = _catalogForSlot(slot);
                 final selected = _draft[step.slug]?[slot];
                 return Padding(
-                  padding: const EdgeInsets.only(left: 8, bottom: 10),
+                  padding: const EdgeInsets.only(left: StudioSpacing.xs, bottom: StudioLayoutSpacing.inlineGap),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[

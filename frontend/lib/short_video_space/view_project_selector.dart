@@ -290,7 +290,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ),
             onChanged: onVoiceProfileChanged,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextFormField(
             key: ValueKey<String>('ss-$selectedProjectId'),
             initialValue: subtitleStyle,
@@ -300,7 +300,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ),
             onChanged: onSubtitleStyleChanged,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           TextFormField(
             key: ValueKey<String>('bgm-$selectedProjectId'),
             initialValue: bgmStrategy,
@@ -341,12 +341,12 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ],
           ),
           if (projectConfigLine != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: operationFeedbackIsSuccess == true
-                    ? theme.colorScheme.primaryContainer
+                    ? StudioTokens.of(context).primarySoft
                     : operationFeedbackIsSuccess == false
                         ? theme.colorScheme.errorContainer
                         : theme.colorScheme.surfaceContainerHighest,
@@ -393,7 +393,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Text(
             loadingProjectOverview
                 ? l10n.shortVideoSpaceLoadingProjectReadiness

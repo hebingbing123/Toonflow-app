@@ -447,7 +447,7 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
               borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
               child: Row(
                 children: [
                   Expanded(
@@ -506,7 +506,6 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
         side: BorderSide(color: tokens.surfaceHighlight),
       ),
     ),
-    visualDensity: VisualDensity.compact,
   );
 }
 

@@ -24,37 +24,9 @@ class CreatorStarterTemplatesStrip extends StatelessWidget {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final tokens = StudioTokens.of(context);
-    final theme = Theme.of(context);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: tokens.primary.withValues(alpha: 0.28)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            l10n.studioCreatorStartersTitle,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: tokens.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.studioCreatorStartersSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: tokens.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
               final width = constraints.maxWidth;
               final useRow = width >= 720 && starters.length > 1;
               final children = starters
@@ -84,15 +56,12 @@ class CreatorStarterTemplatesStrip extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   for (var i = 0; i < children.length; i++) ...<Widget>[
-                    if (i > 0) const SizedBox(height: 10),
+                    if (i > 0) const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     children[i],
                   ],
                 ],
               );
-            },
-          ),
-        ],
-      ),
+      },
     );
   }
 }
@@ -142,7 +111,7 @@ class _StarterCard extends StatelessWidget {
               color: tokens.textSecondary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           SizedBox(
             width: expanded ? null : double.infinity,
             child: StudioPrimaryButton(

@@ -667,13 +667,13 @@ class _TimelineShotCard extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  visualDensity: VisualDensity.compact,
+                  style: studioUtilityIconButtonStyle(context),
                   onPressed: onMoveUp,
                   icon: const Icon(Icons.arrow_upward, size: 18),
                   tooltip: l10n.shortVideoTimelineMoveUp,
                 ),
                 IconButton(
-                  visualDensity: VisualDensity.compact,
+                  style: studioUtilityIconButtonStyle(context),
                   onPressed: onMoveDown,
                   icon: const Icon(Icons.arrow_downward, size: 18),
                   tooltip: l10n.shortVideoTimelineMoveDown,

@@ -22,7 +22,7 @@ class StudioReviewPackTeamSummary extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
           color: tokens.bgInset,
           borderRadius: BorderRadius.circular(10),

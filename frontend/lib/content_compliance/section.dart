@@ -308,7 +308,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       final topAlert = sortedAlerts.first;
                       return Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: _alertBorderColor(context, topAlert.level),
@@ -409,7 +409,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 padding: const EdgeInsets.only(bottom: 8),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       color: _alertBorderColor(
@@ -1097,7 +1097,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 else
                   ...queue.items.map(
                     (item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
@@ -1201,7 +1201,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 10),
+                            const SizedBox(height: StudioLayoutSpacing.inlineGap),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,

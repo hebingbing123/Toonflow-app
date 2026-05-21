@@ -45,7 +45,7 @@ class _CandidateComparePanel extends StatelessWidget {
                     candidateCardUi.headline,
                     style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -75,7 +75,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                 ),
                 if (candidateCardUi.onConfirmStoryboardCandidates != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   OutlinedButton.icon(
                     onPressed: candidateCardUi.confirmStoryboardCandidatesBusy
                         ? null
@@ -91,7 +91,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   ),
                 ],
                 if (candidateCardUi.onBatchGenerateCandidateClips != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   FilledButton.tonalIcon(
                     onPressed: candidateCardUi.batchGenerateCandidateClipsBusy
                         ? null
@@ -111,7 +111,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   ),
                 ],
                 if (onOpenProjectsForCandidateAssets != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   OutlinedButton.icon(
                     onPressed: onOpenProjectsForCandidateAssets,
                     icon: const Icon(Icons.folder_open_outlined),

@@ -11,6 +11,8 @@ import 'package:openflow_app/project_studio/studio_readiness.dart';
 import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 
+import 'studio_workbench_test_helpers.dart';
+
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
     theme: buildStudioDarkTheme(useGoogleFonts: false),
@@ -246,6 +248,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await expandProjectStudioCockpit(tester);
 
       // Script step hides cockpit headline (see ProjectStudioCockpitPanel.showHeadline).
       expect(
@@ -377,10 +380,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await expandProjectStudioCockpit(tester);
 
       expect(find.text('Novel imports'), findsOneWidget);
       expect(find.text('Open script workspace'), findsOneWidget);
       expect(find.text('Quick-start templates'), findsOneWidget);
+      await expandStudioWorkbenchSection(tester);
       expect(find.text('Plot narrative'), findsOneWidget);
       expect(find.text('Sample-first route'), findsNothing);
     },

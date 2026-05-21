@@ -275,7 +275,7 @@ class _VersionManagerState extends State<VersionManager> {
               Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
+                color: StudioTokens.of(context).primarySoft,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -332,68 +332,73 @@ class _VersionManagerState extends State<VersionManager> {
                 icon: Icons.layers_outlined,
               )
             else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.versions.length,
-                itemBuilder: (context, index) {
-                  final version = widget.versions[index];
-                  final isCurrent = version.id == widget.currentVersionId;
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var index = 0; index < widget.versions.length; index++)
+                    Builder(
+                      builder: (context) {
+                        final version = widget.versions[index];
+                        final isCurrent = version.id == widget.currentVersionId;
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    color: isCurrent
-                        ? StudioTokens.of(context).primarySoft.withValues(
-                            alpha: 0.72,
-                          )
-                        : null,
-                    child: ListTile(
-                      leading: Icon(
-                        isCurrent
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_unchecked,
-                        color: isCurrent
-                            ? StudioTokens.of(context).primary
-                            : StudioTokens.of(context).textSecondary,
-                      ),
-                      title: Text(
-                        version.name,
-                        style: TextStyle(
-                          fontWeight: isCurrent
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                      subtitle: Text(
-                        l10n.shortVideoVersionManagerVersionRowSubtitle(
-                          version.shotCount,
-                          _formatDateTime(version.createdAt),
-                        ),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!isCurrent)
-                            IconButton(
-                              icon: const Icon(Icons.swap_horiz, size: 20),
-                              tooltip: l10n.shortVideoVersionManagerTooltipSwitchVersion,
-                              onPressed: _isLoading
-                                  ? null
-                                  : () => _handleSwitchVersion(version.id),
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          color: isCurrent
+                              ? StudioTokens.of(context).primarySoft.withValues(
+                                  alpha: 0.72,
+                                )
+                              : null,
+                          child: ListTile(
+                            leading: Icon(
+                              isCurrent
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: isCurrent
+                                  ? StudioTokens.of(context).primary
+                                  : StudioTokens.of(context).textSecondary,
                             ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 20),
-                            tooltip: l10n.shortVideoVersionManagerTooltipDeleteVersion,
-                            onPressed: _isLoading || isCurrent
-                                ? null
-                                : () => _handleDeleteVersion(version),
+                            title: Text(
+                              version.name,
+                              style: TextStyle(
+                                fontWeight: isCurrent
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l10n.shortVideoVersionManagerVersionRowSubtitle(
+                                version.shotCount,
+                                _formatDateTime(version.createdAt),
+                              ),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!isCurrent)
+                                  IconButton(
+                                    icon: const Icon(Icons.swap_horiz, size: 20),
+                                    tooltip: l10n
+                                        .shortVideoVersionManagerTooltipSwitchVersion,
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () => _handleSwitchVersion(version.id),
+                                  ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 20),
+                                  tooltip: l10n
+                                      .shortVideoVersionManagerTooltipDeleteVersion,
+                                  onPressed: _isLoading || isCurrent
+                                      ? null
+                                      : () => _handleDeleteVersion(version),
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
+                ],
               ),
 
             const SizedBox(height: 24),
@@ -427,12 +432,13 @@ class _VersionManagerState extends State<VersionManager> {
                 icon: Icons.drafts_outlined,
               )
             else
-              // 显示最近的 3 个草稿
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.drafts.length > 3 ? 3 : widget.drafts.length,
-                itemBuilder: (context, index) {
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var index = 0;
+                      index < (widget.drafts.length > 3 ? 3 : widget.drafts.length);
+                      index++)
+                    Builder(builder: (context) {
                   final draft = widget.drafts[index];
 
                   return Card(
@@ -471,7 +477,8 @@ class _VersionManagerState extends State<VersionManager> {
                       ),
                     ),
                   );
-                },
+                    }),
+                ],
               ),
 
             // 加载指示器
@@ -839,7 +846,6 @@ class _VersionManagerState extends State<VersionManager> {
                     ),
                   )
                 : ListView.builder(
-                    shrinkWrap: true,
                     itemCount: widget.drafts.length,
                     itemBuilder: (context, index) {
                       final draft = widget.drafts[index];

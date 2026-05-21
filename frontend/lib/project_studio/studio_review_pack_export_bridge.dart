@@ -136,7 +136,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
               ],
             ),
             if (!ready && blocking.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               ...blocking.map(
                 (issue) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -147,7 +147,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Wrap(
               spacing: 8,
               runSpacing: 8,

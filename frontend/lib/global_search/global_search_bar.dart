@@ -361,7 +361,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         : l10n.globalSearchPinnedViewsTitle;
     return ListTile(
       dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      contentPadding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.stackMedium, vertical: 2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: Container(
         width: 32,
@@ -709,8 +709,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                 ],
               ),
               child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
                 children: [
                   if (_loadingSuggestions && queryLen >= _minQueryLength)
                     const Padding(
@@ -1318,7 +1317,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               // Loading indicator or search button
               if (_loadingSuggestions)
                 Padding(
-                  padding: EdgeInsets.only(right: compact ? 10 : 12),
+                  padding: EdgeInsets.only(right: compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
                   child: SizedBox(
                     width: iconSize,
                     height: iconSize,

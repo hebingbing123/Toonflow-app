@@ -352,7 +352,7 @@ class _VendorCardState extends State<_VendorCard> {
         : baseHelper;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       child: StudioCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -521,7 +521,7 @@ class _VendorProtocolChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: emphasized
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.55)
+            ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.55)
             : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(4),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_conflict_banner.dart';
@@ -420,8 +421,8 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
           : () => _selectStep(nextStep, telemetrySource: 'next_cta'),
     );
     return Material(
-      elevation: 12,
-      shadowColor: Colors.black.withValues(alpha: 0.35),
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       color: tokens.bgSurface.withValues(alpha: 0.96),
       child: SafeArea(
         top: false,
@@ -527,7 +528,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                         Icons.warning_amber_rounded,
                         color: Theme.of(context).colorScheme.error,
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: StudioLayoutSpacing.inlineGap),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,11 +623,17 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       if (_step == StudioStep.script && widget.host.home != null)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: CreatorStarterTemplatesStrip(
-            starters: creatorStarterTemplatesForScript(
-              widget.host.home!.cockpit.starterTemplates,
+          child: StudioWorkbenchSection(
+            title: l10n.studioCreatorStartersTitle,
+            subtitle: l10n.studioCreatorStartersSubtitle,
+            expandTooltip: l10n.studioCockpitExpand,
+            collapseTooltip: l10n.studioCockpitCollapse,
+            child: CreatorStarterTemplatesStrip(
+              starters: creatorStarterTemplatesForScript(
+                widget.host.home!.cockpit.starterTemplates,
+              ),
+              onApply: _handleStarterTemplate,
             ),
-            onApply: _handleStarterTemplate,
           ),
         ),
       if (_step == StudioStep.script &&
@@ -918,7 +925,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
               color: tokens.textSecondary,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -1196,7 +1203,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
             ),
           ),
           if (pendingCandidates.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 14),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Text(
               l10n.projectStudioPendingCandidateReviewTitle,
               style: theme.textTheme.titleSmall?.copyWith(
@@ -1204,7 +1211,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             ...pendingCandidates
                 .take(4)
                 .map(
@@ -1242,7 +1249,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                 ),
           ],
           if (missingAnchors.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 14),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Text(
               l10n.projectStudioMissingAnchorsTitle,
               style: theme.textTheme.titleSmall?.copyWith(
@@ -1250,7 +1257,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             ...missingAnchors
                 .take(3)
                 .map(
@@ -1305,7 +1312,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
@@ -1378,7 +1385,7 @@ class _AssetHubListCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             ...children,
           ],
         ),
@@ -1403,7 +1410,7 @@ class _AssetHubLine extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -1481,7 +1488,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
             ),
           ),
           if (onTap != null) ...<Widget>[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(
               openLabel,
               style: theme.textTheme.labelMedium?.copyWith(

@@ -108,7 +108,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
           '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -130,7 +130,6 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                     side: BorderSide(color: statusColor.withValues(alpha: 0.45)),
-                    visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                   ),
                   PopupMenuButton<ReviewPackFeedbackStatus>(

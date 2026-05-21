@@ -256,7 +256,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 ),
               ],
             ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (widget.studioPresentation)
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
@@ -275,7 +275,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             )
           else
             _buildComplianceAdminPanel(context, theme, l10n),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (widget.studioPresentation)
             StudioFilterRow(children: _notificationListFilterChildren(l10n))
           else
@@ -1013,7 +1013,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   ) {
     final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         border: Border.all(
           color: item.isUnread
@@ -1022,7 +1022,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         ),
         borderRadius: BorderRadius.circular(8),
         color: item.isUnread
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.18)
+            ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.18)
             : null,
       ),
       child: ListTile(
@@ -1034,7 +1034,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
+                  color: StudioTokens.of(context).primarySoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(

@@ -549,12 +549,12 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           else
             createButton,
           if (widget.controller.latestPlaintextToken != null) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondaryContainer.withValues(
+                color: StudioTokens.of(context).accentSoft.withValues(
                   alpha: 0.45,
                 ),
                 borderRadius: BorderRadius.circular(8),
@@ -571,7 +571,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     l10n.apiKeysPlaintextOnceBody,
                     style: theme.textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   SelectableText(widget.controller.latestPlaintextToken!),
                   const SizedBox(height: 8),
                   if (compact)
@@ -631,7 +631,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(compact ? 14 : 16),
+      padding: EdgeInsets.all(compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
@@ -665,7 +665,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (widget.controller.loading)
             const Center(child: CircularProgressIndicator())
           else if (widget.controller.items.isEmpty)
@@ -747,8 +747,8 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.all(compact ? 10 : 12),
+      margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
+      padding: EdgeInsets.all(compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
@@ -775,7 +775,6 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                                 ? l10n.apiKeysChipUsable
                                 : l10n.apiKeysChipUnusable,
                           ),
-                          visualDensity: VisualDensity.compact,
                         ),
                         Chip(
                           label: Text(
@@ -783,12 +782,10 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                                 ? l10n.apiKeysChipActive
                                 : l10n.apiKeysChipRevoked,
                           ),
-                          visualDensity: VisualDensity.compact,
                         ),
                         if (item.isExpired)
                           Chip(
                             label: Text(l10n.apiKeysChipExpired),
-                            visualDensity: VisualDensity.compact,
                           ),
                         Chip(
                           label: Text(
@@ -796,7 +793,6 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                                 ? l10n.apiKeysScopeReadOnly
                                 : l10n.apiKeysScopeReadWrite,
                           ),
-                          visualDensity: VisualDensity.compact,
                         ),
                       ],
                     ),
@@ -804,6 +800,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 ),
               ),
               IconButton(
+                style: studioUtilityIconButtonStyle(context),
                 tooltip: l10n.apiKeysCopyPublicIdTooltip,
                 onPressed: () =>
                     _copyText(item.publicId, l10n.apiKeysCopiedPublicIdSnack),
@@ -905,7 +902,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(compact ? 14 : 16),
+      padding: EdgeInsets.all(compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
@@ -924,7 +921,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ...widget.controller.auditItems.map(
               (item) => Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: EdgeInsets.all(compact ? 10 : 12),
+                padding: EdgeInsets.all(compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
                 decoration: BoxDecoration(
                   border: Border.all(color: studioPanelBorderColor(context)),
                   borderRadius: BorderRadius.circular(8),
@@ -951,7 +948,6 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                                 label: Text(
                                   '${entry.key}: ${_metadataValue(entry.value)}',
                                 ),
-                                visualDensity: VisualDensity.compact,
                               ),
                             )
                             .toList(growable: false),

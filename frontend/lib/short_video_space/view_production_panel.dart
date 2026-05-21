@@ -332,7 +332,7 @@ class _ProductionPanel extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final latestExportCardFill = latestExportUi.isWarning
         ? theme.colorScheme.errorContainer.withValues(alpha: 0.72)
-        : theme.colorScheme.primaryContainer.withValues(alpha: 0.4);
+        : StudioTokens.of(context).primarySoft.withValues(alpha: 0.4);
     final latestExportCardBorder = latestExportUi.isWarning
         ? theme.colorScheme.error.withValues(alpha: 0.22)
         : theme.colorScheme.primary.withValues(alpha: 0.18);
@@ -727,6 +727,7 @@ class _ProductionPanel extends StatelessWidget {
                       Theme(
                         data: theme.copyWith(dividerColor: Colors.transparent),
                         child: ExpansionTile(
+                          initiallyExpanded: false,
                           tilePadding: EdgeInsets.zero,
                           childrenPadding: const EdgeInsets.only(
                             left: 8,
@@ -851,7 +852,7 @@ class _ProductionPanel extends StatelessWidget {
                             .isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                             decoration: BoxDecoration(
                               color: latestExportCardTextColor.withValues(
                                 alpha: 0.08,
@@ -1048,7 +1049,7 @@ class _ProductionPanel extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.secondaryContainer,
+                      color: StudioTokens.of(context).accentSoft,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(

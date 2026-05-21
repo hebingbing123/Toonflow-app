@@ -88,7 +88,10 @@ class StudioPrimaryButton extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 46),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioLayoutSpacing.insetComfortable,
+                vertical: StudioLayoutSpacing.insetDense,
+              ),
               child: Center(
                 child: IconTheme(
                   data: IconThemeData(size: 18, color: foregroundColor),

@@ -1001,10 +1001,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       matchIndex + lowerKeyword.length,
                     ),
                     style: (style ?? const TextStyle()).copyWith(
-                      backgroundColor: Theme.of(
-                        ctx,
-                      ).colorScheme.primaryContainer,
-                      color: Theme.of(ctx).colorScheme.onPrimaryContainer,
+                      backgroundColor: StudioTokens.of(ctx).primarySoft,
+                      color: StudioTokens.of(ctx).textPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1388,7 +1386,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     Flexible(
                       child: visibleEntries.isEmpty
                           ? Center(
@@ -2053,7 +2051,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     } else {
       // Use standard ListView.builder for smaller lists
       return ListView.builder(
-        shrinkWrap: true,
         itemCount: visibleEntries.length,
         itemBuilder: (context, idx) {
           final item = visibleEntries[idx];

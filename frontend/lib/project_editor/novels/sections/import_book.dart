@@ -473,7 +473,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   final row = entry.value;
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                     decoration: BoxDecoration(
                       border: Border.all(color: studioPanelBorderColor(ctx)),
                       borderRadius: BorderRadius.circular(10),

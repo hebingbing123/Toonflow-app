@@ -646,7 +646,6 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                         const SizedBox(height: 8),
                         Flexible(
                           child: ListView.builder(
-                            shrinkWrap: true,
                             itemCount: historyList.length,
                             itemBuilder: (ctx, idx) {
                               // Show from newest to oldest
@@ -658,22 +657,18 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                 margin: const EdgeInsets.only(bottom: 8),
                                 elevation: isLatest ? 2 : 0,
                                 color: isLatest
-                                    ? Theme.of(ctx).colorScheme.primaryContainer
+                                    ? StudioTokens.of(ctx).primarySoft
                                     : null,
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: isLatest
-                                        ? Theme.of(ctx).colorScheme.primary
-                                        : Theme.of(
-                                            ctx,
-                                          ).colorScheme.surfaceContainerHighest,
+                                        ? StudioTokens.of(ctx).primary
+                                        : StudioTokens.of(ctx).bgInset,
                                     child: Text(
                                       '${historyList.length - idx}',
                                       style: TextStyle(
                                         color: isLatest
-                                            ? Theme.of(
-                                                ctx,
-                                              ).colorScheme.onPrimary
+                                            ? StudioTokens.of(ctx).textPrimary
                                             : StudioTokens.of(ctx).textSecondary,
                                         fontSize: 12,
                                       ),

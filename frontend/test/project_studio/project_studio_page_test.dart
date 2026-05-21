@@ -10,6 +10,8 @@ import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'studio_workbench_test_helpers.dart';
+
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
     theme: buildStudioDarkTheme(useGoogleFonts: false),
@@ -872,6 +874,7 @@ void main() {
 
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
+    await expandProjectStudioCockpit(tester);
 
     await tester.ensureVisible(find.text('Open task center'));
     await tester.tap(find.text('Open task center'));
@@ -998,6 +1001,7 @@ void main() {
 
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
+    await expandProjectStudioCockpit(tester);
 
     await tester.ensureVisible(find.text('Stay on deliver'));
     await tester.tap(find.text('Stay on deliver'));
@@ -1142,13 +1146,7 @@ void main() {
 
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
-
-    final expand = find.text('View project progress');
-    if (expand.evaluate().isNotEmpty) {
-      await tester.ensureVisible(expand);
-      await tester.tap(expand);
-      await tester.pumpAndSettle();
-    }
+    await expandProjectStudioCockpit(tester);
 
     await tester.ensureVisible(find.text('Open task center'));
     await tester.tap(find.text('Open task center'));
@@ -1322,6 +1320,7 @@ void main() {
 
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
+    await expandProjectStudioCockpit(tester);
 
     final failedTasksMetric = tester.widget<InkWell>(
       find.ancestor(
@@ -1772,13 +1771,7 @@ void main() {
 
       await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
       await tester.pumpAndSettle();
-
-      final expand = find.text('View project progress');
-      if (expand.evaluate().isNotEmpty) {
-        await tester.ensureVisible(expand);
-        await tester.tap(expand);
-        await tester.pumpAndSettle();
-      }
+      await expandProjectStudioCockpit(tester);
 
       final metricY = tester.getTopLeft(find.text('Metric A')).dy;
       final starterY = tester.getTopLeft(find.text('Route A')).dy;
@@ -1943,6 +1936,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Quick-start templates'), findsOneWidget);
+    await expandStudioWorkbenchSection(tester);
     expect(find.text('Plot narrative'), findsOneWidget);
     expect(find.text('Shot rhythm sample'), findsOneWidget);
 

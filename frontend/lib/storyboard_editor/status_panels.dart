@@ -214,7 +214,7 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Wrap(
             spacing: 10,
             runSpacing: 8,
@@ -226,7 +226,7 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Text(
             formatStoryboardShortVideoReadinessSummaryLocalized(l10n, readiness),
             style: theme.textTheme.bodySmall?.copyWith(

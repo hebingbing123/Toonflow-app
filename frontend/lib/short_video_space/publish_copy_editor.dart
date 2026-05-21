@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/tokens.dart';
 
 import '../rust_api.dart';
 
@@ -246,7 +247,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           widget.overseasPlatformIds,
           muted,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
         TextField(
           controller: _titleController,
           decoration: InputDecoration(
@@ -280,7 +281,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           enabled: !widget.busy,
           maxLines: 2,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
         Align(
           alignment: Alignment.centerLeft,
           child: FilledButton.tonalIcon(

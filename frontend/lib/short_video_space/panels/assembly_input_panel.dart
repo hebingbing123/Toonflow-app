@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../view.dart';
 
@@ -54,7 +55,7 @@ class AssemblyInputPanel extends StatelessWidget {
             color: theme.colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -83,7 +84,7 @@ class AssemblyInputPanel extends StatelessWidget {
           ),
         ],
         if (ui.activeJob != null) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           _ActiveJobBanner(
             job: ui.activeJob!,
             l10n: l10n,
@@ -94,11 +95,10 @@ class AssemblyInputPanel extends StatelessWidget {
           ),
         ],
         if (ui.rows.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 280),
             child: ListView.separated(
-              shrinkWrap: true,
               itemCount: ui.rows.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
@@ -152,7 +152,7 @@ class _ActiveJobBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
@@ -234,7 +234,6 @@ class _ShotRow extends StatelessWidget {
         children: [
           Chip(
             label: Text(statusLabel, style: theme.textTheme.labelSmall),
-            visualDensity: VisualDensity.compact,
             backgroundColor: statusColor.withValues(alpha: 0.12),
           ),
           if (!row.ready)

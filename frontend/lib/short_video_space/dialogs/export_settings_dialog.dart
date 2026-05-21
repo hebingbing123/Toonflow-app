@@ -309,7 +309,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: StudioTokens.of(context).primarySoft,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(

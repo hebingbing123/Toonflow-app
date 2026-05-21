@@ -34,7 +34,7 @@ class _ProjectStudioCockpitPanelState extends State<ProjectStudioCockpitPanel> {
   @override
   void initState() {
     super.initState();
-    _expanded = widget.currentStep == StudioStep.script;
+    _expanded = false;
   }
 
   @override
@@ -224,6 +224,7 @@ class _CompactCockpitBar extends StatelessWidget {
             ),
           );
           final expandButton = TextButton(
+            key: const Key('project_studio_cockpit_expand'),
             onPressed: onExpand,
             style: TextButton.styleFrom(
               minimumSize: Size(
@@ -322,7 +323,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(14),

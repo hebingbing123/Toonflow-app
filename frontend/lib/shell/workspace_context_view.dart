@@ -96,7 +96,7 @@ class WorkspaceContextView extends StatelessWidget {
             border: Border.all(color: tokens.surfaceHighlight),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
             child: Row(
               children: <Widget>[
                 Icon(Icons.workspaces_outline, size: 16, color: tokens.accent),
@@ -138,7 +138,7 @@ class WorkspaceContextView extends StatelessWidget {
               border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.stackMedium),
               child: Wrap(
                 spacing: 16,
                 runSpacing: 10,
@@ -297,7 +297,7 @@ class WorkspaceContextView extends StatelessWidget {
               Row(
                 children: <Widget>[
                   const Icon(Icons.workspaces_outline, size: 18),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: StudioLayoutSpacing.inlineGap),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +316,6 @@ class WorkspaceContextView extends StatelessWidget {
                     const SizedBox(width: 12),
                     Chip(
                       label: Text(workspaceTypeLabel),
-                      visualDensity: VisualDensity.compact,
                     ),
                   ],
                 ],
@@ -482,7 +481,7 @@ class _InlineContextChip extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 5),
         child: Text(
           label,
           maxLines: 1,

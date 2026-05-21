@@ -384,7 +384,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                     color: tokens.bgInset.withValues(alpha: 0.84),
                     border: Border.all(color: tokens.borderSubtle),
                   ),
-                  child: Icon(module.icon, size: 18, color: tokens.signal),
+                  child: Icon(module.icon, size: 18, color: tokens.textSecondary),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -399,7 +399,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                   _SettingsProgressDots(
                     count: modules.length,
                     selectedIndex: selectedIndex,
-                    activeColor: tokens.signal,
+                    activeColor: tokens.primary,
                     inactiveColor: tokens.textMuted.withValues(alpha: 0.55),
                   )
                 else
@@ -428,7 +428,7 @@ class _SettingsSummaryTile extends StatelessWidget {
               _SettingsProgressDots(
                 count: modules.length,
                 selectedIndex: selectedIndex,
-                activeColor: tokens.signal,
+                activeColor: tokens.primary,
                 inactiveColor: tokens.textMuted.withValues(alpha: 0.45),
                 compact: false,
               ),

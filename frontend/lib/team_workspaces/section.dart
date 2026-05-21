@@ -12,6 +12,7 @@ import 'strings.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 // Split into multiple files for maintainability
 part 'section_helpers.dart';
@@ -460,14 +461,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ),
         ],
         if (items != null && items.isNotEmpty)
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (BuildContext context, int index) =>
-                const Divider(height: 1),
-            itemBuilder: (context, index) {
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var index = 0; index < items.length; index++) ...[
+                if (index > 0) const Divider(height: 1),
+                Builder(builder: (context) {
               final row = items[index];
+              final tokens = StudioTokens.of(context);
               final w = row.workspace;
               final busy = _patchingWorkspaceId == w.id;
               final switching = _switchingWorkspaceId == w.id;
@@ -486,8 +487,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 child: ListTile(
                   dense: true,
                   selected: isCurrent,
-                  selectedTileColor: theme.colorScheme.primaryContainer
-                      .withValues(alpha: 0.35),
+                  selectedTileColor: tokens.primarySoft.withValues(alpha: 0.35),
                   title: Text(w.name),
                   subtitle: Text(
                     '${w.workspaceType} · ${row.role}'
@@ -501,8 +501,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           padding: const EdgeInsets.only(right: 8),
                           child: Chip(
                             label: Text(l10n.teamWorkspaceCurrentBadge),
-                            visualDensity: VisualDensity.compact,
-                            backgroundColor: theme.colorScheme.primaryContainer,
+                            backgroundColor: tokens.primarySoft,
                           ),
                         ),
                       if (canManage)
@@ -603,7 +602,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                   ),
                 ),
               );
-            },
+                }),
+              ],
+            ],
           ),
       ],
     );

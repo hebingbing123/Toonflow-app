@@ -47,9 +47,17 @@ flutter test test/ui/help_hub_studio_test.dart --update-goldens
 
 勿提交 `test/ui/failures/` 临时 diff 图。
 
+## Git 忽略
+
+`frontend/.gitignore` 已忽略 `test/ui/failures/`（本地 golden diff，勿提交）。
+
 ## 2026-05 收口结论
 
 - 业务层 `Colors.green/red/...`：**0**
-- 全局 `shrinkWrap` 热区：**0**
+- 全局 `MaterialTapTargetSize.shrinkWrap` 热区：**0**
+- 主路径 `EdgeInsets` 游离 `10/14/18`：已映射 `StudioLayoutSpacing`（typography 定义层除外）
+- 嵌套 `ListView.shrinkWrap`：主路径已改为 `Column` 或 bounded `ListView`；`GridView.shrinkWrap` + `NeverScrollableScrollPhysics` 仍保留（日历、项目网格等）
+- 主路径 `primaryContainer` / `secondaryContainer`：已改为 `StudioTokens.primarySoft` / `accentSoft`（`pipeline_step_chip` 非 Studio 回退除外）
 - 主路径空状态：**StudioEmptyState** 三类工厂
 - 桌面 / ui_gallery 黄金图：已与 token、光晕、空状态对齐
+- 工作台 IA：`StudioWorkbenchSection` 默认可折叠；驾驶舱默认收起（测试用 `project_studio_cockpit_expand` / `studio_workbench_section_toggle`）（改登录 Hero 后需再跑 `--update-goldens`）

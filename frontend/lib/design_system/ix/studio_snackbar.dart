@@ -22,7 +22,7 @@ void showStudioSnackBar(
       backgroundColor: tokens.bgElevated,
       elevation: 12,
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.stackMedium),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         side: BorderSide(color: tokens.borderDefault),

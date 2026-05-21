@@ -569,7 +569,6 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     workspaceStats!.workspaceMemberCount,
                                   ),
                                 ),
-                                visualDensity: VisualDensity.compact,
                               ),
                               Chip(
                                 label: Text(
@@ -577,7 +576,6 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     workspaceStats!.workspaceProjectCount,
                                   ),
                                 ),
-                                visualDensity: VisualDensity.compact,
                               ),
                               Chip(
                                 label: Text(
@@ -585,7 +583,6 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     workspaceStats!.workspaceActiveJobCount,
                                   ),
                                 ),
-                                visualDensity: VisualDensity.compact,
                               ),
                             ],
                           ),
@@ -678,7 +675,6 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                         ),
                                         Chip(
                                           label: Text(label),
-                                          visualDensity: VisualDensity.compact,
                                           backgroundColor: chipColor,
                                         ),
                                       ],
@@ -1016,7 +1012,6 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                         isPrimaryOwner ? 'owner' : m.role,
                                       ),
                                     ),
-                                    visualDensity: VisualDensity.compact,
                                   ),
                                 if (canTransferOwner)
                                   IconButton(

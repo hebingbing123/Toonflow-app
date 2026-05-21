@@ -200,7 +200,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: StudioLayoutSpacing.inlineGap),
                 StudioDialogInsetPanel(lines: statusLines),
                 const SizedBox(height: 12),
                 StudioFilterRow(
@@ -394,7 +394,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   },
                 ),
                 if (detailLines.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   StudioDialogInsetPanel(lines: detailLines),
                 ],
               ],

@@ -600,10 +600,10 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     final removing = _removingUsers.contains(row.userId);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: studioPanelBorderColor(context)),
@@ -710,7 +710,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: studioPanelBorderColor(context)),

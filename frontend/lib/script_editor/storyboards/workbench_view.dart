@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_empty_state.dart';
 import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/components/studio_text_styles.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -82,38 +83,27 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                     l10n.scriptEditorStoryboardsProductionSummaryPending,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-                decoration: studioRecessedPanelDecoration(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model.diagnosis.summary,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.scriptEditorStoryboardsRecommendedActionLine(
-                        describeStoryboardListRecommendedAction(
-                          l10n,
-                          model.diagnosis.recommendedAction,
-                        ),
-                      ),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(
-                        color: studioPanelMutedColor(context),
+              const SizedBox(height: StudioLayoutSpacing.listItem),
+              StudioWorkbenchSection(
+                title: model.diagnosis.summary,
+                subtitle: model.diagnosis.detail,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(
+                    StudioLayoutSpacing.cardInner - 4,
+                  ),
+                  decoration: studioRecessedPanelDecoration(context),
+                  child: Text(
+                    l10n.scriptEditorStoryboardsRecommendedActionLine(
+                      describeStoryboardListRecommendedAction(
+                        l10n,
+                        model.diagnosis.recommendedAction,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      model.diagnosis.detail,
-                      style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: studioPanelMutedColor(context),
                     ),
-                  ],
+                  ),
                 ),
               ),
               if (model.storyboardTaskLine != null) ...[
@@ -173,7 +163,6 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                         title: l10n.scriptEditorStoryboardsEmptyList,
                       )
                     : ListView.builder(
-                        shrinkWrap: true,
                         itemCount: model.boardsList.length,
                         itemBuilder: (_, i) {
                           final board = model.boardsList[i];

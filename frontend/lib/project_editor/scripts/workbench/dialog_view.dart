@@ -7,6 +7,7 @@ import '../../../rust_api.dart';
 import '../../../script_editor/support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_workbench_section.dart';
 
 class ProjectScriptsWorkbenchDialogViewModel {
   const ProjectScriptsWorkbenchDialogViewModel({
@@ -141,34 +142,25 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper,
                 ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-                decoration: studioRecessedPanelDecoration(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model.diagnosis.summary,
-                      style: Theme.of(context).textTheme.titleSmall,
+              const SizedBox(height: StudioLayoutSpacing.listItem),
+              StudioWorkbenchSection(
+                title: model.diagnosis.summary,
+                subtitle: model.diagnosis.detail,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(
+                    StudioLayoutSpacing.cardInner - 4,
+                  ),
+                  decoration: studioRecessedPanelDecoration(context),
+                  child: FilledButton.tonal(
+                    key: const Key(
+                      'project-scripts-workbench-recommended-action',
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      model.diagnosis.detail,
-                      style: studioHintStyle(context),
-                    ),
-                    const SizedBox(height: 8),
-                    FilledButton.tonal(
-                      key: const Key(
-                        'project-scripts-workbench-recommended-action',
-                      ),
-                      onPressed: model.localBusy
-                          ? null
-                          : callbacks.onRunRecommendedAction,
-                      child: Text(model.recommendedActionLabel),
-                    ),
-                  ],
+                    onPressed: model.localBusy
+                        ? null
+                        : callbacks.onRunRecommendedAction,
+                    child: Text(model.recommendedActionLabel),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

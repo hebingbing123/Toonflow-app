@@ -76,7 +76,6 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                         studioHarnessWsEventTypeLabel(l10n, eventType),
                       ),
                     ),
-                    visualDensity: VisualDensity.compact,
                   ),
               ],
             ),

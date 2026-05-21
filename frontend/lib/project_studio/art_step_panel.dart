@@ -432,7 +432,7 @@ class _SelectedPackSummary extends StatelessWidget {
         legacyArtStyle.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(10),
@@ -496,7 +496,7 @@ class _SummaryRow extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

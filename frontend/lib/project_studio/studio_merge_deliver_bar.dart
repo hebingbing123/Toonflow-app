@@ -24,7 +24,7 @@ class StudioMergeDeliverBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
           color: tokens.bgSurface,
           borderRadius: BorderRadius.circular(10),
@@ -54,7 +54,7 @@ class StudioMergeDeliverBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       summary,
-                      const SizedBox(height: 10),
+                      const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       action,
                     ],
                   );

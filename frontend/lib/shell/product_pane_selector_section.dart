@@ -132,7 +132,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
                 })
                 .toList(growable: false),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           PlatformShortDramaPipelineStrip(
             onSelectPane: widget.onSelectPane,
             jobsPaneEnabled: widget.config.jobsPaneEnabled,

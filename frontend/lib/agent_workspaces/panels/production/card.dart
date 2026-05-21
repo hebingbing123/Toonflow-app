@@ -130,7 +130,7 @@ class _AgentWorkspaceProductionCardState
             ),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
             ProductionWorkspaceControlsPanel(

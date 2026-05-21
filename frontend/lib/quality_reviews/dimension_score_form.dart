@@ -255,7 +255,6 @@ class _DimensionRow extends StatelessWidget {
                   Checkbox(
                     value: skipped,
                     onChanged: onSkipChanged,
-                    visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),

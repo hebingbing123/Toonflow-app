@@ -512,7 +512,6 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           trailing: preview.isDuplicated
                               ? Chip(
                                   label: Text(l10n.agentMemoryDuplicateChip),
-                                  visualDensity: VisualDensity.compact,
                                 )
                               : null,
                         );

@@ -85,7 +85,6 @@ class _StudioAgentDrawerBody extends StatelessWidget {
           Flexible(
             child: ListView.separated(
               padding: const EdgeInsets.all(StudioSpacing.sm),
-              shrinkWrap: true,
               itemBuilder: (context, index) {
                 final agent = agents[index];
                 return _StudioAgentActionTile(

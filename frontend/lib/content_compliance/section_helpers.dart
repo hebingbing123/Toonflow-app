@@ -1057,7 +1057,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                     color: studioPanelBorderColor(context),

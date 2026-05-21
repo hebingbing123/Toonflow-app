@@ -24,13 +24,11 @@ class StudioCostEstimateChip extends StatelessWidget {
     if (loading) {
       return Chip(
         label: Text(l10n.studioCostEstimateLoading),
-        visualDensity: VisualDensity.compact,
       );
     }
     if (error != null) {
       return Chip(
         label: Text(error!, maxLines: 2),
-        visualDensity: VisualDensity.compact,
         backgroundColor: theme.colorScheme.errorContainer,
       );
     }
@@ -46,25 +44,21 @@ class StudioCostEstimateChip extends StatelessWidget {
         if (est.platformBillingExempt)
           Chip(
             label: Text(l10n.studioCostEstimateByok),
-            visualDensity: VisualDensity.compact,
             backgroundColor: theme.colorScheme.secondaryContainer,
           )
         else
           Chip(
             label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
-            visualDensity: VisualDensity.compact,
           ),
         if (est.quotaImpactJobs > 0)
           Chip(
             label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
-            visualDensity: VisualDensity.compact,
           ),
         if (pct != null && est.dailyJobQuota != null)
           Chip(
             label: Text(
               l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
             ),
-            visualDensity: VisualDensity.compact,
           ),
       ],
     );

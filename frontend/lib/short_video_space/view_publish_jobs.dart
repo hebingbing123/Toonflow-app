@@ -23,7 +23,7 @@ class _PublishJobsPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
         Row(
           children: [
             Text(

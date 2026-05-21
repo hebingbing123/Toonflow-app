@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../design_system/studio_typography.dart';
@@ -580,7 +581,7 @@ class _VersionComparisonState extends State<VersionComparison> {
 
             // 统计信息卡片
             Card(
-              color: theme.colorScheme.primaryContainer,
+              color: StudioTokens.of(context).primarySoft,
               child: Padding(
                 padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: Row(
@@ -699,25 +700,16 @@ class _VersionComparisonState extends State<VersionComparison> {
             Expanded(
               child: filteredDiffs.isEmpty
                   ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: 64,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchQuery.isNotEmpty
-                                ? l10n.shortVideoVersionComparisonEmptyNoMatch
-                                : l10n.shortVideoVersionComparisonEmptyIdentical,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: StudioTokens.of(context).textSecondary,
+                      child: _searchQuery.isNotEmpty
+                          ? StudioEmptyState.noResults(
+                              title: l10n
+                                  .shortVideoVersionComparisonEmptyNoMatch,
+                            )
+                          : StudioEmptyState.emptyData(
+                              title: l10n
+                                  .shortVideoVersionComparisonEmptyIdentical,
+                              icon: Icons.check_circle_outline,
                             ),
-                          ),
-                        ],
-                      ),
                     )
                   : Card(
                       child: ListView.builder(

@@ -273,7 +273,7 @@ extension _HomePageProductShell on _HomePageState {
                     : tokens.surfaceHighlight.withValues(alpha: 0.85),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 9),
             child: Row(
               children: <Widget>[
                 Icon(
@@ -362,9 +362,15 @@ extension _HomePageProductShell on _HomePageState {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(14),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              StudioLayoutSpacing.insetDense,
+              StudioLayoutSpacing.inlineGap,
+              StudioLayoutSpacing.insetDense,
+              StudioLayoutSpacing.insetDense,
+            ),
+            child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
@@ -443,6 +449,7 @@ extension _HomePageProductShell on _HomePageState {
                 ),
               ],
             ],
+            ),
           ),
         ),
       ),
@@ -675,17 +682,6 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
-  ButtonStyle _chromeIconButtonStyle(StudioTokens tokens) {
-    return IconButton.styleFrom(
-      backgroundColor: tokens.bgSurface.withValues(alpha: 0.72),
-      foregroundColor: tokens.textSecondary,
-      hoverColor: tokens.accentSoft.withValues(alpha: 0.94),
-      highlightColor: tokens.primarySoft,
-      fixedSize: const Size(44, 44),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-  }
-
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
       return ProductLoginPage(
@@ -747,7 +743,7 @@ extension _HomePageProductShell on _HomePageState {
             Builder(
               builder: (buttonContext) {
                 return IconButton(
-                  style: _chromeIconButtonStyle(tokens),
+                  style: studioChromeIconButtonStyle(context),
                   tooltip: l10n.productShellMoreMenu,
                   onPressed: () => _openProductShellMoreMenu(buttonContext),
                   icon:
@@ -764,7 +760,7 @@ extension _HomePageProductShell on _HomePageState {
             if (!compactTopChrome) ...<Widget>[
               const SizedBox(width: StudioSpacing.chromeActionGap),
               StudioIconMenuButton<String>(
-                style: _chromeIconButtonStyle(tokens),
+                style: studioChromeIconButtonStyle(context),
                 tooltip: l10n.localeSectionTitle,
                 icon: Icons.language_outlined,
                 entries: <StudioMenuEntry<String>>[
@@ -785,7 +781,7 @@ extension _HomePageProductShell on _HomePageState {
               ),
               const SizedBox(width: StudioSpacing.chromeActionGap),
               IconButton(
-                style: _chromeIconButtonStyle(tokens),
+                style: studioChromeIconButtonStyle(context),
                 tooltip: l10n.authSignOut,
                 onPressed: _authController.signOut,
                 icon: const Icon(Icons.logout_outlined),

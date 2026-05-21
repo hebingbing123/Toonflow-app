@@ -77,7 +77,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             ),
             if (publishPanelUi.matrixDomesticLines.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelMatrixDomesticLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
@@ -90,7 +90,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
             ],
             if (publishPanelUi.matrixOverseasLines.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelMatrixOverseasLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
@@ -103,7 +103,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
             ],
             if (publishPanelUi.prepareLines.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelPrepareChecks,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
@@ -116,7 +116,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
             ],
             if (publishPanelUi.draftLines.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Row(
                 children: [
                   Text(
@@ -151,7 +151,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(
+                    color: StudioTokens.of(context).primarySoft.withValues(
                       alpha: 0.3,
                     ),
                     borderRadius: BorderRadius.circular(8),
@@ -338,7 +338,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             ],
             if (publishPanelUi.publishDraftOptions.length > 1 &&
                 publishPanelUi.onSelectPublishDraft != null) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelCurrentDraftLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),

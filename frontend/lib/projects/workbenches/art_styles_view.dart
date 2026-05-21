@@ -5,7 +5,9 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
   const ArtStylesWorkbenchDialogViewModel({
@@ -161,11 +163,10 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                         },
                 )
               else
-                Text(
-                  l10n.projectsArtWorkbenchEmptyHint,
-                  style: studioHintStyle(context),
+                StudioEmptyState.emptyData(
+                  title: l10n.projectsArtWorkbenchEmptyHint,
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioLayoutSpacing.listItem),
               TextField(
                 controller: model.nameCtrl,
                 decoration: InputDecoration(

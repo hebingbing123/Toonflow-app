@@ -24,7 +24,7 @@ class _PublishCalendarPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 14),
+        const SizedBox(height: StudioLayoutSpacing.stackMedium),
         Text(
           l10n.shortVideoSpaceScheduleCalendar,
           style: theme.textTheme.labelSmall?.copyWith(

@@ -43,6 +43,26 @@ ButtonStyle studioUtilityIconButtonStyle(BuildContext context) {
   );
 }
 
+/// Top-bar chrome (Shell more menu, locale, sign-out) — 44px with surface fill.
+ButtonStyle studioChromeIconButtonStyle(BuildContext context) {
+  final tokens = StudioTokens.of(context);
+  return IconButton.styleFrom(
+    backgroundColor: tokens.bgSurface.withValues(alpha: 0.72),
+    foregroundColor: tokens.textSecondary,
+    hoverColor: tokens.accentSoft.withValues(alpha: 0.94),
+    highlightColor: tokens.primarySoft,
+    fixedSize: const Size(
+      StudioSpacing.navItemTouchTarget,
+      StudioSpacing.navItemTouchTarget,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+    ),
+    tapTargetSize: MaterialTapTargetSize.padded,
+    visualDensity: VisualDensity.standard,
+  );
+}
+
 /// Slightly recessed panel (input rails, workbench sidecars).
 BoxDecoration studioRecessedPanelDecoration(BuildContext context) {
   final tokens = StudioTokens.of(context);

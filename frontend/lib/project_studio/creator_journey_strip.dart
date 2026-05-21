@@ -212,7 +212,7 @@ class CreatorJourneyStrip extends StatelessWidget {
               ? tokens.borderSubtle
               : tokens.primary.withValues(alpha: 0.35);
           return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
             child: SizedBox(
               height: 2,
               width: 8,

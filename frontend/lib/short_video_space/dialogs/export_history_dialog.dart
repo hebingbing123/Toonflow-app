@@ -743,7 +743,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.secondaryContainer,
+          color: StudioTokens.of(context).accentSoft,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -757,7 +757,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
+        color: StudioTokens.of(context).accentSoft,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.18),

@@ -400,7 +400,6 @@ class StudioDialogShell extends StatelessWidget {
                           ),
                           if (onClose != null)
                             IconButton(
-                              visualDensity: VisualDensity.compact,
                               tooltip: MaterialLocalizations.of(
                                 context,
                               ).closeButtonTooltip,
@@ -409,6 +408,12 @@ class StudioDialogShell extends StatelessWidget {
                                   alpha: 0.78,
                                 ),
                                 foregroundColor: tokens.textSecondary,
+                                minimumSize: const Size(
+                                  StudioSpacing.iconTouchTarget,
+                                  StudioSpacing.iconTouchTarget,
+                                ),
+                                tapTargetSize: MaterialTapTargetSize.padded,
+                                visualDensity: VisualDensity.standard,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   side: BorderSide(
@@ -496,7 +501,7 @@ class StudioDialogInsetPanel extends StatelessWidget {
         : base;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),

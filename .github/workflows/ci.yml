@@ -157,6 +157,14 @@ jobs:
           cd frontend
           flutter build ${{ matrix.target }} --debug
 
+  studio-visual-debt:
+    name: Studio visual debt baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Studio visual debt grep gates
+        run: bash scripts/studio-visual-debt-check.sh
+
   ui-smoke:
     name: UI smoke (widget + interaction)
     runs-on: ubuntu-latest

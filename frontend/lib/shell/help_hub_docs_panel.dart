@@ -555,7 +555,6 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 l10n,
                               ),
                             ),
-                            visualDensity: VisualDensity.compact,
                           ),
                           const SizedBox(height: 4),
                           SelectableText(item.url),

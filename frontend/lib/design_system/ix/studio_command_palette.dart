@@ -162,7 +162,6 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                             ),
                           )
                         : ListView.builder(
-                            shrinkWrap: true,
                             itemCount: items.length,
                             itemBuilder: (context, index) {
                               final action = items[index];

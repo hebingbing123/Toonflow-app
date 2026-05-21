@@ -416,7 +416,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     itemCount: rows.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     itemBuilder: (context, index) {
                       final row = rows[index];
                       return StudioReviewPackStoryboardRow(

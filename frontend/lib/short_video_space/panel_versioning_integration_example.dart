@@ -220,6 +220,7 @@ class PanelFreshnessIndicator extends StatelessWidget {
     }
 
     final l10n = resolveAppLocalizationsForErrors(context);
+    final theme = Theme.of(context);
     final age = snap.ageSeconds;
     final severity = PanelVersionManager.getSeverity(age);
 
@@ -249,7 +250,7 @@ class PanelFreshnessIndicator extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           PanelVersionManager.formatAge(age, l10n),
-          style: TextStyle(fontSize: 11, color: color),
+          style: theme.textTheme.labelSmall?.copyWith(color: color),
         ),
       ],
     );

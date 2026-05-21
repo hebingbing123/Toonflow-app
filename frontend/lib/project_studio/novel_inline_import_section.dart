@@ -349,7 +349,7 @@ class _StudioScriptNovelInlineImportState
             child: Text(l10n.projectEditorNovelsWorkbenchCreateSubmit),
           ),
           if (_infoLine != null) ...<Widget>[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Text(
               _infoLine!,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -358,7 +358,7 @@ class _StudioScriptNovelInlineImportState
             ),
           ],
           if (_busy) ...<Widget>[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
             const LinearProgressIndicator(minHeight: 2),
           ],
           ],

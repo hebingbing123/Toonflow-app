@@ -29,7 +29,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
@@ -159,7 +159,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import 'support.dart';
@@ -98,32 +99,21 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             model.contextLine ?? l10n.scriptEditorWorkbenchPanelIntro,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-            decoration: studioRecessedPanelDecoration(context),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  model.diagnosis.summary,
-                  style: theme.textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  model.diagnosis.detail,
-                  style: studioHintStyle(context),
-                ),
-                const SizedBox(height: 8),
-                FilledButton.tonal(
-                  onPressed: model.recommendedAction,
-                  child: Text(model.recommendedActionLabel),
-                ),
-              ],
+          const SizedBox(height: StudioLayoutSpacing.listItem),
+          StudioWorkbenchSection(
+            title: model.diagnosis.summary,
+            subtitle: model.diagnosis.detail,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+              decoration: studioRecessedPanelDecoration(context),
+              child: FilledButton.tonal(
+                onPressed: model.recommendedAction,
+                child: Text(model.recommendedActionLabel),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.listItem),
           if (model.loadingContext)
             const LinearProgressIndicator(minHeight: 2)
           else ...[

@@ -161,7 +161,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                               color: errorColor,
                             ),
                           ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: StudioLayoutSpacing.inlineGap),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

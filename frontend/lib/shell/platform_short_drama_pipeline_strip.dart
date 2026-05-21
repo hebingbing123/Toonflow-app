@@ -102,7 +102,7 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
             l10n.productPipelineStripSubtitle,
             style: studioMutedBodySmall(context),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(

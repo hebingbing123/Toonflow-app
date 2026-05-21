@@ -49,7 +49,7 @@ InputDecoration agentWorkspaceFieldDecoration(
           ),
     filled: true,
     fillColor: tokens.bgInset,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+    contentPadding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.stackMedium),
     border: _agentFieldBorder(tokens),
     enabledBorder: _agentFieldBorder(tokens),
     focusedBorder: _agentFieldBorder(tokens, focus: tokens.primary),

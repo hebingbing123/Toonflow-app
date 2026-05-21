@@ -100,7 +100,7 @@ class SearchResultCard extends StatelessWidget {
       parts.add(TextSpan(
         text: match.group(1),
         style: TextStyle(
-          backgroundColor: theme.colorScheme.primaryContainer,
+          backgroundColor: StudioTokens.of(context).primarySoft,
           color: theme.colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.w600,
         ),
@@ -137,7 +137,7 @@ class SearchResultCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       elevation: isSelected ? 4 : 1,
       color: isSelected 
-          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+          ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.3)
           : null,
       child: Container(
         decoration: isSelected
@@ -182,7 +182,7 @@ class SearchResultCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
+                        color: StudioTokens.of(context).primarySoft,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

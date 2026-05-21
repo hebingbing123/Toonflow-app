@@ -1223,7 +1223,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     Text(
                       readinessGapSummary,
                       style: studioMutedBodySmall(context),
@@ -1315,7 +1315,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                           ),
                       ],
                       if (onOpenProductionForShotReadiness != null) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         OutlinedButton.icon(
                           onPressed: onOpenProductionForShotReadiness,
                           icon: const Icon(Icons.movie_creation_outlined),
@@ -1675,7 +1675,7 @@ class _FlowNodeShell extends StatelessWidget {
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
           child: Align(alignment: Alignment.centerLeft, child: child),
         ),
       ),
@@ -1727,7 +1727,7 @@ class _CandidateCompareCard extends StatelessWidget {
               _WritebackStatusChip(line: item.writebackLine!),
             ],
             if ((item.referenceImageUrl ?? '').trim().isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.inlineGap),
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: Image.network(
@@ -1968,7 +1968,7 @@ class _WritebackStatusChip extends StatelessWidget {
         line.contains('未完整');
     final color = incomplete
         ? theme.colorScheme.errorContainer
-        : theme.colorScheme.secondaryContainer;
+        : StudioTokens.of(context).accentSoft;
     final onColor = incomplete
         ? theme.colorScheme.onErrorContainer
         : theme.colorScheme.onSecondaryContainer;
