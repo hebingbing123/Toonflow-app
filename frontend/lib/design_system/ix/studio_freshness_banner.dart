@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../studio_typography.dart';
+import '../tokens.dart';
 import '../../rust_api.dart';
 
 /// Product banner when dashboard/snapshot data may be stale (quality, panels, etc.).
@@ -25,22 +27,23 @@ class StudioFreshnessBanner extends StatelessWidget {
         ? l10n.qualityReviewsFreshnessNever
         : _formatLocalTime(meta.refreshedAt!);
 
+    final tokens = StudioTokens.of(context);
     final Color backgroundColor;
     final Color textColor;
     final IconData icon;
     if (isStale) {
-      backgroundColor = Colors.orange.shade50;
-      textColor = Colors.orange.shade900;
+      backgroundColor = tokens.warning.withValues(alpha: 0.14);
+      textColor = tokens.warning;
       icon = Icons.warning_amber_outlined;
     } else {
-      backgroundColor = Colors.green.shade50;
-      textColor = Colors.green.shade900;
+      backgroundColor = tokens.success.withValues(alpha: 0.14);
+      textColor = tokens.success;
       icon = Icons.check_circle_outline;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
@@ -153,7 +156,7 @@ class _FreshnessDetailsState extends State<_FreshnessDetails> {
             ),
             style: TextStyle(
               color: widget.textColor,
-              fontSize: 11,
+              fontSize: StudioTypography.of(context).meta,
               fontFamily: 'monospace',
             ),
           ),

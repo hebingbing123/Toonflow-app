@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../rust_api.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
+import '../rust_api.dart';
 import 'support.dart';
 
 class ScriptWorkbenchPanelViewModel {
@@ -66,13 +69,10 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final tokens = StudioTokens.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: outline.withValues(alpha: 0.45)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -96,18 +96,13 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
           ),
           Text(
             model.contextLine ?? l10n.scriptEditorWorkbenchPanelIntro,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: studioHintStyle(context),
           ),
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.45,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
+            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+            decoration: studioRecessedPanelDecoration(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -118,7 +113,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   model.diagnosis.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: studioHintStyle(context),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.tonal(
@@ -151,7 +146,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: model.errorReason.isEmpty
-                      ? outline
+                      ? tokens.textMuted
                       : theme.colorScheme.error,
                 ),
               ),

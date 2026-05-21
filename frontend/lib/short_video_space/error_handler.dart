@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
@@ -200,7 +201,7 @@ class ShortVideoErrorHandler {
     final messenger = ScaffoldMessenger.of(context);
     final snackBar = SnackBar(
       content: Text(result.userMessage),
-      backgroundColor: _getBackgroundColor(result.severity),
+      backgroundColor: _getBackgroundColor(context, result.severity),
       duration: _getDuration(result.severity),
       action: result.shouldRetry && onRetry != null
           ? SnackBarAction(
@@ -215,16 +216,20 @@ class ShortVideoErrorHandler {
   }
 
   /// 根据严重程度获取背景颜色
-  static Color _getBackgroundColor(ErrorSeverity severity) {
+  static Color _getBackgroundColor(
+    BuildContext context,
+    ErrorSeverity severity,
+  ) {
+    final tokens = StudioTokens.of(context);
     switch (severity) {
       case ErrorSeverity.info:
-        return Colors.blue;
+        return tokens.signal;
       case ErrorSeverity.warning:
-        return Colors.orange;
+        return tokens.warning;
       case ErrorSeverity.error:
-        return Colors.red;
+        return tokens.danger;
       case ErrorSeverity.critical:
-        return Colors.red.shade900;
+        return tokens.danger.withValues(alpha: 0.92);
     }
   }
 

@@ -135,7 +135,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                           l10n.storyboardPatchScopeHint,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
+                                color: studioPanelMutedColor(context),
                               ),
                         ),
                         if (submitSummary != null) ...[
@@ -169,9 +169,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                 item,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.outline,
+                                      color: studioPanelMutedColor(context),
                                     ),
                               ),
                             ),

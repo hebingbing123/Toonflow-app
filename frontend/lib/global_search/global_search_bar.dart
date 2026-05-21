@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../design_system/theme.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -666,7 +665,6 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final renderBox = context.findRenderObject() as RenderBox?;
     final fieldSize = renderBox?.size ?? const Size(400, 40);
     _removeOverlay();
@@ -699,15 +697,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             child: Container(
               constraints: const BoxConstraints(maxHeight: 420),
               decoration: BoxDecoration(
-                gradient: studio.panelGradient,
+                color: tokens.bgSurface.withValues(alpha: 0.98),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: tokens.surfaceHighlight),
+                border: Border.all(color: tokens.borderSubtle),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: tokens.panelGlow.withValues(alpha: 0.16),
-                    blurRadius: 28,
-                    spreadRadius: -16,
-                    offset: const Offset(0, 18),
+                    color: Colors.black.withValues(alpha: 0.22),
+                    blurRadius: 20,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
@@ -1266,10 +1263,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             boxShadow: _focusNode.hasFocus
                 ? <BoxShadow>[
                     BoxShadow(
-                      color: tokens.panelGlowSecondary.withValues(alpha: 0.16),
-                      blurRadius: 18,
-                      spreadRadius: -10,
-                      offset: const Offset(0, 10),
+                      color: tokens.primary.withValues(alpha: 0.14),
+                      blurRadius: 8,
+                      spreadRadius: -2,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : const <BoxShadow>[],
@@ -1284,7 +1281,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   size: iconSize,
                   color: _focusNode.hasFocus
                       ? tokens.accent
-                      : theme.colorScheme.onSurfaceVariant,
+                      : tokens.textMuted,
                 ),
               ),
 
@@ -1338,14 +1335,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     size: iconSize,
                     color: _canSearch
                         ? Colors.white
-                        : theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.3,
-                          ),
+                        : tokens.textMuted.withValues(alpha: 0.35),
                   ),
                   onPressed: _canSearch ? _performSearch : null,
                   style: IconButton.styleFrom(
-                    backgroundColor: _canSearch ? null : Colors.transparent,
-                    foregroundColor: Colors.white,
+                    backgroundColor:
+                        _canSearch ? tokens.primary : Colors.transparent,
+                    foregroundColor:
+                        _canSearch ? Colors.white : tokens.textMuted,
                   ),
                   padding: EdgeInsets.all(compact ? 6 : 8),
                   constraints: const BoxConstraints(),

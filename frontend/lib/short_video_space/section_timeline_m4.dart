@@ -114,7 +114,10 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
           if (revisions.isEmpty) {
             return Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(l10n.shortVideoTimelineRevisionEmpty),
+              child: StudioEmptyState.emptyData(
+                title: l10n.shortVideoTimelineRevisionEmpty,
+                icon: Icons.history_outlined,
+              ),
             );
           }
           return SafeArea(

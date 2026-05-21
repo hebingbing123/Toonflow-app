@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
 import '../tokens.dart';
 import 'studio_text_styles.dart';
 
@@ -40,7 +39,6 @@ Future<T?> showStudioBottomSheet<T>({
     backgroundColor: Colors.transparent,
     barrierColor: tokens.overlay,
     builder: (ctx) {
-      final studio = StudioColors.of(ctx);
       final sheetTokens = StudioTokens.of(ctx);
       return ClipRRect(
         borderRadius: const BorderRadius.vertical(
@@ -48,11 +46,11 @@ Future<T?> showStudioBottomSheet<T>({
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: studio.panelGradient,
+            color: sheetTokens.bgSurface.withValues(alpha: 0.98),
             border: Border(
-              top: BorderSide(color: sheetTokens.surfaceHighlight),
-              left: BorderSide(color: sheetTokens.surfaceHighlight),
-              right: BorderSide(color: sheetTokens.surfaceHighlight),
+              top: BorderSide(color: sheetTokens.borderSubtle),
+              left: BorderSide(color: sheetTokens.borderSubtle),
+              right: BorderSide(color: sheetTokens.borderSubtle),
             ),
           ),
           child: builder(ctx),
@@ -257,7 +255,6 @@ class StudioDialogFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final viewport = MediaQuery.sizeOf(context);
     final width = viewport.width.isFinite
         ? viewport.width.clamp(320.0, maxWidth)
@@ -275,15 +272,14 @@ class StudioDialogFrame extends StatelessWidget {
           color: Colors.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              gradient: studio.panelGradient,
+              color: tokens.bgSurface.withValues(alpha: 0.98),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-              border: Border.all(color: tokens.surfaceHighlight),
+              border: Border.all(color: tokens.borderSubtle),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: tokens.panelGlow.withValues(alpha: 0.18),
-                  blurRadius: 32,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 16),
+                  color: Colors.black.withValues(alpha: 0.24),
+                  blurRadius: 24,
+                  offset: const Offset(0, 14),
                 ),
               ],
             ),
@@ -330,7 +326,6 @@ class StudioDialogShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final viewport = MediaQuery.sizeOf(context);
     final width = viewport.width.isFinite
         ? viewport.width.clamp(320.0, maxWidth)
@@ -353,21 +348,14 @@ class StudioDialogShell extends StatelessWidget {
           color: Colors.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              gradient: studio.panelGradient,
+              color: tokens.bgSurface.withValues(alpha: 0.98),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-              border: Border.all(color: tokens.surfaceHighlight),
+              border: Border.all(color: tokens.borderSubtle),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: tokens.panelGlow.withValues(alpha: 0.18),
-                  blurRadius: 32,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 16),
-                ),
-                BoxShadow(
-                  color: tokens.panelGlowSecondary.withValues(alpha: 0.1),
+                  color: Colors.black.withValues(alpha: 0.24),
                   blurRadius: 24,
-                  spreadRadius: -16,
-                  offset: const Offset(0, 10),
+                  offset: const Offset(0, 14),
                 ),
               ],
             ),

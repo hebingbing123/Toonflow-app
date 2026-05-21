@@ -626,21 +626,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.history_outlined,
-                            size: 48,
-                            color: Theme.of(ctx).colorScheme.outline,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.shortVideoOperationHistoryEmpty,
-                            style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(ctx).colorScheme.outline,
-                            ),
-                          ),
-                        ],
+                      child: StudioEmptyState.emptyData(
+                        title: l10n.shortVideoOperationHistoryEmpty,
+                        icon: Icons.history_outlined,
                       ),
                     ),
                   )
@@ -686,9 +674,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                             ? Theme.of(
                                                 ctx,
                                               ).colorScheme.onPrimary
-                                            : Theme.of(
-                                                ctx,
-                                              ).colorScheme.onSurfaceVariant,
+                                            : StudioTokens.of(ctx).textSecondary,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -719,7 +705,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                             color: Theme.of(
                                               ctx,
                                             ).colorScheme.onPrimary,
-                                            fontSize: 11,
+                                            fontSize: StudioTypography.of(
+                                              ctx,
+                                            ).meta,
                                           ),
                                         )
                                       : null,

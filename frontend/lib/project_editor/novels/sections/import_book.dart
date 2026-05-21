@@ -52,7 +52,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
         Text(
           l10n.projectEditorNovelsWorkbenchImportStudioHint,
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(ctx).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -431,12 +431,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(ctx).colorScheme.outlineVariant,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: studioInsetPanelDecoration(ctx),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -480,9 +475,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(ctx).colorScheme.outlineVariant,
-                      ),
+                      border: Border.all(color: studioPanelBorderColor(ctx)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(

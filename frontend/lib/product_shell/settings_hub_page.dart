@@ -168,7 +168,11 @@ class _SettingsHubPageState extends State<SettingsHubPage>
               controller: _tabController,
               maxWidth: contentWidth,
             ),
-            SizedBox(height: contentWidth < 720 ? 16 : 22),
+            SizedBox(
+              height: contentWidth < 720
+                  ? StudioLayoutSpacing.section - 8
+                  : StudioLayoutSpacing.section - 2,
+            ),
             tabBody,
           ],
         );
@@ -196,7 +200,6 @@ class _SettingsHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final compact = maxWidth < 640;
     final scrollableTabs = maxWidth < 760;
@@ -204,7 +207,7 @@ class _SettingsHeroCard extends StatelessWidget {
     final summary = modules[selectedIndex.clamp(0, modules.length - 1)];
     final subtitleStyle =
         studioSectionIntroStyle(context) ??
-        TextStyle(color: theme.colorScheme.onSurfaceVariant);
+        TextStyle(color: tokens.textSecondary);
     final tabBar = TabBar(
       controller: controller,
       tabAlignment: scrollableTabs ? TabAlignment.start : TabAlignment.fill,
@@ -213,7 +216,9 @@ class _SettingsHeroCard extends StatelessWidget {
       overlayColor: WidgetStatePropertyAll<Color>(
         tokens.primary.withValues(alpha: 0.08),
       ),
-      labelPadding: EdgeInsets.only(right: scrollableTabs ? 10 : 0),
+      labelPadding: EdgeInsets.only(
+        right: scrollableTabs ? StudioSpacing.xs : 0,
+      ),
       isScrollable: scrollableTabs,
       tabs: <Widget>[
         for (var index = 0; index < modules.length; index++)
@@ -221,7 +226,9 @@ class _SettingsHeroCard extends StatelessWidget {
             height: compact ? 58 : 62,
             child: Padding(
               padding: EdgeInsets.only(
-                right: !scrollableTabs && index < modules.length - 1 ? 10 : 0,
+                right: !scrollableTabs && index < modules.length - 1
+                    ? StudioSpacing.xs + 2
+                    : 0,
               ),
               child: _SettingsModuleTab(
                 module: modules[index],
@@ -236,113 +243,25 @@ class _SettingsHeroCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Color.lerp(tokens.surfaceHighlight, tokens.panelGlow, 0.25)!,
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            tokens.bgSurface.withValues(alpha: 0.98),
-            tokens.bgElevated.withValues(alpha: 0.96),
-            tokens.bgInset.withValues(alpha: 0.98),
-          ],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: tokens.panelGlow.withValues(alpha: 0.11),
-            blurRadius: 34,
-            spreadRadius: -24,
-            offset: const Offset(0, 20),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard + 10),
+        border: Border.all(color: tokens.borderSubtle),
+        color: tokens.bgSurface.withValues(alpha: 0.96),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        Colors.white.withValues(alpha: 0.035),
-                        Colors.transparent,
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: AnimatedAlign(
-                  duration: const Duration(milliseconds: 320),
-                  curve: Curves.easeOutCubic,
-                  alignment: switch (selectedIndex) {
-                    0 => Alignment.topRight,
-                    1 => Alignment.centerRight,
-                    2 => Alignment.bottomRight,
-                    _ => Alignment.bottomCenter,
-                  },
-                  child: Transform.rotate(
-                    angle: -0.14,
-                    child: Container(
-                      width: compact ? 138 : 216,
-                      height: compact ? 52 : 82,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: LinearGradient(
-                          colors: <Color>[
-                            tokens.panelGlowSecondary.withValues(alpha: 0.18),
-                            tokens.panelGlow.withValues(alpha: 0.04),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: compact ? 16 : 24,
-              right: compact ? 16 : 24,
-              top: compact ? 82 : 96,
-              child: Container(
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: <Color>[
-                      Colors.transparent,
-                      tokens.panelGlowSecondary.withValues(alpha: 0.45),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                compact ? 16 : 24,
-                compact ? 16 : 22,
-                compact ? 16 : 24,
-                compact ? 16 : 22,
-              ),
-              child: Column(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          compact ? StudioSpacing.sm : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.sm : StudioLayoutSpacing.section - 2,
+          compact ? StudioSpacing.sm : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.sm : StudioLayoutSpacing.section - 2,
+        ),
+        child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (compact) ...<Widget>[
                     Text(title, style: studioPageTitleStyle(context)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
                     Text(subtitle, style: subtitleStyle),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     _SettingsSummaryTile(
                       compact: true,
                       module: summary,
@@ -359,7 +278,7 @@ class _SettingsHeroCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(title, style: studioPageTitleStyle(context)),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
                               ConstrainedBox(
                                 constraints: const BoxConstraints(
                                   maxWidth: 520,
@@ -381,15 +300,17 @@ class _SettingsHeroCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                  SizedBox(height: compact ? 18 : 20),
+                  SizedBox(
+                    height: compact
+                        ? StudioLayoutSpacing.cardInner + 2
+                        : StudioLayoutSpacing.cardInner + 4,
+                  ),
                   if (scrollableTabs)
                     DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(
-                            alpha: 0.55,
-                          ),
+                          color: tokens.borderSubtle.withValues(alpha: 0.55),
                         ),
                         color: tokens.bgInset.withValues(alpha: 0.84),
                       ),
@@ -402,9 +323,6 @@ class _SettingsHeroCard extends StatelessWidget {
                     tabBar,
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -446,25 +364,11 @@ class _SettingsSummaryTile extends StatelessWidget {
       },
       child: Container(
         key: ValueKey<String>(module.label),
-        padding: EdgeInsets.all(compact ? 14 : 16),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(compact ? 18 : 20),
-          border: Border.all(
-            color: Color.lerp(
-              tokens.panelGlowSecondary,
-              tokens.surfaceHighlight,
-              0.45,
-            )!,
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[
-              tokens.bgElevated.withValues(alpha: 0.96),
-              tokens.primarySoft.withValues(alpha: 0.88),
-              tokens.accentSoft.withValues(alpha: 0.66),
-            ],
-          ),
+          border: Border.all(color: tokens.borderSubtle),
+          color: tokens.bgInset.withValues(alpha: 0.88),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,9 +382,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: tokens.bgInset.withValues(alpha: 0.84),
-                    border: Border.all(
-                      color: tokens.panelGlowSecondary.withValues(alpha: 0.42),
-                    ),
+                    border: Border.all(color: tokens.borderSubtle),
                   ),
                   child: Icon(module.icon, size: 18, color: tokens.signal),
                 ),
@@ -498,8 +400,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                     count: modules.length,
                     selectedIndex: selectedIndex,
                     activeColor: tokens.signal,
-                    inactiveColor: theme.colorScheme.onSurfaceVariant
-                        .withValues(alpha: 0.34),
+                    inactiveColor: tokens.textMuted.withValues(alpha: 0.55),
                   )
                 else
                   Container(
@@ -509,17 +410,13 @@ class _SettingsSummaryTile extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: tokens.panelGlowSecondary.withValues(
-                          alpha: 0.36,
-                        ),
-                      ),
+                      border: Border.all(color: tokens.borderSubtle),
                       color: tokens.bgInset.withValues(alpha: 0.72),
                     ),
                     child: Text(
                       '$currentIndexLabel / $totalIndexLabel',
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: tokens.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -532,9 +429,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                 count: modules.length,
                 selectedIndex: selectedIndex,
                 activeColor: tokens.signal,
-                inactiveColor: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.28,
-                ),
+                inactiveColor: tokens.textMuted.withValues(alpha: 0.45),
                 compact: false,
               ),
             ],
@@ -560,16 +455,13 @@ class _SettingsModuleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final label = Text(
       module.label,
       maxLines: 1,
       overflow: expand ? TextOverflow.ellipsis : TextOverflow.visible,
       style: studioControlLabelStyle(context)?.copyWith(
-        color: selected
-            ? theme.colorScheme.onSurface
-            : theme.colorScheme.onSurfaceVariant,
+        color: selected ? tokens.textPrimary : tokens.textSecondary,
       ),
     );
 
@@ -587,33 +479,12 @@ class _SettingsModuleTab extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: selected
-              ? tokens.panelGlowSecondary.withValues(alpha: 0.62)
-              : Colors.white.withValues(alpha: 0.06),
+          color: selected ? tokens.primary : tokens.borderSubtle,
+          width: selected ? 1.5 : 1,
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: selected
-              ? <Color>[
-                  tokens.primarySoft.withValues(alpha: 0.98),
-                  tokens.accentSoft.withValues(alpha: 0.88),
-                ]
-              : <Color>[
-                  tokens.bgSurface.withValues(alpha: 0.34),
-                  tokens.bgInset.withValues(alpha: 0.18),
-                ],
-        ),
-        boxShadow: selected
-            ? <BoxShadow>[
-                BoxShadow(
-                  color: tokens.panelGlow.withValues(alpha: 0.12),
-                  blurRadius: 18,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 10),
-                ),
-              ]
-            : null,
+        color: selected
+            ? tokens.primarySoft.withValues(alpha: 0.85)
+            : tokens.bgSurface.withValues(alpha: 0.42),
       ),
       child: Row(
         mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
@@ -621,9 +492,7 @@ class _SettingsModuleTab extends StatelessWidget {
           Icon(
             module.icon,
             size: compact ? 18 : 19,
-            color: selected
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onSurfaceVariant,
+            color: selected ? tokens.textPrimary : tokens.textSecondary,
           ),
           const SizedBox(width: 10),
           if (expand) Expanded(child: label) else label,

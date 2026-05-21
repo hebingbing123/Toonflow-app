@@ -273,9 +273,7 @@ class _StoryboardBatchWorkbenchDialogState
           children: [
             Text(
               l10n.scriptEditorStoryboardBatchDialogIntro,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: studioHintStyle(context),
             ),
             const SizedBox(height: 12),
             _buildDiagnosisCard(
@@ -340,12 +338,7 @@ class _StoryboardBatchWorkbenchDialogState
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.secondaryContainer.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: studioRecessedPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

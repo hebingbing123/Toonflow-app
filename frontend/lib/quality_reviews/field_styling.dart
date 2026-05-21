@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 
 /// Muted secondary copy on studio dark surfaces (never use [ColorScheme.outline]).
 Color qualityReviewsMutedColor(BuildContext context) => studioMutedTextColor(context);
@@ -96,7 +97,7 @@ class QualityReviewIdLookupRow extends StatelessWidget {
 ThemeData qualityReviewsFormTheme(BuildContext context) {
   final base = Theme.of(context);
   final scheme = base.colorScheme;
-  final muted = scheme.onSurfaceVariant;
+  final muted = StudioTokens.of(context).textSecondary;
   return base.copyWith(
     textTheme: base.textTheme.apply(
       bodyColor: scheme.onSurface,

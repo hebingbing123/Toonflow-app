@@ -11,7 +11,6 @@ class _PublishCalendarPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final l10n = resolveAppLocalizationsForErrors(context);
     
     if (!publishPanelUi.visible ||
@@ -28,7 +27,9 @@ class _PublishCalendarPanel extends StatelessWidget {
         const SizedBox(height: 14),
         Text(
           l10n.shortVideoSpaceScheduleCalendar,
-          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: studioPanelMutedColor(context),
+          ),
         ),
         const SizedBox(height: 8),
         PublishScheduleCalendar(

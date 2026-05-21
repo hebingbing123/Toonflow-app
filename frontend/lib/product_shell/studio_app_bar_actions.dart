@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/theme.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../shell/navigation_controller.dart';
@@ -80,12 +79,11 @@ class _UtilityIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final borderRadius = BorderRadius.circular(12);
     final iconWidget = Icon(
       icon,
       size: 21,
-      color: selected ? Colors.white : tokens.textSecondary,
+      color: selected ? tokens.primary : tokens.textSecondary,
     );
 
     return Tooltip(
@@ -95,27 +93,16 @@ class _UtilityIconButton extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: borderRadius,
         child: Ink(
-          width: 44,
-          height: 44,
+          width: StudioSpacing.iconTouchTarget + 8,
+          height: StudioSpacing.iconTouchTarget + 8,
           decoration: BoxDecoration(
-            gradient: selected ? studio.signalGradient : null,
-            color: selected ? null : tokens.bgSurface.withValues(alpha: 0.72),
+            color: selected
+                ? tokens.primarySoft.withValues(alpha: 0.92)
+                : tokens.bgSurface.withValues(alpha: 0.72),
             borderRadius: borderRadius,
             border: selected
-                ? Border.all(
-                    color: tokens.accent.withValues(alpha: 0.42),
-                  )
+                ? Border.all(color: tokens.primary.withValues(alpha: 0.45))
                 : null,
-            boxShadow: selected
-                ? <BoxShadow>[
-                    BoxShadow(
-                      color: tokens.panelGlowSecondary.withValues(alpha: 0.18),
-                      blurRadius: 18,
-                      spreadRadius: -10,
-                      offset: const Offset(0, 10),
-                    ),
-                  ]
-                : const <BoxShadow>[],
           ),
           child: InkWell(
             onTap: onPressed,

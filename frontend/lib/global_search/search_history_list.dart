@@ -4,6 +4,8 @@ import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search history dropdown: shows recent queries on focus, tap to fill and search, clear button.
 class SearchHistoryList extends StatefulWidget {
@@ -145,12 +147,13 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     }
 
     if (_error != null) {
+      final tokens = StudioTokens.of(context);
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(StudioSpacing.sm),
           child: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 20),
+              Icon(Icons.error_outline, color: tokens.danger, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -169,16 +172,9 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     }
 
     if (_history.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            l10n.globalSearchNoSearchHistory,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-          ),
-        ),
+      return StudioEmptyState.emptyData(
+        title: l10n.globalSearchNoSearchHistory,
+        icon: Icons.history,
       );
     }
 
@@ -187,45 +183,49 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // History rows
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _history.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final entry = _history[index];
-              return ListTile(
-                dense: true,
-                leading: const Icon(Icons.history, size: 20),
-                title: Text(
-                  entry.query,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          // History rows (Column avoids nested ListView shrinkWrap scroll issues)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              for (var i = 0; i < _history.length; i++) ...<Widget>[
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.history, size: 20),
+                  title: Text(
+                    _history[i].query,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    l10n.globalSearchResultRows(_history[i].resultCount),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  trailing: Text(
+                    _formatTime(_history[i].searchedAt),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: StudioTokens.of(context).textMuted,
+                    ),
+                  ),
+                  onTap: () => widget.onHistorySelected(_history[i].query),
                 ),
-                subtitle: Text(
-                  l10n.globalSearchResultRows(entry.resultCount),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                trailing: Text(
-                  _formatTime(entry.searchedAt),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                ),
-                onTap: () => widget.onHistorySelected(entry.query),
-              );
-            },
+                if (i < _history.length - 1) const Divider(height: 1),
+              ],
+            ],
           ),
           const Divider(height: 1),
           // Clear history
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.xs,
+              vertical: StudioSpacing.xs / 2,
+            ),
             child: TextButton.icon(
               onPressed: _handleClearHistory,
               icon: const Icon(Icons.delete_outline, size: 18),
               label: Text(l10n.globalSearchClearHistory),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(
+                foregroundColor: StudioTokens.of(context).danger,
+              ),
             ),
           ),
         ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/tokens.dart';
+import '../../design_system/studio_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'version_manager.dart';
@@ -561,7 +563,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                       Text(
                         '${widget.baseVersion.name} → ${widget.compareVersion.name}',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: StudioTokens.of(context).textSecondary,
                         ),
                       ),
                     ],
@@ -580,7 +582,7 @@ class _VersionComparisonState extends State<VersionComparison> {
             Card(
               color: theme.colorScheme.primaryContainer,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: Row(
                   children: [
                     Expanded(
@@ -588,7 +590,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         icon: Icons.add_circle_outline,
                         label: l10n.shortVideoVersionComparisonStatAdded,
                         value: _statistics.addedCount.toString(),
-                        color: Colors.green,
+                        color: StudioTokens.of(context).success,
                       ),
                     ),
                     Expanded(
@@ -596,7 +598,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         icon: Icons.remove_circle_outline,
                         label: l10n.shortVideoVersionComparisonStatRemoved,
                         value: _statistics.removedCount.toString(),
-                        color: Colors.red,
+                        color: StudioTokens.of(context).danger,
                       ),
                     ),
                     Expanded(
@@ -604,7 +606,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         icon: Icons.edit_outlined,
                         label: l10n.shortVideoVersionComparisonStatModified,
                         value: _statistics.modifiedCount.toString(),
-                        color: Colors.orange,
+                        color: StudioTokens.of(context).warning,
                       ),
                     ),
                     Expanded(
@@ -612,7 +614,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         icon: Icons.check_circle_outline,
                         label: l10n.shortVideoVersionComparisonStatUnchanged,
                         value: _statistics.unchangedCount.toString(),
-                        color: Colors.grey,
+                        color: StudioTokens.of(context).textMuted,
                       ),
                     ),
                     Expanded(
@@ -711,7 +713,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                                 ? l10n.shortVideoVersionComparisonEmptyNoMatch
                                 : l10n.shortVideoVersionComparisonEmptyIdentical,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: StudioTokens.of(context).textSecondary,
                             ),
                           ),
                         ],
@@ -767,7 +769,7 @@ class _StatisticItem extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
       ],
@@ -782,15 +784,16 @@ class _DifferenceListItem extends StatelessWidget {
   final ShotDifference difference;
 
   Color _getTypeColor(BuildContext context) {
+    final tokens = StudioTokens.of(context);
     switch (difference.type) {
       case DifferenceType.added:
-        return Colors.green;
+        return tokens.success;
       case DifferenceType.removed:
-        return Colors.red;
+        return tokens.danger;
       case DifferenceType.modified:
-        return Colors.orange;
+        return tokens.warning;
       case DifferenceType.unchanged:
-        return Colors.grey;
+        return tokens.textMuted;
     }
   }
 
@@ -810,6 +813,7 @@ class _DifferenceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final typeColor = _getTypeColor(context);
 
@@ -856,14 +860,14 @@ class _DifferenceListItem extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
+                          color: tokens.danger.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeOld,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.red,
+                          style: TextStyle(
+                            fontSize: StudioTypography.of(context).meta,
+                            color: tokens.danger,
                           ),
                         ),
                       ),
@@ -875,7 +879,7 @@ class _DifferenceListItem extends StatelessWidget {
                             difference.oldValue,
                           ),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.red.shade700,
+                            color: tokens.danger,
                             decoration: TextDecoration.lineThrough,
                           ),
                           maxLines: 2,
@@ -893,14 +897,14 @@ class _DifferenceListItem extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
+                          color: tokens.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeNew,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.green,
+                          style: TextStyle(
+                            fontSize: StudioTypography.of(context).meta,
+                            color: tokens.success,
                           ),
                         ),
                       ),
@@ -912,7 +916,7 @@ class _DifferenceListItem extends StatelessWidget {
                             difference.newValue,
                           ),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.green.shade700,
+                            color: tokens.success,
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 2,

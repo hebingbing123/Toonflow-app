@@ -38,7 +38,6 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
     }
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final timeline = _shortVideoTimeline;
     if (timeline == null && !_loadingTimeline) {
       unawaited(_loadShortVideoTimeline());
@@ -69,12 +68,12 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
             if (_loadingTimeline)
               Text(
                 l10n.shortVideoTimelineLoading,
-                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
               )
             else if (timeline == null || timeline.scripts.isEmpty)
-              Text(
-                l10n.shortVideoTimelineEmpty,
-                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              StudioEmptyState.emptyData(
+                title: l10n.shortVideoTimelineEmpty,
+                icon: Icons.timeline_outlined,
               )
             else
               _TimelineNleEditor(
@@ -598,7 +597,6 @@ class _TimelineShotCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final preview = (shot.thumbnailUrl ?? shot.selectedVideoUrl ?? '').trim();
     final inMs = clip?.inMs ?? shot.inMs;
     final outMs = clip?.outMs ?? shot.outMs;
@@ -607,7 +605,7 @@ class _TimelineShotCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          border: Border.all(color: outline),
+          border: Border.all(color: studioPanelBorderColor(context)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

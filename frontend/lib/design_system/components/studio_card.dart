@@ -9,11 +9,15 @@ class StudioCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(StudioSpacing.sm),
     this.onTap,
+    this.emphasized = false,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
+
+  /// When false, uses a flat surface (secondary panels, dense tool pages).
+  final bool emphasized;
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +26,24 @@ class StudioCard extends StatelessWidget {
     final card = Container(
       padding: padding,
       decoration: BoxDecoration(
-        gradient: studio.panelGradient,
+        gradient: emphasized ? studio.panelGradient : null,
+        color: emphasized ? null : tokens.bgSurface.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        border: Border.all(color: tokens.surfaceHighlight),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: tokens.panelGlow.withValues(alpha: 0.08),
-            blurRadius: 22,
-            spreadRadius: -16,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(
+          color: emphasized
+              ? tokens.surfaceHighlight
+              : tokens.borderSubtle,
+        ),
+        boxShadow: emphasized
+            ? <BoxShadow>[
+                BoxShadow(
+                  color: tokens.primary.withValues(alpha: 0.06),
+                  blurRadius: 14,
+                  spreadRadius: -12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );

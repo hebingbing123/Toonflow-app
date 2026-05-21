@@ -53,7 +53,6 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     return StudioAlertDialog(
       title: Text(l10n.projectsCreativeManualTitle),
       content: SizedBox(
@@ -65,9 +64,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
             children: [
               Text(
                 l10n.projectsCreativeManualIntro,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 12),
               SegmentedButton<_CreativeManualKind>(
@@ -145,9 +142,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
               else
                 Text(
                   l10n.projectsCreativeManualEmptyKind,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  style: studioHintStyle(context),
                 ),
               const SizedBox(height: 12),
               TextField(

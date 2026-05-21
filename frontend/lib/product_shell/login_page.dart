@@ -314,8 +314,8 @@ class _HeroStage extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: StudioSpacing.xs + 2,
+          runSpacing: StudioSpacing.xs + 2,
           children: <Widget>[
             _SignalChip(
               icon: Icons.auto_stories_outlined,
@@ -328,18 +328,6 @@ class _HeroStage extends StatelessWidget {
             _SignalChip(
               icon: Icons.movie_creation_outlined,
               label: l10n.productPipelineStripShortVideo,
-            ),
-            _SignalChip(
-              icon: Icons.task_alt_outlined,
-              label: l10n.productNavTasks,
-            ),
-            _SignalChip(
-              icon: Icons.cloud_queue_outlined,
-              label: l10n.productNavJobs,
-            ),
-            _SignalChip(
-              icon: Icons.verified_outlined,
-              label: l10n.productNavQuality,
             ),
           ],
         ),
@@ -428,28 +416,19 @@ class _AiStagePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final typography = StudioTypography.of(context);
     final ringSize = compact ? 124.0 : 156.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: studio.panelGradient,
+        color: tokens.bgInset.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: tokens.surfaceHighlight.withValues(alpha: 0.88),
-        ),
+        border: Border.all(color: tokens.borderSubtle),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: tokens.panelGlow.withValues(alpha: 0.12),
-            blurRadius: 28,
-            spreadRadius: -12,
-            offset: const Offset(0, 14),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 26,
-            offset: const Offset(0, 18),
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -562,24 +541,25 @@ class _SignalChip extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: tokens.bgSurface.withValues(alpha: 0.78),
+        color: tokens.bgInset.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: tokens.surfaceHighlight.withValues(alpha: 0.8),
-        ),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.xs + 4,
+          vertical: StudioSpacing.xs,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, size: 16, color: tokens.accent),
-            const SizedBox(width: 8),
+            Icon(icon, size: 15, color: tokens.textMuted),
+            const SizedBox(width: StudioSpacing.xs),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.86),
-                fontWeight: FontWeight.w600,
+                color: tokens.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -706,10 +686,10 @@ class _StageCoreCluster extends StatelessWidget {
               boxShadow: <BoxShadow>[
                 BoxShadow(
                   color: tokens.primary.withValues(
-                    alpha: 0.10 + (basePulse * 0.06),
+                    alpha: 0.06 + (basePulse * 0.04),
                   ),
-                  blurRadius: 28,
-                  spreadRadius: -12,
+                  blurRadius: 16,
+                  spreadRadius: -10,
                 ),
               ],
             ),
@@ -778,9 +758,9 @@ class _OrbitMarker extends StatelessWidget {
         color: color,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: glowColor,
-            blurRadius: size * 2.4,
-            spreadRadius: size * 0.4,
+            color: glowColor.withValues(alpha: 0.55),
+            blurRadius: size * 1.6,
+            spreadRadius: size * 0.15,
           ),
         ],
       ),
@@ -860,7 +840,10 @@ class _StageLabel extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.sm,
+          vertical: StudioSpacing.xs,
+        ),
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -906,31 +889,23 @@ class _AuthPanel extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: studio.panelGradient,
+        color: tokens.bgSurface.withValues(alpha: 0.98),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: tokens.surfaceHighlight.withValues(alpha: 0.92),
-        ),
+        border: Border.all(color: tokens.borderSubtle),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: tokens.panelGlowSecondary.withValues(alpha: 0.10),
-            blurRadius: 26,
-            spreadRadius: -12,
-            offset: const Offset(0, 14),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.24),
-            blurRadius: 28,
-            offset: const Offset(0, 20),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          compact ? 20 : 24,
-          compact ? 20 : 24,
-          compact ? 20 : 24,
-          compact ? 18 : 22,
+          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.sm + 2 : StudioLayoutSpacing.section - 2,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -943,7 +918,7 @@ class _AuthPanel extends StatelessWidget {
                 Text(
                   l10n.productLoginWorkspaceAccess,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: tokens.textSecondary,
                   ),
                 ),
                 DecoratedBox(
@@ -1037,7 +1012,7 @@ class _AuthPanel extends StatelessWidget {
               if (errorMessage != null && errorMessage!.isNotEmpty) ...<Widget>[
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(StudioSpacing.sm),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.errorContainer.withValues(
                       alpha: 0.40,
@@ -1075,9 +1050,9 @@ class _AuthPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: tokens.panelGlow.withValues(alpha: 0.30),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
+                      color: tokens.primary.withValues(alpha: 0.10),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -1100,7 +1075,7 @@ class _AuthPanel extends StatelessWidget {
                     : l10n.productLoginSignUpHint,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: tokens.textSecondary,
                 ),
               ),
             ],

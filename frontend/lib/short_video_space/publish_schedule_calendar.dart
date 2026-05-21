@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/studio_typography.dart';
 import '../rust_api.dart';
 
 typedef PublishCalendarDayCallback = void Function(
@@ -53,7 +55,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final outline =
-        theme.colorScheme.outlineVariant.withValues(alpha: 0.7);
+        studioPanelBorderColor(context).withValues(alpha: 0.7);
     final counts = _scheduledCountsByDay();
     final locale = Localizations.localeOf(context);
     final title = DateFormat.yMMMM(locale.toString()).format(_monthFirst);
@@ -159,7 +161,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                           countLabel,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: outline,
-                            fontSize: 10,
+                            fontSize: StudioTypography.of(context).meta,
                           ),
                         ),
                       ],

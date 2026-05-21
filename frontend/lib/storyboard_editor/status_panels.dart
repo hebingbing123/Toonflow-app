@@ -17,7 +17,6 @@ class _StoryboardPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     final imageUrl = productionRow?.url?.trim();
     final narrationSource = describeStoryboardNarrationSource(
       l10n,
@@ -40,10 +39,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
     };
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: outline.withValues(alpha: 0.45)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,9 +50,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             metaLine,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
+            style: studioHintStyle(context),
           ),
           const SizedBox(height: 12),
           if (loadingProduction)
@@ -64,9 +58,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
           else if (imageUrl == null || imageUrl.isEmpty)
             Text(
               l10n.scriptEditorStoryboardsNoSelectedFrame,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: outline),
+              style: studioHintStyle(context),
             )
           else
             ClipRRect(
@@ -105,9 +97,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: studioHintStyle(context),
             ),
           ],
           const SizedBox(height: 8),
@@ -115,9 +105,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
             l10n.scriptEditorStoryboardsAudioDelivery(audioDeliveryLine),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            style: studioHintStyle(context),
           ),
         ],
       ),
@@ -141,12 +129,7 @@ class _StoryboardDiagnosisCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.secondaryContainer.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: studioRecessedPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -202,19 +185,15 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final steps = _steps(l10n, readiness);
     final ready = readiness.readyForGeneration;
     final badgeStyle = theme.textTheme.labelMedium?.copyWith(
-      color: ready ? theme.colorScheme.primary : outline,
+      color: ready ? theme.colorScheme.primary : studioPanelMutedColor(context),
       fontWeight: FontWeight.w600,
     );
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: outline.withValues(alpha: 0.45)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -251,7 +230,9 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
           Text(
             formatStoryboardShortVideoReadinessSummaryLocalized(l10n, readiness),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: ready ? theme.colorScheme.primary : outline,
+              color: ready
+                  ? theme.colorScheme.primary
+                  : studioPanelMutedColor(context),
             ),
           ),
         ],
@@ -270,20 +251,20 @@ class _ReadinessStepPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final outline = scheme.outline;
+    final muted = studioPanelMutedColor(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           ok ? Icons.check_circle_outline : Icons.highlight_off_outlined,
           size: 17,
-          color: ok ? scheme.primary : outline,
+          color: ok ? scheme.primary : muted,
         ),
         const SizedBox(width: 5),
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: ok ? scheme.onSurface : outline,
+            color: ok ? scheme.onSurface : muted,
           ),
         ),
       ],

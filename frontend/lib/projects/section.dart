@@ -13,6 +13,8 @@ import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
 part 'workbenches/art_styles.dart';
 part 'workbenches/art_styles_helpers.dart';
@@ -135,7 +137,6 @@ class ProjectsSection extends StatelessWidget {
     }
 
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) => Column(
@@ -157,9 +158,7 @@ class ProjectsSection extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.projectsListSubtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
+            style: studioHintStyle(context),
           ),
           const SizedBox(height: 8),
           if (productPresentation)
@@ -216,9 +215,7 @@ class ProjectsSection extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+                border: Border.all(color: studioPanelBorderColor(context)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

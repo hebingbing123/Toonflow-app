@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/openflow_brand.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../shell/navigation_controller.dart';
 import 'navigation.dart';
@@ -42,10 +43,10 @@ class StudioSidebar extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(
-              extended ? 20 : 12,
-              20,
-              extended ? 20 : 12,
-              16,
+              extended ? StudioSpacing.sm : StudioSpacing.xs + 4,
+              StudioSpacing.sm,
+              extended ? StudioSpacing.sm : StudioSpacing.xs + 4,
+              StudioSpacing.sm,
             ),
             child: extended
                 ? _BrandHeader(appTitle: appTitle)
@@ -53,7 +54,7 @@ class StudioSidebar extends StatelessWidget {
           ),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
               itemCount: destinations.length,
               itemBuilder: (context, index) {
                 final dest = destinations[index];
@@ -87,10 +88,11 @@ class _BrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
     return Row(
       children: <Widget>[
         const OpenFlowBrandMark(size: 40),
-        const SizedBox(width: 12),
+        const SizedBox(width: StudioSpacing.xs + 4),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,12 +103,12 @@ class _BrandHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: studioChromeTitleStyle(
                   context,
-                )?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                )?.copyWith(color: tokens.textPrimary, fontWeight: FontWeight.w700),
               ),
               Text(
                 'Studio',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: tokens.textMuted,
                 ),
               ),
             ],
@@ -117,7 +119,7 @@ class _BrandHeader extends StatelessWidget {
   }
 }
 
-class _SidebarTile extends StatelessWidget {
+class _SidebarTile extends StatefulWidget {
   const _SidebarTile({
     required this.extended,
     required this.selected,
@@ -135,71 +137,115 @@ class _SidebarTile extends StatelessWidget {
   final int? badge;
 
   @override
+  State<_SidebarTile> createState() => _SidebarTileState();
+}
+
+class _SidebarTileState extends State<_SidebarTile> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    final bg = selected
-        ? const Color(0xFF6C5CE7).withValues(alpha: 0.22)
-        : Colors.transparent;
-    final fg = selected ? Colors.white : Colors.white.withValues(alpha: 0.58);
+    final tokens = StudioTokens.of(context);
+    final fg = widget.selected
+        ? tokens.textPrimary
+        : (_hovered ? tokens.textSecondary : tokens.textMuted);
+    final bg = widget.selected
+        ? tokens.primarySoft.withValues(alpha: 0.72)
+        : (_hovered
+              ? tokens.primary.withValues(alpha: 0.08)
+              : Colors.transparent);
+    final border = widget.selected
+        ? Border(
+            left: BorderSide(color: tokens.primary, width: 3),
+          )
+        : (_hovered && !widget.extended
+              ? Border.all(
+                  color: tokens.primary.withValues(alpha: 0.35),
+                  width: 1,
+                )
+              : null);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs / 2),
       child: Material(
         color: bg,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: extended ? 12 : 8,
-              vertical: 10,
+          onTap: widget.onTap,
+          onHover: (hovered) {
+            if (_hovered != hovered) {
+              setState(() => _hovered = hovered);
+            }
+          },
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+              border: border,
             ),
-            child: extended
+            constraints: widget.extended
+                ? null
+                : const BoxConstraints(
+                    minWidth: StudioSpacing.navItemTouchTarget,
+                    minHeight: StudioSpacing.navItemTouchTarget,
+                  ),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.extended ? StudioSpacing.sm : 0,
+              vertical: widget.extended ? StudioSpacing.xs : 0,
+            ),
+            child: widget.extended
                 ? Row(
                     children: <Widget>[
-                      Icon(icon, color: fg, size: 20),
-                      const SizedBox(width: 12),
+                      Icon(widget.icon, color: fg, size: 20),
+                      const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: Text(
-                          label,
+                          widget.label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
                                 color: fg,
-                                fontWeight: selected
+                                fontWeight: widget.selected
                                     ? FontWeight.w600
                                     : FontWeight.w500,
                               ),
                         ),
                       ),
-                      if (badge != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6B6B),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            badge! > 99 ? '99+' : '$badge',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
+                      if (widget.badge != null)
+                        _SidebarBadge(count: widget.badge!),
                     ],
                   )
                 : Tooltip(
-                    message: label,
-                    child: Icon(icon, color: fg, size: 22),
+                    message: widget.label,
+                    child: Center(
+                      child: Icon(widget.icon, color: fg, size: 22),
+                    ),
                   ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SidebarBadge extends StatelessWidget {
+  const _SidebarBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: tokens.danger,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: studioBadgeTextStyle(context),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../design_system/tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import '../../panel_support.dart';
@@ -195,7 +196,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

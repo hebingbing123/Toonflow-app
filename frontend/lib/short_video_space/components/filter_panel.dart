@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Filter panel component for short video assembly
@@ -278,7 +279,7 @@ class _FilterPanelState extends State<FilterPanel> {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
+            color: studioPanelBorderColor(context),
             width: 1,
           ),
         ),

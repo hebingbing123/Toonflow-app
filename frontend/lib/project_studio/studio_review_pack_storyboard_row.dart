@@ -182,7 +182,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                 Text(
                   l10n.studioReviewPackScriptLine(row.scriptNumericId!),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
               ],

@@ -82,6 +82,7 @@ import 'design_system/components/studio_empty_state.dart';
 import 'design_system/components/studio_onboarding_coach.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
+import 'design_system/components/studio_surfaces.dart';
 import 'design_system/components/studio_text_styles.dart';
 import 'design_system/glass.dart';
 import 'design_system/ix/studio_api_error_callout.dart';

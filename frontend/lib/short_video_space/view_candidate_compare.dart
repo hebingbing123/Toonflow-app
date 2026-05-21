@@ -16,7 +16,6 @@ class _CandidateComparePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,17 +33,17 @@ class _CandidateComparePanel extends StatelessWidget {
                 if (candidateCardUi.loading)
                   Text(
                     candidateCardUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                   )
                 else if (candidateCardUi.unavailable)
                   Text(
                     candidateCardUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                   )
                 else ...[
                   Text(
                     candidateCardUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                   ),
                   const SizedBox(height: 10),
                   Wrap(
@@ -73,7 +72,7 @@ class _CandidateComparePanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   candidateCardUi.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                 ),
                 if (candidateCardUi.onConfirmStoryboardCandidates != null) ...[
                   const SizedBox(height: 10),
@@ -136,24 +135,30 @@ class _CandidateComparePanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   candidateComparePanelUi.headline,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   candidateComparePanelUi.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                 ),
                 if (!candidateComparePanelUi.loading &&
-                    !candidateComparePanelUi.unavailable &&
-                    candidateComparePanelUi.items.isNotEmpty) ...[
+                    !candidateComparePanelUi.unavailable) ...[
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: candidateComparePanelUi.items
-                        .map((item) => _CandidateCompareCard(item: item))
-                        .toList(growable: false),
-                  ),
+                  if (candidateComparePanelUi.items.isEmpty)
+                    StudioEmptyState.emptyData(
+                      title: candidateComparePanelUi.headline,
+                      subtitle: candidateComparePanelUi.detail,
+                      icon: Icons.compare_outlined,
+                    )
+                  else
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: candidateComparePanelUi.items
+                          .map((item) => _CandidateCompareCard(item: item))
+                          .toList(growable: false),
+                    ),
                 ],
               ],
             ),

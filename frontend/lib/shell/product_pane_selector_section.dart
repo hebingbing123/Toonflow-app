@@ -156,7 +156,6 @@ class _PlatformPaneDisabledNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(
@@ -166,11 +165,8 @@ class _PlatformPaneDisabledNotice extends StatelessWidget {
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: outline.withValues(alpha: 0.45)),
-              borderRadius: BorderRadius.circular(8),
-            ),
+            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+            decoration: studioRecessedPanelDecoration(context),
             child: Text(reason, style: theme.textTheme.bodySmall),
           ),
         ],

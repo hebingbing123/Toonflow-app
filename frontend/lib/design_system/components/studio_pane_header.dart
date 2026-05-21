@@ -36,9 +36,11 @@ class StudioPaneHeader extends StatelessWidget {
         return null;
       }
       return IconButton(
-        visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.only(left: 0, right: 8),
-        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        constraints: const BoxConstraints(
+          minWidth: StudioSpacing.iconTouchTarget + 4,
+          minHeight: StudioSpacing.iconTouchTarget + 4,
+        ),
         tooltip: l10n.studioBackPreviousPane,
         style: IconButton.styleFrom(
           backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),

@@ -22,14 +22,25 @@ class _HelpHubSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    
+    // Product shell places this pane in a vertical sliver list (unbounded height).
+    // TabBarView needs a finite height; derive from viewport instead of Expanded.
+    final tabBodyHeight = (MediaQuery.sizeOf(context).height * 0.72).clamp(
+      420.0,
+      900.0,
+    );
+
     return DefaultTabController(
       length: 3,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+            padding: const EdgeInsets.only(
+              top: StudioLayoutSpacing.cardInner - 4,
+              left: StudioLayoutSpacing.cardInner - 4,
+              right: StudioLayoutSpacing.cardInner - 4,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -45,7 +56,7 @@ class _HelpHubSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
           TabBar(
             tabs: [
               Tab(text: l10n.helpHubTabPersonal),
@@ -53,7 +64,8 @@ class _HelpHubSection extends StatelessWidget {
               Tab(text: l10n.billingAuditTitle),
             ],
           ),
-          Expanded(
+          SizedBox(
+            height: tabBodyHeight,
             child: TabBarView(
               children: [
                 HelpHubDocsPanel(accessToken: accessToken),

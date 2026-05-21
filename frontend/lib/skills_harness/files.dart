@@ -76,8 +76,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                   height: 720,
                   child: versions.isEmpty
                       ? Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Text(l10n.skillsHarnessVersionEmpty),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: StudioEmptyState.emptyData(
+                            title: l10n.skillsHarnessVersionEmpty,
+                            icon: Icons.history_outlined,
+                          ),
                         )
                       : Column(
                           mainAxisSize: MainAxisSize.min,
@@ -140,7 +143,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: Theme.of(ctx).colorScheme.outline,
+                                    color: studioPanelMutedColor(ctx),
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),

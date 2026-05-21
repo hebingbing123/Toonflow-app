@@ -348,7 +348,9 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
     }
   }
 
-  Color _alertBorderColor(ThemeData theme, String level) {
+  Color _alertBorderColor(BuildContext context, String level) {
+    final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     switch (level) {
       case 'critical':
         return theme.colorScheme.error;
@@ -357,7 +359,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
       case 'medium':
         return theme.colorScheme.primary;
       default:
-        return theme.colorScheme.outlineVariant;
+        return studioPanelBorderColor(context);
     }
   }
 
@@ -589,7 +591,9 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
   Future<void> _loadAlertActionPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final stored = prefs.getString(_alertActionPreferenceKey);
+      final stored = prefs.getString(
+        _ContentComplianceSectionState._alertActionPreferenceKey,
+      );
       if (stored == null || stored.trim().isEmpty) {
         return;
       }
@@ -615,7 +619,10 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
     try {
       final prefs = await SharedPreferences.getInstance();
       final ordered = _preferSecondaryAsPrimaryStages.toList()..sort();
-      await prefs.setString(_alertActionPreferenceKey, ordered.join(','));
+      await prefs.setString(
+        _ContentComplianceSectionState._alertActionPreferenceKey,
+        ordered.join(','),
+      );
     } catch (_) {
       // Ignore local preference write failures.
     }
@@ -627,7 +634,9 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
     });
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_alertActionPreferenceKey);
+      await prefs.remove(
+        _ContentComplianceSectionState._alertActionPreferenceKey,
+      );
     } catch (_) {
       // Ignore local preference reset failures.
     }
@@ -1029,12 +1038,16 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
+        final tokens = StudioTokens.of(dialogContext);
         return StudioAlertDialog(
           title: Text(l10n.contentComplianceAuditTitle(item.id)),
           content: SizedBox(
             width: 640,
             child: rows.isEmpty
-                ? Text(l10n.contentComplianceAuditEmpty)
+                ? StudioEmptyState.emptyData(
+                    title: l10n.contentComplianceAuditEmpty,
+                    icon: Icons.history_outlined,
+                  )
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1047,7 +1060,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: theme.colorScheme.outlineVariant,
+                                    color: studioPanelBorderColor(context),
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -1063,9 +1076,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                       audit.createdAt,
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
+                                            color: tokens.textSecondary,
                                           ),
                                     ),
                                     const SizedBox(height: 6),

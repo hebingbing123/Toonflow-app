@@ -49,7 +49,7 @@ class CreatorStarterTemplatesStrip extends StatelessWidget {
           Text(
             l10n.studioCreatorStartersSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -118,7 +118,7 @@ class _StarterCard extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(10),
@@ -139,7 +139,7 @@ class _StarterCard extends StatelessWidget {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 10),

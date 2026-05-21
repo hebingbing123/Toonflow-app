@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
+import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import 'support.dart';
 
@@ -54,8 +57,6 @@ class ProjectAssetsOverviewView extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final bodySmall = theme.textTheme.bodySmall;
-    final outline = theme.colorScheme.outline;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,7 +76,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           if (model.assetsScriptFilterLoading)
             Text(
               l10n.projectEditorAssetsOverviewFilteringByScript,
-              style: bodySmall?.copyWith(color: outline),
+              style: studioHintStyle(context),
             )
           else if (model.assetsForScript != null)
             Text(
@@ -89,7 +90,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           else
             Text(
               l10n.projectEditorAssetsOverviewScriptAssetsNotLoaded,
-              style: bodySmall?.copyWith(color: outline),
+              style: studioHintStyle(context),
             ),
         ],
         if (model.scriptList.isNotEmpty)
@@ -142,14 +143,8 @@ class ProjectAssetsOverviewView extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.35,
-            ),
-          ),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+          decoration: studioInsetPanelDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -160,9 +155,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 l10n.projectEditorAssetsOverviewCardIntro,
-                style: bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(

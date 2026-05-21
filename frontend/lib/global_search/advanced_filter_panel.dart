@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
 
@@ -166,7 +168,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           left: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
+            color: studioPanelBorderColor(context),
             width: 1,
           ),
         ),
@@ -294,7 +296,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
     );
   }

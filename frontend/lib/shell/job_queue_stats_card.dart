@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/studio_code_labels.dart';
@@ -151,7 +152,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
                   '${_stats!.pendingByKind}',
                 ),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ],
@@ -175,7 +176,7 @@ class _QueueMetricChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -186,7 +187,7 @@ class _QueueMetricChip extends StatelessWidget {
               TextSpan(
                 text: '$label ',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
               TextSpan(text: value),

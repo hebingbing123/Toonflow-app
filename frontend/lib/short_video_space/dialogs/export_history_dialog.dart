@@ -654,7 +654,8 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
   Widget _buildHistoryList(ThemeData theme) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    
+    final tokens = StudioTokens.of(context);
+
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -698,20 +699,20 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             Icon(
               Icons.inbox_outlined,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryNoRecords,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryNoRecordsHint,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
           ],
@@ -825,17 +826,13 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         ? null
         : item.errorMessage!.trim();
 
+    final tokens = StudioTokens.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: isFocused
-            ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.45)
-            : null,
+        color: isFocused ? tokens.primarySoft.withValues(alpha: 0.55) : null,
         border: isFocused
             ? Border(
-                left: BorderSide(
-                  color: theme.colorScheme.secondary,
-                  width: 3,
-                ),
+                left: BorderSide(color: tokens.primary, width: 3),
               )
             : null,
       ),
@@ -908,7 +905,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             Text(
               'Task ID: ${item.taskId}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
             if (item.fileSize != null)
@@ -968,7 +965,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 l10n.shortVideoExportSettingsFramerateOption(item.framerate),
               ),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
           ],
@@ -1056,15 +1053,15 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     switch (status) {
       case ExportTaskStatus.completed:
         icon = Icons.check_circle;
-        color = Colors.green;
+        color = StudioTokens.of(context).success;
         break;
       case ExportTaskStatus.failed:
         icon = Icons.error;
-        color = theme.colorScheme.error;
+        color = StudioTokens.of(context).danger;
         break;
       case ExportTaskStatus.cancelled:
         icon = Icons.cancel;
-        color = theme.colorScheme.onSurfaceVariant;
+        color = StudioTokens.of(context).textSecondary;
         break;
       default:
         icon = Icons.schedule;
@@ -1084,11 +1081,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   Color _getStatusColor(ExportTaskStatus status, ThemeData theme) {
     switch (status) {
       case ExportTaskStatus.completed:
-        return Colors.green;
+        return StudioTokens.of(context).success;
       case ExportTaskStatus.failed:
-        return theme.colorScheme.error;
+        return StudioTokens.of(context).danger;
       case ExportTaskStatus.cancelled:
-        return theme.colorScheme.onSurfaceVariant;
+        return StudioTokens.of(context).textSecondary;
       default:
         return theme.colorScheme.primary;
     }

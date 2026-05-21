@@ -61,7 +61,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(10),
@@ -172,7 +172,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Material(
-        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.55),
+        color: tokens.primarySoft.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
@@ -191,7 +191,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
                   child: Text(
                     l10n.studioNovelCrawlAuthWebGuideCollapsed,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSecondaryContainer,
+                      color: tokens.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

@@ -245,7 +245,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                         Text(
                           l10n.studioStepArtTitle,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
+                            color: tokens.textPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -253,7 +253,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                         Text(
                           l10n.studioArtStepEditSubtitle,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: tokens.textSecondary,
                           ),
                         ),
                       ],
@@ -318,7 +318,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                       Text(
                         l10n.studioArtStepApplyFootnote,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: tokens.textSecondary,
                         ),
                       ),
                     ],
@@ -452,7 +452,7 @@ class _SelectedPackSummary extends StatelessWidget {
             Text(
               l10n.studioArtStepNoStylePacks,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             )
           else ...<Widget>[
@@ -494,6 +494,7 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -502,7 +503,7 @@ class _SummaryRow extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           Text(
@@ -516,7 +517,7 @@ class _SummaryRow extends StatelessWidget {
             Text(
               detail!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
           ],

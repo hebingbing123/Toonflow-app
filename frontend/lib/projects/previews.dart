@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -362,7 +363,7 @@ class _ProjectAccessBadge extends StatelessWidget {
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: restricted
               ? colorScheme.onTertiaryContainer
-              : colorScheme.onSurfaceVariant,
+              : StudioTokens.of(context).textSecondary,
         ),
       ),
     );

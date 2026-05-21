@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design_system/components/studio_code_dropdown_field.dart';
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
@@ -140,6 +143,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final queue = widget.controller.queue;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -147,7 +151,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: theme.colorScheme.outlineVariant),
+          border: Border.all(color: studioPanelBorderColor(context)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -161,7 +165,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             Text(
               l10n.contentComplianceIntro,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
             const SizedBox(height: 12),
@@ -307,7 +311,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: _alertBorderColor(theme, topAlert.level),
+                            color: _alertBorderColor(context, topAlert.level),
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -409,7 +413,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       color: _alertBorderColor(
-                                        theme,
+                                        context,
                                         alert.level,
                                       ),
                                     ),
@@ -428,9 +432,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                         alert.message,
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
+                                              color: tokens.textSecondary,
                                             ),
                                       ),
                                       const SizedBox(height: 8),
@@ -984,7 +986,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: owner.overCapacity
                                           ? theme.colorScheme.error
-                                          : theme.colorScheme.onSurfaceVariant,
+                                          : tokens.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -1072,7 +1074,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                       workspace.oldestOpenAgeHours,
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                                      color: tokens.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -1085,10 +1087,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 ],
                 const SizedBox(height: 8),
                 if (queue.items.isEmpty)
-                  Text(
-                    l10n.contentComplianceQueueEmpty,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: StudioEmptyState.emptyData(
+                      title: l10n.contentComplianceQueueEmpty,
+                      icon: Icons.fact_check_outlined,
                     ),
                   )
                 else
@@ -1100,7 +1103,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: theme.colorScheme.outlineVariant,
+                            color: studioPanelBorderColor(context),
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -1177,7 +1180,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             Text(
                               _buildAuditLines(l10n, item).join('\n'),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                                color: tokens.textSecondary,
                               ),
                             ),
                             if ((item.detail ?? '').isNotEmpty) ...[
@@ -1194,7 +1197,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   item.resolutionNote!,
                                 ),
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                  color: tokens.textSecondary,
                                 ),
                               ),
                             ],

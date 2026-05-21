@@ -113,7 +113,6 @@ extension _ShortVideoSpaceSectionCharactersExtension
     }
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -140,12 +139,12 @@ extension _ShortVideoSpaceSectionCharactersExtension
           if (_loadingCharacters)
             Text(
               l10n.shortVideoCharactersLoading,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
             )
           else if (_projectCharacters.isEmpty)
-            Text(
-              l10n.shortVideoCharactersEmpty,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            StudioEmptyState.emptyData(
+              title: l10n.shortVideoCharactersEmpty,
+              icon: Icons.people_outline,
             )
           else
             ..._projectCharacters.map((character) {
@@ -172,7 +171,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
                           voiceId.isEmpty ? '—' : voiceId,
                           emotion.isEmpty ? '—' : emotion,
                         ),
-                        style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                        style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -208,7 +207,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
             const SizedBox(height: 6),
             Text(
               _charactersStatusLine!,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
             ),
           ],
         ],

@@ -13,6 +13,9 @@ import '../rust_api/search/saved_views.dart';
 import 'search_result_card.dart';
 import 'advanced_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search results page displaying grouped search results by type.
 ///
@@ -890,7 +893,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         color: theme.colorScheme.surfaceContainerHighest,
                         border: Border(
                           bottom: BorderSide(
-                            color: theme.colorScheme.outlineVariant,
+                            color: studioPanelBorderColor(context),
                           ),
                         ),
                       ),
@@ -899,14 +902,14 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           Icon(
                             Icons.search,
                             size: 20,
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: StudioTokens.of(context).textSecondary,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               l10n.globalSearchFoundResults(_response!.total),
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                                color: StudioTokens.of(context).textSecondary,
                               ),
                             ),
                           ),
@@ -954,7 +957,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: theme.colorScheme.outlineVariant,
+                            color: studioPanelBorderColor(context),
                           ),
                         ),
                       ),
@@ -1066,11 +1069,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: StudioTokens.of(context).borderSubtle,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: StudioSpacing.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1079,16 +1082,16 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             width: double.infinity,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: StudioTokens.of(context).borderSubtle,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           Container(
                             width: 200,
                             height: 12,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: StudioTokens.of(context).borderSubtle,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1097,21 +1100,21 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 Container(
                   width: double.infinity,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: StudioTokens.of(context).borderSubtle,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Container(
                   width: double.infinity,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: StudioTokens.of(context).borderSubtle,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -1146,7 +1149,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             Text(
               _error ?? l10n.globalSearchUnknownError,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -1165,32 +1168,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   /// Build no results state
   Widget _buildNoResultsState() {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.globalSearchNoResultsTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.globalSearchNoResultsHint,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return StudioEmptyState.noResults(
+      title: l10n.globalSearchNoResultsTitle,
+      subtitle: l10n.globalSearchNoResultsHint,
     );
   }
 
@@ -1271,7 +1251,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
-          top: BorderSide(color: theme.colorScheme.outlineVariant),
+          top: BorderSide(color: studioPanelBorderColor(context)),
         ),
       ),
       child: Row(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_dropdown_field.dart';
+import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_text_styles.dart';
 import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../../rust_api.dart';
 import '../asset_type_labels.dart';
@@ -39,9 +41,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
             children: [
               Text(
                 l10n.projectEditorAssetGenerationDescription,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 12),
               _AssetGenerationControlsPanel(

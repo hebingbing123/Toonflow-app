@@ -114,7 +114,7 @@ class _VendorSetupProjectsNudgeState extends State<VendorSetupProjectsNudge> {
                     Text(
                       l10n.settingsDomesticVendorsSetupProgress(ready, total),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: tokens.textSecondary,
                       ),
                     ),
                   ],

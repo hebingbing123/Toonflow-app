@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/theme.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/billing_l10n_helpers.dart';
@@ -59,7 +59,6 @@ class WorkspaceContextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final workspaceTypeLabel = _workspaceTypeLabel(l10n, workspaceType);
@@ -108,7 +107,7 @@ class WorkspaceContextView extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: tokens.textSecondary,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                   ),
                 ),
@@ -134,9 +133,9 @@ class WorkspaceContextView extends StatelessWidget {
           padding: const EdgeInsets.only(top: 4),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              gradient: studio.panelGradient,
+              color: tokens.bgSurface.withValues(alpha: 0.94),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: tokens.surfaceHighlight),
+              border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -174,8 +173,8 @@ class WorkspaceContextView extends StatelessWidget {
                   if (workspaceTypeLabel != null)
                     Chip(
                       label: Text(workspaceTypeLabel),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.standard,
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                     ),
                   if (showBilling)
                     _CompactMetaChip(
@@ -198,9 +197,9 @@ class WorkspaceContextView extends StatelessWidget {
             waitDuration: const Duration(milliseconds: 350),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                gradient: studio.panelGradient,
+                color: tokens.bgSurface.withValues(alpha: 0.94),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: tokens.surfaceHighlight),
+                border: Border.all(color: tokens.borderSubtle),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -219,7 +218,7 @@ class WorkspaceContextView extends StatelessWidget {
                       child: Text(
                         '$workspaceLine · $scopeLine',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: tokens.textSecondary,
+                          color: StudioTokens.of(context).textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -240,9 +239,9 @@ class WorkspaceContextView extends StatelessWidget {
         padding: const EdgeInsets.only(top: 4),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: studio.panelGradient,
+            color: tokens.bgSurface.withValues(alpha: 0.94),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: tokens.surfaceHighlight),
+            border: Border.all(color: tokens.borderSubtle),
           ),
           child: ExpansionTile(
             tilePadding: const EdgeInsets.symmetric(
@@ -268,8 +267,8 @@ class WorkspaceContextView extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8),
                     child: Chip(
                       label: Text(workspaceTypeLabel),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.standard,
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                     ),
                   ),
               ],
@@ -286,12 +285,12 @@ class WorkspaceContextView extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: studio.panelGradient,
+          color: tokens.bgSurface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: tokens.surfaceHighlight),
+          border: Border.all(color: tokens.borderSubtle),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -402,7 +401,7 @@ class WorkspaceContextView extends StatelessWidget {
                 Text(
                   l10n.workspaceBillingPercentUsed(usagePercent),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
               ],
@@ -444,12 +443,12 @@ class _CompactMetaChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          Icon(icon, size: 16, color: StudioTokens.of(context).textSecondary),
           const SizedBox(width: 8),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
@@ -490,7 +489,7 @@ class _InlineContextChip extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: tokens.textSecondary),
+          ).textTheme.labelSmall?.copyWith(color: StudioTokens.of(context).textSecondary),
         ),
       ),
     );

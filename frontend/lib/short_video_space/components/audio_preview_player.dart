@@ -202,7 +202,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          color: studioPanelBorderColor(context).withValues(alpha: 0.2),
         ),
       ),
       child: Column(

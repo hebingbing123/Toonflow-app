@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_surfaces.dart';
 import '../../l10n/app_localizations.dart';
 import '../view.dart';
 
@@ -34,13 +35,13 @@ class AssemblyInputPanel extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final muted = studioPanelMutedColor(context);
 
     if (ui.loading) {
-      return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: outline));
+      return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: muted));
     }
     if (ui.unavailable) {
-      return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: outline));
+      return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: muted));
     }
 
     return Column(

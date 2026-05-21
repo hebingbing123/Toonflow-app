@@ -220,36 +220,38 @@ class _CompactCockpitBar extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           );
           final expandButton = TextButton(
             onPressed: onExpand,
             style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: EdgeInsets.symmetric(
-                horizontal: dense ? 10 : 12,
-                vertical: dense ? 6 : 8,
+              minimumSize: Size(
+                dense ? 48 : 56,
+                StudioSpacing.iconTouchTarget,
               ),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: dense
-                  ? VisualDensity.compact
-                  : VisualDensity.standard,
+              padding: EdgeInsets.symmetric(
+                horizontal: dense ? StudioSpacing.sm : StudioSpacing.sm,
+                vertical: dense ? StudioSpacing.xs : StudioSpacing.xs,
+              ),
+              tapTargetSize: MaterialTapTargetSize.padded,
+              visualDensity: VisualDensity.standard,
             ),
             child: Text(expandLabel),
           );
           final primaryButton = FilledButton(
             onPressed: () => onExecuteAction(primaryAction),
             style: FilledButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: EdgeInsets.symmetric(
-                horizontal: dense ? 12 : 14,
-                vertical: dense ? 8 : 10,
+              minimumSize: Size(
+                dense ? 48 : 56,
+                dense ? StudioSpacing.iconTouchTarget : 40,
               ),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: dense
-                  ? VisualDensity.compact
-                  : VisualDensity.standard,
+              padding: EdgeInsets.symmetric(
+                horizontal: dense ? StudioSpacing.sm : StudioSpacing.sm,
+                vertical: dense ? StudioSpacing.xs : StudioSpacing.xs,
+              ),
+              tapTargetSize: MaterialTapTargetSize.padded,
+              visualDensity: VisualDensity.standard,
             ),
             child: Text(primaryAction.ctaLabel),
           );
@@ -339,7 +341,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
+                    color: tokens.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -352,7 +354,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
           Text(
             cockpit.subheadline,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -458,7 +460,7 @@ class _CockpitMetricTile extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final card = Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 6),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(10),
@@ -470,14 +472,14 @@ class _CockpitMetricTile extends StatelessWidget {
           Text(
             metric.label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             metric.value,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
+              color: tokens.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -525,7 +527,7 @@ class _CockpitStarterTile extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 6),
         decoration: BoxDecoration(
           color: tokens.bgInset,
           borderRadius: BorderRadius.circular(10),
@@ -537,7 +539,7 @@ class _CockpitStarterTile extends StatelessWidget {
             Text(
               starter.title,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
+                color: tokens.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -547,7 +549,7 @@ class _CockpitStarterTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
               ),
             ),
             TextButton(

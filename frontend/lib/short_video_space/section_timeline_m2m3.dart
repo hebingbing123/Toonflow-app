@@ -331,9 +331,9 @@ class _VoiceoverTrackPanel extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     if (clips.isEmpty) {
-      return Text(
-        l10n.shortVideoTimelineEmpty,
-        style: theme.textTheme.bodySmall,
+      return StudioEmptyState.emptyData(
+        title: l10n.shortVideoTimelineEmpty,
+        icon: Icons.graphic_eq_outlined,
       );
     }
     return Column(
@@ -342,7 +342,10 @@ class _VoiceoverTrackPanel extends StatelessWidget {
           SizedBox(
             height: 48,
             child: CustomPaint(
-              painter: _WaveformBarsPainter(peaks!),
+              painter: _WaveformBarsPainter(
+                peaks!,
+                StudioTokens.of(context).primary,
+              ),
               child: const SizedBox.expand(),
             ),
           ),
@@ -379,13 +382,14 @@ class _VoiceoverTrackPanel extends StatelessWidget {
 }
 
 class _WaveformBarsPainter extends CustomPainter {
-  _WaveformBarsPainter(this.peaks);
+  _WaveformBarsPainter(this.peaks, this.barColor);
 
   final List<double> peaks;
+  final Color barColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF5C6BC0);
+    final paint = Paint()..color = barColor;
     final barW = size.width / peaks.length;
     for (var i = 0; i < peaks.length; i++) {
       final h = peaks[i].clamp(0.0, 1.0) * size.height;
@@ -399,6 +403,6 @@ class _WaveformBarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WaveformBarsPainter oldDelegate) {
-    return oldDelegate.peaks != peaks;
+    return oldDelegate.peaks != peaks || oldDelegate.barColor != barColor;
   }
 }

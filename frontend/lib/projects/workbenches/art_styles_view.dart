@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
   const ArtStylesWorkbenchDialogViewModel({
@@ -70,7 +71,6 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
@@ -86,9 +86,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
             children: [
               Text(
                 l10n.projectsArtWorkbenchIntro,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -165,9 +163,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               else
                 Text(
                   l10n.projectsArtWorkbenchEmptyHint,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  style: studioHintStyle(context),
                 ),
               const SizedBox(height: 12),
               TextField(

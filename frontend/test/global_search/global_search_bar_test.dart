@@ -34,7 +34,7 @@ void main() {
       await tester.pump();
 
       // Find the search button (arrow forward icon button)
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_forward);
+      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
       expect(searchButton, findsOneWidget);
 
       // Verify button is disabled (onPressed is null)
@@ -52,7 +52,7 @@ void main() {
       await tester.pump();
 
       // Find the search button
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_forward);
+      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
       expect(searchButton, findsOneWidget);
 
       // Verify button is enabled (onPressed is not null)
@@ -107,7 +107,7 @@ void main() {
       await tester.pump();
 
       // Click search button
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_forward);
+      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
       await tester.tap(searchButton);
       await tester.pump();
 
@@ -125,7 +125,7 @@ void main() {
       await tester.pump();
 
       // Find the search button - it should be disabled
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_forward);
+      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
       final iconButton = tester.widget<IconButton>(searchButton);
       
       // Verify button is disabled when less than 2 characters

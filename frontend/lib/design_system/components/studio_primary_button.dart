@@ -74,16 +74,10 @@ class StudioPrimaryButton extends StatelessWidget {
           boxShadow: enabled
               ? <BoxShadow>[
                   BoxShadow(
-                    color: tokens.panelGlow.withValues(alpha: 0.22),
-                    blurRadius: 22,
-                    spreadRadius: -10,
-                    offset: const Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: tokens.panelGlowSecondary.withValues(alpha: 0.14),
-                    blurRadius: 18,
-                    spreadRadius: -12,
-                    offset: const Offset(0, 8),
+                    color: tokens.primary.withValues(alpha: 0.18),
+                    blurRadius: 10,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 3),
                   ),
                 ]
               : const <BoxShadow>[],

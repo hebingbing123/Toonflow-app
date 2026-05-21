@@ -40,6 +40,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(zh.helpHubDocsTitle), findsWidgets);
+
+    await tester.tap(find.text(zh.opsWhSectionTitle));
+    await tester.pumpAndSettle();
+
     expect(find.text(zh.opsWhLatestCreatedTitle), findsOneWidget);
     expect(find.text(zh.opsWhRecentDeliveries), findsOneWidget);
     expect(
@@ -76,8 +80,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text(zh.opsWhSectionTitle));
+    await tester.pumpAndSettle();
+
     await expectLater(
-      find.text(zh.opsWhSectionTitle),
+      find.widgetWithText(Tab, zh.opsWhSectionTitle),
       matchesGoldenFile(goldenPathForDesktopLayout('10_help_hub')),
     );
   });

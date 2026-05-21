@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/tokens.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/ix/studio_freshness_banner.dart';
@@ -450,7 +451,7 @@ class QualityReviewsListPreview extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final compact = MediaQuery.sizeOf(context).width < 520;
     final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      color: StudioTokens.of(context).textSecondary,
       height: 1.35,
     );
     return Column(

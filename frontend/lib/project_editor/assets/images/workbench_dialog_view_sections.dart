@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
@@ -97,11 +99,8 @@ Widget _buildDiagnosisCard(
 }) {
   return Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      borderRadius: BorderRadius.circular(12),
-    ),
+    padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+    decoration: studioInsetPanelDecoration(context),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

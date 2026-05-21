@@ -637,9 +637,9 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         ),
                         const SizedBox(height: 4),
                         if (pendingInvites.isEmpty && !loading)
-                          Text(
-                            l10n.teamWorkspaceNoInviteRecords,
-                            style: Theme.of(context).textTheme.bodySmall,
+                          StudioEmptyState.emptyData(
+                            title: l10n.teamWorkspaceNoInviteRecords,
+                            icon: Icons.mail_outline,
                           ),
                         ...sortWorkspaceInvitesByExpiry(
                           filterInvitesByExpiryVisibility(
@@ -846,9 +846,9 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         ),
                         const SizedBox(height: 6),
                         if (auditRows.isEmpty && !loading)
-                          Text(
-                            l10n.teamWorkspaceNoActivityRecords,
-                            style: Theme.of(context).textTheme.bodySmall,
+                          StudioEmptyState.emptyData(
+                            title: l10n.teamWorkspaceNoActivityRecords,
+                            icon: Icons.history_outlined,
                           ),
                         ...auditRows
                             .where((audit) {
@@ -932,7 +932,10 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       ),
                       const SizedBox(height: 8),
                       if (members.isEmpty && !loading)
-                        Text(l10n.teamWorkspaceNoMembers),
+                        StudioEmptyState.emptyData(
+                          title: l10n.teamWorkspaceNoMembers,
+                          icon: Icons.group_outlined,
+                        ),
                       if (loading) const LinearProgressIndicator(),
                       if (members.isNotEmpty)
                         ...filterWorkspaceMembers(
@@ -1482,7 +1485,9 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       const SizedBox(height: 8),
                       if (loading) const LinearProgressIndicator(),
                       if (!loading && filteredInvites.isEmpty)
-                        Text(l10n.teamWorkspaceNoInvitesForCurrentFilters),
+                        StudioEmptyState.noResults(
+                          title: l10n.teamWorkspaceNoInvitesForCurrentFilters,
+                        ),
                       if (pagedInvites.isNotEmpty) ...<Widget>[
                         Wrap(
                           spacing: 8,

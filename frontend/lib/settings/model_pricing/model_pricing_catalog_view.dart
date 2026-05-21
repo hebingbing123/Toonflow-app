@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../l10n/billing_l10n_helpers.dart';
@@ -75,7 +76,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
         Text(
           l10n.studioModelPricingSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 12),

@@ -7,7 +7,10 @@ import '../l10n/studio_code_labels.dart';
 import '../l10n/billing_l10n_helpers.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/tokens.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -187,7 +190,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       Text(
                         l10n.notificationsCenterSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: StudioTokens.of(context).textSecondary,
                         ),
                       ),
                     ],
@@ -226,7 +229,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       Text(
                         l10n.notificationsCenterSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: StudioTokens.of(context).textSecondary,
                         ),
                       ),
                     ],
@@ -289,18 +292,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (filtered.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                l10n.notificationsEmptyFiltered,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: StudioEmptyState.noResults(
+                title: l10n.notificationsEmptyFiltered,
               ),
             )
           else
@@ -413,9 +408,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
 
   static const double _kComplianceFilterFieldWidth = 220;
 
-  TextStyle? _complianceMutedStyle(ThemeData theme) {
-    return theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
+  TextStyle? _complianceMutedStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: StudioTokens.of(context).textSecondary,
     );
   }
 
@@ -434,7 +429,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
               height: 1.3,
             ),
           ),
@@ -450,12 +445,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     ThemeData theme,
     AppLocalizations l10n,
   ) {
-    final muted = _complianceMutedStyle(theme);
+    final muted = _complianceMutedStyle(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -719,7 +714,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     ThemeData theme,
     AppLocalizations l10n,
   ) {
-    final muted = _complianceMutedStyle(theme);
+    final muted = _complianceMutedStyle(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -1023,7 +1018,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         border: Border.all(
           color: item.isUnread
               ? theme.colorScheme.primary.withValues(alpha: 0.35)
-              : theme.colorScheme.outlineVariant,
+              : studioPanelBorderColor(context),
         ),
         borderRadius: BorderRadius.circular(8),
         color: item.isUnread
@@ -1061,7 +1056,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               Text(
                 '${_notificationTypeLabel(l10n, item.notificationType)} · ${_formatDateTime(item.createdAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ],

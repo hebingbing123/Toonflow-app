@@ -146,48 +146,16 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: studio.panelGradient,
+        color: tokens.bgSurface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: tokens.surfaceHighlight),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: tokens.panelGlow.withValues(alpha: 0.08),
-            blurRadius: 24,
-            spreadRadius: -16,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          inline
-              ? 12
-              : narrow
-              ? 10
-              : widget.compact
-              ? 12
-              : 14,
-          inline
-              ? 8
-              : narrow
-              ? 10
-              : widget.compact
-              ? 10
-              : 12,
-          inline
-              ? 12
-              : narrow
-              ? 10
-              : widget.compact
-              ? 12
-              : 14,
-          inline
-              ? 8
-              : narrow
-              ? 10
-              : widget.compact
-              ? 10
-              : 12,
+          inline ? StudioSpacing.xs + 4 : StudioSpacing.xs + 2,
+          inline ? StudioSpacing.xs : StudioSpacing.xs + 2,
+          inline ? StudioSpacing.xs + 4 : StudioSpacing.xs + 2,
+          inline ? StudioSpacing.xs : StudioSpacing.xs + 2,
         ),
         child: inline
             ? _buildInlineHeader(context, tokens, studio, l10n, stepChips)
@@ -199,7 +167,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         _buildTitleBadge(context, tokens, studio, l10n),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           l10n.productPipelineStripSubtitle,
                           maxLines: 2,
@@ -213,7 +181,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
                     Row(
                       children: <Widget>[
                         _buildTitleBadge(context, tokens, studio, l10n),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: StudioSpacing.xs + 2),
                         Expanded(
                           child: Text(
                             l10n.productPipelineStripSubtitle,
@@ -225,13 +193,13 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
                         ),
                       ],
                     ),
-                  SizedBox(height: narrow ? 10 : 12),
+                  SizedBox(height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4),
                   _buildStepChipsRail(
                     context,
                     tokens,
                     stepChips,
                     framed: true,
-                    gap: narrow ? 6 : 8,
+                    gap: StudioSpacing.xs,
                   ),
                 ],
               ),
@@ -250,7 +218,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         _buildTitleBadge(context, tokens, studio, l10n),
-        const SizedBox(width: 10),
+        const SizedBox(width: StudioSpacing.xs + 2),
         Expanded(
           child: Text(
             l10n.productPipelineStripSubtitle,
@@ -261,14 +229,14 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
             ).textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: StudioSpacing.xs + 4),
         Flexible(
           child: _buildStepChipsRail(
             context,
             tokens,
             stepChips,
             framed: false,
-            gap: 5,
+            gap: StudioSpacing.xs - 3,
           ),
         ),
       ],
@@ -299,12 +267,13 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: tokens.surfaceHighlight.withValues(alpha: 0.94),
-        ),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.xs - 2,
+          vertical: StudioSpacing.xs - 3,
+        ),
         child: scroll,
       ),
     );
@@ -318,26 +287,25 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
   ) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: studio.signalGradient,
+        color: tokens.bgInset.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: tokens.primary.withValues(alpha: 0.34)),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.xs + 1,
+          vertical: StudioSpacing.xs / 2,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
-              Icons.hub_outlined,
-              size: 14,
-              color: Colors.white.withValues(alpha: 0.92),
-            ),
-            const SizedBox(width: 6),
+            Icon(Icons.hub_outlined, size: 14, color: tokens.textMuted),
+            const SizedBox(width: StudioSpacing.xs - 2),
             Text(
               l10n.productPipelineStripTitle,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.94),
+                fontWeight: FontWeight.w600,
+                color: tokens.textSecondary,
               ),
             ),
           ],

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_text_styles.dart';
+import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../../script_editor/support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 
 class ProjectScriptsWorkbenchDialogViewModel {
   const ProjectScriptsWorkbenchDialogViewModel({
@@ -140,13 +144,8 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                decoration: studioRecessedPanelDecoration(context),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -157,9 +156,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       model.diagnosis.detail,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                      style: studioHintStyle(context),
                     ),
                     const SizedBox(height: 8),
                     FilledButton.tonal(
@@ -251,10 +248,14 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (model.previewRows.isEmpty)
-                Text(
-                  model.scriptList.isEmpty
-                      ? l10n.projectEditorScriptsWorkbenchDialogContextPreviewEmpty
-                      : model.scriptList
+                model.scriptList.isEmpty
+                    ? StudioEmptyState.emptyData(
+                        title: l10n
+                            .projectEditorScriptsWorkbenchDialogContextPreviewEmpty,
+                        icon: Icons.article_outlined,
+                      )
+                    : Text(
+                        model.scriptList
                             .take(6)
                             .map(
                               (script) =>
@@ -265,8 +266,8 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                                   ),
                             )
                             .join('\n'),
-                  style: Theme.of(context).textTheme.bodySmall,
-                )
+                        style: Theme.of(context).textTheme.bodySmall,
+                      )
               else
                 ...model.previewRows
                     .take(6)

@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 AppLocalizations _previewPlayerL10n(BuildContext context) =>
     AppLocalizations.of(context) ?? lookupAppLocalizations(const Locale('en'));
@@ -473,9 +474,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: StudioTokens.of(context).textSecondary,
                               ),
                         ),
                       ],
@@ -555,9 +554,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             l10n.shortVideoPreviewPlayerOverallProgress,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: StudioTokens.of(context).textSecondary,
                                 ),
                           ),
                           const SizedBox(width: 8),
@@ -589,9 +586,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           Icon(
                             Icons.movie,
                             size: 16,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: StudioTokens.of(context).textSecondary,
                           ),
                         if (_isPlaylistMode) const SizedBox(width: 8),
                         Text(

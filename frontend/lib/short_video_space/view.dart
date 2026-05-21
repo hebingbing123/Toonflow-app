@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/layout_breakpoints.dart';
+import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -708,6 +711,7 @@ class DeliveryModeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
 
     Color bgColor;
@@ -716,23 +720,23 @@ class DeliveryModeBadge extends StatelessWidget {
 
     switch (deliveryMode.toLowerCase()) {
       case 'live':
-        bgColor = Colors.green.shade100;
-        textColor = Colors.green.shade900;
+        bgColor = tokens.success.withValues(alpha: 0.18);
+        textColor = tokens.success;
         icon = Icons.check_circle;
         break;
       case 'sandbox':
-        bgColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade800;
+        bgColor = tokens.bgInset;
+        textColor = tokens.textMuted;
         icon = Icons.warning_amber;
         break;
       case 'manual_bridge':
-        bgColor = Colors.blue.shade100;
-        textColor = Colors.blue.shade900;
+        bgColor = tokens.primarySoft.withValues(alpha: 0.9);
+        textColor = tokens.signal;
         icon = Icons.person;
         break;
       default:
-        bgColor = Colors.orange.shade100;
-        textColor = Colors.orange.shade900;
+        bgColor = tokens.warning.withValues(alpha: 0.18);
+        textColor = tokens.warning;
         icon = Icons.help_outline;
     }
     final label = shortVideoDeliveryModeLabel(l10n, deliveryMode);
@@ -748,7 +752,7 @@ class DeliveryModeBadge extends StatelessWidget {
           label,
           style: theme.textTheme.labelSmall?.copyWith(
             color: textColor,
-            fontSize: 10,
+            fontSize: StudioTypography.of(context).meta,
           ),
         ),
       );
@@ -1005,7 +1009,7 @@ class ShortVideoSpaceView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!_compactEmbed) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.section),
           StudioPaneHeader(
             title: l10n.shortVideoSpacePageTitle,
             subtitle: l10n.shortVideoSpacePageSubtitle,
@@ -1016,10 +1020,10 @@ class ShortVideoSpaceView extends StatelessWidget {
             ),
           ),
           if (desktopCapabilityPanel != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioLayoutSpacing.section),
             desktopCapabilityPanel!,
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.section),
           _Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1039,7 +1043,7 @@ class ShortVideoSpaceView extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.section),
           _ProjectSelectorPanel(
             mode: mode,
             onModeChanged: onModeChanged,
@@ -1083,7 +1087,7 @@ class ShortVideoSpaceView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                if (!_compactEmbed) const SizedBox(height: 16),
+                if (!_compactEmbed) const SizedBox(height: StudioLayoutSpacing.section),
                 _Panel(
                   dense: _compactEmbed,
                   child: _OverviewMigrationPanel(
@@ -1106,7 +1110,8 @@ class ShortVideoSpaceView extends StatelessWidget {
           ),
         ],
         if (_showAssemblyPanels || _showQualityPanels) ...[
-          if (!_compactEmbed || _showQualityPanels) const SizedBox(height: 16),
+          if (!_compactEmbed || _showQualityPanels)
+            const SizedBox(height: StudioLayoutSpacing.section),
           _ProductionPanel(
             dense: _compactEmbed,
             assetsOverviewPanelUi: assetsOverviewPanelUi,
@@ -1158,21 +1163,22 @@ class ShortVideoSpaceView extends StatelessWidget {
         if (!_compactEmbed) ...[
           if (projectCharactersPanel != null) ...[
             projectCharactersPanel!,
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioLayoutSpacing.section),
           ],
           if (shortVideoTimelinePanel != null) ...[
             shortVideoTimelinePanel!,
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioLayoutSpacing.section),
           ],
           _CandidateComparePanel(
             candidateCardUi: candidateCardUi,
             candidateComparePanelUi: candidateComparePanelUi,
             onOpenProjectsForCandidateAssets: onOpenProjectsForCandidateAssets,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.section),
           _Panel(
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final tokens = StudioTokens.of(context);
                 final sideBySide =
                     constraints.maxWidth >= kStudioTwoColumnMinWidth;
 
@@ -1327,7 +1333,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Expanded(flex: 3, child: modeReadinessBlock),
-                      const SizedBox(width: 28),
+                      const SizedBox(width: StudioLayoutSpacing.section + 4),
                       Expanded(flex: 2, child: shotReadinessBlock),
                     ],
                   );
@@ -1337,12 +1343,12 @@ class ShortVideoSpaceView extends StatelessWidget {
                   children: <Widget>[
                     modeReadinessBlock,
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: StudioLayoutSpacing.section - 4,
+                      ),
                       child: Divider(
                         height: 1,
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.65,
-                        ),
+                        color: tokens.borderSubtle,
                       ),
                     ),
                     shotReadinessBlock,
@@ -1351,10 +1357,11 @@ class ShortVideoSpaceView extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioLayoutSpacing.section),
           _Panel(
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final tokens = StudioTokens.of(context);
                 final sideBySide =
                     constraints.maxWidth >= kStudioTwoColumnMinWidth;
                 final nextStepBlock = Column(
@@ -1382,7 +1389,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Expanded(flex: 4, child: nextStepBlock),
-                      const SizedBox(width: 28),
+                      const SizedBox(width: StudioLayoutSpacing.section + 4),
                       Expanded(flex: 8, child: stageFlow),
                     ],
                   );
@@ -1392,12 +1399,12 @@ class ShortVideoSpaceView extends StatelessWidget {
                   children: <Widget>[
                     nextStepBlock,
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: StudioLayoutSpacing.section - 4,
+                      ),
                       child: Divider(
                         height: 1,
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.65,
-                        ),
+                        color: tokens.borderSubtle,
                       ),
                     ),
                     stageFlow,
@@ -1420,12 +1427,15 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline;
+    final tokens = StudioTokens.of(context);
     return Container(
-      padding: EdgeInsets.all(dense ? 12 : 16),
+      padding: EdgeInsets.all(
+        dense ? StudioLayoutSpacing.cardInner - 4 : StudioLayoutSpacing.cardInner,
+      ),
       decoration: BoxDecoration(
-        border: Border.all(color: outline),
-        borderRadius: BorderRadius.circular(8),
+        color: tokens.bgSurface.withValues(alpha: 0.96),
+        border: Border.all(color: tokens.borderSubtle),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
       ),
       child: child,
     );
@@ -1606,7 +1616,7 @@ class _StageFlowStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final tokens = StudioTokens.of(context);
     final muted = studioMutedTextColor(context);
     return _HorizontalFlowLane(
       nodeWidth: _nodeWidth,
@@ -1619,14 +1629,14 @@ class _StageFlowStrip extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(card.title, style: theme.textTheme.titleSmall),
+                    Text(card.title, style: studioControlLabelStyle(context)),
                     const SizedBox(height: 2),
                     Text(
                       card.status,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: scheme.primary,
+                        color: tokens.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1656,13 +1666,13 @@ class _FlowNodeShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final tokens = StudioTokens.of(context);
     return SizedBox.expand(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-          border: Border.all(color: scheme.outlineVariant),
-          borderRadius: BorderRadius.circular(8),
+          color: tokens.bgInset.withValues(alpha: 0.88),
+          border: Border.all(color: tokens.borderSubtle),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1681,7 +1691,7 @@ class _CandidateCompareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final border = theme.colorScheme.outlineVariant;
+    final tokens = StudioTokens.of(context);
     final muted = studioMutedTextColor(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final header = item.scriptNumericId != null
@@ -1697,13 +1707,14 @@ class _CandidateCompareCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: border),
-          borderRadius: BorderRadius.circular(8),
+          color: tokens.bgSurface.withValues(alpha: 0.96),
+          border: Border.all(color: tokens.borderSubtle),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(header, style: theme.textTheme.titleSmall),
+            Text(header, style: studioCardTitleStyle(context)),
             const SizedBox(height: 8),
             Text(item.readinessLine, style: theme.textTheme.bodySmall),
             const SizedBox(height: 4),
@@ -1827,17 +1838,22 @@ class _MetricChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.xs + 2,
+        vertical: StudioSpacing.xs / 2 + 2,
+      ),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outline),
-        borderRadius: BorderRadius.circular(8),
+        color: tokens.bgInset.withValues(alpha: 0.72),
+        border: Border.all(color: tokens.borderSubtle),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
       ),
       child: Text(
         resolveAppLocalizationsForErrors(
           context,
         ).shortVideoMetricChipLine(label, value),
-        style: theme.textTheme.labelMedium,
+        style: theme.textTheme.labelMedium?.copyWith(color: tokens.textSecondary),
       ),
     );
   }
@@ -1887,15 +1903,15 @@ class _ReadinessFlowNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final tokens = StudioTokens.of(context);
     final muted = studioMutedTextColor(context);
-    final accent = item.ready ? scheme.primary : muted;
+    final accent = item.ready ? tokens.primary : muted;
     final border = item.ready
-        ? scheme.primary.withValues(alpha: 0.42)
-        : scheme.outlineVariant;
+        ? tokens.primary.withValues(alpha: 0.45)
+        : tokens.borderSubtle;
     final fill = item.ready
-        ? scheme.primaryContainer.withValues(alpha: 0.35)
-        : scheme.surfaceContainerHighest.withValues(alpha: 0.45);
+        ? tokens.primarySoft.withValues(alpha: 0.85)
+        : tokens.bgInset.withValues(alpha: 0.88);
     return SizedBox.expand(
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -1923,9 +1939,7 @@ class _ReadinessFlowNode extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: item.ready
-                          ? scheme.onPrimaryContainer
-                          : scheme.onSurface,
+                      color: item.ready ? tokens.textPrimary : tokens.textSecondary,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),

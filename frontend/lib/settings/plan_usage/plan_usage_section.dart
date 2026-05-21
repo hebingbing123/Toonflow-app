@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
@@ -148,7 +149,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
                 Text(
                   l10n.studioPlanUsageEstimateDisclaimer,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
               ],

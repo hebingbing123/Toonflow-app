@@ -21,7 +21,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
         Text(
           l10n.projectEditorAssetsCompatibilityImagesSectionLabel,
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.outline,
+            color: studioPanelMutedColor(ctx),
           ),
         ),
         Wrap(

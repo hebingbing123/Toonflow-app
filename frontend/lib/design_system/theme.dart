@@ -124,11 +124,11 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: tokens.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        shadowColor: tokens.panelGlow.withValues(alpha: 0.34),
+        shadowColor: Colors.transparent,
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+        tapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
@@ -140,6 +140,17 @@ ThemeData buildStudioDarkTheme({
         ),
       ),
     ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(
+          StudioSpacing.iconTouchTarget,
+          StudioSpacing.iconTouchTarget,
+        ),
+        tapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
+        iconSize: 22,
+      ),
+    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: tokens.textPrimary,
@@ -147,8 +158,8 @@ ThemeData buildStudioDarkTheme({
         side: BorderSide(color: tokens.surfaceHighlight),
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+        tapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
@@ -164,8 +175,8 @@ ThemeData buildStudioDarkTheme({
         foregroundColor: tokens.accent,
         padding: typography.textButtonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+        tapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
         textStyle: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: typography.label,
@@ -215,7 +226,7 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
         elevation: const WidgetStatePropertyAll<double>(16),
         shadowColor: WidgetStatePropertyAll<Color>(
-          tokens.panelGlow.withValues(alpha: 0.2),
+          Colors.black.withValues(alpha: 0.42),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
           Colors.transparent,
@@ -235,7 +246,7 @@ ThemeData buildStudioDarkTheme({
       color: tokens.bgElevated,
       surfaceTintColor: Colors.transparent,
       elevation: 16,
-      shadowColor: tokens.panelGlow.withValues(alpha: 0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.42),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         side: BorderSide(color: tokens.surfaceHighlight),
@@ -277,7 +288,7 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
         elevation: const WidgetStatePropertyAll<double>(16),
         shadowColor: WidgetStatePropertyAll<Color>(
-          tokens.panelGlow.withValues(alpha: 0.2),
+          Colors.black.withValues(alpha: 0.42),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
           Colors.transparent,

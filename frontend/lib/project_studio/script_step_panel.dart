@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/novels/support.dart';
@@ -258,7 +259,7 @@ class _ProjectStudioScriptStepPanelState
   Widget _buildNovelTab(BuildContext context, AppLocalizations l10n) {
     final novels = _novelsRef[0]?.items ?? const <NovelRow>[];
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -273,15 +274,12 @@ class _ProjectStudioScriptStepPanelState
             ),
           ),
           if (novels.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
             Text(
               l10n.studioScriptStepNovelsSectionTitle,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
+              style: studioInsetSectionTitleStyle(context),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             buildProjectNovelsWorkbenchSection(
               ctx: context,
               l10n: l10n,
@@ -316,25 +314,20 @@ class _ProjectStudioScriptStepPanelState
 
   Widget _buildExtractTab(BuildContext context, AppLocalizations l10n) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
             l10n.studioScriptStepTabExtract,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
+            style: studioInsetSectionTitleStyle(context),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle - 2),
           Text(
             l10n.studioScriptStepExtractBody,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: studioHintStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
           _buildScriptsSection(context, l10n),
         ],
       ),
@@ -347,7 +340,7 @@ class _ProjectStudioScriptStepPanelState
       return const Center(child: CircularProgressIndicator());
     }
     if (_loadError != null) {
-      return StudioEmptyState(
+      return StudioEmptyState.emptyData(
         icon: Icons.cloud_off_outlined,
         title: l10n.studioScriptStepLoadErrorTitle,
         subtitle: _loadError!,
@@ -374,7 +367,7 @@ class _ProjectStudioScriptStepPanelState
               children: <Widget>[
                 _buildNovelTab(context, l10n),
                 SingleChildScrollView(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
                   child: _buildScriptsSection(context, l10n),
                 ),
                 _buildExtractTab(context, l10n),
@@ -415,13 +408,15 @@ class _ProjectStudioScriptStepPanelState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      padding: const EdgeInsets.fromLTRB(
+                        StudioLayoutSpacing.cardInner - 4,
+                        StudioSpacing.xs,
+                        StudioLayoutSpacing.cardInner - 4,
+                        0,
+                      ),
                       child: Text(
                         l10n.productAgentScriptWorkspaceTitle,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: studioPaneTitleStyle(context),
                       ),
                     ),
                     Expanded(child: widget.agentWorkspace),

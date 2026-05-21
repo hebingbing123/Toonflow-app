@@ -97,7 +97,8 @@ class _StudioAgentDrawerBody extends StatelessWidget {
                   },
                 );
               },
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: StudioSpacing.xs + 2),
               itemCount: agents.length,
             ),
           ),
@@ -128,11 +129,16 @@ class _StudioAgentDrawerHeader extends StatelessWidget {
             child: Text(title, style: studioDialogTitleStyle(context)),
           ),
           IconButton(
-            visualDensity: VisualDensity.compact,
             tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
             style: IconButton.styleFrom(
               backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),
               foregroundColor: tokens.textSecondary,
+              minimumSize: const Size(
+                StudioSpacing.iconTouchTarget,
+                StudioSpacing.iconTouchTarget,
+              ),
+              tapTargetSize: MaterialTapTargetSize.padded,
+              visualDensity: VisualDensity.standard,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(color: tokens.surfaceHighlight),

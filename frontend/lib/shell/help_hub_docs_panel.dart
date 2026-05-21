@@ -263,22 +263,24 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                           if (errorText.isNotEmpty)
                             Text(
                               errorText,
-                              style: const TextStyle(color: Colors.red),
+                              style: TextStyle(
+                                color: StudioTokens.of(ctx).danger,
+                              ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       if (activeItems.isEmpty)
-                        Text(
-                          dl10n.helpHubNoCustomInScope,
-                          style: Theme.of(ctx).textTheme.bodySmall,
+                        StudioEmptyState.emptyData(
+                          title: dl10n.helpHubNoCustomInScope,
+                          icon: Icons.link_off_outlined,
                         ),
                       ...activeItems.asMap().entries.map((entry) {
                         final idx = entry.key;
                         final item = entry.value;
                         return Card(
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
                             child: Row(
                               children: [
                                 Expanded(
@@ -299,6 +301,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 ),
                                 const SizedBox(width: 8),
                                 IconButton(
+                                  style: studioUtilityIconButtonStyle(ctx),
                                   tooltip: dl10n
                                       .notificationsComplianceTooltipMoveUp,
                                   onPressed: (_savingHelpHubLinks || idx == 0)
@@ -312,6 +315,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                   icon: const Icon(Icons.arrow_upward),
                                 ),
                                 IconButton(
+                                  style: studioUtilityIconButtonStyle(ctx),
                                   tooltip: dl10n
                                       .notificationsComplianceTooltipMoveDown,
                                   onPressed:
@@ -327,6 +331,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                   icon: const Icon(Icons.arrow_downward),
                                 ),
                                 IconButton(
+                                  style: studioUtilityIconButtonStyle(ctx),
                                   tooltip: dl10n.notificationsActionDelete,
                                   onPressed: _savingHelpHubLinks
                                       ? null
@@ -452,7 +457,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
     final filteredHelpHubLinks = _filteredHelpHubLinks();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -499,7 +504,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               _error == kProductShellSignInErrorPlaceholder
                   ? l10n.platformConfigPleaseSignIn
                   : _error!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: StudioTokens.of(context).danger),
             ),
           const SizedBox(height: 8),
           TextField(
@@ -511,16 +516,18 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
           if (_resp != null)
             Text(_helpHubInventorySummary(l10n, filteredHelpHubLinks)),
           if (_resp != null && _resp!.items.isEmpty)
-            Text(
-              l10n.helpHubNoEffectiveLinks,
-              style: Theme.of(context).textTheme.bodySmall,
+            StudioEmptyState.emptyData(
+              title: l10n.helpHubNoEffectiveLinks,
+              icon: Icons.menu_book_outlined,
             ),
           if (_resp != null &&
               _resp!.items.isNotEmpty &&
               filteredHelpHubLinks.isEmpty)
-            Text(
-              l10n.helpHubSearchEmpty,
-              style: Theme.of(context).textTheme.bodySmall,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: StudioEmptyState.noResults(
+                title: l10n.helpHubSearchEmpty,
+              ),
             ),
           if (_resp != null && filteredHelpHubLinks.isNotEmpty)
             ConstrainedBox(
@@ -532,7 +539,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                   final item = filteredHelpHubLinks[index];
                   return Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -558,6 +565,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             runSpacing: 8,
                             children: [
                               IconButton(
+                                style: studioUtilityIconButtonStyle(context),
                                 tooltip: l10n.helpHubCopyLinkTooltip,
                                 onPressed: () async {
                                   await Clipboard.setData(
@@ -573,6 +581,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 icon: const Icon(Icons.copy),
                               ),
                               IconButton(
+                                style: studioUtilityIconButtonStyle(context),
                                 tooltip: l10n.helpHubCopyTitleUrlTooltip,
                                 onPressed: () async {
                                   await Clipboard.setData(

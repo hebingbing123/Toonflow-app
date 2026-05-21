@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
@@ -178,7 +181,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           Text(
             l10n.adminConsoleIntro,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -186,7 +189,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outlineVariant),
+              border: Border.all(color: studioPanelBorderColor(context)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Wrap(
@@ -291,7 +294,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -300,11 +303,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           Text(title, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           if (children.isEmpty)
-            Text(
-              emptyText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            StudioEmptyState.emptyData(
+              title: emptyText,
+              icon: Icons.manage_search_outlined,
             )
           else
             ...children,
@@ -551,7 +552,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   detail.dailyJobQuotaOverride!,
                 ),
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -669,7 +670,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(
           l10n.adminConsoleWorkspaceContextRepairIntro,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -752,14 +753,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           Text(
             l10n.adminConsoleWorkspaceGovernancePersonalHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           )
         else
           Text(
             l10n.adminConsoleWorkspaceGovernanceEnterpriseHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
         const SizedBox(height: 8),
@@ -910,7 +911,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(
           l10n.adminConsoleWorkspaceMemberRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1024,7 +1025,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   Text(
                     l10n.adminConsoleOwnerTransferHint,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                   ),
               ],
@@ -1055,7 +1056,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? l10n.adminConsoleWorkspaceOwnerRemediationPersonalHint
               : l10n.adminConsoleWorkspaceOwnerRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         if (!isPersonal) ...[
@@ -1162,11 +1163,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: 8),
         if (detail.projectAclSummaries.isEmpty)
-          Text(
-            l10n.adminConsoleNoProjectAclSummary,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+          StudioEmptyState.emptyData(
+            title: l10n.adminConsoleNoProjectAclSummary,
+            icon: Icons.shield_outlined,
           )
         else
           ...detail.projectAclSummaries.map(
@@ -1251,7 +1250,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(
           l10n.adminConsoleBatchProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1503,7 +1502,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(
           l10n.adminConsoleProjectOwnerRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1559,7 +1558,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(
           l10n.adminConsoleProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1792,7 +1791,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1845,11 +1844,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         Text(title, style: theme.textTheme.titleSmall),
         const SizedBox(height: 6),
         if (items.isEmpty)
-          Text(
-            l10n.adminConsoleNoData,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+          StudioEmptyState.emptyData(
+            title: l10n.adminConsoleNoData,
+            icon: Icons.inbox_outlined,
           )
         else
           ...items.map(

@@ -496,7 +496,7 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
     ),
     elevation: const WidgetStatePropertyAll<double>(16),
     shadowColor: WidgetStatePropertyAll<Color>(
-      tokens.panelGlow.withValues(alpha: 0.22),
+      Colors.black.withValues(alpha: 0.42),
     ),
     backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
     surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),

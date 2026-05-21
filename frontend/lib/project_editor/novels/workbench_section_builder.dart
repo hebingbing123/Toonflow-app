@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_text_styles.dart';
+import '../../../design_system/tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'support.dart';
@@ -30,14 +33,8 @@ Widget buildProjectNovelsWorkbenchSection({
 
   return Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
-      borderRadius: BorderRadius.circular(12),
-      color: Theme.of(
-        ctx,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-    ),
+    padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+    decoration: studioInsetPanelDecoration(ctx),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,9 +45,7 @@ Widget buildProjectNovelsWorkbenchSection({
         const SizedBox(height: 4),
         Text(
           l10n.projectEditorNovelsWorkbenchStudioCrossLink,
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-          ),
+          style: studioHintStyle(ctx),
         ),
         const SizedBox(height: 4),
         Text(
@@ -63,16 +58,14 @@ Widget buildProjectNovelsWorkbenchSection({
                   last!.numericId,
                   last.chapter,
                 ),
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-          ),
+          style: studioHintStyle(ctx),
         ),
         if (novels.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
             intakeSummaryLine,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(ctx).textSecondary,
             ),
           ),
         ],

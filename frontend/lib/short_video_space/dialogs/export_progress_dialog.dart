@@ -372,6 +372,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Widget build(BuildContext context) {
     final progress = _progress;
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
 
     return StudioAlertDialog(
@@ -435,7 +436,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   progress.status == ExportTaskStatus.failed
                       ? theme.colorScheme.error
                       : progress.status == ExportTaskStatus.completed
-                          ? Colors.green
+                          ? StudioTokens.of(context).success
                           : theme.colorScheme.primary,
                 ),
               ),
@@ -482,14 +483,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     Icon(
                       _getStatusIcon(progress.status),
                       size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: tokens.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _getStatusMessage(progress, l10n),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: tokens.textSecondary,
                         ),
                       ),
                     ),
@@ -534,7 +535,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 widget.taskId,
               ),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: tokens.textSecondary,
                 fontFamily: 'monospace',
               ),
             ),
@@ -546,7 +547,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
               title: Text(
                 l10n.qualityReviewsFreshnessShowDetails,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: tokens.textSecondary,
                 ),
               ),
               children: [
@@ -555,7 +556,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     widget.taskId,
                   ),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: tokens.textSecondary,
                     fontFamily: 'monospace',
                   ),
                 ),

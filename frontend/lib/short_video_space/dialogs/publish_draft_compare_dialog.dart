@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -111,7 +112,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
               Text(
                 l10n.shortVideoPublishDraftCompareIntro,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
+                  color: studioPanelMutedColor(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -250,7 +251,7 @@ class _DraftCompareCard extends StatelessWidget {
             child: Text(
               k,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.outline,
+                color: studioPanelMutedColor(context),
               ),
             ),
           ),

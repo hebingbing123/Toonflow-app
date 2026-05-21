@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
+import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
@@ -513,14 +514,13 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                           )
                         else if (_shots.isEmpty)
                           Expanded(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Text(
-                                  l10n.studioStoryboardStudioNoShots,
-                                  textAlign: TextAlign.center,
-                                ),
+                            child: StudioEmptyState.firstUse(
+                              title: l10n.studioStoryboardStudioNoShots,
+                              icon: Icons.view_comfy_alt_outlined,
+                              actionLabel: l10n.projectStudioOpenStep(
+                                l10n.studioStepScriptShort,
                               ),
+                              onAction: _openScriptStep,
                             ),
                           )
                         else

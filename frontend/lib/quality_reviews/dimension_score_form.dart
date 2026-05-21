@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
+import '../design_system/tokens.dart';
 
 // ---------------------------------------------------------------------------
 // Compile-time constant: rubric version from docs/plans/quality-rubric.md
@@ -170,7 +171,7 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
           child: Text(
             l10n.qualityReviewsRubricVersionLine(kRubricVersion),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
         ),
@@ -248,7 +249,7 @@ class _DimensionRow extends StatelessWidget {
                   Text(
                     skipLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                   ),
                   Checkbox(
@@ -327,7 +328,7 @@ class DimensionScoreDisplayWidget extends StatelessWidget {
       return Text(
         l10n.qualityReviewsDimensionScoreEmpty,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          color: StudioTokens.of(context).textSecondary,
         ),
       );
     }

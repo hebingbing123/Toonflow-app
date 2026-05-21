@@ -18,8 +18,6 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
-    final bodySmall = Theme.of(context).textTheme.bodySmall;
     final scopeHint = filterScriptNumericId == null
         ? l10n.projectEditorAssetGenWorkbenchSelectionScopeGlobal
         : l10n.projectEditorAssetGenWorkbenchSelectionScopeFiltered(filterScriptNumericId!);
@@ -28,7 +26,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
       children: [
         Text(
           scopeHint,
-          style: bodySmall?.copyWith(color: outline),
+          style: studioHintStyle(context),
         ),
         const SizedBox(height: 12),
         SizedBox(

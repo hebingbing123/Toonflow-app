@@ -5,6 +5,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/studio_typography.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -238,27 +240,28 @@ class PanelConsistencyAlert extends StatelessWidget {
     Color textColor;
     IconData icon;
 
+    final tokens = StudioTokens.of(context);
     switch (severity) {
       case StaleSeverity.info:
-        backgroundColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade900;
+        backgroundColor = tokens.signal.withValues(alpha: 0.14);
+        textColor = tokens.signal;
         icon = Icons.info_outline;
         break;
       case StaleSeverity.warning:
-        backgroundColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade900;
+        backgroundColor = tokens.warning.withValues(alpha: 0.14);
+        textColor = tokens.warning;
         icon = Icons.warning_amber_outlined;
         break;
       case StaleSeverity.error:
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade900;
+        backgroundColor = tokens.danger.withValues(alpha: 0.14);
+        textColor = tokens.danger;
         icon = Icons.error_outline;
         break;
     }
 
     return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(StudioSpacing.xs),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
@@ -299,7 +302,7 @@ class PanelConsistencyAlert extends StatelessWidget {
                         ),
                         style: TextStyle(
                           color: textColor.withValues(alpha: 0.8),
-                          fontSize: 11,
+                          fontSize: StudioTypography.of(context).meta,
                         ),
                       ),
                     ),

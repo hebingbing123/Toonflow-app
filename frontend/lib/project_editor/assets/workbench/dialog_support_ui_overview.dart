@@ -42,13 +42,8 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
         ],
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+          decoration: studioInsetPanelDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

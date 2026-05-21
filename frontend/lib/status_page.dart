@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'config.dart';
 import 'l10n/native_bridge_startup_labels.dart';
 import 'l10n/studio_code_labels.dart';
+import 'design_system/components/studio_surfaces.dart';
 import 'design_system/components/studio_text_styles.dart';
 import 'design_system/tokens.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
@@ -168,7 +169,7 @@ class _StatusPageState extends State<StatusPage> {
               SelectableText(
                 l10n.statusPageApiBaseLabel(kApiBaseUrl),
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ],
@@ -385,7 +386,7 @@ class _MetricTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

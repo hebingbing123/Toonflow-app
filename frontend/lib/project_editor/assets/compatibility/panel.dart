@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_text_styles.dart';
 import '../../../rust_api.dart';
 
 /// Renders collapsed asset probe actions for project editor diagnostics.
@@ -48,9 +49,7 @@ class ProjectAssetsCompatibilityPanel extends StatelessWidget {
       title: Text(l10n.projectEditorAssetsCompatibilityPanelTitle),
       subtitle: Text(
         l10n.projectEditorAssetsCompatibilityPanelSubtitle,
-        style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-          color: Theme.of(ctx).colorScheme.outline,
-        ),
+        style: studioHintStyle(ctx),
       ),
       children: [
         buildImagesSection(),

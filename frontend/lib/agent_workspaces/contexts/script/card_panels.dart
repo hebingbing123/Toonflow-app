@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
 import 'support.dart';
@@ -42,7 +43,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -131,7 +132,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[

@@ -164,6 +164,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final tokens = StudioTokens.of(context);
     final estimatedSize = _calculateEstimatedFileSize();
 
     return StudioAlertDialog(
@@ -365,16 +366,14 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     Icon(
                       Icons.info_outline,
                       size: 20,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: tokens.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         l10n.shortVideoExportSettingsExportTimeHint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: tokens.textSecondary,
                             ),
                       ),
                     ),

@@ -36,7 +36,7 @@ class StudioReviewPackTeamSummary extends StatelessWidget {
             rollup.pending,
           ),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
             height: 1.35,
           ),
         ),

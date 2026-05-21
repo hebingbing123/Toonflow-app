@@ -198,7 +198,7 @@ class _StoryboardVideoSection extends StatelessWidget {
         Text(
           l10n.storyboardVideoWorkbenchPatchAttributionHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
+            color: studioPanelMutedColor(context),
           ),
         ),
         const SizedBox(height: 4),
@@ -299,14 +299,14 @@ class _StoryboardVideoSection extends StatelessWidget {
           Text(
             buildStoryboardVideoPromptSourceSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
+              color: studioPanelMutedColor(context),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             buildStoryboardVideoPromptAnchorSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
+              color: studioPanelMutedColor(context),
             ),
           ),
           const SizedBox(height: 2),
@@ -479,7 +479,7 @@ class _StoryboardVideoSection extends StatelessWidget {
         Text(
           l10n.storyboardVideoWorkbenchSingleTrackHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
+            color: studioPanelMutedColor(context),
           ),
         ),
         if (latestExportJob != null) ...[
@@ -520,7 +520,7 @@ class _StoryboardVideoSection extends StatelessWidget {
               ? l10n.storyboardVideoWorkbenchSelectedVideoDetailSelected
               : l10n.storyboardVideoWorkbenchSelectedVideoDetailEmpty,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
+            color: studioPanelMutedColor(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -559,16 +559,17 @@ class _StoryboardVideoSection extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
-        Text(
-          storyboardVideos.isEmpty
-              ? l10n.storyboardVideoWorkbenchCandidatesEmpty
-              : l10n.storyboardVideoWorkbenchCandidatesDetail,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
+        if (storyboardVideos.isEmpty)
+          StudioEmptyState.emptyData(
+            title: l10n.storyboardVideoWorkbenchCandidatesEmpty,
+          )
+        else ...<Widget>[
+          Text(
+            l10n.storyboardVideoWorkbenchCandidatesDetail,
+            style: studioHintStyle(context),
           ),
-        ),
-        const SizedBox(height: 8),
-        ...storyboardVideos.take(3).map((video) {
+          const SizedBox(height: 8),
+          ...storyboardVideos.take(3).map((video) {
           final state = video.state ?? '';
           final duration = video.duration ?? '';
           final videoUrl = video.videoUrl?.trim() ?? '';
@@ -639,6 +640,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ],
           );
         }),
+        ],
         if (generateData != null &&
             (generateData!.generatingJobs.isNotEmpty ||
                 generateData!.videoWritebackSummary.inFlightGenerationJobCount >

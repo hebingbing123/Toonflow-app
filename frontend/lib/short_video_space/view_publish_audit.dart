@@ -12,7 +12,6 @@ class _PublishAuditPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     
     if (!publishPanelUi.visible ||
         publishPanelUi.loading ||
@@ -27,7 +26,9 @@ class _PublishAuditPanel extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           l10n.shortVideoPublishAuditOverviewTitle,
-          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: studioPanelMutedColor(context),
+          ),
         ),
         const SizedBox(height: 6),
         // P11: Delivery mode breakdown

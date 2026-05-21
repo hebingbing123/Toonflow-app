@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_empty_state.dart';
+import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_text_styles.dart';
+import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import '../../storyboard_editor/support/diagnosis.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -57,7 +61,6 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     return StudioAlertDialog(
       title: Text(l10n.scriptEditorStoryboardsDialogTitle(model.boardsList.length)),
       content: SizedBox(
@@ -71,26 +74,19 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                 model.boardsList.isEmpty
                     ? l10n.scriptEditorStoryboardsIntroEmpty
                     : l10n.scriptEditorStoryboardsIntroHasBoards,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 8),
               Text(
                 model.productionSummaryLine ??
                     l10n.scriptEditorStoryboardsProductionSummaryPending,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: outline.withValues(alpha: 0.4)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                decoration: studioRecessedPanelDecoration(context),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -108,7 +104,9 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                       ),
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: outline),
+                      ).textTheme.bodySmall?.copyWith(
+                        color: studioPanelMutedColor(context),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -171,13 +169,8 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
               SizedBox(
                 height: 320,
                 child: model.boardsList.isEmpty
-                    ? Center(
-                        child: Text(
-                          l10n.scriptEditorStoryboardsEmptyList,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(color: outline),
-                        ),
+                    ? StudioEmptyState.emptyData(
+                        title: l10n.scriptEditorStoryboardsEmptyList,
                       )
                     : ListView.builder(
                         shrinkWrap: true,

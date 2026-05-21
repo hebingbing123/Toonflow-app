@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
@@ -118,7 +119,7 @@ class SearchResultCard extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
+          color: StudioTokens.of(context).textSecondary,
         ),
         children: parts,
       ),
@@ -206,20 +207,20 @@ class SearchResultCard extends StatelessWidget {
                     Icon(
                       Icons.access_time,
                       size: 14,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       _formatTime(l10n, context, result.updatedAt),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: StudioTokens.of(context).textSecondary,
                       ),
                     ),
                     const Spacer(),
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 14,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                   ],
                 ),

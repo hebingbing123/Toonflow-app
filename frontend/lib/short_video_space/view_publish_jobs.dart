@@ -11,7 +11,6 @@ class _PublishJobsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final l10n = resolveAppLocalizationsForErrors(context);
     
     if (!publishPanelUi.visible ||
@@ -29,7 +28,9 @@ class _PublishJobsPanel extends StatelessWidget {
           children: [
             Text(
               l10n.shortVideoSpacePublishJobs,
-              style: theme.textTheme.labelSmall?.copyWith(color: outline),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: studioPanelMutedColor(context),
+              ),
             ),
             const Spacer(),
             // P11: Delivery mode filter chips

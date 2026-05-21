@@ -5,6 +5,7 @@ import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/tokens.dart';
 import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../platform/studio_load_state.dart';
@@ -114,7 +115,7 @@ class JobsSectionView extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final compact = MediaQuery.sizeOf(context).width < 520;
     final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      color: StudioTokens.of(context).textSecondary,
       height: 1.35,
     );
     return Column(

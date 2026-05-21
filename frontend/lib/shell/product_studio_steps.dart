@@ -16,10 +16,11 @@ extension _HomePageProductStudioSteps on _HomePageState {
         project == null ||
         project.id.isEmpty) {
       return Center(
-        child: Text(
-          resolveAppLocalizationsForErrors(
+        child: StudioEmptyState.emptyData(
+          title: resolveAppLocalizationsForErrors(
             context,
           ).studioScriptStepScopeMissing,
+          icon: Icons.folder_off_outlined,
         ),
       );
     }
@@ -133,7 +134,12 @@ extension _HomePageProductStudioSteps on _HomePageState {
             artToken == null ||
             artToken.isEmpty ||
             artRow.id.isEmpty) {
-          return Center(child: Text(l10n.studioScriptStepScopeMissing));
+          return Center(
+            child: StudioEmptyState.emptyData(
+              title: l10n.studioScriptStepScopeMissing,
+              icon: Icons.folder_off_outlined,
+            ),
+          );
         }
         return ProjectStudioArtStepPanel(
           accessToken: artToken,

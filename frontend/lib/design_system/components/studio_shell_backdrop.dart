@@ -25,10 +25,8 @@ class StudioShellBackdrop extends StatelessWidget {
               child: CustomPaint(
                 painter: _StudioShellBackdropPainter(
                   gridColor: tokens.surfaceHighlight.withValues(alpha: 0.22),
-                  primaryColor: tokens.panelGlow.withValues(alpha: 0.16),
-                  accentColor: tokens.panelGlowSecondary.withValues(
-                    alpha: 0.12,
-                  ),
+                  primaryColor: tokens.primary.withValues(alpha: 0.08),
+                  accentColor: tokens.accent.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -39,8 +37,8 @@ class StudioShellBackdrop extends StatelessWidget {
             child: _AmbientGlow(
               size: 420,
               colors: <Color>[
-                tokens.panelGlow.withValues(alpha: 0.14),
-                tokens.panelGlow.withValues(alpha: 0),
+                tokens.primary.withValues(alpha: 0.08),
+                tokens.primary.withValues(alpha: 0),
               ],
             ),
           ),
@@ -50,8 +48,8 @@ class StudioShellBackdrop extends StatelessWidget {
             child: _AmbientGlow(
               size: 360,
               colors: <Color>[
-                tokens.panelGlowSecondary.withValues(alpha: 0.12),
-                tokens.panelGlowSecondary.withValues(alpha: 0),
+                tokens.accent.withValues(alpha: 0.06),
+                tokens.accent.withValues(alpha: 0),
               ],
             ),
           ),

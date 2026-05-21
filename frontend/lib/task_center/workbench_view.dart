@@ -616,7 +616,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final muted = StudioTokens.of(context).textSecondary;
     final small = Theme.of(context).textTheme.bodySmall;
     final code = job.errorDetails == null
         ? null

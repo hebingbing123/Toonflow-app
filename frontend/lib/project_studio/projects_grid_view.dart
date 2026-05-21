@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
-import '../design_system/theme.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -87,8 +86,8 @@ class ProjectsGridView extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 20,
-            crossAxisSpacing: 20,
+            mainAxisSpacing: StudioSpacing.sm + 4,
+            crossAxisSpacing: StudioSpacing.sm + 4,
             childAspectRatio: childAspectRatio,
           ),
           itemCount: projects.length,
@@ -118,8 +117,8 @@ class _LoadingGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
+      mainAxisSpacing: StudioSpacing.sm,
+      crossAxisSpacing: StudioSpacing.sm,
       childAspectRatio: 1.15,
       children: List<Widget>.generate(
         4,
@@ -146,7 +145,6 @@ class _ProjectGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
     final l10n = AppLocalizations.of(context)!;
     final title =
@@ -160,24 +158,15 @@ class _ProjectGridCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         child: Container(
           decoration: BoxDecoration(
-            gradient: studio.panelGradient,
+            color: tokens.bgSurface.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
             border: Border.all(
-              color: selected ? tokens.primary : tokens.surfaceHighlight,
+              color: selected ? tokens.primary : tokens.borderSubtle,
               width: selected ? 1.5 : 1,
             ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: selected
-                    ? tokens.panelGlow.withValues(alpha: 0.14)
-                    : tokens.panelGlowSecondary.withValues(alpha: 0.06),
-                blurRadius: 20,
-                spreadRadius: -14,
-                offset: const Offset(0, 12),
-              ),
-            ],
+            boxShadow: null,
           ),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(StudioLayoutSpacing.section - 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -222,8 +211,8 @@ class _ProjectGridCard extends StatelessWidget {
                 children: <Widget>[
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+                      horizontal: StudioSpacing.xs + 2,
+                      vertical: StudioSpacing.xs - 2,
                     ),
                     decoration: BoxDecoration(
                       color: tokens.bgInset.withValues(alpha: 0.92),
@@ -242,21 +231,14 @@ class _ProjectGridCard extends StatelessWidget {
                   const Spacer(),
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      gradient: selected
-                          ? studio.signalGradient
-                          : LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: <Color>[
-                                tokens.primarySoft.withValues(alpha: 0.92),
-                                tokens.accentSoft.withValues(alpha: 0.92),
-                              ],
-                            ),
+                      color: selected
+                          ? tokens.primary
+                          : tokens.primarySoft.withValues(alpha: 0.92),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
                         color: selected
-                            ? tokens.accent.withValues(alpha: 0.42)
-                            : tokens.surfaceHighlight,
+                            ? tokens.primary.withValues(alpha: 0.42)
+                            : tokens.borderSubtle,
                       ),
                     ),
                     child: InkWell(
@@ -264,8 +246,8 @@ class _ProjectGridCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: StudioSpacing.sm,
+                          vertical: StudioSpacing.xs,
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -273,13 +255,19 @@ class _ProjectGridCard extends StatelessWidget {
                             Text(
                               l10n.studioEnterStudio,
                               style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(color: Colors.white),
+                                  ?.copyWith(
+                                    color: selected
+                                        ? Colors.white
+                                        : tokens.textPrimary,
+                                  ),
                             ),
                             const SizedBox(width: 8),
-                            const Icon(
+                            Icon(
                               Icons.arrow_outward,
                               size: 16,
-                              color: Colors.white,
+                              color: selected
+                                  ? Colors.white
+                                  : tokens.textPrimary,
                             ),
                           ],
                         ),

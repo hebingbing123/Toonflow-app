@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 
+import '../studio_typography.dart';
 import '../tokens.dart';
+import 'studio_text_styles.dart';
 
 /// 16:9 media preview card (Wave 4).
 class StudioMediaCard extends StatelessWidget {
@@ -79,7 +81,10 @@ class StudioMediaCard extends StatelessWidget {
                       ),
                       child: Text(
                         label!,
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                        style: studioControlLabelStyle(context)?.copyWith(
+                          color: Colors.white,
+                          fontSize: StudioTypography.of(context).meta,
+                        ),
                       ),
                     ),
                   ),

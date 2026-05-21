@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../components/studio_dialog_shell.dart';
-import '../theme.dart';
+import '../components/studio_empty_state.dart';
 import '../tokens.dart';
 
 /// Command palette action (⌘K / Ctrl+K).
@@ -107,7 +107,6 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
     final tokens = StudioTokens.of(context);
     final items = _filtered;
 
-    final studio = StudioColors.of(context);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520, maxHeight: 420),
@@ -115,15 +114,14 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
           color: Colors.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              gradient: studio.panelGradient,
+              color: tokens.bgSurface.withValues(alpha: 0.98),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-              border: Border.all(color: tokens.surfaceHighlight),
+              border: Border.all(color: tokens.borderSubtle),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: tokens.panelGlow.withValues(alpha: 0.18),
-                  blurRadius: 32,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 16),
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 24,
+                  offset: const Offset(0, 14),
                 ),
               ],
             ),
@@ -153,21 +151,32 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                   ),
                   Divider(height: 1, color: tokens.borderSubtle),
                   Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final action = items[index];
-                        return ListTile(
-                          leading: Icon(action.icon ?? Icons.chevron_right),
-                          title: Text(action.label),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            action.onInvoke();
-                          },
-                        );
-                      },
-                    ),
+                    child: items.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(StudioSpacing.sm),
+                            child: StudioEmptyState.noResults(
+                              title: AppLocalizations.of(context)!
+                                  .globalSearchNoResultsTitle,
+                              subtitle: AppLocalizations.of(context)!
+                                  .globalSearchNoResultsHint,
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final action = items[index];
+                              return ListTile(
+                                leading:
+                                    Icon(action.icon ?? Icons.chevron_right),
+                                title: Text(action.label),
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  action.onInvoke();
+                                },
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),

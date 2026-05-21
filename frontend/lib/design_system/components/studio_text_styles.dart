@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../studio_typography.dart';
+import '../tokens.dart';
 
 /// Readable secondary copy on studio dark surfaces (never [ColorScheme.outline]).
 Color studioMutedTextColor(BuildContext context) {
-  return Theme.of(context).colorScheme.onSurfaceVariant;
+  return StudioTokens.of(context).textSecondary;
 }
 
 TextStyle? studioPageTitleStyle(BuildContext context) {
@@ -92,4 +93,22 @@ TextStyle? studioMutedBodySmall(BuildContext context) {
 
 TextStyle? studioMutedBodyMedium(BuildContext context) {
   return studioSectionIntroStyle(context);
+}
+
+/// Badge / count pill on dark chrome (sidebar, app bar).
+/// Section title on dark studio inset panels (script step rail, etc.).
+TextStyle? studioInsetSectionTitleStyle(BuildContext context) {
+  return studioPaneTitleStyle(context)?.copyWith(
+    color: StudioTokens.of(context).textPrimary,
+  );
+}
+
+TextStyle studioBadgeTextStyle(BuildContext context) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    color: Colors.white,
+    fontSize: typography.meta,
+    fontWeight: FontWeight.w700,
+    height: 1.1,
+  );
 }

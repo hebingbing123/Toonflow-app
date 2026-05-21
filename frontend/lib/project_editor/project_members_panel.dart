@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -281,7 +284,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(12),
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
       ),
@@ -302,7 +305,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                           ? l10n.projectMembersAclEnabledIntro
                           : l10n.projectMembersAclInheritedIntro,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: StudioTokens.of(context).textSecondary,
                       ),
                     ),
                   ],
@@ -380,7 +383,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +393,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           Text(
             l10n.projectMembersForbiddenBody,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
         ],
@@ -409,7 +412,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,7 +422,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           Text(
             l10n.projectMembersAddSectionIntro,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
           const SizedBox(height: 10),
@@ -472,23 +475,19 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             Text(
               l10n.projectMembersForbiddenWorkspaceMembers,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
             )
           else if (widget.workspaceId == null || widget.workspaceId!.trim().isEmpty)
-            Text(
-              l10n.projectMembersNoWorkspaceContext,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            StudioEmptyState.emptyData(
+              title: l10n.projectMembersNoWorkspaceContext,
+              icon: Icons.workspaces_outlined,
             )
           else ...[
             if (assignableCandidates.isEmpty)
-              Text(
-                l10n.projectMembersNoCandidates,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              StudioEmptyState.emptyData(
+                title: l10n.projectMembersNoCandidates,
+                icon: Icons.person_search_outlined,
               )
             else
               Row(
@@ -562,7 +561,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,12 +573,15 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 ? l10n.projectMembersExplicitEmptyIntro
                 : l10n.projectMembersExplicitNonEmptyIntro,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
           const SizedBox(height: 10),
           if (_projectRows.isEmpty)
-            Text(l10n.projectMembersExplicitEmptyState, style: theme.textTheme.bodySmall)
+            StudioEmptyState.emptyData(
+              title: l10n.projectMembersExplicitEmptyState,
+              icon: Icons.group_outlined,
+            )
           else
             ..._projectRows.map((row) => _buildExplicitMemberRow(theme, l10n, row)),
         ],
@@ -604,7 +606,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.colorScheme.outlineVariant),
+          border: Border.all(color: studioPanelBorderColor(context)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -711,12 +713,12 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: RichText(
         text: TextSpan(
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
           children: [
             TextSpan(text: '$label: '),

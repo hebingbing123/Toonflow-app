@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
 
@@ -32,7 +34,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -87,8 +89,15 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                   : onSkipReview,
               child: Text(l10n.benchmarkActionSkipReview),
             ),
-            const SizedBox(height: 12),
-            if (reviewQueue.isNotEmpty) ...[
+            const SizedBox(height: StudioSpacing.sm),
+            if (reviewQueue.isEmpty)
+              StudioEmptyState.emptyData(
+                title: l10n.benchmarkSummaryReviewQueueEmpty,
+                icon: Icons.fact_check_outlined,
+                actionLabel: l10n.benchmarkActionFetchReviewQueue,
+                onAction: busy ? null : onFetchReviewQueue,
+              )
+            else ...[
               Text(
                 l10n.benchmarkSummaryReviewQueue(
                   reviewQueue.length,

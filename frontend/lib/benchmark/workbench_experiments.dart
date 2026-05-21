@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
 
@@ -51,7 +53,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,8 +173,15 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                   : onCreateExperiment,
               child: Text(l10n.benchmarkButtonCreateExperiment),
             ),
-            const SizedBox(height: 12),
-            if (experiments.isNotEmpty) ...[
+            const SizedBox(height: StudioSpacing.sm),
+            if (experiments.isEmpty)
+              StudioEmptyState.emptyData(
+                title: l10n.benchmarkSummaryExperimentsEmpty,
+                icon: Icons.science_outlined,
+                actionLabel: l10n.benchmarkActionFetchExperiments,
+                onAction: busy ? null : onFetchExperiments,
+              )
+            else ...[
               Text(
                 l10n.benchmarkSummaryExperiments(
                   experiments.length,

@@ -308,7 +308,6 @@ extension _HomePageProductShell on _HomePageState {
     required double panelWidth,
   }) {
     final tokens = StudioTokens.of(ctx);
-    final studio = StudioColors.of(ctx);
     final localeCode = AppLocaleNotifier.instance.code;
     final sectionLabelStyle = Theme.of(ctx).textTheme.labelSmall?.copyWith(
       color: tokens.textMuted,
@@ -350,15 +349,14 @@ extension _HomePageProductShell on _HomePageState {
       color: Colors.transparent,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: studio.panelGradient,
+          color: tokens.bgSurface.withValues(alpha: 0.98),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: tokens.surfaceHighlight),
+          border: Border.all(color: tokens.borderSubtle),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.28),
-              blurRadius: 24,
-              spreadRadius: -8,
-              offset: const Offset(0, 12),
+              color: Colors.black.withValues(alpha: 0.20),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -380,11 +378,14 @@ extension _HomePageProductShell on _HomePageState {
                     ),
                     IconButton(
                       tooltip: l10n.studioDismiss,
-                      visualDensity: VisualDensity.compact,
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: IconButton.styleFrom(
-                        minimumSize: const Size(32, 32),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: const Size(
+                          StudioSpacing.iconTouchTarget,
+                          StudioSpacing.iconTouchTarget,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        visualDensity: VisualDensity.standard,
                         foregroundColor: tokens.textSecondary,
                       ),
                       icon: const Icon(Icons.close_rounded, size: 18),
@@ -696,7 +697,6 @@ extension _HomePageProductShell on _HomePageState {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
     final appTitle =
         _appL10n?.appTitle ??
@@ -967,25 +967,9 @@ extension _HomePageProductShell on _HomePageState {
                 Expanded(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      gradient: studio.panelGradient,
+                      color: tokens.bgSurface.withValues(alpha: 0.96),
                       borderRadius: shellPanelRadius,
-                      border: Border.all(color: tokens.surfaceHighlight),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: tokens.panelGlow.withValues(alpha: 0.10),
-                          blurRadius: 32,
-                          spreadRadius: -12,
-                          offset: const Offset(0, 18),
-                        ),
-                        BoxShadow(
-                          color: tokens.panelGlowSecondary.withValues(
-                            alpha: 0.08,
-                          ),
-                          blurRadius: 28,
-                          spreadRadius: -16,
-                          offset: const Offset(0, 12),
-                        ),
-                      ],
+                      border: Border.all(color: tokens.borderSubtle),
                     ),
                     child: ClipRRect(
                       borderRadius: shellPanelRadius,

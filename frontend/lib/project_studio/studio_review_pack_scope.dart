@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/tokens.dart';
@@ -266,7 +267,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
               Text(
                 l10n.studioReviewPackLoading,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ],
@@ -350,7 +351,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                 Text(
                   l10n.studioReviewPackSubtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
                 if (rollup != null || production != null) ...<Widget>[
@@ -406,12 +407,9 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text(
-                        l10n.studioReviewPackEmpty,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      child: StudioEmptyState.emptyData(
+                        title: l10n.studioReviewPackEmpty,
+                        icon: Icons.movie_filter_outlined,
                       ),
                     ),
                   )

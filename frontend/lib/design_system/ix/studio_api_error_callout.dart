@@ -56,21 +56,26 @@ class StudioApiErrorCallout extends StatelessWidget {
           icon: const Icon(Icons.close, size: 18),
           color: tokens.textSecondary,
           tooltip: l10n.studioDismiss,
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+          visualDensity: VisualDensity.standard,
+          constraints: const BoxConstraints(
+            minWidth: StudioSpacing.iconTouchTarget,
+            minHeight: StudioSpacing.iconTouchTarget,
+          ),
         );
         final retryButton = TextButton.icon(
           onPressed: onRetry,
           style: TextButton.styleFrom(
             foregroundColor: errorColor,
-            minimumSize: Size.zero,
-            padding: EdgeInsets.symmetric(
-              horizontal: subtle ? 8 : 10,
-              vertical: subtle ? 6 : 8,
+            minimumSize: const Size(
+              StudioSpacing.iconTouchTarget,
+              StudioSpacing.iconTouchTarget,
             ),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.symmetric(
+              horizontal: subtle ? 10 : 12,
+              vertical: subtle ? 8 : 10,
+            ),
+            tapTargetSize: MaterialTapTargetSize.padded,
+            visualDensity: VisualDensity.standard,
           ),
           icon: const Icon(Icons.refresh_rounded, size: 14),
           label: Text(l10n.studioRetry),
@@ -203,8 +208,8 @@ class StudioApiErrorCallout extends StatelessWidget {
                                         : theme.textTheme.bodySmall)
                                     ?.copyWith(
                                       color: subtle
-                                          ? theme.colorScheme.onSurfaceVariant
-                                          : theme.colorScheme.onSurface,
+                                          ? tokens.textSecondary
+                                          : tokens.textPrimary,
                                       height: subtle ? 1.3 : 1.35,
                                     ),
                           ),

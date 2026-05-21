@@ -37,15 +37,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(ctx).colorScheme.outlineVariant,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              color: Theme.of(
-                ctx,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            ),
+            decoration: studioInsetPanelDecoration(ctx),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -169,14 +161,12 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           title: Text(
             l10n.projectEditorBasicsModalityDefaultsTitle,
             style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(ctx).textSecondary,
             ),
           ),
           subtitle: Text(
             l10n.projectEditorBasicsModalityDefaultsSubtitle,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.outline,
-            ),
+            style: studioHintStyle(ctx),
           ),
           children: <Widget>[
             _buildProjectModelField(
@@ -324,9 +314,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         else
           Text(
             l10n.projectEditorBasicsStatsNotLoaded,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.outline,
-            ),
+            style: studioHintStyle(ctx),
           ),
       ],
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_empty_state.dart';
 import '../../../design_system/components/studio_model_cost_controls.dart';
+import '../../../design_system/components/studio_text_styles.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -75,7 +77,6 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 780.0)
@@ -91,7 +92,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
             children: [
               Text(
                 l10n.scriptEditorEditImageWorkbenchIntro,
-                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                style: studioHintStyle(context),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -215,9 +216,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (model.steps.isEmpty)
-                Text(
-                  l10n.scriptEditorEditImageWorkbenchStepsEmpty,
-                  style: theme.textTheme.bodySmall,
+                StudioEmptyState.emptyData(
+                  title: l10n.scriptEditorEditImageWorkbenchStepsEmpty,
                 )
               else
                 SizedBox(

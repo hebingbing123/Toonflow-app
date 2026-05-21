@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import 'navigation_controller.dart';
 import 'pipeline_step_chip.dart';
@@ -76,13 +78,17 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
           );
         })
         .toList(growable: false);
+    final tokens = StudioTokens.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioLayoutSpacing.cardInner - 4,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        color: tokens.bgInset.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

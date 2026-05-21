@@ -5,6 +5,8 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
 
@@ -136,7 +138,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = studioPanelMutedColor(context);
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
@@ -167,7 +169,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 l10n.agentMemoryWorkbenchIntro,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -232,7 +234,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               const SizedBox(height: 8),
@@ -342,14 +344,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 l10n.agentMemoryIsolateHint,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 4),
               Text(
                 l10n.agentMemoryOptimizeScopeHint,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               if (!model.canOptimizeVideoMemory) ...[
                 const SizedBox(height: 4),
@@ -357,7 +359,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   l10n.agentMemoryOptimizeEnableHint,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (model.memorySummary != null) ...[
@@ -366,7 +368,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   model.memorySummary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (costOverviewLine != null) ...[
@@ -375,7 +377,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   costOverviewLine,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (memoryInsights.summary != null) ...[
@@ -384,7 +386,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   memoryInsights.summary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (memoryInsights.videoSummary != null) ...[
@@ -393,7 +395,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   memoryInsights.videoSummary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (memoryInsights.efficiencySummary != null) ...[
@@ -402,7 +404,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   memoryInsights.efficiencySummary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (memoryInsights.bucketPrioritySummary != null) ...[
@@ -411,7 +413,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   memoryInsights.bucketPrioritySummary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (memoryInsights.recommendation != null) ...[
@@ -421,7 +423,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   '${memoryInsights.recommendation}',
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (executionChecklist != null) ...[
@@ -434,7 +436,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                         executionChecklist,
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall?.copyWith(color: outline),
+                        ).textTheme.bodySmall?.copyWith(color: muted),
                       ),
                     ),
                     IconButton(
@@ -679,7 +681,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   model.statusLine!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
             ],

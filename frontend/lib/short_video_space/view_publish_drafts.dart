@@ -20,7 +20,6 @@ class _PublishDraftsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final l10n = resolveAppLocalizationsForErrors(context);
 
     if (!publishPanelUi.visible) {
@@ -58,30 +57,30 @@ class _PublishDraftsPanel extends StatelessWidget {
           if (publishPanelUi.exportGateHint.trim().isNotEmpty) ...[
             Text(
               publishPanelUi.exportGateHint,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
             ),
             const SizedBox(height: 8),
           ],
           if (publishPanelUi.loading)
             Text(
               publishPanelUi.headline,
-              style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             )
           else if (publishPanelUi.unavailable)
             Text(
               publishPanelUi.headline,
-              style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             )
           else ...[
             Text(
               publishPanelUi.headline,
-              style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+              style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             ),
             if (publishPanelUi.matrixDomesticLines.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
                 l10n.shortVideoPublishPanelMatrixDomesticLabel,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               for (final line in publishPanelUi.matrixDomesticLines)
@@ -94,7 +93,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 l10n.shortVideoPublishPanelMatrixOverseasLabel,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               for (final line in publishPanelUi.matrixOverseasLines)
@@ -107,7 +106,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 l10n.shortVideoPublishPanelPrepareChecks,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               for (final line in publishPanelUi.prepareLines)
@@ -122,7 +121,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 children: [
                   Text(
                     l10n.shortVideoPublishPanelDraftListHeading,
-                    style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                    style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
                   ),
                   const Spacer(),
                   // P8: Multi-select toggle
@@ -342,7 +341,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 l10n.shortVideoPublishPanelCurrentDraftLabel,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               StudioDropdownButtonFormField<String>(
@@ -431,7 +430,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 l10n.shortVideoPublishPanelAutomationByPlatform,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               for (final entry
@@ -633,7 +632,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 l10n.shortVideoPublishPanelBatchResultSummary,
-                style: theme.textTheme.labelSmall?.copyWith(color: outline),
+                style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
               const SizedBox(height: 6),
               ...publishPanelUi.publishBatchResultLines
@@ -649,7 +648,7 @@ class _PublishDraftsPanel extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             publishPanelUi.detail,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
           ),
         ],
       ),

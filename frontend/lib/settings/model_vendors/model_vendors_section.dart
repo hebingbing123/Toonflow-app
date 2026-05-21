@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_card.dart';
+import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/studio_typography.dart';
+import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../rust_api.dart';
@@ -180,7 +185,7 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
         Text(
           l10n.settingsModelVendorsSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
         const SizedBox(height: 12),
@@ -214,9 +219,9 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
             ),
           )
         else if (_vendors.isEmpty)
-          Text(
-            l10n.settingsModelVendorsEmpty,
-            style: theme.textTheme.bodyMedium,
+          StudioEmptyState.emptyData(
+            title: l10n.settingsModelVendorsEmpty,
+            icon: Icons.hub_outlined,
           )
         else
           ..._vendors.map((vendor) => _VendorCard(
@@ -392,7 +397,7 @@ class _VendorCardState extends State<_VendorCard> {
                               kinds,
                             ),
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: StudioTokens.of(context).textSecondary,
                             ),
                           ),
                         ],
@@ -411,7 +416,7 @@ class _VendorCardState extends State<_VendorCard> {
                       ),
                     Icon(
                       _expanded ? Icons.expand_less : Icons.expand_more,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: StudioTokens.of(context).textSecondary,
                     ),
                   ],
                 ),
@@ -449,7 +454,7 @@ class _VendorCardState extends State<_VendorCard> {
                     size: 18,
                     color: widget.credentialConfigured
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.outline,
+                        : studioPanelMutedColor(context),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -522,11 +527,11 @@ class _VendorProtocolChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontSize: 10,
+        style: studioBadgeTextStyle(context).copyWith(
+          fontSize: StudioTypography.of(context).meta,
           color: emphasized
               ? theme.colorScheme.onPrimaryContainer
-              : theme.colorScheme.onSurfaceVariant,
+              : StudioTokens.of(context).textSecondary,
         ),
       ),
     );

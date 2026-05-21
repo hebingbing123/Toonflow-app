@@ -639,7 +639,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
           );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -698,10 +698,11 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
           ),
           if (_latestCreatedWebhook != null) ...[
             const SizedBox(height: 8),
-            Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
+            Container(
+              width: double.infinity,
+              decoration: studioInsetPanelDecoration(context),
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -714,6 +715,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           ),
                         ),
                         IconButton(
+                          style: studioUtilityIconButtonStyle(context),
                           tooltip: l10n.helpHubDialogClose,
                           onPressed: () {
                             setState(() {
@@ -793,7 +795,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
               _webhooksError == kProductShellSignInErrorPlaceholder
                   ? l10n.platformConfigPleaseSignIn
                   : _webhooksError!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: StudioTokens.of(context).danger),
             ),
           if (_webhooks != null)
             Text(_webhookInventorySummary(l10n, filteredWebhooks)),
@@ -821,6 +823,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     trailing: IconButton(
+                      style: studioUtilityIconButtonStyle(context),
                       tooltip: l10n.opsWhCopyActivityTooltip,
                       onPressed: () async {
                         final text = '${webhookActivityActionLabel(l10n, entry.action)}\n'
@@ -851,12 +854,17 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                 itemBuilder: (context, index) {
                   final wh = filteredWebhooks[index];
                   final rowBusy = _webhookMutatingId == wh.id;
+                  final tokens = StudioTokens.of(context);
+                  final highlightLatest = _latestCreatedWebhook?.id == wh.id;
                   return Card(
-                    color: _latestCreatedWebhook?.id == wh.id
-                        ? Theme.of(context).colorScheme.primaryContainer
+                    color: highlightLatest
+                        ? tokens.primarySoft.withValues(alpha: 0.92)
                         : null,
+                    elevation: highlightLatest ? 0 : null,
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(
+                        StudioLayoutSpacing.cardInner - 4,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1020,6 +1028,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             runSpacing: 8,
                             children: [
                               IconButton(
+                                style: studioUtilityIconButtonStyle(context),
                                 tooltip: l10n.opsWhTooltipCopyUrl,
                                 onPressed: () async {
                                   await Clipboard.setData(

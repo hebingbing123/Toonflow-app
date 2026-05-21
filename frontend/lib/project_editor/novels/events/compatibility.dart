@@ -23,7 +23,7 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
           resolveAppLocalizationsForErrors(ctx)
               .projectEditorNovelEventsRegressionProbeCaption,
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.outline,
+            color: studioPanelMutedColor(ctx),
           ),
         ),
         Wrap(

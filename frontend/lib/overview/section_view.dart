@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
@@ -132,7 +133,7 @@ class OverviewSectionView extends StatelessWidget {
         Text(
           apiText,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: StudioTokens.of(context).textSecondary,
           ),
         ),
       ],
@@ -162,7 +163,7 @@ class _ProbeTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-          border: Border.all(color: colorScheme.outlineVariant),
+          border: Border.all(color: studioPanelBorderColor(context)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(StudioSpacing.sm),

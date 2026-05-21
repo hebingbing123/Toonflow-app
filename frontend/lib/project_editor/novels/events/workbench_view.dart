@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_surfaces.dart';
+import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -87,13 +89,8 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
               if (model.previewRows.isNotEmpty)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                  decoration: studioInsetPanelDecoration(context),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

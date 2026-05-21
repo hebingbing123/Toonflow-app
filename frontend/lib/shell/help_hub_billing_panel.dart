@@ -418,7 +418,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
     final l10n = resolveAppLocalizationsForErrors(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       child: Builder(
         builder: (context) {
           final viewportWidth = MediaQuery.sizeOf(context).width;

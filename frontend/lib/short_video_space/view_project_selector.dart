@@ -78,7 +78,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
+    final muted = StudioTokens.of(context).textSecondary;
     final l10n = resolveAppLocalizationsForErrors(context);
     final fieldTextStyle = theme.textTheme.bodyLarge?.copyWith(
       color: theme.colorScheme.onSurface,
@@ -356,7 +356,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                       ? theme.colorScheme.primary
                       : operationFeedbackIsSuccess == false
                           ? theme.colorScheme.error
-                          : theme.colorScheme.outline,
+                          : studioPanelMutedColor(context),
                   width: 1,
                 ),
               ),
@@ -373,7 +373,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                         ? theme.colorScheme.primary
                         : operationFeedbackIsSuccess == false
                             ? theme.colorScheme.error
-                            : theme.colorScheme.onSurfaceVariant,
+                            : StudioTokens.of(context).textSecondary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -384,7 +384,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                             ? theme.colorScheme.onPrimaryContainer
                             : operationFeedbackIsSuccess == false
                                 ? theme.colorScheme.onErrorContainer
-                                : theme.colorScheme.onSurfaceVariant,
+                                : StudioTokens.of(context).textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

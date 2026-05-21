@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
+
 import '../rust_api.dart';
 
 typedef PublishPlatformCopyCommit =
@@ -219,7 +221,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final muted = studioPanelMutedColor(context);
     final ids = _allIds;
     if (ids.isEmpty || widget.onCommit == null) {
       return const SizedBox.shrink();
@@ -230,19 +232,19 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       children: [
         Text(
           l10n.shortVideoPublishCopyEditorSectionTitle,
-          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+          style: theme.textTheme.labelSmall?.copyWith(color: muted),
         ),
         const SizedBox(height: 6),
         _chipRow(
           l10n.shortVideoSpaceTargetMarketDomestic,
           widget.domesticPlatformIds,
-          outline,
+          muted,
         ),
         const SizedBox(height: 8),
         _chipRow(
           l10n.shortVideoSpaceTargetMarketOverseas,
           widget.overseasPlatformIds,
-          outline,
+          muted,
         ),
         const SizedBox(height: 10),
         TextField(

@@ -210,6 +210,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
   Widget build(BuildContext context) {
     final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
     final l10n = resolveAppLocalizationsForErrors(context);
+    final tokens = StudioTokens.of(context);
 
     return StudioAlertDialog(
       scrollable: false,
@@ -400,9 +401,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: _previewStatusIsError
                                     ? Theme.of(context).colorScheme.error
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
+                                    : tokens.textSecondary,
                               ),
                         ),
                       ),
@@ -422,16 +421,14 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     Icon(
                       Icons.info_outline,
                       size: 20,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: tokens.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         l10n.shortVideoSpaceDialogVoiceoverSettingsInfoMessage,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: tokens.textSecondary,
                             ),
                       ),
                     ),

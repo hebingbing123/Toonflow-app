@@ -159,7 +159,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                 Text(
                   l10n.projectEditorModelRoutingQualityStepHint,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
               ],

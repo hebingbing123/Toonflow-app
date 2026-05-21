@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/theme.dart';
 import '../design_system/tokens.dart';
 
 /// Pipeline navigation chip: icon + label inline (avoids FilterChip avatar hiding text).
-class PipelineStepChip extends StatelessWidget {
+class PipelineStepChip extends StatefulWidget {
   const PipelineStepChip({
     super.key,
     required this.label,
@@ -25,26 +24,38 @@ class PipelineStepChip extends StatelessWidget {
   final bool compact;
 
   @override
+  State<PipelineStepChip> createState() => _PipelineStepChipState();
+}
+
+class _PipelineStepChipState extends State<PipelineStepChip> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = useStudioTokens ? StudioTokens.of(context) : null;
-    final studio = useStudioTokens ? StudioColors.of(context) : null;
-    final iconColor = selected
-        ? Colors.white
+    final tokens = widget.useStudioTokens ? StudioTokens.of(context) : null;
+    final hovered = _hovered && widget.enabled && !widget.selected;
+    final selectedFg = tokens?.textPrimary ?? theme.colorScheme.onSurface;
+    final iconColor = widget.selected
+        ? (tokens?.primary ?? theme.colorScheme.primary)
         : (tokens?.textSecondary ?? theme.colorScheme.onSurfaceVariant);
     final labelStyle = theme.textTheme.labelLarge?.copyWith(
-      color: selected
-          ? Colors.white
+      color: widget.selected
+          ? selectedFg
           : (tokens?.textPrimary ?? theme.colorScheme.onSurface),
-      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+      fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
     );
-    final borderColor = selected
+    final borderColor = widget.selected
         ? (tokens != null
               ? tokens.primary.withValues(alpha: 0.42)
               : theme.colorScheme.primary.withValues(alpha: 0.32))
-        : (tokens?.surfaceHighlight ?? theme.colorScheme.outlineVariant);
-    final background = selected
-        ? null
+        : hovered && tokens != null
+        ? tokens.primary.withValues(alpha: 0.32)
+        : (tokens?.borderSubtle ?? theme.colorScheme.outlineVariant);
+    final background = widget.selected
+        ? (tokens?.primarySoft ?? theme.colorScheme.primaryContainer)
+        : hovered && tokens != null
+        ? tokens.primarySoft.withValues(alpha: 0.45)
         : (tokens != null
               ? tokens.bgInset.withValues(alpha: 0.92)
               : theme.colorScheme.surfaceContainerHighest.withValues(
@@ -52,72 +63,89 @@ class PipelineStepChip extends StatelessWidget {
                 ));
 
     return Opacity(
-      opacity: enabled ? 1 : 0.52,
+      opacity: widget.enabled ? 1 : 0.52,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: selected ? studio?.signalGradient : null,
           color: background,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: borderColor),
-          boxShadow: selected && tokens != null
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: tokens.panelGlow.withValues(alpha: 0.18),
-                    blurRadius: 16,
-                    spreadRadius: -8,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : null,
+          border: Border.all(
+            color: widget.selected
+                ? (tokens?.primary.withValues(alpha: 0.55) ?? borderColor)
+                : borderColor,
+            width: widget.selected ? 1.5 : (hovered && tokens != null ? 1.25 : 1),
+          ),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: enabled && onSelected != null
-                ? () => onSelected!(true)
+            onTap: widget.enabled && widget.onSelected != null
+                ? () => widget.onSelected!(true)
                 : null,
+            onHover: (value) {
+              if (_hovered != value) {
+                setState(() => _hovered = value);
+              }
+            },
             borderRadius: BorderRadius.circular(999),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: compact ? 9 : 12,
-                vertical: compact ? 5 : 8,
+                horizontal: widget.compact
+                    ? StudioSpacing.xs + 2
+                    : StudioSpacing.sm,
+                vertical: widget.compact
+                    ? StudioSpacing.xs - 1
+                    : StudioSpacing.xs + 1,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: selected
-                          ? Colors.white.withValues(alpha: 0.14)
+                      color: widget.selected
+                          ? (tokens?.bgSurface.withValues(alpha: 0.55) ??
+                                theme.colorScheme.surface.withValues(
+                                  alpha: 0.55,
+                                ))
                           : (tokens != null
-                                ? tokens.bgSurface.withValues(alpha: 0.88)
+                                ? tokens.bgSurface.withValues(
+                                    alpha: hovered ? 0.96 : 0.88,
+                                  )
                                 : theme.colorScheme.surface.withValues(
                                     alpha: 0.78,
                                   )),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: selected
-                            ? Colors.white.withValues(alpha: 0.18)
-                            : (tokens?.surfaceHighlight ??
+                        color: widget.selected
+                            ? (tokens?.primary.withValues(alpha: 0.28) ??
+                                  theme.colorScheme.primary.withValues(
+                                    alpha: 0.28,
+                                  ))
+                            : hovered && tokens != null
+                            ? tokens.primary.withValues(alpha: 0.22)
+                            : (tokens?.borderSubtle ??
                                   theme.colorScheme.outlineVariant),
                       ),
                     ),
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: compact ? 6 : 8,
-                        vertical: compact ? 4 : 6,
+                        horizontal: widget.compact ? 6 : 8,
+                        vertical: widget.compact ? 4 : 6,
                       ),
                       child: Icon(
-                        icon,
-                        size: compact ? 14 : 16,
+                        widget.icon,
+                        size: widget.compact ? 14 : 16,
                         color: iconColor,
                       ),
                     ),
                   ),
-                  SizedBox(width: compact ? 5 : 8),
+                  SizedBox(
+                    width: widget.compact
+                        ? StudioSpacing.xs - 3
+                        : StudioSpacing.xs,
+                  ),
                   Text(
-                    label,
-                    style: compact
+                    widget.label,
+                    style: widget.compact
                         ? theme.textTheme.labelSmall?.copyWith(
                             color: labelStyle?.color,
                             fontWeight: labelStyle?.fontWeight,

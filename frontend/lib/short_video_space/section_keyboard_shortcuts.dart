@@ -244,7 +244,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                                       .surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
-                                    color: Theme.of(ctx).colorScheme.outline,
+                                    color: studioPanelMutedColor(ctx),
                                   ),
                                 ),
                                 child: Text(

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_empty_state.dart';
+import '../../../design_system/tokens.dart';
 import '../../../l10n/studio_code_labels.dart';
 import '../../../rust_api.dart';
 
@@ -56,7 +58,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -108,9 +110,8 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
             ],
             const SizedBox(height: 8),
             if (lines.isEmpty)
-              Text(
-                l10n.agentWorkspaceActivityNoWsEvents,
-                style: Theme.of(context).textTheme.bodySmall,
+              StudioEmptyState.emptyData(
+                title: l10n.agentWorkspaceActivityNoWsEvents,
               )
             else
               Column(

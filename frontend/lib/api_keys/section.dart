@@ -7,6 +7,9 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 enum _ExpiryPreset { none, sevenDays, thirtyDays, ninetyDays, custom }
 
@@ -362,7 +365,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               Text(
                 l10n.apiKeysIntroBody,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
               SizedBox(height: compact ? 10 : 12),
@@ -420,7 +423,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       width: double.infinity,
       padding: EdgeInsets.all(panelPadding),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -536,7 +539,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               child: Text(
                 l10n.apiKeysExpiresAtUtc(_fmtDate(_customExpiryDate!)),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ),
@@ -630,7 +633,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       width: double.infinity,
       padding: EdgeInsets.all(compact ? 14 : 16),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -666,11 +669,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           if (widget.controller.loading)
             const Center(child: CircularProgressIndicator())
           else if (widget.controller.items.isEmpty)
-            Text(
-              l10n.apiKeysEmptyList,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            StudioEmptyState.emptyData(
+              title: l10n.apiKeysEmptyList,
+              icon: Icons.vpn_key_outlined,
             )
           else
             ...widget.controller.items.map(
@@ -749,7 +750,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: EdgeInsets.all(compact ? 10 : 12),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -816,7 +817,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           Text(
             l10n.apiKeysPublicIdLine(item.publicId),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -827,7 +828,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               item.useCount,
             ),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             ),
           ),
           if (item.lastUsedAt != null)
@@ -838,7 +839,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 item.lastUsedPath ?? '',
               ),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
             ),
           if (item.lastUsedIp != null || item.lastUsedUserAgent != null)
@@ -847,7 +848,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 '${studioApiKeysLastUsedLabel(l10n, item.lastUsedIp ?? '')}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
               ),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -856,21 +857,21 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             Text(
               l10n.apiKeysExpiresAtLine(_fmt(item.expiresAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
             ),
           if (item.rotatedAt != null)
             Text(
               l10n.apiKeysRotatedAtLine(_fmt(item.rotatedAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
             ),
           if (item.revokedAt != null)
             Text(
               l10n.apiKeysRevokedAtLine(_fmt(item.revokedAt!)),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
               ),
             ),
           const SizedBox(height: 8),
@@ -906,7 +907,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       width: double.infinity,
       padding: EdgeInsets.all(compact ? 14 : 16),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -915,11 +916,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           Text(l10n.apiKeysAuditTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           if (widget.controller.auditItems.isEmpty)
-            Text(
-              l10n.apiKeysAuditEmpty,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            StudioEmptyState.emptyData(
+              title: l10n.apiKeysAuditEmpty,
+              icon: Icons.history_outlined,
             )
           else
             ...widget.controller.auditItems.map(
@@ -927,7 +926,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: EdgeInsets.all(compact ? 10 : 12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  border: Border.all(color: studioPanelBorderColor(context)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -938,7 +937,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     Text(
                       '${item.eventType} · ${_fmt(item.createdAt)}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: StudioTokens.of(context).textSecondary,
                       ),
                     ),
                     if (item.metadata.isNotEmpty) ...[

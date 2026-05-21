@@ -6,6 +6,8 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+
 import '../rust_api.dart';
 import 'support.dart';
 import 'workbench_cases.dart';
@@ -227,7 +229,6 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline;
     final projectId = int.tryParse(_projectIdCtrl.text.trim());
     final l10n = resolveAppLocalizationsForErrors(context);
     return SingleChildScrollView(
@@ -252,9 +253,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           const SizedBox(height: 8),
           Text(
             l10n.benchmarkIntroBody,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
+            style: studioHintStyle(context),
           ),
           const SizedBox(height: 12),
           Wrap(

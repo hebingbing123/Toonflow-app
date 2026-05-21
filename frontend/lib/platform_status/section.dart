@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
@@ -157,11 +158,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
     return '$hh:$mm:$ss';
   }
 
-  Color _statusColor(bool healthy) {
-    if (healthy) {
-      return Colors.green;
-    }
-    return Colors.orange;
+  Color _statusColor(BuildContext context, bool healthy) {
+    final tokens = StudioTokens.of(context);
+    return healthy ? tokens.success : tokens.warning;
   }
 
   @override
@@ -262,10 +261,12 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             ],
           ),
           if (_error != null) ...<Widget>[
-            const SizedBox(height: 10),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             Text(
               _error!,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: StudioTokens.of(context).danger,
+              ),
             ),
           ],
           const SizedBox(height: 12),
@@ -279,7 +280,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   l10n,
                   _health?.status ?? '-',
                 ),
-                color: _statusColor((_health?.status ?? '') == 'ok'),
+                color: _statusColor(context, (_health?.status ?? '') == 'ok'),
               ),
               _StatusChip(
                 title: l10n.platformStatusChipReady,
@@ -287,7 +288,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   l10n,
                   _ready?.status ?? '-',
                 ),
-                color: _statusColor((_ready?.status ?? '') == 'ok'),
+                color: _statusColor(context, (_ready?.status ?? '') == 'ok'),
               ),
               _StatusChip(
                 title: l10n.platformStatusChipSli,
@@ -296,7 +297,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                     : (sliStatus.healthy
                           ? l10n.platformStatusHealthy
                           : l10n.platformStatusDegraded),
-                color: _statusColor(sliStatus?.healthy == true),
+                color: _statusColor(context, sliStatus?.healthy == true),
               ),
               _StatusChip(
                 title: l10n.platformStatusChipEndpoints,
@@ -306,7 +307,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
               _StatusChip(
                 title: l10n.platformStatusChipDegraded,
                 value: '$degradedEndpoints',
-                color: _statusColor(degradedEndpoints == 0),
+                color: _statusColor(context, degradedEndpoints == 0),
               ),
             ],
           ),
@@ -381,13 +382,14 @@ class _SliTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final tokens = StudioTokens.of(context);
     final healthy = snapshot.healthy;
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 0),
       leading: Icon(
         healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
-        color: healthy ? Colors.green : Colors.orange,
+        color: healthy ? tokens.success : tokens.warning,
       ),
       title: Text(snapshot.definition.name),
       subtitle: Text(

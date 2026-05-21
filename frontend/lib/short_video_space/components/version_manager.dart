@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../../rust_api.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 
 /// 成片版本数据模型
 class AssemblyVersion {
@@ -325,16 +327,9 @@ class _VersionManagerState extends State<VersionManager> {
             const SizedBox(height: 8),
 
             if (widget.versions.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    l10n.shortVideoVersionManagerNoVersionsHint,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+              StudioEmptyState.emptyData(
+                title: l10n.shortVideoVersionManagerNoVersionsHint,
+                icon: Icons.layers_outlined,
               )
             else
               ListView.builder(
@@ -348,7 +343,9 @@ class _VersionManagerState extends State<VersionManager> {
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     color: isCurrent
-                        ? theme.colorScheme.surfaceContainerHighest
+                        ? StudioTokens.of(context).primarySoft.withValues(
+                            alpha: 0.72,
+                          )
                         : null,
                     child: ListTile(
                       leading: Icon(
@@ -356,8 +353,8 @@ class _VersionManagerState extends State<VersionManager> {
                             ? Icons.radio_button_checked
                             : Icons.radio_button_unchecked,
                         color: isCurrent
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
+                            ? StudioTokens.of(context).primary
+                            : StudioTokens.of(context).textSecondary,
                       ),
                       title: Text(
                         version.name,
@@ -425,16 +422,9 @@ class _VersionManagerState extends State<VersionManager> {
             const SizedBox(height: 8),
 
             if (widget.drafts.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    l10n.shortVideoVersionManagerNoDraftsHint,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+              StudioEmptyState.emptyData(
+                title: l10n.shortVideoVersionManagerNoDraftsHint,
+                icon: Icons.drafts_outlined,
               )
             else
               // 显示最近的 3 个草稿

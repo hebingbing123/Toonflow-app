@@ -12,6 +12,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'panel_versioning.dart';
 import '../rust_api.dart';
@@ -225,17 +226,18 @@ class PanelFreshnessIndicator extends StatelessWidget {
     Color color;
     IconData icon;
 
+    final tokens = StudioTokens.of(context);
     switch (severity) {
       case StaleSeverity.info:
-        color = Colors.green;
+        color = tokens.signal;
         icon = Icons.check_circle_outline;
         break;
       case StaleSeverity.warning:
-        color = Colors.orange;
+        color = tokens.warning;
         icon = Icons.warning_amber_outlined;
         break;
       case StaleSeverity.error:
-        color = Colors.red;
+        color = tokens.danger;
         icon = Icons.error_outline;
         break;
     }

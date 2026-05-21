@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -126,7 +129,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(12),
         color: theme.colorScheme.surfaceContainerHighest.withValues(
           alpha: 0.35,
@@ -146,7 +149,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                     Text(
                       l10n.projectEditorAuditSubtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: StudioTokens.of(context).textSecondary,
                       ),
                     ),
                   ],
@@ -230,11 +233,9 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (filtered.isEmpty)
-            Text(
-              l10n.projectEditorAuditEmpty,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            StudioEmptyState.emptyData(
+              title: l10n.projectEditorAuditEmpty,
+              icon: Icons.fact_check_outlined,
             )
           else
             ...filtered.map(

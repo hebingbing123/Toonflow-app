@@ -10,6 +10,8 @@ import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 // Split into multiple files for maintainability
 part 'section_helpers.dart';
@@ -426,9 +428,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             style: theme.textTheme.bodySmall,
           ),
         if (items != null && items.isEmpty)
-          Text(
-            l10n.teamWorkspaceNoWorkspacesHint,
-            style: theme.textTheme.bodySmall,
+          StudioEmptyState.emptyData(
+            title: l10n.teamWorkspaceNoWorkspacesHint,
+            icon: Icons.groups_outlined,
           ),
         if (items != null &&
             items.isNotEmpty &&
@@ -439,7 +441,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
+              border: Border.all(color: studioPanelBorderColor(context)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

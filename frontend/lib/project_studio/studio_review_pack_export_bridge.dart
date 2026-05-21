@@ -68,7 +68,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
         child: Text(
           l10n.studioReviewPackExportCheckUnavailable,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: tokens.textSecondary,
           ),
         ),
       );
@@ -89,7 +89,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         decoration: BoxDecoration(
           color: ready
               ? tokens.primary.withValues(alpha: 0.12)
@@ -127,7 +127,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
                       Text(
                         detail,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: tokens.textSecondary,
                         ),
                       ),
                     ],

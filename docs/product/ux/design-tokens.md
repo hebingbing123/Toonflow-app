@@ -28,7 +28,7 @@ Flutter 实现：`frontend/lib/design_system/tokens.dart`（`ThemeExtension<Stud
 |-------|------|------|
 | `textPrimary` | 15px | 正文 |
 | `textSecondary` | 13px | 次要 |
-| `textMuted` | 11px | 辅助 |
+| `textMuted` | 12px（compact `meta` 档，见 `studio_typography.dart`） | 辅助 |
 
 ## 字体
 
@@ -58,3 +58,16 @@ Flutter 实现：`frontend/lib/design_system/tokens.dart`（`ThemeExtension<Stud
 ## 降级
 
 `--dart-define=STUDIO_GLASS=false` 关闭毛玻璃，侧栏/顶栏用实色 `bgElevated`。
+
+## 语义间距与状态色（2025 巡检收口）
+
+| 名称 | 常量 | 说明 |
+|------|------|------|
+| 页面顶间距 | `StudioLayoutSpacing.pageTop` | 24 |
+| 区块间距 | `StudioLayoutSpacing.section` | 24 |
+| 卡片内边距 | `StudioLayoutSpacing.cardInner` | 16 |
+| 标题-副标题 | `StudioLayoutSpacing.titleSubtitle` | 8 |
+| 警告色 | `StudioTokens.warning` | 深色背景上的弱提示 |
+| 图标热区 | `StudioSpacing.iconTouchTarget` | 36 |
+
+产品与 PR 视觉约定见 [`studio-visual-guidelines.md`](studio-visual-guidelines.md)。

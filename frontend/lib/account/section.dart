@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../design_system/components/studio_card.dart';
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -90,7 +92,7 @@ class _AccountSectionState extends State<AccountSection> {
         final subtitleStyle =
             studioSectionIntroStyle(context) ??
             theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: StudioTokens.of(context).textSecondary,
             );
         final panels = wide
             ? Row(
@@ -258,11 +260,9 @@ class _AccountSectionState extends State<AccountSection> {
               if (widget.controller.loading)
                 const Center(child: CircularProgressIndicator())
               else if (widget.controller.items.isEmpty)
-                Text(
-                  l10n.accountExportEmpty,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                StudioEmptyState.emptyData(
+                  title: l10n.accountExportEmpty,
+                  icon: Icons.cloud_download_outlined,
                 )
               else
                 ...widget.controller.items.map(
@@ -283,18 +283,11 @@ class _AccountSectionState extends State<AccountSection> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            tokens.bgElevated.withValues(alpha: 0.68),
-            tokens.bgInset.withValues(alpha: 0.92),
-          ],
-        ),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      decoration: studioInsetPanelDecoration(
+        context,
+        backgroundColor: tokens.bgElevated.withValues(alpha: 0.72),
+        borderRadius: StudioSpacing.radiusCard,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -334,7 +327,7 @@ class _AccountSectionState extends State<AccountSection> {
                   _formatDateTime(item.createdAt),
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
               if (item.byteSize != null) ...<Widget>[
@@ -344,7 +337,7 @@ class _AccountSectionState extends State<AccountSection> {
                     _formatBytes(context, item.byteSize!),
                   ),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ),
               ],
@@ -442,7 +435,7 @@ class _AccountSectionState extends State<AccountSection> {
             Text(
               l10n.accountDeleteDescription,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
                 height: 1.5,
               ),
             ),
@@ -465,7 +458,7 @@ class _AccountSectionState extends State<AccountSection> {
                     widget.controller.lastDeleteResponse!.generationJobCount,
                   ),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                     height: 1.45,
                   ),
                 ),
@@ -495,7 +488,7 @@ class _AccountSectionState extends State<AccountSection> {
                 decoration: InputDecoration(
                   hintText: _deleteConfirmPhrase,
                   hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                    color: StudioTokens.of(context).textSecondary.withValues(
                       alpha: 0.68,
                     ),
                     fontFamily: 'monospace',
@@ -582,6 +575,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildAcknowledgeTile(BuildContext context, AppLocalizations l10n) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
 
     void setAcknowledged(bool value) {
       setState(() {
@@ -603,7 +597,7 @@ class _AccountSectionState extends State<AccountSection> {
             border: Border.all(
               color: _acknowledgeIrreversible
                   ? theme.colorScheme.error.withValues(alpha: 0.42)
-                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.55),
+                  : tokens.borderSubtle.withValues(alpha: 0.55),
             ),
             color: _acknowledgeIrreversible
                 ? theme.colorScheme.error.withValues(alpha: 0.08)
@@ -615,7 +609,7 @@ class _AccountSectionState extends State<AccountSection> {
               Checkbox(
                 value: _acknowledgeIrreversible,
                 onChanged: (value) => setAcknowledged(value ?? false),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -665,7 +659,7 @@ class _AccountSectionState extends State<AccountSection> {
             Text(
               prefix,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
                 height: 1.4,
               ),
             ),
@@ -691,7 +685,7 @@ class _AccountSectionState extends State<AccountSection> {
             Text(
               suffix,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
                 height: 1.4,
               ),
             ),

@@ -231,7 +231,7 @@ class _StudioNovelCrawlAuthSectionState
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final outline = theme.colorScheme.onSurfaceVariant;
+    final outline = tokens.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

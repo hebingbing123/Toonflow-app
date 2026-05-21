@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_empty_state.dart';
+import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import 'plan_workbench_support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -87,31 +91,14 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         ? ''
                         : ' · ${planData.scriptRows.take(3).map((row) => row.name ?? '#${row.id ?? 0}').join(' / ')}',
                   ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  style: studioHintStyle(context),
                 ),
               const SizedBox(height: 8),
-              Text(
-                model.eventSummaryLine,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Text(model.eventSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: 8),
-              Text(
-                model.draftSummaryLine,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Text(model.draftSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: 8),
-              Text(
-                model.guidanceSummaryLine,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Text(model.guidanceSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -177,11 +164,9 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (model.draftPackets.isEmpty)
-                Text(
-                  l10n.projectScriptPlanWorkbenchNoDraftPacketsHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                StudioEmptyState.emptyData(
+                  title: l10n.projectScriptPlanWorkbenchNoDraftPacketsHint,
+                  icon: Icons.article_outlined,
                 )
               else
                 ...model.draftPackets
@@ -191,15 +176,10 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.25),
+                          padding: const EdgeInsets.all(
+                            StudioLayoutSpacing.cardInner - 4,
                           ),
+                          decoration: studioRecessedPanelDecoration(context),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -211,9 +191,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                               Text(
                                 '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${draft.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : draft.chapterIndexes.join(', ')}'
                                 '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                                style: studioHintStyle(context),
                               ),
                               const SizedBox(height: 6),
                               SelectableText(
@@ -233,11 +211,9 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (model.guidanceRows.isEmpty)
-                Text(
-                  l10n.projectScriptPlanWorkbenchNoGuidanceHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                StudioEmptyState.emptyData(
+                  title: l10n.projectScriptPlanWorkbenchNoGuidanceHint,
+                  icon: Icons.auto_fix_high_outlined,
                 )
               else
                 ...model.guidanceRows
@@ -247,15 +223,10 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.2),
+                          padding: const EdgeInsets.all(
+                            StudioLayoutSpacing.cardInner - 4,
                           ),
+                          decoration: studioRecessedPanelDecoration(context),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -267,9 +238,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                               Text(
                                 '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${guidance.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : guidance.chapterIndexes.join(', ')}'
                                 '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                                style: studioHintStyle(context),
                               ),
                               const SizedBox(height: 6),
                               SelectableText(

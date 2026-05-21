@@ -907,7 +907,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
           Text(
             hub.headline,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: tokens.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -915,7 +915,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
           Text(
             hub.subheadline,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 14),
@@ -953,7 +953,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
               Text(
                 hub.primaryAction.title,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: tokens.textSecondary,
                 ),
               ),
             ],
@@ -1184,7 +1184,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
           Text(
             l10n.projectStudioStoryboardBlockersTitle,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: tokens.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1192,7 +1192,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
           Text(
             l10n.projectStudioStoryboardBlockersSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           if (pendingCandidates.isNotEmpty) ...<Widget>[
@@ -1200,7 +1200,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
             Text(
               l10n.projectStudioPendingCandidateReviewTitle,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
+                color: tokens.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1246,7 +1246,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
             Text(
               l10n.projectStudioMissingAnchorsTitle,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
+                color: tokens.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1306,7 +1306,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(12),
@@ -1322,7 +1322,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
                 Text(
                   title,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: tokens.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1330,7 +1330,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
                 Text(
                   detail,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: tokens.textSecondary,
                   ),
                 ),
               ],
@@ -1362,7 +1362,7 @@ class _AssetHubListCard extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         decoration: BoxDecoration(
           color: tokens.bgInset,
           borderRadius: BorderRadius.circular(12),
@@ -1374,7 +1374,7 @@ class _AssetHubListCard extends StatelessWidget {
             Text(
               title,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
+                color: tokens.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1401,6 +1401,7 @@ class _AssetHubLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -1409,7 +1410,7 @@ class _AssetHubLine extends StatelessWidget {
           Text(
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: tokens.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1417,14 +1418,14 @@ class _AssetHubLine extends StatelessWidget {
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             meta,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
         ],
@@ -1449,7 +1450,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final card = Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(12),
@@ -1461,14 +1462,14 @@ class _AssetsHubMetricCard extends StatelessWidget {
           Text(
             metric.label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             metric.value,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: tokens.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1476,7 +1477,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
           Text(
             metric.detail,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: tokens.textSecondary,
             ),
           ),
           if (onTap != null) ...<Widget>[

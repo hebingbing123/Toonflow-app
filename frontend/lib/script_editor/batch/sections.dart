@@ -132,9 +132,7 @@ extension _StoryboardBatchWorkbenchSections
         const SizedBox(height: 4),
         Text(
           l10n.scriptEditorStoryboardBatchQuickGenerateHint,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
-          ),
+          style: studioHintStyle(context),
         ),
       ],
     );
@@ -201,12 +199,7 @@ extension _StoryboardBatchWorkbenchSections
     final exportEstimate = _currentExportEstimate();
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: studioRecessedPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -322,9 +315,7 @@ extension _StoryboardBatchWorkbenchSections
               l10n.scriptEditorStoryboardBatchExportShotIds(
                 _exportSummary!.shotIds.join(', '),
               ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: studioHintStyle(context),
             ),
           ],
           const SizedBox(height: 12),
@@ -333,9 +324,7 @@ extension _StoryboardBatchWorkbenchSections
                 ? Center(
                     child: Text(
                       l10n.scriptEditorStoryboardBatchPreviewPlaceholder,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                      style: studioHintStyle(context),
                     ),
                   )
                 : ClipRRect(

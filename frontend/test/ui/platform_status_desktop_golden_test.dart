@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/home_page.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/ui_gallery_capture.dart';
 import '../support/utility_shell_fixtures.dart';
@@ -11,6 +12,7 @@ import '../support/utility_shell_fixtures.dart';
 /// Isolated golden for platform status (avoids binding pollution from gallery file).
 void main() {
   testWidgets('platform_status desktop layout golden', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
     final router = buildPlatformStatusTestRouter();
     addTearDown(router.dispose);
 

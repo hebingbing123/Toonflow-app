@@ -194,11 +194,9 @@ class _StudioScriptNovelInlineImportState
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final outline = theme.colorScheme.onSurfaceVariant;
-
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(12),
@@ -221,7 +219,7 @@ class _StudioScriptNovelInlineImportState
                 child: Text(
                   l10n.studioScriptNovelInlineImportTitle,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
+                    color: tokens.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -235,7 +233,9 @@ class _StudioScriptNovelInlineImportState
           const SizedBox(height: 4),
           Text(
             l10n.studioScriptNovelInlineImportSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: tokens.textSecondary,
+            ),
           ),
           const SizedBox(height: 12),
           StudioNovelCrawlAuthSection(
@@ -352,7 +352,9 @@ class _StudioScriptNovelInlineImportState
             const SizedBox(height: 10),
             Text(
               _infoLine!,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              style: theme.textTheme.bodySmall?.copyWith(
+              color: tokens.textSecondary,
+            ),
             ),
           ],
           if (_busy) ...<Widget>[

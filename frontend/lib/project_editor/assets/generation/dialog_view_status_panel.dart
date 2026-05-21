@@ -34,8 +34,8 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
+    final muted = studioPanelMutedColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -47,14 +47,14 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             summarizeProductionAssetData(productionData!, l10n),
-            style: bodySmall?.copyWith(color: outline),
+            style: bodySmall?.copyWith(color: muted),
           ),
         ],
         if (pollingData != null) ...[
           const SizedBox(height: 4),
           Text(
             summarizeAssetPollingStatuses(pollingData!.statuses, l10n),
-            style: bodySmall?.copyWith(color: outline),
+            style: bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -81,7 +81,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             summarizeWorkbenchAssetMaterialData(materialData!, l10n),
-            style: bodySmall?.copyWith(color: outline),
+            style: bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -103,7 +103,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             summarizeWorkbenchBatchGenerationData(batchData!, l10n),
-            style: bodySmall?.copyWith(color: outline),
+            style: bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -125,7 +125,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             summarizeWorkbenchPromptPolling(promptPollingData!, l10n),
-            style: bodySmall?.copyWith(color: outline),
+            style: bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 4),
           Wrap(

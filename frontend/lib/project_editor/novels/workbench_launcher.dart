@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_surfaces.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'import_parser.dart';
@@ -200,14 +201,7 @@ Future<void> openNovelWorkbenchDialog({
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(
-                                dialogCtx,
-                              ).colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          decoration: studioInsetPanelDecoration(dialogCtx),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

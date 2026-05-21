@@ -66,7 +66,7 @@ class EpisodeConsolePage extends StatelessWidget {
               child: Text(
                 l10n.studioEpisodeConsoleBetaBody,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
             ),

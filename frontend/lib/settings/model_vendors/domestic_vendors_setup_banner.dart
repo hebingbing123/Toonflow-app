@@ -87,6 +87,7 @@ class _DomesticVendorsSetupBannerState extends State<DomesticVendorsSetupBanner>
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: StudioCard(
+        emphasized: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -109,7 +110,7 @@ class _DomesticVendorsSetupBannerState extends State<DomesticVendorsSetupBanner>
                       Text(
                         l10n.settingsDomesticVendorsSetupSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: tokens.textSecondary,
                           height: 1.45,
                         ),
                       ),
@@ -210,7 +211,7 @@ class _DomesticVendorSetupRow extends StatelessWidget {
               Icon(
                 ready ? Icons.check_circle : Icons.radio_button_unchecked,
                 size: 20,
-                color: ready ? tokens.primary : theme.colorScheme.outline,
+                color: ready ? tokens.primary : tokens.textMuted,
               ),
               const SizedBox(width: 10),
               Expanded(

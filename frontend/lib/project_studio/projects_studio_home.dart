@@ -160,12 +160,12 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             l10n.studioProjectsHomeTitle,
             style: studioPageTitleStyle(context),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
           Text(
             l10n.studioProjectsHomeSubtitle,
             style: studioSectionIntroStyle(context),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: StudioLayoutSpacing.section - 6),
           action,
         ],
       );
@@ -181,7 +181,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                 l10n.studioProjectsHomeTitle,
                 style: studioPageTitleStyle(context),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
               Text(
                 l10n.studioProjectsHomeSubtitle,
                 style: studioSectionIntroStyle(context),
@@ -189,7 +189,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             ],
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: StudioSpacing.sm),
         action,
       ],
     );
@@ -210,7 +210,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             l10n.studioContinueCreating,
             style: studioPaneTitleStyle(context),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle + 6),
           for (var i = 0; i < recent.length; i++) ...<Widget>[
             SizedBox(
               width: recentCardWidth,
@@ -223,7 +223,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                     : () => widget.onSelectProjectScope!(recent[i]),
               ),
             ),
-            if (i != recent.length - 1) const SizedBox(height: 12),
+            if (i != recent.length - 1)
+              const SizedBox(height: StudioSpacing.sm),
           ],
         ],
       );
@@ -232,13 +233,14 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(l10n.studioContinueCreating, style: studioPaneTitleStyle(context)),
-        const SizedBox(height: 14),
+        const SizedBox(height: StudioSpacing.sm),
         SizedBox(
           height: 152,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: recent.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 14),
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: StudioSpacing.sm),
             itemBuilder: (context, index) {
               final project = recent[index];
               return SizedBox(
@@ -305,7 +307,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                           widget.onOpenModelVendorSettings!,
                     ),
                   if (_enterpriseEmpty) ...<Widget>[
-                    const SizedBox(height: 20),
+                    const SizedBox(height: StudioLayoutSpacing.section - 4),
                     _EnterpriseEmptyBanner(
                       workspaceName: widget.currentWorkspaceName,
                       creating: widget.controller.creatingProject,
@@ -315,13 +317,13 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                   ],
                   if (widget.currentProjectNumericId == null &&
                       projects.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 20),
+                    const SizedBox(height: StudioLayoutSpacing.section - 4),
                     _SelectProjectHintBanner(
                       message: l10n.studioPipelineSelectProjectFirst,
                     ),
                   ],
                   if (useSplitOverview) ...<Widget>[
-                    const SizedBox(height: 28),
+                    const SizedBox(height: StudioLayoutSpacing.section + 4),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -352,7 +354,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                     ),
                   ] else ...<Widget>[
                     if (recent.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 28),
+                      const SizedBox(height: StudioLayoutSpacing.section + 4),
                       _buildRecentRail(
                         context,
                         l10n,
@@ -361,19 +363,19 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                         recentCardWidth: recentCardWidth,
                       ),
                     ],
-                    const SizedBox(height: 28),
+                    const SizedBox(height: StudioLayoutSpacing.section + 4),
                     if (projects.isEmpty && !widget.controller.loadingProjects)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          StudioEmptyState(
+                          StudioEmptyState.firstUse(
                             title: l10n.studioProjectsEmptyTitle,
                             subtitle: l10n.studioProjectsEmptySubtitle,
                             icon: Icons.folder_open_outlined,
                             actionLabel: l10n.studioCreateProject,
                             onAction: _createProject,
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: StudioLayoutSpacing.section + 4),
                           StudioGettingStartedSteps(
                             steps: <String>[
                               l10n.studioProjectsEmptyStep1,
@@ -485,10 +487,10 @@ class _EnterpriseEmptyBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton + 2),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -498,14 +500,14 @@ class _EnterpriseEmptyBanner extends StatelessWidget {
             l10n.projectsEnterpriseEmptyTitle,
             style: studioPaneTitleStyle(context),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
           Text(
             buildEnterpriseProjectsEmptyStateBody(l10n, workspaceName),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Wrap(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: <Widget>[
               StudioPrimaryButton(
                 label: creating
@@ -541,12 +543,15 @@ class _SelectProjectHintBanner extends StatelessWidget {
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioLayoutSpacing.cardInner,
+          vertical: StudioSpacing.sm - 2,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(Icons.touch_app_outlined, size: 18, color: tokens.primary),
-            const SizedBox(width: 10),
+            Icon(Icons.touch_app_outlined, size: 18, color: tokens.textMuted),
+            const SizedBox(width: StudioSpacing.sm - 6),
             Expanded(
               child: Text(
                 message,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -131,11 +134,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(12),
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-      ),
+      decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -146,9 +145,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
           const SizedBox(height: 4),
           Text(
             l10n.projectEditorShortDramaTargetsSectionBody,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+            style: studioHintStyle(context),
           ),
           const SizedBox(height: 12),
           Text(

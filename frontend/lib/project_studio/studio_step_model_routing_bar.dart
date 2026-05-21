@@ -254,7 +254,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                       Icon(
                         Icons.alt_route_outlined,
                         size: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: StudioTokens.of(context).textSecondary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -262,9 +262,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                           l10n.studioModelRoutingDeliverInherit,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: StudioTokens.of(context).textSecondary,
                               ),
                         ),
                       ),
@@ -292,8 +290,8 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                               horizontal: 8,
                               vertical: 4,
                             ),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.padded,
+                            visualDensity: VisualDensity.standard,
                           ),
                           child: Text(l10n.studioScriptStepRetry),
                         ),
@@ -310,7 +308,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                           Chip(
                             visualDensity: VisualDensity.compact,
                             materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                                MaterialTapTargetSize.padded,
                             label: Text(
                               '${_slotLabel(l10n, entry.slot)} · ${_sourceLabel(l10n, entry.source)}',
                               style: Theme.of(context).textTheme.labelSmall,
@@ -410,7 +408,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
               Text(
                 l10n.studioModelRoutingPrimaryFootnote,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: StudioTokens.of(context).textSecondary,
                 ),
               ),
               if (widget.onOpenProjectSettings != null)
@@ -493,9 +491,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: StudioTokens.of(context).textSecondary,
                               ),
                         ),
                       ],
@@ -503,7 +499,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   ),
                   Icon(
                     expanded ? Icons.expand_less : Icons.expand_more,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: StudioTokens.of(context).textSecondary,
                   ),
                 ],
               ),
@@ -565,7 +561,7 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -579,7 +575,7 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
             Text(
               l10n.studioModelRoutingCatalogEmptyBody,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: StudioTokens.of(context).textSecondary,
                 height: 1.45,
               ),
             ),

@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
-
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -65,7 +66,6 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
@@ -123,12 +123,17 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               if (model.assets.isEmpty)
-                Text(
-                  model.loading ? l10n.projectEditorAssetHistoryLoadingAssets : l10n.projectEditorAssetHistoryEmptyState,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
-                )
+                model.loading
+                    ? Text(
+                        l10n.projectEditorAssetHistoryLoadingAssets,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: studioPanelMutedColor(context),
+                        ),
+                      )
+                    : StudioEmptyState.emptyData(
+                        title: l10n.projectEditorAssetHistoryEmptyState,
+                        icon: Icons.photo_library_outlined,
+                      )
               else ...[
                 SizedBox(
                   height: 180,
@@ -184,7 +189,9 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     l10n.projectEditorAssetHistoryNoImages,
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: outline),
+                    ).textTheme.bodySmall?.copyWith(
+                    color: studioPanelMutedColor(context),
+                  ),
                   ),
                 if (model.selectedImage != null) ...[
                   const SizedBox(height: 8),
@@ -218,7 +225,9 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     l10n.projectEditorAssetHistoryNoPreview,
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: outline),
+                    ).textTheme.bodySmall?.copyWith(
+                    color: studioPanelMutedColor(context),
+                  ),
                   ),
               ],
             ],

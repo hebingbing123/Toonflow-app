@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -221,7 +222,7 @@ class _NovelCrawlLoginWebViewDialogState
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                    color: studioPanelBorderColor(context).withValues(alpha: 0.35),
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),

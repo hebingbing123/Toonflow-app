@@ -21,6 +21,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     required this.accentSoft,
     required this.signal,
     required this.danger,
+    required this.warning,
     required this.success,
     required this.overlay,
     required this.surfaceHighlight,
@@ -47,6 +48,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
   final Color accentSoft;
   final Color signal;
   final Color danger;
+  final Color warning;
   final Color success;
   final Color overlay;
   final Color surfaceHighlight;
@@ -73,6 +75,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     accentSoft: Color(0xFF0C303A),
     signal: Color(0xFF56B7FF),
     danger: Color(0xFFFF6D7A),
+    warning: Color(0xFFFFB347),
     success: Color(0xFF35D49B),
     overlay: Color(0xB3000000),
     surfaceHighlight: Color(0xFF1D3650),
@@ -105,6 +108,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     Color? accentSoft,
     Color? signal,
     Color? danger,
+    Color? warning,
     Color? success,
     Color? overlay,
     Color? surfaceHighlight,
@@ -131,6 +135,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       accentSoft: accentSoft ?? this.accentSoft,
       signal: signal ?? this.signal,
       danger: danger ?? this.danger,
+      warning: warning ?? this.warning,
       success: success ?? this.success,
       overlay: overlay ?? this.overlay,
       surfaceHighlight: surfaceHighlight ?? this.surfaceHighlight,
@@ -163,6 +168,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       accentSoft: l(accentSoft, other.accentSoft),
       signal: l(signal, other.signal),
       danger: l(danger, other.danger),
+      warning: l(warning, other.warning),
       success: l(success, other.success),
       overlay: l(overlay, other.overlay),
       surfaceHighlight: l(surfaceHighlight, other.surfaceHighlight),
@@ -183,6 +189,22 @@ abstract final class StudioSpacing {
   static const double radiusButton = 10;
   static const double radiusCard = 14;
 
+  /// Minimum square hit target for chrome icon buttons (desktop).
+  static const double iconTouchTarget = 36;
+
+  /// Collapsed sidebar nav tile size.
+  static const double navItemTouchTarget = 44;
+
   /// Gap between adjacent icon buttons in top-bar chrome groups.
   static const double chromeActionGap = 4;
+}
+
+/// Page-level semantic spacing (prefer over ad-hoc 10/14/18 values).
+abstract final class StudioLayoutSpacing {
+  static const double pageTop = StudioSpacing.md;
+  static const double section = StudioSpacing.md;
+  static const double cardInner = StudioSpacing.sm;
+  static const double titleSubtitle = StudioSpacing.xs;
+  static const double actionRow = StudioSpacing.sm;
+  static const double listItem = StudioSpacing.xs;
 }

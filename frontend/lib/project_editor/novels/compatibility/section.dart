@@ -23,9 +23,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
       title: Text(l10n.projectEditorNovelsCompatibilitySectionTitle),
       subtitle: Text(
         l10n.projectEditorNovelsCompatibilitySectionSubtitle,
-        style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-          color: Theme.of(ctx).colorScheme.outline,
-        ),
+        style: studioHintStyle(ctx),
       ),
       children: [
         Align(
@@ -33,7 +31,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
           child: Text(
             l10n.projectEditorNovelsCompatibilitySectionProbeHint,
             style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.outline,
+              color: studioPanelMutedColor(ctx),
             ),
           ),
         ),

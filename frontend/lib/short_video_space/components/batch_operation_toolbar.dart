@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../design_system/components/studio_surfaces.dart';
 import 'package:flutter/services.dart';
 
 import '../../rust_api.dart';
@@ -116,7 +118,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
+            color: studioPanelBorderColor(context),
             width: 1,
           ),
         ),

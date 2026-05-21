@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_text_styles.dart';
 import '../../rust_api.dart';
 import 'overview.dart';
 
@@ -70,9 +71,7 @@ Widget buildProjectAssetsSection({
       else
         Text(
           l10n.projectEditorAssetsSectionListNotLoaded,
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-            color: Theme.of(ctx).colorScheme.outline,
-          ),
+          style: studioHintStyle(ctx),
         ),
     ],
   );

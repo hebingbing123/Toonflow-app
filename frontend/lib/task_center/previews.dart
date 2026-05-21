@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import 'support.dart';
 
@@ -173,7 +174,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final compact = MediaQuery.sizeOf(context).width < 520;
     final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      color: StudioTokens.of(context).textSecondary,
       height: 1.35,
     );
     final grouped = groupJobsByPhase(jobs);

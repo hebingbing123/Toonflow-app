@@ -32,7 +32,6 @@ class _OverviewMigrationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final overview = _ProjectOverviewSection(
       spaceOverviewSummary: spaceOverviewSummary,
       overviewMetrics: overviewMetrics,
@@ -62,7 +61,7 @@ class _OverviewMigrationPanel extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: VerticalDivider(
                     width: 1,
-                    color: theme.colorScheme.outlineVariant.withValues(
+                    color: studioPanelBorderColor(context).withValues(
                       alpha: 0.65,
                     ),
                   ),
@@ -80,7 +79,7 @@ class _OverviewMigrationPanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Divider(
                 height: 1,
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.65),
+                color: studioPanelBorderColor(context).withValues(alpha: 0.65),
               ),
             ),
             migration,
@@ -123,7 +122,7 @@ class _ProjectOverviewSection extends StatelessWidget {
           spaceOverviewSummary,
           style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -131,13 +130,13 @@ class _ProjectOverviewSection extends StatelessWidget {
               .map((item) => _MetricChip(label: item.label, value: item.value))
               .toList(growable: false),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           qualitySummaryLine,
           style: theme.textTheme.bodySmall?.copyWith(color: muted),
         ),
         if (badCaseMetrics.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioSpacing.xs + 2),
           Text(
             l10n.shortVideoSpaceRecentBadCaseTrends,
             style: theme.textTheme.labelLarge,
@@ -154,7 +153,7 @@ class _ProjectOverviewSection extends StatelessWidget {
           ),
         ],
         if (recentTaskLines.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.shortVideoSpaceRecentTaskFlow,
             style: theme.textTheme.labelLarge,
@@ -218,7 +217,7 @@ class _MigrationOrderSection extends StatelessWidget {
           migrationSummary,
           style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -328,6 +327,7 @@ class _ProductionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final muted = studioMutedTextColor(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final latestExportCardFill = latestExportUi.isWarning
@@ -339,7 +339,8 @@ class _ProductionPanel extends StatelessWidget {
     final latestExportCardTextColor = latestExportUi.isWarning
         ? theme.colorScheme.onErrorContainer
         : theme.colorScheme.onPrimaryContainer;
-    final sectionSpacing = dense ? 12.0 : 16.0;
+    final sectionSpacing =
+        dense ? StudioSpacing.xs + 4 : StudioLayoutSpacing.cardInner;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,7 +373,7 @@ class _ProductionPanel extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (assetsOverviewPanelUi.typeLines.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     for (final line in assetsOverviewPanelUi.typeLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 6),
@@ -451,19 +452,19 @@ class _ProductionPanel extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (assemblyPanelUi.defaultsLine.trim().isNotEmpty) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     Text(
                       assemblyPanelUi.defaultsLine,
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
                   if (assemblyPanelUi.qualityLines.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     Text(
                       l10n.shortVideoSpaceQualityReview,
                       style: theme.textTheme.labelMedium,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     for (final line in assemblyPanelUi.qualityLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
@@ -487,7 +488,7 @@ class _ProductionPanel extends StatelessWidget {
                       ),
                   ],
                   if (assemblyPanelUi.scriptLines.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     for (final line in assemblyPanelUi.scriptLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 6),
@@ -511,12 +512,12 @@ class _ProductionPanel extends StatelessWidget {
                       ),
                   ],
                   if (assemblyPanelUi.multiTrackDecisionLines.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     Text(
                       l10n.shortVideoSpaceMultiTrackExportDecision,
                       style: theme.textTheme.labelMedium,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     for (final line in assemblyPanelUi.multiTrackDecisionLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
@@ -549,7 +550,7 @@ class _ProductionPanel extends StatelessWidget {
                     assemblyPanelUi.visible &&
                     !assemblyPanelUi.loading &&
                     !assemblyPanelUi.unavailable) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioSpacing.xs + 2),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -622,7 +623,7 @@ class _ProductionPanel extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (exportCheckPanelUi.metrics.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -634,7 +635,7 @@ class _ProductionPanel extends StatelessWidget {
                     ),
                   ],
                   if (exportCheckPanelUi.qualityGateLine.trim().isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: StudioSpacing.xs + 2),
                     Text(
                       exportCheckPanelUi.qualityGateLine,
                       style: theme.textTheme.bodySmall,
@@ -651,7 +652,7 @@ class _ProductionPanel extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     for (final line
                         in exportCheckPanelUi.qualityGateBlockingLines)
                       Padding(
@@ -685,8 +686,8 @@ class _ProductionPanel extends StatelessWidget {
                           '${gap.title}: ${gap.facetSummary}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: gap.hasBlocking
-                                ? theme.colorScheme.error
-                                : Colors.orange,
+                                ? tokens.danger
+                                : tokens.warning,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -707,7 +708,7 @@ class _ProductionPanel extends StatelessWidget {
                         child: Text(
                           line,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange,
+                            color: tokens.warning,
                           ),
                         ),
                       ),
@@ -735,8 +736,8 @@ class _ProductionPanel extends StatelessWidget {
                             gap.title,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: gap.hasBlocking
-                                  ? theme.colorScheme.error
-                                  : Colors.orange,
+                                  ? tokens.danger
+                                  : tokens.warning,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -764,7 +765,7 @@ class _ProductionPanel extends StatelessWidget {
                       l10n.shortVideoSpaceBlockingItems,
                       style: theme.textTheme.labelSmall?.copyWith(color: muted),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     for (final line in exportCheckPanelUi.blockingLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
@@ -782,14 +783,14 @@ class _ProductionPanel extends StatelessWidget {
                       l10n.shortVideoSpaceWarningItems,
                       style: theme.textTheme.labelSmall?.copyWith(color: muted),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs - 2),
                     for (final line in exportCheckPanelUi.warningLines)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           line,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange,
+                            color: tokens.warning,
                           ),
                         ),
                       ),
@@ -801,7 +802,7 @@ class _ProductionPanel extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
                 if (latestExportUi.visible) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioSpacing.xs + 2),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -836,7 +837,7 @@ class _ProductionPanel extends StatelessWidget {
                         if ((latestExportUi.statusLine ?? '')
                             .trim()
                             .isNotEmpty) ...[
-                          const SizedBox(height: 6),
+                          const SizedBox(height: StudioSpacing.xs - 2),
                           Text(
                             latestExportUi.statusLine!,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -911,7 +912,7 @@ class _ProductionPanel extends StatelessWidget {
                                 if ((latestExportUi.activeTaskError ?? '')
                                     .trim()
                                     .isNotEmpty) ...[
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: StudioSpacing.xs - 2),
                                   Text(
                                     latestExportUi.activeTaskError!,
                                     style: theme.textTheme.bodySmall?.copyWith(
@@ -924,7 +925,7 @@ class _ProductionPanel extends StatelessWidget {
                           ),
                         ],
                         if (latestExportUi.detail.isNotEmpty) ...[
-                          const SizedBox(height: 6),
+                          const SizedBox(height: StudioSpacing.xs - 2),
                           Text(
                             latestExportUi.detail,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -947,7 +948,7 @@ class _ProductionPanel extends StatelessWidget {
                               ),
                             ),
                         ],
-                        const SizedBox(height: 10),
+                        const SizedBox(height: StudioSpacing.xs + 2),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -1043,7 +1044,7 @@ class _ProductionPanel extends StatelessWidget {
                 ],
                 if (localAssemblyBlockedHint != null &&
                     localAssemblyBlockedHint!.trim().isNotEmpty) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: StudioSpacing.xs + 2),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -1060,7 +1061,7 @@ class _ProductionPanel extends StatelessWidget {
                           ),
                         ),
                         if (onOpenDesktopDownloads != null) ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: StudioSpacing.xs + 2),
                           FilledButton.tonalIcon(
                             onPressed: onOpenDesktopDownloads,
                             icon: const Icon(Icons.download_outlined),
@@ -1071,7 +1072,7 @@ class _ProductionPanel extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: StudioSpacing.xs + 2),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,

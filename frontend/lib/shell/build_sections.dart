@@ -38,7 +38,7 @@ extension _HomePageBuildSections on _HomePageState {
     final notifier = AppLocaleNotifier.instance;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
