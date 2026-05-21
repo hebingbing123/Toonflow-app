@@ -737,6 +737,46 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
+  /// Build browser-style navigation buttons (back/forward) for desktop
+  Widget _buildNavigationButtons(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: tokens.bgInset.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: tokens.surfaceHighlight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            IconButton(
+              style: studioChromeIconButtonStyle(context),
+              tooltip: 'Back',
+              onPressed: () {
+                // TODO: Implement navigation history back
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              style: studioChromeIconButtonStyle(context),
+              tooltip: 'Forward',
+              onPressed: () {
+                // TODO: Implement navigation history forward
+              },
+              icon: const Icon(Icons.arrow_forward_ios, size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
       StudioToastOverlay.hide();
@@ -904,13 +944,14 @@ extension _HomePageProductShell on _HomePageState {
                     children: <Widget>[
                       Row(
                         children: <Widget>[
-                          Expanded(
-                            child: _buildStudioLogoHeader(
-                              context,
-                              appTitle,
-                              pageTitle,
-                            ),
+                          _buildStudioLogoHeader(
+                            context,
+                            appTitle,
+                            pageTitle,
                           ),
+                          const SizedBox(width: 8),
+                          _buildNavigationButtons(context),
+                          const Spacer(),
                           const StudioJobTray(),
                           const SizedBox(width: 8),
                           StudioAppBarActions(
@@ -943,27 +984,29 @@ extension _HomePageProductShell on _HomePageState {
                   )
                 : Row(
                     children: <Widget>[
+                      _buildStudioLogoHeader(
+                        context,
+                        appTitle,
+                        pageTitle,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildNavigationButtons(context),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: _buildStudioLogoHeader(
-                          context,
-                          appTitle,
-                          pageTitle,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: desktopXWide
+                                ? 520
+                                : desktopWide
+                                ? 460
+                                : 400,
+                          ),
+                          child: globalSearchBar,
                         ),
                       ),
                       const StudioJobTray(),
                       const SizedBox(width: 8),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: desktopXWide
-                              ? 420
-                              : desktopWide
-                              ? 360
-                              : 320,
-                        ),
-                        child: globalSearchBar,
-                      ),
                       if (showHeaderWorkspaceContext) ...<Widget>[
-                        const SizedBox(width: StudioLayoutSpacing.inlineGap),
                         ConstrainedBox(
                           constraints: BoxConstraints(
                             maxWidth: desktopXWide
@@ -977,8 +1020,8 @@ extension _HomePageProductShell on _HomePageState {
                             inline: true,
                           ),
                         ),
+                        const SizedBox(width: 8),
                       ],
-                      const SizedBox(width: 8),
                       StudioAppBarActions(
                         selectedPane: currentPane,
                         unreadNotifications:
