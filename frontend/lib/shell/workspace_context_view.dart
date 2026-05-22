@@ -29,6 +29,10 @@ class WorkspaceContextView extends StatelessWidget {
     this.workspaceJobsToday,
     this.compact = false,
     this.inline = false,
+    this.embedded = false,
+    this.titleBarChrome = false,
+    this.titleBarDense = false,
+    this.onProjectScopeTap,
   });
 
   final bool loading;
@@ -36,6 +40,18 @@ class WorkspaceContextView extends StatelessWidget {
   /// Single-line bar for Studio compact shell (billing in expansion).
   final bool compact;
   final bool inline;
+
+  /// Inside [StudioPipelineStrip]; skip outer card chrome.
+  final bool embedded;
+
+  /// Product shell top title bar (macOS integrated or desktop chrome row).
+  final bool titleBarChrome;
+
+  /// Single-line scope summary when title bar width is tight.
+  final bool titleBarDense;
+
+  /// When set, the project scope row navigates to the scoped project home (shell).
+  final VoidCallback? onProjectScopeTap;
   final String? workspaceName;
   final String? workspaceType;
   final String? projectLabel;
@@ -43,6 +59,86 @@ class WorkspaceContextView extends StatelessWidget {
   final String? workspacePlanTier;
   final int? workspaceDailyJobQuota;
   final int? workspaceJobsToday;
+
+  bool _hasActionableProjectScope(AppLocalizations l10n, String scopeLine) {
+    if (onProjectScopeTap == null || loading) {
+      return false;
+    }
+    return scopeLine != l10n.workspaceContextNoProject;
+  }
+
+  Widget _wrapProjectScopeTapTarget({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required StudioTokens tokens,
+    required String scopeLine,
+    required Widget child,
+  }) {
+    if (!_hasActionableProjectScope(l10n, scopeLine)) {
+      return child;
+    }
+    return Tooltip(
+      message: l10n.projectEditorBasicsHomeSectionTitle,
+      waitDuration: const Duration(milliseconds: 350),
+      child: InkWell(
+        onTap: onProjectScopeTap,
+        borderRadius: BorderRadius.circular(4),
+        hoverColor: tokens.bgInset.withValues(alpha: 0.65),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleBarProjectScopeRow({
+    required BuildContext context,
+    required ThemeData theme,
+    required StudioTokens tokens,
+    required AppLocalizations l10n,
+    required String scopeLine,
+    required double iconSize,
+    required double fontSize,
+    required Color textColor,
+  }) {
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          Icons.folder_open_outlined,
+          size: iconSize,
+          color: _hasActionableProjectScope(l10n, scopeLine)
+              ? tokens.accent.withValues(alpha: 0.9)
+              : tokens.textMuted,
+        ),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            scopeLine,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: textColor,
+              fontSize: fontSize,
+              height: 1.1,
+              decoration: _hasActionableProjectScope(l10n, scopeLine)
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+              decorationColor: tokens.accent.withValues(alpha: 0.55),
+            ),
+          ),
+        ),
+      ],
+    );
+    return _wrapProjectScopeTapTarget(
+      context: context,
+      l10n: l10n,
+      tokens: tokens,
+      scopeLine: scopeLine,
+      child: row,
+    );
+  }
 
   String? _workspaceTypeLabel(AppLocalizations l10n, String? raw) {
     final normalized = raw?.trim().toLowerCase();
@@ -86,6 +182,207 @@ class WorkspaceContextView extends StatelessWidget {
       final tooltip = billingSummary == null
           ? summary
           : '$summary\n$billingSummary';
+
+      if (titleBarChrome) {
+        if (titleBarDense) {
+          final denseBody = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.workspaces_outline,
+                size: 12,
+                color: tokens.accent,
+              ),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  summary,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: tokens.textSecondary,
+                    fontSize: 11,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            ],
+          );
+          return Tooltip(
+            message: tooltip,
+            waitDuration: const Duration(milliseconds: 350),
+            child: _wrapProjectScopeTapTarget(
+              context: context,
+              l10n: l10n,
+              tokens: tokens,
+              scopeLine: scopeLine,
+              child: denseBody,
+            ),
+          );
+        }
+        return Tooltip(
+          message: tooltip,
+          waitDuration: const Duration(milliseconds: 350),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.workspaces_outline,
+                    size: 12,
+                    color: tokens.accent,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      workspaceLine,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: tokens.textPrimary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                  if (workspaceTypeLabel != null) ...<Widget>[
+                    const SizedBox(width: 5),
+                    _InlineContextChip(
+                      label: workspaceTypeLabel,
+                      compact: true,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 2),
+              _buildTitleBarProjectScopeRow(
+                context: context,
+                theme: theme,
+                tokens: tokens,
+                l10n: l10n,
+                scopeLine: scopeLine,
+                iconSize: 11,
+                fontSize: 10,
+                textColor: _hasActionableProjectScope(l10n, scopeLine)
+                    ? tokens.accent.withValues(alpha: 0.92)
+                    : tokens.textSecondary,
+              ),
+            ],
+          ),
+        );
+      }
+
+      // embedded 模式：更清晰的两行布局
+      if (embedded) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // 第一行：工作区
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.workspaces_outline,
+                  size: 14,
+                  color: tokens.accent,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    workspaceLine,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: tokens.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (workspaceTypeLabel != null) ...<Widget>[
+                  const SizedBox(width: 6),
+                  _InlineContextChip(
+                    label: workspaceTypeLabel,
+                    compact: true,
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            // 第二行：项目
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.folder_open_outlined,
+                  size: 13,
+                  color: tokens.textMuted,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    scopeLine,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: tokens.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                if (showBilling) ...<Widget>[
+                  const SizedBox(width: 8),
+                  _InlineContextChip(
+                    label: billingSummary!,
+                    compact: true,
+                  ),
+                ],
+              ],
+            ),
+          ],
+        );
+      }
+      
+      // 非 embedded 模式：保持原来的单行布局
+      final row = Row(
+        children: <Widget>[
+          Icon(
+            Icons.workspaces_outline,
+            size: 16,
+            color: tokens.accent,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              summary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: tokens.textSecondary,
+                fontSize: embedded ? 12 : null,
+              ),
+            ),
+          ),
+          if (workspaceTypeLabel != null &&
+              (embedded || width >= 1520)) ...<Widget>[
+            const SizedBox(width: 8),
+            _InlineContextChip(label: workspaceTypeLabel),
+          ],
+          if (showBilling && !embedded && width >= 1680) ...<Widget>[
+            const SizedBox(width: 8),
+            _InlineContextChip(label: billingSummary!),
+          ],
+        ],
+      );
+      if (embedded) {
+        return Tooltip(
+          message: tooltip,
+          waitDuration: const Duration(milliseconds: 350),
+          child: row,
+        );
+      }
       return Tooltip(
         message: tooltip,
         waitDuration: const Duration(milliseconds: 350),
@@ -96,31 +393,11 @@ class WorkspaceContextView extends StatelessWidget {
             border: Border.all(color: tokens.surfaceHighlight),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.workspaces_outline, size: 16, color: tokens.accent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    summary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: StudioTokens.of(context).textSecondary,
-                    ),
-                  ),
-                ),
-                if (workspaceTypeLabel != null && width >= 1520) ...<Widget>[
-                  const SizedBox(width: 8),
-                  _InlineContextChip(label: workspaceTypeLabel),
-                ],
-                if (showBilling && width >= 1680) ...<Widget>[
-                  const SizedBox(width: 8),
-                  _InlineContextChip(label: billingSummary!),
-                ],
-              ],
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioLayoutSpacing.insetDense,
+              vertical: StudioLayoutSpacing.inlineGap,
             ),
+            child: row,
           ),
         ),
       );
@@ -465,30 +742,40 @@ class _CompactMetaChip extends StatelessWidget {
 }
 
 class _InlineContextChip extends StatelessWidget {
-  const _InlineContextChip({required this.label});
+  const _InlineContextChip({
+    required this.label,
+    this.compact = false,
+  });
 
   final String label;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: tokens.bgInset.withValues(alpha: 0.92),
+        color: tokens.bgInset.withValues(alpha: compact ? 0.75 : 0.92),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: tokens.surfaceHighlight.withValues(alpha: 0.9),
+          color: tokens.surfaceHighlight.withValues(alpha: compact ? 0.6 : 0.9),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 5),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 6 : StudioLayoutSpacing.inlineGap,
+          vertical: compact ? 3 : 5,
+        ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: StudioTokens.of(context).textSecondary),
+          ).textTheme.labelSmall?.copyWith(
+            color: StudioTokens.of(context).textSecondary,
+            fontSize: compact ? 10 : null,
+          ),
         ),
       ),
     );

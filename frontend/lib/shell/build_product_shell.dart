@@ -2,6 +2,13 @@
 
 part of '../../home_page.dart';
 
+enum _StudioPaneUriHistoryMode {
+  /// Web: [go] pushes browser history; desktop: [replace].
+  auto,
+  push,
+  replace,
+}
+
 extension _HomePageProductShell on _HomePageState {
   static const bool _kStudioShellFourItems = true;
 
@@ -52,15 +59,13 @@ extension _HomePageProductShell on _HomePageState {
       _handleProductPipelinePaneSelect(pane);
       return;
     }
-    _shellNavigationController.selectProductWorkspacePane(pane);
-    _ensureProductPaneData(pane);
-    if (kStudioPaneUriSyncedPanes.contains(pane)) {
-      final uri = studioUriForUtilityPane(pane);
-      final current = GoRouterState.of(context).uri.toString();
-      if (current != uri) {
-        GoRouter.of(context).go(uri);
+    _withStudioPaneRouteSyncSuppressed(() {
+      _shellNavigationController.selectProductWorkspacePane(pane);
+      _ensureProductPaneData(pane);
+      if (kStudioPaneUriSyncedPanes.contains(pane)) {
+        _syncProductWorkspacePaneUri(pane);
       }
-    }
+    });
   }
 
   void _openSettingsModelVendorsTab() {
@@ -94,22 +99,108 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
-  void _goToProjectsHome() {
-    _shellNavigationController.resetProductWorkspacePaneHistory();
-    if (_shellNavigationController.productWorkspacePane ==
-        ProductWorkspacePane.projects) {
+  /// Logo / explicit «回到项目首页» — clears in-app history.
+  bool _hasTitleBarScopedProject() {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return false;
+    }
+    final projectUuid =
+        _workspaceInputController.projectUuidController.text.trim().isEmpty
+        ? null
+        : _workspaceInputController.projectUuidController.text.trim();
+    final label = productWorkspaceProjectLabel(
+      l10n: l10n,
+      projects: _projectsController.projects,
+      projectNumericId: _productScopedProjectNumericId,
+      projectUuid: projectUuid,
+    );
+    return label != null && label.trim().isNotEmpty;
+  }
+
+  /// Title-bar project line → shell projects home (replaces logo on macOS chrome).
+  void _openTitleBarProjectHome() {
+    if (widget.shellMode != HomeShellMode.product || !_hasTitleBarScopedProject()) {
       return;
     }
-    _shellNavigationController.replaceProductWorkspacePane(
-      ProductWorkspacePane.projects,
-    );
-    _ensureProductPaneData(ProductWorkspacePane.projects);
-    if (kStudioPaneUriSyncedPanes.contains(ProductWorkspacePane.projects)) {
-      final uri = studioUriForUtilityPane(ProductWorkspacePane.projects);
-      final current = GoRouterState.of(context).uri.toString();
-      if (current != uri) {
-        GoRouter.of(context).go(uri);
+    final onShellHome = studioUriIsShellHome(GoRouterState.of(context).uri);
+    _withStudioPaneRouteSyncSuppressed(() {
+      if (!onShellHome) {
+        GoRouter.of(context).go('/');
       }
+      if (_shellNavigationController.productWorkspacePane !=
+          ProductWorkspacePane.projects) {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.projects,
+        );
+        _ensureProductPaneData(ProductWorkspacePane.projects);
+      } else {
+        _syncProductWorkspacePaneUri(ProductWorkspacePane.projects);
+      }
+    });
+  }
+
+  void _goToProjectsHome({bool clearNavigationHistory = true}) {
+    if (clearNavigationHistory) {
+      _shellNavigationController.resetProductWorkspacePaneHistory();
+    }
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.projects) {
+      if (clearNavigationHistory &&
+          kStudioPaneUriSyncedPanes.contains(ProductWorkspacePane.projects)) {
+        _withStudioPaneRouteSyncSuppressed(() {
+          _syncProductWorkspacePaneUri(ProductWorkspacePane.projects);
+        });
+      }
+      return;
+    }
+    _withStudioPaneRouteSyncSuppressed(() {
+      if (clearNavigationHistory) {
+        _shellNavigationController.replaceProductWorkspacePane(
+          ProductWorkspacePane.projects,
+        );
+      } else {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.projects,
+        );
+      }
+      _ensureProductPaneData(ProductWorkspacePane.projects);
+      if (kStudioPaneUriSyncedPanes.contains(ProductWorkspacePane.projects)) {
+        _syncProductWorkspacePaneUri(ProductWorkspacePane.projects);
+      }
+    });
+  }
+
+  /// Pipeline / shell-home pane switches (records ←/→ history like utility panes).
+  void _navigateShellProductWorkspacePane(ProductWorkspacePane pane) {
+    if (!_isProductPaneEnabledForConfig(pane, _platformConfig)) {
+      return;
+    }
+    _withStudioPaneRouteSyncSuppressed(() {
+      _shellNavigationController.selectProductWorkspacePane(pane);
+      _ensureProductPaneData(pane);
+      if (kStudioPaneUriSyncedPanes.contains(pane)) {
+        _syncProductWorkspacePaneUri(pane);
+      }
+    });
+  }
+
+  bool get _suppressStudioPaneRouteSync => _studioPaneRouteSyncSuppressCount > 0;
+
+  /// While we [replace] the shell URI after pane back/forward/select, ignore route
+  /// resync — otherwise [replaceProductWorkspacePane] clears the forward stack.
+  void _withStudioPaneRouteSyncSuppressed(void Function() action) {
+    _studioPaneRouteSyncSuppressCount++;
+    try {
+      action();
+    } finally {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _studioPaneRouteSyncSuppressCount =
+            (_studioPaneRouteSyncSuppressCount - 1).clamp(0, 1 << 30);
+      });
     }
   }
 
@@ -118,15 +209,129 @@ extension _HomePageProductShell on _HomePageState {
     if (!popped) {
       return false;
     }
-    final pane = _shellNavigationController.productWorkspacePane;
-    if (kStudioPaneUriSyncedPanes.contains(pane)) {
-      final uri = studioUriForUtilityPane(pane);
-      final current = GoRouterState.of(context).uri.toString();
-      if (current != uri) {
-        GoRouter.of(context).go(uri);
+    _withStudioPaneRouteSyncSuppressed(() {
+      if (kIsWeb) {
+        final router = GoRouter.maybeOf(context);
+        if (router?.canPop() ?? false) {
+          router!.pop();
+          return;
+        }
+      }
+      _syncProductWorkspacePaneUri(
+        _shellNavigationController.productWorkspacePane,
+        historyMode: _StudioPaneUriHistoryMode.replace,
+      );
+    });
+    return true;
+  }
+
+  bool _forwardProductWorkspacePane() {
+    final advanced = _shellNavigationController.forwardProductWorkspacePane();
+    if (!advanced) {
+      return false;
+    }
+    _withStudioPaneRouteSyncSuppressed(() {
+      _syncProductWorkspacePaneUri(
+        _shellNavigationController.productWorkspacePane,
+        historyMode: _StudioPaneUriHistoryMode.replace,
+      );
+    });
+    return true;
+  }
+
+  void _syncProductWorkspacePaneUri(
+    ProductWorkspacePane pane, {
+    _StudioPaneUriHistoryMode historyMode = _StudioPaneUriHistoryMode.auto,
+  }) {
+    if (!kStudioPaneUriSyncedPanes.contains(pane)) {
+      return;
+    }
+    final uri = studioUriForUtilityPane(pane);
+    final current = GoRouterState.of(context).uri.toString();
+    if (current == uri) {
+      return;
+    }
+    final router = GoRouter.of(context);
+    final usePushHistory = switch (historyMode) {
+      _StudioPaneUriHistoryMode.push => true,
+      _StudioPaneUriHistoryMode.replace => false,
+      _StudioPaneUriHistoryMode.auto => kIsWeb,
+    };
+    if (usePushHistory) {
+      router.go(uri);
+    } else {
+      router.replace(uri);
+    }
+  }
+
+  void _reconcileStudioPaneFromBrowserRoute(ProductWorkspacePane pane) {
+    final nav = _shellNavigationController;
+    if (nav.productWorkspacePane == pane) {
+      return;
+    }
+
+    final forwardPeek = nav.productPaneForwardPeek;
+    if (forwardPeek == pane) {
+      nav.forwardProductWorkspacePane();
+      _ensureProductPaneData(pane);
+      return;
+    }
+
+    if (nav.rewindProductWorkspacePaneTo(pane)) {
+      _ensureProductPaneData(pane);
+      return;
+    }
+
+    nav.selectProductWorkspacePane(pane);
+    _ensureProductPaneData(pane);
+  }
+
+  /// Leaves `/projects/…` (剧本/制作) and returns to shell home for the pane stack.
+  void _exitProjectStudioRoute() {
+    _withStudioPaneRouteSyncSuppressed(() {
+      final nav = _shellNavigationController;
+      if (nav.canGoBackProductWorkspacePane) {
+        nav.popProductWorkspacePane();
+      }
+      final pane = nav.productWorkspacePane;
+      final uri = kStudioPaneUriSyncedPanes.contains(pane)
+          ? studioUriForUtilityPane(pane)
+          : '/';
+      final router = GoRouter.of(context);
+      if (kIsWeb) {
+        router.go(uri);
+      } else {
+        router.replace(uri);
+      }
+      _ensureProductPaneData(nav.productWorkspacePane);
+    });
+  }
+
+  void _handleProductShellBack() {
+    if (!studioUriIsShellHome(GoRouterState.of(context).uri)) {
+      _exitProjectStudioRoute();
+      return;
+    }
+
+    if (_shellNavigationController.canGoBackProductWorkspacePane) {
+      if (_popProductWorkspacePane()) {
+        return;
       }
     }
-    return true;
+    final router = GoRouter.maybeOf(context);
+    if (router?.canPop() ?? false) {
+      router!.pop();
+      return;
+    }
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _handleProductShellForward() {
+    if (_shellNavigationController.canGoForwardProductWorkspacePane) {
+      _forwardProductWorkspacePane();
+    }
   }
 
   String _studioShellHeaderTitle(AppLocalizations l10n) {
@@ -180,32 +385,30 @@ extension _HomePageProductShell on _HomePageState {
         final projectId = _resolvedProductNumericIdForPipeline();
         if (projectId == null) {
           _promptSelectProjectFirst();
-          _shellNavigationController.selectProductWorkspacePane(pane);
+          _navigateShellProductWorkspacePane(pane);
           return;
         }
         final step = pane == ProductWorkspacePane.scriptWorkspace
             ? StudioStep.script.slug
             : StudioStep.storyboard.slug;
-        context.go('/projects/$projectId/$step');
+        _withStudioPaneRouteSyncSuppressed(() {
+          _shellNavigationController.selectProductWorkspacePane(pane);
+          context.go('/projects/$projectId/$step');
+        });
         return;
       case ProductWorkspacePane.projects:
-        _goToProjectsHome();
+        _goToProjectsHome(clearNavigationHistory: false);
         return;
       default:
-        _shellNavigationController.selectProductWorkspacePane(pane);
-        _ensureProductPaneData(pane);
-        if (kStudioPaneUriSyncedPanes.contains(pane)) {
-          final uri = studioUriForUtilityPane(pane);
-          final current = GoRouterState.of(context).uri.toString();
-          if (current != uri) {
-            GoRouter.of(context).go(uri);
-          }
-        }
+        _navigateShellProductWorkspacePane(pane);
     }
   }
 
   void _syncStudioPaneFromRoute() {
     if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    if (_suppressStudioPaneRouteSync) {
       return;
     }
     if (widget.studioOverlay != StudioOverlayMode.none) {
@@ -216,14 +419,7 @@ extension _HomePageProductShell on _HomePageState {
       return;
     }
     final pane = studioPaneFromUri(uri);
-    if (_shellNavigationController.productWorkspacePane == pane) {
-      return;
-    }
-    _shellNavigationController.selectProductWorkspacePane(pane);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _ensureProductPaneData(pane);
-    });
+    _reconcileStudioPaneFromBrowserRoute(pane);
   }
 
   void _handleStudioRouteChanged() {
@@ -293,12 +489,84 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
+  ProductShellMoreMenuGrouping _productShellMoreMenuGrouping(
+    AppLocalizations l10n,
+    double width,
+  ) {
+    final secondaryRaw = <ProductShellDestination>[
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.notifications,
+          icon: Icons.notifications_outlined,
+          selectedIcon: Icons.notifications,
+          label: (_) => l10n.productNavNotifications,
+        ),
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.account,
+          icon: Icons.settings_outlined,
+          selectedIcon: Icons.settings,
+          label: (_) => l10n.studioAppBarSettings,
+        ),
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.helpHub,
+          icon: Icons.help_outline,
+          selectedIcon: Icons.help,
+          label: (_) => l10n.studioAppBarHelp,
+        ),
+      ...(_kStudioShellFourItems
+          ? studioShellSecondaryDestinations(
+              l10n,
+              jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
+              qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
+            )
+          : secondaryProductShellDestinations(l10n)),
+    ];
+    final seenPanes = <ProductWorkspacePane>{};
+    final secondary = secondaryRaw
+        .where((dest) => seenPanes.add(dest.pane))
+        .toList(growable: false);
+    return groupProductShellMoreMenuDestinations(secondary);
+  }
+
+  void _closeMacOSTitleBarMoreMenu() {
+    if (!_macOSTitleBarMoreMenuOpen) {
+      return;
+    }
+    setState(() => _macOSTitleBarMoreMenuOpen = false);
+  }
+
+  void _toggleMacOSTitleBarMoreMenu() {
+    setState(() => _macOSTitleBarMoreMenuOpen = !_macOSTitleBarMoreMenuOpen);
+  }
+
+  void _applyProductShellMoreMenuSelection(ProductWorkspacePane selected) {
+    if (!_isProductPaneEnabledForConfig(selected, _platformConfig)) {
+      return;
+    }
+    if (selected == ProductWorkspacePane.scriptWorkspace ||
+        selected == ProductWorkspacePane.productionWorkspace) {
+      _handleProductPipelinePaneSelect(selected);
+      return;
+    }
+    if (kStudioPaneUriSyncedPanes.contains(selected)) {
+      _selectProductUtilityPane(selected);
+      return;
+    }
+    _shellNavigationController.selectProductWorkspacePane(selected);
+    _ensureProductPaneData(selected);
+  }
+
   Widget _buildProductShellMoreMenuContent(
     BuildContext ctx, {
     required AppLocalizations l10n,
     required ProductShellMoreMenuGrouping grouping,
     required bool compactActions,
     required double panelWidth,
+    bool titleCentered = false,
+    VoidCallback? onDismiss,
+    void Function(ProductWorkspacePane pane)? onDestinationSelected,
   }) {
     final tokens = StudioTokens.of(ctx);
     final localeCode = AppLocaleNotifier.instance.code;
@@ -323,7 +591,13 @@ extension _HomePageProductShell on _HomePageState {
           label: dest.label(l10n),
           icon: dest.icon,
           selected: selected,
-          onTap: () => Navigator.of(ctx).pop(dest.pane),
+          onTap: () {
+            if (onDestinationSelected != null) {
+              onDestinationSelected(dest.pane);
+            } else {
+              Navigator.of(ctx).pop(dest.pane);
+            }
+          },
         ),
       );
     }
@@ -372,10 +646,21 @@ extension _HomePageProductShell on _HomePageState {
       );
     }
 
+    void dismissPanel() {
+      if (onDismiss != null) {
+        onDismiss();
+      } else {
+        Navigator.of(ctx).pop();
+      }
+    }
+
     return Material(
       color: Colors.transparent,
       child: DecoratedBox(
         decoration: studioInsetPanelDecoration(ctx).copyWith(
+          border: Border.all(
+            color: tokens.primary.withValues(alpha: titleCentered ? 0.42 : 0),
+          ),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.16),
@@ -400,22 +685,42 @@ extension _HomePageProductShell on _HomePageState {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          l10n.productShellMoreMenu,
-                          style: studioPaneTitleStyle(ctx),
+                  child: titleCentered
+                      ? Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            Text(
+                              l10n.productShellMoreMenu,
+                              style: studioPaneTitleStyle(ctx),
+                              textAlign: TextAlign.center,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                tooltip: l10n.studioDismiss,
+                                onPressed: dismissPanel,
+                                style: studioUtilityIconButtonStyle(ctx),
+                                icon: const Icon(Icons.close_rounded, size: 16),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                l10n.productShellMoreMenu,
+                                style: studioPaneTitleStyle(ctx),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: l10n.studioDismiss,
+                              onPressed: dismissPanel,
+                              style: studioUtilityIconButtonStyle(ctx),
+                              icon: const Icon(Icons.close_rounded, size: 18),
+                            ),
+                          ],
                         ),
-                      ),
-                      IconButton(
-                        tooltip: l10n.studioDismiss,
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        style: studioUtilityIconButtonStyle(ctx),
-                        icon: const Icon(Icons.close_rounded, size: 18),
-                      ),
-                    ],
-                  ),
                 ),
                 destinationSection(destinations: grouping.quickAccess),
                 if (grouping.workflow.isNotEmpty) ...<Widget>[
@@ -452,7 +757,7 @@ extension _HomePageProductShell on _HomePageState {
                       icon: Icons.language_outlined,
                       selected: localeCode == option.$1,
                       onTap: () {
-                        Navigator.of(ctx).pop();
+                        dismissPanel();
                         unawaited(
                           AppLocaleNotifier.instance.setLocaleCode(option.$1),
                         );
@@ -466,7 +771,7 @@ extension _HomePageProductShell on _HomePageState {
                     selected: false,
                     showCheckWhenSelected: false,
                     onTap: () {
-                      Navigator.of(ctx).pop();
+                      dismissPanel();
                       unawaited(_authController.signOut());
                     },
                   ),
@@ -520,41 +825,7 @@ extension _HomePageProductShell on _HomePageState {
       ancestor: overlayBox,
     );
     final anchorRect = anchorOffset & anchorBox.size;
-    final secondaryRaw = <ProductShellDestination>[
-      if (width < 720)
-        ProductShellDestination(
-          pane: ProductWorkspacePane.notifications,
-          icon: Icons.notifications_outlined,
-          selectedIcon: Icons.notifications,
-          label: (_) => l10n.productNavNotifications,
-        ),
-      if (width < 720)
-        ProductShellDestination(
-          pane: ProductWorkspacePane.account,
-          icon: Icons.settings_outlined,
-          selectedIcon: Icons.settings,
-          label: (_) => l10n.studioAppBarSettings,
-        ),
-      if (width < 720)
-        ProductShellDestination(
-          pane: ProductWorkspacePane.helpHub,
-          icon: Icons.help_outline,
-          selectedIcon: Icons.help,
-          label: (_) => l10n.studioAppBarHelp,
-        ),
-      ...(_kStudioShellFourItems
-          ? studioShellSecondaryDestinations(
-              l10n,
-              jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
-              qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
-            )
-          : secondaryProductShellDestinations(l10n)),
-    ];
-    final seenPanes = <ProductWorkspacePane>{};
-    final secondary = secondaryRaw
-        .where((dest) => seenPanes.add(dest.pane))
-        .toList(growable: false);
-    final grouping = groupProductShellMoreMenuDestinations(secondary);
+    final grouping = _productShellMoreMenuGrouping(l10n, width);
     final compactActions = width < 720;
     final selected = await showGeneralDialog<ProductWorkspacePane>(
       context: anchorContext,
@@ -644,20 +915,7 @@ extension _HomePageProductShell on _HomePageState {
     if (selected == null || !mounted) {
       return;
     }
-    if (!_isProductPaneEnabledForConfig(selected, _platformConfig)) {
-      return;
-    }
-    if (selected == ProductWorkspacePane.scriptWorkspace ||
-        selected == ProductWorkspacePane.productionWorkspace) {
-      _handleProductPipelinePaneSelect(selected);
-      return;
-    }
-    if (kStudioPaneUriSyncedPanes.contains(selected)) {
-      _selectProductUtilityPane(selected);
-      return;
-    }
-    _shellNavigationController.selectProductWorkspacePane(selected);
-    _ensureProductPaneData(selected);
+    _applyProductShellMoreMenuSelection(selected);
   }
 
   List<StudioCommandAction> _studioCommandActions(AppLocalizations l10n) {
@@ -697,8 +955,9 @@ extension _HomePageProductShell on _HomePageState {
   Widget _buildStudioLogoHeader(
     BuildContext context,
     String appTitle,
-    String pageTitle,
-  ) {
+    String pageTitle, {
+    bool showPageTitle = true,
+  }) {
     return InkWell(
       onTap: _goToProjectsHome,
       borderRadius: BorderRadius.circular(8),
@@ -722,17 +981,347 @@ extension _HomePageProductShell on _HomePageState {
                       context,
                     )?.copyWith(fontWeight: FontWeight.w700),
                   ),
-                  Text(
-                    pageTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: studioHintStyle(context),
-                  ),
+                  if (showPageTitle)
+                    Text(
+                      pageTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: studioHintStyle(context),
+                    ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// VS Code–style macOS integrated title bar (38px shell, 30px search field).
+  static const double _kMacOSTitleBarHeight = 38;
+  static const double _kMacOSTitleBarInnerHeight = 30;
+  static const double _kMacOSTitleBarHeightWithContext = 44;
+  static const double _kMacOSTitleBarInnerHeightWithContext = 38;
+  static const double _kTitleBarWorkspaceContextMaxWidth = 300;
+  static const double _kMacOSTitleBarSearchMinWidth = 200;
+  static const double _kMacOSTitleBarSearchMaxWidth = 680;
+  /// Reserved width for traffic lights + left drag target (macOS HIG ~12–14px margin).
+  static const double _kMacOSTrafficLightInset = 72;
+
+  /// Extra breathing room before title-bar workspace breadcrumb (after inset).
+  static const double _kMacOSTitleBarGapAfterTrafficLights = 16;
+  static const double _kMacOSIntegratedMinWidth =
+      DesktopWindowConstraints.minWidth;
+
+  static const double _kMacOSTitleBarIconSize = 17;
+  static const double _kMacOSTitleBarIconBox = 28;
+
+  ButtonStyle _macOSTitleBarIconStyle(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return IconButton.styleFrom(
+      foregroundColor: tokens.textSecondary.withValues(alpha: 0.88),
+      hoverColor: tokens.bgInset.withValues(alpha: 0.85),
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(_kMacOSTitleBarIconBox, _kMacOSTitleBarIconBox),
+      fixedSize: const Size(_kMacOSTitleBarIconBox, _kMacOSTitleBarIconBox),
+      iconSize: _kMacOSTitleBarIconSize,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  static const double _kMacOSNavChevronBox = 28;
+  static const double _kMacOSNavChevronIcon = 18;
+
+  Widget _buildMacOSNavChevronButton({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required bool enabled,
+    required VoidCallback? onPressed,
+  }) {
+    final tokens = StudioTokens.of(context);
+    final color = enabled
+        ? tokens.textSecondary.withValues(alpha: 0.92)
+        : tokens.textMuted.withValues(alpha: 0.34);
+    return SizedBox(
+      width: _kMacOSNavChevronBox,
+      height: _kMacOSNavChevronBox,
+      child: IconButton(
+        style: IconButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(
+            _kMacOSNavChevronBox,
+            _kMacOSNavChevronBox,
+          ),
+          fixedSize: const Size(
+            _kMacOSNavChevronBox,
+            _kMacOSNavChevronBox,
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          foregroundColor: color,
+          disabledForegroundColor: color,
+          hoverColor: enabled
+              ? tokens.bgInset.withValues(alpha: 0.75)
+              : Colors.transparent,
+        ),
+        onPressed: enabled ? onPressed : null,
+        tooltip: tooltip,
+        icon: Icon(icon, size: _kMacOSNavChevronIcon, weight: 300),
+      ),
+    );
+  }
+
+  bool _canProductShellGoBack() {
+    if (!studioUriIsShellHome(GoRouterState.of(context).uri)) {
+      return true;
+    }
+    if (_shellNavigationController.canGoBackProductWorkspacePane) {
+      return true;
+    }
+    final router = GoRouter.maybeOf(context);
+    if (router?.canPop() ?? false) {
+      return true;
+    }
+    return Navigator.of(context).canPop();
+  }
+
+  Widget _buildMacOSNavChevrons(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _shellNavigationController,
+      builder: (context, _) {
+        final canBack = _canProductShellGoBack();
+        final canForward =
+            _shellNavigationController.canGoForwardProductWorkspacePane;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildMacOSNavChevronButton(
+              context: context,
+              icon: Icons.arrow_back,
+              tooltip: 'Back',
+              enabled: canBack,
+              onPressed: canBack ? _handleProductShellBack : null,
+            ),
+            const SizedBox(width: 4),
+            _buildMacOSNavChevronButton(
+              context: context,
+              icon: Icons.arrow_forward,
+              tooltip: 'Forward',
+              enabled: canForward,
+              onPressed: canForward ? _handleProductShellForward : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _handleMacOSTitleBarPointerDown(PointerDownEvent event) {
+    final now = DateTime.now();
+    if (_macOSTitleBarLastPointerDownTime != null &&
+        now.difference(_macOSTitleBarLastPointerDownTime!) <
+            const Duration(milliseconds: 400)) {
+      _macOSTitleBarLastPointerDownTime = null;
+      _macOSTitleBarPointerDownPosition = null;
+      unawaited(_toggleMacOSWindowZoom());
+      return;
+    }
+    _macOSTitleBarLastPointerDownTime = now;
+    _macOSTitleBarPointerDownPosition = event.position;
+    _macOSTitleBarDragHandoff = false;
+  }
+
+  void _handleMacOSTitleBarPointerMove(PointerMoveEvent event) {
+    if (_macOSTitleBarDragHandoff ||
+        _macOSTitleBarPointerDownPosition == null ||
+        (event.buttons & kPrimaryMouseButton) == 0) {
+      return;
+    }
+    if ((event.position - _macOSTitleBarPointerDownPosition!).distance > 4) {
+      _macOSTitleBarDragHandoff = true;
+      unawaited(_startWindowDragging());
+    }
+  }
+
+  void _handleMacOSTitleBarPointerUp(PointerUpEvent event) {
+    _macOSTitleBarPointerDownPosition = null;
+    _macOSTitleBarDragHandoff = false;
+  }
+
+  /// Opaque drag/zoom target for macOS title-bar chrome (empty areas only).
+  Widget _buildMacOSTitleBarDragRegion() {
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: _handleMacOSTitleBarPointerDown,
+      onPointerMove: _handleMacOSTitleBarPointerMove,
+      onPointerUp: _handleMacOSTitleBarPointerUp,
+      child: const ColoredBox(color: Color(0x00000000)),
+    );
+  }
+
+  /// Navigation arrows hugging the left edge of the centered search field.
+  Widget _buildMacOSTitleBarSearchCluster({
+    required BuildContext context,
+    required Widget searchBar,
+    required bool moreMenuOpen,
+    required double slotHeight,
+  }) {
+    return IgnorePointer(
+      ignoring: moreMenuOpen,
+      child: Opacity(
+        opacity: moreMenuOpen ? 0 : 1,
+        child: SizedBox(
+          height: slotHeight,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _buildMacOSNavChevrons(context),
+                const SizedBox(width: 4),
+                Expanded(child: searchBar),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  EdgeInsets _macOSTitleBarContentPadding({required bool hasWorkspaceContext}) {
+    // Extra top inset: equal top/bottom reads visually high under traffic lights.
+    return hasWorkspaceContext
+        ? const EdgeInsets.only(left: 0, right: 10, top: 6, bottom: 5)
+        : const EdgeInsets.only(left: 0, right: 10, top: 5, bottom: 3);
+  }
+
+  Widget _buildMacOSTitleBarMoreMenuOverlay({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required ProductShellMoreMenuGrouping grouping,
+    required double titleBarHeight,
+    required bool stackedTopChrome,
+  }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final slotWidth = screenWidth / 3;
+    final left = (screenWidth - slotWidth) / 2;
+    final top = stackedTopChrome
+        ? titleBarHeight - 32
+        : 4.0;
+    final panelHeight = math.min(
+      _estimateMoreMenuPanelHeight(
+        panelWidth: slotWidth,
+        grouping: grouping,
+        compactActions: true,
+      ),
+      MediaQuery.sizeOf(context).height * 0.55,
+    );
+
+    return Positioned(
+      top: top,
+      left: left,
+      width: slotWidth,
+      child: Material(
+        elevation: 12,
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: panelHeight),
+          child: _buildProductShellMoreMenuContent(
+            context,
+            l10n: l10n,
+            grouping: grouping,
+            compactActions: true,
+            panelWidth: slotWidth,
+            titleCentered: true,
+            onDismiss: _closeMacOSTitleBarMoreMenu,
+            onDestinationSelected: (pane) {
+              _closeMacOSTitleBarMoreMenu();
+              _applyProductShellMoreMenuSelection(pane);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacOSTitleBarMoreButton(
+    BuildContext context, {
+    required AppLocalizations l10n,
+    required bool moreMenuOpen,
+  }) {
+    return IconButton(
+      style: _macOSTitleBarIconStyle(context),
+      tooltip: l10n.productShellMoreMenu,
+      onPressed: _toggleMacOSTitleBarMoreMenu,
+      icon: Icon(
+        moreMenuOpen ? Icons.apps : Icons.apps_rounded,
+        size: _kMacOSTitleBarIconSize,
+      ),
+    );
+  }
+
+  Widget _buildMacOSIntegratedTitleBar({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required Widget searchBar,
+    required ProductWorkspacePane currentPane,
+    required bool moreMenuOpen,
+    required bool ultraNarrow,
+    Widget? workspaceContext,
+    required double innerHeight,
+  }) {
+    final searchCluster = Flexible(
+      fit: FlexFit.loose,
+      child: _buildMacOSTitleBarSearchCluster(
+        context: context,
+        searchBar: searchBar,
+        moreMenuOpen: moreMenuOpen,
+        slotHeight: innerHeight,
+      ),
+    );
+    return SizedBox(
+      height: innerHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          if (workspaceContext != null) ...<Widget>[
+            SizedBox(
+              height: innerHeight,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _kTitleBarWorkspaceContextMaxWidth,
+                  ),
+                  child: workspaceContext,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+          Expanded(child: _buildMacOSTitleBarDragRegion()),
+          searchCluster,
+          Expanded(child: _buildMacOSTitleBarDragRegion()),
+          if (!ultraNarrow) ...<Widget>[
+            const SizedBox(width: 8),
+            const StudioJobTray(),
+            StudioAppBarActions(
+              dense: true,
+              selectedPane: currentPane,
+              unreadNotifications: _notificationsController.unreadCount,
+              onSelectPane: _selectProductUtilityPane,
+            ),
+          ],
+          _buildMacOSTitleBarMoreButton(
+            context,
+            l10n: l10n,
+            moreMenuOpen: moreMenuOpen,
+          ),
+        ],
       ),
     );
   }
@@ -751,25 +1340,32 @@ extension _HomePageProductShell on _HomePageState {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            IconButton(
-              style: studioChromeIconButtonStyle(context),
-              tooltip: 'Back',
-              onPressed: () {
-                // TODO: Implement navigation history back
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
+            ListenableBuilder(
+              listenable: _shellNavigationController,
+              builder: (context, _) {
+                final canBack = _canProductShellGoBack();
+                final canForward =
+                    _shellNavigationController.canGoForwardProductWorkspacePane;
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IconButton(
+                      style: studioChromeIconButtonStyle(context),
+                      tooltip: 'Back',
+                      onPressed: canBack ? _handleProductShellBack : null,
+                      icon: const Icon(Icons.arrow_back_ios_new, size: 22),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      style: studioChromeIconButtonStyle(context),
+                      tooltip: 'Forward',
+                      onPressed:
+                          canForward ? _handleProductShellForward : null,
+                      icon: const Icon(Icons.arrow_forward_ios, size: 22),
+                    ),
+                  ],
+                );
               },
-              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            ),
-            const SizedBox(width: 4),
-            IconButton(
-              style: studioChromeIconButtonStyle(context),
-              tooltip: 'Forward',
-              onPressed: () {
-                // TODO: Implement navigation history forward
-              },
-              icon: const Icon(Icons.arrow_forward_ios, size: 18),
             ),
           ],
         ),
@@ -777,17 +1373,31 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
+  static const MethodChannel _macOSWindowChannel =
+      MethodChannel('com.openflow.app/window');
+
   /// Start dragging the window (macOS only)
   Future<void> _startWindowDragging() async {
     if (!Platform.isMacOS) {
       return;
     }
     try {
-      const channel = MethodChannel('com.openflow.app/window');
-      await channel.invokeMethod('startDragging');
+      await _macOSWindowChannel.invokeMethod('startDragging');
     } catch (e) {
       // Silently fail if method channel is not available
       debugPrint('Failed to start window dragging: $e');
+    }
+  }
+
+  /// Double-click title bar chrome → toggle macOS fullscreen (macOS only).
+  Future<void> _toggleMacOSWindowZoom() async {
+    if (!Platform.isMacOS) {
+      return;
+    }
+    try {
+      await _macOSWindowChannel.invokeMethod('toggleZoom');
+    } catch (e) {
+      debugPrint('Failed to toggle macOS window fullscreen: $e');
     }
   }
 
@@ -815,12 +1425,25 @@ extension _HomePageProductShell on _HomePageState {
       currentPane: currentPane,
     );
     final width = MediaQuery.sizeOf(context).width;
-    final compactTopChrome = width < 860;
-    final stackedTopChrome = width >= 860 && width < 1240;
-    // Header chip when wide row (≥1440) or stacked second row (≥1120); block only if neither.
-    final showHeaderWorkspaceContext = showPipeline &&
-        !compactTopChrome &&
-        (width >= 1440 || (stackedTopChrome && width >= 1120));
+    final isMacOS = Platform.isMacOS;
+    // macOS: always VS Code single-row title bar; non-macOS keeps legacy breakpoints.
+    final compactTopChrome = !isMacOS && width < 860;
+    final stackedTopChrome = !isMacOS && width >= 860 && width < 1240;
+    final useMacOSIntegratedTitleBar =
+        isMacOS && width >= _kMacOSIntegratedMinWidth;
+    final macOSUltraNarrowTitleBar =
+        useMacOSIntegratedTitleBar && width < 1080;
+    final mergeWorkspaceIntoTitleBar = showPipeline;
+    final titleBarWorkspaceContext = mergeWorkspaceIntoTitleBar
+        ? _buildWorkspaceContextSection(
+            context,
+            inline: true,
+            titleBarChrome: true,
+            titleBarDense:
+                compactTopChrome ||
+                (useMacOSIntegratedTitleBar && macOSUltraNarrowTitleBar),
+          )
+        : null;
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
@@ -839,8 +1462,10 @@ extension _HomePageProductShell on _HomePageState {
       currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
       currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
       onNavigateToResults: _openGlobalSearchResults,
-      compact: compactTopChrome || stackedTopChrome,
-      showLocalPrefsMenu: !compactTopChrome,
+      compact: compactTopChrome,
+      titleBarDense: useMacOSIntegratedTitleBar,
+      showLocalPrefsMenu:
+          !compactTopChrome && !useMacOSIntegratedTitleBar,
     );
     final moreMenuChrome = DecoratedBox(
       decoration: BoxDecoration(
@@ -905,9 +1530,19 @@ extension _HomePageProductShell on _HomePageState {
       ),
     );
 
-    final isMacOS = Platform.isMacOS;
-    final titleBarHeight = compactTopChrome
-        ? (width < 560 ? 112.0 : 118.0)
+    final macOSMoreGrouping = useMacOSIntegratedTitleBar
+        ? _productShellMoreMenuGrouping(l10n, width)
+        : null;
+    final macOSTitleBarUsesContext = useMacOSIntegratedTitleBar &&
+        titleBarWorkspaceContext != null;
+    final titleBarHeight = useMacOSIntegratedTitleBar
+        ? (macOSTitleBarUsesContext
+              ? _kMacOSTitleBarHeightWithContext
+              : _kMacOSTitleBarHeight)
+        : compactTopChrome
+        ? (titleBarWorkspaceContext != null
+              ? (width < 560 ? 132.0 : 138.0)
+              : (width < 560 ? 112.0 : 118.0))
         : stackedTopChrome
         ? 112.0
         : desktopXWide
@@ -916,12 +1551,69 @@ extension _HomePageProductShell on _HomePageState {
         ? 72.0
         : 68.0;
 
+    final macOSTitleBar = useMacOSIntegratedTitleBar
+        ? SizedBox(
+            height: titleBarHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: tokens.bgElevated,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: tokens.surfaceHighlight.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                  child: Stack(
+                    children: <Widget>[
+                      if (isMacOS)
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: _kMacOSTrafficLightInset,
+                          child: _buildMacOSTitleBarDragRegion(),
+                        ),
+                      Padding(
+                        padding: _macOSTitleBarContentPadding(
+                          hasWorkspaceContext: titleBarWorkspaceContext != null,
+                        ).copyWith(
+                          left: _kMacOSTrafficLightInset +
+                              (titleBarWorkspaceContext != null
+                                  ? _kMacOSTitleBarGapAfterTrafficLights
+                                  : 0),
+                        ),
+                        child: _buildMacOSIntegratedTitleBar(
+                          context: context,
+                          l10n: l10n,
+                          searchBar: globalSearchBar,
+                          currentPane: currentPane,
+                          moreMenuOpen: _macOSTitleBarMoreMenuOpen,
+                          ultraNarrow: macOSUltraNarrowTitleBar,
+                          workspaceContext: titleBarWorkspaceContext,
+                          innerHeight: macOSTitleBarUsesContext
+                              ? _kMacOSTitleBarInnerHeightWithContext
+                              : _kMacOSTitleBarInnerHeight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        : null;
+
     final mainColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        GestureDetector(
+        macOSTitleBar ??
+            GestureDetector(
           behavior: HitTestBehavior.translucent,
           onPanStart: isMacOS ? (_) => _startWindowDragging() : null,
+          onDoubleTap: isMacOS ? () => unawaited(_toggleMacOSWindowZoom()) : null,
           child: StudioGlassPanel(
             border: Border(
               bottom: BorderSide(
@@ -929,9 +1621,9 @@ extension _HomePageProductShell on _HomePageState {
               ),
             ),
             padding: EdgeInsets.only(
-              left: isMacOS && !compactTopChrome ? 78 : (desktopXWide ? 24 : desktopWide ? 20 : 16),
+              left: desktopXWide ? 24 : desktopWide ? 20 : 16,
               right: desktopXWide ? 24 : desktopWide ? 20 : 16,
-              top: isMacOS ? 8 : 0,
+              top: 0,
               bottom: 0,
             ),
             child: SizedBox(
@@ -947,12 +1639,20 @@ extension _HomePageProductShell on _HomePageState {
                               context,
                               appTitle,
                               pageTitle,
+                              showPageTitle: titleBarWorkspaceContext == null,
                             ),
                           ),
                           const SizedBox(width: 8),
                           moreMenuChrome,
                         ],
                       ),
+                      if (titleBarWorkspaceContext != null) ...<Widget>[
+                        const SizedBox(height: StudioLayoutSpacing.inlineGap - 2),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: titleBarWorkspaceContext,
+                        ),
+                      ],
                       const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       Row(children: <Widget>[Expanded(child: globalSearchBar)]),
                     ],
@@ -962,12 +1662,18 @@ extension _HomePageProductShell on _HomePageState {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           _buildStudioLogoHeader(
                             context,
                             appTitle,
                             pageTitle,
+                            showPageTitle: titleBarWorkspaceContext == null,
                           ),
+                          if (titleBarWorkspaceContext != null) ...<Widget>[
+                            const SizedBox(width: 12),
+                            Flexible(child: titleBarWorkspaceContext),
+                          ],
                           const SizedBox(width: 8),
                           _buildNavigationButtons(context),
                           const Spacer(),
@@ -987,27 +1693,30 @@ extension _HomePageProductShell on _HomePageState {
                       Row(
                         children: <Widget>[
                           Expanded(child: globalSearchBar),
-                          if (showHeaderWorkspaceContext) ...<Widget>[
-                            const SizedBox(width: StudioLayoutSpacing.inlineGap),
-                            SizedBox(
-                              width: 250,
-                              child: _buildWorkspaceContextSection(
-                                context,
-                                inline: true,
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ],
                   )
                 : Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildStudioLogoHeader(
                         context,
                         appTitle,
                         pageTitle,
+                        showPageTitle: titleBarWorkspaceContext == null,
                       ),
+                      if (titleBarWorkspaceContext != null) ...<Widget>[
+                        const SizedBox(width: 14),
+                        Flexible(
+                          flex: 2,
+                          fit: FlexFit.loose,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: titleBarWorkspaceContext,
+                          ),
+                        ),
+                      ],
                       const SizedBox(width: 8),
                       _buildNavigationButtons(context),
                       const SizedBox(width: 12),
@@ -1025,22 +1734,6 @@ extension _HomePageProductShell on _HomePageState {
                       ),
                       const StudioJobTray(),
                       const SizedBox(width: 8),
-                      if (showHeaderWorkspaceContext) ...<Widget>[
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: desktopXWide
-                                ? 360
-                                : desktopWide
-                                ? 300
-                                : 240,
-                          ),
-                          child: _buildWorkspaceContextSection(
-                            context,
-                            inline: true,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
                       StudioAppBarActions(
                         selectedPane: currentPane,
                         unreadNotifications:
@@ -1055,7 +1748,9 @@ extension _HomePageProductShell on _HomePageState {
           ),
         ),
         Expanded(
-          child: Padding(
+          child: Stack(
+            children: <Widget>[
+              Padding(
             padding: EdgeInsets.fromLTRB(
               shellHorizontalPadding,
               14,
@@ -1066,13 +1761,6 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (showPipeline) ...<Widget>[
-                  if (!showHeaderWorkspaceContext) ...<Widget>[
-                    _buildWorkspaceContextSection(
-                      context,
-                      compact: useCompactStudio,
-                    ),
-                    SizedBox(height: useCompactStudio ? 8 : 12),
-                  ],
                   StudioPipelineStrip(
                     selectedPane: currentPane,
                     jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
@@ -1080,7 +1768,7 @@ extension _HomePageProductShell on _HomePageState {
                     compact: useCompactStudio,
                     onSelectPane: _handleProductPipelinePaneSelect,
                   ),
-                  SizedBox(height: useCompactStudio ? 12 : 16),
+                  SizedBox(height: useCompactStudio ? 10 : 12),
                 ],
                 Expanded(
                   child: DecoratedBox(
@@ -1121,13 +1809,49 @@ extension _HomePageProductShell on _HomePageState {
               ],
             ),
           ),
+              if (useMacOSIntegratedTitleBar && _macOSTitleBarMoreMenuOpen)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: _closeMacOSTitleBarMoreMenu,
+                    behavior: HitTestBehavior.translucent,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );
 
+    final shellBody = useMacOSIntegratedTitleBar && macOSMoreGrouping != null
+        ? Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              mainColumn,
+              if (_macOSTitleBarMoreMenuOpen)
+                _buildMacOSTitleBarMoreMenuOverlay(
+                  context: context,
+                  l10n: l10n,
+                  grouping: macOSMoreGrouping,
+                  titleBarHeight: titleBarHeight,
+                  stackedTopChrome: false,
+                ),
+            ],
+          )
+        : mainColumn;
+
     final shell = Scaffold(
       backgroundColor: Colors.transparent,
-      body: StudioShellBackdrop(child: mainColumn),
+      body: PopScope(
+        canPop: !_canProductShellGoBack(),
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (didPop) {
+            return;
+          }
+          _handleProductShellBack();
+        },
+        child: StudioShellBackdrop(child: shellBody),
+      ),
     );
 
     return StudioShellScope(

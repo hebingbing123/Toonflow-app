@@ -106,23 +106,26 @@ extension _HomePageProductNavigation on _HomePageState {
     String? scriptUuid,
     String? workspaceId,
   }) {
-    if (projectNumericId != null && projectNumericId > 0) {
-      setState(() {
-        _productScopedProjectNumericId = projectNumericId;
-      });
-      _workspaceInputController.applyProjectScope(
-        projectNumericId,
-        scriptNumericId: scriptNumericId,
-        projectUuid: projectUuid,
-        scriptUuid: scriptUuid,
-        workspaceId: workspaceId,
-      );
-    }
-    _shellNavigationController.selectProductWorkspacePane(pane);
-    _ensureProductPaneData(pane);
-    if (kStudioPaneUriSyncedPanes.contains(pane)) {
-      context.go(studioUriForUtilityPane(pane));
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (projectNumericId != null && projectNumericId > 0) {
+        setState(() {
+          _productScopedProjectNumericId = projectNumericId;
+        });
+        _workspaceInputController.applyProjectScope(
+          projectNumericId,
+          scriptNumericId: scriptNumericId,
+          projectUuid: projectUuid,
+          scriptUuid: scriptUuid,
+          workspaceId: workspaceId,
+        );
+      }
+      _shellNavigationController.selectProductWorkspacePane(pane);
+      _ensureProductPaneData(pane);
+      if (kStudioPaneUriSyncedPanes.contains(pane)) {
+        _syncProductWorkspacePaneUri(pane);
+      }
+    });
   }
 
   Future<void> _openComplianceProductTarget(

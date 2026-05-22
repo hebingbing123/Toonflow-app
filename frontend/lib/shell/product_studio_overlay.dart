@@ -11,6 +11,23 @@ extension _HomePageProductStudioOverlay on _HomePageState {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.studioAgentSubmitted(kind))));
+    final projectNumericId =
+        _productScopedProjectNumericId ?? widget.studioProjectNumericId;
+    final step = studioStepForHarnessAgentKind(kind);
+    if (projectNumericId != null &&
+        projectNumericId > 0 &&
+        step != null &&
+        GoRouter.maybeOf(context) != null) {
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.projects,
+      );
+      goProjectStudioStepIfScoped(
+        context,
+        projectNumericId: projectNumericId,
+        step: step,
+      );
+      return;
+    }
     switch (kind) {
       case 'script_rewriter':
       case 'extractor':
@@ -71,7 +88,9 @@ extension _HomePageProductStudioOverlay on _HomePageState {
         projectNumericId: projectNumericId,
         projectUuid: effectiveProjectUuid,
         accessToken: token,
-        onClose: () => context.go('/projects/$projectNumericId/script'),
+        onClose: () => context.go(
+          '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
+        ),
         onOpenProductionWorkspace: ({required String projectUuid}) {
           _openShellPaneFromStudioOverlay(
             ProductWorkspacePane.productionWorkspace,

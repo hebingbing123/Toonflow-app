@@ -1651,7 +1651,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioScriptStepSetupSubtitle =>
-      'Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.';
+      'Model routing, quick templates, and progress — open from the compact bar when needed.';
+
+  @override
+  String get studioScriptFocusModeSubtitle =>
+      'Script focus — novels, scripts, and extraction';
+
+  @override
+  String studioScriptFocusModeSubtitleWithCounts(
+    int novelCount,
+    int scriptCount,
+  ) {
+    return 'Script focus · Novels $novelCount · Scripts $scriptCount';
+  }
+
+  @override
+  String get studioArtFocusModeSubtitle =>
+      'Art direction — style packs for this project';
+
+  @override
+  String get studioAssetsFocusModeSubtitle =>
+      'Assets — characters, props, and references';
+
+  @override
+  String get studioStoryboardFocusModeSubtitle =>
+      'Storyboard — shots and timing';
+
+  @override
+  String get studioVideoFocusModeSubtitle => 'Video — generation and preview';
+
+  @override
+  String get studioDeliverFocusModeSubtitle =>
+      'Deliver — export, quality, and review';
+
+  @override
+  String studioStepPrepSheetTitle(String step) {
+    return '$step setup';
+  }
+
+  @override
+  String get studioStepPrepSheetSubtitle =>
+      'Model routing, quick actions, and progress — open when needed.';
+
+  @override
+  String get studioScriptStepOpenAgent => 'Script Agent';
+
+  @override
+  String get studioScriptStepCloseAgent => 'Close Agent';
+
+  @override
+  String get studioScriptStepSetupOpen => 'Setup';
+
+  @override
+  String get studioScriptStepModelRoutingSettingsLink =>
+      'Model routing & vendors (Settings)';
+
+  @override
+  String get studioCreatorJourneyCompactExpand => 'Full workflow';
+
+  @override
+  String get studioCreatorJourneyCompactExpandTitle => 'Six-step workflow';
+
+  @override
+  String studioCreatorJourneyCompactCurrent(String step) {
+    return 'Focus: $step';
+  }
 
   @override
   String get studioArtStepOpenSettings => 'Advanced project settings';
@@ -1977,6 +2041,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioCreatorJourneyNext => 'Next step';
 
   @override
+  String studioCreatorJourneyNextSop(String step) {
+    return 'Next: $step';
+  }
+
+  @override
   String get studioCreatorJourneyNextDoneHint =>
       'Review stage — finish merge & preview above.';
 
@@ -2292,6 +2361,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioStoryboardShotList => 'Shots';
+
+  @override
+  String get studioStoryboardStudioShotListEmpty => 'No shots yet';
 
   @override
   String studioStoryboardShotLabel(int n) {

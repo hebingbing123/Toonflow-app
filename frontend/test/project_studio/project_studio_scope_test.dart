@@ -32,7 +32,7 @@ ProjectStudioHost _hostFor(
     projectNumericId: 42,
     projectUuid: 'project-42',
     projectName: 'Project Delta',
-    accessToken: null,
+    accessToken: 'token',
     home: readiness.home,
     assetsOverview: readiness.assetsOverview,
     readiness: readiness.readiness,
@@ -263,6 +263,8 @@ void main() {
   testWidgets(
     'project studio scope filters cockpit content for the script step',
     (tester) async {
+      await ensureProjectStudioTestSurface(tester);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       const home = ProjectHome(
         project: ProjectRow(
           id: 'project-42',
@@ -380,6 +382,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await openProjectStudioStepSetup(tester);
       await expandProjectStudioCockpit(tester);
 
       expect(find.text('Novel imports'), findsOneWidget);
@@ -394,6 +397,8 @@ void main() {
   testWidgets('project studio scope renders asset hub during assets step', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     const assetsOverview = ProjectAssetsOverview(
       schemaVersion: 1,
       totalCount: 4,
@@ -463,7 +468,7 @@ void main() {
             projectNumericId: 42,
             projectUuid: 'project-42',
             projectName: 'Project Delta',
-            accessToken: null,
+            accessToken: 'token',
             assetsOverview: readiness.assetsOverview,
             initialStep: StudioStep.assets,
             completedSteps: readiness.completedSteps,

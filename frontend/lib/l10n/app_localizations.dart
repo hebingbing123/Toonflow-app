@@ -2951,8 +2951,107 @@ abstract class AppLocalizations {
   /// No description provided for @studioScriptStepSetupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.'**
+  /// **'Model routing, quick templates, and progress — open from the compact bar when needed.'**
   String get studioScriptStepSetupSubtitle;
+
+  /// No description provided for @studioScriptFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script focus — novels, scripts, and extraction'**
+  String get studioScriptFocusModeSubtitle;
+
+  /// No description provided for @studioScriptFocusModeSubtitleWithCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Script focus · Novels {novelCount} · Scripts {scriptCount}'**
+  String studioScriptFocusModeSubtitleWithCounts(
+    int novelCount,
+    int scriptCount,
+  );
+
+  /// No description provided for @studioArtFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Art direction — style packs for this project'**
+  String get studioArtFocusModeSubtitle;
+
+  /// No description provided for @studioAssetsFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets — characters, props, and references'**
+  String get studioAssetsFocusModeSubtitle;
+
+  /// No description provided for @studioStoryboardFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard — shots and timing'**
+  String get studioStoryboardFocusModeSubtitle;
+
+  /// No description provided for @studioVideoFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video — generation and preview'**
+  String get studioVideoFocusModeSubtitle;
+
+  /// No description provided for @studioDeliverFocusModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver — export, quality, and review'**
+  String get studioDeliverFocusModeSubtitle;
+
+  /// No description provided for @studioStepPrepSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{step} setup'**
+  String studioStepPrepSheetTitle(String step);
+
+  /// No description provided for @studioStepPrepSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model routing, quick actions, and progress — open when needed.'**
+  String get studioStepPrepSheetSubtitle;
+
+  /// No description provided for @studioScriptStepOpenAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Script Agent'**
+  String get studioScriptStepOpenAgent;
+
+  /// No description provided for @studioScriptStepCloseAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Agent'**
+  String get studioScriptStepCloseAgent;
+
+  /// No description provided for @studioScriptStepSetupOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get studioScriptStepSetupOpen;
+
+  /// No description provided for @studioScriptStepModelRoutingSettingsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Model routing & vendors (Settings)'**
+  String get studioScriptStepModelRoutingSettingsLink;
+
+  /// No description provided for @studioCreatorJourneyCompactExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Full workflow'**
+  String get studioCreatorJourneyCompactExpand;
+
+  /// No description provided for @studioCreatorJourneyCompactExpandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Six-step workflow'**
+  String get studioCreatorJourneyCompactExpandTitle;
+
+  /// No description provided for @studioCreatorJourneyCompactCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus: {step}'**
+  String studioCreatorJourneyCompactCurrent(String step);
 
   /// No description provided for @studioArtStepOpenSettings.
   ///
@@ -3530,6 +3629,12 @@ abstract class AppLocalizations {
   /// **'Next step'**
   String get studioCreatorJourneyNext;
 
+  /// No description provided for @studioCreatorJourneyNextSop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {step}'**
+  String studioCreatorJourneyNextSop(String step);
+
   /// No description provided for @studioCreatorJourneyNextDoneHint.
   ///
   /// In en, this message translates to:
@@ -4068,6 +4173,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shots'**
   String get studioStoryboardShotList;
+
+  /// No description provided for @studioStoryboardStudioShotListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No shots yet'**
+  String get studioStoryboardStudioShotListEmpty;
 
   /// No description provided for @studioStoryboardShotLabel.
   ///

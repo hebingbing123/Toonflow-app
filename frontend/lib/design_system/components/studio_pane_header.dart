@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../product_shell/studio_shell_scope.dart';
 import '../tokens.dart';
@@ -32,7 +33,10 @@ class StudioPaneHeader extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     final resolvedTitleStyle = titleStyle ?? studioPaneTitleStyle(context);
     Widget? buildBackButton() {
-      if (!showBack) {
+      // Product shell already exposes ←/→ in the title bar (StudioShellScope).
+      final effectiveShowBack =
+          showBack && StudioShellScope.maybeOf(context) == null;
+      if (!effectiveShowBack) {
         return null;
       }
       return IconButton(
@@ -87,7 +91,9 @@ class StudioPaneHeader extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final stackTrailing = trailing != null && constraints.maxWidth < 440;
+        final stackTrailing =
+            trailing != null &&
+            constraints.maxWidth < kStudioCompactHeaderMinWidth;
         final backButton = buildBackButton();
         if (!stackTrailing) {
           return Row(
@@ -97,7 +103,18 @@ class StudioPaneHeader extends StatelessWidget {
               Expanded(child: titleBlock),
               if (trailing != null) ...<Widget>[
                 const SizedBox(width: 12),
-                ?trailing,
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      physics: const ClampingScrollPhysics(),
+                      child: trailing,
+                    ),
+                  ),
+                ),
               ],
             ],
           );

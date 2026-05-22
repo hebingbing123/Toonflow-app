@@ -131,6 +131,45 @@ void main() {
     },
   );
 
+  testWidgets('storyboard studio empty shots shows one primary empty state', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _wrapApp(
+        child: StoryboardStudioPage(
+          projectNumericId: 7,
+          projectUuid: '00000000-0000-0000-0000-000000000099',
+          accessToken: 'test-token',
+          onOpenProductionWorkspace: ({required String projectUuid}) {},
+          debugScripts: const [
+            ScriptWorkbenchDetailRow(
+              numericId: 1,
+              name: 'Episode 1',
+              relatedAssets: [],
+            ),
+          ],
+          debugShots: const <ProductionStoryboardItemV1>[],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'No shots in this script yet. Add storyboards on the script step first.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('No shots yet'), findsNothing);
+    expect(find.text('Shots'), findsNothing);
+    expect(find.text('Properties'), findsNothing);
+    expect(find.text('Grid mode'), findsNothing);
+    expect(find.text('Open Script'), findsWidgets);
+  });
+
   testWidgets('storyboard studio close button uses explicit close action', (
     tester,
   ) async {

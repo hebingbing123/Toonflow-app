@@ -1550,7 +1550,64 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioScriptStepSetupTitle => '步骤准备区';
 
   @override
-  String get studioScriptStepSetupSubtitle => '模型路由、快速模板与项目进度；默认收起，主工作区优先。';
+  String get studioScriptStepSetupSubtitle => '模型路由、快速模板与项目进度；需要时从紧凑栏打开。';
+
+  @override
+  String get studioScriptFocusModeSubtitle => '剧本专注：小说、剧本与提取';
+
+  @override
+  String studioScriptFocusModeSubtitleWithCounts(
+    int novelCount,
+    int scriptCount,
+  ) {
+    return '剧本专注 · 小说 $novelCount · 剧本 $scriptCount';
+  }
+
+  @override
+  String get studioArtFocusModeSubtitle => '美术专注：为本项目选择画风与故事风格';
+
+  @override
+  String get studioAssetsFocusModeSubtitle => '资产专注：角色、道具与参考图';
+
+  @override
+  String get studioStoryboardFocusModeSubtitle => '分镜专注：镜头与时间线';
+
+  @override
+  String get studioVideoFocusModeSubtitle => '视频专注：生成与预览';
+
+  @override
+  String get studioDeliverFocusModeSubtitle => '交付专注：导出、质检与审片';
+
+  @override
+  String studioStepPrepSheetTitle(String step) {
+    return '$step · 步骤准备';
+  }
+
+  @override
+  String get studioStepPrepSheetSubtitle => '模型路由、快捷操作与进度；需要时再打开。';
+
+  @override
+  String get studioScriptStepOpenAgent => '剧本 Agent';
+
+  @override
+  String get studioScriptStepCloseAgent => '收起 Agent';
+
+  @override
+  String get studioScriptStepSetupOpen => '步骤准备';
+
+  @override
+  String get studioScriptStepModelRoutingSettingsLink => '模型路由与厂商（设置）';
+
+  @override
+  String get studioCreatorJourneyCompactExpand => '全流程';
+
+  @override
+  String get studioCreatorJourneyCompactExpandTitle => '六步工作流';
+
+  @override
+  String studioCreatorJourneyCompactCurrent(String step) {
+    return '专注：$step';
+  }
 
   @override
   String get studioArtStepOpenSettings => '高级项目设定';
@@ -1854,6 +1911,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioCreatorJourneyNext => '下一步';
 
   @override
+  String studioCreatorJourneyNextSop(String step) {
+    return '下一步：$step';
+  }
+
+  @override
   String get studioCreatorJourneyNextDoneHint => '已进入成片与评审阶段，请在上方完成合成与预览。';
 
   @override
@@ -2155,6 +2217,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioStoryboardShotList => '镜头';
+
+  @override
+  String get studioStoryboardStudioShotListEmpty => '暂无镜头';
 
   @override
   String studioStoryboardShotLabel(int n) {

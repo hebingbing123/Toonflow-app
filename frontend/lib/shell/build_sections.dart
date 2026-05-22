@@ -199,6 +199,9 @@ extension _HomePageBuildSections on _HomePageState {
     BuildContext context, {
     bool compact = false,
     bool inline = false,
+    bool embedded = false,
+    bool titleBarChrome = false,
+    bool titleBarDense = false,
   }) {
     final workspace = _sessionMe?.currentWorkspace;
     final projects = _projectsController.projects;
@@ -219,6 +222,10 @@ extension _HomePageBuildSections on _HomePageState {
     final billingScope = meV2?.billingScope;
     final workspaceBilling = meV2?.currentWorkspaceBilling;
 
+    final hasScopedProject = projectLabel != null &&
+        projectLabel.trim().isNotEmpty &&
+        projectLabel != l10n.workspaceContextNoProject;
+
     return WorkspaceContextView(
       loading: _loadingSessionMe,
       workspaceName: workspace?.name,
@@ -230,6 +237,12 @@ extension _HomePageBuildSections on _HomePageState {
       workspaceJobsToday: workspaceBilling?.jobsToday,
       compact: compact,
       inline: inline,
+      embedded: embedded,
+      titleBarChrome: titleBarChrome,
+      titleBarDense: titleBarDense,
+      onProjectScopeTap: hasScopedProject && widget.shellMode == HomeShellMode.product
+          ? _openTitleBarProjectHome
+          : null,
     );
   }
 

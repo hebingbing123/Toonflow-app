@@ -56,6 +56,14 @@ static void my_application_activate(GApplication* application) {
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+  // Keep in sync with `lib/desktop/desktop_window_constraints.dart`.
+  gtk_widget_set_size_request(GTK_WIDGET(window), 960, 640);
+  GdkGeometry geometry{};
+  geometry.min_width = 960;
+  geometry.min_height = 640;
+  gtk_window_set_geometry_hints(
+      window, nullptr, &geometry,
+      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(

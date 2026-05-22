@@ -14,6 +14,90 @@ void main() {
       expect(creatorJourneyMilestoneNavIndex(StudioStep.quality), 4);
     });
 
+    test('creatorJourneyCompactBarNextStep uses milestone jumps', () {
+      expect(
+        creatorJourneyCompactBarNextStep(StudioStep.art),
+        StudioStep.storyboard,
+      );
+      expect(
+        creatorJourneyCompactBarNextStep(StudioStep.assets),
+        StudioStep.storyboard,
+      );
+      expect(
+        creatorJourneyCompactBarNextStep(StudioStep.storyboard),
+        StudioStep.deliver,
+      );
+    });
+
+    test('creatorJourneyCompactBarPrevStep walks back within milestone', () {
+      expect(
+        creatorJourneyCompactBarPrevStep(StudioStep.assets),
+        StudioStep.art,
+      );
+      expect(
+        creatorJourneyCompactBarPrevStep(StudioStep.storyboard),
+        StudioStep.art,
+      );
+      expect(
+        creatorJourneyCompactBarPrevStep(StudioStep.video),
+        StudioStep.storyboard,
+      );
+      expect(
+        creatorJourneyCompactBarPrevStep(StudioStep.deliver),
+        StudioStep.video,
+      );
+      expect(
+        creatorJourneyCompactBarPrevStep(StudioStep.quality),
+        StudioStep.deliver,
+      );
+    });
+
+    test('creatorJourneyCompactBarNext does not skip deliver for review pack', () {
+      expect(
+        creatorJourneyCompactBarNextStep(StudioStep.storyboard),
+        StudioStep.deliver,
+      );
+      expect(
+        creatorJourneyCompactBarNextStep(StudioStep.video),
+        StudioStep.deliver,
+      );
+      expect(
+        creatorJourneyCompactBarNextOpensReviewPack(StudioStep.storyboard),
+        isFalse,
+      );
+      expect(
+        creatorJourneyCompactBarNextOpensReviewPack(StudioStep.video),
+        isFalse,
+      );
+      expect(
+        creatorJourneyCompactBarNextOpensReviewPack(StudioStep.deliver),
+        isTrue,
+      );
+      expect(
+        creatorJourneyCompactBarNextOpensReviewPack(StudioStep.quality),
+        isTrue,
+      );
+    });
+
+    test('creatorJourneyCompactBarFocusUsesStepShortLabel off landing', () {
+      expect(
+        creatorJourneyCompactBarFocusUsesStepShortLabel(StudioStep.storyboard),
+        isFalse,
+      );
+      expect(
+        creatorJourneyCompactBarFocusUsesStepShortLabel(StudioStep.assets),
+        isTrue,
+      );
+      expect(
+        creatorJourneyCompactBarFocusUsesStepShortLabel(StudioStep.video),
+        isTrue,
+      );
+      expect(
+        creatorJourneyCompactBarFocusUsesStepShortLabel(StudioStep.quality),
+        isTrue,
+      );
+    });
+
     test('creatorJourneyLandingStep picks canonical tabs', () {
       expect(creatorJourneyLandingStep(0), StudioStep.script);
       expect(creatorJourneyLandingStep(1), StudioStep.script);

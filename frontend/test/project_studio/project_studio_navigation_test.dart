@@ -7,6 +7,7 @@ import 'package:openflow_app/project_editor/style_pack_catalog.dart';
 import 'package:openflow_app/project_studio/art_step_panel.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
 import 'package:openflow_app/project_studio/project_studio_page.dart';
+import 'package:openflow_app/project_studio/project_studio_navigation.dart';
 import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,43 @@ Widget _routerApp(GoRouter router) {
 }
 
 void main() {
+  group('projectStudioStepUri', () {
+    test('quality maps to deliver with tab=quality', () {
+      final uri = projectStudioStepUri(9, StudioStep.quality);
+      expect(uri.path, '/projects/9/deliver');
+      expect(uri.queryParameters['tab'], 'quality');
+    });
+
+    test('storyboard uses slug path', () {
+      final uri = projectStudioStepUri(9, StudioStep.storyboard);
+      expect(uri.path, '/projects/9/storyboard');
+      expect(uri.queryParameters, isEmpty);
+    });
+  });
+
+  group('studioStepForHarnessAgentKind', () {
+    test('maps harness agents to studio steps', () {
+      expect(
+        studioStepForHarnessAgentKind('script_rewriter'),
+        StudioStep.script,
+      );
+      expect(studioStepForHarnessAgentKind('extractor'), StudioStep.script);
+      expect(
+        studioStepForHarnessAgentKind('storyboard_breaker'),
+        StudioStep.storyboard,
+      );
+      expect(
+        studioStepForHarnessAgentKind('grid_prompt_generator'),
+        StudioStep.storyboard,
+      );
+      expect(
+        studioStepForHarnessAgentKind('voice_assigner'),
+        StudioStep.assets,
+      );
+      expect(studioStepForHarnessAgentKind('unknown'), isNull);
+    });
+  });
+
   testWidgets('explicit route step wins over saved last step', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'storyboard',
@@ -102,7 +140,9 @@ void main() {
     );
   });
 
-  testWidgets('tapping art chip navigates to art step', (WidgetTester tester) async {
+  testWidgets('compact bar next from script navigates to art step', (
+    WidgetTester tester,
+  ) async {
     late GoRouter router;
     final host = ProjectStudioHost(
       projectNumericId: 42,
@@ -134,7 +174,7 @@ void main() {
 
     expect(find.text('body-script'), findsOneWidget);
 
-    await tester.tap(find.text('Art'));
+    await tester.tap(find.text('Next: Art'));
     await tester.pumpAndSettle();
 
     expect(find.text('body-art'), findsOneWidget);

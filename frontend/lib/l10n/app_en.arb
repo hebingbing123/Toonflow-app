@@ -754,7 +754,39 @@
     }
   },
   "studioScriptStepSetupTitle": "Step setup",
-  "studioScriptStepSetupSubtitle": "Model routing, quick templates, and project progress — collapsed by default so the workspace stays in focus.",
+  "studioScriptStepSetupSubtitle": "Model routing, quick templates, and progress — open from the compact bar when needed.",
+  "studioScriptFocusModeSubtitle": "Script focus — novels, scripts, and extraction",
+  "studioScriptFocusModeSubtitleWithCounts": "Script focus · Novels {novelCount} · Scripts {scriptCount}",
+  "@studioScriptFocusModeSubtitleWithCounts": {
+    "placeholders": {
+      "novelCount": { "type": "int" },
+      "scriptCount": { "type": "int" }
+    }
+  },
+  "studioArtFocusModeSubtitle": "Art direction — style packs for this project",
+  "studioAssetsFocusModeSubtitle": "Assets — characters, props, and references",
+  "studioStoryboardFocusModeSubtitle": "Storyboard — shots and timing",
+  "studioVideoFocusModeSubtitle": "Video — generation and preview",
+  "studioDeliverFocusModeSubtitle": "Deliver — export, quality, and review",
+  "studioStepPrepSheetTitle": "{step} setup",
+  "@studioStepPrepSheetTitle": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
+  "studioStepPrepSheetSubtitle": "Model routing, quick actions, and progress — open when needed.",
+  "studioScriptStepOpenAgent": "Script Agent",
+  "studioScriptStepCloseAgent": "Close Agent",
+  "studioScriptStepSetupOpen": "Setup",
+  "studioScriptStepModelRoutingSettingsLink": "Model routing & vendors (Settings)",
+  "studioCreatorJourneyCompactExpand": "Full workflow",
+  "studioCreatorJourneyCompactExpandTitle": "Six-step workflow",
+  "studioCreatorJourneyCompactCurrent": "Focus: {step}",
+  "@studioCreatorJourneyCompactCurrent": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
   "studioArtStepOpenSettings": "Advanced project settings",
   "studioArtStepEditSubtitle": "Choose bundled art and story style packs for this project. Changes apply to the next image and script generation jobs.",
   "studioArtStepSaveButton": "Save art direction",
@@ -858,6 +890,12 @@
   "studioCreatorStarterRhythmDetail": "When script exists, break the first storyboard batch for a watchable rhythm.",
   "studioCreatorStarterRhythmCta": "Open storyboard rhythm",
   "studioCreatorJourneyNext": "Next step",
+  "studioCreatorJourneyNextSop": "Next: {step}",
+  "@studioCreatorJourneyNextSop": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
   "studioCreatorJourneyNextDoneHint": "Review stage — finish merge & preview above.",
   "studioCreatorJourneyStatusCompleted": "Completed",
   "studioCreatorJourneyStatusInProgress": "In progress",
@@ -962,6 +1000,7 @@
   "studioStoryboardStudioTitle": "Storyboard studio",
   "studioStoryboardStudioBody": "Use production workspace for full editing; this view focuses on shot flow.",
   "studioStoryboardShotList": "Shots",
+  "studioStoryboardStudioShotListEmpty": "No shots yet",
   "studioStoryboardShotLabel": "Shot {n}",
   "@studioStoryboardShotLabel": {"placeholders": {"n": {"type": "int"}}},
   "studioStoryboardProperties": "Properties",

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
@@ -12,6 +14,7 @@ import '../project_editor/novels/workbench_section_builder.dart';
 import '../project_editor/scripts/section_builder.dart';
 import '../rust_api.dart';
 import '../settings/model_vendors/vendor_setup_nudge.dart';
+import 'project_studio_focus_scope.dart';
 
 /// Opens the full novel workbench dialog; panel supplies mutable [novelsRef].
 typedef StudioScriptOpenNovelWorkbench =
@@ -55,6 +58,7 @@ class ProjectStudioScriptStepPanel extends StatefulWidget {
     this.onScriptSelected,
     this.onContentChanged,
     this.openNovelWorkbenchOnMount = false,
+    this.focusMode = false,
   });
 
   final String accessToken;
@@ -68,6 +72,9 @@ class ProjectStudioScriptStepPanel extends StatefulWidget {
   final ValueChanged<ScriptBrief>? onScriptSelected;
   final VoidCallback? onContentChanged;
   final bool openNovelWorkbenchOnMount;
+
+  /// Hides the duplicate «小说与剧本» rail header; counts go to shell subtitle.
+  final bool focusMode;
 
   @override
   State<ProjectStudioScriptStepPanel> createState() =>
@@ -91,6 +98,7 @@ class _ProjectStudioScriptStepPanelState
   bool _loading = true;
   String? _loadError;
   int? _selectedScriptId;
+  bool _agentPaneOpen = false;
 
   @override
   void initState() {
@@ -153,6 +161,13 @@ class _ProjectStudioScriptStepPanelState
         }
       });
       widget.onContentChanged?.call();
+      if (widget.focusMode) {
+        ProjectStudioFocusScope.reportScriptContentCounts(
+          context,
+          novelCount: _novelCount,
+          scriptCount: _scriptCount,
+        );
+      }
       await _maybeOpenPendingNovelWorkbench();
     } catch (e) {
       if (!mounted) return;
@@ -414,7 +429,10 @@ class _ProjectStudioScriptStepPanelState
     return TabBar(
       isScrollable: true,
       dividerColor: Colors.transparent,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+      labelPadding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: widget.focusMode ? 4 : 0,
+      ),
       indicatorSize: TabBarIndicatorSize.label,
       tabAlignment: TabAlignment.start,
       tabs: <Tab>[
@@ -483,7 +501,7 @@ class _ProjectStudioScriptStepPanelState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildContentRailHeader(context, l10n),
+          if (!widget.focusMode) _buildContentRailHeader(context, l10n),
           _buildContentTabBar(l10n),
           Expanded(
             child: TabBarView(
@@ -504,7 +522,11 @@ class _ProjectStudioScriptStepPanelState
     );
   }
 
-  Widget _buildAgentColumn(BuildContext context, AppLocalizations l10n) {
+  Widget _buildAgentColumn(
+    BuildContext context,
+    AppLocalizations l10n, {
+    VoidCallback? onClose,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -515,14 +537,57 @@ class _ProjectStudioScriptStepPanelState
             StudioLayoutSpacing.cardInner - 4,
             StudioLayoutSpacing.inlineGap,
           ),
-          child: StudioPaneHeader(
-            showBack: false,
-            title: l10n.productAgentScriptWorkspaceTitle,
-            subtitle: l10n.productAgentScriptWorkspaceSubtitle,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: StudioPaneHeader(
+                  showBack: false,
+                  title: l10n.productAgentScriptWorkspaceTitle,
+                  subtitle: l10n.productAgentScriptWorkspaceSubtitle,
+                ),
+              ),
+              if (onClose != null)
+                IconButton(
+                  tooltip: l10n.studioScriptStepCloseAgent,
+                  onPressed: onClose,
+                  icon: const Icon(Icons.close_rounded),
+                ),
+            ],
           ),
         ),
         Expanded(child: widget.agentWorkspace),
       ],
+    );
+  }
+
+  Widget _buildOpenAgentFab(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return Material(
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.25),
+      borderRadius: BorderRadius.circular(24),
+      color: tokens.bgSurface.withValues(alpha: 0.96),
+      child: InkWell(
+        onTap: () => setState(() => _agentPaneOpen = true),
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.smart_toy_outlined, size: 20, color: tokens.primary),
+              const SizedBox(width: 8),
+              Text(
+                l10n.studioScriptStepOpenAgent,
+                style: studioControlLabelStyle(context)?.copyWith(
+                  color: tokens.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -535,12 +600,34 @@ class _ProjectStudioScriptStepPanelState
     final l10n = AppLocalizations.of(context)!;
     final rail = _buildContentRail(context);
 
+    if (!_agentPaneOpen) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Positioned.fill(child: rail),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _buildOpenAgentFab(context, l10n),
+          ),
+        ],
+      );
+    }
+
     if (stackVertically) {
+      const minAgentColumnHeight = 140.0;
+      final maxTopHeight = math.max(
+        120.0,
+        constraints.maxHeight - minAgentColumnHeight,
+      );
+      final topHeight = (constraints.maxHeight * 0.46)
+          .clamp(120.0, math.min(420.0, maxTopHeight))
+          .toDouble();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           SizedBox(
-            height: (constraints.maxHeight * 0.46).clamp(280.0, 420.0),
+            height: topHeight,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: tokens.bgInset,
@@ -549,7 +636,13 @@ class _ProjectStudioScriptStepPanelState
               child: rail,
             ),
           ),
-          Expanded(child: _buildAgentColumn(context, l10n)),
+          Expanded(
+            child: _buildAgentColumn(
+              context,
+              l10n,
+              onClose: () => setState(() => _agentPaneOpen = false),
+            ),
+          ),
         ],
       );
     }
@@ -559,8 +652,7 @@ class _ProjectStudioScriptStepPanelState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(
-          width: railWidth,
+        Expanded(
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgInset,
@@ -569,7 +661,14 @@ class _ProjectStudioScriptStepPanelState
             child: rail,
           ),
         ),
-        Expanded(child: _buildAgentColumn(context, l10n)),
+        SizedBox(
+          width: railWidth,
+          child: _buildAgentColumn(
+            context,
+            l10n,
+            onClose: () => setState(() => _agentPaneOpen = false),
+          ),
+        ),
       ],
     );
   }

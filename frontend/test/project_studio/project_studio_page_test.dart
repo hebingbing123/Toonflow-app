@@ -173,10 +173,65 @@ void main() {
         projectNumericId: 42,
         projectUuid: 'project-42',
         projectName: 'Project Delta',
-        accessToken: null,
+        accessToken: 'token',
         initialStep: StudioStep.script,
         completedSteps: 3,
         conflictMessage: 'Version mismatch detected',
+        home: const ProjectHome(
+          project: ProjectRow(
+            id: 'project-42',
+            numericId: 42,
+            name: 'Project Delta',
+            intro: null,
+            projectType: null,
+            imageModel: null,
+            imageQuality: null,
+            videoModel: null,
+            artStyle: null,
+            directorManual: null,
+            mode: null,
+            videoRatio: null,
+            createTimeMs: null,
+            artStylePack: null,
+            storyStylePack: null,
+            targetMarket: null,
+            targetPlatforms: null,
+            durationStrategy: null,
+            voiceProfile: null,
+            subtitleStyle: null,
+            bgmStrategy: null,
+            projectAccessMode: 'restricted',
+            projectAccessRole: 'editor',
+          ),
+          stats: ProjectStats(
+            scriptCount: 1,
+            storyboardCount: 1,
+            roleCount: 0,
+            novelCount: 0,
+            videoCount: 0,
+          ),
+          readinessScore: 40,
+          readinessSummary: 'Agents in setup sheet.',
+          onboarding: ProjectHomeOnboarding(
+            complete: false,
+            checklist: <ProjectHomeChecklistItem>[],
+          ),
+          styleBibleReady: false,
+          cockpit: ProjectHomeCockpit(
+            headline: 'Headline',
+            subheadline: 'Sub',
+            primaryAction: ProjectHomeAction(
+              key: 'primary',
+              title: 'Primary',
+              detail: 'd',
+              targetStep: 'storyboard',
+              ctaLabel: 'Primary CTA',
+            ),
+            secondaryActions: <ProjectHomeAction>[],
+            metrics: const <ProjectHomeMetric>[],
+            starterTemplates: const <ProjectHomeStarterTemplate>[],
+          ),
+        ),
         onExit: () {},
         onStepChanged: stepChanges.add,
         onOpenAgentDrawer: () {},
@@ -194,6 +249,7 @@ void main() {
       expect(find.text('3/6'), findsOneWidget);
       expect(find.text('Version mismatch detected'), findsOneWidget);
       expect(find.text('body-storyboard'), findsOneWidget);
+      await openProjectStudioStepSetup(tester);
       expect(find.text('Break storyboard'), findsOneWidget);
       expect(find.text('Grid prompts'), findsOneWidget);
       expect(stepChanges, <StudioStep>[StudioStep.storyboard]);
@@ -743,6 +799,8 @@ void main() {
   testWidgets('cockpit actions route to tasks, asset editor, and agents', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'script',
     });
@@ -754,7 +812,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: const ProjectHome(
         project: ProjectRow(
           id: 'project-42',
@@ -876,14 +934,13 @@ void main() {
     await tester.pumpAndSettle();
     await expandProjectStudioCockpit(tester);
 
-    await tester.ensureVisible(find.text('Open task center'));
-    await tester.tap(find.text('Open task center'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Open task center'));
     await tester.pump();
-    await tester.ensureVisible(find.text('Review candidates'));
-    await tester.tap(find.text('Review candidates'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Review candidates'));
     await tester.pump();
-    await tester.ensureVisible(find.text('Break storyboard'));
-    await tester.tap(find.text('Break storyboard'));
+    final breakStoryboard = find.widgetWithText(OutlinedButton, 'Break storyboard');
+    expect(breakStoryboard, findsOneWidget);
+    tester.widget<OutlinedButton>(breakStoryboard).onPressed!.call();
     await tester.pump();
 
     expect(taskOpenCount, 1);
@@ -899,6 +956,8 @@ void main() {
   testWidgets('cockpit actions without launch intents use target step only', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'script',
     });
@@ -911,7 +970,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: ProjectHome(
         project: const ProjectRow(
           id: 'project-42',
@@ -1017,6 +1076,8 @@ void main() {
   testWidgets('explicit cockpit launch intents override opaque action keys', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'deliver',
     });
@@ -1029,7 +1090,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: ProjectHome(
         project: const ProjectRow(
           id: 'project-42',
@@ -1148,8 +1209,7 @@ void main() {
     await tester.pumpAndSettle();
     await expandProjectStudioCockpit(tester);
 
-    await tester.ensureVisible(find.text('Open task center'));
-    await tester.tap(find.text('Open task center'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Open task center'));
     await tester.pump();
 
     final metricCard = tester.widget<InkWell>(
@@ -1182,6 +1242,8 @@ void main() {
   testWidgets('cockpit metrics can drill into tasks and asset hub', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'script',
     });
@@ -1193,7 +1255,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: const ProjectHome(
         project: ProjectRow(
           id: 'project-42',
@@ -1374,7 +1436,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: const ProjectHome(
         project: ProjectRow(
           id: 'project-42',
@@ -1467,6 +1529,8 @@ void main() {
   testWidgets('starter templates can launch sample, asset, and ops routes', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'deliver',
     });
@@ -1479,7 +1543,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       home: const ProjectHome(
         project: ProjectRow(
           id: 'project-42',
@@ -1606,13 +1670,7 @@ void main() {
 
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
-
-    final expand = find.text('View project progress');
-    if (expand.evaluate().isNotEmpty) {
-      await tester.ensureVisible(expand);
-      await tester.tap(expand);
-      await tester.pumpAndSettle();
-    }
+    await expandProjectStudioCockpit(tester);
 
     tester
         .widget<TextButton>(
@@ -1658,7 +1716,7 @@ void main() {
         projectNumericId: 42,
         projectUuid: 'project-42',
         projectName: 'Project Delta',
-        accessToken: null,
+        accessToken: 'token',
         home: const ProjectHome(
           project: ProjectRow(
             id: 'project-42',
@@ -1771,6 +1829,7 @@ void main() {
 
       await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
       await tester.pumpAndSettle();
+      await openProjectStudioStepSetup(tester);
       await expandProjectStudioCockpit(tester);
 
       final metricY = tester.getTopLeft(find.text('Metric A')).dy;
@@ -1824,7 +1883,7 @@ void main() {
       projectNumericId: 42,
       projectUuid: 'project-42',
       projectName: 'Project Delta',
-      accessToken: null,
+      accessToken: 'token',
       initialStep: StudioStep.script,
       home: ProjectHome(
         project: const ProjectRow(
@@ -1882,10 +1941,10 @@ void main() {
           starterTemplates: <ProjectHomeStarterTemplate>[
             ProjectHomeStarterTemplate(
               key: 'starter_creator_plot',
-              title: '剧情叙事起步',
-              detail: '先补 brief',
+              title: 'Plot narrative',
+              detail: 'Fill brief first',
               targetStep: 'script',
-              ctaLabel: '从剧本开跑',
+              ctaLabel: 'Start with script',
               launchIntent: ProjectHomeLaunchIntent(
                 targetStep: 'script',
                 notice: 'Brief first',
@@ -1893,10 +1952,10 @@ void main() {
             ),
             ProjectHomeStarterTemplate(
               key: 'starter_creator_shot_rhythm',
-              title: '镜头节奏样片',
-              detail: '拆分镜',
+              title: 'Shot rhythm sample',
+              detail: 'Break storyboard',
               targetStep: 'storyboard',
-              ctaLabel: '进入分镜节奏',
+              ctaLabel: 'Enter storyboard rhythm',
               launchIntent: ProjectHomeLaunchIntent(
                 targetStep: 'storyboard',
                 agentKind: 'storyboard_breaker',
@@ -1935,6 +1994,7 @@ void main() {
     await tester.pumpWidget(_wrapRouterApp(router));
     await tester.pumpAndSettle();
 
+    await openProjectStudioStepSetup(tester);
     expect(find.text('Quick-start templates'), findsOneWidget);
     await expandStudioWorkbenchSection(tester);
     expect(find.text('Plot narrative'), findsOneWidget);
@@ -1977,13 +2037,77 @@ void main() {
     await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Workspace'));
-    await tester.pumpAndSettle();
+    await openProjectStudioWorkspaceMenu(tester);
 
     expect(find.text('Main path'), findsOneWidget);
     expect(find.text('Open review pack'), findsOneWidget);
     expect(find.text('Workspace tools'), findsOneWidget);
     expect(find.text('Assets'), findsOneWidget);
     expect(find.text('Video'), findsOneWidget);
+  });
+
+  testWidgets('compact bar next from storyboard goes to deliver not review-pack', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'studio_last_step_42': 'storyboard',
+    });
+
+    const deliverShort = 'Deliver';
+    const reviewPack = 'Review pack';
+
+    late GoRouter router;
+    final host = ProjectStudioHost(
+      projectNumericId: 42,
+      projectUuid: 'project-42',
+      projectName: 'Nav Test',
+      accessToken: null,
+      initialStep: StudioStep.storyboard,
+      onExit: () {},
+      onStepChanged: (_) {},
+      onOpenAgentDrawer: () {},
+      onRunHarnessAgent: (_) async {},
+      buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+    );
+
+    router = GoRouter(
+      initialLocation: '/projects/42/storyboard',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/projects/42/storyboard',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/deliver',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/review-pack',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text('review-pack-page')),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_wrapRouterApp(router));
+    await tester.pumpAndSettle();
+
+    expect(find.text('body-storyboard'), findsOneWidget);
+    expect(find.text('Next: $deliverShort'), findsOneWidget);
+    expect(find.text('Next: $reviewPack'), findsNothing);
+
+    await tester.tap(find.text('Next: $deliverShort'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('body-deliver'), findsOneWidget);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/projects/42/deliver',
+    );
+    expect(find.text('review-pack-page'), findsNothing);
   });
 }

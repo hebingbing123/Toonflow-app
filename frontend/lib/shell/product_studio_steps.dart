@@ -33,6 +33,7 @@ extension _HomePageProductStudioSteps on _HomePageState {
     return ProjectStudioScriptStepPanel(
       accessToken: token,
       project: project,
+      focusMode: true,
       openNovelWorkbenchOnMount: openNovelWorkbenchOnMount,
       onOpenNovelWorkbench: (novelsRef, novelsBusy, reload) =>
           _studioScriptOpenNovelWorkbench(
@@ -176,16 +177,54 @@ extension _HomePageProductStudioSteps on _HomePageState {
             );
           });
         }
-        return _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.production,
-          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
-          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+        return ProjectStudioAgentFocusBody(
+          openLabel: l10n.productAgentProductionWorkspaceTitle,
+          agentWorkspace: _buildAgentWorkspacePane(
+            initialPane: AgentWorkspacePane.production,
+            sectionTitle: l10n.productAgentProductionWorkspaceTitle,
+            sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+            suppressSectionHeader: true,
+          ),
         );
       case StudioStep.storyboard:
-        return _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.production,
-          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
-          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+        final storyboardRow = _studioProjectRowForNumericId(projectNumericId);
+        final storyboardToken = _effectiveAccessToken;
+        if (storyboardRow == null ||
+            storyboardToken == null ||
+            storyboardToken.isEmpty ||
+            storyboardRow.id.isEmpty) {
+          return Center(
+            child: StudioEmptyState.emptyData(
+              title: l10n.studioScriptStepScopeMissing,
+              icon: Icons.folder_off_outlined,
+            ),
+          );
+        }
+        return StoryboardStudioPage(
+          projectNumericId: projectNumericId,
+          projectUuid: storyboardRow.id,
+          accessToken: storyboardToken,
+          embeddedInProjectStudio: true,
+          onOpenProductionWorkspace: ({required String projectUuid}) {
+            _openShellPaneFromStudioOverlay(
+              ProductWorkspacePane.productionWorkspace,
+              projectNumericId: projectNumericId,
+              projectUuid: projectUuid,
+            );
+          },
+          onOpenShotEditor:
+              ({
+                required String projectUuid,
+                required int scriptNumericId,
+                required int storyboardNumericId,
+              }) {
+                return _openStoryboardEditor(
+                  storyboardToken,
+                  storyboardNumericId,
+                  projectId: projectUuid,
+                  scriptNumericId: scriptNumericId,
+                );
+              },
         );
       case StudioStep.video:
         return StudioVideoStepPanel(
@@ -321,11 +360,33 @@ extension _HomePageProductStudioSteps on _HomePageState {
         _workspaceInputController.clearScriptScope();
       },
       onOpenScriptWorkspace: () {
+        if (projectNumericId > 0) {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+          goProjectStudioStepIfScoped(
+            context,
+            projectNumericId: projectNumericId,
+            step: StudioStep.script,
+          );
+          return;
+        }
         _shellNavigationController.selectProductWorkspacePane(
           ProductWorkspacePane.scriptWorkspace,
         );
       },
       onOpenProductionWorkspace: () {
+        if (projectNumericId > 0) {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.projects,
+          );
+          goProjectStudioStepIfScoped(
+            context,
+            projectNumericId: projectNumericId,
+            step: StudioStep.storyboard,
+          );
+          return;
+        }
         _shellNavigationController.selectProductWorkspacePane(
           ProductWorkspacePane.productionWorkspace,
         );

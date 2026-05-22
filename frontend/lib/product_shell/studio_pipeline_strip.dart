@@ -16,6 +16,7 @@ class StudioPipelineStrip extends StatefulWidget {
     required this.jobsPaneEnabled,
     required this.qualityPaneEnabled,
     this.compact = false,
+    this.leadingContext,
   });
 
   final ProductWorkspacePane selectedPane;
@@ -23,6 +24,9 @@ class StudioPipelineStrip extends StatefulWidget {
   final bool jobsPaneEnabled;
   final bool qualityPaneEnabled;
   final bool compact;
+
+  /// Workspace breadcrumb merged into this strip (saves a stacked header row).
+  final Widget? leadingContext;
 
   @override
   State<StudioPipelineStrip> createState() => _StudioPipelineStripState();
@@ -152,18 +156,31 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          inline ? StudioSpacing.xs + 4 : StudioSpacing.xs + 2,
-          inline ? StudioSpacing.xs : StudioSpacing.xs + 2,
-          inline ? StudioSpacing.xs + 4 : StudioSpacing.xs + 2,
-          inline ? StudioSpacing.xs : StudioSpacing.xs + 2,
+          StudioSpacing.sm,
+          widget.leadingContext != null ? StudioSpacing.sm : (inline ? StudioSpacing.xs : StudioSpacing.xs + 2),
+          StudioSpacing.sm,
+          widget.leadingContext != null ? StudioSpacing.sm : (inline ? StudioSpacing.xs : StudioSpacing.xs + 2),
         ),
-        child: inline
-            ? _buildInlineHeader(context, tokens, studio, l10n, stepChips)
+        child: inline || widget.leadingContext == null
+            ? _buildInlineHeader(
+                context,
+                tokens,
+                studio,
+                l10n,
+                stepChips,
+                leading: widget.leadingContext,
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  if (widget.leadingContext != null) ...<Widget>[
+                    widget.leadingContext!,
+                    const SizedBox(height: StudioSpacing.xs),
+                  ],
                   _buildTitleBadge(context, tokens, studio, l10n),
-                  SizedBox(height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4),
+                  SizedBox(
+                    height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4,
+                  ),
                   _buildStepChipsRail(
                     context,
                     tokens,
@@ -182,19 +199,52 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     StudioTokens tokens,
     StudioColors studio,
     AppLocalizations l10n,
-    List<Widget> stepChips,
-  ) {
+    List<Widget> stepChips, {
+    Widget? leading,
+  }) {
+    // 当有 leading context 时，使用两行布局：上面是面包屑，下面是平台链
+    if (leading != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // 第一行：面包屑导航
+          leading,
+          const SizedBox(height: 10),
+          // 第二行：平台链标题 + 步骤标签
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _buildTitleBadge(context, tokens, studio, l10n),
+              const SizedBox(width: StudioSpacing.xs + 4),
+              Expanded(
+                child: _buildStepChipsRail(
+                  context,
+                  tokens,
+                  stepChips,
+                  framed: true,
+                  gap: StudioSpacing.xs - 3,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // 没有 leading context 时，保持原来的单行布局
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         _buildTitleBadge(context, tokens, studio, l10n),
         const SizedBox(width: StudioSpacing.xs + 4),
         Flexible(
+          flex: 3,
+          fit: FlexFit.loose,
           child: _buildStepChipsRail(
             context,
             tokens,
             stepChips,
-            framed: false,
+            framed: true,
             gap: StudioSpacing.xs - 3,
           ),
         ),

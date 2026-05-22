@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,7 @@ class GlobalSearchBar extends StatefulWidget {
     this.currentWorkspaceId,
     this.onNavigateToResults,
     this.compact = false,
+    this.titleBarDense = false,
     this.showLocalPrefsMenu = true,
   });
 
@@ -52,6 +54,8 @@ class GlobalSearchBar extends StatefulWidget {
   })?
   onNavigateToResults;
   final bool compact;
+  /// VS Code–style title-bar search: ~28px tall, 12px text, no fixed width.
+  final bool titleBarDense;
   final bool showLocalPrefsMenu;
 
   @override
@@ -81,12 +85,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   bool _loadingHistory = false;
   bool _loadingSuggestions = false;
   Timer? _suggestionDebounce;
+  Timer? _overlayTextDebounce;
   List<SearchResult> _suggestions = [];
   bool _showHistory = false;
   List<HistoryEntry> _history = [];
   List<_PinnedSearchView> _pinnedViews = [];
   List<_PinnedSearchView> _recentViews = [];
   OverlayEntry? _overlayEntry;
+  int _paletteSelectedIndex = 0;
 
   /// Minimum characters required to trigger search
   static const int _minQueryLength = 2;
@@ -101,6 +107,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   @override
   void dispose() {
     _suggestionDebounce?.cancel();
+    _overlayTextDebounce?.cancel();
     _removeOverlay();
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
@@ -110,8 +117,27 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   void _onTextChanged() {
-    setState(() {});
+    _paletteSelectedIndex = 0;
+    _overlayTextDebounce?.cancel();
+    _overlayTextDebounce = Timer(const Duration(milliseconds: 48), () {
+      if (!mounted) {
+        return;
+      }
+      _refreshOverlay();
+    });
     _scheduleSuggestionFetch();
+  }
+
+  /// Rebuild overlay list without tearing down the input field (avoids focus loss).
+  void _refreshOverlay() {
+    if (!mounted || !_focusNode.hasFocus) {
+      return;
+    }
+    if (_overlayEntry == null) {
+      _showOverlay();
+      return;
+    }
+    _overlayEntry!.markNeedsBuild();
   }
 
   void _scheduleSuggestionFetch() {
@@ -123,9 +149,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         _loadingSuggestions = false;
       });
       if (_focusNode.hasFocus && (_history.isNotEmpty || _loadingHistory)) {
-        _showOverlay();
+        _refreshOverlay();
       } else if (_focusNode.hasFocus && q.isEmpty) {
-        _showOverlay();
+        _refreshOverlay();
       }
       return;
     }
@@ -158,7 +184,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         _loadingSuggestions = false;
       });
       if (_focusNode.hasFocus) {
-        _showOverlay();
+        _refreshOverlay();
       }
     } catch (_) {
       if (!mounted) return;
@@ -167,7 +193,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         _loadingSuggestions = false;
       });
       if (_focusNode.hasFocus) {
-        _showOverlay();
+        _refreshOverlay();
       }
     }
   }
@@ -206,7 +232,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       });
       await _loadPinnedViews();
       if (mounted && _focusNode.hasFocus) {
-        _showOverlay();
+        _refreshOverlay();
       }
     } catch (e) {
       // Silently fail - history is not critical
@@ -219,7 +245,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       }
       await _loadPinnedViews();
       if (mounted && _focusNode.hasFocus) {
-        _showOverlay();
+        _refreshOverlay();
       }
     }
   }
@@ -573,7 +599,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       return;
     }
     if (_focusNode.hasFocus) {
-      _showOverlay();
+      _refreshOverlay();
     }
   }
 
@@ -660,319 +686,427 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     ).showSnackBar(SnackBar(content: Text(l10n.globalSearchViewDeleted)));
   }
 
-  /// Show history dropdown overlay
-  void _showOverlay() {
-    final l10n = resolveAppLocalizationsForErrors(context);
-    final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
-    final renderBox = context.findRenderObject() as RenderBox?;
-    final fieldSize = renderBox?.size ?? const Size(400, 40);
-    _removeOverlay();
+  double _overlayPanelWidth(BuildContext context, Size fieldSize) {
+    // Title-bar search: palette width tracks the field (not screen/3).
+    if (widget.titleBarDense) {
+      final w = fieldSize.width;
+      return w > 0 ? w : 280;
+    }
+    return math.max(fieldSize.width, 320);
+  }
 
-    final queryLen = _controller.text.trim().length;
-    final showSuggestionsPanel =
-        queryLen >= _minQueryLength &&
-        (_loadingSuggestions || _suggestions.isNotEmpty);
-    final showPinnedPanel =
-        queryLen < _minQueryLength && _pinnedViews.isNotEmpty;
-    final showRecentViewsPanel =
-        queryLen < _minQueryLength && _recentViews.isNotEmpty;
-    final showTemplatePanel = queryLen < _minQueryLength;
-    final headerStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: tokens.accent,
-      fontWeight: FontWeight.w600,
+  /// Read-only query strip in the palette (typing stays in the title-bar field).
+  Widget _buildPaletteQueryHeader(
+    AppLocalizations l10n,
+    ThemeData theme,
+    StudioTokens tokens,
+  ) {
+    final hintStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 13,
+      color: tokens.textSecondary.withValues(alpha: 0.78),
     );
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        width: fieldSize.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0, fieldSize.height + 8),
-          child: Material(
-            color: Colors.transparent,
-            elevation: 0,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              constraints: const BoxConstraints(maxHeight: 420),
-              decoration: BoxDecoration(
-                color: tokens.bgSurface.withValues(alpha: 0.98),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: tokens.borderSubtle),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.22),
-                    blurRadius: 20,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
-                children: [
-                  if (_loadingSuggestions && queryLen >= _minQueryLength)
-                    const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
-                  if (showPinnedPanel) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        l10n.globalSearchPinnedViewsTitle,
-                        style: headerStyle,
-                      ),
-                    ),
-                    ..._buildGroupedViewTiles(
-                      context,
-                      _pinnedViews,
-                      icon: Icons.push_pin,
-                      headerStyle: theme.textTheme.labelSmall?.copyWith(
-                        color: tokens.textMuted,
-                      ),
-                    ),
-                    if (_showHistory || showSuggestionsPanel)
-                      Divider(height: 1, color: tokens.surfaceHighlight),
-                  ],
-                  if (showRecentViewsPanel) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        l10n.globalSearchRecentViewsTitle,
-                        style: headerStyle,
-                      ),
-                    ),
-                    ..._buildGroupedViewTiles(
-                      context,
-                      _recentViews,
-                      icon: Icons.schedule,
-                      headerStyle: theme.textTheme.labelSmall?.copyWith(
-                        color: tokens.textMuted,
-                      ),
-                    ),
-                    if (_showHistory ||
-                        showSuggestionsPanel ||
-                        showTemplatePanel)
-                      Divider(height: 1, color: tokens.surfaceHighlight),
-                  ],
-                  if (showTemplatePanel) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        l10n.globalSearchQuickTemplatesTitle,
-                        style: headerStyle,
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _quickTemplates
-                          .map(
-                            (template) => Padding(
-                              padding: const EdgeInsets.only(
-                                left: 16,
-                                right: 8,
-                                bottom: 8,
-                              ),
-                              child: ActionChip(
-                                label: Text(
-                                  _quickTemplateLabel(l10n, template.id),
-                                ),
-                                backgroundColor: tokens.bgInset.withValues(
-                                  alpha: 0.94,
-                                ),
-                                side: BorderSide(
-                                  color: tokens.surfaceHighlight,
-                                ),
-                                onPressed: () => _openQuickTemplate(template),
-                              ),
-                            ),
-                          )
-                          .toList(growable: false),
-                    ),
-                    if (_showHistory || showSuggestionsPanel)
-                      Divider(height: 1, color: tokens.surfaceHighlight),
-                  ],
-                  if (showSuggestionsPanel) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        l10n.globalSearchLiveSuggestionsTitle,
-                        style: headerStyle,
-                      ),
-                    ),
-                    ..._suggestions.map(
-                      (r) => ListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        leading: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: tokens.primarySoft.withValues(alpha: 0.9),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: tokens.surfaceHighlight),
-                          ),
-                          child: Icon(
-                            switch (r.resultType) {
-                              ResultType.project => Icons.folder_outlined,
-                              ResultType.script => Icons.article_outlined,
-                              ResultType.asset => Icons.widgets_outlined,
-                              ResultType.novel => Icons.menu_book_outlined,
-                              ResultType.novelEvent =>
-                                Icons.event_note_outlined,
-                            },
-                            size: 17,
-                            color: tokens.accent,
-                          ),
-                        ),
-                        title: Text(
-                          r.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 14,
-                            color: tokens.textPrimary,
-                          ),
-                        ),
-                        subtitle: Text(
-                          switch (r.resultType) {
-                            ResultType.project => l10n.globalSearchTypeProject,
-                            ResultType.script => l10n.globalSearchTypeScript,
-                            ResultType.asset => l10n.globalSearchTypeAsset,
-                            ResultType.novel => l10n.globalSearchTypeNovel,
-                            ResultType.novelEvent =>
-                              l10n.globalSearchTypeNovelEvent,
-                          },
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: tokens.textSecondary,
-                          ),
-                        ),
-                        onTap: _performSearch,
-                      ),
-                    ),
-                    if (_showHistory)
-                      Divider(height: 1, color: tokens.surfaceHighlight),
-                  ],
-                  if (_loadingHistory)
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Center(
-                        child: SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
-                  if (_showHistory) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        l10n.globalSearchRecentSearchTitle,
-                        style: headerStyle,
-                      ),
-                    ),
-                    ..._history.map(
-                      (entry) => ListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        leading: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: tokens.bgInset.withValues(alpha: 0.94),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: tokens.surfaceHighlight),
-                          ),
-                          child: Icon(
-                            Icons.history,
-                            size: 17,
-                            color: tokens.textSecondary,
-                          ),
-                        ),
-                        title: Text(
-                          entry.query,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 14,
-                            color: tokens.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          l10n.globalSearchFoundResults(entry.resultCount),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: tokens.textSecondary,
-                          ),
-                        ),
-                        onTap: () => _selectHistoryEntry(entry.query),
-                      ),
-                    ),
-                    ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      leading: Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: theme.colorScheme.error,
-                      ),
-                      title: Text(
-                        l10n.globalSearchClearHistory,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 14,
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                      onTap: _clearHistory,
-                    ),
-                  ],
-                  if (!showSuggestionsPanel &&
-                      !_showHistory &&
-                      !_loadingHistory &&
-                      !_loadingSuggestions)
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        queryLen >= _minQueryLength
-                            ? l10n.globalSearchNoPreviewHint
-                            : l10n.globalSearchMinCharsHint,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                ],
-              ),
+    final textStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 13,
+      color: tokens.textPrimary.withValues(alpha: 0.92),
+      fontWeight: FontWeight.w400,
+    );
+    final query = _controller.text;
+    final label = query.isEmpty ? l10n.globalSearchInputHint : query;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: tokens.primary.withValues(alpha: 0.55)),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.search_rounded,
+            size: 16,
+            color: tokens.textSecondary.withValues(alpha: 0.88),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: query.isEmpty ? hintStyle : textStyle,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaletteRow({
+    required ThemeData theme,
+    required StudioTokens tokens,
+    required String title,
+    String? trailing,
+    IconData? icon,
+    bool selected = false,
+    VoidCallback? onTap,
+  }) {
+    final rowStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 13,
+      color: tokens.textPrimary.withValues(alpha: 0.92),
+    );
+    final trailingStyle = theme.textTheme.labelSmall?.copyWith(
+      fontSize: 11,
+      color: tokens.textMuted.withValues(alpha: 0.85),
+    );
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 28,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          color: selected
+              ? tokens.bgInset.withValues(alpha: 0.95)
+              : Colors.transparent,
+          child: Row(
+            children: <Widget>[
+              if (icon != null) ...<Widget>[
+                Icon(icon, size: 16, color: tokens.textSecondary),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: rowStyle,
+                ),
+              ),
+              if (trailing != null) ...<Widget>[
+                const SizedBox(width: 8),
+                Text(trailing, style: trailingStyle),
+              ],
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPaletteDivider(StudioTokens tokens) {
+    return Divider(height: 1, thickness: 1, color: tokens.surfaceHighlight);
+  }
+
+  List<Widget> _buildPaletteOverlayList({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required ThemeData theme,
+    required StudioTokens tokens,
+    required int queryLen,
+    required bool showSuggestionsPanel,
+    required bool showPinnedPanel,
+    required bool showRecentViewsPanel,
+    required bool showTemplatePanel,
+  }) {
+    var row = 0;
+    final items = <Widget>[];
+
+    void addRow(
+      Widget Function(bool selected) build, {
+      bool dividerBefore = false,
+    }) {
+      if (dividerBefore && items.isNotEmpty) {
+        items.add(_buildPaletteDivider(tokens));
+      }
+      items.add(build(row == _paletteSelectedIndex));
+      row++;
+    }
+
+    if (_loadingSuggestions && queryLen >= _minQueryLength) {
+      items.add(
+        const Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+      );
+      return items;
+    }
+
+    if (showTemplatePanel) {
+      for (final template in _quickTemplates) {
+        addRow(
+          (selected) => _buildPaletteRow(
+            theme: theme,
+            tokens: tokens,
+            title: _quickTemplateLabel(l10n, template.id),
+            icon: Icons.search,
+            selected: selected,
+            onTap: () => _openQuickTemplate(template),
+          ),
+        );
+      }
+    }
+
+    if (showPinnedPanel) {
+      addRow(
+        (selected) => _buildPaletteRow(
+          theme: theme,
+          tokens: tokens,
+          title: l10n.globalSearchPinnedViewsTitle,
+          icon: Icons.push_pin_outlined,
+          selected: selected,
+          onTap: () {},
+        ),
+        dividerBefore: items.isNotEmpty,
+      );
+      for (final view in _pinnedViews) {
+        addRow(
+          (selected) => _buildPaletteRow(
+            theme: theme,
+            tokens: tokens,
+            title: view.title,
+            trailing: view.workspaceName,
+            icon: Icons.bookmark_outline,
+            selected: selected,
+            onTap: () => _openPinnedView(view),
+          ),
+        );
+      }
+    }
+
+    if (showRecentViewsPanel) {
+      addRow(
+        (selected) => _buildPaletteRow(
+          theme: theme,
+          tokens: tokens,
+          title: l10n.globalSearchRecentViewsTitle,
+          icon: Icons.schedule,
+          selected: selected,
+          onTap: () {},
+        ),
+        dividerBefore: items.isNotEmpty,
+      );
+      for (final view in _recentViews) {
+        addRow(
+          (selected) => _buildPaletteRow(
+            theme: theme,
+            tokens: tokens,
+            title: view.title,
+            trailing: l10n.globalSearchSavedUsed(view.useCount),
+            icon: Icons.history,
+            selected: selected,
+            onTap: () => _openPinnedView(view),
+          ),
+        );
+      }
+    }
+
+    if (showSuggestionsPanel) {
+      addRow(
+        (selected) => _buildPaletteRow(
+          theme: theme,
+          tokens: tokens,
+          title: l10n.globalSearchLiveSuggestionsTitle,
+          icon: Icons.manage_search,
+          selected: selected,
+          onTap: () {},
+        ),
+        dividerBefore: items.isNotEmpty,
+      );
+      for (final r in _suggestions) {
+        addRow(
+          (selected) => _buildPaletteRow(
+            theme: theme,
+            tokens: tokens,
+            title: r.title,
+            trailing: switch (r.resultType) {
+              ResultType.project => l10n.globalSearchTypeProject,
+              ResultType.script => l10n.globalSearchTypeScript,
+              ResultType.asset => l10n.globalSearchTypeAsset,
+              ResultType.novel => l10n.globalSearchTypeNovel,
+              ResultType.novelEvent => l10n.globalSearchTypeNovelEvent,
+            },
+            icon: switch (r.resultType) {
+              ResultType.project => Icons.folder_outlined,
+              ResultType.script => Icons.article_outlined,
+              ResultType.asset => Icons.widgets_outlined,
+              ResultType.novel => Icons.menu_book_outlined,
+              ResultType.novelEvent => Icons.event_note_outlined,
+            },
+            selected: selected,
+            onTap: _performSearch,
+          ),
+        );
+      }
+    }
+
+    if (_loadingHistory) {
+      items.add(
+        const Padding(
+          padding: EdgeInsets.all(12),
+          child: Center(
+            child: SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+      );
+      return items;
+    }
+
+    if (_showHistory && queryLen < _minQueryLength) {
+      addRow(
+        (selected) => _buildPaletteRow(
+          theme: theme,
+          tokens: tokens,
+          title: l10n.globalSearchRecentSearchTitle,
+          icon: Icons.history,
+          selected: selected,
+          onTap: () {},
+        ),
+        dividerBefore: items.isNotEmpty,
+      );
+      for (final entry in _history) {
+        addRow(
+          (selected) => _buildPaletteRow(
+            theme: theme,
+            tokens: tokens,
+            title: entry.query,
+            trailing: l10n.globalSearchFoundResults(entry.resultCount),
+            icon: Icons.history,
+            selected: selected,
+            onTap: () => _selectHistoryEntry(entry.query),
+          ),
+        );
+      }
+      addRow(
+        (selected) => _buildPaletteRow(
+          theme: theme,
+          tokens: tokens,
+          title: l10n.globalSearchClearHistory,
+          icon: Icons.delete_outline,
+          selected: selected,
+          onTap: _clearHistory,
+        ),
+      );
+    }
+
+    if (items.isEmpty) {
+      items.add(
+        Padding(
+          padding: const EdgeInsets.all(14),
+          child: Text(
+            queryLen >= _minQueryLength
+                ? l10n.globalSearchNoPreviewHint
+                : l10n.globalSearchMinCharsHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: tokens.textMuted,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  /// VS Code command-palette style overlay (search header + flat result list).
+  void _showOverlay() {
+    _removeOverlay();
+    _paletteSelectedIndex = 0;
+
+    _overlayEntry = OverlayEntry(
+      builder: (overlayContext) {
+        final l10n = resolveAppLocalizationsForErrors(context);
+        final theme = Theme.of(context);
+        final tokens = StudioTokens.of(context);
+        final renderBox = context.findRenderObject() as RenderBox?;
+        final fieldSize = renderBox?.size ?? const Size(400, 40);
+        final queryLen = _controller.text.trim().length;
+        final showSuggestionsPanel =
+            queryLen >= _minQueryLength &&
+            (_loadingSuggestions || _suggestions.isNotEmpty);
+        final showPinnedPanel =
+            queryLen < _minQueryLength && _pinnedViews.isNotEmpty;
+        final showRecentViewsPanel =
+            queryLen < _minQueryLength && _recentViews.isNotEmpty;
+        final showTemplatePanel = queryLen < _minQueryLength;
+        final panelWidth = _overlayPanelWidth(context, fieldSize);
+        final listChildren = _buildPaletteOverlayList(
+          context: context,
+          l10n: l10n,
+          theme: theme,
+          tokens: tokens,
+          queryLen: queryLen,
+          showSuggestionsPanel: showSuggestionsPanel,
+          showPinnedPanel: showPinnedPanel,
+          showRecentViewsPanel: showRecentViewsPanel,
+          showTemplatePanel: showTemplatePanel,
+        );
+
+        return Positioned(
+          width: panelWidth,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(
+              0,
+              fieldSize.height + (widget.titleBarDense ? 4 : 8),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 440),
+                decoration: BoxDecoration(
+                  color: tokens.bgElevated.withValues(alpha: 0.98),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: tokens.primary.withValues(alpha: 0.38),
+                  ),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.38),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (!widget.titleBarDense)
+                      _buildPaletteQueryHeader(l10n, theme, tokens),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: widget.titleBarDense ? 420 : 392,
+                      ),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          4,
+                          widget.titleBarDense ? 6 : 4,
+                          4,
+                          4,
+                        ),
+                        shrinkWrap: true,
+                        children: listChildren,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
 
     Overlay.of(context).insert(_overlayEntry!);
@@ -1222,53 +1356,243 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     return KeyEventResult.ignored;
   }
 
+  static const InputBorder _titleBarSearchNoBorder = InputBorder.none;
+
+  InputDecoration _titleBarSearchDecoration({
+    required String hintText,
+    required TextStyle hintStyle,
+    EdgeInsets contentPadding = const EdgeInsets.fromLTRB(0, 5, 0, 10),
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: hintStyle,
+      isDense: true,
+      filled: false,
+      border: _titleBarSearchNoBorder,
+      enabledBorder: _titleBarSearchNoBorder,
+      focusedBorder: _titleBarSearchNoBorder,
+      disabledBorder: _titleBarSearchNoBorder,
+      errorBorder: _titleBarSearchNoBorder,
+      focusedErrorBorder: _titleBarSearchNoBorder,
+      contentPadding: contentPadding,
+      alignLabelWithHint: true,
+    );
+  }
+
+  void _requestTitleBarSearchFocus() {
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  /// macOS title-bar search — VS Code layout: one rounded box; icon + hint centered;
+  /// the full box is tappable (not only the narrow TextField).
+  Widget _buildTitleBarDenseSearch(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    StudioTokens tokens,
+  ) {
+    const barHeight = 30.0;
+    const fontSize = 13.0;
+    const fieldRadius = 8.0;
+    const iconGap = 8.0;
+    final hintColor = tokens.textSecondary.withValues(alpha: 0.86);
+    final textColor = tokens.textPrimary.withValues(alpha: 0.92);
+    final iconColor = tokens.textSecondary.withValues(alpha: 0.88);
+    final fieldBorder = _focusNode.hasFocus
+        ? tokens.accent.withValues(alpha: 0.55)
+        : tokens.surfaceHighlight.withValues(alpha: 0.4);
+    const fieldContentPadding = EdgeInsets.fromLTRB(0, 8, 0, 7);
+    final hintStyle = TextStyle(
+      fontSize: fontSize,
+      color: hintColor,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    );
+    final textStyle =
+        (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+      fontSize: fontSize,
+      color: textColor,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    );
+
+    Widget searchGlyph({required Color color}) {
+      return Icon(
+        Icons.search_rounded,
+        size: 16,
+        fill: 0.22,
+        weight: 500,
+        color: color,
+      );
+    }
+
+    Widget trailingSlot() {
+      if (_loadingSuggestions) {
+        return SizedBox(
+          width: 15,
+          height: 15,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: tokens.accent,
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.text,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _requestTitleBarSearchFocus,
+        child: SizedBox(
+          height: barHeight,
+          width: double.infinity,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: tokens.bgInset.withValues(alpha: 0.96),
+              borderRadius: BorderRadius.circular(fieldRadius),
+              border: Border.all(color: fieldBorder),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const trailingSlotWidth = iconGap + 15.0;
+                  final glyphColor = _focusNode.hasFocus
+                      ? tokens.accent.withValues(alpha: 0.92)
+                      : iconColor;
+                  final maxInputWidth = math.max(
+                    80.0,
+                    constraints.maxWidth - 16 - iconGap - trailingSlotWidth,
+                  );
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          searchGlyph(color: glyphColor),
+                          const SizedBox(width: iconGap),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: maxInputWidth,
+                            ),
+                            child: IntrinsicWidth(
+                              child: TextField(
+                                controller: _controller,
+                                focusNode: _focusNode,
+                                maxLines: 1,
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                style: textStyle,
+                                cursorColor: tokens.accent,
+                                decoration: _titleBarSearchDecoration(
+                                  hintText: l10n.globalSearchInputHint,
+                                  hintStyle: hintStyle,
+                                  contentPadding: fieldContentPadding,
+                                ),
+                                onSubmitted: (_) {
+                                  if (_canSearch) {
+                                    _performSearch();
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(child: trailingSlot()),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final compact = widget.compact;
-    final barHeight = compact ? 38.0 : 40.0;
-    final barRadius = compact ? 18.0 : 20.0;
-    final iconSize = compact ? 18.0 : 20.0;
-    final leadingPadding = compact ? 10.0 : 12.0;
-    final iconGap = compact ? 6.0 : 8.0;
-    final textPadding = compact ? 8.0 : 10.0;
-    final fontSize = compact ? 13.0 : 14.0;
+    final titleBarDense = widget.titleBarDense;
+    if (titleBarDense) {
+      return Focus(
+        onKeyEvent: _handleKeyEvent,
+        child: CompositedTransformTarget(
+          link: _layerLink,
+          child: _buildTitleBarDenseSearch(context, l10n, theme, tokens),
+        ),
+      );
+    }
+    final compact = widget.compact || titleBarDense;
+    final barHeight = titleBarDense ? 30.0 : (compact ? 38.0 : 40.0);
+    final barRadius = titleBarDense ? 8.0 : (compact ? 18.0 : 20.0);
+    final iconSize = titleBarDense ? 16.0 : (compact ? 18.0 : 20.0);
+    final leadingPadding = titleBarDense ? 8.0 : (compact ? 10.0 : 12.0);
+    final iconGap = titleBarDense ? 4.0 : (compact ? 6.0 : 8.0);
+    final textPadding = titleBarDense ? 6.0 : (compact ? 8.0 : 10.0);
+    final fontSize = titleBarDense ? 12.0 : (compact ? 13.0 : 14.0);
+    final mutedFieldColor = tokens.textMuted.withValues(
+      alpha: titleBarDense ? 0.52 : 1.0,
+    );
+    final mutedHintColor = tokens.textMuted.withValues(
+      alpha: titleBarDense ? 0.42 : 1.0,
+    );
+    final mutedIconColor = tokens.textMuted.withValues(
+      alpha: titleBarDense ? 0.48 : 1.0,
+    );
 
     return Focus(
       onKeyEvent: _handleKeyEvent,
       child: CompositedTransformTarget(
         link: _layerLink,
         child: Container(
-          width: 400,
+          width: titleBarDense ? null : 400,
           height: barHeight,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                tokens.bgSurface.withValues(alpha: 0.96),
-                tokens.bgInset.withValues(alpha: 0.98),
-              ],
-            ),
+            color: titleBarDense
+                ? tokens.bgInset.withValues(alpha: 0.92)
+                : null,
+            gradient: titleBarDense
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      tokens.bgSurface.withValues(alpha: 0.96),
+                      tokens.bgInset.withValues(alpha: 0.98),
+                    ],
+                  ),
             borderRadius: BorderRadius.circular(barRadius),
             border: Border.all(
               color: _focusNode.hasFocus
                   ? tokens.accent
                   : tokens.surfaceHighlight,
-              width: _focusNode.hasFocus ? 1.5 : 1,
+              width: _focusNode.hasFocus ? (titleBarDense ? 1.0 : 1.5) : 1,
             ),
-            boxShadow: _focusNode.hasFocus
-                ? <BoxShadow>[
+            boxShadow: titleBarDense || !_focusNode.hasFocus
+                ? const <BoxShadow>[]
+                : <BoxShadow>[
                     BoxShadow(
                       color: tokens.primary.withValues(alpha: 0.14),
                       blurRadius: 8,
                       spreadRadius: -2,
                       offset: const Offset(0, 2),
                     ),
-                  ]
-                : const <BoxShadow>[],
+                  ],
           ),
           child: Row(
             children: [
@@ -1276,11 +1600,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               Padding(
                 padding: EdgeInsets.only(left: leadingPadding, right: iconGap),
                 child: Icon(
-                  Icons.search,
+                  Icons.search_rounded,
                   size: iconSize,
+                  fill: titleBarDense ? 0.2 : 0.0,
+                  weight: titleBarDense ? 500 : 400,
                   color: _focusNode.hasFocus
-                      ? tokens.accent
-                      : tokens.textMuted,
+                      ? tokens.accent.withValues(alpha: titleBarDense ? 0.75 : 1.0)
+                      : (titleBarDense ? mutedIconColor : tokens.textMuted),
                 ),
               ),
 
@@ -1293,7 +1619,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     hintText: l10n.globalSearchInputHint,
                     hintStyle: TextStyle(
                       fontSize: fontSize,
-                      color: tokens.textMuted,
+                      color: titleBarDense ? mutedHintColor : tokens.textMuted,
+                      fontWeight: titleBarDense ? FontWeight.w400 : null,
                     ),
                     border: InputBorder.none,
                     isDense: true,
@@ -1301,6 +1628,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   ),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: fontSize,
+                    color: titleBarDense
+                        ? (_controller.text.isEmpty
+                              ? mutedHintColor
+                              : mutedFieldColor)
+                        : null,
+                    fontWeight: titleBarDense ? FontWeight.w400 : null,
                   ),
                   onSubmitted: (_) {
                     if (_canSearch) {
@@ -1330,21 +1663,30 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               else
                 IconButton(
                   icon: Icon(
-                    Icons.arrow_outward,
+                    Icons.arrow_outward_rounded,
                     size: iconSize,
+                    fill: titleBarDense ? 0.15 : 0.0,
                     color: _canSearch
                         ? Colors.white
-                        : tokens.textMuted.withValues(alpha: 0.35),
+                        : (titleBarDense
+                              ? mutedIconColor
+                              : tokens.textMuted.withValues(alpha: 0.35)),
                   ),
                   onPressed: _canSearch ? _performSearch : null,
                   style: IconButton.styleFrom(
-                    backgroundColor:
-                        _canSearch ? tokens.primary : Colors.transparent,
+                    backgroundColor: _canSearch
+                        ? tokens.primary.withValues(
+                            alpha: titleBarDense ? 0.82 : 1.0,
+                          )
+                        : Colors.transparent,
                     foregroundColor:
                         _canSearch ? Colors.white : tokens.textMuted,
                   ),
-                  padding: EdgeInsets.all(compact ? 6 : 8),
-                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.all(titleBarDense ? 5 : (compact ? 6 : 8)),
+                  constraints: BoxConstraints(
+                    minWidth: titleBarDense ? 26 : 0,
+                    minHeight: titleBarDense ? 26 : 0,
+                  ),
                   tooltip: _canSearch
                       ? l10n.globalSearchActionSearch
                       : l10n.globalSearchEnterAtLeastChars(2),

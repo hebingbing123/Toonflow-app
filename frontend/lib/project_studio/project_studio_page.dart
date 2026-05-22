@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/layout_breakpoints.dart';
+import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -9,15 +11,18 @@ import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'creator_journey_menu.dart';
+import 'creator_journey_compact_bar.dart';
 import 'creator_journey_strip.dart';
 import 'creator_journey_telemetry.dart';
-import 'project_studio_cockpit_panel.dart';
+import 'project_studio_focus_scope.dart';
+import 'project_studio_generic_step_setup.dart';
 import 'project_studio_script_step_setup.dart';
 import 'project_studio_host.dart';
 import 'project_studio_model_routing_scope.dart';
 import 'studio_step_model_routing_bar.dart';
 import 'studio_agent_quick_bar.dart';
 import 'studio_step.dart';
+import 'project_studio_navigation.dart';
 import 'studio_step_prefs.dart';
 import 'studio_step_progress_ring.dart';
 
@@ -34,8 +39,11 @@ class ProjectStudioPage extends StatefulWidget {
 class _ProjectStudioPageState extends State<ProjectStudioPage> {
   late StudioStep _step = widget.host.initialStep;
   final Set<StudioStep> _visited = <StudioStep>{};
+  final ProjectStudioFocusState _focusState = ProjectStudioFocusState();
   ProjectModelRoutingResponse? _modelRouting;
   StudioStep? _lastDispatchedHostStep;
+
+  bool get _studioFocusMode => widget.host.studioFocusMode;
 
   /// Avoid duplicate [ProjectStudioHost.onStepChanged] when routes rebuild Studio
   /// (e.g. prefs restore fires again after `go` swaps the nested route widget).
@@ -59,9 +67,38 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _normalizeLegacyQualityRoute();
+      _syncStepFromRouteIfNeeded();
       _restoreLastStep();
     });
     _loadModelRouting();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProjectStudioPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final routeStep = _routeRequestedStepOrNull();
+    final incoming = routeStep ?? widget.host.initialStep;
+    if (incoming == _step) {
+      return;
+    }
+    setState(() {
+      _step = incoming;
+      _markStepVisited(incoming);
+    });
+    _dispatchHostStepChanged(incoming);
+  }
+
+  /// Keeps [_step] aligned with the browser URL when the nested studio route changes.
+  void _syncStepFromRouteIfNeeded() {
+    final routeStep = _routeRequestedStepOrNull();
+    if (routeStep == null || routeStep == _step || !mounted) {
+      return;
+    }
+    setState(() {
+      _step = routeStep;
+      _markStepVisited(routeStep);
+    });
+    _dispatchHostStepChanged(routeStep);
   }
 
   /// Canonical URL is `/deliver?tab=quality`; keep [StudioStep.quality] for body routing.
@@ -98,6 +135,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
   Future<void> _restoreLastStep() async {
     final routeStep = _routeRequestedStepOrNull();
     if (routeStep != null) {
+      // URL is source of truth when [stepSlug] is present (already synced in init).
       return;
     }
     final last = await StudioStepPrefs.loadLastStep(
@@ -139,14 +177,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
   }
 
   Uri _uriForStudioStep(StudioStep step) {
-    final base = '/projects/${widget.host.projectNumericId}';
-    if (step == StudioStep.quality) {
-      return Uri(
-        path: '$base/deliver',
-        queryParameters: const <String, String>{'tab': 'quality'},
-      );
-    }
-    return Uri(path: '$base/${step.slug}');
+    return projectStudioStepUri(widget.host.projectNumericId, step);
   }
 
   void _syncRouteToStep(StudioStep step) {
@@ -227,20 +258,34 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       widget.host.onOpenTasks!();
       return;
     }
+    final targetStep = intent.targetStep;
+    if (targetStep != null && targetStep != _step) {
+      _selectStep(targetStep, telemetrySource: 'deep_link');
+    }
     final assetKind = intent.assetEditorKind;
     final onOpenAssetEditor = widget.host.onOpenAssetEditor;
     if (assetKind != null && onOpenAssetEditor != null) {
-      onOpenAssetEditor(
-        ProjectStudioAssetEditorTarget(
-          kind: assetKind,
-          notice: intent.notice?.trim().isEmpty == true ? null : intent.notice,
-        ),
-      );
-      return;
-    }
-    final targetStep = intent.targetStep;
-    if (targetStep != null && targetStep != _step) {
-      _selectStep(targetStep);
+      if (_step != StudioStep.assets) {
+        _selectStep(StudioStep.assets, telemetrySource: 'deep_link');
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        onOpenAssetEditor(
+          ProjectStudioAssetEditorTarget(
+            kind: assetKind,
+            notice: intent.notice?.trim().isEmpty == true ? null : intent.notice,
+          ),
+        );
+      });
+      if (intent.agentKind == null) {
+        final notice = intent.notice?.trim();
+        if (notice != null && notice.isNotEmpty && context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(notice)));
+        }
+        return;
+      }
     }
     if (intent.agentKind != null) {
       widget.host.onRunHarnessAgent(intent.agentKind!);
@@ -408,15 +453,136 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     };
   }
 
+  ProjectStudioScriptStepSetupPanel? _buildScriptStepSetupPanel({
+    required Set<StudioAgentAction> visibleAgentActions,
+    bool sheetPresentation = false,
+    bool includeModelRouting = false,
+  }) {
+    final token = widget.host.accessToken;
+    final home = widget.host.home;
+    if (token == null || token.isEmpty || home == null) {
+      return null;
+    }
+    return ProjectStudioScriptStepSetupPanel(
+      accessToken: token,
+      projectUuid: widget.host.projectUuid,
+      home: home,
+      visibleAgentActions: visibleAgentActions,
+      sheetPresentation: sheetPresentation,
+      includeModelRouting: includeModelRouting,
+      onOpenModelRoutingSettings: _openScriptModelRoutingSettings,
+      onRoutingUpdated: (routing) {
+        setState(() => _modelRouting = routing);
+      },
+      onOpenProjectSettings: widget.host.onOpenProjectSettings,
+      onOpenGlobalModelVendorSettings: widget.host.onOpenGlobalModelVendorSettings,
+      onRunHarnessAgent: widget.host.onRunHarnessAgent,
+      onExecuteHomeAction: _handleProjectHomeAction,
+      metricActionBuilder: (metric) =>
+          _actionForMetric(metric, AppLocalizations.of(context)!),
+      onExecuteStarter: _handleStarterTemplate,
+    );
+  }
+
+  void _openScriptModelRoutingSettings() {
+    final openVendors = widget.host.onOpenGlobalModelVendorSettings;
+    if (openVendors != null) {
+      openVendors();
+      return;
+    }
+    widget.host.onOpenProjectSettings?.call();
+  }
+
+  Future<void> _openStepSetupSheet(
+    Set<StudioAgentAction> visibleAgentActions,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_step == StudioStep.script) {
+      final panel = _buildScriptStepSetupPanel(
+        visibleAgentActions: visibleAgentActions,
+        sheetPresentation: true,
+        includeModelRouting: false,
+      );
+      if (panel != null) {
+        await showProjectStudioScriptStepSetupSheet(context, panel: panel);
+        return;
+      }
+      _openScriptModelRoutingSettings();
+      return;
+    }
+
+    final home = widget.host.home;
+    if (home == null) {
+      _openScriptModelRoutingSettings();
+      return;
+    }
+
+    await showProjectStudioStepSetupSheet(
+      context,
+      title: l10n.studioStepPrepSheetTitle(_stepFocusLabel(l10n)),
+      subtitle: l10n.studioStepPrepSheetSubtitle,
+      body: ProjectStudioGenericStepSetupPanel(
+        step: _step,
+        home: home,
+        visibleAgentActions: visibleAgentActions,
+        onRunHarnessAgent: widget.host.onRunHarnessAgent,
+        onExecuteHomeAction: _handleProjectHomeAction,
+        metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
+        onExecuteStarter: _handleStarterTemplate,
+        onOpenModelRoutingSettings: _openScriptModelRoutingSettings,
+      ),
+    );
+  }
+
+  String _stepFocusLabel(AppLocalizations l10n, {StudioStep? step}) {
+    return projectStudioStepShortLabel(l10n, step ?? _step);
+  }
+
+  String _studioFocusSubtitle(AppLocalizations l10n) {
+    switch (_step) {
+      case StudioStep.script:
+        final novels = _focusState.scriptNovelCount;
+        final scripts = _focusState.scriptScriptCount;
+        if (novels != null && scripts != null) {
+          return l10n.studioScriptFocusModeSubtitleWithCounts(novels, scripts);
+        }
+        return l10n.studioScriptFocusModeSubtitle;
+      case StudioStep.art:
+        return l10n.studioArtFocusModeSubtitle;
+      case StudioStep.assets:
+        return l10n.studioAssetsFocusModeSubtitle;
+      case StudioStep.storyboard:
+        return l10n.studioStoryboardFocusModeSubtitle;
+      case StudioStep.video:
+        return l10n.studioVideoFocusModeSubtitle;
+      case StudioStep.deliver:
+      case StudioStep.quality:
+        return l10n.studioDeliverFocusModeSubtitle;
+    }
+  }
+
+  void _handleCreatorJourneyNext({required String telemetrySource}) {
+    if (creatorJourneyCompactBarNextOpensReviewPack(_step)) {
+      _openReviewPack(source: telemetrySource);
+      return;
+    }
+    final nextStep = creatorJourneyCompactBarNextStep(_step);
+    if (nextStep != null) {
+      _selectStep(nextStep, telemetrySource: telemetrySource);
+    }
+  }
+
   Widget _buildCreatorNextFooter(AppLocalizations l10n) {
-    final nextStep = _step.next;
+    final hasNext =
+        creatorJourneyCompactBarNextStep(_step) != null ||
+        creatorJourneyCompactBarNextOpensReviewPack(_step);
     final tokens = StudioTokens.of(context);
     final button = StudioPrimaryButton(
       icon: Icons.arrow_forward_rounded,
       label: l10n.studioCreatorJourneyNext,
-      onPressed: nextStep == null
-          ? null
-          : () => _selectStep(nextStep, telemetrySource: 'next_cta'),
+      onPressed: hasNext
+          ? () => _handleCreatorJourneyNext(telemetrySource: 'next_cta')
+          : null,
     );
     return Material(
       elevation: 4,
@@ -426,7 +592,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-          child: nextStep != null
+          child: hasNext
               ? button
               : Tooltip(
                   message: l10n.studioCreatorJourneyNextDoneHint,
@@ -447,38 +613,22 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         l10n.projectsUnnamedProject(widget.host.projectNumericId);
     final storyboardReadiness = widget.host.readiness;
     final topChrome = <Widget>[
-      StudioPaneHeader(
-        title: title,
-        subtitle: l10n.studioProjectStudioSubtitle,
-        onBack: widget.host.onExit,
-        titleStyle: studioProjectTitleStyle(context),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            StudioStepProgressRing(completedSteps: widget.host.completedSteps),
-            if (widget.host.runningJobCount > 0)
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: TextButton.icon(
-                  onPressed: widget.host.onOpenTasks,
-                  icon: const Icon(Icons.pending_actions_outlined, size: 18),
-                  label: Text('${widget.host.runningJobCount}'),
-                ),
-              ),
-            const SizedBox(width: 4),
-            IconButton(
-              tooltip: l10n.studioAgentDrawerTitle,
-              onPressed: widget.host.onOpenAgentDrawer,
-              icon: const Icon(Icons.smart_toy_outlined),
+      ListenableBuilder(
+        listenable: _focusState,
+        builder: (context, _) {
+          return StudioPaneHeader(
+            title: title,
+            subtitle: _studioFocusMode
+                ? _studioFocusSubtitle(l10n)
+                : l10n.studioProjectStudioSubtitle,
+            onBack: widget.host.onExit,
+            titleStyle: studioProjectTitleStyle(context),
+            trailing: _ProjectStudioHeaderTrailing(
+              l10n: l10n,
+              host: widget.host,
             ),
-            TextButton(
-              onPressed: () => context.push(
-                '/projects/${widget.host.projectNumericId}/console/1',
-              ),
-              child: Text(l10n.studioOpenEpisodeConsole),
-            ),
-          ],
-        ),
+          );
+        },
       ),
       if (widget.host.conflictMessage != null)
         Padding(
@@ -557,135 +707,67 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         ),
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            CreatorJourneyStrip(
-              currentStep: _step,
-              failedJobCount: widget.host.failedJobCount,
-              onSelectMilestone: (StudioStep step) =>
-                  _selectStep(step, telemetrySource: 'milestone'),
-              onOpenReviewPackMilestone: () =>
-                  _openReviewPack(source: 'milestone'),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: PopupMenuButton<CreatorWorkspaceMenuTarget>(
-                tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
-                itemBuilder: (BuildContext context) =>
-                    buildCreatorWorkspaceMenuEntries(l10n),
-                onSelected: _handleWorkspaceMenuSelection,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Icon(
-                        Icons.tune_rounded,
-                        size: 18,
-                        color: tokens.textSecondary.withValues(alpha: 0.85),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.studioCreatorJourneyMoreSteps,
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(
-                              color: tokens.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ],
+        child: _studioFocusMode
+            ? CreatorJourneyCompactBar(
+                currentStep: _step,
+                failedJobCount: widget.host.failedJobCount,
+                onSelectStep: (StudioStep step) =>
+                    _selectStep(step, telemetrySource: 'compact_bar'),
+                onBackToProjects: widget.host.onExit,
+                onWorkspaceMenuSelected: _handleWorkspaceMenuSelection,
+                onOpenReviewPackMilestone: () =>
+                    _openReviewPack(source: 'milestone'),
+                onOpenStepSetup: widget.host.accessToken != null &&
+                        widget.host.accessToken!.isNotEmpty
+                    ? () => _openStepSetupSheet(visibleAgentActions)
+                    : null,
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  CreatorJourneyStrip(
+                    currentStep: _step,
+                    failedJobCount: widget.host.failedJobCount,
+                    onSelectMilestone: (StudioStep step) =>
+                        _selectStep(step, telemetrySource: 'milestone'),
+                    onBackToProjects: widget.host.onExit,
+                    onOpenReviewPackMilestone: () =>
+                        _openReviewPack(source: 'milestone'),
                   ),
-                ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: PopupMenuButton<CreatorWorkspaceMenuTarget>(
+                      tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
+                      itemBuilder: (BuildContext context) =>
+                          buildCreatorWorkspaceMenuEntries(l10n),
+                      onSelected: _handleWorkspaceMenuSelection,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(
+                              Icons.tune_rounded,
+                              size: 18,
+                              color: tokens.textSecondary.withValues(alpha: 0.85),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.studioCreatorJourneyMoreSteps,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: tokens.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
-      if (_step == StudioStep.script &&
-          widget.host.accessToken != null &&
-          widget.host.accessToken!.isNotEmpty &&
-          widget.host.home != null)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-          child: ProjectStudioScriptStepSetupPanel(
-            accessToken: widget.host.accessToken!,
-            projectUuid: widget.host.projectUuid,
-            home: widget.host.home!,
-            visibleAgentActions: visibleAgentActions,
-            onRoutingUpdated: (routing) {
-              setState(() => _modelRouting = routing);
-            },
-            onOpenProjectSettings: widget.host.onOpenProjectSettings,
-            onOpenGlobalModelVendorSettings:
-                widget.host.onOpenGlobalModelVendorSettings,
-            onRunHarnessAgent: widget.host.onRunHarnessAgent,
-            onExecuteHomeAction: _handleProjectHomeAction,
-            metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
-            onExecuteStarter: _handleStarterTemplate,
-          ),
-        )
-      else if (_step == StudioStep.script &&
-          widget.host.accessToken != null &&
-          widget.host.accessToken!.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-          child: StudioStepModelRoutingBar(
-            accessToken: widget.host.accessToken!,
-            projectId: widget.host.projectUuid,
-            step: StudioStep.script,
-            onOpenProjectSettings: widget.host.onOpenProjectSettings,
-            onOpenGlobalModelVendorSettings:
-                widget.host.onOpenGlobalModelVendorSettings,
-            onRoutingUpdated: (routing) {
-              setState(() => _modelRouting = routing);
-            },
-          ),
-        )
-      else if (widget.host.accessToken != null &&
-          widget.host.accessToken!.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-          child: StudioStepModelRoutingBar(
-            accessToken: widget.host.accessToken!,
-            projectId: widget.host.projectUuid,
-            step: _step,
-            onOpenProjectSettings: widget.host.onOpenProjectSettings,
-            onOpenGlobalModelVendorSettings:
-                widget.host.onOpenGlobalModelVendorSettings,
-            onRoutingUpdated: (routing) {
-              setState(() => _modelRouting = routing);
-            },
-          ),
-        ),
-      if (_step != StudioStep.script) ...<Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: StudioAgentQuickBar(
-            visibleActions: visibleAgentActions,
-            onRewriteScript: () =>
-                widget.host.onRunHarnessAgent('script_rewriter'),
-            onExtractEntities: () => widget.host.onRunHarnessAgent('extractor'),
-            onBreakStoryboard: () =>
-                widget.host.onRunHarnessAgent('storyboard_breaker'),
-            onAssignVoices: () =>
-                widget.host.onRunHarnessAgent('voice_assigner'),
-            onGridPrompts: () =>
-                widget.host.onRunHarnessAgent('grid_prompt_generator'),
-          ),
-        ),
-        if (widget.host.home != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: ProjectStudioCockpitPanel(
-              home: widget.host.home!,
-              currentStep: _step,
-              onExecuteAction: _handleProjectHomeAction,
-              metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
-              onExecuteStarter: _handleStarterTemplate,
-            ),
-          ),
-      ],
       if (_step == StudioStep.assets && widget.host.assetsOverview != null)
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -711,32 +793,43 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         ),
     ];
 
-    return ProjectStudioModelRoutingScope(
-      routing: _modelRouting,
-      child: LayoutBuilder(
+    return ProjectStudioFocusScope(
+      state: _focusState,
+      child: ProjectStudioModelRoutingScope(
+        routing: _modelRouting,
+        child: LayoutBuilder(
         builder: (context, constraints) {
           final topChromeMaxHeight = constraints.maxHeight.isFinite
               ? constraints.maxHeight * 0.50
               : double.infinity;
+          final topChromeWidget = _studioFocusMode
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: topChrome,
+                )
+              : ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: topChromeMaxHeight),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: topChrome,
+                    ),
+                  ),
+                );
           return Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: topChromeMaxHeight),
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.zero,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: topChrome,
-                      ),
-                    ),
-                  ),
+                  topChromeWidget,
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 72),
+                      padding: EdgeInsets.only(
+                        bottom: _studioFocusMode ? 12 : 72,
+                      ),
                       child: IndexedStack(
                         index: _step.sopStackIndex,
                         children: StudioStep.sopSteps
@@ -760,15 +853,17 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                   ),
                 ],
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: _buildCreatorNextFooter(l10n),
-              ),
+              if (!_studioFocusMode)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildCreatorNextFooter(l10n),
+                ),
             ],
           );
         },
+      ),
       ),
     );
   }
@@ -832,16 +927,19 @@ class _ProjectAssetHubCard extends StatelessWidget {
       onOpenTasks!();
       return;
     }
-    if (assetTarget.isNotEmpty && onOpenAssetEditor != null) {
-      onOpenAssetEditor!(
-        _buildEditorTargetForAssetTarget(l10n, assetTarget, notice: notice),
-      );
-      return;
-    }
     if (targetStepSlug.isNotEmpty && targetStepSlug != 'tasks') {
       onSelectStep(StudioStep.fromSlug(targetStepSlug));
+    } else if (assetTarget.isNotEmpty) {
+      onSelectStep(StudioStep.assets);
     }
     final agentKind = (intent?.agentKind ?? '').trim();
+    if (assetTarget.isNotEmpty && onOpenAssetEditor != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onOpenAssetEditor!(
+          _buildEditorTargetForAssetTarget(l10n, assetTarget, notice: notice),
+        );
+      });
+    }
     if (agentKind.isNotEmpty) {
       onRunHarnessAgent(agentKind);
     }
@@ -939,20 +1037,24 @@ class _ProjectAssetHubCard extends StatelessWidget {
           ),
           if (hub.metrics.isNotEmpty) ...<Widget>[
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: hub.metrics
-                  .map(
-                    (metric) => _AssetsHubMetricCard(
-                      metric: metric,
-                      openLabel: l10n.projectStudioOpen,
-                      onTap: metric.launchIntent == null
-                          ? null
-                          : () => _executeMetric(l10n, metric),
-                    ),
-                  )
-                  .toList(growable: false),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: hub.metrics
+                    .map(
+                      (metric) => Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: _AssetsHubMetricCard(
+                          metric: metric,
+                          onTap: metric.launchIntent == null
+                              ? null
+                              : () => _executeMetric(l10n, metric),
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
             ),
           ],
           if (hub.characterSummaries.isNotEmpty ||
@@ -1416,19 +1518,30 @@ class _AssetHubLine extends StatelessWidget {
 class _AssetsHubMetricCard extends StatelessWidget {
   const _AssetsHubMetricCard({
     required this.metric,
-    required this.openLabel,
     this.onTap,
   });
 
+  static const double _cardWidth = 320;
+
   final AssetsOverviewHubMetric metric;
-  final String openLabel;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
+    final labelStyle = theme.textTheme.labelMedium?.copyWith(
+      color: tokens.textSecondary,
+    );
+    final valueStyle = theme.textTheme.titleLarge?.copyWith(
+      color: tokens.textPrimary,
+      fontWeight: FontWeight.w700,
+    );
+    final detailStyle = theme.textTheme.bodySmall?.copyWith(
+      color: tokens.textSecondary,
+    );
     final card = Container(
+      width: _cardWidth,
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
@@ -1436,51 +1549,106 @@ class _AssetsHubMetricCard extends StatelessWidget {
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(
-            metric.label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: tokens.textSecondary,
-            ),
-          ),
+          StudioEllipsisTooltipText(text: metric.label, style: labelStyle),
           const SizedBox(height: 6),
-          Text(
-            metric.value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: tokens.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          StudioEllipsisTooltipText(text: metric.value, style: valueStyle),
           const SizedBox(height: 6),
-          Text(
-            metric.detail,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: tokens.textSecondary,
-            ),
-          ),
-          if (onTap != null) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.inlineGap),
-            Text(
-              openLabel,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+          StudioEllipsisTooltipText(text: metric.detail, style: detailStyle),
         ],
       ),
     );
-    return SizedBox(
-      width: 248,
-      child: onTap == null
-          ? card
-          : InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: onTap,
-              child: card,
+    if (onTap == null) {
+      return card;
+    }
+    return Semantics(
+      button: true,
+      label: metric.label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: card,
+      ),
+    );
+  }
+}
+
+/// Header actions; shrinks to icons when the pane header row is narrow.
+class _ProjectStudioHeaderTrailing extends StatelessWidget {
+  const _ProjectStudioHeaderTrailing({
+    required this.l10n,
+    required this.host,
+  });
+
+  final AppLocalizations l10n;
+  final ProjectStudioHost host;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            !constraints.maxWidth.isFinite ||
+            constraints.maxWidth < kStudioCompactHeaderMinWidth;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            StudioStepProgressRing(completedSteps: host.completedSteps),
+            if (host.runningJobCount > 0)
+              compact
+                  ? IconButton(
+                      tooltip:
+                          '${l10n.projectStudioOpenTasks} (${host.runningJobCount})',
+                      onPressed: host.onOpenTasks,
+                      icon: Badge(
+                        label: Text('${host.runningJobCount}'),
+                        child: const Icon(Icons.pending_actions_outlined, size: 20),
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: TextButton.icon(
+                        onPressed: host.onOpenTasks,
+                        icon: const Icon(Icons.pending_actions_outlined, size: 18),
+                        label: Text('${host.runningJobCount}'),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    ),
+            IconButton(
+              tooltip: l10n.studioAgentDrawerTitle,
+              onPressed: host.onOpenAgentDrawer,
+              icon: const Icon(Icons.smart_toy_outlined),
+              visualDensity: VisualDensity.compact,
             ),
+            compact
+                ? IconButton(
+                    tooltip: l10n.studioOpenEpisodeConsole,
+                    onPressed: () => context.push(
+                      '/projects/${host.projectNumericId}/console/1',
+                    ),
+                    icon: const Icon(Icons.dashboard_outlined, size: 20),
+                    visualDensity: VisualDensity.compact,
+                  )
+                : TextButton(
+                    onPressed: () => context.push(
+                      '/projects/${host.projectNumericId}/console/1',
+                    ),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Text(
+                      l10n.studioOpenEpisodeConsole,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+          ],
+        );
+      },
     );
   }
 }

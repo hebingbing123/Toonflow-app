@@ -257,7 +257,7 @@ class JobsSectionView extends StatelessWidget {
       StudioPaneHeader(
         title: l10n.jobsTitle,
         subtitle: l10n.jobsSubtitle,
-        showBack: studioPresentation,
+        showBack: false,
         trailing: RiskyOperationConfirmPrefsOverflowMenu(
           tooltip: l10n.jobsPrefsTooltip,
         ),

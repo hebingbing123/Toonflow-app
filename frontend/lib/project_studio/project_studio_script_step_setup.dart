@@ -12,7 +12,7 @@ import 'studio_agent_quick_bar.dart';
 import 'studio_step.dart';
 import 'studio_step_model_routing_bar.dart';
 
-/// Collapsible script-step chrome: model routing, starters, quick actions, cockpit.
+/// Script-step setup: model routing, starters, quick actions, cockpit.
 class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
   const ProjectStudioScriptStepSetupPanel({
     super.key,
@@ -27,7 +27,17 @@ class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
     required this.onExecuteHomeAction,
     required this.metricActionBuilder,
     required this.onExecuteStarter,
+    this.sheetPresentation = false,
+    this.includeModelRouting = true,
+    this.onOpenModelRoutingSettings,
   });
+
+  /// When true, renders only the body (for a full-height bottom sheet).
+  final bool sheetPresentation;
+
+  /// Script focus mode keeps routing off the canvas (use [onOpenModelRoutingSettings]).
+  final bool includeModelRouting;
+  final VoidCallback? onOpenModelRoutingSettings;
 
   final String accessToken;
   final String projectUuid;
@@ -83,19 +93,12 @@ class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-    return StudioWorkbenchSection(
-      title: l10n.studioScriptStepSetupTitle,
-      subtitle: l10n.studioScriptStepSetupSubtitle,
-      initiallyExpanded: false,
-      expandTooltip: l10n.studioCockpitExpand,
-      collapseTooltip: l10n.studioCockpitCollapse,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        if (includeModelRouting) ...<Widget>[
           StudioStepModelRoutingBar(
             accessToken: accessToken,
             projectId: projectUuid,
@@ -105,26 +108,121 @@ class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
             onRoutingUpdated: onRoutingUpdated,
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
-          Text(
-            l10n.studioCreatorStartersTitle,
-            style: studioControlLabelStyle(context),
+        ] else if (onOpenModelRoutingSettings != null) ...<Widget>[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onOpenModelRoutingSettings,
+              icon: const Icon(Icons.hub_outlined, size: 18),
+              label: Text(l10n.studioScriptStepModelRoutingSettingsLink),
+            ),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          Text(
-            l10n.studioCreatorStartersSubtitle,
-            style: studioHintStyle(context),
-          ),
-          const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          CreatorStarterTemplatesStrip(
-            starters: creatorStarterTemplatesForScript(home.cockpit.starterTemplates),
-            onApply: onExecuteStarter,
-          ),
-          if (visibleAgentActions.isNotEmpty) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            _buildQuickBarAndCockpit(context),
-          ],
         ],
-      ),
+        Text(
+          l10n.studioCreatorStartersTitle,
+          style: studioControlLabelStyle(context),
+        ),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
+        Text(
+          l10n.studioCreatorStartersSubtitle,
+          style: studioHintStyle(context),
+        ),
+        const SizedBox(height: StudioLayoutSpacing.inlineGap),
+        CreatorStarterTemplatesStrip(
+          starters: creatorStarterTemplatesForScript(home.cockpit.starterTemplates),
+          onApply: onExecuteStarter,
+        ),
+        if (visibleAgentActions.isNotEmpty) ...<Widget>[
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
+          _buildQuickBarAndCockpit(context),
+        ],
+      ],
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final body = _buildBody(context);
+    if (sheetPresentation) {
+      return body;
+    }
+
+    return StudioWorkbenchSection(
+      title: l10n.studioScriptStepSetupTitle,
+      subtitle: l10n.studioScriptStepSetupSubtitle,
+      initiallyExpanded: false,
+      expandTooltip: l10n.studioCockpitExpand,
+      collapseTooltip: l10n.studioCockpitCollapse,
+      child: body,
+    );
+  }
+}
+
+/// Opens step prep in a tall sheet (script or generic panel).
+Future<void> showProjectStudioStepSetupSheet(
+  BuildContext context, {
+  required String title,
+  required String subtitle,
+  required Widget body,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  final tokens = StudioTokens.of(context);
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.72,
+        minChildSize: 0.4,
+        maxChildSize: 0.92,
+        builder: (context, scrollController) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: tokens.bgSurface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+              children: <Widget>[
+                Text(
+                  title,
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: studioHintStyle(sheetContext),
+                ),
+                const SizedBox(height: StudioLayoutSpacing.stackMedium),
+                body,
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+/// Script step prep sheet.
+Future<void> showProjectStudioScriptStepSetupSheet(
+  BuildContext context, {
+  required ProjectStudioScriptStepSetupPanel panel,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  return showProjectStudioStepSetupSheet(
+    context,
+    title: l10n.studioScriptStepSetupTitle,
+    subtitle: l10n.studioScriptStepSetupSubtitle,
+    body: panel,
+  );
 }

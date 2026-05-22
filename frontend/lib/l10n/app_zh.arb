@@ -753,7 +753,39 @@
     }
   },
   "studioScriptStepSetupTitle": "步骤准备区",
-  "studioScriptStepSetupSubtitle": "模型路由、快速模板与项目进度；默认收起，主工作区优先。",
+  "studioScriptStepSetupSubtitle": "模型路由、快速模板与项目进度；需要时从紧凑栏打开。",
+  "studioScriptFocusModeSubtitle": "剧本专注：小说、剧本与提取",
+  "studioScriptFocusModeSubtitleWithCounts": "剧本专注 · 小说 {novelCount} · 剧本 {scriptCount}",
+  "@studioScriptFocusModeSubtitleWithCounts": {
+    "placeholders": {
+      "novelCount": { "type": "int" },
+      "scriptCount": { "type": "int" }
+    }
+  },
+  "studioArtFocusModeSubtitle": "美术专注：为本项目选择画风与故事风格",
+  "studioAssetsFocusModeSubtitle": "资产专注：角色、道具与参考图",
+  "studioStoryboardFocusModeSubtitle": "分镜专注：镜头与时间线",
+  "studioVideoFocusModeSubtitle": "视频专注：生成与预览",
+  "studioDeliverFocusModeSubtitle": "交付专注：导出、质检与审片",
+  "studioStepPrepSheetTitle": "{step} · 步骤准备",
+  "@studioStepPrepSheetTitle": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
+  "studioStepPrepSheetSubtitle": "模型路由、快捷操作与进度；需要时再打开。",
+  "studioScriptStepOpenAgent": "剧本 Agent",
+  "studioScriptStepCloseAgent": "收起 Agent",
+  "studioScriptStepSetupOpen": "步骤准备",
+  "studioScriptStepModelRoutingSettingsLink": "模型路由与厂商（设置）",
+  "studioCreatorJourneyCompactExpand": "全流程",
+  "studioCreatorJourneyCompactExpandTitle": "六步工作流",
+  "studioCreatorJourneyCompactCurrent": "专注：{step}",
+  "@studioCreatorJourneyCompactCurrent": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
   "studioArtStepOpenSettings": "高级项目设定",
   "studioArtStepEditSubtitle": "为项目选择内置画风包与故事风格包，保存后作用于后续图像与剧本生成。",
   "studioArtStepSaveButton": "保存美术设定",
@@ -857,6 +889,12 @@
   "studioCreatorStarterRhythmDetail": "已有剧本时，优先拆出第一批分镜，跑出可预览的镜头节奏。",
   "studioCreatorStarterRhythmCta": "进入分镜节奏",
   "studioCreatorJourneyNext": "下一步",
+  "studioCreatorJourneyNextSop": "下一步：{step}",
+  "@studioCreatorJourneyNextSop": {
+    "placeholders": {
+      "step": { "type": "String" }
+    }
+  },
   "studioCreatorJourneyNextDoneHint": "已进入成片与评审阶段，请在上方完成合成与预览。",
   "studioCreatorJourneyStatusCompleted": "已完成",
   "studioCreatorJourneyStatusInProgress": "进行中",
@@ -961,6 +999,7 @@
   "studioStoryboardStudioTitle": "分镜工作室",
   "studioStoryboardStudioBody": "完整编辑请用制作工作区；此视图聚焦镜头流。",
   "studioStoryboardShotList": "镜头",
+  "studioStoryboardStudioShotListEmpty": "暂无镜头",
   "studioStoryboardShotLabel": "镜头 {n}",
   "studioStoryboardProperties": "属性",
   "studioStoryboardPropertiesHint": "选中镜头后在此编辑提示词、帧模式与候选。",

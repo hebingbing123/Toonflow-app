@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
+import 'studio_step_model_routing_bar.dart';
 
 /// Maps the internal Studio routing steps onto the five-milestone creator journey.
 int creatorJourneyMilestoneNavIndex(StudioStep step) {
@@ -23,9 +24,85 @@ int creatorJourneyMilestoneNavIndex(StudioStep step) {
   }
 }
 
-/// Landing route when user taps milestone `index` (0–4).
-StudioStep creatorJourneyLandingStep(int milestoneIndex) {
-  switch (milestoneIndex.clamp(0, 4)) {
+/// [←] Target in focus-mode compact bar: same-milestone SOP back, else prior milestone landing.
+StudioStep? creatorJourneyCompactBarPrevStep(StudioStep step) {
+  if (step == StudioStep.quality) {
+    return StudioStep.deliver;
+  }
+  if (step == StudioStep.deliver) {
+    return StudioStep.video;
+  }
+  final nav = creatorJourneyMilestoneNavIndex(step);
+  final landing = creatorJourneyLandingStep(nav);
+  final sopIndex = StudioStep.sopSteps.indexOf(step);
+  if (step != landing && sopIndex > 0) {
+    final prevSop = StudioStep.sopSteps[sopIndex - 1];
+    if (creatorJourneyMilestoneNavIndex(prevSop) == nav) {
+      return prevSop;
+    }
+  }
+  if (nav <= 1) {
+    return null;
+  }
+  return creatorJourneyLandingStep(nav - 1);
+}
+
+/// Whether [←] should call [onBackToProjects] (script milestone).
+bool creatorJourneyCompactBarPrevIsExitToProjects(StudioStep step) {
+  return creatorJourneyMilestoneNavIndex(step) == 1 &&
+      creatorJourneyCompactBarPrevStep(step) == null;
+}
+
+/// Whether the compact-bar «Focus:» pill should use [projectStudioStepShortLabel]
+/// instead of the milestone name (assets / video / quality off landing tab).
+bool creatorJourneyCompactBarFocusUsesStepShortLabel(StudioStep step) {
+  final nav = creatorJourneyMilestoneNavIndex(step);
+  return step != creatorJourneyLandingStep(nav);
+}
+
+/// [→] Target in focus-mode compact bar: next milestone landing (not raw SOP chain).
+///
+/// Keeps «美术 → 分镜» aligned with milestone labels; [StudioStep.assets] is reached
+/// via the step menu / «更多步骤», not the primary forward control from art.
+StudioStep? creatorJourneyCompactBarNextStep(StudioStep step) {
+  final nav = creatorJourneyMilestoneNavIndex(step);
+  if (nav >= 4) {
+    return null;
+  }
+  return creatorJourneyLandingStep(nav + 1);
+}
+
+/// Whether compact-bar [→] opens the review-pack route (only after deliver/quality).
+bool creatorJourneyCompactBarNextOpensReviewPack(StudioStep step) {
+  return creatorJourneyCompactBarNextStep(step) == null &&
+      creatorJourneyMilestoneNavIndex(step) >= 4;
+}
+
+/// [←]/[→]/«专注» label for compact bar (nav 4 landing is deliver, not review-pack).
+String creatorJourneyCompactBarChromeLabel(
+  AppLocalizations l10n,
+  StudioStep step,
+) {
+  final nav = creatorJourneyMilestoneNavIndex(step);
+  final landing = creatorJourneyLandingStep(nav);
+  if (step != landing) {
+    return projectStudioStepShortLabel(l10n, step);
+  }
+  return switch (nav) {
+    1 => l10n.studioCreatorJourneyScript,
+    2 => l10n.studioCreatorJourneyArtPhase,
+    3 => l10n.studioCreatorJourneyStoryboardPhase,
+    4 => l10n.studioStepDeliverShort,
+    _ => projectStudioStepShortLabel(l10n, step),
+  };
+}
+
+/// Nav milestone index (1–4) → landing [StudioStep] for compact-bar [→]/[←].
+///
+/// Not the same as [creatorJourneyStripTargetForTile] (strip tiles 0–4 include
+/// «项目» exit and review-pack route on tile 4).
+StudioStep creatorJourneyLandingStep(int milestoneNavIndex) {
+  switch (milestoneNavIndex.clamp(0, 4)) {
     case 0:
     case 1:
       return StudioStep.script;
@@ -37,6 +114,56 @@ StudioStep creatorJourneyLandingStep(int milestoneIndex) {
       return StudioStep.deliver;
     default:
       return StudioStep.script;
+  }
+}
+
+/// Strip UI tile kinds (project / script / art / storyboard / review-pack).
+enum CreatorJourneyStripTileKind { exitProjects, studioStep, reviewPack }
+
+/// Target when the user taps a tile on [CreatorJourneyStrip].
+final class CreatorJourneyStripTileTarget {
+  const CreatorJourneyStripTileTarget.exitProjects()
+    : kind = CreatorJourneyStripTileKind.exitProjects,
+      step = null;
+
+  const CreatorJourneyStripTileTarget.studio(this.step)
+    : kind = CreatorJourneyStripTileKind.studioStep;
+
+  const CreatorJourneyStripTileTarget.reviewPack()
+    : kind = CreatorJourneyStripTileKind.reviewPack,
+      step = null;
+
+  final CreatorJourneyStripTileKind kind;
+  final StudioStep? step;
+}
+
+/// Strip tile label (tile 4 is deliver landing; review-pack is via [→] / menu).
+String creatorJourneyStripLabelForTile(AppLocalizations l10n, int tileIndex) {
+  return switch (tileIndex.clamp(0, 4)) {
+    0 => l10n.studioCreatorJourneyProject,
+    1 => l10n.studioCreatorJourneyScript,
+    2 => l10n.studioCreatorJourneyArtPhase,
+    3 => l10n.studioCreatorJourneyStoryboardPhase,
+    4 => l10n.studioStepDeliverShort,
+    _ => l10n.studioCreatorJourneyScript,
+  };
+}
+
+/// Maps strip tile index 0–4 to exit / studio step (tile 4 = deliver).
+CreatorJourneyStripTileTarget creatorJourneyStripTargetForTile(int tileIndex) {
+  switch (tileIndex.clamp(0, 4)) {
+    case 0:
+      return const CreatorJourneyStripTileTarget.exitProjects();
+    case 1:
+      return const CreatorJourneyStripTileTarget.studio(StudioStep.script);
+    case 2:
+      return const CreatorJourneyStripTileTarget.studio(StudioStep.art);
+    case 3:
+      return const CreatorJourneyStripTileTarget.studio(StudioStep.storyboard);
+    case 4:
+      return const CreatorJourneyStripTileTarget.studio(StudioStep.deliver);
+    default:
+      return const CreatorJourneyStripTileTarget.studio(StudioStep.script);
   }
 }
 
@@ -112,13 +239,14 @@ Color _statusColor(
   }
 }
 
-/// Five-milestone creator journey strip (project → script → art → storyboard → review pack).
+/// Five-milestone creator journey strip (project → script → art → storyboard → deliver).
 class CreatorJourneyStrip extends StatelessWidget {
   const CreatorJourneyStrip({
     super.key,
     required this.currentStep,
     required this.failedJobCount,
     required this.onSelectMilestone,
+    this.onBackToProjects,
     this.onOpenReviewPackMilestone,
   });
 
@@ -126,21 +254,20 @@ class CreatorJourneyStrip extends StatelessWidget {
   final int failedJobCount;
   final ValueChanged<StudioStep> onSelectMilestone;
 
-  /// When set, tapping the last milestone opens the review-pack route instead of
-  /// only selecting [StudioStep.deliver] in-place.
+  /// Tile 0 («项目»): return to projects home.
+  final VoidCallback? onBackToProjects;
+
+  /// Tile 4: open `/review-pack` when set.
   final VoidCallback? onOpenReviewPackMilestone;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
-    final labels = <String>[
-      l10n.studioCreatorJourneyProject,
-      l10n.studioCreatorJourneyScript,
-      l10n.studioCreatorJourneyArtPhase,
-      l10n.studioCreatorJourneyStoryboardPhase,
-      l10n.studioCreatorJourneyReviewPack,
-    ];
+    final labels = List<String>.generate(
+      5,
+      (i) => creatorJourneyStripLabelForTile(l10n, i),
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -158,14 +285,19 @@ class CreatorJourneyStrip extends StatelessWidget {
             currentStep: currentStep,
             failedJobCount: failedJobCount,
           );
-          final landing = creatorJourneyLandingStep(i);
+          final tileTarget = creatorJourneyStripTargetForTile(i);
           final semanticsLabel =
               '${labels[i]}, ${_statusSemantics(l10n, status)}';
           final iconColor = _statusColor(context, status, tokens);
-          final VoidCallback onTapMilestone =
-              i == labels.length - 1 && onOpenReviewPackMilestone != null
-              ? onOpenReviewPackMilestone!
-              : () => onSelectMilestone(landing);
+          final VoidCallback onTapMilestone = switch (tileTarget.kind) {
+            CreatorJourneyStripTileKind.exitProjects =>
+              onBackToProjects ?? () => onSelectMilestone(StudioStep.script),
+            CreatorJourneyStripTileKind.studioStep =>
+              () => onSelectMilestone(tileTarget.step!),
+            CreatorJourneyStripTileKind.reviewPack =>
+              onOpenReviewPackMilestone ??
+              () => onSelectMilestone(StudioStep.deliver),
+          };
 
           final tile = InkWell(
             borderRadius: BorderRadius.circular(10),

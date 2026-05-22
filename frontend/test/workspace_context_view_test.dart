@@ -182,6 +182,49 @@ void main() {
     },
   );
 
+  testWidgets('title bar project scope tap invokes callback', (tester) async {
+    var tapped = false;
+    await tester.pumpWidget(
+      _l10nApp(
+        WorkspaceContextView(
+          loading: false,
+          workspaceName: 'Personal Workspace',
+          workspaceType: 'personal',
+          projectLabel: 'Project #1 · Demo',
+          inline: true,
+          titleBarChrome: true,
+          onProjectScopeTap: () => tapped = true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Project #1 · Demo'));
+    await tester.pumpAndSettle();
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('title bar chrome renders compact two-line scope', (tester) async {
+    await tester.pumpWidget(
+      _l10nApp(
+        const WorkspaceContextView(
+          loading: false,
+          workspaceName: 'Personal Workspace',
+          workspaceType: 'personal',
+          projectLabel: 'Project #1 · Demo',
+          inline: true,
+          titleBarChrome: true,
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('个人工作区'), findsOneWidget);
+    expect(find.text('个人'), findsOneWidget);
+    expect(find.text('Project #1 · Demo'), findsOneWidget);
+  });
+
   testWidgets('workspace context billing title in zh locale', (tester) async {
     await tester.pumpWidget(
       _l10nApp(

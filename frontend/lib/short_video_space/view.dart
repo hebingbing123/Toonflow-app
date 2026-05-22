@@ -1013,8 +1013,8 @@ class ShortVideoSpaceView extends StatelessWidget {
           StudioPaneHeader(
             title: l10n.shortVideoSpacePageTitle,
             subtitle: l10n.shortVideoSpacePageSubtitle,
+            showBack: false,
             titleStyle: studioProjectTitleStyle(context),
-            onBack: onOpenProjects,
             trailing: RiskyOperationConfirmPrefsOverflowMenu(
               tooltip: l10n.notificationsRiskyPrefsTooltip,
             ),

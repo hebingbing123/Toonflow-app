@@ -53,6 +53,7 @@ class ProjectStudioHost {
     this.onRefreshAfterConflict,
     this.onOpenProjectSettings,
     this.onOpenGlobalModelVendorSettings,
+    this.studioFocusMode = true,
   });
 
   final int projectNumericId;
@@ -72,6 +73,8 @@ class ProjectStudioHost {
   final VoidCallback? onRefreshAfterConflict;
   final VoidCallback? onOpenProjectSettings;
   final VoidCallback? onOpenGlobalModelVendorSettings;
+  /// When true, uses [CreatorJourneyCompactBar]; cockpit/agents live in the Setup sheet.
+  final bool studioFocusMode;
   final VoidCallback onExit;
   final ValueChanged<StudioStep> onStepChanged;
   final VoidCallback onOpenAgentDrawer;

@@ -7,7 +7,9 @@ import '../design_system/studio_adaptive_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../locale/app_locale_notifier.dart';
 import '../platform/rust_api_feedback.dart';
+import '../shell/navigation_controller.dart';
 import 'router.dart';
+import 'studio_shell_navigation_scope.dart';
 import 'studio_theme.dart';
 
 /// MaterialApp.router for Studio product shell.
@@ -20,13 +22,23 @@ class StudioProductApp extends StatefulWidget {
 
 class _StudioProductAppState extends State<StudioProductApp> {
   late final GoRouter _router = createStudioRouter();
+  late final ShellNavigationController _shellNavigation =
+      ShellNavigationController();
+
+  @override
+  void dispose() {
+    _shellNavigation.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: AppLocaleNotifier.instance,
-      builder: (context, _) {
-        return StudioScaffoldMessenger(
+    return StudioShellNavigationScope(
+      navigation: _shellNavigation,
+      child: ListenableBuilder(
+        listenable: AppLocaleNotifier.instance,
+        builder: (context, _) {
+          return StudioScaffoldMessenger(
           key: kRustApiRootScaffoldMessengerKey,
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
@@ -60,7 +72,8 @@ class _StudioProductAppState extends State<StudioProductApp> {
             },
           ),
         );
-      },
+        },
+      ),
     );
   }
 }

@@ -26,6 +26,10 @@ constexpr const wchar_t kGetPreferredBrightnessRegKey[] =
   L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 
+// Keep in sync with `lib/desktop/desktop_window_constraints.dart`.
+constexpr int kMinWindowWidth = 960;
+constexpr int kMinWindowHeight = 640;
+
 // The number of Win32Window objects that currently exist.
 static int g_active_window_count = 0;
 
@@ -216,6 +220,13 @@ Win32Window::MessageHandler(HWND hwnd,
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);
       return 0;
+
+    case WM_GETMINMAXINFO: {
+      auto* min_max_info = reinterpret_cast<MINMAXINFO*>(lparam);
+      min_max_info->ptMinTrackSize.x = kMinWindowWidth;
+      min_max_info->ptMinTrackSize.y = kMinWindowHeight;
+      return 0;
+    }
   }
 
   return DefWindowProc(window_handle_, message, wparam, lparam);

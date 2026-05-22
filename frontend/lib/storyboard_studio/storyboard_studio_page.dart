@@ -82,6 +82,7 @@ class StoryboardStudioPage extends StatefulWidget {
     this.projectUuidResolver,
     this.onOpenShotEditor,
     this.initialScriptNumericId,
+    this.embeddedInProjectStudio = false,
     this.debugScripts,
     this.debugShots,
   });
@@ -94,6 +95,9 @@ class StoryboardStudioPage extends StatefulWidget {
   final StoryboardProjectUuidResolver? projectUuidResolver;
   final StoryboardShotEditorCallback? onOpenShotEditor;
   final int? initialScriptNumericId;
+
+  /// When true, renders inside [ProjectStudioPage] without its own [Scaffold].
+  final bool embeddedInProjectStudio;
   final List<ScriptWorkbenchDetailRow>? debugScripts;
   final List<ProductionStoryboardItemV1>? debugShots;
 
@@ -426,7 +430,45 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       return;
     }
     if (!mounted) return;
-    context.go('/projects/${widget.projectNumericId}/script');
+    context.go('/projects/${widget.projectNumericId}/storyboard');
+  }
+
+  Widget? _buildScriptEpisodePicker(AppLocalizations l10n) {
+    if (_scripts.length <= 1) {
+      return null;
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: StudioDropdownButton<int>(
+          value: _scriptNumericId,
+          items: _scripts
+              .map(
+                (s) => DropdownMenuItem<int>(
+                  value: s.numericId,
+                  child: Text(
+                    s.name?.trim().isNotEmpty == true
+                        ? s.name!.trim()
+                        : l10n.studioEpisodeConsoleTitle(s.numericId),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: _loadingShots
+              ? null
+              : (value) async {
+                  setState(() {
+                    _scriptNumericId = value;
+                    _selectedShotId = null;
+                    _shots = <ProductionStoryboardItemV1>[];
+                    _dataVersion = null;
+                  });
+                  await _loadShots();
+                },
+        ),
+      ),
+    );
   }
 
   @override
@@ -444,52 +486,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
         : l10n.studioStepOpenProduction;
     final topAction = noShots ? _openScriptStep : _openProductionWorkspace;
 
-    return Scaffold(
-      backgroundColor: tokens.bgBase,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _closeStudio,
-        ),
-        title: Text(
-          l10n.studioStoryboardStudioTitle,
-          style: studioProjectTitleStyle(context),
-        ),
-        actions: <Widget>[
-          if (_scripts.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: StudioDropdownButton<int>(
-                value: _scriptNumericId,
-                items: _scripts
-                    .map(
-                      (s) => DropdownMenuItem<int>(
-                        value: s.numericId,
-                        child: Text(
-                          s.name?.trim().isNotEmpty == true
-                              ? s.name!.trim()
-                              : l10n.studioEpisodeConsoleTitle(s.numericId),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _loadingShots
-                    ? null
-                    : (value) async {
-                        setState(() {
-                          _scriptNumericId = value;
-                          _selectedShotId = null;
-                          _shots = <ProductionStoryboardItemV1>[];
-                          _dataVersion = null;
-                        });
-                        await _loadShots();
-                      },
-              ),
-            ),
-          TextButton(onPressed: topAction, child: Text(topActionLabel)),
-        ],
-      ),
-      body: _loadingScripts
+    final workspaceBody = _loadingScripts
           ? const Center(child: CircularProgressIndicator())
           : _loadError != null && _shots.isEmpty
           ? Center(
@@ -501,38 +498,28 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
           : Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(
-                  width: 240,
-                  child: ColoredBox(
-                    color: tokens.bgInset,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                          child: Text(
-                            l10n.studioStoryboardShotList,
-                            style: studioPaneTitleStyle(context),
-                          ),
-                        ),
-                        if (_loadingShots)
-                          const Expanded(
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        else if (_shots.isEmpty)
-                          Expanded(
-                            child: StudioEmptyState.firstUse(
-                              title: l10n.studioStoryboardStudioNoShots,
-                              icon: Icons.view_comfy_alt_outlined,
-                              actionLabel: l10n.projectStudioOpenStep(
-                                l10n.studioStepScriptShort,
-                              ),
-                              onAction: _openScriptStep,
+                if (!noShots)
+                  SizedBox(
+                    width: 240,
+                    child: ColoredBox(
+                      color: tokens.bgInset,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                            child: Text(
+                              l10n.studioStoryboardShotList,
+                              style: studioPaneTitleStyle(context),
                             ),
-                          )
-                        else
-                          Expanded(
-                            child: ListView.builder(
+                          ),
+                          if (_loadingShots)
+                            const Expanded(
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          else
+                            Expanded(
+                              child: ListView.builder(
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               itemCount: _shots.length,
                               itemBuilder: (context, index) {
@@ -568,40 +555,45 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                 );
                               },
                             ),
-                          ),
-                      ],
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 Expanded(
                   child: Column(
                     children: <Widget>[
                       Expanded(
-                        child: selected == null
+                        child: noShots
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(32),
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 420,
+                                    ),
+                                    child: StudioEmptyState.firstUse(
+                                      title: l10n.studioStoryboardStudioNoShots,
+                                      icon: Icons.view_comfy_alt_outlined,
+                                      actionLabel: l10n.projectStudioOpenStep(
+                                        l10n.studioStepScriptShort,
+                                      ),
+                                      onAction: _openScriptStep,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : selected == null
                             ? Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(24),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Text(
-                                        noShots
-                                            ? l10n.studioStoryboardStudioNoShots
-                                            : l10n.studioStoryboardStudioSelectShot,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      if (noShots) ...<Widget>[
-                                        const SizedBox(height: 16),
-                                        OutlinedButton(
-                                          onPressed: _openScriptStep,
-                                          child: Text(
-                                            l10n.projectStudioOpenStep(
-                                              l10n.studioStepScriptShort,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                  child: Text(
+                                    l10n.studioStoryboardStudioSelectShot,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: tokens.textMuted),
                                   ),
                                 ),
                               )
@@ -651,22 +643,25 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                 ),
                               ),
                       ),
-                      const Divider(height: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: GridStoryboardPanel(
-                          busy: _gridBusy,
-                          onGenerateGrid: _runGridGenerate,
+                      if (!noShots) ...<Widget>[
+                        const Divider(height: 1),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: GridStoryboardPanel(
+                            busy: _gridBusy,
+                            onGenerateGrid: _runGridGenerate,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 300,
-                  child: ColoredBox(
-                    color: tokens.bgSurface,
-                    child: selected == null
+                if (!noShots)
+                  SizedBox(
+                    width: 300,
+                    child: ColoredBox(
+                      color: tokens.bgSurface,
+                      child: selected == null
                         ? ListView(
                             padding: const EdgeInsets.all(16),
                             children: <Widget>[
@@ -711,10 +706,71 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                               ),
                             ],
                           ),
+                    ),
                   ),
-                ),
               ],
+            );
+
+    if (widget.embeddedInProjectStudio) {
+      final scriptPicker = _buildScriptEpisodePicker(l10n);
+      return ColoredBox(
+        color: tokens.bgBase,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (scriptPicker != null) scriptPicker,
+            Expanded(child: workspaceBody),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: tokens.bgBase,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _closeStudio,
+        ),
+        title: Text(
+          l10n.studioStoryboardStudioTitle,
+          style: studioProjectTitleStyle(context),
+        ),
+        actions: <Widget>[
+          if (_scripts.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: StudioDropdownButton<int>(
+                value: _scriptNumericId,
+                items: _scripts
+                    .map(
+                      (s) => DropdownMenuItem<int>(
+                        value: s.numericId,
+                        child: Text(
+                          s.name?.trim().isNotEmpty == true
+                              ? s.name!.trim()
+                              : l10n.studioEpisodeConsoleTitle(s.numericId),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _loadingShots
+                    ? null
+                    : (value) async {
+                        setState(() {
+                          _scriptNumericId = value;
+                          _selectedShotId = null;
+                          _shots = <ProductionStoryboardItemV1>[];
+                          _dataVersion = null;
+                        });
+                        await _loadShots();
+                      },
+              ),
             ),
+          TextButton(onPressed: topAction, child: Text(topActionLabel)),
+        ],
+      ),
+      body: workspaceBody,
     );
   }
 }

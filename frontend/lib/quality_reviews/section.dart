@@ -343,7 +343,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
           StudioPaneHeader(
             title: l10n.productNavQuality,
             subtitle: l10n.qualityReviewsSectionIntro,
-            showBack: widget.studioPresentation,
+            showBack: false,
             trailing: RiskyOperationConfirmPrefsOverflowMenu(
               tooltip: l10n.taskCenterLocalClientPrefs,
             ),

@@ -16,6 +16,10 @@ Page<void> _studioShellPlaceholderPage(GoRouterState state) {
   return const NoTransitionPage<void>(child: SizedBox.shrink());
 }
 
+/// Full-screen shot list / grid studio (not the six-step SOP route).
+String studioStoryboardStudioRoute(int projectNumericId) =>
+    '/projects/$projectNumericId/storyboard-studio';
+
 HomePage buildStoryboardStudioHomePage({required int projectNumericId}) {
   return HomePage(
     key: ValueKey<String>('storyboard-$projectNumericId'),
@@ -115,7 +119,7 @@ GoRouter createStudioRouter() {
         ),
       ),
       GoRoute(
-        path: '/projects/:projectNumericId/storyboard',
+        path: '/projects/:projectNumericId/storyboard-studio',
         builder: (context, state) {
           final id = int.parse(state.pathParameters['projectNumericId']!);
           return buildStoryboardStudioHomePage(projectNumericId: id);

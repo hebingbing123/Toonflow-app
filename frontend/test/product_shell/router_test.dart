@@ -46,4 +46,17 @@ void main() {
   test('project root redirect resolves to script step', () {
     expect(studioProjectRootRedirectLocation('42'), '/projects/42/script');
   });
+
+  test('storyboard SOP slug uses project studio overlay', () {
+    final studio = buildProjectStudioHomePage(
+      projectNumericId: 7,
+      stepSlug: 'storyboard',
+    );
+    expect(studio.studioOverlay, StudioOverlayMode.projectStudio);
+    expect(studio.studioStepSlug, 'storyboard');
+  });
+
+  test('full-screen storyboard studio has dedicated route helper', () {
+    expect(studioStoryboardStudioRoute(7), '/projects/7/storyboard-studio');
+  });
 }

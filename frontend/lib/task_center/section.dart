@@ -219,7 +219,7 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
             StudioPaneHeader(
               title: l10n.productNavTasks,
               subtitle: l10n.taskCenterSectionIntro,
-              showBack: widget.studioPresentation,
+              showBack: false,
               trailing: RiskyOperationConfirmPrefsOverflowMenu(
                 tooltip: l10n.taskCenterLocalClientPrefs,
               ),

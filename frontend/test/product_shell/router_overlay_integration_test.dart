@@ -74,10 +74,10 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
-      initialLocation: '/projects/7/storyboard',
+      initialLocation: '/projects/7/storyboard-studio',
       routes: <RouteBase>[
         GoRoute(
-          path: '/projects/:projectNumericId/storyboard',
+          path: '/projects/:projectNumericId/storyboard-studio',
           builder: (context, state) => _overlayPage(
             overlay: StudioOverlayMode.storyboardStudio,
             projectNumericId: int.parse(
@@ -96,7 +96,7 @@ void main() {
     expect(find.byKey(const Key('product-auth-submit')), findsNothing);
     expect(
       router.routeInformationProvider.value.uri.toString(),
-      '/projects/7/storyboard',
+      '/projects/7/storyboard-studio',
     );
     expect(tester.takeException(), isNull);
   });
@@ -108,11 +108,11 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
-      initialLocation: '/projects/7/storyboard',
+      initialLocation: '/projects/7/storyboard-studio',
       routes: <RouteBase>[
         GoRoute(path: '/', builder: (context, state) => _shellPage()),
         GoRoute(
-          path: '/projects/:projectNumericId/storyboard',
+          path: '/projects/:projectNumericId/storyboard-studio',
           builder: (context, state) => _overlayPage(
             overlay: StudioOverlayMode.storyboardStudio,
             projectNumericId: int.parse(
@@ -127,14 +127,13 @@ void main() {
     await tester.pumpWidget(_routerApp(router));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open production'));
+    await tester.tap(find.text('Open Script'));
     await tester.pumpAndSettle();
 
     expect(
       router.routeInformationProvider.value.uri.toString(),
-      '/?pane=production',
+      '/projects/7/script',
     );
-    expect(find.text('Production workspace'), findsWidgets);
     expect(find.text('Storyboard studio'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -146,10 +145,10 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
-      initialLocation: '/projects/7/storyboard',
+      initialLocation: '/projects/7/storyboard-studio',
       routes: <RouteBase>[
         GoRoute(
-          path: '/projects/:projectNumericId/storyboard',
+          path: '/projects/:projectNumericId/storyboard-studio',
           builder: (context, state) => _overlayPage(
             overlay: StudioOverlayMode.storyboardStudio,
             projectNumericId: int.parse(
@@ -179,7 +178,7 @@ void main() {
 
     expect(
       router.routeInformationProvider.value.uri.toString(),
-      '/projects/7/script',
+      '/projects/7/storyboard',
     );
     expect(find.text('Storyboard studio'), findsNothing);
     expect(find.text('Project Delta'), findsOneWidget);

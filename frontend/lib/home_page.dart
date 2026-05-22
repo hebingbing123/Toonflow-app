@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'desktop/desktop_window_constraints.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/studio_code_labels.dart';
 import 'l10n/short_video_generation_blocked.dart';
@@ -104,6 +107,7 @@ import 'product_shell/studio_shell_layout.dart';
 import 'product_shell/studio_app_bar_actions.dart';
 import 'product_shell/studio_pipeline_strip.dart';
 import 'product_shell/studio_shell_branches.dart';
+import 'product_shell/studio_shell_navigation_scope.dart';
 import 'product_shell/product_studio_route_launcher.dart';
 import 'product_shell/studio_shell_scope.dart';
 import 'product_shell/studio_shell_navigation.dart';
@@ -118,11 +122,13 @@ import 'project_studio/studio_review_pack_scope.dart';
 import 'project_studio/studio_snapshot_bus.dart';
 import 'project_studio/studio_merge_deliver_bar.dart';
 import 'project_studio/studio_overlay_mode.dart';
+import 'project_studio/project_studio_navigation.dart';
 import 'project_studio/studio_step.dart';
 import 'project_studio/studio_video_step_panel.dart';
 import 'project_studio/script_step_panel.dart';
 import 'project_studio/novel_crawl_auth_section.dart';
 import 'project_studio/art_step_panel.dart';
+import 'project_studio/project_studio_agent_focus_body.dart';
 import 'product_shell/studio_agent_drawer.dart';
 import 'episode_console/episode_console_page.dart';
 import 'storyboard_studio/storyboard_studio_page.dart';
@@ -334,6 +340,11 @@ class _HomePageState extends State<HomePage> {
   Listenable? _studioRouteListenerTarget;
   final _workspaceInputController = WorkspaceInputController();
   bool _workspacePromptDefaultsSeeded = false;
+  bool _macOSTitleBarMoreMenuOpen = false;
+  DateTime? _macOSTitleBarLastPointerDownTime;
+  Offset? _macOSTitleBarPointerDownPosition;
+  bool _macOSTitleBarDragHandoff = false;
+  int _studioPaneRouteSyncSuppressCount = 0;
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
       WorkspaceRunController(
@@ -470,8 +481,13 @@ class _HomePageState extends State<HomePage> {
     l10nProvider: () => _appL10n,
   );
 
-  late final ShellNavigationController _shellNavigationController =
-      ShellNavigationController();
+  ShellNavigationController? _ownedShellNavigationController;
+  late ShellNavigationController _shellNavigationController;
+  bool _shellNavigationBound = false;
+  bool _productShellInitialized = false;
+
+  bool get _usesSharedShellNavigation =>
+      _ownedShellNavigationController == null;
   late final WorkspaceOutputController _workspaceOutputController =
       WorkspaceOutputController(l10nProvider: () => _appL10n);
   late final WorkspaceWsEventController _workspaceWsEventController =
@@ -602,6 +618,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _ownedShellNavigationController = ShellNavigationController();
+    _shellNavigationController = _ownedShellNavigationController!;
     _authController.addListener(_handleAuthChanged);
     _accountProbesController.addListener(_handleAccountProbesChanged);
     _contentProbesController.addListener(_handleContentProbesChanged);
@@ -615,25 +633,66 @@ class _HomePageState extends State<HomePage> {
     _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
     _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
     _applyInitialDeepLinkNavigation(Uri.base);
-    if (widget.shellMode == HomeShellMode.product) {
-      _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
-      _shellNavigationController.selectProductWorkspacePane(
-        widget.initialProductPane ?? ProductWorkspacePane.projects,
-      );
-      if (widget.studioProjectNumericId != null) {
-        _productScopedProjectNumericId = widget.studioProjectNumericId;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _attachStudioRouteListener();
-        _syncStudioPaneFromRoute();
-        unawaited(_refreshRecentProjectIds());
-      });
+    if (widget.studioProjectNumericId != null) {
+      _productScopedProjectNumericId = widget.studioProjectNumericId;
     }
     if (kSupabaseConfigured && !widget.debugSkipAuthListenerAttach) {
       _authController.attachAuthListener();
     }
     _syncSessionContext();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bindSharedShellNavigationIfNeeded();
+    _initializeProductShellNavigationIfNeeded();
+    if (widget.shellMode == HomeShellMode.product &&
+        widget.studioOverlay == StudioOverlayMode.none) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncStudioPaneFromRoute();
+      });
+    }
+  }
+
+  /// Inherited [StudioShellNavigationScope] is only valid after [initState].
+  void _bindSharedShellNavigationIfNeeded() {
+    if (_shellNavigationBound) {
+      return;
+    }
+    _shellNavigationBound = true;
+    final shared = StudioShellNavigationScope.maybeOf(context);
+    if (shared == null || identical(shared, _shellNavigationController)) {
+      return;
+    }
+    _shellNavigationController.removeListener(_handleShellNavigationChanged);
+    _ownedShellNavigationController?.dispose();
+    _ownedShellNavigationController = null;
+    _shellNavigationController = shared;
+    _shellNavigationController.addListener(_handleShellNavigationChanged);
+  }
+
+  void _initializeProductShellNavigationIfNeeded() {
+    if (_productShellInitialized || widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    _productShellInitialized = true;
+    final preservePaneAcrossProjectRoute =
+        _usesSharedShellNavigation &&
+        widget.studioOverlay != StudioOverlayMode.none;
+    final initialPane =
+        widget.initialProductPane ?? ProductWorkspacePane.projects;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
+      if (!preservePaneAcrossProjectRoute) {
+        _shellNavigationController.selectProductWorkspacePane(initialPane);
+      }
+      _attachStudioRouteListener();
+      _syncStudioPaneFromRoute();
+      unawaited(_refreshRecentProjectIds());
+    });
   }
 
   @override
@@ -666,7 +725,8 @@ class _HomePageState extends State<HomePage> {
           }
           return;
         }
-        if (widget.initialProductPane != null &&
+        if (!_usesSharedShellNavigation &&
+            widget.initialProductPane != null &&
             _shellNavigationController.productWorkspacePane !=
                 widget.initialProductPane) {
           _shellNavigationController.replaceProductWorkspacePane(
@@ -1379,15 +1439,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (widget.shellMode == HomeShellMode.product &&
-        widget.studioOverlay == StudioOverlayMode.none) {
-      _syncStudioPaneFromRoute();
-    }
-  }
-
   void _attachStudioRouteListener() {
     final router = GoRouter.maybeOf(context);
     if (router == null) {
@@ -1437,7 +1488,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.dispose();
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();
-    _shellNavigationController.dispose();
+    _ownedShellNavigationController?.dispose();
     _workspaceOperationController.dispose();
     _workspaceOutputController.dispose();
     _workspaceInputController.dispose();

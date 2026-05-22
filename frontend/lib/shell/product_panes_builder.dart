@@ -78,12 +78,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
         const SizedBox(height: 8),
         StudioPaneHeader(
           title: title,
-          showBack: widget.shellMode == HomeShellMode.product,
-          onBack: () {
-            if (!_popProductWorkspacePane()) {
-              _goToProjectsHome();
-            }
-          },
+          showBack: false,
         ),
         const SizedBox(height: 32),
         Center(
