@@ -167,7 +167,6 @@ Future<void> showProjectStudioStepSetupSheet(
   required String subtitle,
   required Widget body,
 }) {
-  final l10n = AppLocalizations.of(context)!;
   final tokens = StudioTokens.of(context);
   return showModalBottomSheet<void>(
     context: context,

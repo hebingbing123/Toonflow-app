@@ -360,13 +360,14 @@ extension _HomePageProductStudioSteps on _HomePageState {
         _workspaceInputController.clearScriptScope();
       },
       onOpenScriptWorkspace: () {
-        if (projectNumericId > 0) {
+        final scopedId = _productScopedProjectNumericId;
+        if (scopedId != null && scopedId > 0) {
           _shellNavigationController.selectProductWorkspacePane(
             ProductWorkspacePane.projects,
           );
           goProjectStudioStepIfScoped(
             context,
-            projectNumericId: projectNumericId,
+            projectNumericId: scopedId,
             step: StudioStep.script,
           );
           return;
@@ -376,13 +377,14 @@ extension _HomePageProductStudioSteps on _HomePageState {
         );
       },
       onOpenProductionWorkspace: () {
-        if (projectNumericId > 0) {
+        final scopedId = _productScopedProjectNumericId;
+        if (scopedId != null && scopedId > 0) {
           _shellNavigationController.selectProductWorkspacePane(
             ProductWorkspacePane.projects,
           );
           goProjectStudioStepIfScoped(
             context,
-            projectNumericId: projectNumericId,
+            projectNumericId: scopedId,
             step: StudioStep.storyboard,
           );
           return;

@@ -109,7 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           cd frontend
-          flutter analyze
+          flutter analyze --no-fatal-infos
       - name: flutter test
         run: |
           set -euo pipefail

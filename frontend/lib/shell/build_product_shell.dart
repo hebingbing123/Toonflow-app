@@ -1003,8 +1003,6 @@ extension _HomePageProductShell on _HomePageState {
   static const double _kMacOSTitleBarHeightWithContext = 44;
   static const double _kMacOSTitleBarInnerHeightWithContext = 38;
   static const double _kTitleBarWorkspaceContextMaxWidth = 300;
-  static const double _kMacOSTitleBarSearchMinWidth = 200;
-  static const double _kMacOSTitleBarSearchMaxWidth = 680;
   /// Reserved width for traffic lights + left drag target (macOS HIG ~12–14px margin).
   static const double _kMacOSTrafficLightInset = 72;
 

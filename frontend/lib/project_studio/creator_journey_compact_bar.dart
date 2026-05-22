@@ -6,7 +6,6 @@ import '../l10n/app_localizations.dart';
 import 'creator_journey_menu.dart';
 import 'creator_journey_strip.dart';
 import 'studio_step.dart';
-import 'studio_step_model_routing_bar.dart';
 
 /// Compact journey chrome for project-studio focus mode.
 class CreatorJourneyCompactBar extends StatelessWidget {
@@ -185,7 +184,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       return null;
     }
     final prevLabel = creatorJourneyCompactBarChromeLabel(l10n, prevStep);
-    final onPressed = () => onSelectStep(prevStep);
+    void onPressed() => onSelectStep(prevStep);
     if (iconOnly) {
       return IconButton(
         tooltip: prevLabel,
@@ -388,7 +387,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
 
         return Row(
           children: <Widget>[
-            if (prev != null) prev,
+            ?prev,
             Expanded(
               child: Center(
                 child: _buildCurrentPill(
@@ -400,7 +399,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                 ),
               ),
             ),
-            if (next != null) next,
+            ?next,
             tools,
           ],
         );

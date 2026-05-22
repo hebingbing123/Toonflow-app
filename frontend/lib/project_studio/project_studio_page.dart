@@ -198,7 +198,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         'step_selected',
         <String, Object?>{
           'step': step.slug,
-          if (telemetrySource != null) 'source': telemetrySource,
+          'source': ?telemetrySource,
           'project_id': widget.host.projectNumericId,
         },
       ),
