@@ -49,6 +49,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       productionSummaryLoaded[0] = true;
     } catch (e) {
       productionSummaryLoaded[0] = false;
+      if (!mounted) return;
       productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
         describeUserVisibleApiErrorResolved(context, e),
       );

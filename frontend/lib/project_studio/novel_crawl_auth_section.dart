@@ -286,7 +286,7 @@ class _StudioNovelCrawlAuthSectionState
           ],
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _authMode,
+            initialValue: _authMode,
             decoration: InputDecoration(
               labelText: l10n.studioNovelCrawlAuthModeLabel,
               isDense: true,

@@ -57,7 +57,7 @@ void main() {
     const routing = ProjectModelRoutingResponse(
       projectId: '00000000-0000-0000-0000-000000000001',
       defaults: ProjectModelRoutingDefaults(),
-      steps: const <String, Map<String, String>>{},
+      steps: <String, Map<String, String>>{},
       effective: <ModelRoutingEffectiveEntry>[
         ModelRoutingEffectiveEntry(
           step: 'deliver',

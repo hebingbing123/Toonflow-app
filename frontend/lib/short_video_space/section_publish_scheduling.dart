@@ -72,6 +72,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
         SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleSet(iso))),
       );
     } catch (e) {
+      if (!context.mounted) return;
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );
@@ -115,6 +116,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
         SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(res.updated, iso))),
       );
     } catch (e) {
+      if (!context.mounted) return;
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );
@@ -244,6 +246,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
         SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarUpdated(res.updated, iso))),
       );
     } catch (e) {
+      if (!context.mounted) return;
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiErrorResolved(context, e)))),
       );

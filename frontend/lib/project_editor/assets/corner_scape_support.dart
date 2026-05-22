@@ -106,6 +106,7 @@ class CornerScapeWorkbenchController {
       session.loadingPreview = false;
       session.selectedPreviewBytes = bytes;
     });
+    if (!ctx.mounted) return;
     session.syncSummaryLine(setState, resolveAppLocalizationsForErrors(ctx));
   }
 

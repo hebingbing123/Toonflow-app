@@ -89,6 +89,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
         await refreshData();
       } catch (e) {
+        if (!mounted) return;
         showFeedback(
           l10n.shortVideoBatchEnableFailedError(
             describeUserVisibleApiErrorResolved(context, e),
@@ -172,6 +173,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
         await refreshData();
       } catch (e) {
+        if (!mounted) return;
         showFeedback(
           l10n.shortVideoBatchDisableFailedError(
             describeUserVisibleApiErrorResolved(context, e),
@@ -400,6 +402,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
       await refreshData();
     } catch (e) {
+      if (!context.mounted) return;
       showFeedback(
         l10n.shortVideoBatchReplaceFailedError(
           describeUserVisibleApiErrorResolved(context, e),
@@ -581,20 +584,20 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       totalSuccessful = response.succeeded;
       totalFailed = response.failed;
     } catch (e) {
+      if (!context.mounted) return;
+      final errorText = describeUserVisibleApiErrorResolved(context, e);
       totalProcessed = eligibleShots.length;
       totalFailed = eligibleShots.length;
       for (final shot in eligibleShots) {
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage: describeUserVisibleApiErrorResolved(context, e),
+            errorMessage: errorText,
           ),
         );
       }
       showFeedback(
-        l10n.shortVideoBatchVoiceoverGenFailedError(
-          describeUserVisibleApiErrorResolved(context, e),
-        ),
+        l10n.shortVideoBatchVoiceoverGenFailedError(errorText),
         isSuccess: false,
       );
     }
@@ -706,6 +709,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       if (context.mounted) {
         Navigator.of(context).pop();
       }
+      if (!context.mounted) return;
 
       showFeedback(
         l10n.shortVideoBatchVoiceoverSingleFailedError(
@@ -756,7 +760,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 } catch (e) {
                   failed++;
                   final storyboardId = operation['storyboardId'] as int;
-                  final errorMessage = describeUserVisibleApiErrorResolved(context, e);
+                  final errorMessage = context.mounted
+                      ? describeUserVisibleApiErrorResolved(context, e)
+                      : e.toString();
                   failedItems.add(
                     BatchOperationFailedItem(
                       shotId: storyboardId,

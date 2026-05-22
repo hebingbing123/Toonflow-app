@@ -1,3 +1,6 @@
+// FFI symbol names must match generated Rust exports.
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:ffi';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';

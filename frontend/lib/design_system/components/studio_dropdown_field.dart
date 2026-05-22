@@ -280,7 +280,6 @@ class StudioIconMenuButton<T> extends StatelessWidget {
                   label: entry.label,
                   subtitle: entry.subtitle,
                   leading: entry.leading,
-                  child: entry.child,
                   selected: false,
                   showCheckmark: false,
                   enabled: entry.enabled,
@@ -291,6 +290,7 @@ class StudioIconMenuButton<T> extends StatelessWidget {
                           onSelected(entry.value);
                         }
                       : null,
+                  child: entry.child,
                 );
               },
             ),
@@ -375,12 +375,12 @@ class _StudioMultiSelectFieldState<T> extends State<StudioMultiSelectField<T>> {
           .map(
             (entry) => _StudioMultiSelectMenuRow<T>(
               label: entry.label,
-              child: entry.child,
               selected: _selected.contains(entry.value),
               enabled: widget.enabled && entry.enabled,
               onPressed: widget.enabled && entry.enabled
                   ? () => _toggle(entry.value)
                   : null,
+              child: entry.child,
             ),
           )
           .toList(growable: false),

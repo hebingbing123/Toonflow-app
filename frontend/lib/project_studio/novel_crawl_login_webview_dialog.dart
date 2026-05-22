@@ -245,13 +245,13 @@ class _NovelCrawlLoginWebViewDialogState
                           onWebViewCreated: (controller) {
                             _webController = controller;
                           },
-                          onLoadStart: (_, __) {
+                          onLoadStart: (_, _) {
                             setState(() => _progress = 0.05);
                           },
                           onProgressChanged: (_, progress) {
                             setState(() => _progress = progress / 100);
                           },
-                          onLoadStop: (_, __) {
+                          onLoadStop: (_, _) {
                             setState(() => _progress = 1);
                           },
                           onReceivedError: (_, request, error) {

@@ -267,7 +267,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               if (!ctx.mounted) return;
                               setDialogState(() => submitting = false);
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+                                SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                               );
                             }
                           },

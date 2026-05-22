@@ -39,7 +39,7 @@ void main() {
             onRunHarnessAgent: (_) async {},
             buildStepBody: (_) => const SizedBox(),
           ),
-          loadSnapshot: (_, __) async {
+          loadSnapshot: (_, _) async {
             throw RustApiException(
               'database_error',
               statusCode: 503,

@@ -203,8 +203,9 @@ class ExportHistoryItem {
   }
 
   String formattedFileSize(AppLocalizations l10n) {
-    if (fileSize == null)
+    if (fileSize == null) {
       return l10n.shortVideoSpaceDialogExportHistoryFileSizeUnknown;
+    }
     final sizeInMB = fileSize! / (1024 * 1024);
     if (sizeInMB < 1) {
       return l10n.shortVideoSpaceDialogExportHistoryFileSizeKB(

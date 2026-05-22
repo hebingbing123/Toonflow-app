@@ -279,6 +279,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     )) {
       return;
     }
+    if (!mounted) return;
     final scriptId = _scriptNumericId;
     if (scriptId == null || _shots.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -288,6 +289,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     }
 
     final dims = _suggestGrid(_shots.length);
+    if (!mounted) return;
     final config = await showGridStoryboardDialog(
       context: context,
       shotCount: _shots.length,
@@ -718,7 +720,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            if (scriptPicker != null) scriptPicker,
+            ?scriptPicker,
             Expanded(child: workspaceBody),
           ],
         ),

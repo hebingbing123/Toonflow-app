@@ -208,8 +208,7 @@ if [ "$MODE" = "full" ] || [ "$FRONTEND_CHANGED" = true ]; then
 
     echo "==> frontend/ flutter analyze"
     step_start
-    # Info-level lints are advisory; errors and warnings remain fatal.
-    (cd frontend && flutter analyze --no-fatal-infos)
+    (cd frontend && flutter analyze)
     step_finish "frontend flutter analyze"
     
     # Tests only in full mode

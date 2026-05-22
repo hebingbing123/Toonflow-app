@@ -381,6 +381,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
               : draft.title.trim();
           summary.add(l10n.shortVideoPublishOpsBatchLineOk(title));
         } catch (e) {
+          if (!mounted) return;
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               draft.id,
@@ -443,6 +444,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
             l10n.shortVideoPublishOpsBatchLineRetryOk(job.id.substring(0, 8)),
           );
         } catch (e) {
+          if (!mounted) return;
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               job.id.substring(0, 8),

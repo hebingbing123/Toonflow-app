@@ -165,7 +165,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                                 );
                               }
                             }
@@ -218,7 +218,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
                                 );
                               }
                             }

@@ -144,7 +144,6 @@ class QualityReviewsController extends ChangeNotifier {
     qualityBadCaseStatsLine = null;
     qualityDashboardLine = null;
     qualityDashboardRefreshLine = null;
-    qualityDashboardFreshnessLine = null;
     qualityReviewByIdLine = null;
     qualityReviews = null;
     qualityStatsRows = null;
@@ -427,7 +426,6 @@ class QualityReviewsController extends ChangeNotifier {
         maxItems: 5,
         l10n: _l10nResolved,
       );
-      qualityDashboardFreshnessLine = null;
       qualityDashboardLoadState = StudioLoadState.success;
       qualityDashboardLastError = null;
       _refreshQualityDashboardLine();

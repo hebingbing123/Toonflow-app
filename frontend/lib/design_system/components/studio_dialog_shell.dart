@@ -387,14 +387,16 @@ class StudioDialogShell extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                if (headerTitle != null) headerTitle,
-                                if (subtitle != null) ...<Widget>[
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    subtitle!,
-                                    style: studioSectionIntroStyle(context),
-                                  ),
-                                ],
+                                ?headerTitle,
+                                ...?subtitle == null
+                                    ? null
+                                    : <Widget>[
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          subtitle!,
+                                          style: studioSectionIntroStyle(context),
+                                        ),
+                                      ],
                               ],
                             ),
                           ),

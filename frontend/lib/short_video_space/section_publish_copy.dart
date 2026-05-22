@@ -126,6 +126,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
         SnackBar(content: Text(l10n.shortVideoPublishCopySaved)),
       );
     } catch (e) {
+      if (!mounted) return;
       messenger?.showSnackBar(
         SnackBar(
           content: Text(

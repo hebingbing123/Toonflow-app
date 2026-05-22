@@ -21,7 +21,7 @@ void main() {
       accessToken: 'token',
       projectNumericId: 7,
       projectUuid: '00000000-0000-0000-0000-000000000099',
-      resolveFromNumericId: (_, __) async => 'should-not-be-used',
+      resolveFromNumericId: (_, _) async => 'should-not-be-used',
     );
 
     expect(resolved, '00000000-0000-0000-0000-000000000099');
@@ -98,7 +98,7 @@ void main() {
             projectNumericId: 7,
             projectUuid: ':',
             accessToken: 'test-token',
-            projectUuidResolver: (_, __) async =>
+            projectUuidResolver: (_, _) async =>
                 '00000000-0000-0000-0000-000000000007',
             onOpenProductionWorkspace: ({required String projectUuid}) {
               openedProjectUuid = projectUuid;
