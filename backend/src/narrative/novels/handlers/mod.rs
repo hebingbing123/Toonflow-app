@@ -6,6 +6,7 @@ mod get;
 mod list;
 pub mod observability;
 mod update_delete;
+pub mod whole_book_import;
 
 pub(super) use crawl_auth::{get_novel_crawl_auth, put_novel_crawl_auth};
 pub(super) use crawl_preview::post_novel_crawl_import;
@@ -17,3 +18,5 @@ pub(super) use get::get_novel_for_project;
 pub(super) use list::list_novels_for_project;
 pub(super) use observability::get_novel_crawl_observability;
 pub(super) use update_delete::{delete_novel_for_project, patch_novel_for_project};
+pub(super) use whole_book_import::get_novel_whole_book_import_session;
+pub(super) use whole_book_import::post_novel_whole_book_import;

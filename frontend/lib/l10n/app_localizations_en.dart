@@ -1757,7 +1757,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioScriptNovelInlineImportSubtitle =>
-      'Crawl by URL, paste full text, or add one chapter — no dialog required.';
+      'Crawl by URL, pick a novel file (.txt/.md) to split and import, or paste a snippet; use file pick for full books.';
 
   @override
   String get studioScriptNovelInlineOpenFullWorkbench => 'Advanced workbench';
@@ -1769,7 +1769,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioScriptNovelInlineImportFromUrl => 'Crawl & import chapters';
 
   @override
-  String get studioScriptNovelInlinePasteSection => 'Paste full book';
+  String get studioScriptNovelInlinePasteSection => 'Full text (paste or file)';
+
+  @override
+  String get studioScriptNovelInlinePickFileAndImport =>
+      'Pick novel file & import';
 
   @override
   String studioScriptNovelInlineImportParsed(int count) {
@@ -2426,6 +2430,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get studioStoryboardStudioNoShots =>
       'No shots in this script yet. Add storyboards on the script step first.';
+
+  @override
+  String get studioStoryboardStudioNoShotsTitle => 'No storyboard shots yet';
+
+  @override
+  String get studioStoryboardStudioNoShotsSubtitle =>
+      'Add storyboards on the script step first.';
 
   @override
   String get studioStoryboardStudioSelectShot =>
@@ -9599,7 +9610,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorNovelsWorkbenchImportRawPasteHelper =>
-      'Auto-split by headings like “Chapter 12”, “Episode 5”, or other chapter/act markers in your manuscript.';
+      'Auto-split by chapter headings; for full books use Pick novel file.';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileButton => 'Pick novel file';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileAndImportButton =>
+      'Pick novel file & import';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileEmpty =>
+      'The file is empty or has no readable text.';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileUnreadable =>
+      'Could not read the selected file. Try .txt or .md.';
+
+  @override
+  String projectEditorNovelsWholeBookPickFileTooLarge(int maxMb) {
+    return 'File exceeds $maxMb MB. Split it or import in parts.';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookPickFileLoadedPreparse(
+    int count,
+    int chars,
+  ) {
+    return 'Detected $count chapters from file (~$chars characters).';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookPickFileLargeNoPastePreview(int chars) {
+    return 'About $chars characters — not loaded into the paste box (keeps UI responsive). Import parsed chapters below.';
+  }
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileUnsupported =>
+      'Unsupported format. Use .txt, .md, or .epub.';
+
+  @override
+  String get projectEditorNovelsWholeBookEpubInvalid =>
+      'Could not parse this EPUB structure.';
+
+  @override
+  String get projectEditorNovelsWholeBookEpubNoText =>
+      'No readable text found in this EPUB.';
+
+  @override
+  String projectEditorNovelsWholeBookResumeImportButton(int done, int total) {
+    return 'Resume import ($done/$total)';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookResumePickSameFile(String name) {
+    return 'Re-select the same book when no local cache (filename may differ): $name';
+  }
+
+  @override
+  String get projectEditorNovelsWholeBookResumeContinueInPlace =>
+      'Restored chapter list from local cache; resuming import…';
+
+  @override
+  String get projectEditorNovelsWholeBookResumeImportButtonInPlace =>
+      'Resume import (no re-paste)';
+
+  @override
+  String get projectEditorNovelsWholeBookSourceKeyMismatch =>
+      'Selected file does not match the interrupted import; treating it as a new book.';
+
+  @override
+  String get projectEditorNovelsWholeBookSourceContentMismatch =>
+      'Book content does not match the interrupted import.';
+
+  @override
+  String projectEditorNovelsWholeBookImportPartialFailure(
+    int index,
+    int imported,
+    int skipped,
+  ) {
+    return 'Import stopped at chapter $index: $imported created, $skipped skipped (already in project). Tap Resume import to continue (cached chapters need no re-paste).';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookImportDoneSummary(
+    int imported,
+    int skipped,
+    int total,
+  ) {
+    return 'Import finished: $imported added, $skipped skipped (existing), $total chapters total.';
+  }
 
   @override
   String get projectEditorNovelsWorkbenchImportBatchSizeLabel =>

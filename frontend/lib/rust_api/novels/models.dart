@@ -282,6 +282,94 @@ class NovelCrawlImportBatchItem {
   }
 }
 
+/// One chapter in a whole-book import batch request.
+class WholeBookImportChapterItem {
+  const WholeBookImportChapterItem({
+    required this.chapterIndex,
+    required this.chapter,
+    required this.chapterData,
+  });
+
+  final int chapterIndex;
+  final String chapter;
+  final String chapterData;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'chapter_index': chapterIndex,
+    'chapter': chapter,
+    'chapter_data': chapterData,
+  };
+}
+
+/// Response for **`POST …/novels/whole-book-import`**.
+class WholeBookImportResponse {
+  const WholeBookImportResponse({
+    required this.imported,
+    required this.skippedExisting,
+    required this.nextListIndex,
+    required this.totalChapters,
+    required this.batchTag,
+    required this.contentHash,
+    required this.completed,
+    required this.canResume,
+    this.failedAtListIndex,
+  });
+
+  final int imported;
+  final int skippedExisting;
+  final int nextListIndex;
+  final int totalChapters;
+  final String batchTag;
+  final String contentHash;
+  final bool completed;
+  final bool canResume;
+  final int? failedAtListIndex;
+
+  factory WholeBookImportResponse.fromJson(Map<String, dynamic> json) {
+    return WholeBookImportResponse(
+      imported: (json['imported'] as num?)?.toInt() ?? 0,
+      skippedExisting: (json['skipped_existing'] as num?)?.toInt() ?? 0,
+      nextListIndex: (json['next_list_index'] as num?)?.toInt() ?? 0,
+      totalChapters: (json['total_chapters'] as num?)?.toInt() ?? 0,
+      batchTag: json['batch_tag'] as String? ?? '',
+      contentHash: json['content_hash'] as String? ?? '',
+      completed: json['completed'] as bool? ?? false,
+      canResume: json['can_resume'] as bool? ?? false,
+      failedAtListIndex: (json['failed_at_list_index'] as num?)?.toInt(),
+    );
+  }
+}
+
+/// Active whole-book import session (**`GET …/whole-book-import/session`**).
+class WholeBookImportSessionResponse {
+  const WholeBookImportSessionResponse({
+    required this.contentHash,
+    required this.sourceDisplayName,
+    required this.batchTag,
+    required this.nextListIndex,
+    required this.totalChapters,
+    required this.updatedAtMs,
+  });
+
+  final String contentHash;
+  final String sourceDisplayName;
+  final String batchTag;
+  final int nextListIndex;
+  final int totalChapters;
+  final int updatedAtMs;
+
+  factory WholeBookImportSessionResponse.fromJson(Map<String, dynamic> json) {
+    return WholeBookImportSessionResponse(
+      contentHash: json['content_hash'] as String? ?? '',
+      sourceDisplayName: json['source_display_name'] as String? ?? '',
+      batchTag: json['batch_tag'] as String? ?? '',
+      nextListIndex: (json['next_list_index'] as num?)?.toInt() ?? 0,
+      totalChapters: (json['total_chapters'] as num?)?.toInt() ?? 0,
+      updatedAtMs: (json['updated_at_ms'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class NovelCrawlImportBatchResponse {
   const NovelCrawlImportBatchResponse({
     required this.total,

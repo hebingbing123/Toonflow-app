@@ -1644,7 +1644,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioScriptNovelInlineImportTitle => '导入小说';
 
   @override
-  String get studioScriptNovelInlineImportSubtitle => '链接抓取、粘贴全书或单章录入，无需弹窗。';
+  String get studioScriptNovelInlineImportSubtitle =>
+      '链接抓取、选择小说文件（.txt/.md）自动切章导入，或粘贴片段试跑；整本建议用选文件。';
 
   @override
   String get studioScriptNovelInlineOpenFullWorkbench => '高级工作台';
@@ -1656,7 +1657,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioScriptNovelInlineImportFromUrl => '抓取并导入章节';
 
   @override
-  String get studioScriptNovelInlinePasteSection => '粘贴全书';
+  String get studioScriptNovelInlinePasteSection => '整本正文（粘贴或选文件）';
+
+  @override
+  String get studioScriptNovelInlinePickFileAndImport => '选择小说文件并导入';
 
   @override
   String studioScriptNovelInlineImportParsed(int count) {
@@ -2276,6 +2280,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioStoryboardStudioNoShots => '当前剧本还没有镜头，请先在剧本步骤添加分镜。';
+
+  @override
+  String get studioStoryboardStudioNoShotsTitle => '还没有分镜镜头';
+
+  @override
+  String get studioStoryboardStudioNoShotsSubtitle => '请先在剧本步骤添加分镜。';
 
   @override
   String get studioStoryboardStudioSelectShot => '从左侧选择镜头以预览和编辑。';
@@ -9180,7 +9190,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectEditorNovelsWorkbenchImportRawPasteHelper =>
-      '支持按「第十二章 / 第3回 / 第五集」等标题自动切章。';
+      '支持按「第十二章 / 第3回 / 第五集」等标题自动切章；整本请用「选择小说文件」。';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileButton => '选择小说文件';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileAndImportButton => '选择小说文件并导入';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileEmpty => '文件为空或无法读取正文。';
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileUnreadable =>
+      '无法读取所选文件，请换 .txt 或 .md 后重试。';
+
+  @override
+  String projectEditorNovelsWholeBookPickFileTooLarge(int maxMb) {
+    return '文件超过 $maxMb MB，请拆分后导入。';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookPickFileLoadedPreparse(
+    int count,
+    int chars,
+  ) {
+    return '已从文件识别 $count 章（约 $chars 字）。';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookPickFileLargeNoPastePreview(int chars) {
+    return '正文约 $chars 字，未填入下方粘贴框（避免卡顿），可直接导入预解析章节。';
+  }
+
+  @override
+  String get projectEditorNovelsWholeBookPickFileUnsupported =>
+      '不支持该文件格式，请使用 .txt、.md 或 .epub。';
+
+  @override
+  String get projectEditorNovelsWholeBookEpubInvalid => '无法解析该 EPUB 文件结构。';
+
+  @override
+  String get projectEditorNovelsWholeBookEpubNoText => 'EPUB 中未找到可读正文。';
+
+  @override
+  String projectEditorNovelsWholeBookResumeImportButton(int done, int total) {
+    return '续传导入（$done/$total）';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookResumePickSameFile(String name) {
+    return '本地无缓存时请重新选择同一本书（文件名可以不同）：$name';
+  }
+
+  @override
+  String get projectEditorNovelsWholeBookResumeContinueInPlace =>
+      '已从本地缓存恢复章节列表，继续导入…';
+
+  @override
+  String get projectEditorNovelsWholeBookResumeImportButtonInPlace =>
+      '续传导入（无需重贴）';
+
+  @override
+  String get projectEditorNovelsWholeBookSourceKeyMismatch =>
+      '所选文件与上次中断的导入不一致，已按新文件处理。';
+
+  @override
+  String get projectEditorNovelsWholeBookSourceContentMismatch =>
+      '书本内容与上次中断的导入不一致，请确认未改稿或换书。';
+
+  @override
+  String projectEditorNovelsWholeBookImportPartialFailure(
+    int index,
+    int imported,
+    int skipped,
+  ) {
+    return '导入在第 $index 章中断：已入库 $imported 章，跳过已有 $skipped 章。可点「续传导入」继续（有缓存则无需重贴/重选文件）。';
+  }
+
+  @override
+  String projectEditorNovelsWholeBookImportDoneSummary(
+    int imported,
+    int skipped,
+    int total,
+  ) {
+    return '导入完成：新增 $imported 章，跳过已有 $skipped 章，共 $total 章。';
+  }
 
   @override
   String get projectEditorNovelsWorkbenchImportBatchSizeLabel => '每批导入条数';

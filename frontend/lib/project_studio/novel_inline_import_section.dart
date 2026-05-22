@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/novels/import_parser.dart';
+import '../project_editor/novels/whole_book_chapter_importer.dart';
+import '../project_editor/novels/whole_book_file_picker.dart';
+import '../project_editor/novels/whole_book_import_resume.dart';
 import '../rust_api.dart';
 import 'novel_crawl_auth_section.dart';
 
@@ -39,6 +45,16 @@ class _StudioScriptNovelInlineImportState
   List<ParsedNovelChapter> _previewChapters = const <ParsedNovelChapter>[];
   String? _previewMessage;
   NovelCrawlAuthOverride? _crawlAuthOverride;
+  WholeBookImportCheckpoint? _resumeCheckpoint;
+  String? _lastSourceDisplayName;
+  String? _lastContentHash;
+  String? _lastBatchTag;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_refreshResumeCheckpoint());
+  }
 
   @override
   void dispose() {
@@ -97,74 +113,212 @@ class _StudioScriptNovelInlineImportState
     });
   }
 
-  void _preparsePaste() {
+  void _applyWholeBookParseResult(String text, List<ParsedNovelChapter> rows) {
     final l10n = AppLocalizations.of(context)!;
-    final rows = parseWholeBookNovelText(l10n, _pasteCtrl.text);
+    final contentHash = text.trim().isEmpty ? null : wholeBookContentHash(text);
     setState(() {
+      _lastContentHash = contentHash;
+      if (shouldMirrorWholeBookIntoPasteField(text)) {
+        _pasteCtrl.text = text;
+      } else {
+        _pasteCtrl.clear();
+      }
       _previewChapters = rows;
       _previewMessage = rows.isEmpty
           ? l10n.projectEditorNovelsActionPreparseResultEmpty
           : l10n.projectEditorNovelsActionPreparseResultOk(rows.length);
+      if (rows.isEmpty) {
+        _infoLine = null;
+      } else if (!shouldMirrorWholeBookIntoPasteField(text)) {
+        _infoLine = l10n.projectEditorNovelsWholeBookPickFileLargeNoPastePreview(
+          text.length,
+        );
+      } else {
+        _infoLine = l10n.projectEditorNovelsWholeBookPickFileLoadedPreparse(
+          rows.length,
+          text.length,
+        );
+      }
     });
   }
 
-  Future<void> _importParsedChapters() async {
+  void _preparsePaste() {
     final l10n = AppLocalizations.of(context)!;
-    final normalized = reindexParsedNovelChapters(l10n, _previewChapters);
-    if (normalized.isEmpty) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorPreparseRequired,
-      );
+    _applyWholeBookParseResult(_pasteCtrl.text, parseWholeBookNovelText(l10n, _pasteCtrl.text));
+  }
+
+  Future<void> _refreshResumeCheckpoint() async {
+    final checkpoint = await loadWholeBookImportCheckpoint(
+      widget.project.id,
+      accessToken: widget.accessToken,
+    );
+    if (!mounted) {
+      return;
     }
-    final quality = evaluateNovelImportQuality(l10n, normalized);
-    if (!quality.canImport) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorImportQuality(
-          quality.blockers.join('；'),
-        ),
-      );
-    }
-    if (quality.warnings.isNotEmpty) {
-      setState(() {
-        _infoLine = l10n.projectEditorNovelsActionImportQualityHint(
-          quality.warnings.join('；'),
-        );
-      });
-    }
-    const batchSize = 10;
-    for (var i = 0; i < normalized.length; i += batchSize) {
-      final end = (i + batchSize < normalized.length)
-          ? i + batchSize
-          : normalized.length;
-      for (final chapter in normalized.sublist(i, end)) {
-        await createProjectNovelUnderProject(
-          widget.accessToken,
-          widget.project.id,
-          chapterIndex: chapter.chapterIndex,
-          chapter: chapter.chapter,
-          chapterData: chapter.chapterData,
-          intakeSource: 'whole_book_import',
-          intakeStatus: 'admitted',
-        );
+    setState(() => _resumeCheckpoint = checkpoint);
+  }
+
+  Future<void> _pickWholeBookFile({required bool importAfterParse}) async {
+    await _runAction(() async {
+      final l10n = AppLocalizations.of(context)!;
+      final payload = await pickWholeBookFile(l10n);
+      if (payload == null || !mounted) {
+        return;
       }
-      if (mounted) {
-        setState(() {
-          _infoLine = l10n.projectEditorNovelsActionImportProgress(
-            end,
-            normalized.length,
+      _lastSourceDisplayName = payload.displayName;
+      _lastContentHash = payload.contentHash;
+      final rows = parseWholeBookNovelText(l10n, payload.text);
+      _applyWholeBookParseResult(payload.text, rows);
+      if (rows.isEmpty) {
+        throw FormatException(l10n.projectEditorNovelsActionPreparseResultEmpty);
+      }
+      if (!importAfterParse) {
+        return;
+      }
+      final resume = _resumeCheckpoint;
+      final canResume = resume != null &&
+          wholeBookImportSourcesMatch(
+            resume,
+            sourceKey: payload.sourceKey,
+            contentHash: payload.contentHash,
           );
-        });
-      }
+      await _importParsedChapters(
+        startListIndex: canResume ? resume.nextChapterListIndex : 0,
+        sourceKey: payload.sourceKey,
+        sourceDisplayName: payload.displayName,
+        contentHash: payload.contentHash,
+        batchTag: canResume ? resume.batchTag : null,
+      );
+    });
+  }
+
+  Future<void> _resumeWholeBookImport() async {
+    final checkpoint = _resumeCheckpoint;
+    if (checkpoint == null) {
+      return;
     }
-    if (mounted) {
-      setState(() {
-        _infoLine = l10n.projectEditorNovelsActionImportComplete(
-          normalized.length,
+    await _runAction(() async {
+      final l10n = AppLocalizations.of(context)!;
+      var rows = await loadWholeBookResumeChapters(
+        l10n: l10n,
+        projectId: widget.project.id,
+        checkpoint: checkpoint,
+        pasteText: _pasteCtrl.text,
+      );
+      var sourceKey = checkpoint.sourceKey;
+      var sourceDisplayName = checkpoint.sourceDisplayName;
+      var contentHash = checkpoint.effectiveContentHash;
+      if (rows != null) {
+        if (mounted) {
+          setState(() {
+            _infoLine = l10n.projectEditorNovelsWholeBookResumeContinueInPlace;
+            _previewChapters = rows!;
+            _lastContentHash = contentHash;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _infoLine = l10n.projectEditorNovelsWholeBookResumePickSameFile(
+              checkpoint.sourceDisplayName,
+            );
+          });
+        }
+        final payload = await pickWholeBookFile(l10n);
+        if (payload == null || !mounted) {
+          return;
+        }
+        if (!wholeBookImportSourcesMatch(
+          checkpoint,
+          sourceKey: payload.sourceKey,
+          contentHash: payload.contentHash,
+        )) {
+          throw FormatException(
+            l10n.projectEditorNovelsWholeBookSourceContentMismatch,
+          );
+        }
+        sourceKey = payload.sourceKey;
+        sourceDisplayName = payload.displayName;
+        contentHash = payload.contentHash;
+        rows = parseWholeBookNovelText(l10n, payload.text);
+        _applyWholeBookParseResult(payload.text, rows);
+        if (rows.isEmpty) {
+          throw FormatException(l10n.projectEditorNovelsActionPreparseResultEmpty);
+        }
+      }
+      await _importParsedChapters(
+        startListIndex: checkpoint.nextChapterListIndex,
+        sourceKey: sourceKey,
+        sourceDisplayName: sourceDisplayName,
+        contentHash: contentHash,
+        batchTag: checkpoint.batchTag,
+        chapters: rows,
+      );
+    });
+  }
+
+  Future<void> _importParsedChapters({
+    int startListIndex = 0,
+    String? sourceKey,
+    String? sourceDisplayName,
+    String? contentHash,
+    String? batchTag,
+    List<ParsedNovelChapter>? chapters,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final importChapters = chapters ?? _previewChapters;
+    final paste = _pasteCtrl.text.trim();
+    final resolvedHash =
+        contentHash ??
+        _lastContentHash ??
+        (paste.isNotEmpty
+            ? wholeBookContentHash(paste)
+            : wholeBookContentHash(
+                importChapters
+                    .map((c) => '${c.chapter}\n${c.chapterData}')
+                    .join('\n'),
+              ));
+    final resolvedSourceKey = sourceKey ?? wholeBookSourceKeyFromContentHash(resolvedHash);
+    final result = await importWholeBookChapters(
+      l10n: l10n,
+      accessToken: widget.accessToken,
+      projectId: widget.project.id,
+      chapters: importChapters,
+      sourceKey: resolvedSourceKey,
+      sourceDisplayName: sourceDisplayName ?? _lastSourceDisplayName ?? 'paste',
+      contentHash: resolvedHash,
+      intakeStatus: 'admitted',
+      startListIndex: startListIndex,
+      existingBatchTag: batchTag ?? _lastBatchTag,
+      onProgress: (done, total, message) {
+        if (!mounted) {
+          return;
+        }
+        setState(() => _infoLine = message);
+      },
+    );
+    _lastBatchTag = result.batchTag;
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      if (result.succeeded) {
+        _infoLine = l10n.projectEditorNovelsWholeBookImportDoneSummary(
+          result.imported,
+          result.skippedExisting,
+          result.total,
         );
         _previewChapters = const <ParsedNovelChapter>[];
         _previewMessage = null;
-      });
-    }
+      } else if (result.canResume && result.failedAtIndex != null) {
+        _infoLine = l10n.projectEditorNovelsWholeBookImportPartialFailure(
+          result.failedAtIndex! + 1,
+          result.imported,
+          result.skippedExisting,
+        );
+      }
+    });
+    await _refreshResumeCheckpoint();
   }
 
   Future<void> _createSingleChapter() async {
@@ -219,7 +373,7 @@ class _StudioScriptNovelInlineImportState
               Expanded(
                 child: Text(
                   l10n.studioScriptNovelInlineImportTitle,
-                  style: studioCardTitleStyle(context),
+                  style: studioPaneTitleStyle(context),
                 ),
               ),
               TextButton(
@@ -264,13 +418,14 @@ class _StudioScriptNovelInlineImportState
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(double.infinity, StudioSpacing.iconTouchTarget + 4),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FilledButton.icon(
+              style: studioFormPrimaryButtonStyle(context),
+              onPressed: _busy ? null : () => _runAction(_importFromUrl),
+              icon: const Icon(Icons.link, size: 18),
+              label: Text(l10n.studioScriptNovelInlineImportFromUrl),
             ),
-            onPressed: _busy ? null : () => _runAction(_importFromUrl),
-            icon: const Icon(Icons.link, size: 18),
-            label: Text(l10n.studioScriptNovelInlineImportFromUrl),
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
           Text(
@@ -285,6 +440,7 @@ class _StudioScriptNovelInlineImportState
             maxLines: 8,
             decoration: InputDecoration(
               labelText: l10n.projectEditorNovelsWorkbenchImportRawPasteLabel,
+              helperText: l10n.projectEditorNovelsWorkbenchImportRawPasteHelper,
               alignLabelWithHint: true,
               isDense: true,
             ),
@@ -294,13 +450,64 @@ class _StudioScriptNovelInlineImportState
             spacing: 8,
             runSpacing: 8,
             children: <Widget>[
+              if (_resumeCheckpoint != null)
+                FutureBuilder<bool>(
+                  future: hasWholeBookImportStash(
+                    widget.project.id,
+                    _resumeCheckpoint!.effectiveContentHash,
+                  ),
+                  builder: (context, stashSnap) {
+                    final cp = _resumeCheckpoint!;
+                    final paste = _pasteCtrl.text.trim();
+                    final inPlace =
+                        stashSnap.data == true ||
+                        (paste.isNotEmpty &&
+                            wholeBookContentHash(paste) ==
+                                cp.effectiveContentHash);
+                    return FilledButton.tonal(
+                      style: FilledButton.styleFrom().merge(
+                        studioFormButtonStyle(context),
+                      ),
+                      onPressed: _busy ? null : _resumeWholeBookImport,
+                      child: Text(
+                        inPlace
+                            ? l10n
+                                  .projectEditorNovelsWholeBookResumeImportButtonInPlace
+                            : l10n.projectEditorNovelsWholeBookResumeImportButton(
+                                cp.nextChapterListIndex,
+                                cp.totalChapters,
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              FilledButton.icon(
+                style: studioFormPrimaryButtonStyle(context),
+                onPressed: _busy
+                    ? null
+                    : () => _pickWholeBookFile(importAfterParse: true),
+                icon: const Icon(Icons.upload_file_outlined, size: 18),
+                label: Text(l10n.studioScriptNovelInlinePickFileAndImport),
+              ),
+              OutlinedButton.icon(
+                style: studioFormSecondaryButtonStyle(context),
+                onPressed: _busy
+                    ? null
+                    : () => _pickWholeBookFile(importAfterParse: false),
+                icon: const Icon(Icons.folder_open_outlined, size: 18),
+                label: Text(l10n.projectEditorNovelsWholeBookPickFileButton),
+              ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: _busy ? null : _preparsePaste,
                 child: Text(
                   l10n.projectEditorNovelsWorkbenchImportPreparseButton,
                 ),
               ),
               FilledButton.tonal(
+                style: FilledButton.styleFrom().merge(
+                  studioFormButtonStyle(context),
+                ),
                 onPressed: _busy || _previewChapters.isEmpty
                     ? null
                     : () => _runAction(_importParsedChapters),
@@ -347,9 +554,15 @@ class _StudioScriptNovelInlineImportState
             ),
           ),
           const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: _busy ? null : () => _runAction(_createSingleChapter),
-            child: Text(l10n.projectEditorNovelsWorkbenchCreateSubmit),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom().merge(
+                studioFormButtonStyle(context),
+              ),
+              onPressed: _busy ? null : () => _runAction(_createSingleChapter),
+              child: Text(l10n.projectEditorNovelsWorkbenchCreateSubmit),
+            ),
           ),
           if (_infoLine != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.inlineGap),

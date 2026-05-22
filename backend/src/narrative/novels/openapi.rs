@@ -13,6 +13,8 @@ use utoipa::OpenApi;
         crate::narrative::novels::handlers::crawl_schedule::post_novel_crawl_schedule_create,
         crate::narrative::novels::handlers::crawl_schedule::list_novel_crawl_schedules,
         crate::narrative::novels::handlers::observability::get_novel_crawl_observability,
+        crate::narrative::novels::handlers::whole_book_import::get_novel_whole_book_import_session,
+        crate::narrative::novels::handlers::whole_book_import::post_novel_whole_book_import,
     ),
     components(schemas(
         crate::narrative::novels::dto::NovelCrawlAuthOverride,
@@ -32,6 +34,11 @@ use utoipa::OpenApi;
         crate::narrative::novels::dto::NovelIntakeStatusCount,
         crate::narrative::novels::dto::NovelCrawlAuditSampleRow,
         crate::narrative::novels::dto::NovelCrawlJobStatusCount,
+        crate::narrative::novels::dto::WholeBookImportChapterItem,
+        crate::narrative::novels::dto::WholeBookImportBody,
+        crate::narrative::novels::dto::WholeBookImportResponse,
+        crate::narrative::novels::dto::WholeBookImportSessionQuery,
+        crate::narrative::novels::dto::WholeBookImportSessionResponse,
     )),
     tags(
         (name = "novels", description = "Novel chapters per project (`app_novel`)")

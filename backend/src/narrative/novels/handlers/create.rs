@@ -25,7 +25,7 @@ fn validate_intake_status(value: &str) -> Result<(), ApiError> {
     )
 }
 
-fn build_novel_intake_metadata(
+pub(super) fn build_novel_intake_metadata(
     intake_source: Option<String>,
     intake_source_url: Option<String>,
     intake_status: Option<String>,

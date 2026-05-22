@@ -798,11 +798,12 @@
   "studioArtStepNoStylePacks": "No art or story style packs selected yet. Pick packs above and save.",
   "studioArtStepArtStyleLabel": "Legacy art style (text)",
   "studioScriptNovelInlineImportTitle": "Import novel",
-  "studioScriptNovelInlineImportSubtitle": "Crawl by URL, paste full text, or add one chapter — no dialog required.",
+  "studioScriptNovelInlineImportSubtitle": "Crawl by URL, pick a novel file (.txt/.md) to split and import, or paste a snippet; use file pick for full books.",
   "studioScriptNovelInlineOpenFullWorkbench": "Advanced workbench",
   "studioScriptNovelInlineUrlSection": "URL crawl",
   "studioScriptNovelInlineImportFromUrl": "Crawl & import chapters",
-  "studioScriptNovelInlinePasteSection": "Paste full book",
+  "studioScriptNovelInlinePasteSection": "Full text (paste or file)",
+  "studioScriptNovelInlinePickFileAndImport": "Pick novel file & import",
   "studioScriptNovelInlineImportParsed": "Import {count} chapters",
   "@studioScriptNovelInlineImportParsed": {
     "placeholders": {
@@ -1021,6 +1022,8 @@
   "studioGridStoryboardFailed": "Grid generation failed: {message}",
   "@studioGridStoryboardFailed": {"placeholders": {"message": {"type": "String"}}},
   "studioStoryboardStudioNoShots": "No shots in this script yet. Add storyboards on the script step first.",
+  "studioStoryboardStudioNoShotsTitle": "No storyboard shots yet",
+  "studioStoryboardStudioNoShotsSubtitle": "Add storyboards on the script step first.",
   "studioStoryboardStudioSelectShot": "Select a shot from the list to preview and edit.",
   "studioStoryboardStudioEmptyPrompt": "No prompt yet — edit on the right or open the full editor.",
   "studioStoryboardStudioOpenEditor": "Full editor",
@@ -6672,7 +6675,66 @@
   "projectEditorNovelsWorkbenchImportRefreshObservabilityButton": "Refresh hosted stats",
   "projectEditorNovelsWorkbenchImportCrawlPreparseButton": "Crawl and pre-parse",
   "projectEditorNovelsWorkbenchImportRawPasteLabel": "Paste whole book or multi-chapter text",
-  "projectEditorNovelsWorkbenchImportRawPasteHelper": "Auto-split by headings like “Chapter 12”, “Episode 5”, or other chapter/act markers in your manuscript.",
+  "projectEditorNovelsWorkbenchImportRawPasteHelper": "Auto-split by chapter headings; for full books use Pick novel file.",
+  "projectEditorNovelsWholeBookPickFileButton": "Pick novel file",
+  "projectEditorNovelsWholeBookPickFileAndImportButton": "Pick novel file & import",
+  "projectEditorNovelsWholeBookPickFileEmpty": "The file is empty or has no readable text.",
+  "projectEditorNovelsWholeBookPickFileUnreadable": "Could not read the selected file. Try .txt or .md.",
+  "projectEditorNovelsWholeBookPickFileTooLarge": "File exceeds {maxMb} MB. Split it or import in parts.",
+  "@projectEditorNovelsWholeBookPickFileTooLarge": {
+    "placeholders": {
+      "maxMb": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileLoadedPreparse": "Detected {count} chapters from file (~{chars} characters).",
+  "@projectEditorNovelsWholeBookPickFileLoadedPreparse": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "chars": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileLargeNoPastePreview": "About {chars} characters — not loaded into the paste box (keeps UI responsive). Import parsed chapters below.",
+  "@projectEditorNovelsWholeBookPickFileLargeNoPastePreview": {
+    "placeholders": {
+      "chars": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileUnsupported": "Unsupported format. Use .txt, .md, or .epub.",
+  "projectEditorNovelsWholeBookEpubInvalid": "Could not parse this EPUB structure.",
+  "projectEditorNovelsWholeBookEpubNoText": "No readable text found in this EPUB.",
+  "projectEditorNovelsWholeBookResumeImportButton": "Resume import ({done}/{total})",
+  "@projectEditorNovelsWholeBookResumeImportButton": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookResumePickSameFile": "Re-select the same book when no local cache (filename may differ): {name}",
+  "@projectEditorNovelsWholeBookResumePickSameFile": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "projectEditorNovelsWholeBookResumeContinueInPlace": "Restored chapter list from local cache; resuming import…",
+  "projectEditorNovelsWholeBookResumeImportButtonInPlace": "Resume import (no re-paste)",
+  "projectEditorNovelsWholeBookSourceKeyMismatch": "Selected file does not match the interrupted import; treating it as a new book.",
+  "projectEditorNovelsWholeBookSourceContentMismatch": "Book content does not match the interrupted import.",
+  "projectEditorNovelsWholeBookImportPartialFailure": "Import stopped at chapter {index}: {imported} created, {skipped} skipped (already in project). Tap Resume import to continue (cached chapters need no re-paste).",
+  "@projectEditorNovelsWholeBookImportPartialFailure": {
+    "placeholders": {
+      "index": { "type": "int" },
+      "imported": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookImportDoneSummary": "Import finished: {imported} added, {skipped} skipped (existing), {total} chapters total.",
+  "@projectEditorNovelsWholeBookImportDoneSummary": {
+    "placeholders": {
+      "imported": { "type": "int" },
+      "skipped": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "projectEditorNovelsWorkbenchImportBatchSizeLabel": "Chapters per import batch",
   "projectEditorNovelsWorkbenchImportPreparseButton": "Pre-parse whole book",
   "projectEditorNovelsWorkbenchImportParsedChaptersButton": "Import pre-parsed chapters",

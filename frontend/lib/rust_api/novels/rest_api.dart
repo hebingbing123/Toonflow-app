@@ -356,6 +356,82 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
   return NovelCrawlImportBatchResponse.fromJson(map);
 }
 
+/// `GET /api/v1/projects/{project_id}/novels/whole-book-import/session` — see `getProjectNovelWholeBookImportSessionByProjectIdV1`.
+Future<WholeBookImportSessionResponse> getProjectNovelWholeBookImportSession(
+  String accessToken,
+  String projectId, {
+  String? contentHash,
+}) async {
+  final query = <String, String>{};
+  if (contentHash != null && contentHash.trim().isNotEmpty) {
+    query['content_hash'] = contentHash.trim();
+  }
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/whole-book-import/session',
+  ).replace(queryParameters: query.isEmpty ? null : query);
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WholeBookImportSessionResponse.fromJson(map);
+}
+
+/// `POST /api/v1/projects/{project_id}/novels/whole-book-import` — see `postProjectNovelWholeBookImportByProjectIdV1`.
+Future<WholeBookImportResponse> postProjectNovelWholeBookImport(
+  String accessToken,
+  String projectId, {
+  required String contentHash,
+  required int totalChapters,
+  required List<WholeBookImportChapterItem> chapters,
+  required String intakeStatus,
+  String? sourceDisplayName,
+  String? batchTag,
+  int? startListIndex,
+  String? intakeSourceUrl,
+  String? intakeNote,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/whole-book-import',
+  );
+  final body = <String, dynamic>{
+    'content_hash': contentHash,
+    'total_chapters': totalChapters,
+    'chapters': chapters.map((c) => c.toJson()).toList(growable: false),
+    'intake_status': intakeStatus,
+    'source_display_name': ?sourceDisplayName,
+    'batch_tag': ?batchTag,
+    'start_list_index': ?startListIndex,
+    'intake_source_url': ?intakeSourceUrl,
+    'intake_note': ?intakeNote,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException.fromHttpResponse(res);
+  }
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WholeBookImportResponse.fromJson(map);
+}
+
 /// `POST /api/v1/projects/{project_id}/novels/crawl-schedules` — see `postProjectNovelCrawlScheduleCreateByProjectIdV1`.
 Map<String, dynamic> buildNovelCrawlScheduleCreateBody({
   required List<String> urls,

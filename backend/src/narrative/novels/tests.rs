@@ -56,6 +56,18 @@ fn patch_novel_body_accepts_nullable_intake_fields() {
 }
 
 #[test]
+fn whole_book_import_body_rejects_unknown_fields() {
+    let err = serde_json::from_str::<super::dto::WholeBookImportBody>(
+        r#"{"content_hash":"abc","total_chapters":1,"chapters":[],"intake_status":"admitted","extra":1}"#,
+    )
+    .unwrap_err();
+    assert!(
+        err.to_string().contains("unknown field") || err.to_string().contains("unknown variant"),
+        "{err}"
+    );
+}
+
+#[test]
 fn list_novels_query_accepts_intake_filters() {
     let query: super::dto::ListNovelsQuery = serde_json::from_value(json!({
         "search": "第一章",

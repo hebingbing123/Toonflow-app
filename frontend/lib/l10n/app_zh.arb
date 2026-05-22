@@ -797,11 +797,12 @@
   "studioArtStepNoStylePacks": "尚未选择画风或故事风格包，请在上方选择后保存。",
   "studioArtStepArtStyleLabel": "遗留画风（文本）",
   "studioScriptNovelInlineImportTitle": "导入小说",
-  "studioScriptNovelInlineImportSubtitle": "链接抓取、粘贴全书或单章录入，无需弹窗。",
+  "studioScriptNovelInlineImportSubtitle": "链接抓取、选择小说文件（.txt/.md）自动切章导入，或粘贴片段试跑；整本建议用选文件。",
   "studioScriptNovelInlineOpenFullWorkbench": "高级工作台",
   "studioScriptNovelInlineUrlSection": "链接抓取",
   "studioScriptNovelInlineImportFromUrl": "抓取并导入章节",
-  "studioScriptNovelInlinePasteSection": "粘贴全书",
+  "studioScriptNovelInlinePasteSection": "整本正文（粘贴或选文件）",
+  "studioScriptNovelInlinePickFileAndImport": "选择小说文件并导入",
   "studioScriptNovelInlineImportParsed": "导入 {count} 章",
   "@studioScriptNovelInlineImportParsed": {
     "placeholders": {
@@ -1019,6 +1020,8 @@
   "studioGridStoryboardFailed": "宫格生成失败：{message}",
   "@studioGridStoryboardFailed": {"placeholders": {"message": {"type": "String"}}},
   "studioStoryboardStudioNoShots": "当前剧本还没有镜头，请先在剧本步骤添加分镜。",
+  "studioStoryboardStudioNoShotsTitle": "还没有分镜镜头",
+  "studioStoryboardStudioNoShotsSubtitle": "请先在剧本步骤添加分镜。",
   "studioStoryboardStudioSelectShot": "从左侧选择镜头以预览和编辑。",
   "studioStoryboardStudioEmptyPrompt": "尚无提示词 — 可在右侧编辑或打开完整编辑器。",
   "studioStoryboardStudioOpenEditor": "完整编辑器",
@@ -6669,7 +6672,66 @@
   "projectEditorNovelsWorkbenchImportRefreshObservabilityButton": "刷新托管统计",
   "projectEditorNovelsWorkbenchImportCrawlPreparseButton": "抓取并预解析",
   "projectEditorNovelsWorkbenchImportRawPasteLabel": "粘贴整本或多章节正文",
-  "projectEditorNovelsWorkbenchImportRawPasteHelper": "支持按「第十二章 / 第3回 / 第五集」等标题自动切章。",
+  "projectEditorNovelsWorkbenchImportRawPasteHelper": "支持按「第十二章 / 第3回 / 第五集」等标题自动切章；整本请用「选择小说文件」。",
+  "projectEditorNovelsWholeBookPickFileButton": "选择小说文件",
+  "projectEditorNovelsWholeBookPickFileAndImportButton": "选择小说文件并导入",
+  "projectEditorNovelsWholeBookPickFileEmpty": "文件为空或无法读取正文。",
+  "projectEditorNovelsWholeBookPickFileUnreadable": "无法读取所选文件，请换 .txt 或 .md 后重试。",
+  "projectEditorNovelsWholeBookPickFileTooLarge": "文件超过 {maxMb} MB，请拆分后导入。",
+  "@projectEditorNovelsWholeBookPickFileTooLarge": {
+    "placeholders": {
+      "maxMb": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileLoadedPreparse": "已从文件识别 {count} 章（约 {chars} 字）。",
+  "@projectEditorNovelsWholeBookPickFileLoadedPreparse": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "chars": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileLargeNoPastePreview": "正文约 {chars} 字，未填入下方粘贴框（避免卡顿），可直接导入预解析章节。",
+  "@projectEditorNovelsWholeBookPickFileLargeNoPastePreview": {
+    "placeholders": {
+      "chars": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookPickFileUnsupported": "不支持该文件格式，请使用 .txt、.md 或 .epub。",
+  "projectEditorNovelsWholeBookEpubInvalid": "无法解析该 EPUB 文件结构。",
+  "projectEditorNovelsWholeBookEpubNoText": "EPUB 中未找到可读正文。",
+  "projectEditorNovelsWholeBookResumeImportButton": "续传导入（{done}/{total}）",
+  "@projectEditorNovelsWholeBookResumeImportButton": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookResumePickSameFile": "本地无缓存时请重新选择同一本书（文件名可以不同）：{name}",
+  "@projectEditorNovelsWholeBookResumePickSameFile": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "projectEditorNovelsWholeBookResumeContinueInPlace": "已从本地缓存恢复章节列表，继续导入…",
+  "projectEditorNovelsWholeBookResumeImportButtonInPlace": "续传导入（无需重贴）",
+  "projectEditorNovelsWholeBookSourceKeyMismatch": "所选文件与上次中断的导入不一致，已按新文件处理。",
+  "projectEditorNovelsWholeBookSourceContentMismatch": "书本内容与上次中断的导入不一致，请确认未改稿或换书。",
+  "projectEditorNovelsWholeBookImportPartialFailure": "导入在第 {index} 章中断：已入库 {imported} 章，跳过已有 {skipped} 章。可点「续传导入」继续（有缓存则无需重贴/重选文件）。",
+  "@projectEditorNovelsWholeBookImportPartialFailure": {
+    "placeholders": {
+      "index": { "type": "int" },
+      "imported": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+  "projectEditorNovelsWholeBookImportDoneSummary": "导入完成：新增 {imported} 章，跳过已有 {skipped} 章，共 {total} 章。",
+  "@projectEditorNovelsWholeBookImportDoneSummary": {
+    "placeholders": {
+      "imported": { "type": "int" },
+      "skipped": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "projectEditorNovelsWorkbenchImportBatchSizeLabel": "每批导入条数",
   "projectEditorNovelsWorkbenchImportPreparseButton": "预解析整本",
   "projectEditorNovelsWorkbenchImportParsedChaptersButton": "导入预解析章节",

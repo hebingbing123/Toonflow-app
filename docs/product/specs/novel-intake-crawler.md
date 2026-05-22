@@ -27,6 +27,8 @@
 - `crawler_client` 首版：按 URL 抓网页、抽标题与正文、回填整本导入区
 - `POST /api/v1/projects/{project_id}/novels/crawl-preview`：托管端抓取预览（工作台「抓取执行端」选 server 时走该路径，支持 TOC / 分页 / 单页回退）
 - `POST /api/v1/projects/{project_id}/novels/crawl-import`：托管端抓取 + 解析 + 质量门 + 落库（工作台「托管导入（增值）」按钮触发）
+- `POST /api/v1/projects/{project_id}/novels/whole-book-import`：整本预解析章节批量落库（幂等跳过已有章，`content_hash` 会话可续传；Web/桌面共用）
+- `GET /api/v1/projects/{project_id}/novels/whole-book-import/session`：查询当前项目未完成的整本导入进度（换浏览器/重装后可续）
 - `GET/PUT /api/v1/projects/{project_id}/novels/crawl-auth`：按项目保存站点认证（Cookie / 账号密码，AES-256-GCM 加密，密钥 `OPENFLOW_VENDOR_CREDENTIAL_KEY`）
 - 剧本步内嵌导入与小说高级工作台均提供「站点认证」折叠区；抓取请求可附带可选 `auth` 覆盖已保存配置
 - `intake_source` / `intake_source_url` / `intake_status` / `intake_note`

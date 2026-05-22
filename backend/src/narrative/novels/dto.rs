@@ -264,6 +264,67 @@ pub struct NovelCrawlAuditSampleRow {
     pub create_time_ms: Option<i64>,
 }
 
+/// One chapter row in a whole-book import batch request.
+#[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct WholeBookImportChapterItem {
+    pub chapter_index: i32,
+    pub chapter: String,
+    pub chapter_data: String,
+}
+
+/// Body for **`POST …/novels/whole-book-import`** — resumable batch chapter import.
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct WholeBookImportBody {
+    pub content_hash: String,
+    pub total_chapters: i32,
+    pub chapters: Vec<WholeBookImportChapterItem>,
+    pub intake_status: String,
+    #[serde(default)]
+    pub source_display_name: Option<String>,
+    #[serde(default)]
+    pub batch_tag: Option<String>,
+    #[serde(default)]
+    pub start_list_index: Option<i32>,
+    #[serde(default)]
+    pub intake_source_url: Option<String>,
+    #[serde(default)]
+    pub intake_note: Option<String>,
+}
+
+/// Response for **`POST …/novels/whole-book-import`**.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct WholeBookImportResponse {
+    pub imported: i32,
+    pub skipped_existing: i32,
+    pub next_list_index: i32,
+    pub total_chapters: i32,
+    pub batch_tag: String,
+    pub content_hash: String,
+    pub completed: bool,
+    pub can_resume: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failed_at_list_index: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct WholeBookImportSessionQuery {
+    #[serde(default)]
+    pub content_hash: Option<String>,
+}
+
+/// Active whole-book import session for resume (Web + desktop).
+#[derive(Debug, Serialize, ToSchema)]
+pub struct WholeBookImportSessionResponse {
+    pub content_hash: String,
+    pub source_display_name: String,
+    pub batch_tag: String,
+    pub next_list_index: i32,
+    pub total_chapters: i32,
+    pub updated_at_ms: i64,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct NovelCrawlObservabilityResponse {
     pub total_chapters: i64,

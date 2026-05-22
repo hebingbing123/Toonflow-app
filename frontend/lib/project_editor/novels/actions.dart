@@ -48,6 +48,220 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     return parseWholeBookNovelText(l10n, raw);
   }
 
+  Future<void> _importWholeBookFromPickedFile({
+    required AppLocalizations l10n,
+    required TextEditingController importRawTextCtrl,
+    required void Function(List<ParsedNovelChapter> rows, String message)
+    applyImportPreview,
+    required bool importAfterParse,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+    required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importExecutionSideCtrl,
+    required TextEditingController importUrlCtrl,
+    required TextEditingController importIntakeStatusCtrl,
+    required TextEditingController importIntakeNoteCtrl,
+    required String token,
+    required ProjectRow project,
+  }) async {
+    final payload = await pickWholeBookFile(l10n);
+    if (payload == null) {
+      return;
+    }
+    final rows = parseWholeBookNovelText(l10n, payload.text);
+    if (rows.isEmpty) {
+      throw FormatException(l10n.projectEditorNovelsActionPreparseResultEmpty);
+    }
+    if (shouldMirrorWholeBookIntoPasteField(payload.text)) {
+      importRawTextCtrl.text = payload.text;
+    } else {
+      importRawTextCtrl.clear();
+    }
+    final message = !shouldMirrorWholeBookIntoPasteField(payload.text)
+        ? l10n.projectEditorNovelsWholeBookPickFileLargeNoPastePreview(
+            payload.text.length,
+          )
+        : l10n.projectEditorNovelsWholeBookPickFileLoadedPreparse(
+            rows.length,
+            payload.text.length,
+          );
+    applyImportPreview(rows, message);
+    if (!importAfterParse) {
+      return;
+    }
+    final checkpoint = await loadWholeBookImportCheckpoint(
+      project.id,
+      accessToken: token,
+      contentHash: payload.contentHash,
+    );
+    final canResume = checkpoint != null &&
+        wholeBookImportSourcesMatch(
+          checkpoint,
+          sourceKey: payload.sourceKey,
+          contentHash: payload.contentHash,
+        );
+    final startIndex = canResume ? checkpoint.nextChapterListIndex : 0;
+    final result = await importWholeBookChapters(
+      l10n: l10n,
+      accessToken: token,
+      projectId: project.id,
+      chapters: rows,
+      sourceKey: payload.sourceKey,
+      sourceDisplayName: payload.displayName,
+      contentHash: payload.contentHash,
+      intakeStatus: importIntakeStatusCtrl.text.trim(),
+      intakeSourceUrl: importUrlCtrl.text.trim().isEmpty
+          ? null
+          : importUrlCtrl.text.trim(),
+      intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+          ? null
+          : importIntakeNoteCtrl.text.trim(),
+      batchSize: int.tryParse(importBatchSizeCtrl.text.trim()) ?? 10,
+      startListIndex: startIndex,
+      existingBatchTag: canResume ? checkpoint.batchTag : null,
+      onProgress: (done, total, progressMessage) {
+        applyInfoLine(progressMessage);
+      },
+    );
+    await refreshWorkbench(setLocalState);
+    if (result.succeeded) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportDoneSummary(
+          result.imported,
+          result.skippedExisting,
+          result.total,
+        ),
+      );
+    } else if (result.canResume && result.failedAtIndex != null) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportPartialFailure(
+          result.failedAtIndex! + 1,
+          result.imported,
+          result.skippedExisting,
+        ),
+      );
+    }
+  }
+
+  Future<void> _resumeWholeBookImportFromPickedFile({
+    required AppLocalizations l10n,
+    required TextEditingController importRawTextCtrl,
+    required void Function(List<ParsedNovelChapter> rows, String message)
+    applyImportPreview,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required StateSetter setLocalState,
+    required void Function(String infoLine) applyInfoLine,
+    required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importUrlCtrl,
+    required TextEditingController importIntakeStatusCtrl,
+    required TextEditingController importIntakeNoteCtrl,
+    required String token,
+    required ProjectRow project,
+  }) async {
+    final checkpoint = await loadWholeBookImportCheckpoint(
+      project.id,
+      accessToken: token,
+    );
+    if (checkpoint == null) {
+      return;
+    }
+    var rows = await loadWholeBookResumeChapters(
+      l10n: l10n,
+      projectId: project.id,
+      checkpoint: checkpoint,
+      pasteText: importRawTextCtrl.text,
+    );
+    String sourceKey = checkpoint.sourceKey;
+    String sourceDisplayName = checkpoint.sourceDisplayName;
+    String contentHash = checkpoint.effectiveContentHash;
+    if (rows != null) {
+      applyInfoLine(l10n.projectEditorNovelsWholeBookResumeContinueInPlace);
+      applyImportPreview(
+        rows,
+        l10n.projectEditorNovelsActionPreparseResultOk(rows.length),
+      );
+    } else {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookResumePickSameFile(
+          checkpoint.sourceDisplayName,
+        ),
+      );
+      final payload = await pickWholeBookFile(l10n);
+      if (payload == null) {
+        return;
+      }
+      if (!wholeBookImportSourcesMatch(
+        checkpoint,
+        sourceKey: payload.sourceKey,
+        contentHash: payload.contentHash,
+      )) {
+        throw FormatException(
+          l10n.projectEditorNovelsWholeBookSourceContentMismatch,
+        );
+      }
+      sourceKey = payload.sourceKey;
+      sourceDisplayName = payload.displayName;
+      contentHash = payload.contentHash;
+      rows = parseWholeBookNovelText(l10n, payload.text);
+      if (rows.isEmpty) {
+        throw FormatException(l10n.projectEditorNovelsActionPreparseResultEmpty);
+      }
+      if (shouldMirrorWholeBookIntoPasteField(payload.text)) {
+        importRawTextCtrl.text = payload.text;
+      } else {
+        importRawTextCtrl.clear();
+      }
+      applyImportPreview(
+        rows,
+        l10n.projectEditorNovelsWholeBookPickFileLoadedPreparse(
+          rows.length,
+          payload.text.length,
+        ),
+      );
+    }
+    final result = await importWholeBookChapters(
+      l10n: l10n,
+      accessToken: token,
+      projectId: project.id,
+      chapters: rows,
+      sourceKey: sourceKey,
+      sourceDisplayName: sourceDisplayName,
+      contentHash: contentHash,
+      intakeStatus: importIntakeStatusCtrl.text.trim(),
+      intakeSourceUrl: importUrlCtrl.text.trim().isEmpty
+          ? null
+          : importUrlCtrl.text.trim(),
+      intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
+          ? null
+          : importIntakeNoteCtrl.text.trim(),
+      batchSize: int.tryParse(importBatchSizeCtrl.text.trim()) ?? 10,
+      startListIndex: checkpoint.nextChapterListIndex,
+      existingBatchTag: checkpoint.batchTag,
+      onProgress: (done, total, progressMessage) {
+        applyInfoLine(progressMessage);
+      },
+    );
+    await refreshWorkbench(setLocalState);
+    if (result.succeeded) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportDoneSummary(
+          result.imported,
+          result.skippedExisting,
+          result.total,
+        ),
+      );
+    } else if (result.canResume && result.failedAtIndex != null) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportPartialFailure(
+          result.failedAtIndex! + 1,
+          result.imported,
+          result.skippedExisting,
+        ),
+      );
+    }
+  }
+
   Future<void> _crawlNovelSourcePreview({
     required AppLocalizations l10n,
     required String token,
@@ -327,81 +541,74 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
+    String? importRawText,
+    String? sourceKey,
+    String? sourceDisplayName,
+    int startListIndex = 0,
   }) async {
-    final normalizedChapters = reindexParsedNovelChapters(l10n, chapters);
-    if (normalizedChapters.isEmpty) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorPreparseRequired,
-      );
-    }
-    final quality = evaluateNovelImportQuality(l10n, normalizedChapters);
-    if (!quality.canImport) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorImportQuality(
-          quality.blockers.join('；'),
-        ),
-      );
-    }
-    if (quality.warnings.isNotEmpty) {
-      applyInfoLine(
-        l10n.projectEditorNovelsActionImportQualityHint(
-          quality.warnings.join('；'),
-        ),
-      );
-    }
-    if (batchSize <= 0) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorBatchSizePositive,
-      );
-    }
-    final emptyBodyChapter = normalizedChapters.firstWhere(
-      (chapter) => chapter.chapterData.trim().isEmpty,
-      orElse: () => const ParsedNovelChapter(
-        chapterIndex: 0,
-        chapter: '',
-        chapterData: '__ok__',
-      ),
+    final paste = importRawText?.trim() ?? '';
+    final resolvedContentHash = paste.isNotEmpty
+        ? wholeBookContentHash(paste)
+        : wholeBookContentHash(
+            chapters.map((c) => '${c.chapter}\n${c.chapterData}').join('\n'),
+          );
+    final resolvedSourceKey =
+        sourceKey ?? wholeBookSourceKeyFromContentHash(resolvedContentHash);
+    final checkpoint = await loadWholeBookImportCheckpoint(
+      project.id,
+      accessToken: token,
+      contentHash: resolvedContentHash,
     );
-    if (emptyBodyChapter.chapterIndex > 0) {
-      throw FormatException(
-        l10n.projectEditorNovelsActionErrorChapterBodyEmpty(
-          emptyBodyChapter.chapterIndex,
-        ),
-      );
-    }
-
-    for (var i = 0; i < normalizedChapters.length; i += batchSize) {
-      final end = (i + batchSize < normalizedChapters.length)
-          ? i + batchSize
-          : normalizedChapters.length;
-      final slice = normalizedChapters.sublist(i, end);
-      for (final chapter in slice) {
-        final sourceKind = _resolveImportSourceKind(
-          intakeSourceMode: intakeSourceMode,
-          intakeSourceUrl: intakeSourceUrl,
+    final canResume = checkpoint != null &&
+        wholeBookImportSourcesMatch(
+          checkpoint,
+          sourceKey: resolvedSourceKey,
+          contentHash: resolvedContentHash,
         );
-        await createProjectNovelUnderProject(
-          token,
-          project.id,
-          chapterIndex: chapter.chapterIndex,
-          chapter: chapter.chapter,
-          chapterData: chapter.chapterData,
-          intakeSource: sourceKind,
-          intakeSourceUrl: intakeSourceUrl,
-          intakeStatus: intakeStatus,
-          intakeNote: intakeNote,
-        );
-      }
-      applyInfoLine(l10n.projectEditorNovelsActionImportProgress(
-        end,
-        normalizedChapters.length,
-      ));
-    }
-
+    final resolvedStart = startListIndex > 0
+        ? startListIndex
+        : canResume
+        ? checkpoint.nextChapterListIndex
+        : 0;
+    final result = await importWholeBookChapters(
+      l10n: l10n,
+      accessToken: token,
+      projectId: project.id,
+      chapters: chapters,
+      sourceKey: resolvedSourceKey,
+      sourceDisplayName: sourceDisplayName ?? 'workbench',
+      contentHash: resolvedContentHash,
+      intakeStatus: intakeStatus,
+      intakeSourceUrl:
+          intakeSourceUrl != null && intakeSourceUrl.trim().isNotEmpty
+          ? intakeSourceUrl.trim()
+          : null,
+      intakeNote: intakeNote,
+      batchSize: batchSize,
+      startListIndex: resolvedStart,
+      existingBatchTag: canResume ? checkpoint.batchTag : null,
+      onProgress: (done, total, progressMessage) {
+        applyInfoLine(progressMessage);
+      },
+    );
     await refreshWorkbench(setLocalState);
-    applyInfoLine(
-      l10n.projectEditorNovelsActionImportComplete(normalizedChapters.length),
-    );
+    if (result.succeeded) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportDoneSummary(
+          result.imported,
+          result.skippedExisting,
+          result.total,
+        ),
+      );
+    } else if (result.canResume && result.failedAtIndex != null) {
+      applyInfoLine(
+        l10n.projectEditorNovelsWholeBookImportPartialFailure(
+          result.failedAtIndex! + 1,
+          result.imported,
+          result.skippedExisting,
+        ),
+      );
+    }
   }
 
   Future<void> _importNovelWorkbenchViaServerCrawl({
@@ -596,20 +803,6 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         recent,
       ),
     );
-  }
-
-  String _resolveImportSourceKind({
-    required String intakeSourceMode,
-    required String? intakeSourceUrl,
-  }) {
-    final hasUrl = intakeSourceUrl != null && intakeSourceUrl.trim().isNotEmpty;
-    if (!hasUrl) {
-      return 'whole_book_import';
-    }
-    if (intakeSourceMode == 'server') {
-      return 'crawler_server';
-    }
-    return 'crawler_client';
   }
 
   Future<void> _readNovelWorkbenchChapter({

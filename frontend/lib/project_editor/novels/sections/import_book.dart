@@ -85,9 +85,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
         ),
         const SizedBox(height: 8),
         Row(
-          children: [
-            SizedBox(
-              width: 180,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
               child: TextField(
                 controller: importScheduleDelayMinutesCtrl,
                 keyboardType: TextInputType.number,
@@ -96,12 +96,12 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       l10n.projectEditorNovelsWorkbenchImportScheduleDelayLabel,
                   helperText:
                       l10n.projectEditorNovelsWorkbenchImportScheduleDelayHelper,
+                  isDense: true,
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            SizedBox(
-              width: 180,
+            Expanded(
               child: TextField(
                 controller: importScheduleRepeatMinutesCtrl,
                 keyboardType: TextInputType.number,
@@ -110,11 +110,20 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       l10n.projectEditorNovelsWorkbenchImportScheduleRepeatLabel,
                   helperText:
                       l10n.projectEditorNovelsWorkbenchImportScheduleRepeatHelper,
+                  isDense: true,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed:
                   localBusy || importExecutionSideCtrl.text.trim() != 'server'
                       ? null
@@ -144,8 +153,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           ),
               child: Text(l10n.projectEditorNovelsWorkbenchImportCreateScheduleButton),
             ),
-            const SizedBox(width: 8),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed:
                   localBusy || importExecutionSideCtrl.text.trim() != 'server'
                       ? null
@@ -164,8 +173,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           ),
               child: Text(l10n.projectEditorNovelsWorkbenchImportListSchedulesButton),
             ),
-            const SizedBox(width: 8),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed:
                   localBusy || importExecutionSideCtrl.text.trim() != 'server'
                       ? null
@@ -192,6 +201,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
         Align(
           alignment: Alignment.centerLeft,
           child: OutlinedButton(
+            style: studioFormSecondaryButtonStyle(ctx),
             onPressed: localBusy
                 ? null
                 : () => _runNovelWorkbenchAction(
@@ -226,20 +236,159 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
+        FutureBuilder<WholeBookImportCheckpoint?>(
+          future: loadWholeBookImportCheckpoint(
+            project.id,
+            accessToken: token,
+          ),
+          builder: (context, snapshot) {
+            final checkpoint = snapshot.data;
+            if (checkpoint == null) {
+              return const SizedBox.shrink();
+            }
+            return FutureBuilder<bool>(
+              future: hasWholeBookImportStash(
+                project.id,
+                checkpoint.effectiveContentHash,
+              ),
+              builder: (context, stashSnap) {
+                final paste = importRawTextCtrl.text.trim();
+                final inPlace =
+                    stashSnap.data == true ||
+                    (paste.isNotEmpty &&
+                        wholeBookContentHash(paste) ==
+                            checkpoint.effectiveContentHash);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: OutlinedButton.icon(
+                    style: studioFormSecondaryButtonStyle(ctx),
+                    onPressed: localBusy
+                        ? null
+                        : () => _runNovelWorkbenchAction(
+                              ctx: ctx,
+                              setDialogState: setDialogState,
+                              setLocalState: setLocalState,
+                              novelsBusy: novelsBusy,
+                              setLocalBusy: setLocalBusy,
+                              action: () =>
+                                  _resumeWholeBookImportFromPickedFile(
+                                    l10n: l10n,
+                                    importRawTextCtrl: importRawTextCtrl,
+                                    applyImportPreview: applyImportPreview,
+                                    refreshWorkbench: refreshWorkbench,
+                                    setLocalState: setLocalState,
+                                    applyInfoLine: updateInfoLine,
+                                    importBatchSizeCtrl: importBatchSizeCtrl,
+                                    importUrlCtrl: importUrlCtrl,
+                                    importIntakeStatusCtrl:
+                                        importIntakeStatusCtrl,
+                                    importIntakeNoteCtrl: importIntakeNoteCtrl,
+                                    token: token,
+                                    project: project,
+                                  ),
+                            ),
+                    icon: const Icon(Icons.play_arrow_outlined, size: 18),
+                    label: Text(
+                      inPlace
+                          ? l10n
+                                .projectEditorNovelsWholeBookResumeImportButtonInPlace
+                          : l10n.projectEditorNovelsWholeBookResumeImportButton(
+                              checkpoint.nextChapterListIndex,
+                              checkpoint.totalChapters,
+                            ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
+            FilledButton.icon(
+              style: studioFormPrimaryButtonStyle(ctx),
+              onPressed: localBusy
+                  ? null
+                  : () => _runNovelWorkbenchAction(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        novelsBusy: novelsBusy,
+                        setLocalBusy: setLocalBusy,
+                        action: () => _importWholeBookFromPickedFile(
+                          l10n: l10n,
+                          importRawTextCtrl: importRawTextCtrl,
+                          applyImportPreview: applyImportPreview,
+                          importAfterParse: true,
+                          refreshWorkbench: refreshWorkbench,
+                          setLocalState: setLocalState,
+                          applyInfoLine: updateInfoLine,
+                          importBatchSizeCtrl: importBatchSizeCtrl,
+                          importExecutionSideCtrl: importExecutionSideCtrl,
+                          importUrlCtrl: importUrlCtrl,
+                          importIntakeStatusCtrl: importIntakeStatusCtrl,
+                          importIntakeNoteCtrl: importIntakeNoteCtrl,
+                          token: token,
+                          project: project,
+                        ),
+                      ),
+              icon: const Icon(Icons.upload_file_outlined, size: 18),
+              label: Text(l10n.projectEditorNovelsWholeBookPickFileAndImportButton),
+            ),
+            OutlinedButton.icon(
+              style: studioFormSecondaryButtonStyle(ctx),
+              onPressed: localBusy
+                  ? null
+                  : () => _runNovelWorkbenchAction(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        novelsBusy: novelsBusy,
+                        setLocalBusy: setLocalBusy,
+                        action: () => _importWholeBookFromPickedFile(
+                          l10n: l10n,
+                          importRawTextCtrl: importRawTextCtrl,
+                          applyImportPreview: applyImportPreview,
+                          importAfterParse: false,
+                          refreshWorkbench: refreshWorkbench,
+                          setLocalState: setLocalState,
+                          applyInfoLine: updateInfoLine,
+                          importBatchSizeCtrl: importBatchSizeCtrl,
+                          importExecutionSideCtrl: importExecutionSideCtrl,
+                          importUrlCtrl: importUrlCtrl,
+                          importIntakeStatusCtrl: importIntakeStatusCtrl,
+                          importIntakeNoteCtrl: importIntakeNoteCtrl,
+                          token: token,
+                          project: project,
+                        ),
+                      ),
+              icon: const Icon(Icons.folder_open_outlined, size: 18),
+              label: Text(l10n.projectEditorNovelsWholeBookPickFileButton),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
             SizedBox(
-              width: 140,
+              width: 132,
               child: TextField(
                 controller: importBatchSizeCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorNovelsWorkbenchImportBatchSizeLabel,
+                  isDense: true,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () {
@@ -258,8 +407,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                     },
               child: Text(l10n.projectEditorNovelsWorkbenchImportPreparseButton),
             ),
-            const SizedBox(width: 8),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -281,6 +430,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         intakeNote: importIntakeNoteCtrl.text.trim().isEmpty
                             ? null
                             : importIntakeNoteCtrl.text.trim(),
+                        importRawText: importRawTextCtrl.text,
                         refreshWorkbench: refreshWorkbench,
                         setLocalState: setLocalState,
                         applyInfoLine: updateInfoLine,
@@ -290,8 +440,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 l10n.projectEditorNovelsWorkbenchImportParsedChaptersButton,
               ),
             ),
-            const SizedBox(width: 8),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy || importExecutionSideCtrl.text.trim() != 'server'
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -317,8 +467,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                     ),
               child: Text(l10n.projectEditorNovelsWorkbenchImportServerImportButton),
             ),
-            const SizedBox(width: 8),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy || importExecutionSideCtrl.text.trim() != 'server'
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -349,16 +499,17 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           ],
         ),
         const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: StudioDropdownButtonFormField<String>(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stackFields = constraints.maxWidth < 520;
+            final fields = <Widget>[
+              StudioDropdownButtonFormField<String>(
                 initialValue: importExecutionSideCtrl.text.isEmpty
                     ? 'client'
                     : importExecutionSideCtrl.text,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorNovelsWorkbenchImportExecutionSideLabel,
+                  isDense: true,
                 ),
                 items: [
                   DropdownMenuItem(
@@ -378,16 +529,14 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   importExecutionSideCtrl.text = value ?? 'client';
                 },
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: StudioDropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: importIntakeStatusCtrl.text.isEmpty
                     ? 'pending_review'
                     : importIntakeStatusCtrl.text,
                 decoration: InputDecoration(
                   labelText:
                       l10n.projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel,
+                  isDense: true,
                 ),
                 items: [
                   DropdownMenuItem(
@@ -411,20 +560,39 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   importIntakeStatusCtrl.text = value ?? 'pending_review';
                 },
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
+              TextField(
                 controller: importIntakeNoteCtrl,
                 maxLines: 2,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorNovelsWorkbenchImportIntakeNoteLabel,
                   helperText:
                       l10n.projectEditorNovelsWorkbenchImportIntakeNoteHelper,
+                  isDense: true,
                 ),
               ),
-            ),
-          ],
+            ];
+            if (stackFields) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  for (var i = 0; i < fields.length; i++) ...<Widget>[
+                    if (i > 0) const SizedBox(height: 8),
+                    fields[i],
+                  ],
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: fields[0]),
+                const SizedBox(width: 8),
+                Expanded(child: fields[1]),
+                const SizedBox(width: 8),
+                Expanded(child: fields[2]),
+              ],
+            );
+          },
         ),
         if (importPreviewRows.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -446,6 +614,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       ),
                     ),
                     OutlinedButton(
+                      style: studioFormSecondaryButtonStyle(ctx),
                       onPressed: localBusy
                           ? null
                           : () {

@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../studio_typography.dart';
 import '../theme.dart';
 import '../tokens.dart';
+import 'studio_text_styles.dart';
 
 class StudioPrimaryButton extends StatelessWidget {
   const StudioPrimaryButton({
@@ -22,8 +26,10 @@ class StudioPrimaryButton extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     final studio = StudioColors.of(context);
     final theme = Theme.of(context);
+    final typography = StudioTypography.of(context);
     final enabled = !loading && onPressed != null;
     final borderRadius = BorderRadius.circular(StudioSpacing.radiusButton);
+    final buttonHeight = typography.buttonHeight;
     final child = loading
         ? SizedBox(
             width: 20,
@@ -105,20 +111,25 @@ class StudioPrimaryButton extends StatelessWidget {
             splashColor: tokens.accent.withValues(alpha: 0.12),
             highlightColor: tokens.primary.withValues(alpha: 0.10),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 46, minWidth: 120),
+              constraints: BoxConstraints(
+                minHeight: buttonHeight,
+                minWidth: 96,
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: StudioLayoutSpacing.insetComfortable,
-                  vertical: 11,
+                padding: EdgeInsets.symmetric(
+                  horizontal: StudioLayoutSpacing.insetDense + 2,
+                  vertical: math.max(8, (buttonHeight - 20) / 2),
                 ),
                 child: Center(
                   child: IconTheme(
                     data: IconThemeData(size: 18, color: foregroundColor),
                     child: DefaultTextStyle(
-                      style: (theme.textTheme.labelLarge ?? const TextStyle())
+                      style: (studioControlLabelStyle(context) ??
+                              theme.textTheme.labelLarge ??
+                              const TextStyle())
                           .copyWith(
                             color: foregroundColor,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
                       child: child,
                     ),

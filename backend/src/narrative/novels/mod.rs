@@ -49,6 +49,14 @@ pub fn router() -> Router<AppState> {
             get(handlers::get_novel_crawl_observability),
         )
         .route(
+            "/api/v1/projects/{project_id}/novels/whole-book-import/session",
+            get(handlers::get_novel_whole_book_import_session),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/novels/whole-book-import",
+            post(handlers::post_novel_whole_book_import),
+        )
+        .route(
             "/api/v1/projects/{project_id}/novels",
             get(handlers::list_novels_for_project).post(handlers::create_novel_for_project),
         )

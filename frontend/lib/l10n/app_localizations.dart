@@ -3122,7 +3122,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioScriptNovelInlineImportSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Crawl by URL, paste full text, or add one chapter — no dialog required.'**
+  /// **'Crawl by URL, pick a novel file (.txt/.md) to split and import, or paste a snippet; use file pick for full books.'**
   String get studioScriptNovelInlineImportSubtitle;
 
   /// No description provided for @studioScriptNovelInlineOpenFullWorkbench.
@@ -3146,8 +3146,14 @@ abstract class AppLocalizations {
   /// No description provided for @studioScriptNovelInlinePasteSection.
   ///
   /// In en, this message translates to:
-  /// **'Paste full book'**
+  /// **'Full text (paste or file)'**
   String get studioScriptNovelInlinePasteSection;
+
+  /// No description provided for @studioScriptNovelInlinePickFileAndImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick novel file & import'**
+  String get studioScriptNovelInlinePickFileAndImport;
 
   /// No description provided for @studioScriptNovelInlineImportParsed.
   ///
@@ -4275,6 +4281,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No shots in this script yet. Add storyboards on the script step first.'**
   String get studioStoryboardStudioNoShots;
+
+  /// No description provided for @studioStoryboardStudioNoShotsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboard shots yet'**
+  String get studioStoryboardStudioNoShotsTitle;
+
+  /// No description provided for @studioStoryboardStudioNoShotsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add storyboards on the script step first.'**
+  String get studioStoryboardStudioNoShotsSubtitle;
 
   /// No description provided for @studioStoryboardStudioSelectShot.
   ///
@@ -15544,8 +15562,127 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorNovelsWorkbenchImportRawPasteHelper.
   ///
   /// In en, this message translates to:
-  /// **'Auto-split by headings like “Chapter 12”, “Episode 5”, or other chapter/act markers in your manuscript.'**
+  /// **'Auto-split by chapter headings; for full books use Pick novel file.'**
   String get projectEditorNovelsWorkbenchImportRawPasteHelper;
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick novel file'**
+  String get projectEditorNovelsWholeBookPickFileButton;
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileAndImportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick novel file & import'**
+  String get projectEditorNovelsWholeBookPickFileAndImportButton;
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is empty or has no readable text.'**
+  String get projectEditorNovelsWholeBookPickFileEmpty;
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the selected file. Try .txt or .md.'**
+  String get projectEditorNovelsWholeBookPickFileUnreadable;
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'File exceeds {maxMb} MB. Split it or import in parts.'**
+  String projectEditorNovelsWholeBookPickFileTooLarge(int maxMb);
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileLoadedPreparse.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected {count} chapters from file (~{chars} characters).'**
+  String projectEditorNovelsWholeBookPickFileLoadedPreparse(
+    int count,
+    int chars,
+  );
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileLargeNoPastePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'About {chars} characters — not loaded into the paste box (keeps UI responsive). Import parsed chapters below.'**
+  String projectEditorNovelsWholeBookPickFileLargeNoPastePreview(int chars);
+
+  /// No description provided for @projectEditorNovelsWholeBookPickFileUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported format. Use .txt, .md, or .epub.'**
+  String get projectEditorNovelsWholeBookPickFileUnsupported;
+
+  /// No description provided for @projectEditorNovelsWholeBookEpubInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse this EPUB structure.'**
+  String get projectEditorNovelsWholeBookEpubInvalid;
+
+  /// No description provided for @projectEditorNovelsWholeBookEpubNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'No readable text found in this EPUB.'**
+  String get projectEditorNovelsWholeBookEpubNoText;
+
+  /// No description provided for @projectEditorNovelsWholeBookResumeImportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume import ({done}/{total})'**
+  String projectEditorNovelsWholeBookResumeImportButton(int done, int total);
+
+  /// No description provided for @projectEditorNovelsWholeBookResumePickSameFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-select the same book when no local cache (filename may differ): {name}'**
+  String projectEditorNovelsWholeBookResumePickSameFile(String name);
+
+  /// No description provided for @projectEditorNovelsWholeBookResumeContinueInPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored chapter list from local cache; resuming import…'**
+  String get projectEditorNovelsWholeBookResumeContinueInPlace;
+
+  /// No description provided for @projectEditorNovelsWholeBookResumeImportButtonInPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume import (no re-paste)'**
+  String get projectEditorNovelsWholeBookResumeImportButtonInPlace;
+
+  /// No description provided for @projectEditorNovelsWholeBookSourceKeyMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected file does not match the interrupted import; treating it as a new book.'**
+  String get projectEditorNovelsWholeBookSourceKeyMismatch;
+
+  /// No description provided for @projectEditorNovelsWholeBookSourceContentMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Book content does not match the interrupted import.'**
+  String get projectEditorNovelsWholeBookSourceContentMismatch;
+
+  /// No description provided for @projectEditorNovelsWholeBookImportPartialFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Import stopped at chapter {index}: {imported} created, {skipped} skipped (already in project). Tap Resume import to continue (cached chapters need no re-paste).'**
+  String projectEditorNovelsWholeBookImportPartialFailure(
+    int index,
+    int imported,
+    int skipped,
+  );
+
+  /// No description provided for @projectEditorNovelsWholeBookImportDoneSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Import finished: {imported} added, {skipped} skipped (existing), {total} chapters total.'**
+  String projectEditorNovelsWholeBookImportDoneSummary(
+    int imported,
+    int skipped,
+    int total,
+  );
 
   /// No description provided for @projectEditorNovelsWorkbenchImportBatchSizeLabel.
   ///
