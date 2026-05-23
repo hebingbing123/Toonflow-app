@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/ix/studio_freshness_banner.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/platform/studio_load_state.dart';
@@ -86,6 +87,34 @@ void main() {
 
     expect(find.text('质量运营看板'), findsOneWidget);
     expect(find.text('summary'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('quality studio presentation shows skeleton while loading reviews', (
+    WidgetTester tester,
+  ) async {
+    final controller = QualityReviewsController(
+      accessTokenProvider: () => 'token',
+      onErrorChanged: (_) {},
+    );
+    controller.qualityReviewsLoadState = StudioLoadState.loading;
+    controller.loadingQualityReviews = true;
+
+    await tester.pumpWidget(
+      _wrap(
+        QualityReviewsSection(
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: 1,
+          platformConfig: PlatformConfigToggleSetV1.defaults,
+          studioPresentation: true,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(StudioSkeleton), findsWidgets);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

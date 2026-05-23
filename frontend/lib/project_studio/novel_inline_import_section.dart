@@ -520,7 +520,7 @@ class _StudioScriptNovelInlineImportState
             ],
           ),
           if (_previewMessage != null) ...<Widget>[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _previewMessage!,
               style: theme.textTheme.bodySmall?.copyWith(color: tokens.primary),
@@ -541,7 +541,7 @@ class _StudioScriptNovelInlineImportState
               isDense: true,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           TextField(
             controller: _chapterBodyCtrl,
             enabled: !_busy,

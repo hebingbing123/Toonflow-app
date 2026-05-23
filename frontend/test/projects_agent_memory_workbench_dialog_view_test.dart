@@ -267,7 +267,7 @@ void main() {
     expect(find.text(zh.agentMemoryWorkbenchTitle), findsOneWidget);
     expect(find.textContaining('2 个项目 ·'), findsOneWidget);
     expect(find.text('已读取 2 条记忆。'), findsOneWidget);
-    expect(find.text('summary / message / all'), findsNWidgets(2));
+    expect(find.text(zh.agentMemoryFieldClearTypeHelper), findsAtLeastNWidgets(1));
     expect(
       find.text('自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。'),
       findsOneWidget,

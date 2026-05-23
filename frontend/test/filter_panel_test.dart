@@ -5,6 +5,8 @@ import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 
+import 'support/studio_collapsible_filter_test_support.dart';
+
 Finder _statusDropdownButton() =>
     find.byType(StudioMultiSelectField<ShotStatusFilter>);
 
@@ -50,27 +52,27 @@ void main() {
     }
 
     testWidgets('should display search input field', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('搜索字幕或旁白内容... (Ctrl+F / Cmd+F)'), findsOneWidget);
     });
 
     testWidgets('should display status filter dropdown', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       expect(find.text('状态过滤'), findsOneWidget);
     });
 
     testWidgets('should display quality filter dropdown', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       expect(find.text('质量过滤'), findsOneWidget);
     });
 
     testWidgets('should not show clear button when no filters active', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       expect(find.text('清除'), findsNothing);
     });
@@ -80,14 +82,14 @@ void main() {
       final initialFilter = FilterState(
         searchKeyword: 'test',
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       expect(find.text('清除'), findsOneWidget);
     });
 
     testWidgets('should trigger filter change with debounce on search input', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Enter search text
       await tester.enterText(find.byType(TextField), 'test keyword');
@@ -103,7 +105,7 @@ void main() {
 
     testWidgets('should show search options when search keyword entered', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Enter search text
       await tester.enterText(find.byType(TextField), 'test');
@@ -117,7 +119,7 @@ void main() {
     testWidgets('should clear search when clear icon tapped', 
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find and tap the clear icon
       final clearIcon = find.byIcon(Icons.clear);
@@ -136,7 +138,7 @@ void main() {
         searchKeyword: 'test',
         statusFilters: {ShotStatusFilter.enabled},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       expect(find.byType(Chip), findsNWidgets(2)); // Search + status filter
       expect(find.text('搜索: test'), findsOneWidget);
@@ -148,7 +150,7 @@ void main() {
       final initialFilter = FilterState(
         searchKeyword: 'test',
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find the chip with delete icon
       final chip = find.byType(Chip);
@@ -172,7 +174,7 @@ void main() {
         statusFilters: {ShotStatusFilter.enabled},
         qualityFilters: {QualityFilter.hasBadExample},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       await tester.tap(find.text('清除'));
       await tester.pumpAndSettle();
@@ -187,7 +189,7 @@ void main() {
     testWidgets('should toggle search in subtitles option', 
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find the subtitle filter chip
       final subtitleChip = find.widgetWithText(FilterChip, '字幕');
@@ -203,7 +205,7 @@ void main() {
     testWidgets('should toggle search in voiceover option', 
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find the voiceover filter chip
       final voiceoverChip = find.widgetWithText(FilterChip, '旁白');
@@ -218,7 +220,7 @@ void main() {
 
     testWidgets('should cancel previous debounce timer when search text changes rapidly', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Enter first search text
       await tester.enterText(find.byType(TextField), 'first');
@@ -239,7 +241,7 @@ void main() {
 
     testWidgets('should trim search keyword whitespace', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       await tester.enterText(find.byType(TextField), '  test keyword  ');
       await tester.pump(const Duration(milliseconds: 350));
@@ -250,7 +252,7 @@ void main() {
 
     testWidgets('should handle empty search after trimming', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       await tester.enterText(find.byType(TextField), '   ');
       await tester.pump(const Duration(milliseconds: 350));
@@ -261,7 +263,7 @@ void main() {
 
     testWidgets('should debounce status filter changes with 200ms delay', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Open status filter dropdown
       await _openMultiSelectMenu(tester, _statusDropdownButton());
@@ -280,7 +282,7 @@ void main() {
 
     testWidgets('should debounce quality filter changes with 200ms delay', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Open quality filter dropdown
       await _openMultiSelectMenu(tester, _qualityDropdownButton());
@@ -299,7 +301,7 @@ void main() {
 
     testWidgets('should cancel previous filter debounce timer when filter changes rapidly', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Open status filter dropdown and select first filter
       await _openMultiSelectMenu(tester, _statusDropdownButton());
@@ -345,7 +347,7 @@ void main() {
 
     testWidgets('should combine search keyword with status filters', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Add search keyword
       await tester.enterText(find.byType(TextField), 'test');
@@ -366,7 +368,7 @@ void main() {
 
     testWidgets('should combine search keyword with quality filters', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Add search keyword
       await tester.enterText(find.byType(TextField), 'test');
@@ -387,7 +389,7 @@ void main() {
 
     testWidgets('should combine status and quality filters', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Open status filter dropdown
       await _openMultiSelectMenu(tester, _statusDropdownButton());
@@ -411,7 +413,7 @@ void main() {
 
     testWidgets('should combine all three filter types', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       // Add search keyword
       await tester.enterText(find.byType(TextField), 'test');
@@ -442,7 +444,7 @@ void main() {
 
     testWidgets('should support multiple status filters', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       await _openMultiSelectMenu(tester, _statusDropdownButton());
       await _tapOverlayMenuLabel(tester, '已启用');
@@ -459,7 +461,7 @@ void main() {
 
     testWidgets('should support multiple quality filters', 
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+      await pumpWithExpandedStudioFilters(tester, createTestWidget());
 
       await _openMultiSelectMenu(tester, _qualityDropdownButton());
       await _tapOverlayMenuLabel(tester, '有坏例');
@@ -479,7 +481,7 @@ void main() {
       final initialFilter = FilterState(
         statusFilters: {ShotStatusFilter.enabled},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       await _openMultiSelectMenu(tester, _statusDropdownButton());
       await _tapOverlayMenuLabel(tester, '已启用');
@@ -495,7 +497,7 @@ void main() {
       final initialFilter = FilterState(
         qualityFilters: {QualityFilter.hasBadExample},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       await _openMultiSelectMenu(tester, _qualityDropdownButton());
       await _tapOverlayMenuLabel(tester, '有坏例');
@@ -513,7 +515,7 @@ void main() {
         statusFilters: {ShotStatusFilter.enabled, ShotStatusFilter.hasVideo},
         qualityFilters: {QualityFilter.hasBadExample, QualityFilter.generationStage},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Should display 5 tags: 1 search + 2 status + 2 quality
       expect(find.byType(Chip), findsNWidgets(5));
@@ -526,7 +528,7 @@ void main() {
         statusFilters: {ShotStatusFilter.enabled},
         qualityFilters: {QualityFilter.hasBadExample},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find and remove the status filter tag
       final statusChip = find.widgetWithText(Chip, '已启用');
@@ -549,7 +551,7 @@ void main() {
         searchKeyword: 'test',
         statusFilters: {ShotStatusFilter.enabled},
       );
-      await tester.pumpWidget(createTestWidget(initialFilter: initialFilter));
+      await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Toggle off subtitle search
       final subtitleChip = find.widgetWithText(FilterChip, '字幕');
@@ -849,7 +851,8 @@ void main() {
     testWidgets('should show save preset button when filters active',
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(initialFilter: initialFilter),
       );
 
@@ -858,7 +861,7 @@ void main() {
 
     testWidgets('should not show save preset button when no filters active',
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidgetWithPresets());
+      await pumpWithExpandedStudioFilters(tester, createTestWidgetWithPresets());
 
       expect(find.text('保存预设'), findsNothing);
     });
@@ -872,7 +875,8 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(presets: presets),
       );
 
@@ -881,7 +885,7 @@ void main() {
 
     testWidgets('should not show presets dropdown when no presets',
         (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidgetWithPresets());
+      await pumpWithExpandedStudioFilters(tester, createTestWidgetWithPresets());
 
       expect(find.byIcon(Icons.bookmarks), findsNothing);
     });
@@ -889,7 +893,8 @@ void main() {
     testWidgets('should open save preset dialog when save button tapped',
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(initialFilter: initialFilter),
       );
 
@@ -903,7 +908,8 @@ void main() {
     testWidgets('should save preset with entered name',
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(initialFilter: initialFilter),
       );
 
@@ -926,7 +932,8 @@ void main() {
     testWidgets('should cancel save preset dialog',
         (WidgetTester tester) async {
       final initialFilter = FilterState(searchKeyword: 'test');
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(initialFilter: initialFilter),
       );
 
@@ -952,7 +959,8 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(presets: presets),
       );
 
@@ -983,7 +991,8 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(presets: presets),
       );
 
@@ -1016,7 +1025,8 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         createTestWidgetWithPresets(presets: presets),
       );
 

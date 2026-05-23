@@ -3,6 +3,7 @@ import 'dart:ui' show Size;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 
+import '../support/studio_collapsible_filter_test_support.dart';
 import '../support/product_shell_test_app.dart';
 import '../support/utility_shell_fixtures.dart';
 
@@ -24,6 +25,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
+    await expandStudioCollapsibleFilterPanel(tester);
 
     expect(find.text(zh.platformStatusTitle), findsAtLeastNWidgets(1));
     expect(find.text(zh.platformStatusIntro), findsOneWidget);

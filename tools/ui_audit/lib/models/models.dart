@@ -11,3 +11,4 @@ export 'audit_metadata.dart';
 export 'audit_summary.dart';
 export 'action_plan_item.dart';
 export 'audit_result.dart';
+export 'fix_proposal.dart';

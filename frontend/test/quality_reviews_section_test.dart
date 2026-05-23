@@ -6,6 +6,8 @@ import 'package:openflow_app/platform/studio_load_state.dart';
 import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/field_styling.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
+
+import 'support/studio_collapsible_filter_test_support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 const _testPlatformConfig = PlatformConfigToggleSetV1.defaults;
@@ -122,6 +124,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await expandStudioCollapsibleFilterPanel(tester);
 
     expect(find.text(zh.qualityReviewsEmptyForCurrentFilters), findsOneWidget);
     expect(find.text(zh.qualityReviewsCount(0)), findsOneWidget);

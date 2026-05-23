@@ -219,7 +219,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                   experimentDetail!.variants.length,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...experimentDetail!.variants.map(
                 (variant) => Text(
                   '${variant.label} · baseline=${variant.isBaseline} · '
@@ -236,7 +236,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                   roiSummary!.overallRationale,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...roiSummary!.variantComparisons.map(
                 (item) => Text(
                   l10n.benchmarkRoiVariantLine(

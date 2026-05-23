@@ -229,7 +229,7 @@ class _WizardStepIndicator extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   labels[i],
                   textAlign: TextAlign.center,

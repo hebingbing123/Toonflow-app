@@ -59,7 +59,7 @@ class _PublishJobsPanel extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         for (final line in publishPanelUi.jobLines)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),

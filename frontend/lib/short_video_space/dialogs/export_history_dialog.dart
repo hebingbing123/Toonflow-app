@@ -1008,7 +1008,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                             ),
                           if (rawErrorLine != null) ...[
                             if (structuredFailureLine != null)
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 4),
                             Text(
                               rawErrorLine,
                               style: theme.textTheme.bodySmall?.copyWith(

@@ -3,8 +3,17 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/jobs/section_view.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/l10n/studio_code_labels.dart';
 import 'package:openflow_app/platform/studio_load_state.dart';
 import 'package:openflow_app/rust_api.dart';
+
+import 'support/studio_collapsible_filter_test_support.dart';
+
+final AppLocalizationsZh _zhL10n = AppLocalizationsZh();
+
+String _jobRowTitle(String status) =>
+    studioJobListTitle(_zhL10n, 'flutter.probe', status);
 
 void noop() {}
 
@@ -150,18 +159,12 @@ void main() {
     expect(find.text('类型汇总：flutter.probe=1'), findsOneWidget);
     expect(find.text('状态汇总：failed=1'), findsOneWidget);
     expect(find.text('2 条作业'), findsOneWidget);
-    expect(
-      find.widgetWithText(ListTile, 'flutter.probe · failed'),
-      findsOneWidget,
-    );
-    expect(
-      find.widgetWithText(ListTile, 'flutter.probe · queued'),
-      findsOneWidget,
-    );
+    expect(find.widgetWithText(ListTile, _jobRowTitle('failed')), findsOneWidget);
+    expect(find.widgetWithText(ListTile, _jobRowTitle('queued')), findsOneWidget);
     expect(find.textContaining('失败原因：provider timeout'), findsOneWidget);
     expect(find.textContaining('认领者：worker-a'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'jobs retry'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'jobs cancel'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, _zhL10n.jobsRetry), findsOneWidget);
+    expect(find.widgetWithText(TextButton, _zhL10n.jobsCancel), findsOneWidget);
   });
 
   testWidgets('jobs section view disables busy actions', (
@@ -248,11 +251,11 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(ListTile, 'flutter.probe · failed'));
+    await tester.tap(find.widgetWithText(ListTile, _jobRowTitle('failed')));
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'jobs retry'));
+    await tester.tap(find.widgetWithText(TextButton, _zhL10n.jobsRetry));
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'jobs cancel'));
+    await tester.tap(find.widgetWithText(TextButton, _zhL10n.jobsCancel));
     await tester.pump();
 
     expect(selectedJob?.id, 'job-1');
@@ -294,11 +297,11 @@ void main() {
       ),
     );
 
-    expect(find.widgetWithText(ListTile, 'flutter.probe · failed'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'flutter.probe · running'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'flutter.probe · succeeded'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'jobs retry'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'jobs cancel'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, _jobRowTitle('failed')), findsOneWidget);
+    expect(find.widgetWithText(ListTile, _jobRowTitle('running')), findsOneWidget);
+    expect(find.widgetWithText(ListTile, _jobRowTitle('succeeded')), findsOneWidget);
+    expect(find.widgetWithText(TextButton, _zhL10n.jobsRetry), findsOneWidget);
+    expect(find.widgetWithText(TextButton, _zhL10n.jobsCancel), findsOneWidget);
   });
 
   testWidgets('product studio hides flutter.probe regression panel', (
@@ -324,7 +327,10 @@ void main() {
       ),
     );
 
-    expect(find.text('加载作业列表'), findsOneWidget);
+    await tester.pump();
+    await expandStudioCollapsibleFilterPanel(tester);
+
+    expect(find.text(_zhL10n.jobsLoadList), findsOneWidget);
     expect(find.text('查看失败作业'), findsOneWidget);
     expect(
       find.text('查看作业列表、状态汇总，并按 ID 打开单条执行记录。'),

@@ -290,26 +290,26 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         if (promptDiagnostics != null) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             buildStoryboardVideoPromptDiagnosticsLine(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             buildStoryboardVideoPromptSourceSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             buildStoryboardVideoPromptAnchorSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             buildStoryboardVideoPromptBudgetHint(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -317,7 +317,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ),
           if (repairSuggestions.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.storyboardVideoWorkbenchRepairSuggestionsPrefix(
                 repairSuggestions.join(' / '),
@@ -603,7 +603,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ].join(' · '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,

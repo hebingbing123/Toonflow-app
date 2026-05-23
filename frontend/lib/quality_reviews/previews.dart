@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_skeleton.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
@@ -52,10 +54,17 @@ class QualityReviewsActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final actionButtons = <Widget>[
-      FilledButton.tonal(
-        onPressed: onOpenWorkbench,
-        child: Text(l10n.qualityReviewsOpenWorkbench),
-      ),
+      if (studioPresentation)
+        StudioPrimaryButton(
+          label: l10n.qualityReviewsOpenWorkbench,
+          icon: Icons.dashboard_customize_outlined,
+          onPressed: onOpenWorkbench,
+        )
+      else
+        FilledButton.tonal(
+          onPressed: onOpenWorkbench,
+          child: Text(l10n.qualityReviewsOpenWorkbench),
+        ),
       if (showDashboardControls)
         (studioPresentation
             ? FilledButton.tonal(
@@ -195,6 +204,19 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
         (badCaseStats?.isNotEmpty ?? false);
     if (!hasAnything) {
       if (dashboardLoadState == StudioLoadState.loading || loadingDashboard) {
+        if (studioPresentation) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioSkeleton(height: 16),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 48),
+              ],
+            ),
+          );
+        }
         return const Center(child: CircularProgressIndicator());
       }
       if (studioPresentation &&
@@ -243,7 +265,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             l10n.qualityReviewsTargetType,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -269,7 +291,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             l10n.qualityReviewsStageGrade,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -291,7 +313,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             l10n.qualityReviewsBadCaseHotspots,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -316,7 +338,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             l10n.qualityReviewsScopeLeaderboard,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           ...scopeInsightRows!
               .take(3)
               .map(
@@ -335,7 +357,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             l10n.qualityReviewsTokenEfficiency,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           ...tokenEfficiencyRows!
               .take(3)
               .map(

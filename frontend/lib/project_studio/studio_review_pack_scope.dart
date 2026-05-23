@@ -350,7 +350,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.studioReviewPackSubtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(

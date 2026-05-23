@@ -5,11 +5,14 @@ import '../../design_system/components/studio_collapsible_filter_panel.dart';
 import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
+import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../platform/studio_load_state.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../rust_api.dart';
 
@@ -108,10 +111,137 @@ class JobsSectionView extends StatelessWidget {
         .toList(growable: false);
   }
 
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: DecoratedBox(
+          decoration: studioInsetPanelDecoration(context),
+          child: const Padding(
+            padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioSkeleton(height: 18),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioJobTile(
+    BuildContext context, {
+    required JobRow job,
+    required AppLocalizations l10n,
+    required bool compact,
+    required TextStyle? detailStyle,
+  }) {
+    final tokens = StudioTokens.of(context);
+    final detailLines = <String>[
+      job.id,
+      if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
+        l10n.jobsFailedReason(job.errorMessage!),
+      if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
+        l10n.jobsClaimedBy(job.claimedBy!),
+    ];
+    final actionButtons = <Widget>[
+      if (job.status == 'failed')
+        TextButton(
+          onPressed: model.retryingJobId == job.id
+              ? null
+              : () => callbacks.onRetryFailedJob(job),
+          child: Text(
+            model.retryingJobId == job.id ? '…' : l10n.jobsRetry,
+          ),
+        ),
+      if (job.status == 'queued' || job.status == 'running')
+        TextButton(
+          onPressed: model.cancellingJobId == job.id
+              ? null
+              : () => callbacks.onCancelQueuedJob(job),
+          child: Text(
+            model.cancellingJobId == job.id ? '…' : l10n.jobsCancel,
+          ),
+        ),
+    ];
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => callbacks.onSelectJob(job),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+        child: Container(
+          margin: const EdgeInsets.only(top: StudioSpacing.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StudioLayoutSpacing.cardInner - 4,
+            vertical: StudioSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: tokens.bgSurface.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+            border: Border.all(color: tokens.borderSubtle),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      studioJobListTitle(l10n, job.kind, job.status),
+                      maxLines: compact ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: studioCardTitleStyle(context),
+                    ),
+                  ),
+                  if (!compact && actionButtons.isNotEmpty)
+                    Wrap(spacing: 4, children: actionButtons),
+                  if (!compact) ...<Widget>[
+                    const SizedBox(width: StudioSpacing.xs),
+                    Icon(Icons.chevron_right, size: 20, color: tokens.textMuted),
+                  ],
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    for (var i = 0; i < detailLines.length; i++) ...<Widget>[
+                      if (i > 0) const SizedBox(height: 4),
+                      Text(
+                        detailLines[i],
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: detailStyle,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (compact && actionButtons.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 8),
+                Wrap(spacing: 8, runSpacing: 4, children: actionButtons),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildJobList(
     BuildContext context, {
     required List<JobRow> visibleJobs,
     required bool showCountHeader,
+    bool studioCards = false,
   }) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final compact = MediaQuery.sizeOf(context).width < 520;
@@ -129,6 +259,15 @@ class JobsSectionView extends StatelessWidget {
           ),
         ],
         ...visibleJobs.take(8).map((job) {
+          if (studioCards) {
+            return _buildStudioJobTile(
+              context,
+              job: job,
+              l10n: l10n,
+              compact: compact,
+              detailStyle: detailStyle,
+            );
+          }
           final detailLines = <String>[
             job.id,
             if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
@@ -200,6 +339,61 @@ class JobsSectionView extends StatelessWidget {
     );
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioPaneHeader(
+              title: l10n.jobsTitle,
+              subtitle: l10n.jobsSubtitle,
+              showBack: false,
+              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.jobsPrefsTooltip,
+              ),
+            ),
+            const SizedBox(height: StudioLayoutSpacing.section - 6),
+            StudioCollapsibleFilterPanel(
+              child: StudioFilterRow(
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                wideBreakpoint: 480,
+                children: <Widget>[
+                  FilledButton.tonal(
+                    onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+                    child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: model.loadingJobs
+                        ? null
+                        : callbacks.onLoadJobsStatusFailed,
+                    child: Text(l10n.jobsLoadFailed),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStudioMainBody(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     if (model.jobsLoadState == StudioLoadState.error) {
@@ -208,23 +402,32 @@ class JobsSectionView extends StatelessWidget {
     if (model.jobsLoadState == StudioLoadState.initial ||
         model.jobsLoadState == StudioLoadState.loading ||
         model.loadingJobs) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildStudioLoadingBody(context);
     }
     final visibleJobs = _visibleJobs();
     if (visibleJobs.isEmpty) {
       return Center(
-        child: StudioEmptyState(
+        child: StudioEmptyState.emptyData(
           title: l10n.jobsEmptyValue,
           subtitle: l10n.jobsSubtitle,
           icon: Icons.work_outline,
+          actionLabel: l10n.jobsLoadList,
+          onAction: callbacks.onLoadJobs,
         ),
       );
     }
     return SingleChildScrollView(
-      child: _buildJobList(
-        context,
-        visibleJobs: visibleJobs,
-        showCountHeader: false,
+      child: DecoratedBox(
+        decoration: studioInsetPanelDecoration(context),
+        child: Padding(
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+          child: _buildJobList(
+            context,
+            visibleJobs: visibleJobs,
+            showCountHeader: false,
+            studioCards: true,
+          ),
+        ),
       ),
     );
   }
@@ -241,7 +444,10 @@ class JobsSectionView extends StatelessWidget {
       child: Center(
         child: Text(
           l10n.jobsCountLabel(_visibleJobs().length),
-          style: Theme.of(context).textTheme.labelLarge,
+          style: studioHintStyle(context)?.copyWith(
+            color: StudioTokens.of(context).textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -327,7 +533,8 @@ class JobsSectionView extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ...header,
+          const SizedBox(height: 16),
+          _buildStudioHeader(context, l10n),
           const SizedBox(height: 12),
           if (model.jobsLoadState == StudioLoadState.error &&
               model.jobsLastError != null)

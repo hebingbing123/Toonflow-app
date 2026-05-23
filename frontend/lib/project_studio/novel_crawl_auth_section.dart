@@ -271,13 +271,13 @@ class _StudioNovelCrawlAuthSectionState
           onTap: () => setState(() => _expanded = true),
         ),
         if (_expanded) ...<Widget>[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.studioNovelCrawlAuthSectionSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           if (!_encryptionConfigured) ...<Widget>[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.studioNovelCrawlAuthEncryptionMissing,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -350,7 +350,7 @@ class _StudioNovelCrawlAuthSectionState
                 isDense: true,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _passwordCtrl,
               enabled: !_loading && !_saving,
@@ -363,7 +363,7 @@ class _StudioNovelCrawlAuthSectionState
                 isDense: true,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _loginUrlCtrl,
               enabled: !_loading && !_saving,
@@ -373,7 +373,7 @@ class _StudioNovelCrawlAuthSectionState
                 isDense: true,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Row(
               children: <Widget>[
                 Expanded(
@@ -417,7 +417,7 @@ class _StudioNovelCrawlAuthSectionState
             ],
           ),
           if (_statusLine != null) ...<Widget>[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _statusLine!,
               style: theme.textTheme.bodySmall?.copyWith(color: outline),

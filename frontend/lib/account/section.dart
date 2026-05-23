@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -64,6 +64,50 @@ class _AccountSectionState extends State<AccountSection> {
     }
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    l10n.accountSectionTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                ),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.accountRiskyPrefsTooltip,
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(l10n.accountSectionSubtitle, style: studioSectionIntroStyle(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _deleteAccount() async {
     final response = await widget.controller.deleteAccount(
       confirmPhrase: _deletePhraseMatches(_confirmController.text)
@@ -79,7 +123,6 @@ class _AccountSectionState extends State<AccountSection> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final canDelete =
         _acknowledgeIrreversible &&
@@ -90,11 +133,6 @@ class _AccountSectionState extends State<AccountSection> {
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 1080;
         final comfortable = constraints.maxWidth >= 720;
-        final subtitleStyle =
-            studioSectionIntroStyle(context) ??
-            theme.textTheme.bodySmall?.copyWith(
-              color: StudioTokens.of(context).textSecondary,
-            );
         final panels = wide
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,28 +167,15 @@ class _AccountSectionState extends State<AccountSection> {
 
         return Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      l10n.accountSectionTitle,
-                      style: studioPaneTitleStyle(context),
-                    ),
-                  ),
-                  RiskyOperationConfirmPrefsOverflowMenu(
-                    tooltip: l10n.accountRiskyPrefsTooltip,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(l10n.accountSectionSubtitle, style: subtitleStyle),
-              SizedBox(height: comfortable ? 16 : 12),
-              panels,
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _buildStudioHeader(context, l10n),
+                SizedBox(height: comfortable ? 16 : StudioLayoutSpacing.stackMedium),
+                panels,
+              ],
+            ),
           ),
         );
       },
@@ -160,9 +185,13 @@ class _AccountSectionState extends State<AccountSection> {
   Widget _buildExportPanel(BuildContext context, {required bool comfortable}) {
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    return StudioCard(
-      padding: EdgeInsets.all(comfortable ? StudioLayoutSpacing.insetComfortable : StudioSpacing.sm),
-      child: LayoutBuilder(
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: EdgeInsets.all(
+          comfortable ? StudioLayoutSpacing.insetComfortable : StudioSpacing.sm,
+        ),
+        child: LayoutBuilder(
         builder: (context, constraints) {
           final stackHeader = constraints.maxWidth < 720;
           final headerDetails = Column(
@@ -258,7 +287,16 @@ class _AccountSectionState extends State<AccountSection> {
               ),
               const SizedBox(height: 16),
               if (widget.controller.loading)
-                const Center(child: CircularProgressIndicator())
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    StudioSkeleton(height: 18),
+                    SizedBox(height: StudioSpacing.sm),
+                    StudioSkeleton(height: 56),
+                    SizedBox(height: StudioSpacing.sm),
+                    StudioSkeleton(height: 56),
+                  ],
+                )
               else if (widget.controller.items.isEmpty)
                 StudioEmptyState.emptyData(
                   title: l10n.accountExportEmpty,
@@ -271,6 +309,7 @@ class _AccountSectionState extends State<AccountSection> {
             ],
           );
         },
+        ),
       ),
     );
   }
@@ -526,33 +565,38 @@ class _AccountSectionState extends State<AccountSection> {
           ),
         );
 
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(comfortable ? StudioLayoutSpacing.insetComfortable : StudioSpacing.sm),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: theme.colorScheme.error.withValues(alpha: 0.24),
-            ),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                tokens.bgSurface.withValues(alpha: 0.98),
-                tokens.bgInset.withValues(alpha: 0.96),
-                theme.colorScheme.errorContainer.withValues(alpha: 0.1),
-              ],
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: theme.colorScheme.error.withValues(alpha: 0.05),
-                blurRadius: 20,
-                spreadRadius: -14,
-                offset: const Offset(0, 12),
+        return DecoratedBox(
+          decoration:
+              studioInsetPanelDecoration(context).copyWith(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: theme.colorScheme.error.withValues(alpha: 0.24),
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    tokens.bgSurface.withValues(alpha: 0.98),
+                    tokens.bgInset.withValues(alpha: 0.96),
+                    theme.colorScheme.errorContainer.withValues(alpha: 0.1),
+                  ],
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: theme.colorScheme.error.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    spreadRadius: -14,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: split
+          child: Padding(
+            padding: EdgeInsets.all(
+              comfortable
+                  ? StudioLayoutSpacing.insetComfortable
+                  : StudioSpacing.sm,
+            ),
+            child: split
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -566,8 +610,13 @@ class _AccountSectionState extends State<AccountSection> {
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[summary, const SizedBox(height: StudioLayoutSpacing.stackMedium), form],
+                  children: <Widget>[
+                    summary,
+                    const SizedBox(height: StudioLayoutSpacing.stackMedium),
+                    form,
+                  ],
                 ),
+          ),
         );
       },
     );
@@ -614,7 +663,7 @@ class _AccountSectionState extends State<AccountSection> {
                 onChanged: (value) => setAcknowledged(value ?? false),
                 materialTapTargetSize: MaterialTapTargetSize.padded,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 6),

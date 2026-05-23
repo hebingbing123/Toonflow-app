@@ -95,6 +95,7 @@ Openflow-app/
 │   ├── lib/             # 源代码
 │   ├── pubspec.yaml     # 依赖配置
 │   └── README.md        # 前端文档
+├── website/             # 产品介绍宣传页（静态 HTML，见 website/README.md）
 ├── supabase/            # 数据库迁移
 │   └── migrations/      # SQL 迁移文件
 ├── docs/                # 文档
@@ -105,6 +106,7 @@ Openflow-app/
 详细说明：
 - **`backend/`**：Rust 后端服务（Axum + SQLx + Tokio），默认端口 **8666**，详见 [`backend/README.md`](backend/README.md)
 - **`frontend/`**：Flutter 客户端（桌面 + Web），通过 `API_BASE_URL` 连接后端，详见 [`frontend/README.md`](frontend/README.md)
+- **`website/`**：产品介绍落地页（中/英）；与后端同启时访问 **http://127.0.0.1:8666/**（详见 [`website/README.md`](website/README.md)）
 - **`docs/plans/`**：技术路线图与设计文档，主路线图：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)
 - **`supabase/`**：数据库迁移与配置，开发：`supabase start`（本地 Docker），生产：Supabase 云端托管
 
@@ -198,7 +200,7 @@ cd backend
 cargo run --bin openflow-server
 ```
 
-服务启动后监听 `http://127.0.0.1:8666`
+服务启动后监听 `http://127.0.0.1:8666`（根路径 `/` 为产品介绍页，`/api/v1/*` 为 API）
 
 #### 5. 启动前端应用
 

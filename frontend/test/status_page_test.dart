@@ -169,7 +169,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text(l10n.statusPageBridgeErrorLine('Bad state: default failed')),
+      find.text(
+        l10n.statusPageBridgeErrorLine('Bad state: fallback failed'),
+      ),
       findsOneWidget,
     );
   });

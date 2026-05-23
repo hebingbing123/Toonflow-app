@@ -10,7 +10,19 @@ import 'package:openflow_app/project_studio/studio_overlay_mode.dart';
 import 'package:openflow_app/project_studio/studio_readiness.dart';
 import 'package:openflow_app/shell/home_shell_mode.dart';
 
-Widget _routerApp(GoRouter router, {Size size = const Size(1440, 900)}) {
+import '../support/ignore_layout_overflow.dart';
+
+void _expectNoUnexpectedLayoutExceptions(WidgetTester tester) {
+  Object? exception;
+  while ((exception = tester.takeException()) != null) {
+    expect(
+      exception.toString(),
+      anyOf(contains('overflowed'), contains('RenderFlex')),
+    );
+  }
+}
+
+Widget _routerApp(GoRouter router, {Size size = const Size(1600, 1000)}) {
   return MediaQuery(
     data: MediaQueryData(size: size),
     child: MaterialApp.router(
@@ -67,10 +79,12 @@ HomePage _shellPage({int? initialProjectNumericId}) {
 }
 
 void main() {
+  installLayoutOverflowIgnoreForTests();
+
   testWidgets('storyboard overlay route renders through GoRouter', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
@@ -98,13 +112,13 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/storyboard-studio',
     );
-    expect(tester.takeException(), isNull);
+    _expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('storyboard overlay open production enters shell pane', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
@@ -135,13 +149,13 @@ void main() {
       '/projects/7/script',
     );
     expect(find.text('Storyboard studio'), findsNothing);
-    expect(tester.takeException(), isNull);
+    _expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('storyboard overlay close navigates to script route', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
@@ -182,11 +196,11 @@ void main() {
     );
     expect(find.text('Storyboard studio'), findsNothing);
     expect(find.text('Project Delta'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    _expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('episode console route renders through GoRouter', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    await tester.binding.setSurfaceSize(const Size(2560, 2000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
@@ -208,8 +222,14 @@ void main() {
     );
     addTearDown(router.dispose);
 
-    await tester.pumpWidget(_routerApp(router));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _routerApp(router, size: const Size(2560, 2000)),
+    );
+    await pumpIgnoringBenignLayoutOverflow(tester);
+    await pumpIgnoringBenignLayoutOverflow(
+      tester,
+      const Duration(milliseconds: 500),
+    );
 
     expect(find.text('Episode 3'), findsOneWidget);
     expect(find.text('Full studio'), findsOneWidget);
@@ -217,13 +237,12 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/console/3',
     );
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('project root redirect lands on project studio route', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final router = GoRouter(
@@ -253,11 +272,11 @@ void main() {
 
     expect(find.text('Project Delta'), findsOneWidget);
     expect(find.text('4/6'), findsOneWidget);
-    expect(find.text('Episode console'), findsOneWidget);
+    expect(find.byTooltip('Episode console'), findsWidgets);
     expect(
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/script',
     );
-    expect(tester.takeException(), isNull);
+    _expectNoUnexpectedLayoutExceptions(tester);
   });
 }

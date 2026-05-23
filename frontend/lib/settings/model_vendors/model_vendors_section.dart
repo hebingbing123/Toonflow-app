@@ -379,11 +379,11 @@ class _VendorCardState extends State<_VendorCard> {
                                 ),
                               ),
                               if (protocolChip != null) ...<Widget>[
-                                const SizedBox(width: 6),
+                                const SizedBox(width: StudioSpacing.xs),
                                 _VendorProtocolChip(label: protocolChip),
                               ],
                               if (aggregationActive && !_expanded) ...<Widget>[
-                                const SizedBox(width: 6),
+                                const SizedBox(width: StudioSpacing.xs),
                                 _VendorProtocolChip(
                                   label: l10n.settingsModelVendorsAggregationHint,
                                   emphasized: true,

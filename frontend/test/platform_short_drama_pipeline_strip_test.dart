@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/shell/navigation_controller.dart';
+import 'package:openflow_app/shell/pipeline_step_chip.dart';
 import 'package:openflow_app/shell/platform_short_drama_pipeline_strip.dart';
 
 void main() {
@@ -25,11 +26,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FilterChip).at(1));
+    await tester.tap(find.byType(PipelineStepChip).at(1));
     await tester.pump();
     expect(last, ProductWorkspacePane.scriptWorkspace);
 
-    await tester.tap(find.byType(FilterChip).last);
+    await tester.tap(find.byType(PipelineStepChip).last);
     await tester.pump();
     expect(last, ProductWorkspacePane.shortVideoSpace);
   });

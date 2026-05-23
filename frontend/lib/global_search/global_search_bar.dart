@@ -375,12 +375,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     ThemeData theme,
     StudioTokens tokens,
   ) {
+    final typography = StudioTypography.of(context);
     final hintStyle = theme.textTheme.bodyMedium?.copyWith(
-      fontSize: 13,
+      fontSize: typography.body,
       color: tokens.textSecondary.withValues(alpha: 0.78),
     );
     final textStyle = theme.textTheme.bodyMedium?.copyWith(
-      fontSize: 13,
+      fontSize: typography.body,
       color: tokens.textPrimary.withValues(alpha: 0.92),
       fontWeight: FontWeight.w400,
     );
@@ -1215,10 +1216,17 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       onKeyEvent: _handleKeyEvent,
       child: CompositedTransformTarget(
         link: _layerLink,
-        child: Container(
-          width: titleBarDense ? null : 400,
-          height: barHeight,
-          decoration: BoxDecoration(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final resolvedWidth = titleBarDense
+                ? null
+                : compact && constraints.maxWidth.isFinite
+                ? constraints.maxWidth.clamp(160.0, 400.0)
+                : 400.0;
+            return Container(
+              width: resolvedWidth,
+              height: barHeight,
+              decoration: BoxDecoration(
             color: titleBarDense
                 ? tokens.bgInset.withValues(alpha: 0.92)
                 : null,
@@ -1347,6 +1355,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                 ),
             ],
           ),
+            );
+          },
         ),
       ),
     );

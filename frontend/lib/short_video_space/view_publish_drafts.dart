@@ -82,7 +82,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelMatrixDomesticLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.matrixDomesticLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -95,7 +95,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelMatrixOverseasLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.matrixOverseasLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -108,7 +108,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelPrepareChecks,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.prepareLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -145,7 +145,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               // P8: Multi-select toolbar
               if (publishPanelUi.multiSelectMode) ...[
                 Container(
@@ -343,7 +343,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelCurrentDraftLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 key: ValueKey<String>(
                   'publish_op_draft_${publishPanelUi.selectedPublishDraftId ?? "__none__"}',
@@ -432,7 +432,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelAutomationByPlatform,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               for (final entry
                   in publishPanelUi.publishAutomationModesByPlatform.entries)
                 Padding(
@@ -634,7 +634,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelBatchResultSummary,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...publishPanelUi.publishBatchResultLines
                   .take(8)
                   .map(

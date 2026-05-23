@@ -63,10 +63,10 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         if (blockerSummary.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(blockerSummary, style: Theme.of(context).textTheme.bodySmall),
         ],
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         ...stages.map(
           (ProductionWorkspaceStage stage) => Card(
             margin: const EdgeInsets.only(bottom: 8),

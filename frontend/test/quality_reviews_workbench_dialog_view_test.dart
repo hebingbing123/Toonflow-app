@@ -285,7 +285,7 @@ void main() {
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.text('1 条评审'), findsOneWidget);
     expect(
-      find.widgetWithText(ListTile, 'output · manual · score=82'),
+      find.widgetWithText(ListTile, '产出 · manual · score=82'),
       findsOneWidget,
     );
   });
@@ -339,14 +339,14 @@ void main() {
     );
     expect(
       tester
-          .widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'passed'))
+          .widget<SwitchListTile>(find.widgetWithText(SwitchListTile, '是否通过'))
           .onChanged,
       isNull,
     );
     expect(
       tester
           .widget<SwitchListTile>(
-            find.widgetWithText(SwitchListTile, 'isBadCase'),
+            find.widgetWithText(SwitchListTile, '是否坏例'),
           )
           .onChanged,
       isNull,
@@ -390,7 +390,7 @@ void main() {
       ),
     );
 
-    final reviewTileTitle = find.text('output · manual · score=82');
+    final reviewTileTitle = find.text('产出 · manual · score=82');
     await tester.ensureVisible(reviewTileTitle);
     await tester.tap(reviewTileTitle);
     await tester.pump();
@@ -436,7 +436,7 @@ void main() {
         ),
       );
 
-      final actionButton = find.byTooltip('Apply suggested action');
+      final actionButton = find.byTooltip('应用建议动作');
       await tester.ensureVisible(actionButton);
       await tester.tap(actionButton);
       await tester.pump();

@@ -14,6 +14,7 @@ pub mod jobs;
 pub mod legacy_numeric_id;
 pub mod llm;
 pub mod manuals;
+pub mod marketing_site;
 pub mod metering;
 pub mod metrics;
 pub mod middleware;

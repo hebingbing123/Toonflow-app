@@ -65,14 +65,14 @@ class ProjectAssetsOverviewView extends StatelessWidget {
             model.focusNotice!,
             style: bodySmall?.copyWith(color: theme.colorScheme.primary),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         Text(
           summarizeProjectAssetRows(model.visibleAssets, l10n: l10n),
           style: bodySmall,
         ),
         if (model.filterScriptNumericId != null) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           if (model.assetsScriptFilterLoading)
             Text(
               l10n.projectEditorAssetsOverviewFilteringByScript,

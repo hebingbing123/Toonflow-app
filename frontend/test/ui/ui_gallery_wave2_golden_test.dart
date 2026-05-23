@@ -11,6 +11,7 @@ import 'package:openflow_app/project_studio/studio_agent_quick_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/project_studio_fixture.dart';
+import '../support/studio_workbench_section_test_support.dart';
 import '../support/studio_golden_app.dart';
 import '../support/ui_gallery_capture.dart';
 import 'search_no_results_test.dart';
@@ -116,7 +117,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.tap(find.text(zh.studioScriptStepSetupOpen));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await expandAllStudioWorkbenchSections(tester);
 
     await expectLater(
       find.byType(StudioAgentQuickBar),

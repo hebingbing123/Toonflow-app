@@ -2149,7 +2149,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             item.selectedMediaKind,
                           ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(l10n.shortVideoSpaceProductionAssemblyDurationLabel),
@@ -2172,14 +2172,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   // 配音状态展示
                   Text(
                     '${item.voiceoverScriptReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady} · '
                     '${item.voiceoverAssetReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady}',
                   ),
                   if (item.voiceoverState.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Text(
@@ -2195,7 +2195,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     ),
                   ],
                   if (item.voiceoverAudioUrl.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Text(
@@ -2215,7 +2215,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   ],
                   if (item.voiceoverState == 'failed' &&
                       item.voiceoverError.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Text(
@@ -2235,7 +2235,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ],
                     ),
                   ],
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     '${l10n.shortVideoSpaceProductionAssemblyMismatchCheckLabel}${subtitleMismatchLine(item)}',
                   ),

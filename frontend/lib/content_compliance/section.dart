@@ -6,7 +6,9 @@ import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_code_dropdown_field.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -141,6 +143,28 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
+  Widget _buildQueueLoadingSkeleton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: DecoratedBox(
+        decoration: studioInsetPanelDecoration(context),
+        child: const Padding(
+          padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              StudioSkeleton(height: 18),
+              SizedBox(height: StudioSpacing.sm),
+              StudioSkeleton(height: 72),
+              SizedBox(height: StudioSpacing.sm),
+              StudioSkeleton(height: 72),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -149,27 +173,35 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     final queue = widget.controller.queue;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: studioPanelBorderColor(context)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.contentComplianceTitle,
-              style: theme.textTheme.titleMedium,
+      child: DecoratedBox(
+        decoration:
+            studioInsetPanelDecoration(
+              context,
+              backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+            ).copyWith(
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  spreadRadius: -8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.contentComplianceIntro,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: tokens.textSecondary,
+        child: Padding(
+          padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.contentComplianceTitle,
+                style: studioPaneTitleStyle(context),
               ),
-            ),
+              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+              Text(
+                l10n.contentComplianceIntro,
+                style: studioSectionIntroStyle(context),
+              ),
             const SizedBox(height: 12),
             StudioCollapsibleFilterPanel(
               title: l10n.contentComplianceSubmitReportTitle,
@@ -274,7 +306,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   Expanded(
                     child: Text(
                       l10n.contentComplianceQueueTitle,
-                      style: theme.textTheme.titleSmall,
+                      style: studioPaneTitleStyle(context),
                     ),
                   ),
                   TextButton.icon(
@@ -309,7 +341,20 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 ],
               ),
-              if (queue != null) ...[
+              if (widget.controller.loadingQueue && queue == null)
+                _buildQueueLoadingSkeleton(context)
+              else if (queue == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: StudioEmptyState.emptyData(
+                    title: l10n.contentComplianceQueueTitle,
+                    subtitle: l10n.contentComplianceIntro,
+                    icon: Icons.fact_check_outlined,
+                    actionLabel: l10n.contentComplianceRefresh,
+                    onAction: widget.controller.loadQueue,
+                  ),
+                )
+              else ...[
                 if (queue.alerts.isNotEmpty) ...[
                   Builder(
                     builder: (context) {
@@ -974,7 +1019,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.titleSmall,
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: StudioSpacing.xs),
                                   Text(
                                     l10n.contentComplianceOwnerCounts(
                                       owner.pendingCount,
@@ -1074,7 +1119,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.titleSmall,
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: StudioSpacing.xs),
                                   Text(
                                     l10n.contentComplianceWorkspaceCounts(
                                       workspace.openCount,
@@ -1113,6 +1158,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     child: StudioEmptyState.emptyData(
                       title: l10n.contentComplianceQueueEmpty,
                       icon: Icons.fact_check_outlined,
+                      actionLabel: l10n.contentComplianceRefresh,
+                      onAction: widget.controller.loadQueue,
                     ),
                   )
                 else
@@ -1123,10 +1170,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: studioPanelBorderColor(context),
+                          color: tokens.bgSurface.withValues(alpha: 0.92),
+                          border: Border.all(color: tokens.borderSubtle),
+                          borderRadius: BorderRadius.circular(
+                            StudioSpacing.radiusButton,
                           ),
-                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1197,7 +1245,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               ),
                               style: theme.textTheme.bodySmall,
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: StudioSpacing.xs),
                             Text(
                               _buildAuditLines(l10n, item).join('\n'),
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -1464,6 +1512,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             ],
           ],
         ),
+      ),
       ),
     );
   }

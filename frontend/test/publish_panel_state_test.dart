@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api/project/publish_models.dart';
 import 'package:openflow_app/short_video_space/publish_copy_editor.dart';
@@ -430,7 +431,7 @@ void main() {
           '标题一',
         );
 
-        await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+        await tester.tap(find.byType(StudioDropdownButtonFormField<String>).first);
         await tester.pumpAndSettle();
 
         final draft2Label = zh.shortVideoPublishDraftDropdownLabel(
@@ -495,7 +496,7 @@ void main() {
           '草稿一未保存改动',
         );
 
-        await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+        await tester.tap(find.byType(StudioDropdownButtonFormField<String>).first);
         await tester.pumpAndSettle();
         final draft2Label = zh.shortVideoPublishDraftDropdownLabel(
           '草稿 2',
@@ -510,7 +511,7 @@ void main() {
         );
         expect(find.text('草稿一未保存改动'), findsNothing);
 
-        await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+        await tester.tap(find.byType(StudioDropdownButtonFormField<String>).first);
         await tester.pumpAndSettle();
         final draft1Label = zh.shortVideoPublishDraftDropdownLabel(
           '草稿 1',
@@ -666,7 +667,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+        await tester.tap(find.byType(StudioDropdownButtonFormField<String>).first);
         await tester.pumpAndSettle();
         final draft2Label = zh.shortVideoPublishDraftDropdownLabel(
           '草稿 2',
@@ -721,8 +722,8 @@ void main() {
       );
       await tester.pump();
 
-      final dropdown = tester.widget<DropdownButtonFormField<String>>(
-        find.byType(DropdownButtonFormField<String>).first,
+      final dropdown = tester.widget<StudioDropdownButtonFormField<String>>(
+        find.byType(StudioDropdownButtonFormField<String>).first,
       );
       expect(dropdown.onChanged, isNull);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);

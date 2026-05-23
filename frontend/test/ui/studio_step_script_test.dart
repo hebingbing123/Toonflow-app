@@ -8,6 +8,7 @@ import 'package:openflow_app/project_studio/studio_agent_quick_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/project_studio_fixture.dart';
+import '../support/studio_workbench_section_test_support.dart';
 
 Widget _wrap(Widget child) {
   return MaterialApp(
@@ -38,14 +39,18 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await expandAllStudioWorkbenchSections(tester);
 
     expect(find.text('演示项目'), findsOneWidget);
     expect(find.text(zh.studioStepScriptBody), findsOneWidget);
-    expect(find.text(zh.studioScriptStepSetupTitle), findsOneWidget);
 
-    await tester.tap(find.text(zh.studioScriptStepSetupTitle));
-    await tester.pumpAndSettle();
+    await tester.tap(find.text(zh.studioScriptStepSetupOpen));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text(zh.studioScriptStepSetupTitle), findsOneWidget);
+    await expandAllStudioWorkbenchSections(tester);
 
     expect(find.text(zh.studioAgentRewriteScript), findsOneWidget);
     expect(find.text(zh.studioAgentExtractEntities), findsOneWidget);

@@ -245,7 +245,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             style: theme.textTheme.bodyMedium,
           ),
           if (home.onboarding.nextStep != null) ...<Widget>[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.projectEditorBasicsHomeNextStep(home.onboarding.nextStep!),
               style: studioHintStyle(context),
@@ -600,7 +600,7 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
           if (detail != null && detail!.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               detail!,
               style: theme.textTheme.bodySmall?.copyWith(

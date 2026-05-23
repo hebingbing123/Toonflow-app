@@ -655,14 +655,14 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
             style: small?.copyWith(color: muted),
           ),
           if (domainLink != null && domainLinkHandler != null) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             TextButton(
               onPressed: () => domainLinkHandler(domainLink),
               child: Text(_domainDeepLinkLabel(l10n, domainLink)),
             ),
           ],
           if (link != null && deepLinkHandler != null) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Wrap(
               spacing: 4,
               runSpacing: 0,

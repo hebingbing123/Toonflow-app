@@ -201,7 +201,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
             context,
           ).textTheme.labelSmall?.copyWith(color: outline),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
           spacing: 6,
           runSpacing: 6,
@@ -235,7 +235,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           l10n.shortVideoPublishCopyEditorSectionTitle,
           style: theme.textTheme.labelSmall?.copyWith(color: muted),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         _chipRow(
           l10n.shortVideoSpaceTargetMarketDomestic,
           widget.domesticPlatformIds,

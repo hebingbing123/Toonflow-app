@@ -262,7 +262,7 @@ class _CompactCockpitBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 summaryText,
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
                   alignment: WrapAlignment.end,
                   spacing: 6,
@@ -279,10 +279,10 @@ class _CompactCockpitBar extends StatelessWidget {
           return Row(
             children: <Widget>[
               Expanded(child: summaryText),
-              const SizedBox(width: 6),
+              const SizedBox(width: StudioSpacing.xs),
               expandButton,
               if (showPrimaryAction) ...<Widget>[
-                const SizedBox(width: 6),
+                const SizedBox(width: StudioSpacing.xs),
                 primaryButton,
               ],
             ],
@@ -351,7 +351,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
                 TextButton(onPressed: onCollapse, child: Text(collapseLabel!)),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             cockpit.subheadline,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -485,7 +485,7 @@ class _CockpitMetricTile extends StatelessWidget {
             ),
           ),
           if (action != null) ...<Widget>[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               action!.ctaLabel,
               style: theme.textTheme.labelMedium?.copyWith(

@@ -92,7 +92,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           children: [
             for (final w in weekdayLabels)
@@ -156,7 +156,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(l10n.l10nBatch_775383c7b6(day.day), style: labelStyle),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
                           countLabel,
                           style: theme.textTheme.bodySmall?.copyWith(

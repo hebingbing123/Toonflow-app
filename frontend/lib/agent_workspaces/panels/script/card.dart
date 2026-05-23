@@ -211,7 +211,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
               l10n.agentWorkspaceGuidedTasksTitle,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             _buildGuidedTasks(),
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
             _buildPromptTemplates(),

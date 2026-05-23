@@ -86,7 +86,7 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
         ),
         const SizedBox(height: 12),
         Text(l10n.shortVideoTimelineSubtitlesTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         _SubtitleCueList(
           cues: _tracks.subtitles,
           onChanged: (next) => setState(() {
@@ -95,7 +95,7 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
         ),
         const SizedBox(height: 12),
         Text(l10n.shortVideoTimelineTransitionsTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         _TransitionList(
           transitions: _tracks.transitions,
           onChanged: (next) => setState(() {
@@ -104,7 +104,7 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
         ),
         const SizedBox(height: 12),
         Text(l10n.shortVideoTimelineVoiceoverTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         _VoiceoverTrackPanel(
           clips: _tracks.voiceover,
           peaks: widget.timeline.voiceoverWaveformPeaks,

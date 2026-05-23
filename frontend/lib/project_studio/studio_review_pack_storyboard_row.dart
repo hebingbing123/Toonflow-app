@@ -186,7 +186,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                 ),
               ],
               if (feedback?.comment != null) ...<Widget>[
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   feedback!.comment!,
                   maxLines: 2,

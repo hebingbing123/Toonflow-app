@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/quality_reviews/dimension_score_form.dart';
 
 /// Wraps [DimensionScoreFormWidget] in a minimal [MaterialApp] + [Scaffold].
@@ -11,6 +12,9 @@ Widget _buildForm({
   void Function(Map<String, int>?)? onChanged,
 }) {
   return MaterialApp(
+    locale: const Locale('zh'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: SingleChildScrollView(
         child: DimensionScoreFormWidget(
@@ -139,8 +143,11 @@ void main() {
     testWidgets('null dimensionScores shows 暂无维度评分 without throwing',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
             body: DimensionScoreDisplayWidget(scores: null),
           ),
         ),
@@ -156,8 +163,11 @@ void main() {
     testWidgets('empty dimensionScores map shows 暂无维度评分',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
             body: DimensionScoreDisplayWidget(scores: {}),
           ),
         ),

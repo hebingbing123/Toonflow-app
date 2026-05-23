@@ -155,7 +155,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                 ),
               ),
               if (step == StudioStep.quality) ...<Widget>[
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   l10n.projectEditorModelRoutingQualityStepHint,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -163,7 +163,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                   ),
                 ),
               ],
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...slots.map((slot) {
                 final catalog = _catalogForSlot(slot);
                 final selected = _draft[step.slug]?[slot];

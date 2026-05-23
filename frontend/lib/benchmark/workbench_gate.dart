@@ -125,7 +125,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                   gateSummary!.assessments.length,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...gateSummary!.assessments.map(
                 (item) => Text(
                   l10n.benchmarkGateAssessmentRow(
@@ -140,7 +140,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
             if (trends != null) ...[
               const SizedBox(height: 12),
               Text(l10n.benchmarkTrendsDataSummary(trends!.weeks.length)),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               ...trends!.weeks.map(
                 (item) => Text(
                   l10n.benchmarkTrendWeekRow(

@@ -93,7 +93,7 @@ Widget agentWorkspaceLabeledField(
           height: 1.3,
         ),
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: StudioSpacing.xs),
       _constrainedAgentField(
         TextField(
           controller: controller,

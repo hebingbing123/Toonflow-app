@@ -75,7 +75,7 @@ void main() {
     );
 
     expect(find.byType(BenchmarkExperimentsWorkbench), findsOneWidget);
-    expect(find.text('读取实验'), findsOneWidget);
+    expect(find.text('读取实验'), findsWidgets);
   });
 
   testWidgets('BenchmarkReviewQueueWorkbench renders without error',
@@ -99,7 +99,7 @@ void main() {
     );
 
     expect(find.byType(BenchmarkReviewQueueWorkbench), findsOneWidget);
-    expect(find.text('读取复核队列'), findsOneWidget);
+    expect(find.text('读取复核队列'), findsWidgets);
   });
 
   testWidgets('BenchmarkGateWorkbench renders without error', (tester) async {

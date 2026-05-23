@@ -319,7 +319,7 @@ class _ReadinessBlock extends StatelessWidget {
               l10n.projectEditorBasicsHomeSectionTitle,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.projectEditorBasicsHomeReadinessLine(
                 home.readinessScore,

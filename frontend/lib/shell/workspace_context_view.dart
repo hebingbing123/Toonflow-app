@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -113,7 +114,7 @@ class WorkspaceContextView extends StatelessWidget {
               ? tokens.accent.withValues(alpha: 0.9)
               : tokens.textMuted,
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: StudioSpacing.xs),
         Flexible(
           child: Text(
             scopeLine,
@@ -194,7 +195,7 @@ class WorkspaceContextView extends StatelessWidget {
                 size: 12,
                 color: tokens.accent,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: StudioSpacing.xs),
               Flexible(
                 child: Text(
                   summary,
@@ -236,7 +237,7 @@ class WorkspaceContextView extends StatelessWidget {
                     size: 12,
                     color: tokens.accent,
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: StudioSpacing.xs),
                   Flexible(
                     child: Text(
                       workspaceLine,
@@ -251,7 +252,7 @@ class WorkspaceContextView extends StatelessWidget {
                     ),
                   ),
                   if (workspaceTypeLabel != null) ...<Widget>[
-                    const SizedBox(width: 5),
+                    const SizedBox(width: StudioSpacing.xs),
                     _InlineContextChip(
                       label: workspaceTypeLabel,
                       compact: true,
@@ -259,7 +260,7 @@ class WorkspaceContextView extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               _buildTitleBarProjectScopeRow(
                 context: context,
                 theme: theme,
@@ -290,7 +291,7 @@ class WorkspaceContextView extends StatelessWidget {
                   size: 14,
                   color: tokens.accent,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: StudioSpacing.xs),
                 Flexible(
                   child: Text(
                     workspaceLine,
@@ -298,13 +299,13 @@ class WorkspaceContextView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: tokens.textPrimary,
-                      fontSize: 13,
+                      fontSize: StudioTypography.of(context).body,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 if (workspaceTypeLabel != null) ...<Widget>[
-                  const SizedBox(width: 6),
+                  const SizedBox(width: StudioSpacing.xs),
                   _InlineContextChip(
                     label: workspaceTypeLabel,
                     compact: true,
@@ -321,7 +322,7 @@ class WorkspaceContextView extends StatelessWidget {
                   size: 13,
                   color: tokens.textMuted,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: StudioSpacing.xs),
                 Flexible(
                   child: Text(
                     scopeLine,
@@ -329,7 +330,7 @@ class WorkspaceContextView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: tokens.textSecondary,
-                      fontSize: 12,
+                      fontSize: StudioTypography.of(context).hint,
                     ),
                   ),
                 ),
@@ -362,7 +363,7 @@ class WorkspaceContextView extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: tokens.textSecondary,
-                fontSize: embedded ? 12 : null,
+                fontSize: embedded ? StudioTypography.of(context).hint : null,
               ),
             ),
           ),
@@ -435,9 +436,7 @@ class WorkspaceContextView extends StatelessWidget {
                         constraints: const BoxConstraints(maxWidth: 520),
                         child: Text(
                           workspaceLine,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontSize: 18,
-                          ),
+                          style: studioCardTitleStyle(context),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -775,7 +774,7 @@ class _InlineContextChip extends StatelessWidget {
             context,
           ).textTheme.labelSmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
-            fontSize: compact ? 10 : null,
+            fontSize: compact ? StudioTypography.of(context).meta : null,
           ),
         ),
       ),

@@ -13,7 +13,9 @@ import 'package:openflow_app/design_system/components/studio_collapsible_filter_
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 // Split into multiple files for maintainability
@@ -294,6 +296,69 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     }
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    l10n.teamWorkspaceTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                ),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.taskCenterLocalClientPrefs,
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(l10n.teamWorkspaceIntro, style: studioSectionIntroStyle(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: const Padding(
+        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioSkeleton(height: 18),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 56),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 56),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -308,26 +373,14 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
 
     final items = _items;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: SingleChildScrollView(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(
-              child: Text(
-                l10n.teamWorkspaceTitle,
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: l10n.taskCenterLocalClientPrefs,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(l10n.teamWorkspaceIntro, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 12),
+            _buildStudioHeader(context, l10n),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
         StudioCollapsibleFilterPanel(
           title: l10n.teamWorkspaceCreateAction,
           child: StudioFilterRow(
@@ -357,7 +410,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           tokenAutoFilledFromUri: _inviteTokenFromUri,
           tokenText: _acceptInviteTokenController.text,
         )) ...<Widget>[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             inviteTokenAutofillHint(l10n),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -433,15 +486,20 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ),
         ],
         const SizedBox(height: 8),
+        if (_loading && items == null) _buildStudioLoadingBody(context),
         if (items == null && !_loading)
-          Text(
-            l10n.teamWorkspaceNoListDataHint,
-            style: theme.textTheme.bodySmall,
+          StudioEmptyState.emptyData(
+            title: l10n.teamWorkspaceNoListDataHint,
+            icon: Icons.groups_outlined,
+            actionLabel: l10n.teamWorkspaceRefreshList,
+            onAction: _load,
           ),
         if (items != null && items.isEmpty)
           StudioEmptyState.emptyData(
             title: l10n.teamWorkspaceNoWorkspacesHint,
             icon: Icons.groups_outlined,
+            actionLabel: l10n.teamWorkspaceRefreshList,
+            onAction: _load,
           ),
         if (items != null &&
             items.isNotEmpty &&
@@ -461,7 +519,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                   onlyPersonalWorkspaceTitle(l10n),
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   onlyPersonalWorkspaceBody(l10n),
                   style: theme.textTheme.bodySmall,
@@ -616,7 +674,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               ],
             ],
           ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/agent_workspaces/agent_workspace_preset_labels.dart';
+
+import 'support/studio_workbench_section_test_support.dart';
 import 'package:openflow_app/agent_workspaces/controls.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/agent_workspaces/input_controller.dart';
 import 'package:openflow_app/agent_workspaces/section.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
@@ -32,13 +36,26 @@ Future<void> _selectDropdownValue(
   WidgetTester tester, {
   required String currentValue,
   required String nextValue,
+  String Function(String tool)? labelForTool,
 }) async {
-  await tester.tap(
-    find.widgetWithText(DropdownButtonFormField<String>, currentValue),
+  final zh = AppLocalizationsZh();
+  final resolveLabel =
+      labelForTool ?? (tool) => agentWorkspaceScriptDomainToolLabel(zh, tool);
+  final currentLabel = resolveLabel(currentValue);
+  final nextLabel = resolveLabel(nextValue);
+
+  final trigger = find.byWidgetPredicate(
+    (widget) =>
+        widget is StudioSelectFieldTrigger &&
+        widget.valueLabel == currentLabel,
   );
-  await tester.pumpAndSettle();
-  await tester.tap(find.text(nextValue).last);
-  await tester.pumpAndSettle();
+  await tester.ensureVisible(trigger.first);
+  await tester.tap(trigger.first);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+  await tester.tap(find.text(nextLabel).last);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
 }
 
 Future<void> _switchPane(WidgetTester tester, AgentWorkspacePane pane) async {
@@ -390,7 +407,7 @@ void main() {
       );
       expect(
         find.textContaining(
-          zh.agentWorkspaceActivityLatest('harness.tool.result'),
+          zh.agentWorkspaceActivityLatestToolResult('tool line'),
         ),
         findsOneWidget,
       );
@@ -596,7 +613,10 @@ void main() {
       tester.view.physicalSize = const Size(1920, 2400);
       tester.view.devicePixelRatio = 1.0;
 
-      final controllers = _WorkspaceControllers(scriptId: '9');
+      final controllers = _WorkspaceControllers(
+        scriptId: '9',
+        scriptDomainTool: 'get_novel_events',
+      );
 
       String? lastTool;
       String? lastArgs;
@@ -634,22 +654,19 @@ void main() {
         findsOneWidget,
       );
 
-      await _selectDropdownValue(
-        tester,
-        currentValue: 'get_planData',
-        nextValue: 'get_novel_events',
-      );
-
       expect(
         find.text(zh.agentWorkspaceScriptArgFillFirstChapter),
         findsOneWidget,
       );
 
-      await _tapButtonInCard(
-        tester,
-        buttonType: FilledButton,
-        cardText: zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle,
-        buttonText: zh.agentWorkspaceScriptReadContext,
+      await expandAllStudioWorkbenchSections(tester);
+      await tester.tap(
+        find.descendant(
+          of: _cardContaining(
+            zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle,
+          ),
+          matching: find.text(zh.agentWorkspaceScriptReadContext),
+        ),
       );
       await tester.pump();
       expect(lastTool, 'get_novel_events');
@@ -1149,6 +1166,7 @@ void main() {
         tester,
         currentValue: 'run_sub_agent_director_plan',
         nextValue: 'run_sub_agent_derive_assets',
+        labelForTool: (tool) => agentWorkspaceProductionSubAgentLabel(zh, tool),
       );
 
       expect(
@@ -1302,11 +1320,14 @@ void main() {
           findsWidgets,
         );
 
-        await _tapButtonInCard(
-          tester,
-          buttonType: FilledButton,
-          cardText: zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
-          buttonText: zh.agentWorkspaceProductionSubAgentAdvanceStage,
+        await expandAllStudioWorkbenchSections(tester);
+        await tester.tap(
+          find.descendant(
+            of: _cardContaining(
+              zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
+            ),
+            matching: find.text(zh.agentWorkspaceProductionSubAgentAdvanceStage),
+          ),
         );
         await tester.pump();
 

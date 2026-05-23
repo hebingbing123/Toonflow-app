@@ -130,7 +130,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
               children: <Widget>[
                 Text(
                   planTierDisplayName(l10n, planTier),
-                  style: studioPageTitleStyle(context)?.copyWith(fontSize: 20),
+                  style: studioPageTitleStyle(context),
                 ),
                 const SizedBox(height: 8),
                 Text(

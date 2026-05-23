@@ -45,7 +45,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   l10n.projectEditorBasicsHomeSectionTitle,
                   style: Theme.of(ctx).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.projectEditorBasicsHomeReadinessLine(
                     home.readinessScore,
@@ -344,7 +344,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           ),
         ),
         if (chips.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
             spacing: 8,
             runSpacing: 8,

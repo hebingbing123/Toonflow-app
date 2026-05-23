@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import '../../tool/ast_parser.dart';
 
+@Skip('Legacy frontend/tool AST prototype; canonical analyzer is tools/ui_audit/')
 void main() {
   group('AstParser', () {
     late Directory tempDir;
@@ -291,5 +292,5 @@ class TestWidget extends StatelessWidget {
       expect(symbolTable.analyzedFiles.contains(includedFile), isTrue);
       expect(symbolTable.analyzedFiles.contains(excludedFile), isFalse);
     });
-  });
+  }, skip: 'Legacy frontend/tool AST prototype; canonical analyzer is tools/ui_audit/');
 }

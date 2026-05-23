@@ -223,7 +223,7 @@ class _ReadinessStepPill extends StatelessWidget {
           size: 17,
           color: ok ? scheme.primary : muted,
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: StudioSpacing.xs),
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(

@@ -205,7 +205,7 @@ class _NovelCrawlLoginWebViewDialogState
               ],
             ),
             if (_errorLine != null) ...<Widget>[
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 _errorLine!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -214,7 +214,7 @@ class _NovelCrawlLoginWebViewDialogState
               ),
             ],
             if (_progress > 0 && _progress < 1) ...<Widget>[
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               LinearProgressIndicator(value: _progress, minHeight: 2),
             ],
             const SizedBox(height: 8),

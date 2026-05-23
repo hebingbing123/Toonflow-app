@@ -270,7 +270,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                     ],
                   ),
                   if (_error != null) ...<Widget>[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -383,7 +383,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioModelPicker(
                         models: models,
                         selectedModelId: selected,
@@ -481,7 +481,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
                           expanded
                               ? l10n.studioModelRoutingPrimarySubtitle
@@ -573,7 +573,7 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.studioModelRoutingCatalogEmptyBody,
               style: theme.textTheme.bodySmall?.copyWith(

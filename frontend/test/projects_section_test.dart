@@ -289,8 +289,8 @@ void main() {
     expect(selectedProject?.numericId, 11);
     expect(openedProject, isNull);
 
-    await tester.ensureVisible(find.widgetWithText(TextButton, zh.studioEnterStudio));
-    await tester.tap(find.widgetWithText(TextButton, zh.studioEnterStudio));
+    await tester.ensureVisible(find.byKey(const Key('project_enter_studio_11')));
+    await tester.tap(find.byKey(const Key('project_enter_studio_11')));
     await tester.pumpAndSettle();
 
     expect(openedProject?.numericId, 11);

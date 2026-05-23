@@ -1037,7 +1037,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                 _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
                 const SizedBox(height: 12),
                 Text(modeTitle, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(modeSummary, style: studioMutedBodyMedium(context)),
                 const SizedBox(height: 8),
                 Text(modeAdvice, style: theme.textTheme.bodySmall),
@@ -1275,7 +1275,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                                   size: 16,
                                   color: theme.colorScheme.tertiary,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: StudioSpacing.xs),
                                 Expanded(
                                   child: Text(
                                     line,
@@ -1292,7 +1292,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                           l10n.shortVideoSpaceShotReadinessPriorityShots,
                           style: theme.textTheme.labelLarge,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: StudioSpacing.xs),
                         for (final line in shotReadinessUi.shotDetailLines)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4),
@@ -1304,7 +1304,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                                   size: 16,
                                   color: theme.colorScheme.primary,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: StudioSpacing.xs),
                                 Expanded(
                                   child: Text(
                                     line,
@@ -1374,7 +1374,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(nextStepTitle, style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(nextStepDetail, style: studioMutedBodyMedium(context)),
                     const SizedBox(height: 12),
                     FilledButton.icon(
@@ -1553,7 +1553,7 @@ class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: nodeChildren,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: captionChildren,
@@ -1610,7 +1610,8 @@ class _StageFlowStrip extends StatelessWidget {
   const _StageFlowStrip({required this.cards});
 
   static const double _nodeWidth = 208;
-  static const double _nodeMinHeight = 58;
+  /// Must fit [_FlowNodeShell] vertical padding plus two label lines (see layout).
+  static const double _nodeMinHeight = 68;
 
   final List<ShortVideoStageCardData> cards;
 
@@ -1631,7 +1632,7 @@ class _StageFlowStrip extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(card.title, style: studioControlLabelStyle(context)),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       card.status,
                       maxLines: 1,
@@ -1724,7 +1725,7 @@ class _CandidateCompareCard extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: muted),
             ),
             if ((item.writebackLine ?? '').trim().isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               _WritebackStatusChip(line: item.writebackLine!),
             ],
             if ((item.referenceImageUrl ?? '').trim().isNotEmpty) ...[
@@ -1933,7 +1934,7 @@ class _ReadinessFlowNode extends StatelessWidget {
                   size: 16,
                   color: accent,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
                     item.label,

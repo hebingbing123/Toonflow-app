@@ -41,19 +41,34 @@ class _HelpHubSection extends StatelessWidget {
               left: StudioLayoutSpacing.cardInner - 4,
               right: StudioLayoutSpacing.cardInner - 4,
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.helpHubDocsTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
+            child: DecoratedBox(
+              decoration: studioInsetPanelDecoration(context).copyWith(
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 10,
+                    spreadRadius: -8,
+                    offset: const Offset(0, 4),
                   ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.helpHubDocsTitle,
+                        style: studioPaneTitleStyle(context),
+                      ),
+                    ),
+                    RiskyOperationConfirmPrefsOverflowMenu(
+                      tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
+                    ),
+                  ],
                 ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
-                ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.titleSubtitle),

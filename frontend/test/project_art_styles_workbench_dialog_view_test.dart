@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/projects/workbenches/art_styles_view.dart';
@@ -310,7 +311,7 @@ void main() {
       await tester.pump();
       expect(closeTapped, 1);
 
-      await tester.tap(find.byType(DropdownButtonFormField<int>));
+      await tester.tap(find.byType(StudioDropdownButtonFormField<int>));
       await tester.pumpAndSettle();
       await tester.tap(find.text('#12 赛博霓虹').last);
       await tester.pumpAndSettle();

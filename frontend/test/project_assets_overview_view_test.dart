@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/overview.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -95,8 +96,8 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Assets 2 · props 1 · role 1'), findsOneWidget);
-    expect(find.text('Script #11 has 1 linked asset(s).'), findsOneWidget);
+    expect(find.textContaining('资产 2 · props 1 · role 1'), findsOneWidget);
+    expect(find.text('剧本 #11 已关联 1 个资产。'), findsOneWidget);
     expect(find.text('#11 第一幕'), findsOneWidget);
     expect(find.text('资产主工作台'), findsOneWidget);
     expect(find.text('打开资产主工作台'), findsOneWidget);
@@ -126,7 +127,9 @@ void main() {
     expect(disabledButtonWithText('打开资产主工作台'), findsOneWidget);
     expect(
       tester
-          .widget<DropdownButton<int?>>(find.byType(DropdownButton<int?>))
+          .widget<StudioDropdownButton<int?>>(
+            find.byType(StudioDropdownButton<int?>),
+          )
           .onChanged,
       isNull,
     );
@@ -152,7 +155,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(DropdownButton<int?>));
+    await tester.tap(find.byType(StudioDropdownButtonFormField<int?>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('#12 第二幕').last);
     await tester.pumpAndSettle();

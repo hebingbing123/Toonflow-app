@@ -168,7 +168,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           _statusLabel(
                             l10n: l10n,

@@ -193,7 +193,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                                 '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
                                 style: studioHintStyle(context),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: StudioSpacing.xs),
                               SelectableText(
                                 draft.content,
                                 maxLines: 10,
@@ -240,7 +240,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                                 '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
                                 style: studioHintStyle(context),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: StudioSpacing.xs),
                               SelectableText(
                                 guidance.content,
                                 maxLines: 10,

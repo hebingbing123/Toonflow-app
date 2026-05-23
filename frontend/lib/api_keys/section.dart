@@ -9,7 +9,9 @@ import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 enum _ExpiryPreset { none, sevenDays, thirtyDays, ninetyDays, custom }
@@ -335,9 +337,52 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     }
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    l10n.apiKeysSectionTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                ),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.apiKeysRiskyPrefsTooltip,
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(l10n.apiKeysIntroBody, style: studioSectionIntroStyle(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -345,37 +390,19 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
 
         return Padding(
           padding: EdgeInsets.only(top: compact ? 12 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.apiKeysSectionTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                  RiskyOperationConfirmPrefsOverflowMenu(
-                    tooltip: l10n.apiKeysRiskyPrefsTooltip,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.apiKeysIntroBody,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: StudioTokens.of(context).textSecondary,
-                ),
-              ),
-              SizedBox(height: compact ? 10 : 12),
-              _buildCreatePanel(context, l10n, compact: compact),
-              SizedBox(height: compact ? 12 : 14),
-              _buildListPanel(context, l10n, compact: compact),
-              SizedBox(height: compact ? 12 : 14),
-              _buildAuditPanel(context, l10n, compact: compact),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _buildStudioHeader(context, l10n),
+                SizedBox(height: compact ? 10 : StudioLayoutSpacing.stackMedium),
+                _buildCreatePanel(context, l10n, compact: compact),
+                SizedBox(height: compact ? 12 : 14),
+                _buildListPanel(context, l10n, compact: compact),
+                SizedBox(height: compact ? 12 : 14),
+                _buildAuditPanel(context, l10n, compact: compact),
+              ],
+            ),
           ),
         );
       },
@@ -420,14 +447,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       ),
     );
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(panelPadding),
-      decoration: BoxDecoration(
-        border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: StudioCollapsibleFilterPanel(
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: EdgeInsets.all(panelPadding),
+        child: StudioCollapsibleFilterPanel(
         title: l10n.apiKeysCreateNewTitle,
         subtitle: _displayNameController.text.trim().isNotEmpty
             ? _displayNameController.text.trim()
@@ -618,6 +642,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
         ],
         ),
       ),
+      ),
     );
   }
 
@@ -627,55 +652,64 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     required bool compact,
   }) {
     final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm),
-      decoration: BoxDecoration(
-        border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.apiKeysExistingKeysTitle,
-            style: theme.textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              Chip(
-                label: Text(
-                  l10n.apiKeysStatActive(widget.controller.activeCount),
-                ),
-              ),
-              Chip(
-                label: Text(
-                  l10n.apiKeysStatRevoked(widget.controller.revokedCount),
-                ),
-              ),
-              Chip(
-                label: Text(
-                  l10n.apiKeysStatTotal(widget.controller.items.length),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          if (widget.controller.loading)
-            const Center(child: CircularProgressIndicator())
-          else if (widget.controller.items.isEmpty)
-            StudioEmptyState.emptyData(
-              title: l10n.apiKeysEmptyList,
-              icon: Icons.vpn_key_outlined,
-            )
-          else
-            ...widget.controller.items.map(
-              (item) => _buildKeyCard(context, l10n, item, compact: compact),
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: EdgeInsets.all(
+          compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              l10n.apiKeysExistingKeysTitle,
+              style: theme.textTheme.titleSmall,
             ),
-        ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                Chip(
+                  label: Text(
+                    l10n.apiKeysStatActive(widget.controller.activeCount),
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    l10n.apiKeysStatRevoked(widget.controller.revokedCount),
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    l10n.apiKeysStatTotal(widget.controller.items.length),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.inlineGap),
+            if (widget.controller.loading)
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  StudioSkeleton(height: 18),
+                  SizedBox(height: StudioSpacing.sm),
+                  StudioSkeleton(height: 56),
+                  SizedBox(height: StudioSpacing.sm),
+                  StudioSkeleton(height: 56),
+                ],
+              )
+            else if (widget.controller.items.isEmpty)
+              StudioEmptyState.emptyData(
+                title: l10n.apiKeysEmptyList,
+                icon: Icons.vpn_key_outlined,
+              )
+            else
+              ...widget.controller.items.map(
+                (item) => _buildKeyCard(context, l10n, item, compact: compact),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -806,7 +840,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(item.keyHint),
           const SizedBox(height: 4),
           Text(
@@ -898,17 +932,16 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     required bool compact,
   }) {
     final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm),
-      decoration: BoxDecoration(
-        border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.apiKeysAuditTitle, style: theme.textTheme.titleSmall),
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: EdgeInsets.all(
+          compact ? StudioLayoutSpacing.stackMedium : StudioSpacing.sm,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(l10n.apiKeysAuditTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           if (widget.controller.auditItems.isEmpty)
             StudioEmptyState.emptyData(
@@ -955,7 +988,8 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

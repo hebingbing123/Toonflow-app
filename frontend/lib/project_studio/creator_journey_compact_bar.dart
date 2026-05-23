@@ -125,7 +125,9 @@ class CreatorJourneyCompactBar extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                 child: DefaultTextStyle(
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  style:
+                      studioChromeTitleStyle(context) ??
+                      const TextStyle(fontWeight: FontWeight.w700),
                   child: entry.child ?? const SizedBox.shrink(),
                 ),
               ),

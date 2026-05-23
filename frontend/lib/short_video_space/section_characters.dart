@@ -204,7 +204,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
               );
             }),
           if ((_charactersStatusLine ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _charactersStatusLine!,
               style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),

@@ -1110,7 +1110,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                       _auditSummary(l10n, audit),
                                       style: theme.textTheme.titleSmall,
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: StudioSpacing.xs),
                                     Text(
                                       audit.createdAt,
                                       style: theme.textTheme.bodySmall
@@ -1118,7 +1118,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                             color: tokens.textSecondary,
                                           ),
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: StudioSpacing.xs),
                                     SelectableText(
                                       _auditDetails(audit),
                                       style: theme.textTheme.bodySmall,

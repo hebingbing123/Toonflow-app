@@ -14,27 +14,46 @@ Widget _buildTestApp(Widget child) {
   );
 }
 
+const _searchBar = GlobalSearchBar(
+  accessToken: 'test-token',
+  showLocalPrefsMenu: false,
+);
+
+Future<void> _pumpSearchBarAfterInput(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(seconds: 1));
+}
+
+Finder _submitSearchButton() {
+  return find.byWidgetPredicate(
+    (widget) =>
+        widget is IconButton &&
+        widget.icon is Icon &&
+        (widget.icon as Icon).icon == Icons.arrow_outward_rounded,
+  );
+}
+
 void main() {
   group('GlobalSearchBar', () {
     testWidgets('renders search input with placeholder', (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('搜索项目、剧本、资产...'), findsOneWidget);
-      expect(find.byIcon(Icons.search), findsOneWidget);
+      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
     });
 
     testWidgets('disables search button when input is less than 2 characters',
         (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       // Find the text field and enter 1 character
       final textField = find.byType(TextField);
       await tester.enterText(textField, 'a');
       await tester.pump();
 
-      // Find the search button (arrow forward icon button)
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
+      final searchButton = _submitSearchButton();
       expect(searchButton, findsOneWidget);
 
       // Verify button is disabled (onPressed is null)
@@ -44,15 +63,15 @@ void main() {
 
     testWidgets('enables search button when input is 2 or more characters',
         (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       // Find the text field and enter 2 characters
       final textField = find.byType(TextField);
       await tester.enterText(textField, 'ab');
-      await tester.pump();
+      await _pumpSearchBarAfterInput(tester);
 
       // Find the search button
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
+      final searchButton = _submitSearchButton();
       expect(searchButton, findsOneWidget);
 
       // Verify button is enabled (onPressed is not null)
@@ -67,6 +86,7 @@ void main() {
         _buildTestApp(
           GlobalSearchBar(
             accessToken: 'test-token',
+            showLocalPrefsMenu: false,
             onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
               capturedQuery = query;
             },
@@ -77,7 +97,7 @@ void main() {
       // Enter text
       final textField = find.byType(TextField);
       await tester.enterText(textField, 'test query');
-      await tester.pump();
+      await _pumpSearchBarAfterInput(tester);
 
       // Simulate Enter key press
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -94,6 +114,7 @@ void main() {
         _buildTestApp(
           GlobalSearchBar(
             accessToken: 'test-token',
+            showLocalPrefsMenu: false,
             onNavigateToResults: (query, {initialResultTypes = const [], initialTimeFrom, initialTimeTo}) {
               capturedQuery = query;
             },
@@ -104,10 +125,10 @@ void main() {
       // Enter text
       final textField = find.byType(TextField);
       await tester.enterText(textField, 'test query');
-      await tester.pump();
+      await _pumpSearchBarAfterInput(tester);
 
       // Click search button
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
+      final searchButton = _submitSearchButton();
       await tester.tap(searchButton);
       await tester.pump();
 
@@ -117,7 +138,7 @@ void main() {
 
     testWidgets('shows error message when query is less than 2 characters',
         (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       // Enter 1 character
       final textField = find.byType(TextField);
@@ -125,7 +146,7 @@ void main() {
       await tester.pump();
 
       // Find the search button - it should be disabled
-      final searchButton = find.widgetWithIcon(IconButton, Icons.arrow_outward);
+      final searchButton = _submitSearchButton();
       final iconButton = tester.widget<IconButton>(searchButton);
       
       // Verify button is disabled when less than 2 characters
@@ -133,7 +154,7 @@ void main() {
     });
 
     testWidgets('Ctrl+K shortcut is handled', (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
       await tester.pump();
 
       // Just verify the Focus widget exists and can handle key events
@@ -142,7 +163,7 @@ void main() {
     });
 
     testWidgets('Escape key clears focus', (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       // Focus the search box
       final textField = find.byType(TextField);
@@ -161,7 +182,7 @@ void main() {
     });
 
     testWidgets('validates maximum query length', (tester) async {
-      await tester.pumpWidget(_buildTestApp(const GlobalSearchBar(accessToken: 'test-token')));
+      await tester.pumpWidget(_buildTestApp(_searchBar));
 
       // Enter a very long query (>200 characters)
       final longQuery = 'a' * 201;

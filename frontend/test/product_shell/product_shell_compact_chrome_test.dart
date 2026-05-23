@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
-import 'package:openflow_app/home_page.dart';
-import 'package:openflow_app/l10n/app_localizations.dart';
-import 'package:openflow_app/product_shell/studio_theme.dart';
-import 'package:openflow_app/project_studio/studio_overlay_mode.dart';
-import 'package:openflow_app/shell/home_shell_mode.dart';
+import 'package:openflow_app/l10n/app_localizations_en.dart';
+import 'package:openflow_app/design_system/components/openflow_brand.dart';
 
-Widget _buildTestApp(Widget child) {
-  return MaterialApp(
-    locale: const Locale('en'),
-    localizationsDelegates: const [
-      AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-    supportedLocales: AppLocalizations.supportedLocales,
-    theme: StudioTheme.build(),
-    home: child,
-  );
-}
+import '../support/product_shell_overlay_harness.dart';
 
 void main() {
   testWidgets('compact product chrome keeps title and search visible', (
@@ -30,23 +13,19 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
+    final router = productShellStoryboardOverlayRouter();
+    addTearDown(router.dispose);
+
     await tester.pumpWidget(
-      _buildTestApp(
-        const HomePage(
-          shellMode: HomeShellMode.product,
-          studioOverlay: StudioOverlayMode.storyboardStudio,
-          studioProjectNumericId: 7,
-          debugAuthenticatedAccessToken: 'test-token',
-          debugSkipSessionContextSync: true,
-          debugSkipAuthListenerAttach: true,
-        ),
-      ),
+      productShellOverlayTestApp(router, size: const Size(390, 844)),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('OpenFlow'), findsOneWidget);
-    expect(find.text('Storyboard studio'), findsOneWidget);
+    final l10n = AppLocalizationsEn();
+    expect(find.text(l10n.appTitle), findsOneWidget);
+    expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
+    expect(find.byType(OpenFlowBrandMark), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -56,22 +35,17 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1180, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
+    final router = productShellStoryboardOverlayRouter();
+    addTearDown(router.dispose);
+
     await tester.pumpWidget(
-      _buildTestApp(
-        const HomePage(
-          shellMode: HomeShellMode.product,
-          studioOverlay: StudioOverlayMode.storyboardStudio,
-          studioProjectNumericId: 7,
-          debugAuthenticatedAccessToken: 'test-token',
-          debugSkipSessionContextSync: true,
-          debugSkipAuthListenerAttach: true,
-        ),
-      ),
+      productShellOverlayTestApp(router, size: const Size(1180, 900)),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('OpenFlow'), findsOneWidget);
-    expect(find.text('Storyboard studio'), findsOneWidget);
+    final l10n = AppLocalizationsEn();
+    expect(find.text(l10n.appTitle), findsOneWidget);
+    expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

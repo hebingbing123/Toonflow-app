@@ -20,7 +20,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: StudioScriptNovelInlineImport(
-            accessToken: 'test-token',
+            accessToken: '',
             project: const ProjectRow(
               id: '00000000-0000-0000-0000-000000000001',
               numericId: 1,
@@ -37,7 +37,7 @@ void main() {
 
     expect(find.text('Import novel'), findsOneWidget);
     expect(find.text('URL crawl'), findsOneWidget);
-    expect(find.text('Paste full book'), findsOneWidget);
+    expect(find.text('Full text (paste or file)'), findsOneWidget);
     expect(find.text('Advanced workbench'), findsOneWidget);
   });
 }

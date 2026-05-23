@@ -11,6 +11,8 @@ import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
@@ -122,6 +124,90 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     }
   }
 
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: DecoratedBox(
+        decoration: studioInsetPanelDecoration(context),
+        child: const Padding(
+          padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              StudioSkeleton(height: 18),
+              SizedBox(height: StudioSpacing.sm),
+              StudioSkeleton(height: 72),
+              SizedBox(height: StudioSpacing.sm),
+              StudioSkeleton(height: 72),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    l10n.notificationsCenterTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                  Text(
+                    l10n.notificationsCenterSubtitle,
+                    style: studioSectionIntroStyle(context),
+                  ),
+                ],
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed:
+                  widget.controller.markingAllRead ||
+                      widget.controller.unreadCount == 0
+                  ? null
+                  : widget.controller.markAllRead,
+              icon: widget.controller.markingAllRead
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.done_all_outlined, size: 18),
+              label: Text(l10n.notificationsMarkAllRead),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _syncStageThrottleControllersFromState() {
     final stagePolicy =
         widget.controller.contentComplianceClearedStageThrottleMinutes;
@@ -176,44 +262,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.studioPresentation)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.notificationsCenterTitle,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.notificationsCenterSubtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: StudioTokens.of(context).textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed:
-                      widget.controller.markingAllRead ||
-                          widget.controller.unreadCount == 0
-                      ? null
-                      : widget.controller.markAllRead,
-                  icon: widget.controller.markingAllRead
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.done_all_outlined),
-                  label: Text(l10n.notificationsMarkAllRead),
-                ),
-              ],
-            )
+            _buildStudioHeader(context, l10n)
           else
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,10 +330,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           _buildNotificationListFilters(l10n),
           const SizedBox(height: 12),
           if (widget.controller.loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            )
+            widget.studioPresentation
+                ? _buildStudioLoadingBody(context)
+                : const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
           else if (filtered.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -480,7 +531,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Semantics(
             label: label,
             textField: true,
@@ -1133,7 +1184,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(item.message),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 '${_notificationTypeLabel(l10n, item.notificationType)} · ${_formatDateTime(item.createdAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(

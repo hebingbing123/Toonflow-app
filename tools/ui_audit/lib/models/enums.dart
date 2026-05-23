@@ -40,3 +40,21 @@ enum SpacingClassification {
   /// Does not match any pattern
   nonStandard,
 }
+
+/// Priority level for fixing issues (combines severity, impact, and fix difficulty)
+enum Priority {
+  /// Must fix immediately - critical user impact
+  critical,
+  
+  /// Should fix soon - significant user impact
+  high,
+  
+  /// Should fix eventually - moderate impact
+  medium,
+  
+  /// Nice to fix - minor impact
+  low,
+  
+  /// Optional - cosmetic only
+  cosmetic,
+}

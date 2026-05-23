@@ -203,7 +203,7 @@ class _DraftCompareCard extends StatelessWidget {
               draft.title.trim().isEmpty ? l10n.shortVideoPublishPanelUntitledDraft : draft.title,
               style: theme.textTheme.titleSmall,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.shortVideoPublishDraftCompareIdLine(_shortId(draft.id)),
               style: theme.textTheme.bodySmall?.copyWith(

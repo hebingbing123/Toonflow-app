@@ -221,7 +221,9 @@ class _ProjectGridCard extends StatelessWidget {
       borderRadius: cardRadius,
       child: Container(
         decoration: BoxDecoration(
-          color: tokens.bgSurface.withValues(alpha: 0.96),
+          color: selected
+              ? tokens.primarySoft.withValues(alpha: 0.28)
+              : tokens.bgSurface.withValues(alpha: 0.96),
           borderRadius: cardRadius,
           border: Border.all(
             color: selected ? tokens.primary : tokens.borderSubtle,
@@ -366,7 +368,9 @@ class _ProjectGridCard extends StatelessWidget {
       borderRadius: cardRadius,
       child: Container(
         decoration: BoxDecoration(
-          color: tokens.bgSurface.withValues(alpha: 0.96),
+          color: selected
+              ? tokens.primarySoft.withValues(alpha: 0.28)
+              : tokens.bgSurface.withValues(alpha: 0.96),
           borderRadius: cardRadius,
           border: Border.all(
             color: selected ? tokens.primary : tokens.borderSubtle,
@@ -407,7 +411,7 @@ class _ProjectGridCard extends StatelessWidget {
                               ),
                             ),
                             if (selected) ...<Widget>[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: StudioSpacing.xs),
                               Icon(
                                 Icons.check_circle,
                                 size: 16,
@@ -453,7 +457,7 @@ class _ProjectGridCard extends StatelessWidget {
                           ],
                         ),
                         if (scopeSelectionEnabled && !selected) ...<Widget>[
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.studioProjectCardTapToSelect,
                             style: Theme.of(context).textTheme.labelSmall

@@ -2032,6 +2032,12 @@ abstract class AppLocalizations {
   /// **'Before AI generation, add models and API keys under Settings → Model vendors.'**
   String get studioProjectsEmptyStep3;
 
+  /// No description provided for @studioGettingStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick start'**
+  String get studioGettingStartedTitle;
+
   /// No description provided for @studioGettingStartedStepSemantics.
   ///
   /// In en, this message translates to:

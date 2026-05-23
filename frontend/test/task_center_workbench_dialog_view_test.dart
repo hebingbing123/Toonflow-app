@@ -6,6 +6,8 @@ import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/task_center/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
+import 'support/studio_workbench_section_test_support.dart';
+
 Widget _appWithZh({required Widget child}) => MaterialApp(
   theme: buildStudioDarkTheme(useGoogleFonts: false),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -253,9 +255,17 @@ void main() {
         ),
       ),
     );
+    await tester.pump();
+    await expandStudioWorkbenchSection(tester);
 
-    await tester.ensureVisible(find.widgetWithText(ActionChip, 'storyboard'));
-    await tester.tap(find.widgetWithText(ActionChip, 'storyboard'));
+    final storyboardChip = find.byWidgetPredicate(
+      (widget) =>
+          widget is ActionChip &&
+          widget.label is Text &&
+          (widget.label as Text).data == 'storyboard',
+    );
+    await tester.ensureVisible(storyboardChip);
+    await tester.tap(storyboardChip);
     await tester.pump();
     await tester.ensureVisible(
       find.widgetWithText(TextButton, zh.taskCenterRetry),

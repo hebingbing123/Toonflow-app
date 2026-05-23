@@ -840,7 +840,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                           onChanged: (_) => setModalState(() {}),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: StudioSpacing.xs),
                         if (auditRows.isEmpty && !loading)
                           StudioEmptyState.emptyData(
                             title: l10n.teamWorkspaceNoActivityRecords,

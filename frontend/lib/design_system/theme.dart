@@ -238,7 +238,7 @@ ThemeData buildStudioDarkTheme({
           ),
         ),
         padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
         ),
       ),
     ),
@@ -300,7 +300,7 @@ ThemeData buildStudioDarkTheme({
           ),
         ),
         padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
         ),
       ),
     ),

@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
@@ -165,6 +169,68 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
     return healthy ? tokens.success : tokens.warning;
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    l10n.platformStatusTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                ),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.taskCenterLocalClientPrefs,
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(l10n.platformStatusIntro, style: studioSectionIntroStyle(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: const Padding(
+        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioSkeleton(height: 18),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 40),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -180,22 +246,8 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  l10n.platformStatusTitle,
-                  style: theme.textTheme.titleMedium,
-                ),
-              ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.taskCenterLocalClientPrefs,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(l10n.platformStatusIntro, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 8),
+          _buildStudioHeader(context, l10n),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           StudioCollapsibleFilterPanel(
             subtitle: l10n.platformStatusLastRefreshed(
               _lastUpdatedAt == null
@@ -288,8 +340,16 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
               ),
             ),
           ],
+          if (_loading && _health == null && _error == null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildStudioLoadingBody(context),
+          ],
           const SizedBox(height: 12),
-          Wrap(
+          DecoratedBox(
+            decoration: studioInsetPanelDecoration(context),
+            child: Padding(
+              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+              child: Wrap(
             spacing: 8,
             runSpacing: 8,
             children: <Widget>[
@@ -329,38 +389,68 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                 color: _statusColor(context, degradedEndpoints == 0),
               ),
             ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-          if (_version != null)
+          if (_version != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Text(
               l10n.platformStatusVersionLine(
                 _version!.service,
                 _version!.version,
                 _version!.gitSha == null ? '' : ' (${_version!.gitSha})',
               ),
-              style: theme.textTheme.bodySmall,
+              style: studioHintStyle(context),
             ),
+          ],
           if (sliStatus != null) ...<Widget>[
-            const SizedBox(height: 12),
-            Text(
-              l10n.platformStatusSliSnapshot,
-              style: theme.textTheme.titleSmall,
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            DecoratedBox(
+              decoration: studioInsetPanelDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.platformStatusSliSnapshot,
+                      style: studioPaneTitleStyle(context),
+                    ),
+                    const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                    ...sliStatus.slis
+                        .take(5)
+                        .map((sli) => _SliTile(snapshot: sli)),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            ...sliStatus.slis.take(5).map((sli) => _SliTile(snapshot: sli)),
           ],
           if (metrics != null) ...<Widget>[
-            const SizedBox(height: 12),
-            Text(
-              l10n.platformStatusHotEndpoints,
-              style: theme.textTheme.titleSmall,
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            DecoratedBox(
+              decoration: studioInsetPanelDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      l10n.platformStatusHotEndpoints,
+                      style: studioPaneTitleStyle(context),
+                    ),
+                    const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                    ...metrics.endpoints.values
+                        .toList(growable: false)
+                        .sorted(
+                          (a, b) =>
+                              b.totalRequests.compareTo(a.totalRequests),
+                        )
+                        .take(5)
+                        .map((endpoint) => _EndpointTile(endpoint: endpoint)),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            ...metrics.endpoints.values
-                .toList(growable: false)
-                .sorted((a, b) => b.totalRequests.compareTo(a.totalRequests))
-                .take(5)
-                .map((endpoint) => _EndpointTile(endpoint: endpoint)),
           ],
         ],
       ),
@@ -403,22 +493,35 @@ class _SliTile extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final tokens = StudioTokens.of(context);
     final healthy = snapshot.healthy;
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-      leading: Icon(
-        healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
-        color: healthy ? tokens.success : tokens.warning,
-      ),
-      title: Text(snapshot.definition.name),
-      subtitle: Text(
-        l10n.platformStatusSliTileSubtitle(
-          snapshot.path,
-          snapshot.currentP95LatencyMs.toString(),
-          (snapshot.currentSuccessRate * 100).toStringAsFixed(2),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: tokens.bgSurface.withValues(alpha: 0.92),
+          border: Border.all(color: tokens.borderSubtle),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+        ),
+        child: ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: StudioLayoutSpacing.cardInner - 4,
+            vertical: StudioSpacing.xs,
+          ),
+          leading: Icon(
+            healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
+            color: healthy ? tokens.success : tokens.warning,
+          ),
+          title: Text(snapshot.definition.name),
+          subtitle: Text(
+            l10n.platformStatusSliTileSubtitle(
+              snapshot.path,
+              snapshot.currentP95LatencyMs.toString(),
+              (snapshot.currentSuccessRate * 100).toStringAsFixed(2),
+            ),
+          ),
+          trailing: Text(l10n.platformStatusRequests(snapshot.totalRequests)),
         ),
       ),
-      trailing: Text(l10n.platformStatusRequests(snapshot.totalRequests)),
     );
   }
 }
@@ -431,19 +534,33 @@ class _EndpointTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-      title: Text(endpoint.path),
-      subtitle: Text(
-        l10n.platformStatusEndpointTileSubtitle(
-          endpoint.totalRequests,
-          (endpoint.successRate * 100).toStringAsFixed(2),
-          endpoint.p95LatencyMs.toString(),
+    final tokens = StudioTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: tokens.bgSurface.withValues(alpha: 0.92),
+          border: Border.all(color: tokens.borderSubtle),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
-      ),
-      trailing: Text(
-        l10n.platformStatusServerErrors(endpoint.serverErrorCount),
+        child: ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: StudioLayoutSpacing.cardInner - 4,
+            vertical: StudioSpacing.xs,
+          ),
+          title: Text(endpoint.path),
+          subtitle: Text(
+            l10n.platformStatusEndpointTileSubtitle(
+              endpoint.totalRequests,
+              (endpoint.successRate * 100).toStringAsFixed(2),
+              endpoint.p95LatencyMs.toString(),
+            ),
+          ),
+          trailing: Text(
+            l10n.platformStatusServerErrors(endpoint.serverErrorCount),
+          ),
+        ),
       ),
     );
   }

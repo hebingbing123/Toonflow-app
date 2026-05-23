@@ -7,6 +7,7 @@ import 'package:openflow_app/shell/navigation_controller.dart';
 
 import '../support/help_hub_fixtures.dart';
 import '../support/product_shell_test_app.dart';
+import '../support/studio_collapsible_filter_test_support.dart';
 import '../support/utility_shell_fixtures.dart';
 
 GoRouter _utilityRouter(
@@ -233,6 +234,7 @@ void main() {
 
       await tester.tap(find.text('Billing webhook audit'));
       await tester.pumpAndSettle();
+      await expandStudioCollapsibleFilterPanel(tester);
 
       expect(find.text('Billing webhook audit'), findsWidgets);
       expect(find.text('Provider'), findsWidgets);
@@ -288,6 +290,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Platform status'), findsAtLeastNWidgets(1));
+    await expandStudioCollapsibleFilterPanel(tester);
     expect(find.text('Refresh'), findsOneWidget);
     expect(
       router.routeInformationProvider.value.uri.toString(),

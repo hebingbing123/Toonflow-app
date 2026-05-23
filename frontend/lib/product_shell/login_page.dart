@@ -418,7 +418,7 @@ class _BrandBanner extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 eyebrow,
                 maxLines: 1,
@@ -828,7 +828,7 @@ class _StageMetric extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(icon, size: 15, color: Colors.white.withValues(alpha: 0.68)),
-              const SizedBox(width: 6),
+              const SizedBox(width: StudioSpacing.xs),
               Flexible(
                 child: Text(
                   title,
@@ -842,7 +842,7 @@ class _StageMetric extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             value,
             maxLines: 1,
@@ -979,7 +979,7 @@ class _AuthPanel extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             _AuthModeToggle(mode: mode, onChanged: onModeChanged),
-            const SizedBox(height: 22),
+            const SizedBox(height: StudioSpacing.md),
             if (!kSupabaseConfigured)
               Text(
                 l10n.authSupabaseNotConfigured,
@@ -1075,7 +1075,7 @@ class _AuthPanel extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 22),
+              const SizedBox(height: StudioSpacing.md),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: studio.primaryGradient,

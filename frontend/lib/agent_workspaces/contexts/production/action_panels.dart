@@ -394,7 +394,7 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
           l10n.agentWorkspaceProductionArgumentTemplates,
           style: Theme.of(context).textTheme.labelMedium,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -440,7 +440,7 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
           style: Theme.of(context).textTheme.labelMedium,
         ),
         if (candidateIds.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.agentWorkspaceProductionCandidateIds(
               candidateIds.length,
@@ -452,7 +452,7 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
           spacing: 8,
           runSpacing: 8,

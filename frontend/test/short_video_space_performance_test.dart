@@ -5,6 +5,8 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 import 'package:openflow_app/short_video_space/components/batch_operation_toolbar.dart';
 
+import 'support/studio_collapsible_filter_test_support.dart';
+
 /// Performance optimization tests for short video editing enhancements
 /// 
 /// **Validates: Requirements 29, 30**
@@ -30,19 +32,23 @@ void main() {
     );
   }
 
+  Future<void> pumpFilterPanelHarness(WidgetTester tester, Widget child) async {
+    await tester.pumpWidget(buildHarness(child));
+    await expandStudioCollapsibleFilterPanel(tester);
+  }
+
   group('FilterPanel Debouncing Tests', () {
     testWidgets('search input debounces with 300ms delay', (tester) async {
       var filterChangeCount = 0;
       FilterState? lastFilter;
 
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
-            onFilterChanged: (filter) {
-              filterChangeCount++;
-              lastFilter = filter;
-            },
-          ),
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
+          onFilterChanged: (filter) {
+            filterChangeCount++;
+            lastFilter = filter;
+          },
         ),
       );
 
@@ -74,14 +80,13 @@ void main() {
     testWidgets('search debounce resets on new input', (tester) async {
       var filterChangeCount = 0;
 
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
             onFilterChanged: (filter) {
               filterChangeCount++;
             },
           ),
-        ),
       );
 
       final searchField = find.byType(TextField);
@@ -107,14 +112,13 @@ void main() {
     testWidgets('handles rapid search input changes efficiently', (tester) async {
       var filterChangeCount = 0;
 
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
             onFilterChanged: (filter) {
               filterChangeCount++;
             },
           ),
-        ),
       );
 
       final searchField = find.byType(TextField);
@@ -136,12 +140,11 @@ void main() {
     });
 
     testWidgets('clears search debounce timer on dispose', (tester) async {
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
             onFilterChanged: (filter) {},
           ),
-        ),
       );
 
       final searchField = find.byType(TextField);
@@ -398,12 +401,11 @@ void main() {
 
   group('FilterPanel Performance Tests', () {
     testWidgets('clears filter debounce timer on dispose', (tester) async {
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
             onFilterChanged: (filter) {},
           ),
-        ),
       );
 
       // Trigger a filter change by opening dropdown (but don't complete it)
@@ -425,14 +427,13 @@ void main() {
     testWidgets('debouncing works correctly for search', (tester) async {
       var filterChangeCount = 0;
 
-      await tester.pumpWidget(
-        buildHarness(
-          FilterPanel(
+      await pumpFilterPanelHarness(
+        tester,
+        FilterPanel(
             onFilterChanged: (filter) {
               filterChangeCount++;
             },
           ),
-        ),
       );
 
       // Trigger search input

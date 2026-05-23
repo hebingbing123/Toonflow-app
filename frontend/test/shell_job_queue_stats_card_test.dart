@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/studio_code_labels.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/shell/job_queue_stats_card.dart';
 
@@ -45,8 +46,8 @@ void main() {
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('en'),
@@ -66,15 +67,34 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Refresh'));
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(JobQueueStatsCard)),
+    )!;
+
+    await tester.tap(find.text(l10n.helpHubRefresh));
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(findTextSpan('pending 7'), findsOneWidget);
-    expect(findTextSpan('claimable 4'), findsOneWidget);
-    expect(find.text('pending_by_kind'), findsOneWidget);
-    expect(findTextSpan('render 5'), findsOneWidget);
-    expect(findTextSpan('export 2'), findsOneWidget);
+    expect(
+      findTextSpan('${studioJobQueueMetricLabel(l10n, 'pending')} 7'),
+      findsOneWidget,
+    );
+    expect(
+      findTextSpan('${studioJobQueueMetricLabel(l10n, 'claimable')} 4'),
+      findsOneWidget,
+    );
+    expect(
+      find.text(studioJobQueueMetricLabel(l10n, 'pending_by_kind')),
+      findsOneWidget,
+    );
+    expect(
+      findTextSpan('${studioJobKindLabel(l10n, 'render')} 5'),
+      findsOneWidget,
+    );
+    expect(
+      findTextSpan('${studioJobKindLabel(l10n, 'export')} 2'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

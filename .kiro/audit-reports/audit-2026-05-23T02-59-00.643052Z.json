@@ -1,0 +1,1282 @@
+{
+  "metadata": {
+    "auditDate": "2026-05-23T02:59:00.643052Z",
+    "auditVersion": "1.0.0",
+    "projectPath": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend",
+    "filesAnalyzed": 677,
+    "widgetsInspected": null
+  },
+  "summary": {
+    "totalFindings": 62,
+    "bySeverity": {
+      "critical": 0,
+      "high": 46,
+      "medium": 16,
+      "low": 0
+    },
+    "byCategory": {
+      "visualHierarchy": 0,
+      "spacing": 0,
+      "typography": 0,
+      "colorSystem": 0,
+      "interactiveElements": 0,
+      "emptyStates": 0,
+      "responsiveness": 0,
+      "componentConsistency": 0,
+      "accessibility": 62
+    }
+  },
+  "findings": [
+    {
+      "id": "ACC-001",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/account/section.dart",
+        "line": 590,
+        "column": 16,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-002",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/api_keys/section.dart",
+        "line": 404,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh, size: 18)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-003",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/api_keys/section.dart",
+        "line": 415,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.key_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-004",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/api_keys/section.dart",
+        "line": 699,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-005",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_dropdown_field.dart",
+        "line": 639,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.check_rounded, size: 18, color: tokens.accent)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-006",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_dropdown_field.dart",
+        "line": 678,
+        "column": 21,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedRotation(turns: expanded ? 0.5 : 0, duration: const Duration(milliseconds: 180), curve: Curv...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-007",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_dropdown_field.dart",
+        "line": 682,
+        "column": 18,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.keyboard_arrow_down_rounded, color: !enabled ? tokens.textMuted.withValues(alpha: 0.5) : ...",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-008",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_media_card.dart",
+        "line": 53,
+        "column": 15,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.movie_outlined, size: 48, color: tokens.textMuted)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-009",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_skeleton.dart",
+        "line": 43,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _controller, builder: (context, child) {return Container(width: widget.wi...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-010",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_workbench_section.dart",
+        "line": 117,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedCrossFade(firstChild: const SizedBox(width: double.infinity), secondChild: Padding(padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-011",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/ix/studio_api_error_callout.dart",
+        "line": 80,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh_rounded, size: 14)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-012",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/episode_console/episode_console_page.dart",
+        "line": 32,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.arrow_back)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-013",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/global_search/global_search_bar.dart",
+        "line": 1096,
+        "column": 14,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.search_rounded, size: 16, fill: 0.22, weight: 500, color: color)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-014",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/global_search/global_search_bar.dart",
+        "line": 1259,
+        "column": 24,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.search_rounded, size: iconSize, fill: titleBarDense ? 0.2 : 0.0, weight: titleBarDense ? ...",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-015",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/jobs/section.dart",
+        "line": 36,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: widget.controller, builder: (context, _) => JobsSectionView(studioPresent...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-016",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/local_prefs/risky_operation_confirm_prefs.dart",
+        "line": 243,
+        "column": 20,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.visibility_outlined, size: 22, color: Theme.of(context).colorScheme.primary)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-017",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/local_prefs/risky_operation_confirm_prefs.dart",
+        "line": 253,
+        "column": 20,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.notifications_active_outlined, size: 22)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-018",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 434,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh, size: 18)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-019",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 800,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextField(controller: _workspaceAuditTemplateFilterController, decoration: const InputDecoration(isD...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-020",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 836,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextField(controller: _workspaceAuditStartAtController, decoration: const InputDecoration(isDense: t...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-021",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 844,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextField(controller: _workspaceAuditEndAtController, decoration: const InputDecoration(isDense: tru...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-022",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 969,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextField(controller: _exportHistoryExportedStartController, decoration: const InputDecoration(isDen...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-023",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/notifications/section.dart",
+        "line": 977,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextField(controller: _exportHistoryExportedEndController, decoration: const InputDecoration(isDense...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-024",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 153,
+        "column": 24,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) {return CustomPaint(painter: _Bac...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-025",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 195,
+        "column": 36,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) => _HeroStage(l10n: l10n, progres...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-026",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 247,
+        "column": 27,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) => _HeroStage(l10n: l10n, progres...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-027",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 746,
+        "column": 22,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.auto_mode_rounded, color: Colors.white, size: 34)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-028",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 1126,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedAlign(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, alignment: mo...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-029",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 351,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOutCubic, sw...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-030",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 468,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic, constrain...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-031",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 492,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(module.icon, size: compact ? 18 : 19, color: selected ? tokens.textPrimary : tokens.textSeconda...",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-032",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 534,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, width: in...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-033",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/studio_app_bar_actions.dart",
+        "line": 123,
+        "column": 24,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(icon, size: iconSize, fill: dense ? 0.35 : 0.0, weight: dense ? 500 : 400, color: selected ? to...",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-034",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/studio_sidebar.dart",
+        "line": 222,
+        "column": 30,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(widget.icon, color: fg, size: 22)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-035",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/novel_crawl_login_webview_dialog.dart",
+        "line": 178,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.cookie_outlined, size: 18)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-036",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/projects_studio_home.dart",
+        "line": 200,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.add, size: 18)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-037",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/projects_studio_home.dart",
+        "line": 384,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: widget.controller, builder: (context, _) {return LayoutBuilder(builder: (...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-038",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/studio_review_pack_scope.dart",
+        "line": 255,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.arrow_back)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-039",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/studio_review_pack_scope.dart",
+        "line": 291,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.arrow_back)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-040",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/studio_review_pack_scope.dart",
+        "line": 330,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.arrow_back)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-041",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/studio_step_model_routing_bar.dart",
+        "line": 506,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedCrossFade(firstChild: const SizedBox(width: double.infinity), secondChild: Padding(padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-042",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/projects/section.dart",
+        "line": 141,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: controller, builder: (context, _) => Column(crossAxisAlignment: CrossAxis...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-043",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Form input missing label or hint",
+      "description": "TextField/TextFormField has no associated label or hint",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/quality_reviews/dimension_score_form.dart",
+        "line": 280,
+        "column": 26,
+        "widgetPath": null
+      },
+      "codeSnippet": "TextFormField(controller: controller, keyboardType: TextInputType.number, inputFormatters: [Filterin...",
+      "recommendation": "Use InputDecoration with labelText/hintText or an external Semantics label",
+      "designSystemReference": "InputDecorationTheme",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-044",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/quality_reviews/section.dart",
+        "line": 316,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: c, builder: (context, _) {final actionsBar = QualityReviewsActionsBar(stu...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-046",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1061,
+        "column": 15,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.download)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-047",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1077,
+        "column": 15,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-048",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1084,
+        "column": 15,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.movie_creation_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-049",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1092,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.movie_creation_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-050",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1099,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-051",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_history_dialog.dart",
+        "line": 1143,
+        "column": 14,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(icon, color: color, size: 24)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-045",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/dialogs/export_progress_dialog.dart",
+        "line": 601,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.download_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-052",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/section_undo_redo.dart",
+        "line": 524,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.undo)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-053",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/section_undo_redo.dart",
+        "line": 534,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.redo)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-054",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/section_undo_redo.dart",
+        "line": 542,
+        "column": 19,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.history)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-055",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/section_undo_redo.dart",
+        "line": 732,
+        "column": 23,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.delete_outline)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-056",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/view.dart",
+        "line": 1458,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.auto_awesome_outlined)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-057",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/view.dart",
+        "line": 1463,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.person_outline)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-058",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/short_video_space/view.dart",
+        "line": 1599,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.arrow_forward_rounded, size: 18, color: muted.withValues(alpha: 0.78))",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-059",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/task_center/previews.dart",
+        "line": 36,
+        "column": 17,
+        "widgetPath": null
+      },
+      "codeSnippet": "const Icon(Icons.refresh, size: 16)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-060",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/task_center/workbench_view.dart",
+        "line": 154,
+        "column": 16,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(Icons.hub_outlined, color: StudioTokens.of(context).accent)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-061",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/task_center/workbench_view.dart",
+        "line": 478,
+        "column": 15,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(icon, size: 16)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-062",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Icon missing semantic label",
+      "description": "Icon widget lacks semanticLabel for screen readers",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/task_center/workbench_view.dart",
+        "line": 484,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "Icon(icon, size: 16)",
+      "recommendation": "Add semanticLabel describing the icon action, or exclude decorative icons with ExcludeSemantics",
+      "designSystemReference": "Semantics / Icon.semanticLabel",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    }
+  ],
+  "errors": [],
+  "actionPlan": [
+    {
+      "priority": 1,
+      "category": "accessibility",
+      "findingIds": [
+        "ACC-021",
+        "ACC-002",
+        "ACC-003",
+        "ACC-004",
+        "ACC-005",
+        "ACC-061",
+        "ACC-007",
+        "ACC-008",
+        "ACC-060",
+        "ACC-059",
+        "ACC-011",
+        "ACC-012",
+        "ACC-013",
+        "ACC-014",
+        "ACC-058",
+        "ACC-016",
+        "ACC-017",
+        "ACC-018",
+        "ACC-019",
+        "ACC-020",
+        "ACC-057",
+        "ACC-022",
+        "ACC-023",
+        "ACC-056",
+        "ACC-055",
+        "ACC-054",
+        "ACC-027",
+        "ACC-053",
+        "ACC-045",
+        "ACC-051",
+        "ACC-031",
+        "ACC-050",
+        "ACC-033",
+        "ACC-034",
+        "ACC-035",
+        "ACC-036",
+        "ACC-049",
+        "ACC-038",
+        "ACC-039",
+        "ACC-040",
+        "ACC-062",
+        "ACC-048",
+        "ACC-043",
+        "ACC-047",
+        "ACC-046",
+        "ACC-052",
+        "ACC-042",
+        "ACC-037",
+        "ACC-032",
+        "ACC-030",
+        "ACC-029",
+        "ACC-041",
+        "ACC-028",
+        "ACC-026",
+        "ACC-025",
+        "ACC-024",
+        "ACC-001",
+        "ACC-015",
+        "ACC-010",
+        "ACC-009",
+        "ACC-006",
+        "ACC-044"
+      ],
+      "rationale": "Accessibility issues affect users with disabilities and may fail WCAG compliance",
+      "estimatedEffort": "< 4 hours"
+    }
+  ]
+}

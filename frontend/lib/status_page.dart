@@ -399,7 +399,7 @@ class _MetricTile extends StatelessWidget {
               context,
             )?.copyWith(fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(detail, style: studioHintStyle(context)),
         ],
       ),

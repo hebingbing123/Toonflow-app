@@ -38,7 +38,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
           l10n.agentWorkspaceScriptStagesTitle,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         ...stages.map(
           (ScriptWorkspaceStage stage) => Card(
             margin: const EdgeInsets.only(bottom: 8),

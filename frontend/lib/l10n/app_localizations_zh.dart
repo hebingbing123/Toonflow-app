@@ -1065,6 +1065,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioProjectsEmptyStep3 => '需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。';
 
   @override
+  String get studioGettingStartedTitle => '快速入门';
+
+  @override
   String studioGettingStartedStepSemantics(
     int stepNumber,
     int stepTotal,

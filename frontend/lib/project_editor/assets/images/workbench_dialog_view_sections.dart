@@ -108,7 +108,7 @@ Widget _buildDiagnosisCard(
           model.diagnosis.summary,
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           model.diagnosis.detail,
           style: Theme.of(context).textTheme.bodySmall,

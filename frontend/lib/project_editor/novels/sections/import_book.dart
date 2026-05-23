@@ -679,7 +679,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextFormField(
                           key: ValueKey(
                             'import-preview-title-${row.chapterIndex}-${row.chapter}',

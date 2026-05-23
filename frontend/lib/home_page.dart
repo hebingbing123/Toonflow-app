@@ -88,6 +88,7 @@ import 'design_system/components/studio_empty_state.dart';
 import 'design_system/components/studio_onboarding_coach.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
+import 'design_system/components/studio_skeleton.dart';
 import 'design_system/components/studio_surfaces.dart';
 import 'design_system/components/studio_collapsible_filter_panel.dart';
 import 'design_system/components/studio_filter_row.dart';

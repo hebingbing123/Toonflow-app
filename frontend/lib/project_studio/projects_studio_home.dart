@@ -15,6 +15,7 @@ import 'studio_readiness.dart';
 import 'create_project_wizard.dart';
 import 'projects_grid_view.dart';
 import 'projects_studio_home_layout.dart';
+import 'studio_step_progress_ring.dart';
 
 /// Product-shell projects home (Wave 2): grid, recent row, wizard create.
 class ProjectsStudioHome extends StatefulWidget {
@@ -173,35 +174,12 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         ),
       ],
     );
-    final createAction = stacked
-        ? StudioPrimaryButton(
-            label: creating ? l10n.projectsCreating : l10n.studioCreateProject,
-            icon: Icons.add,
-            loading: creating,
-            onPressed: creating ? null : _createProject,
-          )
-        : FilledButton.icon(
-            onPressed: creating ? null : _createProject,
-            style: FilledButton.styleFrom(
-              visualDensity: VisualDensity.standard,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              backgroundColor: tokens.primary,
-              foregroundColor: Colors.white,
-            ),
-            icon: creating
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.add, size: 18),
-            label: Text(
-              creating ? l10n.projectsCreating : l10n.studioCreateProject,
-            ),
-          );
+    final createAction = StudioPrimaryButton(
+      label: creating ? l10n.projectsCreating : l10n.studioCreateProject,
+      icon: Icons.add,
+      loading: creating,
+      onPressed: creating ? null : _createProject,
+    );
 
     if (!stacked) {
       return Padding(
@@ -281,6 +259,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
           : null,
     );
     final gettingStarted = StudioGettingStartedSteps(
+      title: l10n.studioGettingStartedTitle,
       steps: <String>[
         l10n.studioProjectsEmptyStep1,
         l10n.studioProjectsEmptyStep2,
@@ -332,6 +311,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               height: compact ? 112 : 132,
               child: _RecentProjectChip(
                 project: recent[i],
+                completedSteps: _progressByProjectId[recent[i].id] ?? 0,
                 compact: compact,
                 selected: widget.currentProjectNumericId == recent[i].numericId,
                 onTap: widget.onSelectProjectScope == null
@@ -363,6 +343,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                 width: recentCardWidth,
                 child: _RecentProjectChip(
                   project: project,
+                  completedSteps: _progressByProjectId[project.id] ?? 0,
                   compact: compact,
                   selected: widget.currentProjectNumericId == project.numericId,
                   onTap: widget.onSelectProjectScope == null
@@ -526,12 +507,14 @@ class _RecentProjectChip extends StatelessWidget {
   const _RecentProjectChip({
     required this.project,
     required this.onTap,
+    this.completedSteps = 0,
     this.selected = false,
     this.compact = false,
   });
 
   final ProjectRow project;
   final VoidCallback onTap;
+  final int completedSteps;
   final bool selected;
   final bool compact;
 
@@ -543,45 +526,56 @@ class _RecentProjectChip extends StatelessWidget {
         project.name ?? l10n.projectsUnnamedProject(project.numericId);
 
     return Material(
-      color: selected ? tokens.bgElevated : tokens.bgInset,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
+            color: selected
+                ? tokens.primarySoft.withValues(alpha: 0.42)
+                : tokens.bgInset.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected ? tokens.primary : tokens.borderSubtle,
               width: selected ? 1.5 : 1,
             ),
           ),
-          padding: EdgeInsets.all(
-            compact
-                ? StudioLayoutSpacing.insetDense
-                : StudioLayoutSpacing.insetComfortable,
-          ),
-          child: Column(
+          child: Padding(
+            padding: EdgeInsets.all(
+              compact
+                  ? StudioLayoutSpacing.insetDense
+                  : StudioLayoutSpacing.insetComfortable,
+            ),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      l10n.studioContinueCreating,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: tokens.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
+                  Text(
+                    '#${project.numericId}',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: tokens.textMuted,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.15,
                     ),
                   ),
+                  const Spacer(),
                   if (selected)
-                    Icon(
-                      Icons.check_circle,
-                      size: compact ? 16 : 18,
-                      color: tokens.primary,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                        Icons.check_circle,
+                        size: compact ? 16 : 18,
+                        color: tokens.primary,
+                      ),
                     ),
+                  StudioStepProgressRing(
+                    completedSteps: completedSteps,
+                    size: compact ? 28 : 32,
+                  ),
                 ],
               ),
               const Spacer(),
@@ -592,6 +586,7 @@ class _RecentProjectChip extends StatelessWidget {
                 style: studioCardTitleStyle(context),
               ),
             ],
+            ),
           ),
         ),
       ),

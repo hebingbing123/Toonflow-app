@@ -236,7 +236,7 @@ extension _StoryboardBatchWorkbenchSections
               l10n.scriptEditorStoryboardBatchExportEstimateHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateContent(
                 exportEstimate.shotCount,
@@ -285,7 +285,7 @@ extension _StoryboardBatchWorkbenchSections
               l10n.scriptEditorStoryboardBatchLastExportHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.scriptEditorStoryboardBatchExportFileLine(
                 _exportSummary!.filename,

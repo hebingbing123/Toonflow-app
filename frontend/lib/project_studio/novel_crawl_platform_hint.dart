@@ -90,7 +90,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       body,
                       style: theme.textTheme.bodySmall?.copyWith(

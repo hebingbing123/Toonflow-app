@@ -537,6 +537,7 @@
   "studioProjectsEmptyStep1": "点击「创建项目」，填写名称并选择故事前提。",
   "studioProjectsEmptyStep2": "打开项目后从「剧本」步开始写作或导入内容。",
   "studioProjectsEmptyStep3": "需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。",
+  "studioGettingStartedTitle": "快速入门",
   "studioGettingStartedStepSemantics": "第 {stepNumber} 步，共 {stepTotal} 步：{stepText}",
   "@studioGettingStartedStepSemantics": {
     "placeholders": {

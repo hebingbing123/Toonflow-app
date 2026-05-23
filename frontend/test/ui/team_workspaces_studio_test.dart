@@ -34,4 +34,34 @@ void main() {
     expect(find.text(zh.teamWorkspaceLoginRequired), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('team workspaces studio header and refresh when signed in', (
+    WidgetTester tester,
+  ) async {
+    final zh = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        home: const Scaffold(
+          body: SingleChildScrollView(
+            child: TeamWorkspacesSection(accessToken: 'token'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(zh.teamWorkspaceTitle), findsOneWidget);
+    expect(find.text(zh.teamWorkspaceRefreshList), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
 }

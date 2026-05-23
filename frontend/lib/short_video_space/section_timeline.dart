@@ -625,7 +625,7 @@ class _TimelineShotCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall,
                 ),
               ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             _TrimField(
               label: l10n.shortVideoTimelineTrimInMs,
               value: inMs,

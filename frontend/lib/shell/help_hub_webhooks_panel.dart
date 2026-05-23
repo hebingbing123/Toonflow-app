@@ -980,7 +980,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                   ),
                                   enabled: !_loadingWebhooks && !rowBusy,
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: StudioSpacing.xs),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 8,

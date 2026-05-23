@@ -344,10 +344,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
               children: <Widget>[
                 Text(title, style: theme.labelLarge),
                 if (subtitle != null && subtitle.trim().isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(subtitle.trim(), style: theme.bodySmall),
                 ],
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 SelectableText(
                   _previewText(normalized, maxChars: 1200),
                   style: theme.bodySmall,

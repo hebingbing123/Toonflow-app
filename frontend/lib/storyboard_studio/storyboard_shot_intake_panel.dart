@@ -180,7 +180,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
         mainAxisSize: widget.compact ? MainAxisSize.max : MainAxisSize.min,
         children: <Widget>[
           Icon(icon, size: 18),
-          const SizedBox(width: 6),
+          const SizedBox(width: StudioSpacing.xs),
           Expanded(
             child: Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
           ),

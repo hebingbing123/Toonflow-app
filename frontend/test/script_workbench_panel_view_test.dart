@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'support/studio_workbench_section_test_support.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/script_editor/workbench_view.dart';
@@ -222,6 +223,7 @@ void main() {
         ),
       ),
     );
+    await expandStudioWorkbenchSection(tester);
 
     await tester.tap(
       find.widgetWithText(
@@ -233,7 +235,7 @@ void main() {
     await tester.tap(
       find.widgetWithText(
         FilledButton,
-        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+        '进入编辑图片工作台',
       ),
     );
     await tester.pump();
@@ -259,10 +261,12 @@ void main() {
     );
     await tester.pump();
     await tester.tap(
-      find.widgetWithText(
-        TextButton,
-        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
-      ),
+      find
+          .widgetWithText(
+            TextButton,
+            _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+          )
+          .last,
     );
     await tester.pump();
 

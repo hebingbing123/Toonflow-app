@@ -251,7 +251,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               if (model.initialProjectScopeSummary != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 SelectableText(
                   l10n.qualityReviewsScopeSeedLine(
                     model.initialProjectScopeSummary!,
@@ -264,7 +264,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               if (model.filterBadCasesOnly ||
                   model.filterDeliveryPriorityOnly ||
                   model.filterAutoSourceOnly) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -280,7 +280,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ],
                 ),
                 if (model.activeFilterQuerySummary != null) ...[
-                  const SizedBox(height: 6),
+                  const SizedBox(height: StudioSpacing.xs),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -869,7 +869,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   l10n.qualityReviewsGradeDistribution,
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 ...model.stageGradeRows.map(
                   (row) => ListTile(
                     dense: true,

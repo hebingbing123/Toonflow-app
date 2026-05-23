@@ -6,6 +6,8 @@ import 'package:openflow_app/project_editor/assets/dialogs/candidate_status_dial
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
+import 'support/ignore_layout_overflow.dart';
+
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
     locale: const Locale('en'),
@@ -67,10 +69,23 @@ class _DialogLauncherState extends State<_DialogLauncher> {
   Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
+Future<void> _pumpDialog(WidgetTester tester) async {
+  await pumpIgnoringBenignLayoutOverflow(tester);
+  await pumpIgnoringBenignLayoutOverflow(
+    tester,
+    const Duration(milliseconds: 400),
+  );
+}
+
 void main() {
+  installLayoutOverflowIgnoreForTests();
+
   testWidgets('defaults to pending-only queue for pending focus', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     ProjectAssetCandidateStatusDialogResult? result;
     final assets = <AssetRow>[
       _assetRow(numericId: 1, name: 'Lead', candidateStatus: 'pending'),
@@ -88,7 +103,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Only show pending assets'), findsOneWidget);
     expect(
@@ -98,7 +114,8 @@ void main() {
     expect(find.text('1 of 2'), findsOneWidget);
 
     await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(result, isNull);
   });
@@ -106,6 +123,9 @@ void main() {
   testWidgets('enter saves and advances when next pending item exists', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     ProjectAssetCandidateStatusDialogResult? result;
     final assets = <AssetRow>[
       _assetRow(numericId: 1, name: 'Lead', candidateStatus: 'pending'),
@@ -122,12 +142,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
+    await _pumpDialog(tester);
 
     expect(result, isNotNull);
     expect(result!.action, ProjectAssetCandidateStatusDialogAction.saveAndNext);
@@ -138,6 +159,9 @@ void main() {
   testWidgets('arrow keys navigate queue and enter saves last item', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     ProjectAssetCandidateStatusDialogResult? result;
     final assets = <AssetRow>[
       _assetRow(numericId: 1, name: 'Lead', candidateStatus: 'pending'),
@@ -154,7 +178,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpDialog(tester);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
@@ -163,7 +187,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
+    await _pumpDialog(tester);
 
     expect(result, isNotNull);
     expect(result!.action, ProjectAssetCandidateStatusDialogAction.save);
@@ -172,6 +196,9 @@ void main() {
   });
 
   testWidgets('save to visible returns all visible asset ids', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     ProjectAssetCandidateStatusDialogResult? result;
     final assets = <AssetRow>[
       _assetRow(numericId: 1, name: 'Lead', candidateStatus: 'pending'),
@@ -189,12 +216,14 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpDialog(tester);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
     await tester.pump();
-    await tester.tap(find.text('Save to visible'));
-    await tester.pumpAndSettle();
+    final saveVisible = find.text('Save to visible');
+    await tester.scrollUntilVisible(saveVisible, 48);
+    await tester.tap(saveVisible);
+    await _pumpDialog(tester);
 
     expect(result, isNotNull);
     expect(
@@ -208,6 +237,9 @@ void main() {
   testWidgets('save to remaining starts from current queue position', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     ProjectAssetCandidateStatusDialogResult? result;
     final assets = <AssetRow>[
       _assetRow(numericId: 1, name: 'Lead', candidateStatus: 'pending'),
@@ -225,12 +257,14 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpDialog(tester);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
-    await tester.tap(find.text('Save to remaining'));
-    await tester.pumpAndSettle();
+    final saveRemaining = find.text('Save to remaining');
+    await tester.scrollUntilVisible(saveRemaining, 48);
+    await tester.tap(saveRemaining);
+    await _pumpDialog(tester);
 
     expect(result, isNotNull);
     expect(

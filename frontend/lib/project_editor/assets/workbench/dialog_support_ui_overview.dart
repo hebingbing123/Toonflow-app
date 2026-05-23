@@ -38,7 +38,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         Container(
           width: double.infinity,
@@ -48,13 +48,13 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(statusLine, style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 scriptScopedLine,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (selectedAsset != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.projectEditorAssetsWorkbenchFocusAssetSummary(
                     selectedAsset!.numericId,

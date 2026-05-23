@@ -400,6 +400,103 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     });
   }
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    l10n.platformConfigSectionTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                ),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
+                ),
+              ],
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(
+              l10n.platformConfigSectionSubtitle,
+              style: studioSectionIntroStyle(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: const Padding(
+        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioSkeleton(height: 18),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 48),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInsetConfigSection(
+    BuildContext context, {
+    required String title,
+    String? intro,
+    String? stateLine,
+    required Widget child,
+  }) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(title, style: studioCardTitleStyle(context)),
+            if (intro != null) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(intro, style: studioSectionIntroStyle(context)),
+            ],
+            if (stateLine != null) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(stateLine, style: studioSectionIntroStyle(context)),
+            ],
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildToggleEditor({
     required AppLocalizations l10n,
     required PlatformConfigToggleSetV1 draft,
@@ -487,220 +584,199 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         workspaceDraft != null &&
         workspaceBaseline != null &&
         workspaceDraft != workspaceBaseline;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                l10n.platformConfigSectionTitle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-            RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.platformConfigSectionSubtitle,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          l10n.riskyPrefsMenuDefaultTooltip,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.platformConfigLocalPrefsDescription,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: _loading ? null : _load,
-              child: Text(
-                _loading
-                    ? l10n.platformConfigButtonRefreshing
-                    : l10n.platformConfigButtonRefresh,
-              ),
-            ),
-            FilledButton(
-              onPressed: _savingUser || !userDraftDirty ? null : _saveUser,
-              child: Text(
-                _savingUser
-                    ? l10n.platformConfigButtonSaving
-                    : l10n.platformConfigButtonSaveUser,
-              ),
-            ),
-            OutlinedButton(
-              onPressed: _savingUser || !(_response?.hasUserOverride ?? false)
-                  ? null
-                  : _resetUser,
-              child: Text(l10n.platformConfigButtonResetUser),
-            ),
-            FilledButton.tonal(
-              onPressed:
-                  _savingWorkspace ||
-                      !workspaceDraftDirty ||
-                      workspace == null ||
-                      !workspace.canManageOverride
-                  ? null
-                  : _saveWorkspace,
-              child: Text(
-                _savingWorkspace
-                    ? l10n.platformConfigButtonSaving
-                    : l10n.platformConfigButtonSaveWorkspace,
-              ),
-            ),
-            OutlinedButton(
-              onPressed:
-                  _savingWorkspace ||
-                      workspace == null ||
-                      !workspace.canManageOverride ||
-                      !(_response?.hasWorkspaceOverride ?? false)
-                  ? null
-                  : _resetWorkspace,
-              child: Text(l10n.platformConfigButtonResetWorkspace),
-            ),
-            OutlinedButton(
-              onPressed: _response == null ? null : _copyConfig,
-              child: Text(l10n.platformConfigButtonCopyJson),
-            ),
-          ],
-        ),
-        if (_error != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            _error!,
-            style: TextStyle(color: StudioTokens.of(context).danger),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildStudioHeader(context, l10n),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
+          _buildInsetConfigSection(
+            context,
+            title: l10n.riskyPrefsMenuDefaultTooltip,
+            intro: l10n.platformConfigLocalPrefsDescription,
+            child: const SizedBox.shrink(),
           ),
-        ],
-        if (_response != null) ...[
-          const SizedBox(height: 8),
-          SelectableText(
-            'scope=${_response!.scope} · schema=v${_response!.schemaVersion}',
-          ),
-          const SizedBox(height: 4),
-          SelectableText(
-            'plan_tier=${_response!.planTier} · has_plan_override=${_response!.hasPlanOverride}',
-          ),
-          if (workspace != null) ...[
-            const SizedBox(height: 4),
-            SelectableText(
-              'current_workspace=${workspace.name} (${workspace.workspaceType}) · role=${workspace.role} · can_manage_override=${workspace.canManageOverride}',
-            ),
-          ],
-        ],
-        if (_response != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.platformConfigPlanOverrideTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.platformConfigPlanLayerIntro,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _response!.hasPlanOverride
-                ? l10n.platformConfigPlanStateActive
-                : l10n.platformConfigPlanStateInactive,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          if (_response!.planOverride != null) ...[
-            const SizedBox(height: 12),
-            _buildToggleEditor(
-              l10n: l10n,
-              draft: _response!.planOverride!,
-              onChanged: null,
-            ),
-          ],
-        ],
-        if (workspace != null && workspaceDraft != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.platformConfigWorkspaceOverrideTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            workspace.canManageOverride
-                ? l10n.platformConfigWorkspaceEnterpriseIntro
-                : l10n.platformConfigWorkspaceViewOnlyIntro,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            (_response?.hasWorkspaceOverride ?? false)
-                ? l10n.platformConfigWorkspaceStateWritten
-                : l10n.platformConfigWorkspaceStateInherit,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 12),
-          _buildToggleEditor(
-            l10n: l10n,
-            draft: workspaceDraft,
-            onChanged: workspace.canManageOverride
-                ? _patchWorkspaceDraft
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
+          StudioCollapsibleFilterPanel(
+            title: l10n.platformConfigButtonRefresh,
+            subtitle: _loading
+                ? l10n.platformConfigButtonRefreshing
                 : null,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                FilledButton.tonal(
+                  onPressed: _loading ? null : _load,
+                  child: Text(
+                    _loading
+                        ? l10n.platformConfigButtonRefreshing
+                        : l10n.platformConfigButtonRefresh,
+                  ),
+                ),
+                FilledButton(
+                  onPressed: _savingUser || !userDraftDirty ? null : _saveUser,
+                  child: Text(
+                    _savingUser
+                        ? l10n.platformConfigButtonSaving
+                        : l10n.platformConfigButtonSaveUser,
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed:
+                      _savingUser || !(_response?.hasUserOverride ?? false)
+                      ? null
+                      : _resetUser,
+                  child: Text(l10n.platformConfigButtonResetUser),
+                ),
+                FilledButton.tonal(
+                  onPressed:
+                      _savingWorkspace ||
+                          !workspaceDraftDirty ||
+                          workspace == null ||
+                          !workspace.canManageOverride
+                      ? null
+                      : _saveWorkspace,
+                  child: Text(
+                    _savingWorkspace
+                        ? l10n.platformConfigButtonSaving
+                        : l10n.platformConfigButtonSaveWorkspace,
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed:
+                      _savingWorkspace ||
+                          workspace == null ||
+                          !workspace.canManageOverride ||
+                          !(_response?.hasWorkspaceOverride ?? false)
+                      ? null
+                      : _resetWorkspace,
+                  child: Text(l10n.platformConfigButtonResetWorkspace),
+                ),
+                OutlinedButton(
+                  onPressed: _response == null ? null : _copyConfig,
+                  child: Text(l10n.platformConfigButtonCopyJson),
+                ),
+              ],
+            ),
           ),
+          if (_error != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            Text(
+              _error!,
+              style: TextStyle(color: StudioTokens.of(context).danger),
+            ),
+          ],
+          if (_loading && _response == null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildStudioLoadingBody(context),
+          ],
+          if (_response != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            DecoratedBox(
+              decoration: studioInsetPanelDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  StudioLayoutSpacing.insetComfortable,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SelectableText(
+                      'scope=${_response!.scope} · schema=v${_response!.schemaVersion}',
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      'plan_tier=${_response!.planTier} · has_plan_override=${_response!.hasPlanOverride}',
+                    ),
+                    if (workspace != null) ...<Widget>[
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        'current_workspace=${workspace.name} (${workspace.workspaceType}) · role=${workspace.role} · can_manage_override=${workspace.canManageOverride}',
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (_response != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildInsetConfigSection(
+              context,
+              title: l10n.platformConfigPlanOverrideTitle,
+              intro: l10n.platformConfigPlanLayerIntro,
+              stateLine: _response!.hasPlanOverride
+                  ? l10n.platformConfigPlanStateActive
+                  : l10n.platformConfigPlanStateInactive,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
+                    style: studioSectionIntroStyle(context),
+                  ),
+                  if (_response!.planOverride != null) ...<Widget>[
+                    const SizedBox(height: 12),
+                    _buildToggleEditor(
+                      l10n: l10n,
+                      draft: _response!.planOverride!,
+                      onChanged: null,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (workspace != null && workspaceDraft != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildInsetConfigSection(
+              context,
+              title: l10n.platformConfigWorkspaceOverrideTitle,
+              intro: workspace.canManageOverride
+                  ? l10n.platformConfigWorkspaceEnterpriseIntro
+                  : l10n.platformConfigWorkspaceViewOnlyIntro,
+              stateLine: (_response?.hasWorkspaceOverride ?? false)
+                  ? l10n.platformConfigWorkspaceStateWritten
+                  : l10n.platformConfigWorkspaceStateInherit,
+              child: _buildToggleEditor(
+                l10n: l10n,
+                draft: workspaceDraft,
+                onChanged: workspace.canManageOverride
+                    ? _patchWorkspaceDraft
+                    : null,
+              ),
+            ),
+          ],
+          if (workspace != null && workspaceDraft == null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildInsetConfigSection(
+              context,
+              title: l10n.platformConfigWorkspaceOverrideTitle,
+              intro: workspace.workspaceType == 'enterprise'
+                  ? l10n.platformConfigWorkspaceNoDraftEnterprise
+                  : l10n.platformConfigWorkspaceNoDraftPersonal,
+              child: const SizedBox.shrink(),
+            ),
+          ],
+          if (userDraft != null) ...<Widget>[
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            _buildInsetConfigSection(
+              context,
+              title: l10n.platformConfigUserOverrideTitle,
+              intro: l10n.platformConfigUserOverrideIntro,
+              stateLine: (_response?.hasUserOverride ?? false)
+                  ? l10n.platformConfigUserStateWritten
+                  : l10n.platformConfigUserStateInherit,
+              child: _buildToggleEditor(
+                l10n: l10n,
+                draft: userDraft,
+                onChanged: _patchUserDraft,
+              ),
+            ),
+          ],
         ],
-        if (workspace != null && workspaceDraft == null) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.platformConfigWorkspaceOverrideTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            workspace.workspaceType == 'enterprise'
-                ? l10n.platformConfigWorkspaceNoDraftEnterprise
-                : l10n.platformConfigWorkspaceNoDraftPersonal,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-        if (userDraft != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.platformConfigUserOverrideTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.platformConfigUserOverrideIntro,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            (_response?.hasUserOverride ?? false)
-                ? l10n.platformConfigUserStateWritten
-                : l10n.platformConfigUserStateInherit,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 12),
-          _buildToggleEditor(
-            l10n: l10n,
-            draft: userDraft,
-            onChanged: _patchUserDraft,
-          ),
-        ],
-      ],
+      ),
     );
   }
 }

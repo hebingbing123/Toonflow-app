@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_card.dart';
+import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api/shared_kernel/models.dart';
@@ -101,16 +102,17 @@ class _InternationalVendorsSetupBannerState
                     children: <Widget>[
                       Text(
                         l10n.settingsInternationalVendorsSetupTitle,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        style: studioAccentBannerTitleStyle(
+                          context,
+                          tokens.primary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         l10n.settingsInternationalVendorsSetupSubtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: tokens.textSecondary,
-                          height: 1.45,
+                        style: studioAccentBannerBodyStyle(
+                          context,
+                          tokens.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),

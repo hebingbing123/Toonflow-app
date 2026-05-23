@@ -6,6 +6,8 @@ import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api.dart';
 
+import '../support/studio_collapsible_filter_test_support.dart';
+
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
     theme: buildStudioDarkTheme(useGoogleFonts: false),
@@ -38,6 +40,7 @@ void main() {
       _wrapApp(child: ApiKeysSection(controller: controller)),
     );
     await tester.pumpAndSettle();
+    await expandStudioCollapsibleFilterPanel(tester);
 
     expect(find.text('API keys'), findsOneWidget);
     expect(find.byTooltip('Refresh'), findsOneWidget);
@@ -60,10 +63,10 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(900, 700));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
+      await pumpWithExpandedStudioFilters(
+        tester,
         _wrapApp(child: ApiKeysSection(controller: controller)),
       );
-      await tester.pumpAndSettle();
 
       expect(find.text('Refresh'), findsOneWidget);
       expect(tester.takeException(), isNull);

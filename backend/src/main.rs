@@ -50,6 +50,9 @@ async fn main() {
         .expect("bind failed");
 
     tracing::info!(%addr, "openflow-server listening");
+    if let Some(site) = openflow_server::marketing_site::resolve_dir() {
+        tracing::info!(site = %site.display(), "marketing site served at /");
+    }
 
     let worker_state = state.clone();
     tokio::spawn(async move {

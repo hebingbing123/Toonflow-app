@@ -119,7 +119,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
                   studioJobQueueMetricLabel(l10n, 'pending_by_kind'),
                   style: theme.textTheme.labelMedium,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
                   spacing: StudioSpacing.xs,
                   runSpacing: StudioSpacing.xs,

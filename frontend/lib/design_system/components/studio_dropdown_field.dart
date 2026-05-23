@@ -494,7 +494,7 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
     minimumSize: const WidgetStatePropertyAll<Size>(Size(180, 0)),
     maximumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 360)),
     padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
     ),
     elevation: const WidgetStatePropertyAll<double>(16),
     shadowColor: WidgetStatePropertyAll<Color>(
@@ -613,7 +613,7 @@ class StudioSelectMenuItem extends StatelessWidget {
                   children: [
                     title,
                     if (subtitle != null) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         subtitle!,
                         style: theme.textTheme.bodySmall?.copyWith(

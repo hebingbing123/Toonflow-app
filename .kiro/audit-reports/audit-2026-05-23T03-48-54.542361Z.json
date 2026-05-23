@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "auditDate": "2026-05-23T03:48:54.542361Z",
+    "auditVersion": "1.0.0",
+    "projectPath": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend",
+    "filesAnalyzed": 679,
+    "widgetsInspected": null
+  },
+  "summary": {
+    "totalFindings": 0,
+    "bySeverity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "byCategory": {
+      "visualHierarchy": 0,
+      "spacing": 0,
+      "typography": 0,
+      "colorSystem": 0,
+      "interactiveElements": 0,
+      "emptyStates": 0,
+      "responsiveness": 0,
+      "componentConsistency": 0,
+      "accessibility": 0
+    }
+  },
+  "findings": [],
+  "errors": [],
+  "actionPlan": []
+}

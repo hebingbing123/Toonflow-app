@@ -174,7 +174,7 @@ class _ActiveJobBanner extends StatelessWidget {
             ),
           if (job.manifestPath != null)
             Text(job.manifestPath!, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
             spacing: 8,
             children: [

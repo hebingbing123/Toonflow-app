@@ -537,6 +537,7 @@
   "studioProjectsEmptyStep1": "Tap Create project, name it, and pick a story premise.",
   "studioProjectsEmptyStep2": "Open the project — you land on Script to write or import your story.",
   "studioProjectsEmptyStep3": "Before AI generation, add models and API keys under Settings → Model vendors.",
+  "studioGettingStartedTitle": "Quick start",
   "studioGettingStartedStepSemantics": "Step {stepNumber} of {stepTotal}: {stepText}",
   "@studioGettingStartedStepSemantics": {
     "placeholders": {

@@ -89,7 +89,7 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
                           ),
                           if (widget.subtitle != null &&
                               widget.subtitle!.trim().isNotEmpty) ...<Widget>[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
                               widget.subtitle!,
                               maxLines: _expanded ? 3 : 1,

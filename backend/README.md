@@ -23,6 +23,8 @@ cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选�
 cargo run --bin openflow-server
 ```
 
+仓库根目录存在 **`website/`** 时，进程会在 **同一端口** 提供营销落地页（`GET /`、`/css/*`、`/js/*` 等）；设 **`OPENFLOW_MARKETING_SITE=off`** 可关闭，或用 **`OPENFLOW_MARKETING_SITE_DIR`** 指定其它静态目录。API 与 Swagger 路径不变（如 **`/api/v1/docs`**）。
+
 每 **客户端 IP** 限流（`tower_governor`）；默认按 **连接 peer IP**。仅在**受信**反向代理后可将 **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** 设为使用 `Forwarded` / `X-Forwarded-For` 等（未受信时勿开，易被伪造）。可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、**`/api/v1/version`**、`/api/v1/ready`、**`POST /api/v1/webhooks/billing`**（计费 webhook，供收单方服务器回调；需 **`BILLING_WEBHOOK_SECRET`** + **`DATABASE_URL`**）。OpenFlow 原生签名建议带 **`X-Openflow-Timestamp`** 并对 **`"<unix>." + body`** 做 HMAC（抗重放；容差 **`BILLING_OPENFLOW_TOLERANCE_SECS`**）；设 **`BILLING_OPENFLOW_REQUIRE_TIMESTAMP=1`** 则禁止仅对 body 签名的旧方式。**`GET /api/v1/webhooks/billing/events`**（全局审计表）仅在 **`BILLING_WEBHOOK_EVENTS_LIST_ENABLED=1`** 时可用，否则 **403**；**`backend/.env.example`** 对本地开发默认写入 **1**，生产多租户请关闭。Webhook 首次成功入库时，若 JSON 含 **`user_id`**（UUID）与 **`plan_tier`**，会 upsert **`app_user_profile`**（可选 **`billing_currency`** / **`billing_provider`**）。
 
 异步任务 worker 多实例时设置不同 **`WORKER_ID`**，便于在任务行的 **`claimed_by`** 上区分认领实例（仍依赖 Postgres `SKIP LOCKED` 协调）。**`JOB_QUEUE_METRICS_INTERVAL_SECS`**（默认 **60**，设为 **0** 关闭）控制 worker 周期性输出结构化日志 **`event=job_queue_metrics`**（含 **`pending`**、**`pending_claimable`**、**`running`**、**`dead`**、**`failed_last_24h`**、**`oldest_claimable_queued_age_secs`**、**`pending_by_kind`** JSON、`worker_id`），便于日志聚合与旁路队列 Gate；与 500ms 抢单轮询解耦。字段语义与运维 Runbook 见 [`docs/plans/jobs-pg-queue-runbook.md`](../docs/plans/jobs-pg-queue-runbook.md)。

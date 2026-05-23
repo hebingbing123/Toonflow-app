@@ -346,7 +346,7 @@ class _StoryboardBatchWorkbenchDialogState
             diagnosis.summary,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 8),
           FilledButton.tonal(

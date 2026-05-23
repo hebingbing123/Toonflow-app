@@ -131,7 +131,7 @@ pub fn build_router(state: AppState) -> Router {
         // Layer 2: Per-user rate limiting applied after global
         .layer(user_governor_layer());
 
-    Router::new()
+    let router = Router::new()
         .route("/api/v1/openapi.yaml", get(openapi::openapi_yaml))
         .route("/api/v1/docs", get(openapi::swagger_ui))
         .merge(user_limited)
@@ -155,5 +155,7 @@ pub fn build_router(state: AppState) -> Router {
             tower_http::request_id::MakeRequestUuid,
         ))
         .layer(tower_http::trace::TraceLayer::new_for_http())
-        .layer(cors)
+        .layer(cors);
+
+    crate::marketing_site::merge_fallback(router)
 }

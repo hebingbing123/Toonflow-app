@@ -102,7 +102,7 @@ class _StarterCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             copy.detail,
             maxLines: 3,

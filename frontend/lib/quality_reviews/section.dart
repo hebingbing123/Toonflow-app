@@ -12,6 +12,10 @@ import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_pane_scaffold.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
@@ -165,6 +169,93 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
     );
   }
 
+  Widget _buildStudioLoadingBody(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: DecoratedBox(
+          decoration: studioInsetPanelDecoration(context),
+          child: const Padding(
+            padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioSkeleton(height: 18),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+                SizedBox(height: StudioSpacing.sm),
+                StudioSkeleton(height: 56),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudioHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    QualityReviewsActionsBar actionsBar,
+  ) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StudioPaneHeader(
+              title: l10n.productNavQuality,
+              subtitle: l10n.qualityReviewsSectionIntro,
+              showBack: false,
+              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.taskCenterLocalClientPrefs,
+              ),
+            ),
+            const SizedBox(height: StudioLayoutSpacing.section - 6),
+            StudioCollapsibleFilterPanel(
+              title: l10n.qualityReviewsFilterAndReadSection,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  actionsBar,
+                  const SizedBox(height: 8),
+                  _buildReviewIdLookupRow(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _wrapStudioInsetBody(BuildContext context, {required Widget child}) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+        child: child,
+      ),
+    );
+  }
+
   Widget _buildReviewIdLookupRow(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return QualityReviewIdLookupRow(
@@ -191,49 +282,60 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
     if (c.qualityReviewsLoadState == StudioLoadState.initial ||
         c.qualityReviewsLoadState == StudioLoadState.loading ||
         c.loadingQualityReviews) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildStudioLoadingBody(context);
     }
 
     final reviews = c.qualityReviews ?? const <QualityReview>[];
+    Widget buildDashboardBlock() {
+      if (!showDashboard) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            l10n.qualityReviewsOpsDashboardTitle,
+            style: studioPaneTitleStyle(context),
+          ),
+          const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+          QualityReviewsOpsDashboardPreview(
+            mutedColor: muted,
+            studioPresentation: true,
+            dashboardSummary: c.qualityDashboardLine,
+            refreshControlsEnabled:
+                widget.platformConfig.qualityRefreshControlsEnabled,
+            refreshSummary: widget.platformConfig.qualityRefreshControlsEnabled
+                ? c.qualityDashboardRefreshLine
+                : null,
+            freshnessMeta: c.qualityDashboardMeta,
+            dashboardLoadState: c.qualityDashboardLoadState,
+            dashboardLoadError: c.qualityDashboardLastError,
+            loadingDashboard: c.loadingQualityDashboard,
+            onRefreshDashboard: _loadQualityDashboard,
+            qualityStatsRows: c.qualityStatsRows,
+            stageGradeRows: c.qualityStageGradeRows,
+            scopeInsightRows: c.qualityScopeInsightRows,
+            tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
+            badCaseStats: c.qualityBadCaseStatItems,
+          ),
+        ],
+      );
+    }
+
     if (reviews.isEmpty) {
       return SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            if (showDashboard) ...<Widget>[
-              Text(
-                l10n.qualityReviewsOpsDashboardTitle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 6),
-              QualityReviewsOpsDashboardPreview(
-                mutedColor: muted,
-                studioPresentation: true,
-                dashboardSummary: c.qualityDashboardLine,
-                refreshControlsEnabled:
-                    widget.platformConfig.qualityRefreshControlsEnabled,
-                refreshSummary:
-                    widget.platformConfig.qualityRefreshControlsEnabled
-                    ? c.qualityDashboardRefreshLine
-                    : null,
-                freshnessMeta: c.qualityDashboardMeta,
-                dashboardLoadState: c.qualityDashboardLoadState,
-                dashboardLoadError: c.qualityDashboardLastError,
-                loadingDashboard: c.loadingQualityDashboard,
-                onRefreshDashboard: _loadQualityDashboard,
-                qualityStatsRows: c.qualityStatsRows,
-                stageGradeRows: c.qualityStageGradeRows,
-                scopeInsightRows: c.qualityScopeInsightRows,
-                tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
-                badCaseStats: c.qualityBadCaseStatItems,
-              ),
-              const SizedBox(height: 12),
-            ],
+            _wrapStudioInsetBody(context, child: buildDashboardBlock()),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Center(
-              child: StudioEmptyState(
+              child: StudioEmptyState.emptyData(
                 title: l10n.qualityReviewsEmptyForCurrentFilters,
                 subtitle: l10n.qualityReviewsSectionIntro,
                 icon: Icons.fact_check_outlined,
+                actionLabel: l10n.qualityReviewsLoadReviewList,
+                onAction: c.loadQualityReviews,
               ),
             ),
           ],
@@ -243,41 +345,17 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
 
     return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (showDashboard) ...<Widget>[
-            Text(
-              l10n.qualityReviewsOpsDashboardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
+          _wrapStudioInsetBody(context, child: buildDashboardBlock()),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
+          _wrapStudioInsetBody(
+            context,
+            child: QualityReviewsListPreview(
+              reviews: reviews,
+              showCountHeader: false,
+              onSelectQualityReview: c.selectQualityReview,
             ),
-            const SizedBox(height: 6),
-            QualityReviewsOpsDashboardPreview(
-              mutedColor: muted,
-              studioPresentation: true,
-              dashboardSummary: c.qualityDashboardLine,
-              refreshControlsEnabled:
-                  widget.platformConfig.qualityRefreshControlsEnabled,
-              refreshSummary:
-                  widget.platformConfig.qualityRefreshControlsEnabled
-                  ? c.qualityDashboardRefreshLine
-                  : null,
-              freshnessMeta: c.qualityDashboardMeta,
-              dashboardLoadState: c.qualityDashboardLoadState,
-              dashboardLoadError: c.qualityDashboardLastError,
-              loadingDashboard: c.loadingQualityDashboard,
-              onRefreshDashboard: _loadQualityDashboard,
-              qualityStatsRows: c.qualityStatsRows,
-              stageGradeRows: c.qualityStageGradeRows,
-              scopeInsightRows: c.qualityScopeInsightRows,
-              tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
-              badCaseStats: c.qualityBadCaseStatItems,
-            ),
-            const SizedBox(height: 12),
-          ],
-          QualityReviewsListPreview(
-            reviews: reviews,
-            showCountHeader: false,
-            onSelectQualityReview: c.selectQualityReview,
           ),
         ],
       ),
@@ -298,7 +376,10 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
       child: Center(
         child: Text(
           l10n.qualityReviewsCount(count),
-          style: Theme.of(context).textTheme.labelLarge,
+          style: studioHintStyle(context)?.copyWith(
+            color: StudioTokens.of(context).textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -358,19 +439,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              ...header,
-              const SizedBox(height: 8),
-              StudioCollapsibleFilterPanel(
-                title: l10n.qualityReviewsFilterAndReadSection,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    actionsBar,
-                    const SizedBox(height: 8),
-                    _buildReviewIdLookupRow(context),
-                  ],
-                ),
-              ),
+              _buildStudioHeader(context, l10n, actionsBar),
               if (c.qualityReviewByIdLine != null) ...<Widget>[
                 const SizedBox(height: 8),
                 SelectableText(
@@ -412,7 +481,7 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
                   l10n.qualityReviewsOpsDashboardTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: StudioSpacing.xs),
                 if (c.qualityDashboardLine != null)
                   Align(
                     alignment: Alignment.centerLeft,

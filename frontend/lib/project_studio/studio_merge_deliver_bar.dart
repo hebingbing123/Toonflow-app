@@ -69,7 +69,7 @@ class StudioMergeDeliverBar extends StatelessWidget {
               },
             ),
             if (onOpenReviewPack != null) ...<Widget>[
-              const SizedBox(height: 6),
+              const SizedBox(height: StudioSpacing.xs),
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(

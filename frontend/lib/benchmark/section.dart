@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -238,26 +240,52 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.benchmarkSectionTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
+          DecoratedBox(
+            decoration:
+                studioInsetPanelDecoration(
+                  context,
+                  backgroundColor: StudioTokens.of(
+                    context,
+                  ).bgSurface.withValues(alpha: 0.96),
+                ).copyWith(
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      spreadRadius: -8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
+            child: Padding(
+              padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.benchmarkSectionTitle,
+                          style: studioPaneTitleStyle(context),
+                        ),
+                      ),
+                      RiskyOperationConfirmPrefsOverflowMenu(
+                        tooltip: l10n.riskyPrefsMenuDefaultTooltip,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                  Text(
+                    l10n.benchmarkIntroBody,
+                    style: studioSectionIntroStyle(context),
+                  ),
+                ],
               ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.riskyPrefsMenuDefaultTooltip,
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.benchmarkIntroBody,
-            style: studioHintStyle(context),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.stackMedium),
           StudioCollapsibleFilterPanel(
             subtitle: _projectIdCtrl.text.trim().isEmpty
                 ? null
@@ -474,7 +502,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 _experimentDetail!.variants.length,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._experimentDetail!.variants.map(
               (variant) => Text(
                 '${variant.label} · baseline=${variant.isBaseline} · budget=${variant.memoryBudgetSnapshot['budgetTier'] ?? '-'} · model=${variant.modelRouteSnapshot['modelName'] ?? '-'}',
@@ -489,7 +517,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 _roiSummary!.overallRationale,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._roiSummary!.variantComparisons.map(
               (item) => Text(
                 l10n.benchmarkRoiVariantLine(
@@ -503,7 +531,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           if (_gateSummary != null) ...[
             const SizedBox(height: 12),
             Text(summarizeBenchmarkGate(l10n, _gateSummary)),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._gateSummary!.assessments.map(
               (item) => Text(
                 l10n.benchmarkGateAssessmentRow(
@@ -518,7 +546,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           if (_trends != null) ...[
             const SizedBox(height: 12),
             Text(summarizeBenchmarkTrends(l10n, _trends)),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._trends!.weeks.map(
               (item) => Text(
                 l10n.benchmarkTrendWeekRow(
@@ -544,7 +572,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 _abCompare!.avgQualityDiff.toStringAsFixed(2),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._abCompare!.comparisons.take(12).map(
               (item) => Text(
                 '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, item.passed ? 'PASS' : 'FAIL')} · '
@@ -564,7 +592,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 _abRunDetail!.run.createdAt,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             ..._abRunDetail!.cases.take(12).map((item) {
               final cmp = item.comparison;
               final passed = cmp['passed'] == true;

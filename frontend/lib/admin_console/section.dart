@@ -1849,7 +1849,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: StudioSpacing.xs),
         if (items.isEmpty)
           StudioEmptyState.emptyData(
             title: l10n.adminConsoleNoData,

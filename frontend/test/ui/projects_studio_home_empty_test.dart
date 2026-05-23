@@ -36,6 +36,7 @@ void main() {
 
     expect(find.byType(StudioEmptyState), findsOneWidget);
     expect(find.byType(StudioGettingStartedSteps), findsOneWidget);
+    expect(find.text('快速入门'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.textContaining('uuid='), findsNothing);
     expect(tester.takeException(), isNull);

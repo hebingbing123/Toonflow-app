@@ -1143,6 +1143,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Before AI generation, add models and API keys under Settings → Model vendors.';
 
   @override
+  String get studioGettingStartedTitle => 'Quick start';
+
+  @override
   String studioGettingStartedStepSemantics(
     int stepNumber,
     int stepTotal,

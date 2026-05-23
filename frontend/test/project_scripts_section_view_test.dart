@@ -3,6 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/scripts/section_view.dart';
+
+import 'support/studio_workbench_section_test_support.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -169,6 +171,7 @@ void main() {
       ),
     );
 
+    await expandAllStudioWorkbenchSections(tester);
     await tester.tap(find.widgetWithText(FilledButton, '打开剧本批量工作台'));
     await tester.pump();
     await tester.tap(find.widgetWithText(OutlinedButton, '打开骨架工作台'));

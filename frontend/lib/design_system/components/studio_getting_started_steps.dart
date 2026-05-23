@@ -9,10 +9,12 @@ import 'studio_text_styles.dart';
 class StudioGettingStartedSteps extends StatelessWidget {
   const StudioGettingStartedSteps({
     super.key,
+    this.title,
     required this.steps,
     this.maxWidth = 420,
   });
 
+  final String? title;
   final List<String> steps;
   final double maxWidth;
 
@@ -44,6 +46,10 @@ class StudioGettingStartedSteps extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  if (title != null && title!.isNotEmpty) ...<Widget>[
+                    Text(title!, style: studioPaneTitleStyle(context)),
+                    const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                  ],
                   for (var i = 0; i < steps.length; i++) ...<Widget>[
                     Semantics(
                       label: l10n.studioGettingStartedStepSemantics(

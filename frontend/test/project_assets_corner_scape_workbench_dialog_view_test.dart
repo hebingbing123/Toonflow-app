@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/project_editor/assets/corner_scape_view.dart';
@@ -300,8 +301,10 @@ void main() {
     await tester.pump();
     await tester.tap(find.textContaining('#21 女主角'));
     await tester.pump();
-    await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.ensureVisible(
+      find.byType(StudioDropdownButtonFormField<String>),
+    );
+    await tester.tap(find.byType(StudioDropdownButtonFormField<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('#2 · done'));
     await tester.pumpAndSettle();

@@ -454,14 +454,21 @@ class StudioDialogShell extends StatelessWidget {
                         StudioSpacing.sm,
                         StudioSpacing.sm,
                       ),
-                      child: Row(
-                        mainAxisAlignment: actionsAlignment,
-                        children: <Widget>[
-                          for (var i = 0; i < actions!.length; i++) ...<Widget>[
-                            if (i > 0) const SizedBox(width: 8),
-                            actions![i],
-                          ],
-                        ],
+                      child: Wrap(
+                        alignment: switch (actionsAlignment) {
+                          MainAxisAlignment.start => WrapAlignment.start,
+                          MainAxisAlignment.center => WrapAlignment.center,
+                          MainAxisAlignment.end => WrapAlignment.end,
+                          MainAxisAlignment.spaceBetween =>
+                            WrapAlignment.spaceBetween,
+                          MainAxisAlignment.spaceAround =>
+                            WrapAlignment.spaceAround,
+                          MainAxisAlignment.spaceEvenly =>
+                            WrapAlignment.spaceEvenly,
+                        },
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: actions!,
                       ),
                     ),
                   ],

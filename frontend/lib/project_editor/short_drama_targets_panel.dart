@@ -152,7 +152,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
             l10n.projectEditorShortDramaTargetsFlavorLabel,
             style: theme.textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           SegmentedButton<_ShortDramaFlavor>(
             segments: [
               ButtonSegment(
@@ -179,7 +179,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
             l10n.projectEditorShortDramaTargetsAspectLabel,
             style: theme.textTheme.labelLarge,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDropdownButtonFormField<String>(
             initialValue: _videoRatio,
             decoration: const InputDecoration(isDense: true),

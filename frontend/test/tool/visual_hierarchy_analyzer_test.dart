@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/visual_hierarchy_analyzer.dart';
 import '../../tool/ast_parser.dart';
 
+@Skip('Legacy frontend/tool analyzer prototype; canonical analyzer is tools/ui_audit/')
 void main() {
   group('VisualHierarchyAnalyzer', () {
     test('calculateContrastRatio returns correct value for black on white', () {
@@ -334,5 +335,5 @@ void main() {
       expect(analyzer.meetsWCAG_AA(7.0, false), isTrue);
       expect(analyzer.meetsWCAG_AA(7.0, true), isTrue);
     });
-  });
+  }, skip: 'Legacy frontend/tool analyzer prototype; canonical analyzer is tools/ui_audit/');
 }

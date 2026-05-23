@@ -627,7 +627,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: StudioSpacing.xs),
             Wrap(
               spacing: 8,
               runSpacing: 8,

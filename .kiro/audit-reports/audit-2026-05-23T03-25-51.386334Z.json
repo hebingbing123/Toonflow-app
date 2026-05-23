@@ -1,0 +1,362 @@
+{
+  "metadata": {
+    "auditDate": "2026-05-23T03:25:51.386334Z",
+    "auditVersion": "1.0.0",
+    "projectPath": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend",
+    "filesAnalyzed": 678,
+    "widgetsInspected": null
+  },
+  "summary": {
+    "totalFindings": 16,
+    "bySeverity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 16,
+      "low": 0
+    },
+    "byCategory": {
+      "visualHierarchy": 0,
+      "spacing": 0,
+      "typography": 0,
+      "colorSystem": 0,
+      "interactiveElements": 0,
+      "emptyStates": 0,
+      "responsiveness": 0,
+      "componentConsistency": 0,
+      "accessibility": 16
+    }
+  },
+  "findings": [
+    {
+      "id": "ACC-001",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/account/section.dart",
+        "line": 590,
+        "column": 16,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-002",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_dropdown_field.dart",
+        "line": 679,
+        "column": 21,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedRotation(turns: expanded ? 0.5 : 0, duration: const Duration(milliseconds: 180), curve: Curv...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-003",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_skeleton.dart",
+        "line": 43,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _controller, builder: (context, child) {return Container(width: widget.wi...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-004",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/design_system/components/studio_workbench_section.dart",
+        "line": 117,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedCrossFade(firstChild: const SizedBox(width: double.infinity), secondChild: Padding(padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-005",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/jobs/section.dart",
+        "line": 36,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: widget.controller, builder: (context, _) => JobsSectionView(studioPresent...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-006",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 154,
+        "column": 24,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) {return CustomPaint(painter: _Bac...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-007",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 196,
+        "column": 36,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) => _HeroStage(l10n: l10n, progres...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-008",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 248,
+        "column": 27,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: _sceneController, builder: (context, _) => _HeroStage(l10n: l10n, progres...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-009",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/login_page.dart",
+        "line": 1127,
+        "column": 13,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedAlign(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, alignment: mo...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-010",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 352,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedSwitcher(duration: const Duration(milliseconds: 260), switchInCurve: Curves.easeOutCubic, sw...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-011",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 469,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic, constrain...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-012",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/product_shell/settings_hub_page.dart",
+        "line": 535,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedContainer(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, width: in...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-013",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/projects_studio_home.dart",
+        "line": 384,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: widget.controller, builder: (context, _) {return LayoutBuilder(builder: (...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-014",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/project_studio/studio_step_model_routing_bar.dart",
+        "line": 506,
+        "column": 11,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedCrossFade(firstChild: const SizedBox(width: double.infinity), secondChild: Padding(padding: ...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-015",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/projects/section.dart",
+        "line": 141,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: controller, builder: (context, _) => Column(crossAxisAlignment: CrossAxis...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    },
+    {
+      "id": "ACC-016",
+      "category": "accessibility",
+      "severity": "medium",
+      "title": "Animation without reduced-motion handling",
+      "description": "Animated widget does not check MediaQuery.disableAnimations or reduced motion",
+      "location": {
+        "file": "/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/quality_reviews/section.dart",
+        "line": 316,
+        "column": 12,
+        "widgetPath": null
+      },
+      "codeSnippet": "AnimatedBuilder(animation: c, builder: (context, _) {final actionsBar = QualityReviewsActionsBar(stu...",
+      "recommendation": "Wrap duration/curve with MediaQuery.disableAnimationsOf(context) check",
+      "designSystemReference": "MediaQuery.disableAnimationsOf",
+      "effort": "small",
+      "beforeAfter": null,
+      "screenshot": null
+    }
+  ],
+  "errors": [],
+  "actionPlan": [
+    {
+      "priority": 1,
+      "category": "accessibility",
+      "findingIds": [
+        "ACC-001",
+        "ACC-002",
+        "ACC-003",
+        "ACC-004",
+        "ACC-005",
+        "ACC-006",
+        "ACC-007",
+        "ACC-008",
+        "ACC-009",
+        "ACC-010",
+        "ACC-011",
+        "ACC-012",
+        "ACC-013",
+        "ACC-014",
+        "ACC-015",
+        "ACC-016"
+      ],
+      "rationale": "Accessibility issues affect users with disabilities and may fail WCAG compliance",
+      "estimatedEffort": "< 4 hours"
+    }
+  ]
+}

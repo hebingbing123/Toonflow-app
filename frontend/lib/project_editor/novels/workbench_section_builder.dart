@@ -68,7 +68,7 @@ Widget buildProjectNovelsWorkbenchSection({
           style: studioHintStyle(ctx),
         ),
         if (novels.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             intakeSummaryLine,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
