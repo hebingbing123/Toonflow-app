@@ -572,7 +572,11 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                         padding: EdgeInsets.zero,
                                         minimumSize: Size.zero,
                                         tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
+                                            MaterialTapTargetSize.padded,
+                                        minimumSize: const Size(
+                                          StudioSpacing.iconTouchTarget,
+                                          StudioSpacing.iconTouchTarget,
+                                        ),
                                       ),
                                       onPressed: _loadingShots ||
                                               _gridBusy ||

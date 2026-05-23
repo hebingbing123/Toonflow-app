@@ -91,7 +91,7 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
   }
 
   void _checkIconSemantics(AstNode node) {
-    if (_hasSemanticLabel(node)) {
+    if (_hasSemanticLabel(node) || _iconHasAccessibleContext(node)) {
       return;
     }
     _report(
@@ -194,6 +194,148 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
       }
     }
     return node.toSource().contains('semanticLabel:');
+  }
+
+  bool _iconHasAccessibleContext(AstNode node) {
+    if (_isDecorativeInputIcon(node) ||
+        _iconHasAdjacentTextLabel(node) ||
+        _isLabeledTextButtonIcon(node)) {
+      return true;
+    }
+
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (_isIconButtonWithTooltip(current) ||
+          _isListTileWithTitle(current) ||
+          _isLabeledMenuItem(current) ||
+          _isSemanticsWithLabel(current) ||
+          _isExcludeSemantics(current)) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  bool _isDecorativeInputIcon(AstNode node) {
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (_widgetTypeName(current) == 'InputDecoration') {
+        return _hasNamedArgument(current, 'prefixIcon') ||
+            _hasNamedArgument(current, 'suffixIcon');
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  /// Icons beside visible [Text] in the same [Row]/[Column] are treated as decorative.
+  bool _iconHasAdjacentTextLabel(AstNode node) {
+    for (final container in const ['Row', 'Column', 'Wrap', 'ListTile']) {
+      final ancestor = _findAncestorWidget(node, container);
+      if (ancestor == null) {
+        continue;
+      }
+      final source = ancestor.toSource();
+      if (RegExp(r'\bText\s*\(').hasMatch(source) ||
+          RegExp(r'\bRichText\s*\(').hasMatch(source)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  AstNode? _findAncestorWidget(AstNode node, String typeName) {
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (_widgetTypeName(current) == typeName) {
+        return current;
+      }
+      current = current.parent;
+    }
+    return null;
+  }
+
+  bool _isLabeledTextButtonIcon(AstNode node) {
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (current is MethodInvocation &&
+          current.methodName.name == 'icon' &&
+          current.target is SimpleIdentifier) {
+        final target = (current.target! as SimpleIdentifier).name;
+        if (target == 'TextButton' ||
+            target == 'FilledButton' ||
+            target == 'OutlinedButton' ||
+            target == 'ElevatedButton') {
+          return current.toSource().contains('label:');
+        }
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  bool _isIconButtonWithTooltip(AstNode node) {
+    final type = _widgetTypeName(node);
+    if (type != 'IconButton' && type != 'CloseButton' && type != 'BackButton') {
+      return false;
+    }
+    return _hasNamedArgument(node, 'tooltip') ||
+        node.toSource().contains('tooltip:');
+  }
+
+  bool _isListTileWithTitle(AstNode node) {
+    return _widgetTypeName(node) == 'ListTile' &&
+        (_hasNamedArgument(node, 'title') || node.toSource().contains('title:'));
+  }
+
+  bool _isLabeledMenuItem(AstNode node) {
+    return switch (_widgetTypeName(node)) {
+      'DropdownMenuItem' ||
+      'PopupMenuItem' ||
+      'MenuItemButton' ||
+      'CheckboxListTile' ||
+      'RadioListTile' ||
+      'SwitchListTile' =>
+        true,
+      _ => false,
+    };
+  }
+
+  bool _isSemanticsWithLabel(AstNode node) {
+    if (_widgetTypeName(node) != 'Semantics') {
+      return false;
+    }
+    return _hasNamedArgument(node, 'label') ||
+        _hasNamedArgument(node, 'button') ||
+        node.toSource().contains('label:');
+  }
+
+  bool _isExcludeSemantics(AstNode node) {
+    return _widgetTypeName(node) == 'ExcludeSemantics' ||
+        _widgetTypeName(node) == 'MergeSemantics';
+  }
+
+  String? _widgetTypeName(AstNode node) {
+    if (node is InstanceCreationExpression) {
+      return node.constructorName.type.toSource();
+    }
+    if (node is MethodInvocation) {
+      if (node.target == null) {
+        return node.methodName.name;
+      }
+      return constructionNameFromMethodInvocation(node);
+    }
+    return null;
+  }
+
+  bool _hasNamedArgument(AstNode node, String name) {
+    for (final arg in _argumentList(node)) {
+      if (arg is NamedExpression && arg.name.label.name == name) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _report(

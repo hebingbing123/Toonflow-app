@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 
 import '../studio_typography.dart';
 import '../tokens.dart';
+import 'studio_decorative_icon.dart';
 import 'studio_text_styles.dart';
 
 /// 16:9 media preview card (Wave 4).
@@ -36,7 +37,7 @@ class StudioMediaCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.error_outline, color: tokens.danger),
+            studioDecorativeIcon(Icons.error_outline, color: tokens.danger),
             const SizedBox(height: 8),
             Text(error!, style: Theme.of(context).textTheme.bodySmall),
             if (onRetry != null)
@@ -50,7 +51,11 @@ class StudioMediaCard extends StatelessWidget {
     } else if (imageUrl != null && imageUrl!.isNotEmpty) {
       child = Image.network(imageUrl!, fit: BoxFit.cover);
     } else {
-      child = Icon(Icons.movie_outlined, size: 48, color: tokens.textMuted);
+      child = studioDecorativeIcon(
+        Icons.movie_outlined,
+        size: 48,
+        color: tokens.textMuted,
+      );
     }
 
     return AspectRatio(

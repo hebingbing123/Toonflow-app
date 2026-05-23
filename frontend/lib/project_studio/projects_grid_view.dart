@@ -473,7 +473,7 @@ class _ProjectGridCard extends StatelessWidget {
               key: Key('project_enter_studio_${project.numericId}'),
               onPressed: onTap,
               style: FilledButton.styleFrom(
-                visualDensity: VisualDensity.compact,
+                visualDensity: VisualDensity.standard,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 10,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/billing_l10n_helpers.dart';
@@ -201,7 +202,7 @@ class WorkspaceContextView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: tokens.textSecondary,
-                    fontSize: 11,
+                    fontSize: StudioTypography.of(context).meta,
                     height: 1.1,
                   ),
                 ),
@@ -243,7 +244,7 @@ class WorkspaceContextView extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: tokens.textPrimary,
-                        fontSize: 11,
+                        fontSize: StudioTypography.of(context).meta,
                         fontWeight: FontWeight.w600,
                         height: 1.1,
                       ),
@@ -265,8 +266,8 @@ class WorkspaceContextView extends StatelessWidget {
                 tokens: tokens,
                 l10n: l10n,
                 scopeLine: scopeLine,
-                iconSize: 11,
-                fontSize: 10,
+                iconSize: StudioTypography.of(context).meta,
+                fontSize: StudioTypography.of(context).meta,
                 textColor: _hasActionableProjectScope(l10n, scopeLine)
                     ? tokens.accent.withValues(alpha: 0.92)
                     : tokens.textSecondary,

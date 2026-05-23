@@ -1040,8 +1040,8 @@ extension _HomePageProductShell on _HomePageState {
       minimumSize: const Size(_kMacOSTitleBarIconBox, _kMacOSTitleBarIconBox),
       fixedSize: const Size(_kMacOSTitleBarIconBox, _kMacOSTitleBarIconBox),
       iconSize: _kMacOSTitleBarIconSize,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.padded,
+      visualDensity: VisualDensity.standard,
     );
   }
 
@@ -1073,8 +1073,8 @@ extension _HomePageProductShell on _HomePageState {
             _kMacOSNavChevronBox,
             _kMacOSNavChevronBox,
           ),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.padded,
+          visualDensity: VisualDensity.standard,
           foregroundColor: color,
           disabledForegroundColor: color,
           hoverColor: enabled

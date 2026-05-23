@@ -183,7 +183,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         : FilledButton.icon(
             onPressed: creating ? null : _createProject,
             style: FilledButton.styleFrom(
-              visualDensity: VisualDensity.compact,
+              visualDensity: VisualDensity.standard,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               backgroundColor: tokens.primary,
               foregroundColor: Colors.white,

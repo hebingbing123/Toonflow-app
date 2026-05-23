@@ -42,8 +42,8 @@ ButtonStyle _studioFormButtonDimensions(BuildContext context) {
     padding: const WidgetStatePropertyAll<EdgeInsets>(
       EdgeInsets.symmetric(horizontal: 14, vertical: 8),
     ),
-    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    visualDensity: VisualDensity.compact,
+    tapTargetSize: MaterialTapTargetSize.padded,
+    visualDensity: VisualDensity.standard,
     textStyle: WidgetStatePropertyAll<TextStyle>(
       labelStyle ?? const TextStyle(fontWeight: FontWeight.w600),
     ),

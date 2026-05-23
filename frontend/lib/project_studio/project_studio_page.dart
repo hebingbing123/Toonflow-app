@@ -1604,7 +1604,7 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                         label: Text('${host.runningJobCount}'),
                         child: const Icon(Icons.pending_actions_outlined, size: 20),
                       ),
-                      visualDensity: VisualDensity.compact,
+                      visualDensity: VisualDensity.standard,
                     )
                   : Padding(
                       padding: const EdgeInsets.only(left: 4),
@@ -1613,7 +1613,7 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                         icon: const Icon(Icons.pending_actions_outlined, size: 18),
                         label: Text('${host.runningJobCount}'),
                         style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: VisualDensity.standard,
                         ),
                       ),
                     ),
@@ -1621,7 +1621,7 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
               tooltip: l10n.studioAgentDrawerTitle,
               onPressed: host.onOpenAgentDrawer,
               icon: const Icon(Icons.smart_toy_outlined),
-              visualDensity: VisualDensity.compact,
+              visualDensity: VisualDensity.standard,
             ),
             compact
                 ? IconButton(
@@ -1630,14 +1630,14 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                       '/projects/${host.projectNumericId}/console/1',
                     ),
                     icon: const Icon(Icons.dashboard_outlined, size: 20),
-                    visualDensity: VisualDensity.compact,
+                    visualDensity: VisualDensity.standard,
                   )
                 : TextButton(
                     onPressed: () => context.push(
                       '/projects/${host.projectNumericId}/console/1',
                     ),
                     style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
+                      visualDensity: VisualDensity.standard,
                     ),
                     child: Text(
                       l10n.studioOpenEpisodeConsole,

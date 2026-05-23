@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -421,12 +422,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     bool selected = false,
     VoidCallback? onTap,
   }) {
+    final typography = StudioTypography.of(context);
     final rowStyle = theme.textTheme.bodyMedium?.copyWith(
-      fontSize: 13,
+      fontSize: typography.body,
       color: tokens.textPrimary.withValues(alpha: 0.92),
     );
     final trailingStyle = theme.textTheme.labelSmall?.copyWith(
-      fontSize: 11,
+      fontSize: typography.meta,
       color: tokens.textMuted.withValues(alpha: 0.85),
     );
     return Material(

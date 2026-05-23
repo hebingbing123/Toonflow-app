@@ -32,8 +32,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
   static ButtonStyle _compactIconStyle(Color foreground) {
     return IconButton.styleFrom(
       foregroundColor: foreground,
-      visualDensity: VisualDensity.compact,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.padded,
       minimumSize: const Size(36, 36),
       padding: EdgeInsets.zero,
     );
@@ -176,7 +176,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         style: TextButton.styleFrom(
           foregroundColor: tokens.textSecondary,
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          visualDensity: VisualDensity.compact,
+          visualDensity: VisualDensity.standard,
         ),
       );
     }
@@ -201,7 +201,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: tokens.textSecondary,
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        visualDensity: VisualDensity.compact,
+        visualDensity: VisualDensity.standard,
       ),
     );
   }
@@ -247,7 +247,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: tokens.primary,
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        visualDensity: VisualDensity.compact,
+        visualDensity: VisualDensity.standard,
       ),
     );
   }
@@ -327,7 +327,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                   style: TextButton.styleFrom(
                     foregroundColor: tokens.textSecondary,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    visualDensity: VisualDensity.compact,
+                    visualDensity: VisualDensity.standard,
                   ),
                 ),
         IconButton(

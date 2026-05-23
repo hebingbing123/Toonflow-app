@@ -130,6 +130,11 @@ dart run ui_audit:ui_audit \
 - `SizedBox` with a `child` → layout width/height, not spacing.
 - `typography.body` / `typography?.meta` → treated as Studio typography scale (not only `StudioTypography` literal).
 - `SizedBox(height: 2)` → medium (micro spacing), not high.
+- Accessibility static pass skips decorative icons in `IconButton`+tooltip, menu items, Row+Text, and `TextButton.icon` with label.
+
+### Accessibility audit (optional / nightly)
+
+Full accessibility static audit (`audit-config-accessibility.yaml`) baseline ~30 high icon findings after heuristics (2026-05-23). Use `studioDecorativeIcon()` for purely decorative glyphs; add `semanticLabel` for standalone informative icons.
 
 ## Related files
 

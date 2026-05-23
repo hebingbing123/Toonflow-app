@@ -46,6 +46,34 @@ class C {
       );
     });
 
+    test('does not flag Icon inside IconButton with tooltip', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m() => IconButton(
+    tooltip: 'Refresh',
+    onPressed: () {},
+    icon: Icon(Icons.refresh),
+  );
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
+    });
+
+    test('does not flag decorative Icon beside Text in Row', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m() => Row(children: [Icon(Icons.folder), Text('Projects')]);
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
+    });
+
     test('does not flag Icon with semanticLabel', () async {
       final file = File('${tempDir.path}/w.dart')
         ..writeAsStringSync('''
