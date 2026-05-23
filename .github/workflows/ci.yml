@@ -193,6 +193,7 @@ jobs:
           set -euo pipefail
           cd tools/ui_audit
           flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
           flutter test
 
   ui-audit:
@@ -221,6 +222,7 @@ jobs:
           set -euo pipefail
           cd tools/ui_audit
           flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
       - name: Run incremental static audit
         env:
           UI_AUDIT_DIFF_BASE: ${{ steps.diff.outputs.base }}
