@@ -68,6 +68,7 @@ void main() {
         tester,
         const Duration(milliseconds: 500),
       );
+      expectNoUnexpectedLayoutExceptions(tester);
 
       final l10n = AppLocalizationsEn();
       expect(find.text(l10n.studioEpisodeConsoleTitle(3)), findsOneWidget);

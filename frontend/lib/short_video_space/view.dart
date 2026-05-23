@@ -1629,10 +1629,16 @@ class _StageFlowStrip extends StatelessWidget {
               node: _FlowNodeShell(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(card.title, style: studioControlLabelStyle(context)),
-                    const SizedBox(height: StudioSpacing.xs),
+                    Text(
+                      card.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: studioControlLabelStyle(context),
+                    ),
+                    const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Text(
                       card.status,
                       maxLines: 1,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/account/controller.dart';
 import 'package:openflow_app/api_keys/controller.dart';
-import 'package:openflow_app/design_system/components/studio_card.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/product_shell/settings_hub_page.dart';
@@ -59,12 +58,12 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Account'), findsWidgets);
     expect(find.text('Data export'), findsOneWidget);
-    final exportCard = find.ancestor(
+    final exportPanel = find.ancestor(
       of: find.text('Data export'),
-      matching: find.byType(StudioCard),
+      matching: find.byType(DecoratedBox),
     );
-    expect(exportCard, findsOneWidget);
-    expect(tester.getSize(exportCard).width, greaterThan(300));
+    expect(exportPanel, findsOneWidget);
+    expect(tester.getSize(exportPanel).width, greaterThan(300));
     final tabBar = find.byType(TabBar);
     final accountTabLabel = find
         .descendant(of: tabBar, matching: find.text('Account'))

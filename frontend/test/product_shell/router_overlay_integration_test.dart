@@ -12,16 +12,6 @@ import 'package:openflow_app/shell/home_shell_mode.dart';
 
 import '../support/ignore_layout_overflow.dart';
 
-void _expectNoUnexpectedLayoutExceptions(WidgetTester tester) {
-  Object? exception;
-  while ((exception = tester.takeException()) != null) {
-    expect(
-      exception.toString(),
-      anyOf(contains('overflowed'), contains('RenderFlex')),
-    );
-  }
-}
-
 Widget _routerApp(GoRouter router, {Size size = const Size(1600, 1000)}) {
   return MediaQuery(
     data: MediaQueryData(size: size),
@@ -112,7 +102,7 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/storyboard-studio',
     );
-    _expectNoUnexpectedLayoutExceptions(tester);
+    expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('storyboard overlay open production enters shell pane', (
@@ -149,7 +139,7 @@ void main() {
       '/projects/7/script',
     );
     expect(find.text('Storyboard studio'), findsNothing);
-    _expectNoUnexpectedLayoutExceptions(tester);
+    expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('storyboard overlay close navigates to script route', (
@@ -196,7 +186,7 @@ void main() {
     );
     expect(find.text('Storyboard studio'), findsNothing);
     expect(find.text('Project Delta'), findsOneWidget);
-    _expectNoUnexpectedLayoutExceptions(tester);
+    expectNoUnexpectedLayoutExceptions(tester);
   });
 
   testWidgets('episode console route renders through GoRouter', (tester) async {
@@ -230,6 +220,7 @@ void main() {
       tester,
       const Duration(milliseconds: 500),
     );
+    expectNoUnexpectedLayoutExceptions(tester);
 
     expect(find.text('Episode 3'), findsOneWidget);
     expect(find.text('Full studio'), findsOneWidget);
@@ -277,6 +268,6 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/script',
     );
-    _expectNoUnexpectedLayoutExceptions(tester);
+    expectNoUnexpectedLayoutExceptions(tester);
   });
 }

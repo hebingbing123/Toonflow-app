@@ -140,7 +140,7 @@ void main() {
       );
       await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
-      expect(find.byType(Chip), findsNWidgets(2)); // Search + status filter
+      expect(find.byType(InputChip), findsNWidgets(2)); // Search + status filter
       expect(find.text('搜索: test'), findsOneWidget);
       expect(find.text('已启用'), findsOneWidget);
     });
@@ -153,7 +153,7 @@ void main() {
       await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find the chip with delete icon
-      final chip = find.byType(Chip);
+      final chip = find.byType(InputChip);
       expect(chip, findsOneWidget);
 
       // Tap the delete icon
@@ -518,7 +518,7 @@ void main() {
       await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Should display 5 tags: 1 search + 2 status + 2 quality
-      expect(find.byType(Chip), findsNWidgets(5));
+      expect(find.byType(InputChip), findsNWidgets(5));
     });
 
     testWidgets('should remove individual filter from combination', 
@@ -531,7 +531,7 @@ void main() {
       await pumpWithExpandedStudioFilters(tester, createTestWidget(initialFilter: initialFilter));
 
       // Find and remove the status filter tag
-      final statusChip = find.widgetWithText(Chip, '已启用');
+      final statusChip = find.widgetWithText(InputChip, '已启用');
       await tester.tap(find.descendant(
         of: statusChip,
         matching: find.byIcon(Icons.close),
