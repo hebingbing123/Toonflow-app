@@ -570,7 +570,6 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                     child: TextButton(
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
                                         tapTargetSize:
                                             MaterialTapTargetSize.padded,
                                         minimumSize: const Size(

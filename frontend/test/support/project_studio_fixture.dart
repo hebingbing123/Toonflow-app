@@ -76,7 +76,7 @@ Widget _artStepPanelBody({
     project: project,
     catalogLoader: fixtureStylePackCatalogLoader,
     onProjectUpdated: onProjectUpdated ?? (_) {},
-    onOpenProjectSettings: () {},
+    onOpenBriefContext: () {},
   );
 }
 

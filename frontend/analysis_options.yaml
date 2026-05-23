@@ -13,6 +13,9 @@ analyzer:
   exclude:
     # K.4 example file - has expected errors until Dart types are regenerated
     - lib/short_video_space/panel_versioning_integration_example.dart
+    # Legacy AST prototype; canonical ui_audit lives in tools/ui_audit/
+    - tool/**
+    - test/tool/**
 
 linter:
   # The lint rules applied to this project can be customized in the

@@ -244,39 +244,39 @@ void main() {
       final analyzer = VisualHierarchyAnalyzer(symbolTable);
 
       // Test display level
-      expect(analyzer._mapToTypographyLevel(30), equals('display'));
+      expect(analyzer.mapToTypographyLevel(30), equals('display'));
 
       // Test pageTitle level
-      expect(analyzer._mapToTypographyLevel(21), equals('pageTitle'));
+      expect(analyzer.mapToTypographyLevel(21), equals('pageTitle'));
 
       // Test dialogTitle level
-      expect(analyzer._mapToTypographyLevel(17), equals('dialogTitle'));
+      expect(analyzer.mapToTypographyLevel(17), equals('dialogTitle'));
 
       // Test cardTitle level
-      expect(analyzer._mapToTypographyLevel(16), equals('cardTitle'));
+      expect(analyzer.mapToTypographyLevel(16), equals('cardTitle'));
 
       // Test body level
-      expect(analyzer._mapToTypographyLevel(14), equals('body'));
+      expect(analyzer.mapToTypographyLevel(14), equals('body'));
 
       // Test hint level
-      expect(analyzer._mapToTypographyLevel(13), equals('hint'));
+      expect(analyzer.mapToTypographyLevel(13), equals('hint'));
 
       // Test meta level
-      expect(analyzer._mapToTypographyLevel(12), equals('meta'));
+      expect(analyzer.mapToTypographyLevel(12), equals('meta'));
     });
 
     test('getHeadingLevel correctly maps typography levels', () {
       final symbolTable = SymbolTable();
       final analyzer = VisualHierarchyAnalyzer(symbolTable);
 
-      expect(analyzer._getHeadingLevel('display'), equals(1));
-      expect(analyzer._getHeadingLevel('pageTitle'), equals(2));
-      expect(analyzer._getHeadingLevel('dialogTitle'), equals(3));
-      expect(analyzer._getHeadingLevel('projectTitle'), equals(3));
-      expect(analyzer._getHeadingLevel('cardTitle'), equals(4));
-      expect(analyzer._getHeadingLevel('paneTitle'), equals(4));
-      expect(analyzer._getHeadingLevel('body'), equals(5));
-      expect(analyzer._getHeadingLevel('hint'), equals(6));
+      expect(analyzer.getHeadingLevel('display'), equals(1));
+      expect(analyzer.getHeadingLevel('pageTitle'), equals(2));
+      expect(analyzer.getHeadingLevel('dialogTitle'), equals(3));
+      expect(analyzer.getHeadingLevel('projectTitle'), equals(3));
+      expect(analyzer.getHeadingLevel('cardTitle'), equals(4));
+      expect(analyzer.getHeadingLevel('paneTitle'), equals(4));
+      expect(analyzer.getHeadingLevel('body'), equals(5));
+      expect(analyzer.getHeadingLevel('hint'), equals(6));
     });
 
     test('matchesTypographyScale correctly identifies valid sizes', () {
@@ -284,18 +284,18 @@ void main() {
       final analyzer = VisualHierarchyAnalyzer(symbolTable);
 
       // Valid sizes from StudioTypography
-      expect(analyzer._matchesTypographyScale(28), isTrue); // display compact
-      expect(analyzer._matchesTypographyScale(30), isTrue); // display regular
-      expect(analyzer._matchesTypographyScale(32), isTrue); // display large
-      expect(analyzer._matchesTypographyScale(20), isTrue); // pageTitle compact
-      expect(analyzer._matchesTypographyScale(21), isTrue); // pageTitle regular
-      expect(analyzer._matchesTypographyScale(14), isTrue); // body regular
-      expect(analyzer._matchesTypographyScale(12), isTrue); // meta
+      expect(analyzer.matchesTypographyScale(28), isTrue); // display compact
+      expect(analyzer.matchesTypographyScale(30), isTrue); // display regular
+      expect(analyzer.matchesTypographyScale(32), isTrue); // display large
+      expect(analyzer.matchesTypographyScale(20), isTrue); // pageTitle compact
+      expect(analyzer.matchesTypographyScale(21), isTrue); // pageTitle regular
+      expect(analyzer.matchesTypographyScale(14), isTrue); // body regular
+      expect(analyzer.matchesTypographyScale(12), isTrue); // meta
 
       // Invalid sizes
-      expect(analyzer._matchesTypographyScale(19), isFalse);
-      expect(analyzer._matchesTypographyScale(23), isFalse);
-      expect(analyzer._matchesTypographyScale(11), isFalse);
+      expect(analyzer.matchesTypographyScale(19), isFalse);
+      expect(analyzer.matchesTypographyScale(23), isFalse);
+      expect(analyzer.matchesTypographyScale(11), isFalse);
     });
 
     test('isLargeText correctly identifies large text', () {
@@ -303,19 +303,19 @@ void main() {
       final analyzer = VisualHierarchyAnalyzer(symbolTable);
 
       // Large text: >= 24px
-      expect(analyzer._isLargeText(24, null), isTrue);
-      expect(analyzer._isLargeText(30, null), isTrue);
+      expect(analyzer.isLargeText(24, null), isTrue);
+      expect(analyzer.isLargeText(30, null), isTrue);
 
       // Large text: >= 18.66px bold
-      expect(analyzer._isLargeText(19, 'FontWeight.w600'), isTrue);
-      expect(analyzer._isLargeText(19, 'FontWeight.w700'), isTrue);
-      expect(analyzer._isLargeText(19, 'w600'), isTrue);
-      expect(analyzer._isLargeText(19, 'bold'), isTrue);
+      expect(analyzer.isLargeText(19, 'FontWeight.w600'), isTrue);
+      expect(analyzer.isLargeText(19, 'FontWeight.w700'), isTrue);
+      expect(analyzer.isLargeText(19, 'w600'), isTrue);
+      expect(analyzer.isLargeText(19, 'bold'), isTrue);
 
       // Not large text
-      expect(analyzer._isLargeText(14, null), isFalse);
-      expect(analyzer._isLargeText(14, 'FontWeight.w400'), isFalse);
-      expect(analyzer._isLargeText(18, 'FontWeight.w400'), isFalse);
+      expect(analyzer.isLargeText(14, null), isFalse);
+      expect(analyzer.isLargeText(14, 'FontWeight.w400'), isFalse);
+      expect(analyzer.isLargeText(18, 'FontWeight.w400'), isFalse);
     });
 
     test('meetsWCAG_AA correctly validates contrast ratios', () {
@@ -323,16 +323,16 @@ void main() {
       final analyzer = VisualHierarchyAnalyzer(symbolTable);
 
       // Body text needs 4.5:1
-      expect(analyzer._meetsWCAG_AA(4.5, false), isTrue);
-      expect(analyzer._meetsWCAG_AA(4.4, false), isFalse);
+      expect(analyzer.meetsWCAG_AA(4.5, false), isTrue);
+      expect(analyzer.meetsWCAG_AA(4.4, false), isFalse);
 
       // Large text needs 3:1
-      expect(analyzer._meetsWCAG_AA(3.0, true), isTrue);
-      expect(analyzer._meetsWCAG_AA(2.9, true), isFalse);
+      expect(analyzer.meetsWCAG_AA(3.0, true), isTrue);
+      expect(analyzer.meetsWCAG_AA(2.9, true), isFalse);
 
       // High contrast passes both
-      expect(analyzer._meetsWCAG_AA(7.0, false), isTrue);
-      expect(analyzer._meetsWCAG_AA(7.0, true), isTrue);
+      expect(analyzer.meetsWCAG_AA(7.0, false), isTrue);
+      expect(analyzer.meetsWCAG_AA(7.0, true), isTrue);
     });
   });
 }

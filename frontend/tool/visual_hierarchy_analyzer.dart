@@ -11,7 +11,6 @@
 
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'ast_parser.dart';
 
 /// Represents a text widget with its visual hierarchy properties
@@ -141,6 +140,12 @@ class VisualHierarchyAnalyzer {
 
   VisualHierarchyAnalyzer(this.symbolTable);
 
+  String _nextFindingId() {
+    final id = _findingCounter;
+    _findingCounter++;
+    return 'VH-${id.toString().padLeft(3, '0')}';
+  }
+
   /// Run the visual hierarchy analysis
   Future<List<VisualHierarchyFinding>> analyze() async {
     print('Starting visual hierarchy analysis...');
@@ -220,7 +225,7 @@ class VisualHierarchyAnalyzer {
         // Map to typography level
         String? typographyLevel;
         if (fontSize != null) {
-          typographyLevel = _mapToTypographyLevel(fontSize);
+          typographyLevel = mapToTypographyLevel(fontSize);
         }
 
         textWidgets.add(TextWidgetInfo(
@@ -244,7 +249,6 @@ class VisualHierarchyAnalyzer {
   }
 
   /// Map font size to StudioTypography level
-  @visibleForTesting
   String mapToTypographyLevel(double fontSize) {
     // Based on StudioTypography scale (using regular profile as reference)
     if (fontSize >= 28) return 'display'; // 28-32
@@ -259,7 +263,6 @@ class VisualHierarchyAnalyzer {
   }
 
   /// Get heading level from typography level
-  @visibleForTesting
   int getHeadingLevel(String? typographyLevel) {
     switch (typographyLevel) {
       case 'display':
@@ -291,11 +294,11 @@ class VisualHierarchyAnalyzer {
 
       // Check if font size matches any StudioTypography value
       final fontSize = widget.fontSize!;
-      final matchesTypography = _matchesTypographyScale(fontSize);
+      final matchesTypography = matchesTypographyScale(fontSize);
 
       if (!matchesTypography) {
         findings.add(VisualHierarchyFinding(
-          id: 'VH-${_findingCounter++.toString().padLeft(3, '0')}',
+          id: _nextFindingId(),
           severity: 'high',
           title: 'Hardcoded font size deviates from StudioTypography',
           description:
@@ -313,7 +316,6 @@ class VisualHierarchyAnalyzer {
   }
 
   /// Check if font size matches StudioTypography scale
-  @visibleForTesting
   bool matchesTypographyScale(double fontSize) {
     // StudioTypography values across all profiles
     const typographyValues = [
@@ -356,13 +358,13 @@ class VisualHierarchyAnalyzer {
 
       int? previousLevel;
       for (final widget in widgets) {
-        final currentLevel = _getHeadingLevel(widget.typographyLevel);
+        final currentLevel = getHeadingLevel(widget.typographyLevel);
 
         // Only check heading levels (1-4)
         if (currentLevel <= 4 && previousLevel != null) {
           if (currentLevel > previousLevel + 1) {
             findings.add(VisualHierarchyFinding(
-              id: 'VH-${_findingCounter++.toString().padLeft(3, '0')}',
+              id: _nextFindingId(),
               severity: 'medium',
               title: 'Heading hierarchy skip detected',
               description:
@@ -398,15 +400,15 @@ class VisualHierarchyAnalyzer {
           calculateContrastRatio(widget.textColor!, backgroundColor);
 
       // Determine if it's large text
-      final isLargeText = _isLargeText(widget.fontSize, widget.fontWeight);
+      final isLargeText = this.isLargeText(widget.fontSize, widget.fontWeight);
 
       // Check WCAG AA compliance
-      final meetsWCAG = _meetsWCAG_AA(contrastRatio, isLargeText);
+      final meetsWCAG = meetsWCAG_AA(contrastRatio, isLargeText);
 
       if (!meetsWCAG) {
         final threshold = isLargeText ? 3.0 : 4.5;
         findings.add(VisualHierarchyFinding(
-          id: 'VH-${_findingCounter++.toString().padLeft(3, '0')}',
+          id: _nextFindingId(),
           severity: 'high',
           title: 'Insufficient color contrast',
           description:
@@ -439,7 +441,7 @@ class VisualHierarchyAnalyzer {
 
       if (!isValid) {
         findings.add(VisualHierarchyFinding(
-          id: 'VH-${_findingCounter++.toString().padLeft(3, '0')}',
+          id: _nextFindingId(),
           severity: 'low',
           title: 'Non-standard font weight',
           description: 'Text uses font weight $fontWeight not in design system',
@@ -480,7 +482,6 @@ class VisualHierarchyAnalyzer {
   }
 
   /// Check if text is considered large (>= 18pt or >= 14pt bold)
-  @visibleForTesting
   bool isLargeText(double? fontSize, String? fontWeight) {
     if (fontSize == null) return false;
 
@@ -494,7 +495,6 @@ class VisualHierarchyAnalyzer {
   }
 
   /// Check if contrast ratio meets WCAG AA standards
-  @visibleForTesting
   bool meetsWCAG_AA(double contrastRatio, bool isLargeText) {
     final threshold = isLargeText ? 3.0 : 4.5;
     return contrastRatio >= threshold;

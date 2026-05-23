@@ -269,7 +269,7 @@ void main() {
                 storyPacks: <StylePackOption>[],
               ),
           onProjectUpdated: (_) {},
-          onOpenProjectSettings: () {},
+          onOpenBriefContext: () {},
         );
       },
     );

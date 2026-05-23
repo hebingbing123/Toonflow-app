@@ -6,7 +6,6 @@
 /// Requirements: 1.2, 1.7, 2.1, 3.7, 4.1
 
 import 'dart:io';
-import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';

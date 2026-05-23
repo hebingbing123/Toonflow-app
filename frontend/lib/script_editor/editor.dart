@@ -15,12 +15,11 @@ extension _HomePageScriptEditor on _HomePageState {
         scriptNumericId,
       );
       if (!mounted) return;
-      final hostContext = context;
       await showStudioDialog<void>(
-        context: hostContext,
+        context: context,
         builder: (dialogContext) {
           return _ScriptEditorDialog(
-            hostContext: hostContext,
+            hostContext: context,
             dialogContext: dialogContext,
             token: token,
             projectNumericId: projectNumericId,
@@ -134,7 +133,7 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
       );
       if (!mounted) return;
       await widget.onScriptTreeMutated?.call();
-      if (!mounted) return;
+      if (!widget.dialogContext.mounted) return;
       await Navigator.of(widget.dialogContext).maybePop();
       if (!widget.hostContext.mounted) return;
       ScaffoldMessenger.of(widget.hostContext).showSnackBar(
@@ -146,16 +145,15 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
         ),
       );
     } catch (e) {
-      if (mounted) {
-        setState(() => _saving = false);
-        ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              describeUserVisibleApiErrorResolved(widget.dialogContext, e),
-            ),
+      if (!widget.dialogContext.mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            describeUserVisibleApiErrorResolved(widget.dialogContext, e),
           ),
-        );
-      }
+        ),
+      );
     }
   }
 
@@ -188,19 +186,18 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
           'extract_state': st.isEmpty ? null : extractParsed,
         },
       );
-      if (!mounted) return;
+      if (!widget.dialogContext.mounted) return;
       await Navigator.of(widget.dialogContext).maybePop();
     } catch (e) {
-      if (mounted) {
-        setState(() => _saving = false);
-        ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              describeUserVisibleApiErrorResolved(widget.dialogContext, e),
-            ),
+      if (!widget.dialogContext.mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            describeUserVisibleApiErrorResolved(widget.dialogContext, e),
           ),
-        );
-      }
+        ),
+      );
     }
   }
 
