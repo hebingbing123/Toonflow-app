@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -111,7 +112,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
           ),
           const Divider(height: 1),
         ];
-        for (final entry in buildCreatorWorkspaceMenuEntries(l10n)) {
+        for (final entry in buildCreatorWorkspaceMenuEntries(context, l10n)) {
           if (entry is PopupMenuDivider) {
             sheetChildren.add(const Divider(height: 1));
             continue;
@@ -265,15 +266,19 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         border: Border.all(color: tokens.primary.withValues(alpha: 0.45)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.menu_book_outlined, size: 18, color: tokens.primary),
-            const SizedBox(width: 8),
+            Icon(Icons.menu_book_outlined, size: 16, color: tokens.primary),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
                 l10n.studioCreatorJourneyCompactCurrent(currentLabel),
-                style: labelStyle?.copyWith(color: tokens.textPrimary),
+                style:
+                    (studioControlLabelStyle(context) ?? labelStyle)?.copyWith(
+                      color: tokens.textPrimary,
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -334,7 +339,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         PopupMenuButton<CreatorWorkspaceMenuTarget>(
           tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
           onSelected: onWorkspaceMenuSelected,
-          itemBuilder: (context) => buildCreatorWorkspaceMenuEntries(l10n),
+          itemBuilder: (context) => buildCreatorWorkspaceMenuEntries(context, l10n),
           padding: EdgeInsets.zero,
           icon: Icon(
             Icons.tune_rounded,
@@ -351,9 +356,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     final nav = creatorJourneyMilestoneNavIndex(currentStep);
-    final labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-      fontWeight: FontWeight.w600,
-    );
+    final labelStyle = studioControlLabelStyle(context);
     final currentLabel = creatorJourneyCompactBarChromeLabel(l10n, currentStep);
 
     return LayoutBuilder(
@@ -390,12 +393,15 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             ?prev,
             Expanded(
               child: Center(
-                child: _buildCurrentPill(
-                  context: context,
-                  l10n: l10n,
-                  tokens: tokens,
-                  currentLabel: currentLabel,
-                  labelStyle: labelStyle,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 260),
+                  child: _buildCurrentPill(
+                    context: context,
+                    l10n: l10n,
+                    tokens: tokens,
+                    currentLabel: currentLabel,
+                    labelStyle: labelStyle,
+                  ),
                 ),
               ),
             ),

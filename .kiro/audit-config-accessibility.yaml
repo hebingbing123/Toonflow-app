@@ -1,0 +1,23 @@
+# Accessibility-focused audit (static + runtime fixtures)
+audit:
+  projectPath: frontend/
+  include:
+    - lib/**/*.dart
+  exclude:
+    - lib/generated/**
+    - lib/**/*.g.dart
+    - lib/**/*.freezed.dart
+  categories:
+    - accessibility
+    - interactiveElements
+  minimumSeverity: low
+  runtime:
+    enabled: true
+    breakpoints: [520, 720, 1100]
+    captureScreenshots: false
+  output:
+    formats: [json, markdown, html]
+    directory: .kiro/audit-reports/
+  thresholds:
+    failOnCritical: true
+    failOnHigh: true

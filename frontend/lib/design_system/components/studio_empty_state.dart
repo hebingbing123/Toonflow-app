@@ -239,7 +239,7 @@ class StudioEmptyState extends StatelessWidget {
                       title,
                       textAlign: TextAlign.center,
                       style:
-                          (_quiet
+                          (subtitle != null || _quiet
                                   ? studioPaneTitleStyle(context)
                                   : studioPageTitleStyle(context))
                               ?.copyWith(letterSpacing: 0),

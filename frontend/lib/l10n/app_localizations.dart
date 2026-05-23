@@ -3056,8 +3056,38 @@ abstract class AppLocalizations {
   /// No description provided for @studioArtStepOpenSettings.
   ///
   /// In en, this message translates to:
-  /// **'Advanced project settings'**
+  /// **'Brief & brand constraints'**
   String get studioArtStepOpenSettings;
+
+  /// No description provided for @studioArtStepOpenFullSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Full project settings'**
+  String get studioArtStepOpenFullSettings;
+
+  /// No description provided for @studioArtStepBriefSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief & visual constraints'**
+  String get studioArtStepBriefSheetTitle;
+
+  /// No description provided for @studioArtStepBriefSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Context that shapes art direction and storyboards. Pick style packs on the main Art step.'**
+  String get studioArtStepBriefSheetSubtitle;
+
+  /// No description provided for @studioArtStepBriefSheetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save brief'**
+  String get studioArtStepBriefSheetSave;
+
+  /// No description provided for @studioArtStepBriefSheetSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief and brand constraints saved.'**
+  String get studioArtStepBriefSheetSaved;
 
   /// No description provided for @studioArtStepEditSubtitle.
   ///
@@ -4279,7 +4309,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioStoryboardStudioNoShots.
   ///
   /// In en, this message translates to:
-  /// **'No shots in this script yet. Add storyboards on the script step first.'**
+  /// **'No shots in this script yet. Add one below or paste a batch.'**
   String get studioStoryboardStudioNoShots;
 
   /// No description provided for @studioStoryboardStudioNoShotsTitle.
@@ -4291,8 +4321,26 @@ abstract class AppLocalizations {
   /// No description provided for @studioStoryboardStudioNoShotsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Add storyboards on the script step first.'**
+  /// **'Add shots inline below—one prompt per line for batch import.'**
   String get studioStoryboardStudioNoShotsSubtitle;
+
+  /// No description provided for @studioStoryboardIntakeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add storyboard shots for this script. Expand a mode to enter prompts; nothing opens in another dialog.'**
+  String get studioStoryboardIntakeIntro;
+
+  /// No description provided for @studioStoryboardIntakeIntroCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add or batch-import shots for this script.'**
+  String get studioStoryboardIntakeIntroCompact;
+
+  /// No description provided for @studioStoryboardIntakeAddedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard shot added.'**
+  String get studioStoryboardIntakeAddedSnackBar;
 
   /// No description provided for @studioStoryboardStudioSelectShot.
   ///
@@ -13698,8 +13746,14 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorScriptsSectionIntroBody.
   ///
   /// In en, this message translates to:
-  /// **'Manage scripts under this project and open a script to edit content and storyboards.'**
+  /// **'Tap a script to open the Storyboard step; use the pencil to edit script fields.'**
   String get projectEditorScriptsSectionIntroBody;
+
+  /// No description provided for @projectEditorScriptsSectionEditScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit script'**
+  String get projectEditorScriptsSectionEditScript;
 
   /// No description provided for @projectEditorScriptsSectionBatchWorkbenchTitle.
   ///
@@ -16289,7 +16343,7 @@ abstract class AppLocalizations {
   /// No description provided for @scriptEditorOpenStoryboards.
   ///
   /// In en, this message translates to:
-  /// **'Storyboards…'**
+  /// **'Edit storyboards in Storyboard step'**
   String get scriptEditorOpenStoryboards;
 
   /// No description provided for @scriptEditorDeleteScriptButton.

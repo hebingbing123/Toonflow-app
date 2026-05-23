@@ -1610,7 +1610,23 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get studioArtStepOpenSettings => '高级项目设定';
+  String get studioArtStepOpenSettings => '立项与品牌约束';
+
+  @override
+  String get studioArtStepOpenFullSettings => '完整项目设定';
+
+  @override
+  String get studioArtStepBriefSheetTitle => '立项与视觉约束';
+
+  @override
+  String get studioArtStepBriefSheetSubtitle =>
+      '补充会影响画风与分镜的前提、受众与品牌视觉规则。风格包请在主页面选择。';
+
+  @override
+  String get studioArtStepBriefSheetSave => '保存立项信息';
+
+  @override
+  String get studioArtStepBriefSheetSaved => '立项与品牌约束已保存。';
 
   @override
   String get studioArtStepEditSubtitle => '为项目选择内置画风包与故事风格包，保存后作用于后续图像与剧本生成。';
@@ -2279,13 +2295,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get studioStoryboardStudioNoShots => '当前剧本还没有镜头，请先在剧本步骤添加分镜。';
+  String get studioStoryboardStudioNoShots => '当前剧本还没有镜头，可在下方新增或批量导入。';
 
   @override
   String get studioStoryboardStudioNoShotsTitle => '还没有分镜镜头';
 
   @override
-  String get studioStoryboardStudioNoShotsSubtitle => '请先在剧本步骤添加分镜。';
+  String get studioStoryboardStudioNoShotsSubtitle => '在下方直接填写提示词；批量导入时每行一条。';
+
+  @override
+  String get studioStoryboardIntakeIntro => '为当前剧本添加分镜。选择模式后在此填写，不会再叠一层弹窗。';
+
+  @override
+  String get studioStoryboardIntakeIntroCompact => '为当前剧本新增或批量导入分镜。';
+
+  @override
+  String get studioStoryboardIntakeAddedSnackBar => '已添加分镜。';
 
   @override
   String get studioStoryboardStudioSelectShot => '从左侧选择镜头以预览和编辑。';
@@ -7945,7 +7970,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get projectEditorScriptsSectionIntroBody => '在项目下管理剧本，并进入剧本详情维护内容与分镜。';
+  String get projectEditorScriptsSectionIntroBody => '点击剧本进入分镜步骤；铅笔图标可编辑剧本字段。';
+
+  @override
+  String get projectEditorScriptsSectionEditScript => '编辑剧本';
 
   @override
   String get projectEditorScriptsSectionBatchWorkbenchTitle => '剧本批量工作台';
@@ -9702,7 +9730,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorFieldExtractStateLabelClearIfEmpty => '提取状态（留空则清空）';
 
   @override
-  String get scriptEditorOpenStoryboards => '分镜列表…';
+  String get scriptEditorOpenStoryboards => '在分镜步骤编辑';
 
   @override
   String get scriptEditorDeleteScriptButton => '删除剧本';

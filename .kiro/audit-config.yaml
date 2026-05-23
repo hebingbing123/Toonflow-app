@@ -1,0 +1,42 @@
+# UI/UX Audit Configuration
+audit:
+  projectPath: frontend/
+  
+  include:
+    - lib/**/*.dart
+  
+  exclude:
+    - lib/generated/**
+    - lib/**/*.g.dart
+    - lib/**/*.freezed.dart
+  
+  categories:
+    - visualHierarchy
+    - spacing
+    - typography
+    - colorSystem
+    - interactiveElements
+    - emptyStates
+    - responsiveness
+    - componentConsistency
+    - accessibility
+  
+  minimumSeverity: low
+  
+  runtime:
+    enabled: true
+    breakpoints: [520, 720, 760, 1100, 1280, 1720]
+    captureScreenshots: true
+    screenshotFormat: png
+    screenshotQuality: 80
+  
+  output:
+    formats: [json, markdown, html]
+    directory: .kiro/audit-reports/
+    includeBeforeAfter: true
+    includeScreenshots: true
+  
+  thresholds:
+    failOnCritical: true
+    failOnHigh: false
+    maxFindings: 200

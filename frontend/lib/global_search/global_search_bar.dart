@@ -1132,55 +1132,38 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  const trailingSlotWidth = iconGap + 15.0;
+                  const trailingSlotWidth = 15.0;
                   final glyphColor = _focusNode.hasFocus
                       ? tokens.accent.withValues(alpha: 0.92)
                       : iconColor;
-                  final maxInputWidth = math.max(
-                    80.0,
-                    constraints.maxWidth - 16 - iconGap - trailingSlotWidth,
-                  );
-                  return Stack(
-                    alignment: Alignment.center,
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          searchGlyph(color: glyphColor),
-                          const SizedBox(width: iconGap),
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: maxInputWidth,
-                            ),
-                            child: IntrinsicWidth(
-                              child: TextField(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                maxLines: 1,
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                style: textStyle,
-                                cursorColor: tokens.accent,
-                                decoration: _titleBarSearchDecoration(
-                                  hintText: l10n.globalSearchInputHint,
-                                  hintStyle: hintStyle,
-                                  contentPadding: fieldContentPadding,
-                                ),
-                                onSubmitted: (_) {
-                                  if (_canSearch) {
-                                    _performSearch();
-                                  }
-                                },
-                              ),
-                            ),
+                      searchGlyph(color: glyphColor),
+                      const SizedBox(width: iconGap),
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          maxLines: 1,
+                          textAlign: TextAlign.left,
+                          textAlignVertical: TextAlignVertical.center,
+                          style: textStyle,
+                          cursorColor: tokens.accent,
+                          decoration: _titleBarSearchDecoration(
+                            hintText: l10n.globalSearchInputHint,
+                            hintStyle: hintStyle,
+                            contentPadding: fieldContentPadding,
                           ),
-                        ],
+                          onSubmitted: (_) {
+                            if (_canSearch) {
+                              _performSearch();
+                            }
+                          },
+                        ),
                       ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
+                      SizedBox(
+                        width: trailingSlotWidth,
                         child: Center(child: trailingSlot()),
                       ),
                     ],

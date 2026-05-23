@@ -488,7 +488,7 @@ class _VersionComparisonState extends State<VersionComparison> {
             child: SingleChildScrollView(
               child: SelectableText(
                 report,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                style: studioMonospaceMetaStyle(context),
               ),
             ),
           ),
@@ -750,18 +750,14 @@ class _StatisticItem extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+          style: studioStatHeroValueStyle(context, color),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: StudioTokens.of(context).textSecondary,
+          style: studioAccentBannerBodyStyle(
+            context,
+            StudioTokens.of(context).textSecondary,
           ),
         ),
       ],
@@ -827,9 +823,7 @@ class _DifferenceListItem extends StatelessWidget {
             ),
             child: Text(
               difference.localizedDescription(l10n),
-              style: TextStyle(
-                fontSize: 12,
-                color: typeColor,
+              style: studioAccentBannerBodyStyle(context, typeColor).copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),

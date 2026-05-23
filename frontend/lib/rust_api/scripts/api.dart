@@ -171,6 +171,13 @@ Future<Uint8List> exportScriptsZip(
   String accessToken,
   List<int> numericIds,
 ) async {
+  final ids = numericIds.where((id) => id > 0).toList(growable: false);
+  if (ids.isEmpty) {
+    throw RustApiException(
+      'numeric_ids must be non-empty',
+      statusCode: 400,
+    );
+  }
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/export');
   final res = await http
       .post(
@@ -179,7 +186,7 @@ Future<Uint8List> exportScriptsZip(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'numeric_ids': numericIds}),
+        body: jsonEncode({'numeric_ids': ids}),
       )
       .timeout(const Duration(seconds: 120));
   ensureHttpSuccess(res);
@@ -191,6 +198,10 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
   String accessToken,
   List<int> numericIds,
 ) async {
+  final ids = numericIds.where((id) => id > 0).toList(growable: false);
+  if (ids.isEmpty) {
+    return const <ScriptExtractStatePollRow>[];
+  }
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-state/poll');
   final res = await http
       .post(
@@ -199,7 +210,7 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'numeric_ids': numericIds}),
+        body: jsonEncode({'numeric_ids': ids}),
       )
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);

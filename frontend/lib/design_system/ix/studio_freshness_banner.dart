@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../studio_typography.dart';
+import '../components/studio_text_styles.dart';
 import '../tokens.dart';
 import '../../rust_api.dart';
 
@@ -65,11 +65,7 @@ class StudioFreshnessBanner extends StatelessWidget {
                       isStale
                           ? l10n.qualityReviewsFreshnessStaleTitle
                           : l10n.qualityReviewsFreshnessFreshTitle,
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                      style: studioAccentBannerTitleStyle(context, textColor),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -77,7 +73,7 @@ class StudioFreshnessBanner extends StatelessWidget {
                         refreshedLabel,
                         ageLabel,
                       ),
-                      style: TextStyle(color: textColor, fontSize: 12),
+                      style: studioAccentBannerBodyStyle(context, textColor),
                     ),
                   ],
                 ),
@@ -154,11 +150,7 @@ class _FreshnessDetailsState extends State<_FreshnessDetails> {
               meta.staleReason ?? l10n.qualityReviewsFreshnessNone,
               meta.refreshMode,
             ),
-            style: TextStyle(
-              color: widget.textColor,
-              fontSize: StudioTypography.of(context).meta,
-              fontFamily: 'monospace',
-            ),
+            style: studioMonospaceMetaStyle(context, color: widget.textColor),
           ),
       ],
     );

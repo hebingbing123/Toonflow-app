@@ -15,6 +15,7 @@ import '../rust_api.dart';
 import '../settings/model_vendors/vendor_setup_nudge.dart';
 import 'grid_storyboard_dialog.dart';
 import 'storyboard_frame_image.dart';
+import 'storyboard_shot_intake_panel.dart';
 
 typedef StoryboardProjectUuidResolver =
     Future<String> Function(String accessToken, int projectNumericId);
@@ -81,6 +82,7 @@ class StoryboardStudioPage extends StatefulWidget {
     this.onClose,
     this.projectUuidResolver,
     this.onOpenShotEditor,
+    this.onOpenBatchImageWorkbench,
     this.initialScriptNumericId,
     this.embeddedInProjectStudio = false,
     this.debugScripts,
@@ -94,6 +96,10 @@ class StoryboardStudioPage extends StatefulWidget {
   final StoryboardCloseCallback? onClose;
   final StoryboardProjectUuidResolver? projectUuidResolver;
   final StoryboardShotEditorCallback? onOpenShotEditor;
+  final Future<void> Function({
+    required String projectUuid,
+    required int scriptNumericId,
+  })? onOpenBatchImageWorkbench;
   final int? initialScriptNumericId;
 
   /// When true, renders inside [ProjectStudioPage] without its own [Scaffold].
@@ -141,11 +147,35 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
   }
 
   @override
+  void didUpdateWidget(covariant StoryboardStudioPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextScriptId = widget.initialScriptNumericId;
+    if (nextScriptId == null ||
+        nextScriptId <= 0 ||
+        nextScriptId == oldWidget.initialScriptNumericId ||
+        nextScriptId == _scriptNumericId) {
+      return;
+    }
+    setState(() {
+      _scriptNumericId = nextScriptId;
+      _selectedShotId = null;
+      _shots = <ProductionStoryboardItemV1>[];
+      _dataVersion = null;
+    });
+    unawaited(_loadShots());
+  }
+
+  @override
   void dispose() {
     _pollTimer?.cancel();
     _promptCtrl.dispose();
     _durationCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _onShotsMutated() async {
+    _dataVersion = null;
+    await _loadShots();
   }
 
   Future<String> _ensureProjectUuid() async {
@@ -435,6 +465,23 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     context.go('/projects/${widget.projectNumericId}/storyboard');
   }
 
+  Widget? _buildShotIntake(AppLocalizations l10n, {required bool compact}) {
+    final scriptId = _scriptNumericId;
+    if (scriptId == null) return null;
+    final projectUuid =
+        _resolvedProjectUuid ??
+        storyboardStudioProjectUuidOrNull(widget.projectUuid) ??
+        '';
+    if (projectUuid.isEmpty) return null;
+    return StoryboardShotIntakePanel(
+      accessToken: widget.accessToken,
+      projectUuid: projectUuid,
+      scriptNumericId: scriptId,
+      compact: compact,
+      onShotsChanged: _onShotsMutated,
+    );
+  }
+
   Widget? _buildScriptEpisodePicker(AppLocalizations l10n) {
     if (_scripts.length <= 1) {
       return null;
@@ -510,10 +557,54 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                            child: Text(
-                              l10n.studioStoryboardShotList,
-                              style: studioPaneTitleStyle(context),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                Text(
+                                  l10n.studioStoryboardShotList,
+                                  style: studioPaneTitleStyle(context),
+                                ),
+                                if (widget.onOpenBatchImageWorkbench != null)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: Size.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      onPressed: _loadingShots ||
+                                              _gridBusy ||
+                                              _savingPrompt
+                                          ? null
+                                          : () async {
+                                              final scriptId = _scriptNumericId;
+                                              if (scriptId == null) return;
+                                              final projectUuid =
+                                                  await _ensureProjectUuid();
+                                              await widget
+                                                  .onOpenBatchImageWorkbench!(
+                                                projectUuid: projectUuid,
+                                                scriptNumericId: scriptId,
+                                              );
+                                              if (mounted) {
+                                                await _onShotsMutated();
+                                              }
+                                            },
+                                      child: Text(
+                                        l10n.scriptEditorStoryboardsOpenImageWorkbench,
+                                        style: studioHintStyle(context),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                            child: _buildShotIntake(l10n, compact: true) ??
+                                const SizedBox.shrink(),
                           ),
                           if (_loadingShots)
                             const Expanded(
@@ -568,19 +659,31 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                       Expanded(
                         child: noShots
                             ? Center(
-                                child: Padding(
+                                child: SingleChildScrollView(
                                   padding: const EdgeInsets.all(32),
                                   child: ConstrainedBox(
                                     constraints: const BoxConstraints(
-                                      maxWidth: 420,
+                                      maxWidth: 520,
                                     ),
-                                    child: StudioEmptyState.firstUse(
-                                      title: l10n.studioStoryboardStudioNoShots,
-                                      icon: Icons.view_comfy_alt_outlined,
-                                      actionLabel: l10n.projectStudioOpenStep(
-                                        l10n.studioStepScriptShort,
-                                      ),
-                                      onAction: _openScriptStep,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: <Widget>[
+                                        StudioEmptyState.firstUse(
+                                          title: l10n
+                                              .studioStoryboardStudioNoShotsTitle,
+                                          subtitle: l10n
+                                              .studioStoryboardStudioNoShotsSubtitle,
+                                          icon: Icons.view_comfy_alt_outlined,
+                                          actionLabel: l10n.projectStudioOpenStep(
+                                            l10n.studioStepScriptShort,
+                                          ),
+                                          onAction: _openScriptStep,
+                                        ),
+                                        const SizedBox(height: 20),
+                                        _buildShotIntake(l10n, compact: false) ??
+                                            const SizedBox.shrink(),
+                                      ],
                                     ),
                                   ),
                                 ),

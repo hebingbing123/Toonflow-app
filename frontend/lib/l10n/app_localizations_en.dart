@@ -1718,7 +1718,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get studioArtStepOpenSettings => 'Advanced project settings';
+  String get studioArtStepOpenSettings => 'Brief & brand constraints';
+
+  @override
+  String get studioArtStepOpenFullSettings => 'Full project settings';
+
+  @override
+  String get studioArtStepBriefSheetTitle => 'Brief & visual constraints';
+
+  @override
+  String get studioArtStepBriefSheetSubtitle =>
+      'Context that shapes art direction and storyboards. Pick style packs on the main Art step.';
+
+  @override
+  String get studioArtStepBriefSheetSave => 'Save brief';
+
+  @override
+  String get studioArtStepBriefSheetSaved =>
+      'Brief and brand constraints saved.';
 
   @override
   String get studioArtStepEditSubtitle =>
@@ -2429,14 +2446,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioStoryboardStudioNoShots =>
-      'No shots in this script yet. Add storyboards on the script step first.';
+      'No shots in this script yet. Add one below or paste a batch.';
 
   @override
   String get studioStoryboardStudioNoShotsTitle => 'No storyboard shots yet';
 
   @override
   String get studioStoryboardStudioNoShotsSubtitle =>
-      'Add storyboards on the script step first.';
+      'Add shots inline below—one prompt per line for batch import.';
+
+  @override
+  String get studioStoryboardIntakeIntro =>
+      'Add storyboard shots for this script. Expand a mode to enter prompts; nothing opens in another dialog.';
+
+  @override
+  String get studioStoryboardIntakeIntroCompact =>
+      'Add or batch-import shots for this script.';
+
+  @override
+  String get studioStoryboardIntakeAddedSnackBar => 'Storyboard shot added.';
 
   @override
   String get studioStoryboardStudioSelectShot =>
@@ -8300,7 +8328,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorScriptsSectionIntroBody =>
-      'Manage scripts under this project and open a script to edit content and storyboards.';
+      'Tap a script to open the Storyboard step; use the pencil to edit script fields.';
+
+  @override
+  String get projectEditorScriptsSectionEditScript => 'Edit script';
 
   @override
   String get projectEditorScriptsSectionBatchWorkbenchTitle =>
@@ -10144,7 +10175,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Extract state (leave empty to clear)';
 
   @override
-  String get scriptEditorOpenStoryboards => 'Storyboards…';
+  String get scriptEditorOpenStoryboards =>
+      'Edit storyboards in Storyboard step';
 
   @override
   String get scriptEditorDeleteScriptButton => 'Delete script';

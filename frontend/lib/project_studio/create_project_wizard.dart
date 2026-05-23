@@ -223,10 +223,9 @@ class _WizardStepIndicator extends StatelessWidget {
                   ),
                   child: Text(
                     '${i + 1}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: active ? Colors.white : tokens.textMuted,
+                    style: studioWizardStepNumberStyle(
+                      context,
+                      active ? Colors.white : tokens.textMuted,
                     ),
                   ),
                 ),
@@ -236,15 +235,15 @@ class _WizardStepIndicator extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.25,
-                    fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w500,
+                  style: studioWizardStepLabelStyle(
+                    context,
                     color: isCurrent
                         ? tokens.textPrimary
                         : active
                         ? tokens.textSecondary
                         : tokens.textMuted,
+                    fontWeight:
+                        isCurrent ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
               ],

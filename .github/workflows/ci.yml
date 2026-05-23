@@ -179,6 +179,68 @@ jobs:
           set -euo pipefail
           bash scripts/run-ui-review-gates.sh
 
+  ui-audit-tool:
+    name: UI audit tool tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: flutter pub get + test (tools/ui_audit)
+        run: |
+          set -euo pipefail
+          cd tools/ui_audit
+          flutter pub get
+          flutter test
+
+  ui-audit:
+    name: UI/UX audit (incremental static)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve incremental diff base
+        id: diff
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            echo "base=origin/${{ github.base_ref }}...HEAD" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=HEAD~1..HEAD" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install ui_audit tool
+        run: |
+          set -euo pipefail
+          cd tools/ui_audit
+          flutter pub get
+      - name: Run incremental static audit
+        env:
+          UI_AUDIT_DIFF_BASE: ${{ steps.diff.outputs.base }}
+        run: |
+          set -euo pipefail
+          cd tools/ui_audit
+          dart run ui_audit:ui_audit \
+            --config=../../.kiro/audit-config-ci.yaml \
+            --incremental \
+            --incremental-base="${UI_AUDIT_DIFF_BASE}" \
+            --ci \
+            --fail-on=high
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-audit-report
+          path: .kiro/audit-reports/
+          if-no-files-found: ignore
+
   ui-golden:
     name: UI golden gallery
     runs-on: ubuntu-latest

@@ -130,6 +130,8 @@ This pass will prioritize shared design-system surfaces plus the projects home i
 
 **2026-05-21 收尾核对**：Phase 1–2 代码与黄金图已对齐；Phase 3 曾因并行落地的 `StudioToastOverlay` 关闭钮仍用 `VisualDensity.compact` 导致 `studio-visual-debt-check.sh` 失败，已修复；加载骨架栅格间距与主网格统一为 `StudioLayoutSpacing.stackMedium`。
 
+**2026-05-23 续**：为消除 ui_audit typography high 误报并统一横幅/向导字号，在 `studio_text_styles.dart` 增补 `studioAccentBannerTitleStyle`、`studioWizardStepLabelStyle` 等共享样式；全库 quick 审计 high 归零后可把 CI 门槛升为 `--fail-on=high`。
+
 ### Phase 8: Studio 筛选工具栏（2026-05-21 续）
 
 - 共享：`StudioFilterRow` 增加 `toolbarRow`（宽屏单行 `Row` + `Expanded` 搜索）；`StudioCollapsibleFilterPanel`（默认收起、`ExpansionTile` 展开）。

@@ -12,6 +12,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'panel_versioning.dart';
@@ -130,7 +131,7 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
                         shortVideoPanelVersionPanelTitle(l10n, p.panel),
                         PanelVersionManager.formatAge(p.ageSeconds, l10n),
                       ),
-                      style: const TextStyle(fontSize: 12),
+                      style: studioAccentBannerBodyStyle(context, StudioTokens.of(context).textPrimary),
                     ),
                   ),
                 ),
@@ -277,7 +278,7 @@ class PanelHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: studioPaneTitleStyle(context) ?? studioAccentBannerTitleStyle(context, StudioTokens.of(context).textPrimary),
         ),
         const SizedBox(width: 8),
         PanelFreshnessIndicator(panelName: title, snapshot: snapshot),

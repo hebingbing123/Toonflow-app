@@ -16,6 +16,7 @@ import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_dropdown_field.dart';

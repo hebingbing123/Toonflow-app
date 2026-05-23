@@ -112,3 +112,96 @@ TextStyle studioBadgeTextStyle(BuildContext context) {
     height: 1.1,
   );
 }
+
+/// Title line on semantic status banners (freshness, panel version, etc.).
+TextStyle studioAccentBannerTitleStyle(BuildContext context, Color accentColor) {
+  final typography = StudioTypography.of(context);
+  return (Theme.of(context).textTheme.bodyLarge ?? const TextStyle()).copyWith(
+    fontSize: typography.bodyLarge,
+    fontWeight: FontWeight.bold,
+    color: accentColor,
+    height: 1.3,
+  );
+}
+
+/// Body line on semantic status banners.
+TextStyle studioAccentBannerBodyStyle(BuildContext context, Color accentColor) {
+  final typography = StudioTypography.of(context);
+  return (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
+    fontSize: typography.meta,
+    color: accentColor,
+    height: 1.35,
+  );
+}
+
+/// Monospace meta copy (reports, technical details).
+TextStyle studioMonospaceMetaStyle(BuildContext context, {Color? color}) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontFamily: 'monospace',
+    fontSize: typography.meta,
+    color: color,
+  );
+}
+
+/// Large stat value in comparison / summary tiles.
+TextStyle studioStatHeroValueStyle(BuildContext context, Color color) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontSize: typography.display,
+    fontWeight: FontWeight.bold,
+    color: color,
+    height: 1.1,
+  );
+}
+
+/// Wizard step indicator number inside a circle.
+TextStyle studioWizardStepNumberStyle(BuildContext context, Color color) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontSize: typography.meta,
+    fontWeight: FontWeight.w600,
+    color: color,
+  );
+}
+
+/// Wizard step label under the indicator.
+TextStyle studioWizardStepLabelStyle(
+  BuildContext context, {
+  required Color color,
+  FontWeight fontWeight = FontWeight.w500,
+}) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontSize: typography.meta,
+    height: 1.25,
+    fontWeight: fontWeight,
+    color: color,
+  );
+}
+
+/// Popup menu section header.
+TextStyle studioMenuSectionHeaderStyle(BuildContext context) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontWeight: FontWeight.w700,
+    fontSize: typography.meta,
+    color: StudioTokens.of(context).textSecondary,
+  );
+}
+
+/// Filter count pill and compact chips.
+TextStyle studioFilterCountBadgeStyle(BuildContext context) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(
+    fontSize: typography.meta,
+    fontWeight: FontWeight.bold,
+    color: Theme.of(context).colorScheme.onPrimaryContainer,
+  );
+}
+
+/// Outlined button label in filter panels.
+TextStyle studioFilterActionLabelStyle(BuildContext context) {
+  final typography = StudioTypography.of(context);
+  return TextStyle(fontSize: typography.bodyLarge);
+}

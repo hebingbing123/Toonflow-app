@@ -81,11 +81,10 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
                         children: <Widget>[
                           Text(
                             widget.title,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: tokens.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: studioControlLabelStyle(context)?.copyWith(
+                              color: tokens.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           if (widget.subtitle != null &&
                               widget.subtitle!.trim().isNotEmpty) ...<Widget>[

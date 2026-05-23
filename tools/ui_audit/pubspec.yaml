@@ -1,0 +1,28 @@
+name: ui_audit
+description: A comprehensive UI/UX audit tool for Flutter applications
+version: 1.0.0
+publish_to: none
+
+executables:
+  ui_audit:
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  analyzer: ^6.0.0
+  path: ^1.8.0
+  yaml: ^3.1.0
+  args: ^2.4.0
+  json_annotation: ^4.8.0
+  markdown: ^7.1.0
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: ^1.24.0
+  build_runner: ^2.4.0
+  json_serializable: ^6.7.0

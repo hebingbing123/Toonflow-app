@@ -1,32 +1,48 @@
 part of '../../../home_page.dart';
 
-extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
-  Future<void> _openStoryboardBatchWorkbenchDialog({
-    required BuildContext ctx,
+extension _HomePageScriptEditorStoryboardsBatchWorkbench on _HomePageState {
+  /// Opens batch image generation workbench as a single dialog on the storyboard step.
+  Future<void> _openStoryboardBatchImageWorkbench({
+    required BuildContext context,
     required String token,
-    required String projectId,
+    required String projectUuid,
     required int scriptNumericId,
-    required List<StoryboardRow> boardsList,
-    required StateSetter setBoardsState,
-    required List<bool> actionBusy,
   }) async {
-    await showStudioDialog<void>(
-      context: ctx,
-      builder: (dialogCtx) {
-        return _StoryboardBatchWorkbenchDialog(
-          token: token,
-          projectId: projectId,
-          scriptNumericId: scriptNumericId,
-          boardsList: boardsList,
-          onMutationStart: () => setBoardsState(() => actionBusy[0] = true),
-          onMutationEnd: () {
-            if (ctx.mounted) {
-              setBoardsState(() {});
-              setBoardsState(() => actionBusy[0] = false);
-            }
-          },
+    try {
+      final boards = await fetchStoryboardsForProjectScript(
+        token,
+        projectUuid,
+        scriptNumericId,
+      );
+      if (!context.mounted) return;
+      final boardsList = List<StoryboardRow>.from(boards);
+      await showStudioDialog<void>(
+        context: context,
+        builder: (dialogCtx) {
+          return StatefulBuilder(
+            builder: (dialogCtx, setDialogState) {
+              return _StoryboardBatchWorkbenchDialog(
+                token: token,
+                projectId: projectUuid,
+                scriptNumericId: scriptNumericId,
+                boardsList: boardsList,
+                onMutationStart: () => setDialogState(() {}),
+                onMutationEnd: () {
+                  if (dialogCtx.mounted) setDialogState(() {});
+                },
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(describeUserVisibleApiErrorResolved(context, e)),
+          ),
         );
-      },
-    );
+      }
+    }
   }
 }

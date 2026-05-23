@@ -19,7 +19,8 @@ Widget buildProjectScriptsSection({
   required Future<void> Function() openWorkbench,
   required Future<void> Function() openPlanWorkbench,
   required Future<void> Function() openBatchAddDialog,
-  required void Function(ScriptBrief script) openScriptEditor,
+  void Function(ScriptBrief script)? openStoryboardStep,
+  void Function(ScriptBrief script)? openScriptEditor,
 }) {
   final allScriptIds = scriptList
       .map((script) => script.numericId)
@@ -32,6 +33,12 @@ Widget buildProjectScriptsSection({
   );
 
   Future<void> runProjectScriptsExportAll() async {
+    if (allScriptIds.isEmpty) {
+      setDialogState(() {
+        scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchErrorNeedScriptIds;
+      });
+      return;
+    }
     setDialogState(() {
       scriptTaskBusy[0] = true;
       scriptTaskLine[0] = null;
@@ -69,6 +76,12 @@ Widget buildProjectScriptsSection({
   }
 
   Future<void> runProjectScriptsPollAll() async {
+    if (allScriptIds.isEmpty) {
+      setDialogState(() {
+        scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollExtractIdleOrComplete;
+      });
+      return;
+    }
     setDialogState(() {
       scriptTaskBusy[0] = true;
       scriptTaskLine[0] = null;
@@ -116,6 +129,12 @@ Widget buildProjectScriptsSection({
   }
 
   Future<void> runProjectScriptsExtractAll() async {
+    if (allScriptIds.isEmpty) {
+      setDialogState(() {
+        scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchErrorNeedScriptIds;
+      });
+      return;
+    }
     setDialogState(() {
       scriptTaskBusy[0] = true;
       scriptTaskLine[0] = null;
@@ -264,6 +283,7 @@ Widget buildProjectScriptsSection({
       onPollAll: runProjectScriptsPollAll,
       onExtractAll: runProjectScriptsExtractAll,
       onCreateEmptyScript: createEmptyScript,
+      onOpenStoryboardStep: openStoryboardStep,
       onOpenScriptEditor: openScriptEditor,
     ),
   );

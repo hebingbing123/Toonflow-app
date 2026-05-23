@@ -14,6 +14,7 @@ import '../team_workspaces/strings.dart';
 import 'studio_readiness.dart';
 import 'create_project_wizard.dart';
 import 'projects_grid_view.dart';
+import 'projects_studio_home_layout.dart';
 
 /// Product-shell projects home (Wave 2): grid, recent row, wizard create.
 class ProjectsStudioHome extends StatefulWidget {
@@ -142,17 +143,94 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   Widget _buildHeader(
     BuildContext context,
     AppLocalizations l10n,
-    bool stacked,
+    ProjectsStudioHomeLayout layout,
   ) {
+    final stacked = layout.stackedHeader;
     final tokens = StudioTokens.of(context);
-    final action = StudioPrimaryButton(
-      label: widget.controller.creatingProject
-          ? l10n.projectsCreating
-          : l10n.studioCreateProject,
-      icon: Icons.add,
-      loading: widget.controller.creatingProject,
-      onPressed: widget.controller.creatingProject ? null : _createProject,
+    final creating = widget.controller.creatingProject;
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          l10n.studioProjectsHomeTitle,
+          style: stacked
+              ? studioPageTitleStyle(context)
+              : studioPaneTitleStyle(context),
+        ),
+        SizedBox(
+          height: stacked
+              ? StudioLayoutSpacing.titleSubtitle
+              : StudioSpacing.xs,
+        ),
+        Text(
+          l10n.studioProjectsHomeSubtitle,
+          maxLines: stacked ? 3 : 1,
+          overflow: TextOverflow.ellipsis,
+          style: stacked
+              ? studioSectionIntroStyle(context)
+              : studioHintStyle(context),
+        ),
+      ],
     );
+    final createAction = stacked
+        ? StudioPrimaryButton(
+            label: creating ? l10n.projectsCreating : l10n.studioCreateProject,
+            icon: Icons.add,
+            loading: creating,
+            onPressed: creating ? null : _createProject,
+          )
+        : FilledButton.icon(
+            onPressed: creating ? null : _createProject,
+            style: FilledButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              backgroundColor: tokens.primary,
+              foregroundColor: Colors.white,
+            ),
+            icon: creating
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.add, size: 18),
+            label: Text(
+              creating ? l10n.projectsCreating : l10n.studioCreateProject,
+            ),
+          );
+
+    if (!stacked) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(child: titleBlock),
+            const SizedBox(width: StudioSpacing.sm),
+            createAction,
+          ],
+        ),
+      );
+    }
+
+    if (layout.phoneStackedHeader) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            titleBlock,
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            SizedBox(width: double.infinity, child: createAction),
+          ],
+        ),
+      );
+    }
+
     return DecoratedBox(
       decoration:
           studioInsetPanelDecoration(
@@ -169,49 +247,15 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             ],
           ),
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-        child: stacked
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    l10n.studioProjectsHomeTitle,
-                    style: studioPageTitleStyle(context),
-                  ),
-                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-                  Text(
-                    l10n.studioProjectsHomeSubtitle,
-                    style: studioSectionIntroStyle(context),
-                  ),
-                  const SizedBox(height: StudioLayoutSpacing.section - 6),
-                  action,
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          l10n.studioProjectsHomeTitle,
-                          style: studioPageTitleStyle(context),
-                        ),
-                        const SizedBox(
-                          height: StudioLayoutSpacing.titleSubtitle,
-                        ),
-                        Text(
-                          l10n.studioProjectsHomeSubtitle,
-                          style: studioSectionIntroStyle(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: StudioSpacing.sm),
-                  action,
-                ],
-              ),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetDense + 2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            titleBlock,
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            createAction,
+          ],
+        ),
       ),
     );
   }
@@ -219,8 +263,9 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   Widget _buildEmptyProjectsOverview(
     BuildContext context,
     AppLocalizations l10n,
-    double width,
-  ) {
+    double width, {
+    bool isPhone = false,
+  }) {
     final showSecondaryAction = widget.onOpenModelVendorSettings != null;
     final emptyState = StudioEmptyState.firstUse(
       title: l10n.studioProjectsEmptyTitle,
@@ -244,7 +289,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
       maxWidth: width >= 1080 ? 420 : 560,
     );
 
-    if (width >= 1080) {
+    if (!isPhone && width >= 1080) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -270,6 +315,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     List<ProjectRow> recent, {
     required bool vertical,
     required double recentCardWidth,
+    bool compact = false,
   }) {
     if (vertical) {
       return Column(
@@ -283,9 +329,10 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
           for (var i = 0; i < recent.length; i++) ...<Widget>[
             SizedBox(
               width: recentCardWidth,
-              height: 132,
+              height: compact ? 112 : 132,
               child: _RecentProjectChip(
                 project: recent[i],
+                compact: compact,
                 selected: widget.currentProjectNumericId == recent[i].numericId,
                 onTap: widget.onSelectProjectScope == null
                     ? () => widget.onOpenProjectStudio(recent[i])
@@ -304,7 +351,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         Text(l10n.studioContinueCreating, style: studioPaneTitleStyle(context)),
         const SizedBox(height: StudioSpacing.sm),
         SizedBox(
-          height: 152,
+          height: compact ? 120 : 152,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: recent.length,
@@ -316,6 +363,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                 width: recentCardWidth,
                 child: _RecentProjectChip(
                   project: project,
+                  compact: compact,
                   selected: widget.currentProjectNumericId == project.numericId,
                   onTap: widget.onSelectProjectScope == null
                       ? () => widget.onOpenProjectStudio(project)
@@ -336,40 +384,55 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, _) {
-        final projects = widget.controller.projects ?? const <ProjectRow>[];
-        final recent = _resolveRecent(projects);
-        final width = MediaQuery.sizeOf(context).width;
-        final stackedHeader = width < 760;
-        final showRecentRail = recent.isNotEmpty && projects.length > 2;
-        final useSplitOverview =
-            width >= 1360 && showRecentRail && projects.isNotEmpty;
-        final contentMaxWidth = width >= 2200
-            ? 1980.0
-            : width >= 1800
-            ? 1720.0
-            : width >= 1440
-            ? 1480.0
-            : width >= 1280
-            ? 1320.0
-            : double.infinity;
-        final recentCardWidth = width >= 1800
-            ? 320.0
-            : width >= 1440
-            ? 288.0
-            : width >= 1080
-            ? 272.0
-            : 260.0;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final layout = ProjectsStudioHomeLayout.resolve(
+              context: context,
+              contentWidth: constraints.maxWidth,
+            );
+            final contentWidth = layout.contentWidth;
+            final projects = widget.controller.projects ?? const <ProjectRow>[];
+            final recent = _resolveRecent(projects);
+            final showRecentRail = recent.isNotEmpty && projects.length > 2;
+            final useSplitOverview =
+                layout.useSplitOverview && showRecentRail && projects.isNotEmpty;
+            final contentMaxWidth = layout.isPhone
+                ? double.infinity
+                : contentWidth >= 2200
+                ? 1980.0
+                : contentWidth >= 1800
+                ? 1720.0
+                : contentWidth >= 1440
+                ? 1480.0
+                : contentWidth >= 1280
+                ? 1320.0
+                : double.infinity;
+            final recentCardWidth = layout.isPhone
+                ? 220.0
+                : contentWidth >= 1800
+                ? 320.0
+                : contentWidth >= 1440
+                ? 288.0
+                : contentWidth >= 1080
+                ? 272.0
+                : 260.0;
+            final scrollPadding = EdgeInsets.fromLTRB(
+              layout.isPhone ? StudioSpacing.sm : 0,
+              0,
+              layout.isPhone ? StudioSpacing.sm : 0,
+              24,
+            );
 
-        return Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: contentMaxWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _buildHeader(context, l10n, stackedHeader),
+            return Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: scrollPadding,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: contentMaxWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _buildHeader(context, l10n, layout),
                   if (_enterpriseEmpty) ...<Widget>[
                     const SizedBox(height: StudioLayoutSpacing.section - 4),
                     _EnterpriseEmptyBanner(
@@ -425,11 +488,17 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                         recent,
                         vertical: false,
                         recentCardWidth: recentCardWidth,
+                        compact: layout.isPhone,
                       ),
                     ],
-                    const SizedBox(height: StudioLayoutSpacing.section + 4),
+                    const SizedBox(height: StudioLayoutSpacing.stackMedium),
                     if (projects.isEmpty && !widget.controller.loadingProjects)
-                      _buildEmptyProjectsOverview(context, l10n, width)
+                      _buildEmptyProjectsOverview(
+                        context,
+                        l10n,
+                        contentWidth,
+                        isPhone: layout.isPhone,
+                      )
                     else
                       ProjectsGridView(
                         projects: projects,
@@ -446,6 +515,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             ),
           ),
         );
+          },
+        );
       },
     );
   }
@@ -456,11 +527,13 @@ class _RecentProjectChip extends StatelessWidget {
     required this.project,
     required this.onTap,
     this.selected = false,
+    this.compact = false,
   });
 
   final ProjectRow project;
   final VoidCallback onTap;
   final bool selected;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +556,11 @@ class _RecentProjectChip extends StatelessWidget {
               width: selected ? 1.5 : 1,
             ),
           ),
-          padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+          padding: EdgeInsets.all(
+            compact
+                ? StudioLayoutSpacing.insetDense
+                : StudioLayoutSpacing.insetComfortable,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -500,13 +577,17 @@ class _RecentProjectChip extends StatelessWidget {
                     ),
                   ),
                   if (selected)
-                    Icon(Icons.check_circle, size: 18, color: tokens.primary),
+                    Icon(
+                      Icons.check_circle,
+                      size: compact ? 16 : 18,
+                      color: tokens.primary,
+                    ),
                 ],
               ),
               const Spacer(),
               Text(
                 title,
-                maxLines: 2,
+                maxLines: compact ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
                 style: studioCardTitleStyle(context),
               ),

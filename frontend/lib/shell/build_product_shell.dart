@@ -12,6 +12,23 @@ enum _StudioPaneUriHistoryMode {
 extension _HomePageProductShell on _HomePageState {
   static const bool _kStudioShellFourItems = true;
 
+  /// Native macOS title-bar chrome only (Web must not touch `dart:io` [Platform]).
+  static bool get _isMacOSNativeShell =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
+
+  /// VS Code-style single-row title bar (macOS / Windows / Linux native + Web).
+  static bool _useIntegratedStudioTitleBar(double width) {
+    if (width < _kMacOSIntegratedMinWidth) {
+      return false;
+    }
+    if (kIsWeb) {
+      return true;
+    }
+    return defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
   void _ensureProductPaneData(ProductWorkspacePane pane) {
     if (widget.shellMode != HomeShellMode.product) {
       return;
@@ -1149,6 +1166,13 @@ extension _HomePageProductShell on _HomePageState {
     _macOSTitleBarDragHandoff = false;
   }
 
+  Widget _titleBarFlexibleGap() {
+    if (_isMacOSNativeShell) {
+      return _buildMacOSTitleBarDragRegion();
+    }
+    return const SizedBox.shrink();
+  }
+
   /// Opaque drag/zoom target for macOS title-bar chrome (empty areas only).
   Widget _buildMacOSTitleBarDragRegion() {
     return Listener(
@@ -1301,9 +1325,9 @@ extension _HomePageProductShell on _HomePageState {
             ),
             const SizedBox(width: 10),
           ],
-          Expanded(child: _buildMacOSTitleBarDragRegion()),
+          Expanded(child: _titleBarFlexibleGap()),
           searchCluster,
-          Expanded(child: _buildMacOSTitleBarDragRegion()),
+          Expanded(child: _titleBarFlexibleGap()),
           if (!ultraNarrow) ...<Widget>[
             const SizedBox(width: 8),
             const StudioJobTray(),
@@ -1376,7 +1400,7 @@ extension _HomePageProductShell on _HomePageState {
 
   /// Start dragging the window (macOS only)
   Future<void> _startWindowDragging() async {
-    if (!Platform.isMacOS) {
+    if (!_isMacOSNativeShell) {
       return;
     }
     try {
@@ -1389,7 +1413,7 @@ extension _HomePageProductShell on _HomePageState {
 
   /// Double-click title bar chrome → toggle macOS fullscreen (macOS only).
   Future<void> _toggleMacOSWindowZoom() async {
-    if (!Platform.isMacOS) {
+    if (!_isMacOSNativeShell) {
       return;
     }
     try {
@@ -1423,12 +1447,12 @@ extension _HomePageProductShell on _HomePageState {
       currentPane: currentPane,
     );
     final width = MediaQuery.sizeOf(context).width;
-    final isMacOS = Platform.isMacOS;
-    // macOS: always VS Code single-row title bar; non-macOS keeps legacy breakpoints.
-    final compactTopChrome = !isMacOS && width < 860;
-    final stackedTopChrome = !isMacOS && width >= 860 && width < 1240;
-    final useMacOSIntegratedTitleBar =
-        isMacOS && width >= _kMacOSIntegratedMinWidth;
+    final isMacOS = _isMacOSNativeShell;
+    final useMacOSIntegratedTitleBar = _useIntegratedStudioTitleBar(width);
+    // Legacy multi-row chrome only when the viewport is too narrow for integrated.
+    final compactTopChrome = !useMacOSIntegratedTitleBar && width < 860;
+    final stackedTopChrome =
+        !useMacOSIntegratedTitleBar && width >= 860 && width < 1240;
     final macOSUltraNarrowTitleBar =
         useMacOSIntegratedTitleBar && width < 1080;
     final mergeWorkspaceIntoTitleBar = showPipeline;
@@ -1442,6 +1466,12 @@ extension _HomePageProductShell on _HomePageState {
                 (useMacOSIntegratedTitleBar && macOSUltraNarrowTitleBar),
           )
         : null;
+    final titleBarLeftInset = isMacOS
+        ? _kMacOSTrafficLightInset +
+            (titleBarWorkspaceContext != null
+                ? _kMacOSTitleBarGapAfterTrafficLights
+                : 0)
+        : 16.0;
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
@@ -1577,12 +1607,7 @@ extension _HomePageProductShell on _HomePageState {
                       Padding(
                         padding: _macOSTitleBarContentPadding(
                           hasWorkspaceContext: titleBarWorkspaceContext != null,
-                        ).copyWith(
-                          left: _kMacOSTrafficLightInset +
-                              (titleBarWorkspaceContext != null
-                                  ? _kMacOSTitleBarGapAfterTrafficLights
-                                  : 0),
-                        ),
+                        ).copyWith(left: titleBarLeftInset),
                         child: _buildMacOSIntegratedTitleBar(
                           context: context,
                           l10n: l10n,

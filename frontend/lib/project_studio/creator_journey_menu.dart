@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
 import 'studio_step_model_routing_bar.dart';
@@ -40,13 +41,11 @@ final class CreatorWorkspaceMenuTarget {
 }
 
 List<PopupMenuEntry<CreatorWorkspaceMenuTarget>> buildCreatorWorkspaceMenuEntries(
+  BuildContext context,
   AppLocalizations l10n,
 ) {
   Widget sectionHeader(String label) {
-    return Text(
-      label,
-      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-    );
+    return Text(label, style: studioMenuSectionHeaderStyle(context));
   }
 
   PopupMenuItem<CreatorWorkspaceMenuTarget> stepItem(StudioStep step) {

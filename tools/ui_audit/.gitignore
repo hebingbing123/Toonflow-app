@@ -1,0 +1,21 @@
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.log

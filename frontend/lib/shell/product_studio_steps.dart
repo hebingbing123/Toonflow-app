@@ -88,6 +88,7 @@ extension _HomePageProductStudioSteps on _HomePageState {
       onOpenScriptEditor: (script) => _openScriptEditor(
         token,
         script.numericId,
+        projectNumericId: project.numericId,
         projectId: project.id,
         onScriptTreeMutated: () async {
           kStudioSnapshotBus.invalidate(
@@ -124,8 +125,9 @@ extension _HomePageProductStudioSteps on _HomePageState {
     BuildContext context,
     AppLocalizations l10n,
     StudioStep step,
-    int projectNumericId,
-  ) {
+    int projectNumericId, {
+    ProjectHome? projectHome,
+  }) {
     switch (step) {
       case StudioStep.script:
         return _buildProjectStudioScriptStepBody(context, projectNumericId);
@@ -146,6 +148,7 @@ extension _HomePageProductStudioSteps on _HomePageState {
         return ProjectStudioArtStepPanel(
           accessToken: artToken,
           project: artRow,
+          projectHome: projectHome,
           onProjectUpdated: (updated) {
             if (_projectsController.projects == null) {
               unawaited(_projectsController.loadProjects());
@@ -154,7 +157,14 @@ extension _HomePageProductStudioSteps on _HomePageState {
             }
             setState(() {});
           },
-          onOpenProjectSettings: () => _openProjectDetail(artRow),
+          onOpenBriefContext: () => showArtStepBriefContextSheet(
+            context: context,
+            accessToken: artToken,
+            project: artRow,
+            home: projectHome,
+            onOpenFullProjectSettings: () => _openProjectDetail(artRow),
+          ),
+          onOpenFullProjectSettings: () => _openProjectDetail(artRow),
         );
       case StudioStep.assets:
         final pendingAssetId = _pendingStudioAssetNumericId;
@@ -200,11 +210,27 @@ extension _HomePageProductStudioSteps on _HomePageState {
             ),
           );
         }
+        final initialScriptId = GoRouter.maybeOf(context) == null
+            ? null
+            : projectStudioStoryboardScriptIdFromUri(
+                GoRouterState.of(context).uri,
+              );
         return StoryboardStudioPage(
           projectNumericId: projectNumericId,
           projectUuid: storyboardRow.id,
           accessToken: storyboardToken,
+          initialScriptNumericId: initialScriptId,
           embeddedInProjectStudio: true,
+          onOpenBatchImageWorkbench:
+              ({
+                required String projectUuid,
+                required int scriptNumericId,
+              }) => _openStoryboardBatchImageWorkbench(
+                context: context,
+                token: storyboardToken,
+                projectUuid: projectUuid,
+                scriptNumericId: scriptNumericId,
+              ),
           onOpenProductionWorkspace: ({required String projectUuid}) {
             _openShellPaneFromStudioOverlay(
               ProductWorkspacePane.productionWorkspace,

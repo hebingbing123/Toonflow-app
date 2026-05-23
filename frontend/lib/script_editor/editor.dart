@@ -4,12 +4,10 @@ extension _HomePageScriptEditor on _HomePageState {
   Future<void> _openScriptEditor(
     String token,
     int scriptNumericId, {
+    required int projectNumericId,
     required String projectId,
     Future<void> Function()? onScriptTreeMutated,
   }) async {
-    final nameCtrl = TextEditingController();
-    final contentCtrl = TextEditingController();
-    final stateCtrl = TextEditingController();
     try {
       final script = await fetchScriptByProjectAndNumericId(
         token,
@@ -17,231 +15,280 @@ extension _HomePageScriptEditor on _HomePageState {
         scriptNumericId,
       );
       if (!mounted) return;
-      nameCtrl.text = script.name ?? '';
-      contentCtrl.text = script.content ?? '';
-      stateCtrl.text = script.extractState?.toString() ?? '';
+      final hostContext = context;
       await showStudioDialog<void>(
-        context: context,
-        builder: (ctx) {
-          final l10n = resolveAppLocalizationsForErrors(ctx);
-          return StatefulBuilder(
-            builder: (ctx, setDialogState) {
-              final saving = <bool>[false];
-              final viewportWidth = MediaQuery.sizeOf(ctx).width;
-              final dialogWidth = viewportWidth.isFinite
-                  ? viewportWidth.clamp(320.0, 720.0)
-                  : 720.0;
-              return StudioAlertDialog(
-                title: Text(l10n.scriptEditorDialogTitle(script.numericId)),
-                content: SizedBox(
-                  width: dialogWidth,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextField(
-                          controller: nameCtrl,
-                          decoration: InputDecoration(
-                            labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
-                          ),
-                        ),
-                        const SizedBox(height: StudioLayoutSpacing.listItem),
-                        TextField(
-                          controller: contentCtrl,
-                          minLines: 4,
-                          maxLines: 12,
-                          decoration: InputDecoration(
-                            labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                        const SizedBox(height: StudioLayoutSpacing.listItem),
-                        TextField(
-                          controller: stateCtrl,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText:
-                                l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton(
-                            onPressed: saving[0]
-                                ? null
-                                : () => _openScriptStoryboardsDialog(
-                                    token: token,
-                                    projectId: projectId,
-                                    scriptNumericId: scriptNumericId,
-                                  ),
-                            child: Text(l10n.scriptEditorOpenStoryboards),
-                          ),
-                        ),
-                        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
-                        _ScriptWorkbenchPanel(
-                          token: token,
-                          projectId: projectId,
-                          scriptNumericId: scriptNumericId,
-                          onExtractStateSynced: (extractState) {
-                            stateCtrl.text = extractState?.toString() ?? '';
-                          },
-                          onOpenEditImageWorkbench: () =>
-                              _openScriptEditImageWorkbenchDialog(
-                                token: token,
-                                projectId: projectId,
-                                scriptNumericId: scriptNumericId,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
-                    child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
-                  ),
-                  TextButton(
-                    onPressed: saving[0]
-                        ? null
-                        : () async {
-                            final ok = await showStudioDialog<bool>(
-                              context: ctx,
-                              builder: (c) {
-                                final confirmL10n = resolveAppLocalizationsForErrors(c);
-                                return StudioAlertDialog(
-                                  title: Text(
-                                    confirmL10n.scriptEditorDeleteConfirmTitle,
-                                  ),
-                                  content: Text(
-                                    confirmL10n.scriptEditorDeleteConfirmBody(
-                                      script.numericId,
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(c).pop(false),
-                                      child: Text(
-                                        confirmL10n
-                                            .projectEditorScriptsBatchAddCancel,
-                                      ),
-                                    ),
-                                    FilledButton(
-                                      onPressed: () =>
-                                          Navigator.of(c).pop(true),
-                                      child: Text(
-                                        confirmL10n
-                                            .scriptEditorDeleteConfirmDelete,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            if (ok != true || !ctx.mounted) return;
-                            setDialogState(() => saving[0] = true);
-                            try {
-                              await deleteScriptByProjectAndNumericId(
-                                token,
-                                projectId,
-                                scriptNumericId,
-                              );
-                              if (!ctx.mounted) return;
-                              await onScriptTreeMutated?.call();
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).pop();
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    resolveAppLocalizationsForErrors(context)
-                                        .scriptEditorDeletedSnackBar,
-                                  ),
-                                ),
-                              );
-                            } catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
-                                );
-                              }
-                            }
-                          },
-                    child: Text(l10n.scriptEditorDeleteScriptButton),
-                  ),
-                  FilledButton(
-                    onPressed: saving[0]
-                        ? null
-                        : () async {
-                            setDialogState(() => saving[0] = true);
-                            int? extractParsed;
-                            final st = stateCtrl.text.trim();
-                            if (st.isNotEmpty) {
-                              extractParsed = int.tryParse(st);
-                              if (extractParsed == null) {
-                                if (ctx.mounted) {
-                                  setDialogState(() => saving[0] = false);
-                                  ScaffoldMessenger.of(ctx).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        l10n.scriptEditorExtractStateMustBeInteger,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return;
-                              }
-                            }
-                            try {
-                              await updateScriptByProjectAndNumericId(
-                                token,
-                                projectId,
-                                scriptNumericId,
-                                {
-                                  'name': nameCtrl.text.isEmpty
-                                      ? null
-                                      : nameCtrl.text,
-                                  'content': contentCtrl.text.isEmpty
-                                      ? null
-                                      : contentCtrl.text,
-                                  'extract_state': st.isEmpty
-                                      ? null
-                                      : extractParsed,
-                                },
-                              );
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).pop();
-                            } catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiErrorResolved(ctx, e))),
-                                );
-                              }
-                            }
-                          },
-                    child: Text(
-                      saving[0]
-                          ? l10n.scriptEditorSaveSaving
-                          : l10n.scriptEditorSaveChanges,
-                    ),
-                  ),
-                ],
-              );
-            },
+        context: hostContext,
+        builder: (dialogContext) {
+          return _ScriptEditorDialog(
+            hostContext: hostContext,
+            dialogContext: dialogContext,
+            token: token,
+            projectNumericId: projectNumericId,
+            projectId: projectId,
+            script: script,
+            onScriptTreeMutated: onScriptTreeMutated,
+            onOpenEditImageWorkbench: () => _openScriptEditImageWorkbenchDialog(
+              token: token,
+              projectId: projectId,
+              scriptNumericId: script.numericId,
+            ),
           );
         },
       );
     } catch (e) {
       if (!mounted) return;
       _setErrorFromException(e);
-    } finally {
-      nameCtrl.dispose();
-      contentCtrl.dispose();
-      stateCtrl.dispose();
     }
+  }
+}
+
+class _ScriptEditorDialog extends StatefulWidget {
+  const _ScriptEditorDialog({
+    required this.hostContext,
+    required this.dialogContext,
+    required this.token,
+    required this.projectNumericId,
+    required this.projectId,
+    required this.script,
+    required this.onOpenEditImageWorkbench,
+    this.onScriptTreeMutated,
+  });
+
+  final BuildContext hostContext;
+  final BuildContext dialogContext;
+  final String token;
+  final int projectNumericId;
+  final String projectId;
+  final ScriptRow script;
+  final Future<void> Function() onOpenEditImageWorkbench;
+  final Future<void> Function()? onScriptTreeMutated;
+
+  @override
+  State<_ScriptEditorDialog> createState() => _ScriptEditorDialogState();
+}
+
+class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _contentCtrl;
+  late final TextEditingController _stateCtrl;
+  var _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.script.name ?? '');
+    _contentCtrl = TextEditingController(text: widget.script.content ?? '');
+    _stateCtrl = TextEditingController(
+      text: widget.script.extractState?.toString() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _contentCtrl.dispose();
+    _stateCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openStoryboardStep() async {
+    await Navigator.of(widget.dialogContext).maybePop();
+    if (!widget.hostContext.mounted) return;
+    goProjectStudioStoryboardForScript(
+      widget.hostContext,
+      projectNumericId: widget.projectNumericId,
+      scriptNumericId: widget.script.numericId,
+    );
+  }
+
+  Future<void> _deleteScript(AppLocalizations l10n) async {
+    final ok = await showStudioDialog<bool>(
+      context: widget.dialogContext,
+      builder: (c) {
+        final confirmL10n = resolveAppLocalizationsForErrors(c);
+        return StudioAlertDialog(
+          title: Text(confirmL10n.scriptEditorDeleteConfirmTitle),
+          content: Text(
+            confirmL10n.scriptEditorDeleteConfirmBody(widget.script.numericId),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(c).pop(false),
+              child: Text(confirmL10n.projectEditorScriptsBatchAddCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(c).pop(true),
+              child: Text(confirmL10n.scriptEditorDeleteConfirmDelete),
+            ),
+          ],
+        );
+      },
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await deleteScriptByProjectAndNumericId(
+        widget.token,
+        widget.projectId,
+        widget.script.numericId,
+      );
+      if (!mounted) return;
+      await widget.onScriptTreeMutated?.call();
+      if (!mounted) return;
+      await Navigator.of(widget.dialogContext).maybePop();
+      if (!widget.hostContext.mounted) return;
+      ScaffoldMessenger.of(widget.hostContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            resolveAppLocalizationsForErrors(widget.hostContext)
+                .scriptEditorDeletedSnackBar,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
+          SnackBar(
+            content: Text(
+              describeUserVisibleApiErrorResolved(widget.dialogContext, e),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveChanges(AppLocalizations l10n) async {
+    setState(() => _saving = true);
+    int? extractParsed;
+    final st = _stateCtrl.text.trim();
+    if (st.isNotEmpty) {
+      extractParsed = int.tryParse(st);
+      if (extractParsed == null) {
+        if (mounted) {
+          setState(() => _saving = false);
+          ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
+            SnackBar(
+              content: Text(l10n.scriptEditorExtractStateMustBeInteger),
+            ),
+          );
+        }
+        return;
+      }
+    }
+    try {
+      await updateScriptByProjectAndNumericId(
+        widget.token,
+        widget.projectId,
+        widget.script.numericId,
+        {
+          'name': _nameCtrl.text.isEmpty ? null : _nameCtrl.text,
+          'content': _contentCtrl.text.isEmpty ? null : _contentCtrl.text,
+          'extract_state': st.isEmpty ? null : extractParsed,
+        },
+      );
+      if (!mounted) return;
+      await Navigator.of(widget.dialogContext).maybePop();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
+          SnackBar(
+            content: Text(
+              describeUserVisibleApiErrorResolved(widget.dialogContext, e),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(widget.dialogContext);
+    final viewportWidth = MediaQuery.sizeOf(widget.dialogContext).width;
+    final dialogWidth = viewportWidth.isFinite
+        ? viewportWidth.clamp(320.0, 720.0)
+        : 720.0;
+
+    return StudioAlertDialog(
+      title: Text(l10n.scriptEditorDialogTitle(widget.script.numericId)),
+      content: SizedBox(
+        width: dialogWidth,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _nameCtrl,
+                enabled: !_saving,
+                decoration: InputDecoration(
+                  labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
+                ),
+              ),
+              const SizedBox(height: StudioLayoutSpacing.listItem),
+              TextField(
+                controller: _contentCtrl,
+                enabled: !_saving,
+                minLines: 4,
+                maxLines: 12,
+                decoration: InputDecoration(
+                  labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: StudioLayoutSpacing.listItem),
+              TextField(
+                controller: _stateCtrl,
+                enabled: !_saving,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText:
+                      l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: _saving ? null : _openStoryboardStep,
+                  child: Text(l10n.scriptEditorOpenStoryboards),
+                ),
+              ),
+              const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+              _ScriptWorkbenchPanel(
+                token: widget.token,
+                projectId: widget.projectId,
+                scriptNumericId: widget.script.numericId,
+                onExtractStateSynced: (extractState) {
+                  if (!mounted) return;
+                  _stateCtrl.text = extractState?.toString() ?? '';
+                },
+                onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving
+              ? null
+              : () => Navigator.of(widget.dialogContext).pop(),
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
+        ),
+        TextButton(
+          onPressed: _saving ? null : () => _deleteScript(l10n),
+          child: Text(l10n.scriptEditorDeleteScriptButton),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : () => _saveChanges(l10n),
+          child: Text(
+            _saving ? l10n.scriptEditorSaveSaving : l10n.scriptEditorSaveChanges,
+          ),
+        ),
+      ],
+    );
   }
 }

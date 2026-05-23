@@ -157,12 +157,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.text(
-        'No shots in this script yet. Add storyboards on the script step first.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('No storyboard shots yet'), findsOneWidget);
+    expect(find.text('Add storyboard'), findsWidgets);
     expect(find.text('No shots yet'), findsNothing);
     expect(find.text('Shots'), findsNothing);
     expect(find.text('Properties'), findsNothing);

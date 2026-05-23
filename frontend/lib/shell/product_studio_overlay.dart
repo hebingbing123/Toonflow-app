@@ -177,6 +177,7 @@ extension _HomePageProductStudioOverlay on _HomePageState {
                 l10n,
                 step,
                 projectNumericId,
+                projectHome: readiness.home,
               ),
             ),
           ),

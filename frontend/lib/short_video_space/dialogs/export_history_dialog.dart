@@ -939,11 +939,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               ),
               child: Text(
                 item.status.displayName(l10n),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: _getStatusColor(item.status, theme),
-                  fontWeight: FontWeight.bold,
-                ),
+                style: studioAccentBannerBodyStyle(
+                  context,
+                  _getStatusColor(item.status, theme),
+                ).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           ],

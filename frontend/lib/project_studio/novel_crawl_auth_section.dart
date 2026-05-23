@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -309,10 +310,14 @@ class _StudioNovelCrawlAuthSectionState
           ),
           if (supportsNovelCrawlInAppLogin(context)) ...<Widget>[
             const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: _loading || _saving ? null : _captureCookieInApp,
-              icon: const Icon(Icons.login, size: 18),
-              label: Text(l10n.studioNovelCrawlAuthCaptureCookieButton),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FilledButton.icon(
+                style: studioFormPrimaryButtonStyle(context),
+                onPressed: _loading || _saving ? null : _captureCookieInApp,
+                icon: const Icon(Icons.login, size: 18),
+                label: Text(l10n.studioNovelCrawlAuthCaptureCookieButton),
+              ),
             ),
           ] else ...<Widget>[
             const SizedBox(height: 8),

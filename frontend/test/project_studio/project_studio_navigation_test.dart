@@ -35,6 +35,53 @@ void main() {
       expect(uri.path, '/projects/9/storyboard');
       expect(uri.queryParameters, isEmpty);
     });
+
+    test('storyboard can pre-select script via scriptId query', () {
+      final uri = projectStudioStepUri(
+        9,
+        StudioStep.storyboard,
+        storyboardScriptNumericId: 12,
+      );
+      expect(uri.path, '/projects/9/storyboard');
+      expect(uri.queryParameters['scriptId'], '12');
+      expect(
+        projectStudioStoryboardScriptIdFromUri(uri),
+        12,
+      );
+    });
+  });
+
+  group('goProjectStudioStoryboardForScript', () {
+    testWidgets('navigates with scriptId query', (tester) async {
+      late GoRouter router;
+      router = GoRouter(
+        initialLocation: '/projects/7/script',
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/projects/:projectNumericId/:stepSlug',
+            builder: (context, state) => const Scaffold(
+              body: SizedBox.shrink(),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(_routerApp(router));
+      await tester.pumpAndSettle();
+
+      goProjectStudioStoryboardForScript(
+        tester.element(find.byType(Scaffold)),
+        projectNumericId: 7,
+        scriptNumericId: 99,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        router.routeInformationProvider.value.uri.toString(),
+        '/projects/7/storyboard?scriptId=99',
+      );
+    });
   });
 
   group('studioStepForHarnessAgentKind', () {

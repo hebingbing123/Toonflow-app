@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -54,7 +54,6 @@ import 'project_editor/style_pack_picker_field.dart';
 import 'project_editor/short_drama_targets_panel.dart';
 import 'script_editor/edit_image/workbench_view.dart';
 import 'script_editor/workbench_view.dart';
-import 'script_editor/storyboards/workbench_view.dart';
 import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
@@ -130,6 +129,7 @@ import 'project_studio/studio_step.dart';
 import 'project_studio/studio_video_step_panel.dart';
 import 'project_studio/script_step_panel.dart';
 import 'project_studio/novel_crawl_auth_section.dart';
+import 'project_studio/art_step_brief_sheet.dart';
 import 'project_studio/art_step_panel.dart';
 import 'project_studio/project_studio_agent_focus_body.dart';
 import 'product_shell/studio_agent_drawer.dart';
@@ -188,9 +188,6 @@ part 'project_editor/http_probes/tasks_probe.dart';
 part 'project_editor/scripts/plan_workbench.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
-part 'script_editor/storyboards/dialogs/add.dart';
-part 'script_editor/storyboards/dialogs/batch_add.dart';
-part 'script_editor/storyboards/workbench.dart';
 part 'system_probes/controller.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
 part 'system_probes/models_catalog/settings_probe_scope.dart';

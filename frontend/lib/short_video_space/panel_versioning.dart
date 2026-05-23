@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -277,18 +278,14 @@ class PanelConsistencyAlert extends StatelessWidget {
               children: [
                 Text(
                   l10n.shortVideoPanelVersionDataInconsistencyTitle,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: studioAccentBannerTitleStyle(context, textColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.shortVideoPanelVersionStaleSummary(
                     status.stalePanels.length,
                   ),
-                  style: TextStyle(color: textColor, fontSize: 12),
+                  style: studioAccentBannerBodyStyle(context, textColor),
                 ),
                 if (status.stalePanels.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -320,7 +317,7 @@ class PanelConsistencyAlert extends StatelessWidget {
               backgroundColor: textColor,
               foregroundColor: backgroundColor,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              textStyle: const TextStyle(fontSize: 12),
+              textStyle: studioAccentBannerBodyStyle(context, textColor),
             ),
           ),
         ],

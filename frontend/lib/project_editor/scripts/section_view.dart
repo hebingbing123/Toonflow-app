@@ -37,7 +37,8 @@ class ProjectScriptsSectionViewCallbacks {
     required this.onPollAll,
     required this.onExtractAll,
     required this.onCreateEmptyScript,
-    required this.onOpenScriptEditor,
+    this.onOpenStoryboardStep,
+    this.onOpenScriptEditor,
   });
 
   final VoidCallback? onOpenWorkbench;
@@ -47,6 +48,7 @@ class ProjectScriptsSectionViewCallbacks {
   final VoidCallback? onPollAll;
   final VoidCallback? onExtractAll;
   final VoidCallback? onCreateEmptyScript;
+  final void Function(ScriptBrief script)? onOpenStoryboardStep;
   final void Function(ScriptBrief script)? onOpenScriptEditor;
 }
 
@@ -189,18 +191,35 @@ class ProjectScriptsSectionView extends StatelessWidget {
           )
         else
           ...model.scriptList.map(
-            (script) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                '#${script.numericId} ${script.name ?? ""}',
-                style: theme.textTheme.bodySmall,
-              ),
-              trailing: const Icon(Icons.edit_outlined, size: 18),
-              onTap: model.saving || callbacks.onOpenScriptEditor == null
+            (script) {
+              final openStoryboard = callbacks.onOpenStoryboardStep;
+              final openEditor = callbacks.onOpenScriptEditor;
+              final onTap = model.saving
                   ? null
-                  : () => callbacks.onOpenScriptEditor!(script),
-            ),
+                  : openStoryboard != null
+                  ? () => openStoryboard(script)
+                  : openEditor != null
+                  ? () => openEditor(script)
+                  : null;
+              return ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  '#${script.numericId} ${script.name ?? ""}',
+                  style: theme.textTheme.bodySmall,
+                ),
+                trailing: openStoryboard != null && openEditor != null
+                    ? IconButton(
+                        tooltip: l10n.projectEditorScriptsSectionEditScript,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        onPressed: model.saving
+                            ? null
+                            : () => openEditor(script),
+                      )
+                    : const Icon(Icons.chevron_right, size: 18),
+                onTap: onTap,
+              );
+            },
           ),
       ],
     );

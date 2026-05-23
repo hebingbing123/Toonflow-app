@@ -72,7 +72,7 @@ Widget _artPanelApp({
         saver: saver,
         project: project,
         onProjectUpdated: onProjectUpdated,
-        onOpenProjectSettings: () {},
+        onOpenBriefContext: () {},
       ),
     ),
   );
@@ -116,7 +116,7 @@ void main() {
     expect(find.text('Warm narrative'), findsOneWidget);
     expect(find.text('Current selection'), findsOneWidget);
     expect(find.text('Reset'), findsOneWidget);
-    expect(find.text('Advanced project settings'), findsOneWidget);
+    expect(find.text('Brief & brand constraints'), findsOneWidget);
   });
 
   testWidgets('save invokes saver, onProjectUpdated, and success snackbar', (

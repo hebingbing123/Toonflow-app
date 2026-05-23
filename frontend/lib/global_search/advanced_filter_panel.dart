@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
@@ -257,11 +258,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
               ),
               child: Text(
                 '$activeCount',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                style: studioFilterCountBadgeStyle(context),
               ),
             ),
         ],
@@ -394,7 +391,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             _currentFilters.timeFrom != null
                 ? l10n.globalSearchStartDateLabel(_formatDate(_currentFilters.timeFrom!))
                 : l10n.globalSearchChooseStartDate,
-            style: const TextStyle(fontSize: 14),
+            style: studioFilterActionLabelStyle(context),
           ),
           style: OutlinedButton.styleFrom(
             alignment: Alignment.centerLeft,
@@ -412,7 +409,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             _currentFilters.timeTo != null
                 ? l10n.globalSearchEndDateLabel(_formatDate(_currentFilters.timeTo!))
                 : l10n.globalSearchChooseEndDate,
-            style: const TextStyle(fontSize: 14),
+            style: studioFilterActionLabelStyle(context),
           ),
           style: OutlinedButton.styleFrom(
             alignment: Alignment.centerLeft,

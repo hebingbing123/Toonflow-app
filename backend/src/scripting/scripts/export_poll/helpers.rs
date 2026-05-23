@@ -62,3 +62,16 @@ pub(in crate::scripting::scripts) fn build_scripts_zip(
     }
     Ok(cursor.into_inner())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_numeric_id_list;
+
+    #[test]
+    fn normalize_rejects_empty_after_filter() {
+        let err = normalize_numeric_id_list(vec![], 8).unwrap_err();
+        assert!(matches!(err, crate::error::ApiError::BadRequest(_)));
+        let err = normalize_numeric_id_list(vec![0, -1], 8).unwrap_err();
+        assert!(matches!(err, crate::error::ApiError::BadRequest(_)));
+    }
+}

@@ -1,0 +1,21 @@
+# Quick static audit (spacing + typography only)
+audit:
+  projectPath: frontend/
+  include:
+    - lib/**/*.dart
+  exclude:
+    - lib/generated/**
+    - lib/**/*.g.dart
+    - lib/**/*.freezed.dart
+  categories:
+    - spacing
+    - typography
+  minimumSeverity: medium
+  runtime:
+    enabled: false
+  output:
+    formats: [json, markdown]
+    directory: .kiro/audit-reports/
+  thresholds:
+    failOnCritical: true
+    failOnHigh: false

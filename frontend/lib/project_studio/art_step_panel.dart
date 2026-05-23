@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/style_pack_catalog.dart';
@@ -29,7 +30,9 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
     required this.accessToken,
     required this.project,
     required this.onProjectUpdated,
-    required this.onOpenProjectSettings,
+    required this.onOpenBriefContext,
+    this.onOpenFullProjectSettings,
+    this.projectHome,
     this.catalogLoader,
     this.saver,
   });
@@ -37,7 +40,9 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
   final String accessToken;
   final ProjectRow project;
   final ValueChanged<ProjectRow> onProjectUpdated;
-  final VoidCallback onOpenProjectSettings;
+  final VoidCallback onOpenBriefContext;
+  final VoidCallback? onOpenFullProjectSettings;
+  final ProjectHome? projectHome;
 
   /// Overrides catalog HTTP for tests; production uses [loadProjectStylePackCatalog].
   @visibleForTesting
@@ -216,6 +221,96 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     setState(() => _seedFromProject(widget.project));
   }
 
+  Widget _buildReadinessStrip(AppLocalizations l10n) {
+    final home = widget.projectHome;
+    if (home == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
+    return Container(
+      key: const Key('studio_art_step_readiness'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: tokens.bgInset,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tokens.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            l10n.projectEditorBasicsHomeReadinessLine(
+              home.readinessScore,
+              home.readinessSummary,
+            ),
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (home.onboarding.nextStep != null) ...<Widget>[
+            const SizedBox(height: 6),
+            Text(
+              l10n.projectEditorBasicsHomeNextStep(home.onboarding.nextStep!),
+              style: studioHintStyle(context),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStyleForm(
+    AppLocalizations l10n,
+    ThemeData theme,
+    StudioTokens tokens,
+    StylePackCatalog catalog,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tokens.bgSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tokens.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          StylePackPickerField(
+            label: l10n.projectEditorBasicsLabelArtStylePack,
+            options: catalog.artPacks,
+            selectedPath: _draftArtPack,
+            isArtPack: true,
+            enabled: !_saving,
+            onChanged: (value) => setState(() => _draftArtPack = value),
+          ),
+          const SizedBox(height: 16),
+          StylePackPickerField(
+            label: l10n.projectEditorBasicsLabelStoryStylePack,
+            options: catalog.storyPacks,
+            selectedPath: _draftStoryPack,
+            isArtPack: false,
+            enabled: !_saving,
+            onChanged: (value) => setState(() => _draftStoryPack = value),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            enabled: !_saving,
+            controller: _artStyleCtrl,
+            decoration: InputDecoration(
+              labelText: l10n.studioArtStepArtStyleLabel,
+              helperText: l10n.studioArtStepLegacyArtStyleHelper,
+            ),
+            onChanged: (value) => setState(() => _draftArtStyle = value),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.studioArtStepApplyFootnote,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: tokens.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -223,156 +318,148 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     final tokens = StudioTokens.of(context);
     final catalog = _catalog;
 
-    return Align(
+    return LayoutBuilder(
       key: const Key('studio_art_step_panel'),
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 900;
+        final maxWidth = wide ? 1040.0 : 720.0;
+
+        Widget catalogBody;
+        if (_loadingCatalog) {
+          catalogBody = const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        } else if (_catalogError != null) {
+          catalogBody = _ErrorCard(
+            message: _catalogError!,
+            onRetry: _loadCatalog,
+            retryLabel: l10n.studioScriptStepRetry,
+          );
+        } else if (catalog != null) {
+          final summary = _SelectedPackSummary(
+            l10n: l10n,
+            artPack: findArtStylePackOption(catalog.artPacks, _draftArtPack),
+            storyPack: findStoryStylePackOption(
+              catalog.storyPacks,
+              _draftStoryPack,
+            ),
+            legacyArtStyle: _draftArtStyle.trim(),
+          );
+          final form = _buildStyleForm(l10n, theme, tokens, catalog);
+          catalogBody = wide
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(flex: 3, child: form),
+                    const SizedBox(width: 16),
+                    Expanded(flex: 2, child: summary),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    form,
+                    const SizedBox(height: 12),
+                    summary,
+                  ],
+                );
+        } else {
+          catalogBody = const SizedBox.shrink();
+        }
+
+        return Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Icon(Icons.palette_outlined, size: 36, color: tokens.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          l10n.studioStepArtTitle,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: tokens.textPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.studioArtStepEditSubtitle,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: tokens.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (_loadingCatalog)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_catalogError != null)
-                _ErrorCard(
-                  message: _catalogError!,
-                  onRetry: _loadCatalog,
-                  retryLabel: l10n.studioScriptStepRetry,
-                )
-              else if (catalog != null) ...<Widget>[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: tokens.bgSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: tokens.borderSubtle),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      StylePackPickerField(
-                        label: l10n.projectEditorBasicsLabelArtStylePack,
-                        options: catalog.artPacks,
-                        selectedPath: _draftArtPack,
-                        isArtPack: true,
-                        enabled: !_saving,
-                        onChanged: (value) =>
-                            setState(() => _draftArtPack = value),
+                      Icon(
+                        Icons.palette_outlined,
+                        size: 36,
+                        color: tokens.primary,
                       ),
-                      const SizedBox(height: 16),
-                      StylePackPickerField(
-                        label: l10n.projectEditorBasicsLabelStoryStylePack,
-                        options: catalog.storyPacks,
-                        selectedPath: _draftStoryPack,
-                        isArtPack: false,
-                        enabled: !_saving,
-                        onChanged: (value) =>
-                            setState(() => _draftStoryPack = value),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        enabled: !_saving,
-                        controller: _artStyleCtrl,
-                        decoration: InputDecoration(
-                          labelText: l10n.studioArtStepArtStyleLabel,
-                          helperText: l10n.studioArtStepLegacyArtStyleHelper,
-                        ),
-                        onChanged: (value) =>
-                            setState(() => _draftArtStyle = value),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.studioArtStepApplyFootnote,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: tokens.textSecondary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              l10n.studioStepArtTitle,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: tokens.textPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.studioArtStepEditSubtitle,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: tokens.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                _SelectedPackSummary(
-                  l10n: l10n,
-                  artPack: findArtStylePackOption(catalog.artPacks, _draftArtPack),
-                  storyPack: findStoryStylePackOption(
-                    catalog.storyPacks,
-                    _draftStoryPack,
-                  ),
-                  legacyArtStyle: _draftArtStyle.trim(),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  FilledButton.icon(
-                    key: const Key('studio_art_step_save'),
-                    onPressed: _saving || !_dirty || _loadingCatalog
-                        ? null
-                        : _save,
-                    icon: _saving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save_outlined, size: 18),
-                    label: Text(
-                      _saving
-                          ? l10n.projectEditorSavingEllipsis
-                          : l10n.studioArtStepSaveButton,
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: _saving || !_dirty ? null : _resetDraft,
-                    child: Text(l10n.studioArtStepResetButton),
-                  ),
-                  TextButton.icon(
-                    onPressed: widget.onOpenProjectSettings,
-                    icon: const Icon(Icons.tune_outlined, size: 18),
-                    label: Text(l10n.studioArtStepOpenSettings),
+                  const SizedBox(height: 16),
+                  _buildReadinessStrip(l10n),
+                  if (widget.projectHome != null) const SizedBox(height: 16),
+                  catalogBody,
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      FilledButton.icon(
+                        key: const Key('studio_art_step_save'),
+                        onPressed: _saving || !_dirty || _loadingCatalog
+                            ? null
+                            : _save,
+                        icon: _saving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.save_outlined, size: 18),
+                        label: Text(
+                          _saving
+                              ? l10n.projectEditorSavingEllipsis
+                              : l10n.studioArtStepSaveButton,
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: _saving || !_dirty ? null : _resetDraft,
+                        child: Text(l10n.studioArtStepResetButton),
+                      ),
+                      TextButton.icon(
+                        onPressed: widget.onOpenBriefContext,
+                        icon: const Icon(Icons.article_outlined, size: 18),
+                        label: Text(l10n.studioArtStepOpenSettings),
+                      ),
+                      if (widget.onOpenFullProjectSettings != null)
+                        TextButton(
+                          onPressed: widget.onOpenFullProjectSettings,
+                          child: Text(l10n.studioArtStepOpenFullSettings),
+                        ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

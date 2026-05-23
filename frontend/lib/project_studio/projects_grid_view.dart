@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_primary_button.dart';
+import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -35,39 +38,46 @@ class ProjectsGridView extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        final layout = ProjectsStudioHomeLayout.resolve(
+          context: context,
+          contentWidth: width,
+        );
         if (projects.length == 1) {
+          final project = projects.first;
           final card = _ProjectGridCard(
-            project: projects.first,
-            completedSteps: progressForProject?.call(projects.first) ?? 0,
-            selected: currentProjectNumericId == projects.first.numericId,
+            project: project,
+            completedSteps: progressForProject?.call(project) ?? 0,
+            selected: currentProjectNumericId == project.numericId,
             onSelect: onSelectProject == null
                 ? null
-                : () => onSelectProject!(projects.first),
-            onTap: () => onOpenProject(projects.first),
+                : () => onSelectProject!(project),
+            onTap: () => onOpenProject(project),
+            dense: layout.useDenseSingleCard,
+            standalone: layout.useStandaloneSingleCard,
           );
-          if (width >= 1100) {
+          if (layout.useDenseSingleCard) {
             return Align(
               alignment: Alignment.topLeft,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: width >= 1680 ? 860 : 760,
+                  maxWidth: width >= 1280
+                      ? 520
+                      : width >= 960
+                      ? 480
+                      : math.min(width * 0.92, 440),
                 ),
-                child: AspectRatio(
-                  aspectRatio: width >= 1680 ? 1.34 : 1.22,
-                  child: card,
-                ),
+                child: card,
               ),
             );
           }
-          return AspectRatio(
-            aspectRatio: width < 620 ? 0.92 : 1.0,
-            child: card,
-          );
+          return card;
         }
         final crossAxisCount = switch (projects.length) {
-          2 => width >= 840 ? 2 : 1,
+          2 => layout.isPhone || width < 840 ? 1 : 2,
           _ =>
-            width >= 2100
+            layout.isPhone
+                ? 1
+                : width >= 2100
                 ? 5
                 : width >= 1680
                 ? 4
@@ -77,7 +87,9 @@ class ProjectsGridView extends StatelessWidget {
                 ? 2
                 : 1,
         };
-        final childAspectRatio = width >= 2100
+        final childAspectRatio = layout.isPhone
+            ? 1.12
+            : width >= 2100
             ? 1.18
             : width >= 1680
             ? 1.12
@@ -152,6 +164,8 @@ class _ProjectGridCard extends StatelessWidget {
     this.selected = false,
     this.onSelect,
     required this.onTap,
+    this.dense = false,
+    this.standalone = false,
   });
 
   final ProjectRow project;
@@ -159,6 +173,9 @@ class _ProjectGridCard extends StatelessWidget {
   final bool selected;
   final VoidCallback? onSelect;
   final VoidCallback onTap;
+  final bool dense;
+  /// Intrinsic-height card for phone / narrow pane (no [Expanded] body).
+  final bool standalone;
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +189,32 @@ class _ProjectGridCard extends StatelessWidget {
 
     final scopeSelectionEnabled = onSelect != null;
     final cardRadius = BorderRadius.circular(StudioSpacing.radiusCard);
+    if (dense) {
+      return _buildDenseCard(
+        context,
+        tokens: tokens,
+        l10n: l10n,
+        title: title,
+        summary: summary,
+        focusLabel: focusLabel,
+        fallbackSummary: fallbackSummary,
+        scopeSelectionEnabled: scopeSelectionEnabled,
+        cardRadius: cardRadius,
+      );
+    }
+
+    final selectBody = _buildSelectableCardBody(
+      context,
+      tokens: tokens,
+      l10n: l10n,
+      title: title,
+      summary: summary,
+      focusLabel: focusLabel,
+      fallbackSummary: fallbackSummary,
+      scopeSelectionEnabled: scopeSelectionEnabled,
+      titleMaxLines: standalone ? 2 : 2,
+      summaryMaxLines: standalone ? 2 : 3,
+    );
 
     return Material(
       color: Colors.transparent,
@@ -185,9 +228,157 @@ class _ProjectGridCard extends StatelessWidget {
             width: selected ? 1.5 : 1,
           ),
         ),
-        padding: const EdgeInsets.all(StudioLayoutSpacing.section - 4),
+        padding: EdgeInsets.all(
+          standalone
+              ? StudioLayoutSpacing.insetDense + 2
+              : StudioLayoutSpacing.section - 4,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: standalone ? MainAxisSize.min : MainAxisSize.max,
+          children: <Widget>[
+            if (standalone)
+              selectBody
+            else
+              Expanded(child: selectBody),
+            SizedBox(
+              width: double.infinity,
+              child: StudioPrimaryButton(
+                key: Key('project_enter_studio_${project.numericId}'),
+                label: l10n.studioEnterStudio,
+                icon: Icons.arrow_outward,
+                onPressed: onTap,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectableCardBody(
+    BuildContext context, {
+    required StudioTokens tokens,
+    required AppLocalizations l10n,
+    required String title,
+    required String summary,
+    required String focusLabel,
+    required String fallbackSummary,
+    required bool scopeSelectionEnabled,
+    required int titleMaxLines,
+    required int summaryMaxLines,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: Key('project_select_scope_${project.numericId}'),
+        onTap: onSelect ?? onTap,
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: titleMaxLines,
+                      overflow: TextOverflow.ellipsis,
+                      style: studioCardTitleStyle(context),
+                    ),
+                  ),
+                  if (selected) ...<Widget>[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: tokens.primary,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  StudioStepProgressRing(completedSteps: completedSteps),
+                ],
+              ),
+              const SizedBox(height: StudioSpacing.sm),
+              Text(
+                summary.isNotEmpty ? summary : fallbackSummary,
+                maxLines: summaryMaxLines,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: tokens.textSecondary,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: StudioSpacing.sm),
+              Wrap(
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
+                children: <Widget>[
+                  _ProjectMetaChip(
+                    label: '#${project.numericId}',
+                    color: tokens.textSecondary,
+                  ),
+                  _ProjectMetaChip(
+                    label: focusLabel,
+                    color: selected ? tokens.textPrimary : tokens.primary,
+                    backgroundColor: selected
+                        ? tokens.primarySoft.withValues(alpha: 0.84)
+                        : tokens.bgInset.withValues(alpha: 0.9),
+                    borderColor: selected
+                        ? tokens.primary.withValues(alpha: 0.4)
+                        : tokens.surfaceHighlight.withValues(alpha: 0.9),
+                  ),
+                ],
+              ),
+              if (scopeSelectionEnabled && !selected) ...<Widget>[
+                const SizedBox(height: StudioSpacing.xs),
+                Text(
+                  l10n.studioProjectCardTapToSelect,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: tokens.textMuted),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDenseCard(
+    BuildContext context, {
+    required StudioTokens tokens,
+    required AppLocalizations l10n,
+    required String title,
+    required String summary,
+    required String focusLabel,
+    required String fallbackSummary,
+    required bool scopeSelectionEnabled,
+    required BorderRadius cardRadius,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: cardRadius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: tokens.bgSurface.withValues(alpha: 0.96),
+          borderRadius: cardRadius,
+          border: Border.all(
+            color: selected ? tokens.primary : tokens.borderSubtle,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioLayoutSpacing.stackMedium,
+          vertical: StudioLayoutSpacing.cardInner + 2,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
               child: Material(
@@ -199,9 +390,10 @@ class _ProjectGridCard extends StatelessWidget {
                     StudioSpacing.radiusButton,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,37 +401,33 @@ class _ProjectGridCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 title,
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: studioCardTitleStyle(context),
                               ),
                             ),
                             if (selected) ...<Widget>[
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 6),
                               Icon(
                                 Icons.check_circle,
-                                size: 18,
+                                size: 16,
                                 color: tokens.primary,
                               ),
-                              const SizedBox(width: 8),
                             ],
-                            StudioStepProgressRing(
-                              completedSteps: completedSteps,
-                            ),
                           ],
                         ),
-                        const SizedBox(height: StudioSpacing.sm),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           summary.isNotEmpty ? summary : fallbackSummary,
-                          maxLines: 3,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyMedium
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: tokens.textSecondary,
-                                height: 1.45,
+                                height: 1.35,
                               ),
                         ),
-                        const SizedBox(height: StudioSpacing.sm),
+                        const SizedBox(height: StudioSpacing.xs),
                         Wrap(
                           spacing: StudioSpacing.xs,
                           runSpacing: StudioSpacing.xs,
@@ -265,7 +453,7 @@ class _ProjectGridCard extends StatelessWidget {
                           ],
                         ),
                         if (scopeSelectionEnabled && !selected) ...<Widget>[
-                          const SizedBox(height: StudioSpacing.xs),
+                          const SizedBox(height: 2),
                           Text(
                             l10n.studioProjectCardTapToSelect,
                             style: Theme.of(context).textTheme.labelSmall
@@ -278,14 +466,21 @@ class _ProjectGridCard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              width: double.infinity,
-              child: StudioPrimaryButton(
-                key: Key('project_enter_studio_${project.numericId}'),
-                label: l10n.studioEnterStudio,
-                icon: Icons.arrow_outward,
-                onPressed: onTap,
+            const SizedBox(width: StudioSpacing.sm),
+            StudioStepProgressRing(completedSteps: completedSteps),
+            const SizedBox(width: StudioSpacing.sm),
+            FilledButton.icon(
+              key: Key('project_enter_studio_${project.numericId}'),
+              onPressed: onTap,
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
+              icon: const Icon(Icons.arrow_outward, size: 16),
+              label: Text(l10n.studioEnterStudio),
             ),
           ],
         ),

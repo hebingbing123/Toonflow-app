@@ -48,9 +48,15 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
         scriptList: scriptList,
         statsRef: dialogState.statsRef,
       ),
+      openStoryboardStep: (script) => _goStoryboardStepFromProjectEditor(
+        dialogContext: ctx,
+        project: p,
+        scriptNumericId: script.numericId,
+      ),
       openScriptEditor: (script) => _openScriptEditor(
         token,
         script.numericId,
+        projectNumericId: p.numericId,
         projectId: p.id,
         onScriptTreeMutated: () async {
           final refreshed = await fetchProjectByProjectId(token, p.id);
@@ -63,6 +69,20 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
           await dialogState.reloadAssetsAndStats(token, p.id, p.numericId);
         },
       ),
+    );
+  }
+
+  void _goStoryboardStepFromProjectEditor({
+    required BuildContext dialogContext,
+    required ProjectRow project,
+    required int scriptNumericId,
+  }) {
+    Navigator.of(dialogContext).pop();
+    if (!mounted) return;
+    goProjectStudioStoryboardForScript(
+      context,
+      projectNumericId: project.numericId,
+      scriptNumericId: scriptNumericId,
     );
   }
 }

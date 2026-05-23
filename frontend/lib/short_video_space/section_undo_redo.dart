@@ -666,11 +666,11 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                         : StudioTokens.of(ctx).bgInset,
                                     child: Text(
                                       '${historyList.length - idx}',
-                                      style: TextStyle(
-                                        color: isLatest
+                                      style: studioWizardStepNumberStyle(
+                                        ctx,
+                                        isLatest
                                             ? StudioTokens.of(ctx).textPrimary
                                             : StudioTokens.of(ctx).textSecondary,
-                                        fontSize: 12,
                                       ),
                                     ),
                                   ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
@@ -411,7 +412,7 @@ class _ProjectStudioScriptStepPanelState
         children: <Widget>[
           Text(
             l10n.studioScriptStepTabExtract,
-            style: studioInsetSectionTitleStyle(context),
+            style: studioPaneTitleStyle(context),
           ),
           const SizedBox(height: StudioLayoutSpacing.titleSubtitle - 2),
           Text(
@@ -425,13 +426,13 @@ class _ProjectStudioScriptStepPanelState
     );
   }
 
-  TabBar _buildContentTabBar(AppLocalizations l10n) {
-    return TabBar(
+  Widget _buildContentTabBar(BuildContext context, AppLocalizations l10n) {
+    final tabBar = TabBar(
       isScrollable: true,
       dividerColor: Colors.transparent,
       labelPadding: EdgeInsets.symmetric(
         horizontal: 12,
-        vertical: widget.focusMode ? 4 : 0,
+        vertical: widget.focusMode ? 2 : 0,
       ),
       indicatorSize: TabBarIndicatorSize.label,
       tabAlignment: TabAlignment.start,
@@ -440,6 +441,15 @@ class _ProjectStudioScriptStepPanelState
         Tab(text: l10n.studioScriptStepTabScripts),
         Tab(text: l10n.studioScriptStepTabExtract),
       ],
+    );
+    if (!widget.focusMode) {
+      return tabBar;
+    }
+    return Theme(
+      data: Theme.of(context).copyWith(
+        tabBarTheme: studioWorkbenchTabBarTheme(context),
+      ),
+      child: tabBar,
     );
   }
 
@@ -502,7 +512,7 @@ class _ProjectStudioScriptStepPanelState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           if (!widget.focusMode) _buildContentRailHeader(context, l10n),
-          _buildContentTabBar(l10n),
+          _buildContentTabBar(context, l10n),
           Expanded(
             child: TabBarView(
               children: <Widget>[

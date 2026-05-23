@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../l10n/app_localizations.dart';
@@ -80,9 +81,9 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
                     const SizedBox(height: 8),
                     Text(
                       errorText!,
-                      style: TextStyle(
-                        color: Theme.of(ctx).colorScheme.error,
-                        fontSize: 12,
+                      style: studioAccentBannerBodyStyle(
+                        ctx,
+                        Theme.of(ctx).colorScheme.error,
                       ),
                     ),
                   ],

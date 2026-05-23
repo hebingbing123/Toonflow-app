@@ -186,8 +186,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     }
     final expected = _uriForStudioStep(step);
     final current = GoRouterState.of(context).uri;
-    if (current.path != expected.path ||
-        current.queryParameters['tab'] != expected.queryParameters['tab']) {
+    if (!projectStudioStepUrisEquivalent(current, expected)) {
       context.go(expected.toString());
     }
   }
@@ -739,7 +738,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                     child: PopupMenuButton<CreatorWorkspaceMenuTarget>(
                       tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
                       itemBuilder: (BuildContext context) =>
-                          buildCreatorWorkspaceMenuEntries(l10n),
+                          buildCreatorWorkspaceMenuEntries(context, l10n),
                       onSelected: _handleWorkspaceMenuSelection,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
