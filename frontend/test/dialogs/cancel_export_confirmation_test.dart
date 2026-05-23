@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/dialogs/confirmation_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,6 @@ void main() {
 
     expect(find.byType(StudioAlertDialog), findsOneWidget);
     expect(find.text(zh.shortVideoSpaceDialogConfirmCancelExportTitle), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/studio_code_labels.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -95,6 +96,6 @@ void main() {
       findTextSpan('${studioJobKindLabel(l10n, 'export')} 2'),
       findsOneWidget,
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

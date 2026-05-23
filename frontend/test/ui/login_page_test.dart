@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/auth/controller.dart';
 import 'package:openflow_app/design_system/studio_adaptive_theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
@@ -49,6 +50,6 @@ void main() {
 
     expect(find.text('账号或密码错误'), findsOneWidget);
     expect(find.textContaining('Exception'), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

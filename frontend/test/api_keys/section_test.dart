@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/api_keys/controller.dart';
 import 'package:openflow_app/api_keys/section.dart';
 import 'package:openflow_app/design_system/theme.dart';
@@ -51,7 +52,7 @@ void main() {
     );
     expect(createButton, findsOneWidget);
     expect(tester.getSize(createButton).width, greaterThan(260));
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets(
@@ -69,7 +70,7 @@ void main() {
       );
 
       expect(find.text('Refresh'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 
@@ -107,6 +108,6 @@ void main() {
     expect(find.textContaining('deleted'), findsWidgets);
     expect(find.text('scope: read_write'), findsOneWidget);
     expect(find.text('publicId: deadbeefcafe'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

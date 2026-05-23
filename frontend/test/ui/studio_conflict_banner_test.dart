@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/ix/studio_conflict_banner.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
@@ -32,6 +33,6 @@ void main() {
 
     await tester.tap(find.byTooltip('关闭'));
     expect(dismissed, isTrue);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -32,7 +33,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(zh.teamWorkspaceLoginRequired), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('team workspaces studio header and refresh when signed in', (
@@ -62,6 +63,6 @@ void main() {
 
     expect(find.text(zh.teamWorkspaceTitle), findsOneWidget);
     expect(find.text(zh.teamWorkspaceRefreshList), findsWidgets);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

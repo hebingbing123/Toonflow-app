@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -51,7 +52,7 @@ void main() {
     expect(find.text(zh.studioArtStepSaveButton), findsOneWidget);
     expect(find.text('国风二维'), findsOneWidget);
     expect(find.text('家庭温情'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
 }

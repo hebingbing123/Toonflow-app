@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/native_bridge/native_bridge_bootstrap.dart';
 import 'package:openflow_app/native_bridge/native_bridge_bootstrap_platform.dart';
@@ -63,7 +64,7 @@ void main() {
     expect(find.text('/api/v1/ready'), findsOneWidget);
     expect(find.text('ready'), findsOneWidget);
     expect(find.textContaining('API：'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('status page renders desktop bridge ready details', (

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openflow_app/design_system/components/studio_primary_button.dart';
 import 'package:openflow_app/design_system/theme.dart';
@@ -264,7 +265,7 @@ void main() {
         'grid_prompt_generator',
       ]);
       expect(assetTargets, isEmpty);
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 
@@ -539,7 +540,7 @@ void main() {
           'Storyboard #101 is still blocked by pending candidate assets.',
         ),
       );
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 

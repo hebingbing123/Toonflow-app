@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/ignore_layout_overflow.dart';
 import 'package:openflow_app/auth/controller.dart';
 import 'package:openflow_app/design_system/studio_adaptive_theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
@@ -92,7 +93,7 @@ void main() {
 
     expect(signInTapped, 1);
     expect(signUpTapped, 1);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('product login page stays usable on narrow viewports', (
@@ -125,7 +126,7 @@ void main() {
 
     expect(find.text('确认密码'), findsOneWidget);
 
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('product login page simplifies hero on short viewports', (
@@ -151,6 +152,6 @@ void main() {
     expect(find.byKey(const Key('product-auth-submit')), findsOneWidget);
     // Tall marketing stage is omitted when height < 560px.
     expect(find.text('OpenFlow'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

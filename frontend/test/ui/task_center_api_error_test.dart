@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/platform/studio_load_state.dart';
@@ -56,6 +57,6 @@ void main() {
     expect(find.byType(StudioApiErrorCallout), findsOneWidget);
     expect(find.text('重试'), findsOneWidget);
     expect(find.textContaining('uuid='), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

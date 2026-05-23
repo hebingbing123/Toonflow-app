@@ -204,6 +204,35 @@ void main() {
     expect(tapped, isTrue);
   });
 
+  testWidgets(
+    'title bar chrome falls back to dense row when height is tight',
+    (tester) async {
+      await tester.pumpWidget(
+        _l10nApp(
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              height: 33,
+              width: 300,
+              child: const WorkspaceContextView(
+                loading: false,
+                workspaceName: 'Personal Workspace',
+                workspaceType: 'personal',
+                projectLabel: 'Project #1 · Demo',
+                inline: true,
+                titleBarChrome: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Column), findsNothing);
+      expect(find.textContaining('Project #1 · Demo'), findsOneWidget);
+    },
+  );
+
   testWidgets('title bar chrome renders compact two-line scope', (tester) async {
     await tester.pumpWidget(
       _l10nApp(

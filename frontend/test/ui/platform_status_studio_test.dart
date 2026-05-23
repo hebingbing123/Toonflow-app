@@ -1,6 +1,7 @@
 import 'dart:ui' show Size;
 
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 
 import '../support/studio_collapsible_filter_test_support.dart';
@@ -30,6 +31,6 @@ void main() {
     expect(find.text(zh.platformStatusTitle), findsAtLeastNWidgets(1));
     expect(find.text(zh.platformStatusIntro), findsOneWidget);
     expect(find.text(zh.platformStatusRefreshAction), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

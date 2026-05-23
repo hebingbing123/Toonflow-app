@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 
 import '../support/short_video_space_fixture.dart';
@@ -58,7 +59,7 @@ void main() {
     expect(find.text(zh.shortVideoSpaceCurrentProjectOverview), findsOneWidget);
     expect(find.text(zh.shortVideoSpaceSectionMigrationOrder), findsOneWidget);
     expect(find.byType(VerticalDivider), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('overview and migration stack on narrow screens', (

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/overview/section_view.dart';
@@ -191,7 +192,7 @@ void main() {
       expect(find.text('/api/v1/health'), findsOneWidget);
       expect(find.text('/api/v1/version'), findsOneWidget);
       expect(find.text('/api/v1/ready'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 }

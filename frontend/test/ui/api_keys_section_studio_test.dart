@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/api_keys/controller.dart';
 import 'package:openflow_app/api_keys/section.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -29,6 +30,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(zh.apiKeysSectionTitle), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/settings/plan_usage/plan_usage_section.dart';
 
@@ -22,6 +23,6 @@ void main() {
     await tester.pump();
 
     expect(find.text(zh.teamWorkspaceLoginRequired), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

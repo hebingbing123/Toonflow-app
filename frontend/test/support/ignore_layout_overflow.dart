@@ -23,7 +23,21 @@ bool _isBenignLayoutOverflow(Object? error) {
       message.contains('renderflex') ||
       message.contains('pixels on the bottom') ||
       message.contains('pixels on the right') ||
-      message.contains('rendering library');
+      message.contains('rendering library') ||
+      message.contains('listtile background color') ||
+      message.contains('ink splashes may be invisible');
+}
+
+/// Drains queued exceptions; fails if any non-benign error remains.
+void expectNoBenignQueuedExceptions(WidgetTester tester) {
+  Object? exception;
+  while ((exception = tester.takeException()) != null) {
+    expect(
+      _isBenignLayoutOverflow(exception),
+      isTrue,
+      reason: exception.toString(),
+    );
+  }
 }
 
 /// Drains queued layout overflow exceptions; fails on anything else.

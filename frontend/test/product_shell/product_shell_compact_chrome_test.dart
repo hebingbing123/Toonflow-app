@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
 import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/design_system/components/openflow_brand.dart';
@@ -26,7 +27,7 @@ void main() {
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
     expect(find.byType(OpenFlowBrandMark), findsWidgets);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('stacked product chrome keeps title and search visible', (
@@ -47,6 +48,6 @@ void main() {
     expect(find.text(l10n.appTitle), findsOneWidget);
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

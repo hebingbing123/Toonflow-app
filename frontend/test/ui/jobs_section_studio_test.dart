@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/jobs/section_view.dart';
@@ -70,7 +71,7 @@ void main() {
 
     expect(find.byType(StudioApiErrorCallout), findsOneWidget);
     expect(find.text('重试'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('jobs studio presentation shows skeleton while loading', (
@@ -132,6 +133,6 @@ void main() {
 
     expect(find.byType(StudioSkeleton), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

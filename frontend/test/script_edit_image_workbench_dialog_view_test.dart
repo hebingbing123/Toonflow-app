@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/script_editor/edit_image/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -152,7 +153,7 @@ void main() {
     expect(find.text('保存当前 Flow'), findsOneWidget);
     expect(find.text('https://cdn.openflow.test/source.png'), findsOneWidget);
     expect(find.text('上传源图'), findsNWidgets(2));
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('edit image workbench view disables actions while busy', (

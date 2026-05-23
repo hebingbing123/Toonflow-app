@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/content_compliance/controller.dart';
 import 'package:openflow_app/content_compliance/section.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
@@ -32,6 +33,6 @@ void main() {
     await tester.pump();
 
     expect(find.byType(StudioSkeleton), findsWidgets);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

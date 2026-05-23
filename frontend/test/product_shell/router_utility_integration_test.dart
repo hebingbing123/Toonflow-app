@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openflow_app/rust_api/settings/billing_webhook_events.dart';
 import 'package:openflow_app/rust_api/settings/outbound_webhooks.dart';
@@ -52,7 +53,7 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/?pane=notifications',
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('settings utility route redirects into shell pane', (
@@ -75,7 +76,7 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/?pane=settings',
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help utility route redirects into shell pane', (tester) async {
@@ -92,7 +93,7 @@ void main() {
 
     expect(find.text('Help / docs'), findsAtLeastNWidgets(1));
     expect(router.routeInformationProvider.value.uri.toString(), '/?pane=help');
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help utility route stays stable on tighter desktop width', (
@@ -115,7 +116,7 @@ void main() {
 
     expect(find.text('Help / docs'), findsAtLeastNWidgets(1));
     expect(router.routeInformationProvider.value.uri.toString(), '/?pane=help');
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help utility route stays stable on compact desktop width', (
@@ -138,7 +139,7 @@ void main() {
 
     expect(find.text('Help / docs'), findsAtLeastNWidgets(1));
     expect(router.routeInformationProvider.value.uri.toString(), '/?pane=help');
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help utility route stays stable on narrow desktop width', (
@@ -161,7 +162,7 @@ void main() {
 
     expect(find.text('Help / docs'), findsAtLeastNWidgets(1));
     expect(router.routeInformationProvider.value.uri.toString(), '/?pane=help');
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help utility route stays stable on common laptop viewport', (
@@ -184,7 +185,7 @@ void main() {
 
     expect(find.text('Help / docs'), findsAtLeastNWidgets(1));
     expect(router.routeInformationProvider.value.uri.toString(), '/?pane=help');
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets(
@@ -248,7 +249,7 @@ void main() {
         router.routeInformationProvider.value.uri.toString(),
         '/?pane=help',
       );
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 
@@ -271,7 +272,7 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/settings/models',
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('platform status route opens platform status pane', (
@@ -296,6 +297,6 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/platform-status',
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

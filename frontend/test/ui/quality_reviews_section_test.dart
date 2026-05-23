@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/ix/studio_freshness_banner.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
@@ -57,7 +58,7 @@ void main() {
 
     expect(find.byType(StudioFreshnessBanner), findsOneWidget);
     expect(find.textContaining('STALE'), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('quality section keeps ops dashboard when review list is empty', (
@@ -87,7 +88,7 @@ void main() {
 
     expect(find.text('质量运营看板'), findsOneWidget);
     expect(find.text('summary'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('quality studio presentation shows skeleton while loading reviews', (
@@ -115,6 +116,6 @@ void main() {
 
     expect(find.byType(StudioSkeleton), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

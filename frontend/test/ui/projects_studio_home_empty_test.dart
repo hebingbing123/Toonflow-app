@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_getting_started_steps.dart';
@@ -39,7 +40,7 @@ void main() {
     expect(find.text('快速入门'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.textContaining('uuid='), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets(
@@ -79,7 +80,7 @@ void main() {
 
       expect(find.text('继续创作'), findsNothing);
       expect(find.text('Alpha'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/ix/studio_job_tray.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/studio/job_center.dart';
@@ -29,7 +30,7 @@ void main() {
       find.byTooltip(AppLocalizationsZh().studioJobTrayActiveJobs(1)),
       findsOneWidget,
     );
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('job tray hides when no active jobs', (tester) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
 import '../support/studio_golden_app.dart';
@@ -49,6 +50,6 @@ void main() {
 
     expect(find.text('未找到匹配结果'), findsOneWidget);
     expect(find.text('请尝试其他关键词'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

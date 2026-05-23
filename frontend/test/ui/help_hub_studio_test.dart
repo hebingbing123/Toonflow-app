@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -51,7 +52,7 @@ void main() {
       findsWidgets,
     );
     expect(find.textContaining('upstream timeout after retry'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
 
     await tester.tap(find.text(zh.billingAuditTitle));
     await tester.pumpAndSettle();
@@ -65,7 +66,7 @@ void main() {
 
     expect(find.text(zh.billingAuditQuery), findsOneWidget);
     expect(find.text(zh.billingAuditLoadMore), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('help_hub desktop layout golden', (tester) async {

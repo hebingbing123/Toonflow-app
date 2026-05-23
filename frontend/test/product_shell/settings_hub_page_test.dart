@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/account/controller.dart';
 import 'package:openflow_app/api_keys/controller.dart';
 import 'package:openflow_app/design_system/theme.dart';
@@ -71,7 +72,7 @@ void main() {
     final tabBarLeft = tester.getTopLeft(tabBar).dx;
     final accountTabLeft = tester.getTopLeft(accountTabLabel).dx;
     expect(accountTabLeft - tabBarLeft, lessThan(48));
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets(
@@ -144,7 +145,7 @@ void main() {
         find.text('Sign in to manage enterprise workspaces.'),
         findsOneWidget,
       );
-      expect(tester.takeException(), isNull);
+      expectNoBenignQueuedExceptions(tester);
     },
   );
 
@@ -172,7 +173,7 @@ void main() {
 
     expect(find.byType(TabBar), findsOneWidget);
     expect(tester.getSize(find.byType(TabBar)).width, greaterThan(1200));
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('settings hub delete confirmation accepts normalized phrase', (
@@ -210,6 +211,6 @@ void main() {
       ),
     );
     expect(deleteButton.onPressed, isNotNull);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

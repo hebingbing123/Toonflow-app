@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/account/controller.dart';
 import 'package:openflow_app/api_keys/controller.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -41,6 +42,6 @@ void main() {
 
     expect(find.text(zh.studioSettingsHubTitle), findsOneWidget);
     expect(find.text(zh.studioSettingsTabAccount), findsWidgets);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }

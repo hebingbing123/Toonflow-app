@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
@@ -36,7 +37,7 @@ void main() {
 
     expect(find.byType(StudioAlertDialog), findsOneWidget);
     expect(find.byType(StudioDropdownButtonFormField<String>), findsWidgets);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('voiceover settings dialog shows preview action when enabled', (

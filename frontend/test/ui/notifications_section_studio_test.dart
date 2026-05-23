@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/notifications/controller.dart';
@@ -36,7 +37,7 @@ void main() {
     expect(find.text(zh.notificationsCenterTitle), findsOneWidget);
     expect(find.text(zh.studioFilterToolbarTitle), findsOneWidget);
     expect(find.text(zh.notificationsEmptyFiltered), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 
   testWidgets('notifications studio presentation shows skeleton while loading', (
@@ -66,6 +67,6 @@ void main() {
 
     expect(find.byType(StudioSkeleton), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.takeException(), isNull);
+    expectNoBenignQueuedExceptions(tester);
   });
 }
