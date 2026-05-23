@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../l10n/native_bridge_startup_labels.dart';
@@ -145,7 +146,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: background,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
             border: Border.all(color: foreground.withValues(alpha: 0.18)),
           ),
           child: Column(
@@ -155,7 +156,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(icon, color: foreground),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +184,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               ...lines.map(
                 (line) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -196,7 +197,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
                 ),
               ),
               if (runtime.showDownloadCallToAction) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 FilledButton.icon(
                   onPressed: () => unawaited(_openDownloads()),
                   icon: const Icon(Icons.download_outlined),

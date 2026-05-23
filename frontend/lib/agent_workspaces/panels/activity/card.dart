@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_chip.dart';
 
 import '../../../design_system/components/studio_empty_state.dart';
 import '../../../design_system/tokens.dart';
@@ -70,7 +71,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 if (eventType != null)
-                  Chip(
+                  StudioChip(
                     label: Text(
                       l10n.agentWorkspaceActivityLatest(
                         studioHarnessWsEventTypeLabel(l10n, eventType),
@@ -101,7 +102,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                 l10n.agentWorkspaceActivityLatestAssistantText,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               SelectableText(
                 _previewText(workspaceAssistantText.trim(), maxChars: 960),
                 style: Theme.of(context).textTheme.bodySmall,

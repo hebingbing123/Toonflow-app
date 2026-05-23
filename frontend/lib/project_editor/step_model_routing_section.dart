@@ -126,7 +126,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.primary.withValues(alpha: 0.28)),
       ),
       child: Column(
@@ -138,12 +138,12 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectEditorBasicsStepModelRoutingHelper,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           ..._matrix.expand((row) {
             final step = row.$1;
             final slots = row.$2;
@@ -155,7 +155,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                 ),
               ),
               if (step == StudioStep.quality) ...<Widget>[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.projectEditorModelRoutingQualityStepHint,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -176,7 +176,7 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                         _slotLabel(l10n, slot),
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioModelPicker(
                         models: catalog,
                         selectedModelId: selected,

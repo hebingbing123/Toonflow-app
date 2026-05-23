@@ -86,6 +86,41 @@ class ConfigParser {
     );
   }
 
+  /// Resolves a Flutter project directory (e.g. `frontend/`) from CWD or repo root.
+  static String resolveProjectDirectory(
+    String configuredPath, {
+    String? configFilePath,
+  }) {
+    final cwd = Directory.current.path;
+    final configDir = configFilePath != null
+        ? p.dirname(p.absolute(configFilePath))
+        : cwd;
+    final repoRoot = configFilePath != null
+        ? p.normalize(p.join(configDir, '..'))
+        : _guessRepoRoot(cwd);
+    return _resolveDirectory(
+      configuredPath,
+      cwd: cwd,
+      configDir: configDir,
+      repoRoot: repoRoot,
+    );
+  }
+
+  static String _guessRepoRoot(String cwd) {
+    var dir = p.normalize(cwd);
+    while (true) {
+      if (Directory(p.join(dir, 'frontend', 'lib')).existsSync() &&
+          Directory(p.join(dir, 'tools', 'ui_audit')).existsSync()) {
+        return dir;
+      }
+      final parent = p.dirname(dir);
+      if (parent == dir) {
+        return cwd;
+      }
+      dir = parent;
+    }
+  }
+
   static String _resolveDirectory(
     String configuredPath, {
     required String cwd,

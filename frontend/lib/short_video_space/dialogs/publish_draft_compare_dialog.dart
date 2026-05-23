@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
@@ -104,7 +105,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
         ],
       ),
       content: SizedBox(
-        width: 960,
+        width: studioConstrainedDialogWidth(context, maxWidth: 960),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +154,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                 },
               ),
               if (platformIds.isNotEmpty) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   l10n.shortVideoPublishDraftComparePerPlatformHeading,
                   style: theme.textTheme.titleSmall,
@@ -222,14 +223,14 @@ class _DraftCompareCard extends StatelessWidget {
             _kv(context, l10n.shortVideoPublishDraftCompareFieldCover, _emptyAsDash(draft.coverAssetKey)),
             const SizedBox(height: 8),
             Text(l10n.shortVideoPublishDraftCompareFieldSummary, style: theme.textTheme.labelSmall),
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               draft.description.trim().isEmpty ? '—' : draft.description,
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             Text(l10n.shortVideoPublishDraftCompareFieldTags, style: theme.textTheme.labelSmall),
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _tagsLine(draft.tags),
               style: theme.textTheme.bodySmall,
@@ -311,7 +312,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
                         fontFamily: 'monospace',
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       l10n.shortVideoPublishDraftCompareCopyLineTitle(title),
                       style: theme.textTheme.bodySmall,

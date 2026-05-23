@@ -179,7 +179,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -344,7 +344,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
             _buildStudioLoadingBody(context),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           DecoratedBox(
             decoration: studioInsetPanelDecoration(context),
             child: Padding(
@@ -475,7 +475,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         border: Border.all(color: color.withValues(alpha: 0.6)),
       ),
       child: Text(l10n.platformStatusChipLabel(title, value)),

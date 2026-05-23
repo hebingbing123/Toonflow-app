@@ -39,7 +39,7 @@ Widget buildProjectNovelEventsWorkbenchSection({
           l10n.projectEditorNovelsEventsWorkbenchTitle,
           style: Theme.of(ctx).textTheme.titleSmall,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           first == null
               ? l10n.projectEditorNovelsEventsWorkbenchEmptyDetail

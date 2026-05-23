@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import '../../../design_system/tokens.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -172,7 +174,7 @@ class _ProjectAssetCandidateStatusDialogState
             scrollable: true,
             title: Text(l10n.projectEditorAssetCandidateDialogTitle),
             content: SizedBox(
-              width: 520,
+              width: studioConstrainedDialogWidth(context, maxWidth: 520),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +183,7 @@ class _ProjectAssetCandidateStatusDialogState
                     l10n.projectEditorAssetCandidateDialogIntro,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   if (_hasPendingAssets) ...[
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
@@ -223,7 +225,7 @@ class _ProjectAssetCandidateStatusDialogState
                       _selectAsset(value, visibleAssets);
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Row(
                     children: [
                       IconButton(
@@ -258,7 +260,7 @@ class _ProjectAssetCandidateStatusDialogState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Text(
                     selectedAsset == null
                         ? l10n.projectEditorAssetCandidateCurrentStatusEmpty
@@ -270,7 +272,7 @@ class _ProjectAssetCandidateStatusDialogState
                           ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Text(
                     l10n.projectEditorAssetCandidateNextStatusLabel,
                     style: Theme.of(context).textTheme.labelMedium,

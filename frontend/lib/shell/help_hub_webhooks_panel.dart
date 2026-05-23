@@ -645,7 +645,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
         children: [
           Text(
             l10n.opsWhSectionTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: studioCardTitleStyle(context),
           ),
           const SizedBox(height: 8),
           StudioCollapsibleFilterPanel(
@@ -686,7 +686,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     style: Theme.of(context).textTheme.labelMedium,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 OutboundWebhookEventChips(
                   selected: _createWebhookEventTypes,
                   enabled: !_loadingWebhooks,
@@ -899,11 +899,11 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             wh.url,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: StudioLayoutSpacing.titleTight),
                           if (_latestCreatedWebhook?.id == wh.id)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
-                              child: Chip(
+                              child: StudioChip(
                                 label: Text(l10n.opsWhChipLatestCreated),
                               ),
                             ),
@@ -917,12 +917,12 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           if (!wh.enabled)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Chip(
+                              child: StudioChip(
                                 label: Text(l10n.opsWhChipDisabled),
                               ),
                             ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 6),
+                            padding: const EdgeInsets.only(top: StudioLayoutSpacing.microGap),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -932,7 +932,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                     context,
                                   ).textTheme.labelMedium,
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: StudioLayoutSpacing.titleTight),
                                 OutboundWebhookEventChips(
                                   selected: outboundWebhookEffectiveSelection(
                                     wh.eventTypes,
@@ -970,7 +970,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                     context,
                                   ).textTheme.labelMedium,
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: StudioLayoutSpacing.titleTight),
                                 TextField(
                                   controller:
                                       _webhookWorkspaceDraftControllers[wh.id],
@@ -980,7 +980,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                   ),
                                   enabled: !_loadingWebhooks && !rowBusy,
                                 ),
-                                const SizedBox(height: StudioSpacing.xs),
+                                const SizedBox(height: 8),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 8,

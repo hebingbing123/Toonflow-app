@@ -354,7 +354,7 @@ class _StudioScriptNovelInlineImportState
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: SingleChildScrollView(

@@ -196,7 +196,7 @@ Future<void> showProjectStudioStepSetupSheet(
                     color: tokens.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   subtitle,
                   style: studioHintStyle(sheetContext),

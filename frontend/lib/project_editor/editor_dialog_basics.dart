@@ -45,7 +45,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   l10n.projectEditorBasicsHomeSectionTitle,
                   style: Theme.of(ctx).textTheme.titleSmall,
                 ),
-                const SizedBox(height: StudioSpacing.xs),
+                const SizedBox(height: 8),
                 Text(
                   l10n.projectEditorBasicsHomeReadinessLine(
                     home.readinessScore,
@@ -80,7 +80,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
         ],
         TextField(
           controller: nameCtrl,
@@ -88,7 +88,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldNameClearLabel,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           controller: introCtrl,
           maxLines: 3,
@@ -267,7 +267,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldContinuityRulesOnePerLine,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         StylePackPickerField(
           label: l10n.projectEditorBasicsLabelArtStylePack,
           options: dialogState.artStylePackOptionsRef[0],
@@ -279,7 +279,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             );
           },
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         StylePackPickerField(
           label: l10n.projectEditorBasicsLabelStoryStylePack,
           options: dialogState.storyStylePackOptionsRef[0],
@@ -300,7 +300,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             await _projectsController.loadProjects();
           },
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         if (dialogState.statsRef[0] != null)
           Text(
             l10n.projectEditorBasicsStatsLine(
@@ -344,7 +344,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           ),
         ),
         if (chips.isNotEmpty) ...[
-          const SizedBox(height: StudioSpacing.xs),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,

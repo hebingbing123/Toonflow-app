@@ -62,7 +62,7 @@ class StudioMergeDeliverBar extends StatelessWidget {
                 return Row(
                   children: <Widget>[
                     Expanded(child: summary),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: StudioSpacing.sm),
                     Flexible(child: action),
                   ],
                 );

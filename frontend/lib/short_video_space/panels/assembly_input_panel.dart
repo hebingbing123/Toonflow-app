@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/tokens.dart';
@@ -53,7 +54,7 @@ class AssemblyInputPanel extends StatelessWidget {
           const SizedBox(height: 8),
           Material(
             color: theme.colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
             child: Padding(
               padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
               child: Column(
@@ -155,7 +156,7 @@ class _ActiveJobBanner extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +233,7 @@ class _ShotRow extends StatelessWidget {
         spacing: 4,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Chip(
+          StudioChip(
             label: Text(statusLabel, style: theme.textTheme.labelSmall),
             backgroundColor: statusColor.withValues(alpha: 0.12),
           ),

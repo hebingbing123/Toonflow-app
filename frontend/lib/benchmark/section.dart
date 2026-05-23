@@ -250,7 +250,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 ).copyWith(
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
+                      color: studioShadowColor(context, alpha: 0.12),
                       blurRadius: 10,
                       spreadRadius: -8,
                       offset: const Offset(0, 4),
@@ -381,17 +381,17 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             const SizedBox(height: 8),
             SelectableText(_statusLine!),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _buildPromoteCard(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _buildExperimentCard(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _buildReviewCard(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _buildGateCard(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _buildABCompareCard(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           SelectableText(
             summarizeBenchmarkCases(l10n, _cases),
             style: Theme.of(context).textTheme.bodySmall,
@@ -417,7 +417,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           SelectableText(
             summarizeBenchmarkExperiments(l10n, _experiments),
             style: Theme.of(context).textTheme.bodySmall,
@@ -455,7 +455,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           SelectableText(
             summarizeBenchmarkReviewQueue(l10n, _reviewQueue),
             style: Theme.of(context).textTheme.bodySmall,
@@ -480,7 +480,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 ),
           ],
           if (_memoryProfiles != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.benchmarkMemoryProfilesLine(
                 _memoryProfiles!.profiles
@@ -493,7 +493,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_experimentDetail != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.benchmarkExperimentDetailHeader(
                 _experimentDetail!.experiment.name.trim().isEmpty
@@ -510,7 +510,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_roiSummary != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.benchmarkRoiHeader(
                 _roiSummary!.overallConclusionType,
@@ -529,7 +529,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_gateSummary != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(summarizeBenchmarkGate(l10n, _gateSummary)),
             const SizedBox(height: StudioSpacing.xs),
             ..._gateSummary!.assessments.map(
@@ -544,7 +544,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_trends != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(summarizeBenchmarkTrends(l10n, _trends)),
             const SizedBox(height: StudioSpacing.xs),
             ..._trends!.weeks.map(
@@ -560,7 +560,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_abCompare != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.benchmarkAbAggregateSummary(
                 _abCompare!.passed
@@ -583,7 +583,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
           ],
           if (_abRunDetail != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.benchmarkHistoryReplay(
                 ((_abRunDetail!.run.name?.trim().isEmpty) ?? true)

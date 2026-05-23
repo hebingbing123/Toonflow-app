@@ -75,7 +75,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
           l10n.projectEditorScriptsSectionCountLine(model.scriptList.length),
           style: theme.textTheme.labelLarge,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.projectEditorScriptsSectionIntroBody,
           style: studioHintStyle(context),
@@ -165,7 +165,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
           ],
         ),
         if (model.scriptTaskLine != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             model.scriptTaskLine!,
             style: studioHintStyle(context),

@@ -2,6 +2,7 @@
 // Keeps agent_workspaces/panels/production.dart ≤800 lines.
 
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_chip.dart';
 
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
@@ -33,7 +34,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +43,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
             l10n.agentWorkspaceProductionPromptPreviewTitle,
             style: Theme.of(context).textTheme.labelSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(prompt, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
@@ -84,7 +85,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
-                      Chip(label: Text(stage.status.localizedLabel(l10n))),
+                      StudioChip(label: Text(stage.status.localizedLabel(l10n))),
                     ],
                   ),
                   Text(
@@ -100,7 +101,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(
+                      StudioChip(
                         label: Text(
                           agentWorkspaceFlowKeyLabel(l10n, stage.flowKey),
                         ),
@@ -163,7 +164,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +173,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
             l10n.agentWorkspaceProductionPromptPreviewTitle,
             style: Theme.of(context).textTheme.labelSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(prompt, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
@@ -212,7 +213,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     recipe.title,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     recipe.detail,
                     style: Theme.of(context).textTheme.bodySmall,
@@ -226,13 +227,13 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(
+                      StudioChip(
                         label: Text(
                           agentWorkspaceFlowKeyLabel(l10n, recipe.flowKey),
                         ),
                       ),
                       if (recipe.domainTool != null)
-                        Chip(
+                        StudioChip(
                           label: Text(
                             agentWorkspaceProductionDomainToolLabel(
                               l10n,
@@ -241,7 +242,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                           ),
                         ),
                       if (recipe.subAgentTool != null)
-                        Chip(
+                        StudioChip(
                           label: Text(
                             agentWorkspaceProductionSubAgentLabel(
                               l10n,

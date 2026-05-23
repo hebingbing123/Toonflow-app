@@ -209,7 +209,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
             ],
           ),
           content: SizedBox(
-            width: 500,
+            width: studioConstrainedDialogWidth(context, maxWidth: 500),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

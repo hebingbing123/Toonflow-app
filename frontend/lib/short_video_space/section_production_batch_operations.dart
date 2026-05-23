@@ -297,7 +297,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         return StudioAlertDialog(
           title: Text(dlgL10n.shortVideoBatchReplaceDialogTitle),
           content: SizedBox(
-            width: 500,
+            width: studioConstrainedDialogWidth(context, maxWidth: 500),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -308,7 +308,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     hintText: dlgL10n.shortVideoBatchReplaceFindPatternHint,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 TextField(
                   controller: replacementCtrl,
                   decoration: InputDecoration(
@@ -502,7 +502,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
             return StudioAlertDialog(
               title: Text(dlgL10n.shortVideoBatchGenerateVoiceoverTitle),
               content: SizedBox(
-                width: 480,
+                width: studioConstrainedDialogWidth(context, maxWidth: 480),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

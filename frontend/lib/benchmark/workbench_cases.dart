@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import '../design_system/tokens.dart';
 
 import '../rust_api.dart';
 
@@ -59,7 +60,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
             labelText: l10n.benchmarkProjectIdOptional,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -130,7 +131,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         if (cases.isNotEmpty) ...[
           Text(
             l10n.benchmarkSummaryCases(

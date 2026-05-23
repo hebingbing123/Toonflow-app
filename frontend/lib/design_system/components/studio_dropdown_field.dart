@@ -194,7 +194,7 @@ class StudioDropdownButton<T> extends StatelessWidget {
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.xs),
       ),
     );
   }
@@ -526,7 +526,7 @@ ButtonStyle studioMenuItemButtonStyle(
   return ButtonStyle(
     minimumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 40)),
     padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     ),
     foregroundColor: WidgetStatePropertyAll<Color>(resolvedForeground),
     backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -552,10 +552,10 @@ ButtonStyle studioMenuItemButtonStyle(
     ),
     textStyle: WidgetStatePropertyAll<TextStyle>(
       TextStyle(
-        fontSize: typography?.body ?? 14,
+        fontSize: typography?.body ?? StudioTypography.regular.body,
         fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         height: 1.35,
-        color: resolvedForeground,
+        color: enabled ? tokens.textPrimary : tokens.textMuted,
       ),
     ),
   );
@@ -613,7 +613,7 @@ class StudioSelectMenuItem extends StatelessWidget {
                   children: [
                     title,
                     if (subtitle != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         subtitle!,
                         style: theme.textTheme.bodySmall?.copyWith(

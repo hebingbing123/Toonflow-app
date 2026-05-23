@@ -47,12 +47,12 @@ class _StoryboardPreviewCard extends StatelessWidget {
             l10n.scriptEditorStoryboardsCurrentFrame,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             metaLine,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (loadingProduction)
             const Center(child: CircularProgressIndicator())
           else if (imageUrl == null || imageUrl.isEmpty)
@@ -81,7 +81,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
               ),
             ),
           if ((productionRow?.prompt ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               productionRow!.prompt!.trim(),
               maxLines: 3,
@@ -223,7 +223,7 @@ class _ReadinessStepPill extends StatelessWidget {
           size: 17,
           color: ok ? scheme.primary : muted,
         ),
-        const SizedBox(width: StudioSpacing.xs),
+        const SizedBox(width: 8),
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(

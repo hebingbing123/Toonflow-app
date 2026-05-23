@@ -44,7 +44,7 @@ class _PublishJobsPanel extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DeliveryModeBadge(deliveryMode: e.key, small: true),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 8),
                         Text(l10n.l10nBatch_775383c7b6(e.value), style: theme.textTheme.labelSmall),
                       ],
                     ),
@@ -59,7 +59,7 @@ class _PublishJobsPanel extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: StudioSpacing.xs),
+        const SizedBox(height: 8),
         for (final line in publishPanelUi.jobLines)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),

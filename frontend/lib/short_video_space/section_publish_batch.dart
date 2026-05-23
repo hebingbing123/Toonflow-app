@@ -83,7 +83,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                 children: [
                   Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
                   Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
                   ...validation.blockedDrafts.take(5).map((d) => Padding(
                         padding: const EdgeInsets.only(left: 8, top: 4),
@@ -202,7 +202,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                 children: [
                   Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
                   Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
                   ...validation.blockedDrafts.take(5).map((d) => Padding(
                         padding: const EdgeInsets.only(left: 8, top: 4),

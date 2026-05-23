@@ -101,7 +101,7 @@ class SearchResultCard extends StatelessWidget {
         text: match.group(1),
         style: TextStyle(
           backgroundColor: StudioTokens.of(context).primarySoft,
-          color: theme.colorScheme.onPrimaryContainer,
+          color: StudioTokens.of(context).textPrimary,
           fontWeight: FontWeight.w600,
         ),
       ));
@@ -146,12 +146,12 @@ class SearchResultCard extends StatelessWidget {
                   color: theme.colorScheme.primary,
                   width: 2,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
               )
             : null,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -194,12 +194,12 @@ class SearchResultCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
 
                 // Highlighted snippet
                 _buildHighlightedSnippet(context, result.snippet),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
 
                 // Metadata row
                 Row(
@@ -209,7 +209,7 @@ class SearchResultCard extends StatelessWidget {
                       size: 14,
                       color: StudioTokens.of(context).textSecondary,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: StudioSpacing.xs),
                     Text(
                       _formatTime(l10n, context, result.updatedAt),
                       style: theme.textTheme.bodySmall?.copyWith(

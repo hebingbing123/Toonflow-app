@@ -48,13 +48,13 @@ Widget buildProjectNovelsWorkbenchSection({
             l10n.projectEditorNovelsChapterWorkbenchTitle,
             style: Theme.of(ctx).textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         Text(
           l10n.projectEditorNovelsWorkbenchStudioCrossLink,
           style: studioHintStyle(ctx),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           first == null
               ? l10n.projectEditorNovelsWorkbenchCardSummaryEmptyHelp

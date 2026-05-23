@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -231,7 +232,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -266,7 +267,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -360,7 +361,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     form,
-                    const SizedBox(height: 12),
+                    const SizedBox(height: StudioSpacing.sm),
                     summary,
                   ],
                 );
@@ -385,7 +386,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                         size: 36,
                         color: tokens.primary,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,7 +398,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: StudioSpacing.xs),
                             Text(
                               l10n.studioArtStepEditSubtitle,
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -477,20 +478,18 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(message),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(onPressed: onRetry, child: Text(retryLabel)),
-            ),
-          ],
-        ),
+    return StudioCard(
+      padding: const EdgeInsets.all(StudioSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(message),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(onPressed: onRetry, child: Text(retryLabel)),
+          ),
+        ],
       ),
     );
   }
@@ -600,7 +599,7 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
           if (detail != null && detail!.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               detail!,
               style: theme.textTheme.bodySmall?.copyWith(

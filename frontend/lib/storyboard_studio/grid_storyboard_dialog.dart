@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../design_system/tokens.dart';
 
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
@@ -38,13 +40,13 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
           return StudioAlertDialog(
             title: Text(l10n.studioGridStoryboardDialogTitle),
             content: SizedBox(
-              width: 420,
+              width: studioConstrainedDialogWidth(context, maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(l10n.studioGridStoryboardDialogSubtitle(shotCount)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -56,7 +58,7 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: TextField(
                           controller: colsCtrl,
@@ -68,7 +70,7 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   TextField(
                     controller: promptCtrl,
                     maxLines: 3,

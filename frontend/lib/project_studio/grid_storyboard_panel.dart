@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/tokens.dart';
 
 import '../design_system/components/studio_primary_button.dart';
 import '../l10n/app_localizations.dart';
@@ -23,7 +24,7 @@ class GridStoryboardPanel extends StatelessWidget {
         final actionChildren = <Widget>[
           if (busy)
             const Padding(
-              padding: EdgeInsets.only(right: 12),
+              padding: EdgeInsets.only(right: StudioSpacing.sm),
               child: SizedBox(
                 width: 20,
                 height: 20,
@@ -45,7 +46,7 @@ class GridStoryboardPanel extends StatelessWidget {
                 l10n.studioGridStoryboardHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,

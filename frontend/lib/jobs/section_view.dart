@@ -215,7 +215,7 @@ class JobsSectionView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                      if (i > 0) const SizedBox(height: 4),
+                      if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         detailLines[i],
                         maxLines: 3,
@@ -310,7 +310,7 @@ class JobsSectionView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                    if (i > 0) const SizedBox(height: 4),
+                    if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Text(
                       detailLines[i],
                       maxLines: 3,
@@ -349,7 +349,7 @@ class JobsSectionView extends StatelessWidget {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -468,7 +468,7 @@ class JobsSectionView extends StatelessWidget {
           tooltip: l10n.jobsPrefsTooltip,
         ),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: StudioSpacing.sm),
       if (studioPresentation)
         StudioCollapsibleFilterPanel(
           child: StudioFilterRow(
@@ -535,7 +535,7 @@ class JobsSectionView extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: 16),
           _buildStudioHeader(context, l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           if (model.jobsLoadState == StudioLoadState.error &&
               model.jobsLastError != null)
             StudioApiErrorCallout(
@@ -635,7 +635,7 @@ class JobsSectionView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             controller: model.jobIdController,
             onChanged: callbacks.onJobIdChanged,
@@ -674,7 +674,7 @@ class JobsSectionView extends StatelessWidget {
             ),
           ],
           if (model.jobs != null) ...<Widget>[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             _buildJobList(
               context,
               visibleJobs: _visibleJobs(),

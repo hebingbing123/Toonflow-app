@@ -23,7 +23,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
           return StudioAlertDialog(
             title: Text(l10n.projectEditorScriptsBatchAddTitle),
             content: SizedBox(
-              width: 420,
+              width: studioConstrainedDialogWidth(context, maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

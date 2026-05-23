@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design_system/studio_typography.dart';
 import '../design_system/components/studio_decorative_icon.dart';
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -624,7 +627,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     if (_loadingHistory) {
       items.add(
         const Padding(
-          padding: EdgeInsets.all(12),
+          padding: EdgeInsets.all(StudioSpacing.sm),
           child: Center(
             child: SizedBox(
               width: 18,
@@ -676,16 +679,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
     if (items.isEmpty) {
       items.add(
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child: Text(
-            queryLen >= _minQueryLength
-                ? l10n.globalSearchNoPreviewHint
-                : l10n.globalSearchMinCharsHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: tokens.textMuted,
-            ),
-          ),
+        StudioEmptyState(
+          title: queryLen >= _minQueryLength
+              ? l10n.globalSearchNoPreviewHint
+              : l10n.globalSearchMinCharsHint,
+          variant: StudioEmptyStateVariant.noResults,
+          weight: StudioEmptyStateWeight.quiet,
         ),
       );
     }
@@ -742,13 +741,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                 constraints: const BoxConstraints(maxHeight: 440),
                 decoration: BoxDecoration(
                   color: tokens.bgElevated.withValues(alpha: 0.98),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   border: Border.all(
                     color: tokens.primary.withValues(alpha: 0.38),
                   ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.38),
+                      color: studioShadowColor(context, alpha: 0.38),
                       blurRadius: 24,
                       offset: const Offset(0, 12),
                     ),
@@ -767,10 +766,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       ),
                       child: ListView(
                         padding: EdgeInsets.fromLTRB(
-                          4,
-                          widget.titleBarDense ? 6 : 4,
-                          4,
-                          4,
+                          StudioLayoutSpacing.titleTight,
+                          widget.titleBarDense
+                              ? StudioLayoutSpacing.microGap
+                              : StudioLayoutSpacing.titleTight,
+                          StudioLayoutSpacing.titleTight,
+                          StudioLayoutSpacing.titleTight,
                         ),
                         shrinkWrap: true,
                         children: listChildren,
@@ -1070,28 +1071,27 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     StudioTokens tokens,
   ) {
     const barHeight = 30.0;
-    const fontSize = 13.0;
+    final typography = StudioTypography.of(context);
     const fieldRadius = 8.0;
-    const iconGap = 8.0;
-    final hintColor = tokens.textSecondary.withValues(alpha: 0.86);
+    const iconGap = StudioSpacing.xs;
     final textColor = tokens.textPrimary.withValues(alpha: 0.92);
     final iconColor = tokens.textSecondary.withValues(alpha: 0.88);
     final fieldBorder = _focusNode.hasFocus
         ? tokens.accent.withValues(alpha: 0.55)
         : tokens.surfaceHighlight.withValues(alpha: 0.4);
-    const fieldContentPadding = EdgeInsets.fromLTRB(0, 8, 0, 7);
-    final hintStyle = TextStyle(
-      fontSize: fontSize,
-      color: hintColor,
+    const fieldContentPadding = EdgeInsets.symmetric(vertical: StudioSpacing.xs);
+    final hintStyle = (studioHintStyle(context) ?? const TextStyle()).copyWith(
+      fontSize: typography.body,
       fontWeight: FontWeight.w500,
-      height: 1.0,
+      height: 1.2,
+      color: tokens.textSecondary.withValues(alpha: 0.86),
     );
     final textStyle =
         (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-      fontSize: fontSize,
+      fontSize: typography.body,
       color: textColor,
       fontWeight: FontWeight.w500,
-      height: 1.0,
+      height: 1.2,
     );
 
     Widget searchGlyph({required Color color}) {
@@ -1329,7 +1329,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     size: iconSize,
                     fill: titleBarDense ? 0.15 : 0.0,
                     color: _canSearch
-                        ? Colors.white
+                        ? theme.colorScheme.onPrimary
                         : (titleBarDense
                               ? mutedIconColor
                               : tokens.textMuted.withValues(alpha: 0.35)),
@@ -1341,8 +1341,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             alpha: titleBarDense ? 0.82 : 1.0,
                           )
                         : Colors.transparent,
-                    foregroundColor:
-                        _canSearch ? Colors.white : tokens.textMuted,
+                    foregroundColor: _canSearch
+                        ? theme.colorScheme.onPrimary
+                        : tokens.textMuted,
                   ),
                   padding: EdgeInsets.all(titleBarDense ? 5 : (compact ? 6 : 8)),
                   constraints: BoxConstraints(

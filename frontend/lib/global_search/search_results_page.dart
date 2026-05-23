@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -936,7 +937,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                       child: Align(
                         alignment: Alignment.centerLeft,
-                        child: Chip(
+                        child: StudioChip(
                           label: Text(
                             l10n.globalSearchTimeChip(
                               _filters.timeFrom != null
@@ -972,7 +973,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             ResultType.novel,
                             ResultType.novelEvent,
                           ])
-                            FilterChip(
+                            StudioFilterChip(
                               avatar: Icon(_getTypeIcon(type), size: 16),
                               label: Text(
                                 l10n.globalSearchTypeCountChipLabel(
@@ -995,7 +996,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         runSpacing: 8,
                         children: _templates
                             .map(
-                              (template) => ActionChip(
+                              (template) => StudioActionChip(
                                 label: Text(
                                   _searchViewTemplateLabel(l10n, template),
                                 ),
@@ -1070,7 +1071,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       height: 40,
                       decoration: BoxDecoration(
                         color: StudioTokens.of(context).borderSubtle,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                       ),
                     ),
                     const SizedBox(width: StudioSpacing.sm),

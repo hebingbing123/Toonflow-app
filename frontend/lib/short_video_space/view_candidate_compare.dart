@@ -144,7 +144,7 @@ class _CandidateComparePanel extends StatelessWidget {
                 ),
                 if (!candidateComparePanelUi.loading &&
                     !candidateComparePanelUi.unavailable) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   if (candidateComparePanelUi.items.isEmpty)
                     StudioEmptyState.emptyData(
                       title: candidateComparePanelUi.headline,

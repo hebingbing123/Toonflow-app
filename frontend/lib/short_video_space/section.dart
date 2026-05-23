@@ -14,10 +14,12 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../native_bridge/native_bridge_bootstrap.dart';
 import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_decorative_icon.dart';
@@ -1139,7 +1141,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                 onRefresh: () => unawaited(_loadProjectOverview()),
               ),
             if (widget.embedScope == ShortVideoSpaceEmbedScope.full)
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
             ShortVideoSpaceView(
         embedScope: widget.embedScope,
         publishSectionKey: _publishSectionKey,

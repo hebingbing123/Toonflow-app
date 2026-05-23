@@ -254,7 +254,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
                                 for (var i = 0; i < detailLines.length; i++)
                                   ...<Widget>[
                                     if (i > 0)
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                                     Text(
                                       detailLines[i],
                                       maxLines: 3,
@@ -328,10 +328,10 @@ class TaskCenterSummaryPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(projectSummary, style: bodySmall),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioLayoutSpacing.titleTight),
         Text(taskSummary, style: bodySmall),
         if (taskCategoriesLine != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioLayoutSpacing.titleTight),
           Text(
             l10n.taskCenterCategoriesLine(taskCategoriesLine!),
             style: bodySmall,

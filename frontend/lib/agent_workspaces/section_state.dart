@@ -566,7 +566,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         workspaceUuidController: _effectiveWorkspaceUuidController,
       ),
       if (widget.showPaneSelector) ...<Widget>[
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         AgentWorkspacePaneSelector(
           selectedPane: _pane,
           onSelected: (AgentWorkspacePane nextPane) {
@@ -577,7 +577,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           },
         ),
       ],
-      const SizedBox(height: 12),
+      const SizedBox(height: 16),
       _buildPaneBody(context),
       const SizedBox(height: 24),
     ];

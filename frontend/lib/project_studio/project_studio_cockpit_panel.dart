@@ -358,7 +358,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
               color: tokens.textSecondary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           _CockpitActionRow(
             primaryAction: cockpit.primaryAction,
             secondaryActions: secondaryActions,
@@ -366,7 +366,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
           ),
           if (filtered.metrics.isNotEmpty ||
               filtered.starters.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             LayoutBuilder(
               builder: (context, constraints) {
                 const spacing = 10.0;
@@ -476,7 +476,7 @@ class _CockpitMetricTile extends StatelessWidget {
               color: tokens.textSecondary,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             metric.value,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -544,7 +544,7 @@ class _CockpitStarterTile extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               starter.detail,
               maxLines: 2,

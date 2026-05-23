@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -168,33 +171,60 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   bool get _quotaRequiresValue =>
       _quotaAction == AdminQuotaOverrideActionV1.set;
 
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration:
+          studioInsetPanelDecoration(
+            context,
+            backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+          ).copyWith(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: studioShadowColor(context, alpha: 0.12),
+                blurRadius: 10,
+                spreadRadius: -8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              l10n.adminConsoleTitle,
+              style: studioPaneTitleStyle(context),
+            ),
+            const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+            Text(
+              l10n.adminConsoleIntro,
+              style: studioSectionIntroStyle(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final theme = Theme.of(context);
     final result = widget.controller.searchResult;
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.adminConsoleTitle, style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            l10n.adminConsoleIntro,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: StudioTokens.of(context).textSecondary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: studioPanelBorderColor(context)),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: StudioCollapsibleFilterPanel(
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildStudioHeader(context, l10n),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            DecoratedBox(
+              decoration: studioInsetPanelDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioSpacing.sm),
+                child: StudioCollapsibleFilterPanel(
               title: l10n.adminConsoleSearchLabel,
               subtitle: _searchController.text.trim().isNotEmpty
                   ? _searchController.text.trim()
@@ -236,11 +266,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     ),
                 ],
               ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: StudioLayoutSpacing.stackMedium),
-          if (result != null) ...[
-            _buildSearchGroup(
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            if (result != null) ...<Widget>[
+              _buildSearchGroup(
               context,
               title: l10n.adminConsoleGroupUsers,
               emptyText: l10n.adminConsoleEmptyUsers,
@@ -248,7 +279,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   .map((item) => _userHitTile(context, item))
                   .toList(growable: false),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioLayoutSpacing.insetDense),
             _buildSearchGroup(
               context,
               title: l10n.adminConsoleGroupWorkspaces,
@@ -257,7 +288,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   .map((item) => _workspaceHitTile(context, item))
                   .toList(growable: false),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioLayoutSpacing.insetDense),
             _buildSearchGroup(
               context,
               title: l10n.adminConsoleGroupProjects,
@@ -266,7 +297,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   .map((item) => _projectHitTile(context, item))
                   .toList(growable: false),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioLayoutSpacing.insetDense),
             _buildSearchGroup(
               context,
               title: l10n.adminConsoleGroupJobs,
@@ -276,16 +307,27 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   .toList(growable: false),
             ),
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            ],
+            if (widget.controller.loadingDetail)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: StudioLayoutSpacing.stackMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    StudioSkeleton(height: 18),
+                    SizedBox(height: StudioSpacing.sm),
+                    StudioSkeleton(height: 120),
+                  ],
+                ),
+              )
+            else if (widget.controller.userDetail != null)
+              _buildUserDetail(context, widget.controller.userDetail!)
+            else if (widget.controller.workspaceDetail != null)
+              _buildWorkspaceDetail(context, widget.controller.workspaceDetail!)
+            else if (widget.controller.projectDetail != null)
+              _buildProjectDetail(context, widget.controller.projectDetail!),
           ],
-          if (widget.controller.loadingDetail)
-            const Center(child: CircularProgressIndicator())
-          else if (widget.controller.userDetail != null)
-            _buildUserDetail(context, widget.controller.userDetail!)
-          else if (widget.controller.workspaceDetail != null)
-            _buildWorkspaceDetail(context, widget.controller.workspaceDetail!)
-          else if (widget.controller.projectDetail != null)
-            _buildProjectDetail(context, widget.controller.projectDetail!),
-        ],
+        ),
       ),
     );
   }
@@ -296,27 +338,24 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     required String emptyText,
     required List<Widget> children,
   }) {
-    final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          if (children.isEmpty)
-            StudioEmptyState.emptyData(
-              title: emptyText,
-              icon: Icons.manage_search_outlined,
-            )
-          else
-            ...children,
-        ],
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioSpacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(title, style: studioCardTitleStyle(context)),
+            const SizedBox(height: StudioSpacing.xs),
+            if (children.isEmpty)
+              StudioEmptyState.emptyData(
+                title: emptyText,
+                icon: Icons.manage_search_outlined,
+              )
+            else
+              ...children,
+          ],
+        ),
       ),
     );
   }
@@ -503,7 +542,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleStatusActive),
               selected: _operationalStatus == AdminOperationalStatusV1.active,
               onSelected: (_) {
@@ -513,7 +552,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleStatusSuspended),
               selected:
                   _operationalStatus == AdminOperationalStatusV1.suspended,
@@ -546,7 +585,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             hintText: l10n.adminConsoleInternalNoteHint,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.adminConsoleDailyQuotaOverrideTitle,
           style: theme.textTheme.titleSmall,
@@ -567,7 +606,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleQuotaActionPreserve),
               selected: _quotaAction == AdminQuotaOverrideActionV1.preserve,
               onSelected: (_) {
@@ -576,7 +615,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleQuotaActionClear),
               selected: _quotaAction == AdminQuotaOverrideActionV1.clear,
               onSelected: (_) {
@@ -585,7 +624,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleQuotaActionSet),
               selected: _quotaAction == AdminQuotaOverrideActionV1.set,
               onSelected: (_) {
@@ -612,7 +651,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
           onPressed: widget.controller.savingGovernance
               ? null
@@ -776,7 +815,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              ChoiceChip(
+              StudioChoiceChip(
                 label: Text(l10n.adminConsoleLifecyclePreserve),
                 selected:
                     _workspaceLifecycle ==
@@ -788,7 +827,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   });
                 },
               ),
-              ChoiceChip(
+              StudioChoiceChip(
                 label: Text(l10n.adminConsoleLifecycleArchive),
                 selected:
                     _workspaceLifecycle ==
@@ -800,7 +839,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   });
                 },
               ),
-              ChoiceChip(
+              StudioChoiceChip(
                 label: Text(l10n.adminConsoleLifecycleRestore),
                 selected:
                     _workspaceLifecycle ==
@@ -825,7 +864,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionPreserve),
               selected:
                   _workspaceOpsNoteAction ==
@@ -837,7 +876,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionClear),
               selected:
                   _workspaceOpsNoteAction ==
@@ -848,7 +887,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionSet),
               selected:
                   _workspaceOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set,
@@ -872,7 +911,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 : l10n.adminConsoleInternalNoteBodyEditableHint,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
           onPressed: widget.controller.savingGovernance
               ? null
@@ -937,7 +976,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 ),
               ),
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleRoleMember),
               selected:
                   _workspaceMemberRole == AdminWorkspaceMemberRoleV1.member,
@@ -947,7 +986,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleRoleAdmin),
               selected:
                   _workspaceMemberRole == AdminWorkspaceMemberRoleV1.admin,
@@ -975,7 +1014,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         ...detail.members.map((member) {
           final isOwner = member.role == 'owner';
           return Padding(
@@ -1099,7 +1138,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           ...detail.members
               .where((member) => member.role != 'owner')
               .map(
@@ -1151,17 +1190,17 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            Chip(
+            StudioChip(
               label: Text(
                 l10n.adminConsoleRoleCountOwner(breakdown['owner'] ?? 0),
               ),
             ),
-            Chip(
+            StudioChip(
               label: Text(
                 l10n.adminConsoleRoleCountAdmin(breakdown['admin'] ?? 0),
               ),
             ),
-            Chip(
+            StudioChip(
               label: Text(
                 l10n.adminConsoleRoleCountMember(breakdown['member'] ?? 0),
               ),
@@ -1207,26 +1246,26 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     '#${project.numericId} ${project.name ?? ''}',
                     style: theme.textTheme.bodySmall,
                   ),
-                  Chip(label: Text(studioAdminAclModeLabel(l10n, project.aclMode))),
-                  Chip(
+                  StudioChip(label: Text(studioAdminAclModeLabel(l10n, project.aclMode))),
+                  StudioChip(
                     label: Text(
                       l10n.adminConsoleExplicitAclCount(
                         project.explicitAclCount,
                       ),
                     ),
                   ),
-                  Chip(
+                  StudioChip(
                     label: Text(
                       l10n.adminConsoleEditorCount(project.editorCount),
                     ),
                   ),
-                  Chip(
+                  StudioChip(
                     label: Text(
                       l10n.adminConsoleViewerCount(project.viewerCount),
                     ),
                   ),
                   if (project.archivedAt != null)
-                    Chip(label: Text(l10n.teamWorkspaceArchivedBadge)),
+                    StudioChip(label: Text(l10n.teamWorkspaceArchivedBadge)),
                   TextButton(
                     onPressed: () =>
                         widget.controller.loadProject(project.projectId),
@@ -1265,7 +1304,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchLifecyclePreserve),
               selected:
                   _workspaceBatchLifecycle ==
@@ -1277,7 +1316,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchLifecycleArchive),
               selected:
                   _workspaceBatchLifecycle ==
@@ -1289,7 +1328,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchLifecycleRestore),
               selected:
                   _workspaceBatchLifecycle ==
@@ -1308,7 +1347,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchNotePreserve),
               selected:
                   _workspaceBatchOpsNoteAction ==
@@ -1320,7 +1359,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchNoteClear),
               selected:
                   _workspaceBatchOpsNoteAction ==
@@ -1332,7 +1371,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchNoteSet),
               selected:
                   _workspaceBatchOpsNoteAction ==
@@ -1358,7 +1397,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 : l10n.adminConsoleBatchNoteBodyEditableHint,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
           onPressed: widget.controller.savingBatchGovernance
               ? null
@@ -1573,7 +1612,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleLifecyclePreserve),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.preserve,
@@ -1583,7 +1622,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleLifecycleArchive),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.archive,
@@ -1593,7 +1632,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleLifecycleRestore),
               selected:
                   _projectLifecycle == AdminProjectLifecycleActionV1.restore,
@@ -1615,7 +1654,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionPreserve),
               selected:
                   _projectOpsNoteAction ==
@@ -1627,7 +1666,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionClear),
               selected:
                   _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.clear,
@@ -1637,7 +1676,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 });
               },
             ),
-            ChoiceChip(
+            StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionSet),
               selected:
                   _projectOpsNoteAction == AdminWorkspaceOpsNoteActionV1.set,
@@ -1661,7 +1700,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 : l10n.adminConsoleInternalNoteBodyEditableHint,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
           onPressed: widget.controller.savingGovernance
               ? null
@@ -1796,10 +1835,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1810,12 +1849,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             spacing: 8,
             runSpacing: 8,
             children: chips
-                .map((item) => Chip(label: Text(item)))
+                .map((item) => StudioChip(label: Text(item)))
                 .toList(growable: false),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           ...sections
-              .expand((widget) => [widget, const SizedBox(height: 12)])
+              .expand((widget) => [widget, const SizedBox(height: StudioSpacing.sm)])
               .toList()
             ..removeLast(),
         ],
@@ -1830,7 +1869,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       runSpacing: 8,
       children: rows.entries
           .map(
-            (entry) => Chip(
+            (entry) => StudioChip(
               label: Text(l10n.l10nBatch_078b5e4699(_fieldLabel(l10n, entry.key), entry.value)),
             ),
           )

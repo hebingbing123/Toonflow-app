@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/tokens.dart';
@@ -16,7 +17,7 @@ TextStyle? agentWorkspaceFieldTextStyle(BuildContext context) {
 
 InputBorder _agentFieldBorder(StudioTokens tokens, {Color? focus}) {
   return OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
     borderSide: BorderSide(
       color: focus ?? tokens.borderSubtle,
       width: focus != null ? 1.5 : 1,
@@ -159,7 +160,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 leftField,
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 rightField,
               ],
             );
@@ -168,7 +169,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(child: leftField),
-              const SizedBox(width: 12),
+              const SizedBox(width: StudioSpacing.sm),
               Expanded(child: rightField),
             ],
           );
@@ -232,7 +233,7 @@ class AgentWorkspacePaneSelector extends StatelessWidget {
       runSpacing: 8,
       children: tabs
           .map(
-            (entry) => ChoiceChip(
+            (entry) => StudioChoiceChip(
               label: Text(entry.$2),
               selected: selectedPane == entry.$1,
               onSelected: (bool selected) {

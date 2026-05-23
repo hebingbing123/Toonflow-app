@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/tokens.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
@@ -28,7 +29,7 @@ Future<bool> showStudioCostConfirmSheet({
               l10n.studioCostConfirmTitle,
               style: studioDialogTitleStyle(ctx),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.studioCostConfirmBody(
                 estimate.credits,
@@ -36,7 +37,7 @@ Future<bool> showStudioCostConfirmSheet({
                 l10n.studioPlanUsageEstimateDisclaimer,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: StudioSpacing.sm),
             StudioPrimaryButton(
               label: l10n.studioCostConfirmProceed,
               onPressed: () => Navigator.of(ctx).pop(true),

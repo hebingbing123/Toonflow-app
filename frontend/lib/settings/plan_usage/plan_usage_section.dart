@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -114,52 +114,76 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
     final quotaLabel = quota == null ? '∞' : quota.toString();
     final subStatus = subscriptionStatusLabel(l10n, me.user.subscriptionStatus);
 
+    final tokens = StudioTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            l10n.studioPlanUsageTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          StudioCard(
-            child: Column(
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            DecoratedBox(
+              decoration:
+                  studioInsetPanelDecoration(
+                    context,
+                    backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+                  ).copyWith(
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: studioShadowColor(context, alpha: 0.12),
+                        blurRadius: 10,
+                        spreadRadius: -8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+                child: Text(
+                  l10n.studioPlanUsageTitle,
+                  style: studioPaneTitleStyle(context),
+                ),
+              ),
+            ),
+            const SizedBox(height: StudioLayoutSpacing.stackMedium),
+            DecoratedBox(
+              decoration: studioInsetPanelDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
                   planTierDisplayName(l10n, planTier),
                   style: studioPageTitleStyle(context),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.studioPlanUsageBillingScope(me.billingScope),
                   style: studioSectionIntroStyle(context),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(l10n.studioPlanUsageJobsToday(jobsToday, quotaLabel)),
                 if (usage != null) ...<Widget>[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                   Text(l10n.studioPlanUsageEvents7d(usage.eventsLast7d)),
                 ],
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(l10n.studioPlanUsageSubscription(subStatus)),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.studioPlanUsageEstimateDisclaimer,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: StudioTokens.of(context).textSecondary,
-                  ),
+                  style: studioSectionIntroStyle(context),
                 ),
               ],
+                ),
+              ),
             ),
-          ),
-          if (widget.accessToken != null) ...<Widget>[
-            const SizedBox(height: 24),
-            SpendSummaryPanel(accessToken: widget.accessToken!),
+            if (widget.accessToken != null) ...<Widget>[
+              const SizedBox(height: StudioSpacing.md),
+              SpendSummaryPanel(accessToken: widget.accessToken!),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

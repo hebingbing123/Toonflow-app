@@ -99,7 +99,7 @@ class StudioToastOverlay {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Icon(icon ?? tone.icon, color: accent, size: 22),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: StudioSpacing.sm),
                           Expanded(
                             child: Text(
                               message,
@@ -125,7 +125,7 @@ class StudioToastOverlay {
                         ],
                       ),
                       if (actionLabel != null && onAction != null) ...<Widget>[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioSpacing.xs),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(

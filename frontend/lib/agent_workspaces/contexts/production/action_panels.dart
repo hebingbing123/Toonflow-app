@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
@@ -39,7 +41,7 @@ class ProductionWorkspacePromptTemplatesPanel extends StatelessWidget {
       runSpacing: 8,
       children: presets
           .map(
-            (AgentWorkspacePromptPreset preset) => ActionChip(
+            (AgentWorkspacePromptPreset preset) => StudioActionChip(
               label: Text(preset.label),
               onPressed: busy ? null : () => onSelectPrompt(preset.prompt),
             ),
@@ -134,7 +136,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final narrow = constraints.maxWidth < 720;
@@ -400,7 +402,7 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
           runSpacing: 8,
           children: templates
               .map(
-                (ProductionWorkspaceArgumentTemplateEntry entry) => ActionChip(
+                (ProductionWorkspaceArgumentTemplateEntry entry) => StudioActionChip(
                   label: Text(entry.label),
                   onPressed: busy
                       ? null
@@ -459,7 +461,7 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
           children: suggestions
               .map(
                 (ProductionWorkspaceArgumentSuggestion suggestion) =>
-                    ActionChip(
+                    StudioActionChip(
                       label: Text(suggestion.label),
                       onPressed: busy
                           ? null

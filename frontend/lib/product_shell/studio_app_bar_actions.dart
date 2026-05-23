@@ -203,7 +203,7 @@ class _UtilityBadge extends StatelessWidget {
         child: Text(
           '$value',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Colors.black,
+            color: tokens.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),

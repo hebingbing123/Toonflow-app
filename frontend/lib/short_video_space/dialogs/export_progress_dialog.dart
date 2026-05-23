@@ -396,7 +396,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         ],
       ),
       content: SizedBox(
-        width: 480,
+        width: studioConstrainedDialogWidth(context, maxWidth: 480),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,7 +408,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   size: 48,
                   color: theme.colorScheme.error,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   _errorMessage!,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -476,7 +476,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: Row(
                   children: [
@@ -500,12 +500,12 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
               // Error message
               if (_errorMessage != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   ),
                   child: Row(
                     children: [
@@ -529,7 +529,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
               ],
             ],
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             SelectableText(
               l10n.shortVideoSpaceDialogExportProgressTaskId(
                 widget.taskId,
@@ -539,7 +539,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 fontFamily: 'monospace',
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
               childrenPadding: const EdgeInsets.only(top: 4, bottom: 8),

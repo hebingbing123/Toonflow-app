@@ -3,6 +3,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -224,10 +225,10 @@ class _NovelCrawlLoginWebViewDialogState
                   border: Border.all(
                     color: studioPanelBorderColor(context).withValues(alpha: 0.35),
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   child: startUri == null
                       ? Center(
                           child: Text(

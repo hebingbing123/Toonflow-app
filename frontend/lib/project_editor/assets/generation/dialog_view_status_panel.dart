@@ -44,19 +44,19 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           Text(statusLine!, style: bodySmall),
         ],
         if (productionData != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             summarizeProductionAssetData(productionData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
         ],
         if (pollingData != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             summarizeAssetPollingStatuses(pollingData!.statuses, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -78,12 +78,12 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (materialData != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             summarizeWorkbenchAssetMaterialData(materialData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -100,12 +100,12 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (batchData != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             summarizeWorkbenchBatchGenerationData(batchData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -122,12 +122,12 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (promptPollingData != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             summarizeWorkbenchPromptPolling(promptPollingData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -306,7 +308,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -418,7 +420,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         StudioCollapsibleFilterPanel(
           title: l10n.teamWorkspaceAcceptInviteAction,
           subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
@@ -448,7 +450,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.teamWorkspaceShowArchivedToggle),
@@ -509,7 +511,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               border: Border.all(color: studioPanelBorderColor(context)),
             ),
             child: Column(
@@ -567,7 +569,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       if (isCurrent)
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: Chip(
+                          child: StudioChip(
                             label: Text(l10n.teamWorkspaceCurrentBadge),
                             backgroundColor: tokens.primarySoft,
                           ),

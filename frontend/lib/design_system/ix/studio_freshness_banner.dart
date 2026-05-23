@@ -46,7 +46,7 @@ class StudioFreshnessBanner extends StatelessWidget {
       padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         border: Border.all(color: textColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -56,7 +56,7 @@ class StudioFreshnessBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, color: textColor, size: 24),
-              const SizedBox(width: 12),
+              const SizedBox(width: StudioSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +67,7 @@ class StudioFreshnessBanner extends StatelessWidget {
                           : l10n.qualityReviewsFreshnessFreshTitle,
                       style: studioAccentBannerTitleStyle(context, textColor),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       l10n.qualityReviewsFreshnessStaleBody(
                         refreshedLabel,

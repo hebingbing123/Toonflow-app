@@ -80,7 +80,9 @@ import 'shell/job_queue_stats_card.dart';
 import 'shell/help_hub_support.dart';
 import 'shell/home_shell_mode.dart';
 import 'shell/navigation_controller.dart';
+import 'design_system/components/studio_chip.dart';
 import 'design_system/components/openflow_brand.dart';
+import 'design_system/layout_breakpoints.dart';
 import 'design_system/components/studio_model_cost_controls.dart';
 import 'design_system/ix/studio_cost_confirm_sheet.dart';
 import 'design_system/components/studio_dropdown_field.dart';
@@ -1531,9 +1533,12 @@ class _HomePageState extends State<HomePage> {
           const RiskyOperationConfirmPrefsOverflowMenu(),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: _buildHomePageSections(context, session),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(StudioSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: _buildHomePageSections(context, session),
+        ),
       ),
     );
   }

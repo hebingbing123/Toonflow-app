@@ -115,7 +115,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                     ],
                   ),
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.searchCtrl,
                 decoration: InputDecoration(
@@ -221,7 +221,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.batchDeleteIdsCtrl,
                 decoration: InputDecoration(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/tokens.dart';
 
 import '../../../design_system/components/studio_empty_state.dart';
 import '../../../design_system/components/studio_model_cost_controls.dart';
@@ -94,7 +95,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 l10n.scriptEditorEditImageWorkbenchIntro,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -120,7 +121,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.uploadCtrl,
                 minLines: 4,
@@ -258,7 +259,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: TextField(
                       controller: model.stepStatusCtrl,

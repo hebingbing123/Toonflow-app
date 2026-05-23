@@ -2,6 +2,8 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
+import 'tokens.dart';
+
 /// Stable desktop typography profiles for the Studio product shell.
 ///
 /// Desktop should not scale fonts continuously with viewport width. Instead we
@@ -59,7 +61,7 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     display: 28,
     buttonHeight: 40,
     buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
-    textButtonPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );
 
@@ -76,7 +78,7 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     label: 12,
     display: 30,
     buttonHeight: 42,
-    buttonPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.xs),
     inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );
@@ -95,8 +97,8 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     display: 32,
     buttonHeight: 44,
     buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.md, vertical: StudioSpacing.md),
-    textButtonPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-    inputPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+    textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
+    inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );
 
   static StudioTypography of(BuildContext context) {

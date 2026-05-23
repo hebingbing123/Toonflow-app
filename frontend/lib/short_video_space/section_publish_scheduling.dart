@@ -185,7 +185,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
                     title: Text(dlgL10n.shortVideoPublishScheduleCalendarIncludeScheduled),
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
-                  const SizedBox(height: StudioSpacing.xs),
+                  const SizedBox(height: 8),
                   Text(
                     overrideExisting
                         ? dlgL10n.shortVideoPublishScheduleCalendarHintOverrideAll

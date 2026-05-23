@@ -54,7 +54,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 ),
           child: Text(l10n.projectEditorNovelsWorkbenchDeleteButton),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           controller: generateIdsCtrl,
           decoration: InputDecoration(
@@ -188,7 +188,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           controller: batchDeleteIdsCtrl,
           decoration: InputDecoration(
@@ -219,7 +219,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 ),
           child: Text(l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteButton),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           controller: batchAdmissionIdsCtrl,
           decoration: InputDecoration(

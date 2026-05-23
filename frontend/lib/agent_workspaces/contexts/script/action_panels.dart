@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../../rust_api.dart';
@@ -85,7 +86,7 @@ class ScriptWorkspacePromptTemplatesPanel extends StatelessWidget {
       runSpacing: 8,
       children: presets
           .map(
-            (AgentWorkspacePromptPreset preset) => ActionChip(
+            (AgentWorkspacePromptPreset preset) => StudioActionChip(
               label: Text(preset.label),
               onPressed: busy ? null : () => onSelectPrompt(preset.prompt),
             ),
@@ -323,7 +324,7 @@ class ScriptWorkspaceArgumentTemplatesPanel extends StatelessWidget {
       runSpacing: 8,
       children: templates
           .map(
-            (ScriptWorkspaceArgumentTemplateEntry entry) => ActionChip(
+            (ScriptWorkspaceArgumentTemplateEntry entry) => StudioActionChip(
               label: Text(entry.label),
               onPressed: busy
                   ? null

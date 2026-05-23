@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -39,7 +40,7 @@ Future<void> openProjectAssetLinkDialog({
                   : dlgL10n.projectEditorAssetLinkDialogTitleLink,
             ),
             content: SizedBox(
-              width: 520,
+              width: studioConstrainedDialogWidth(dialogCtx, maxWidth: 520),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

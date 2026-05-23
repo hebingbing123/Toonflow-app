@@ -40,7 +40,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
           return StudioAlertDialog(
             title: Text(dlgL10n.projectEditorAssetCrudCreateTitle),
             content: SizedBox(
-              width: 520,
+              width: studioConstrainedDialogWidth(context, maxWidth: 520),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -164,7 +164,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
               return StudioAlertDialog(
                 title: Text(dlgL10n.projectEditorAssetCrudEditTitle),
                 content: SizedBox(
-                  width: 520,
+                  width: studioConstrainedDialogWidth(context, maxWidth: 520),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,

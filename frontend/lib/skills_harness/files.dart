@@ -72,7 +72,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
               return StudioAlertDialog(
                 title: Text(l10n.skillsHarnessVersionDialogTitle(path)),
                 content: SizedBox(
-                  width: 980,
+                  width: studioConstrainedDialogWidth(context, maxWidth: 980),
                   height: 720,
                   child: versions.isEmpty
                       ? Padding(
@@ -92,7 +92,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               ),
                               style: Theme.of(ctx).textTheme.bodySmall,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             SizedBox(
                               height: 180,
                               child: ListView.separated(
@@ -133,7 +133,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                 },
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             Text(
                               l10n.skillsHarnessDiffTitle,
                               style: Theme.of(ctx).textTheme.titleSmall,
@@ -174,7 +174,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                               ).textTheme.bodySmall,
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
+                                          const SizedBox(width: 16),
                                           Expanded(
                                             child: SelectableText(
                                               row.selectedLine,

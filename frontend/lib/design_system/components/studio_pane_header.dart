@@ -50,7 +50,7 @@ class StudioPaneHeader extends StatelessWidget {
           backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),
           foregroundColor: tokens.textSecondary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
             side: BorderSide(color: tokens.surfaceHighlight),
           ),
         ),

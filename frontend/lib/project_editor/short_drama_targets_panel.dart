@@ -3,6 +3,7 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -142,12 +143,12 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
             l10n.projectEditorShortDramaTargetsSectionTitle,
             style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectEditorShortDramaTargetsSectionBody,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.projectEditorShortDramaTargetsFlavorLabel,
             style: theme.textTheme.labelLarge,
@@ -174,7 +175,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
                     });
                   },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.projectEditorShortDramaTargetsAspectLabel,
             style: theme.textTheme.labelLarge,
@@ -207,7 +208,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
                     });
                   },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Align(
             alignment: Alignment.centerLeft,
             child: FilledButton.tonalIcon(

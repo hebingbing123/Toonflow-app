@@ -151,7 +151,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgSurface.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
@@ -209,7 +209,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
         children: <Widget>[
           // 第一行：面包屑导航
           leading,
-          const SizedBox(height: 10),
+          const SizedBox(height: StudioSpacing.sm),
           // 第二行：平台链标题 + 步骤标签
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

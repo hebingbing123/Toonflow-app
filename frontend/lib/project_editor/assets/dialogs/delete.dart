@@ -30,7 +30,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
             return StudioAlertDialog(
               title: Text(dlgL10n.projectEditorAssetDeleteDialogTitle),
               content: SizedBox(
-                width: 420,
+                width: studioConstrainedDialogWidth(context, maxWidth: 420),
                 child: StudioDropdownButtonFormField<int>(
                   initialValue: selectedAssetNumericId,
                   decoration: InputDecoration(

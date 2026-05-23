@@ -83,7 +83,7 @@ class StudioApiErrorCallout extends StatelessWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
             border: Border.all(
               color: errorColor.withValues(alpha: subtle ? 0.18 : 0.28),
             ),
@@ -128,10 +128,16 @@ class StudioApiErrorCallout extends StatelessWidget {
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                  subtle ? 10 : 12,
-                  subtle ? 10 : 12,
-                  10,
-                  subtle ? 10 : 12,
+                  subtle
+                      ? StudioLayoutSpacing.inlineGap
+                      : StudioLayoutSpacing.insetDense,
+                  subtle
+                      ? StudioLayoutSpacing.inlineGap
+                      : StudioLayoutSpacing.insetDense,
+                  StudioLayoutSpacing.inlineGap,
+                  subtle
+                      ? StudioLayoutSpacing.inlineGap
+                      : StudioLayoutSpacing.insetDense,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +199,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: StudioSpacing.xs),
                           Text(
                             message,
                             maxLines: showDiagnostic

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_primary_button.dart';
@@ -272,7 +273,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             children: qualityStatsRows!
                 .take(4)
                 .map(
-                  (row) => Chip(
+                  (row) => StudioChip(
                     label: Text(
                       l10n.qualityReviewsTargetTypeChip(
                         qualityTargetTypeLabel(row.targetType, l10n),
@@ -298,7 +299,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             children: stageGradeRows!
                 .take(4)
                 .map(
-                  (row) => Chip(
+                  (row) => StudioChip(
                     label: Text(
                       '${row.stage} A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount}',
                     ),
@@ -320,7 +321,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             children: badCaseStats!
                 .take(4)
                 .map(
-                  (row) => Chip(
+                  (row) => StudioChip(
                     label: Text(
                       l10n.qualityReviewsBadCaseChip(
                         row.badCaseCategory ?? l10n.qualityReviewsUncategorized,
@@ -516,7 +517,7 @@ class QualityReviewsListPreview extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   for (var i = 0; i < detailLines.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 4),
+                    if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Text(
                       detailLines[i],
                       maxLines: 3,

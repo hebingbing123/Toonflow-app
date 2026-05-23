@@ -770,7 +770,7 @@ class DeliveryModeBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: textColor),
-          const SizedBox(width: 4),
+          const SizedBox(width: StudioSpacing.xs),
           Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
@@ -1035,7 +1035,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(modeTitle, style: theme.textTheme.titleMedium),
                 const SizedBox(height: StudioSpacing.xs),
                 Text(modeSummary, style: studioMutedBodyMedium(context)),
@@ -1209,7 +1209,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Expanded(child: intro),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: StudioSpacing.sm),
                               readyChip,
                             ],
                           );
@@ -1376,7 +1376,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                     Text(nextStepTitle, style: theme.textTheme.titleMedium),
                     const SizedBox(height: StudioSpacing.xs),
                     Text(nextStepDetail, style: studioMutedBodyMedium(context)),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: StudioSpacing.sm),
                     FilledButton.icon(
                       onPressed: onNextStep,
                       icon: const Icon(Icons.arrow_forward_outlined),
@@ -1632,7 +1632,7 @@ class _StageFlowStrip extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(card.title, style: studioControlLabelStyle(context)),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       card.status,
                       maxLines: 1,
@@ -1719,7 +1719,7 @@ class _CandidateCompareCard extends StatelessWidget {
             Text(header, style: studioCardTitleStyle(context)),
             const SizedBox(height: 8),
             Text(item.readinessLine, style: theme.textTheme.bodySmall),
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               item.qualityLine,
               style: theme.textTheme.bodySmall?.copyWith(color: muted),
@@ -1756,7 +1756,7 @@ class _CandidateCompareCard extends StatelessWidget {
                 ),
                 style: theme.textTheme.labelMedium,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 item.liveActionReferenceShotUrls.take(2).join('\n'),
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
@@ -1768,7 +1768,7 @@ class _CandidateCompareCard extends StatelessWidget {
                 l10n.shortVideoCandidateCurrentVideo,
                 style: theme.textTheme.labelMedium,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               SelectableText(
                 item.selectedVideoUrl!,
                 style: theme.textTheme.bodySmall,
@@ -1780,7 +1780,7 @@ class _CandidateCompareCard extends StatelessWidget {
                 l10n.shortVideoCandidateVideoListTitle,
                 style: theme.textTheme.labelMedium,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               ...item.candidateVideoUrls.map((url) {
                 final isCurrent =
                     url.trim() == (item.selectedVideoUrl ?? '').trim();
@@ -1918,7 +1918,7 @@ class _ReadinessFlowNode extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: fill,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           border: Border.all(color: border),
         ),
         child: Padding(
@@ -1988,7 +1988,7 @@ class _WritebackStatusChip extends StatelessWidget {
             size: 14,
             color: onColor,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: StudioSpacing.xs),
           Flexible(
             child: Text(
               line,

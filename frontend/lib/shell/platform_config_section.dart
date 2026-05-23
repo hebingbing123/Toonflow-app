@@ -410,7 +410,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -456,9 +456,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             StudioSkeleton(height: 18),
-            SizedBox(height: StudioSpacing.sm),
+            SizedBox(height: 16),
             StudioSkeleton(height: 48),
-            SizedBox(height: StudioSpacing.sm),
+            SizedBox(height: 16),
             StudioSkeleton(height: 48),
           ],
         ),
@@ -482,14 +482,14 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           children: <Widget>[
             Text(title, style: studioCardTitleStyle(context)),
             if (intro != null) ...<Widget>[
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioLayoutSpacing.titleTight),
               Text(intro, style: studioSectionIntroStyle(context)),
             ],
             if (stateLine != null) ...<Widget>[
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioLayoutSpacing.titleTight),
               Text(stateLine, style: studioSectionIntroStyle(context)),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             child,
           ],
         ),
@@ -685,12 +685,12 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                     SelectableText(
                       'scope=${_response!.scope} · schema=v${_response!.schemaVersion}',
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioLayoutSpacing.titleTight),
                     SelectableText(
                       'plan_tier=${_response!.planTier} · has_plan_override=${_response!.hasPlanOverride}',
                     ),
                     if (workspace != null) ...<Widget>[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                       SelectableText(
                         'current_workspace=${workspace.name} (${workspace.workspaceType}) · role=${workspace.role} · can_manage_override=${workspace.canManageOverride}',
                       ),
@@ -717,7 +717,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                     style: studioSectionIntroStyle(context),
                   ),
                   if (_response!.planOverride != null) ...<Widget>[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     _buildToggleEditor(
                       l10n: l10n,
                       draft: _response!.planOverride!,

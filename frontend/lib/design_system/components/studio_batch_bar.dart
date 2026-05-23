@@ -22,7 +22,7 @@ class StudioBatchBar extends StatelessWidget {
     return Material(
       elevation: 8,
       color: tokens.bgElevated,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.inlineGap),
         child: Row(

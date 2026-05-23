@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_card.dart';
@@ -207,7 +208,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 ),
                 const SizedBox(height: StudioLayoutSpacing.inlineGap),
                 StudioDialogInsetPanel(lines: statusLines),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 StudioFilterRow(
                   wideLayout: StudioFilterWideLayout.toolbarRow,
                   wideBreakpoint: 480,
@@ -287,7 +288,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     for (final item in _shortVideoProductionPhaseFilterItems(
                       l10n,
                     ))
-                      FilterChip(
+                      StudioFilterChip(
                         label: Text(item.label),
                         selected:
                             model.productionPhaseCtrl.text.trim() == item.key,
@@ -307,7 +308,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     children: model.categories
                         .take(6)
                         .map(
-                          (row) => ActionChip(
+                          (row) => StudioActionChip(
                             label: Text(row.taskClass),
                             onPressed: () =>
                                 callbacks.onPickCategory(row.taskClass),
@@ -317,7 +318,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
                 if (model.jobs.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Text(
                     l10n.taskCenterJobsCount(model.jobs.length),
                     style: studioControlLabelStyle(context),
@@ -453,7 +454,7 @@ class _WorkbenchDialogSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           child,
         ],
       ),
@@ -541,7 +542,7 @@ class _WorkbenchJobRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(title, style: studioControlLabelStyle(context)),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioLayoutSpacing.titleTight),
                         SelectableText(
                           subtitleLines.join('\n'),
                           style: studioHintStyle(context)?.copyWith(
@@ -655,14 +656,14 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
             style: small?.copyWith(color: muted),
           ),
           if (domainLink != null && domainLinkHandler != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioLayoutSpacing.titleTight),
             TextButton(
               onPressed: () => domainLinkHandler(domainLink),
               child: Text(_domainDeepLinkLabel(l10n, domainLink)),
             ),
           ],
           if (link != null && deepLinkHandler != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioLayoutSpacing.titleTight),
             Wrap(
               spacing: 4,
               runSpacing: 0,

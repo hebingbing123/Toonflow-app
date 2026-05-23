@@ -59,15 +59,15 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             continuityCtrl: continuityCtrl,
             dialogState: dialogState,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ProjectMembersPanel(
             accessToken: token,
             projectId: p.id,
             workspaceId: p.workspaceId ?? detail.project.workspaceId,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ProjectAuditPanel(accessToken: token, projectId: p.id),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildProjectEditorNovelsAndEventsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -75,7 +75,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             p: p,
             dialogState: dialogState,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildProjectEditorAssetsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -84,7 +84,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
             scriptList: scriptList,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildProjectEditorScriptsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -93,7 +93,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
             scriptList: scriptList,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildProjectEditorPublishSection(ctx: ctx, token: token, p: p),
         ],
       ),
@@ -117,7 +117,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             l10n.projectEditorPublishSectionTitle,
             style: Theme.of(ctx).textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             l10n.projectEditorPublishSectionBody,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(

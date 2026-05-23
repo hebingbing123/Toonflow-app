@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
 import '../rust_api.dart';
 
 /// Widget for managing benchmark promotion gate decisions
@@ -70,7 +71,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             TextField(
               controller: gateVariantIdController,
               decoration: InputDecoration(
@@ -119,7 +120,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
               child: Text(l10n.benchmarkActionSubmitGateDecision),
             ),
             if (gateSummary != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.benchmarkGateAssessmentsSummary(
                   gateSummary!.assessments.length,
@@ -138,7 +139,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
               ),
             ],
             if (trends != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(l10n.benchmarkTrendsDataSummary(trends!.weeks.length)),
               const SizedBox(height: StudioSpacing.xs),
               ...trends!.weeks.map(

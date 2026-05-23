@@ -156,15 +156,15 @@ extension _ShortVideoSpaceSectionCharactersExtension
               final emotion =
                   (voice['emotion'] as String? ?? voice['style'] as String? ?? '')
                       .trim();
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Padding(
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: StudioCard(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(character.name, style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         l10n.shortVideoCharactersVoiceSummary(
                           provider.isEmpty ? '—' : provider,
@@ -204,7 +204,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
               );
             }),
           if ((_charactersStatusLine ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: StudioSpacing.xs),
+            const SizedBox(height: 8),
             Text(
               _charactersStatusLine!,
               style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),

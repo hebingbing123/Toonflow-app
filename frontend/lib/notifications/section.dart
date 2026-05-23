@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../l10n/billing_l10n_helpers.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_filter_row.dart';
@@ -159,7 +162,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -275,7 +278,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         l10n.notificationsCenterTitle,
                         style: theme.textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         l10n.notificationsCenterSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -300,7 +303,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       : const Icon(Icons.done_all_outlined),
                   label: Text(l10n.notificationsMarkAllRead),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: StudioSpacing.xs),
                 RiskyOperationConfirmPrefsOverflowMenu(
                   tooltip: l10n.notificationsRiskyPrefsTooltip,
                 ),
@@ -328,7 +331,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             _buildComplianceAdminPanel(context, theme, l10n),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           _buildNotificationListFilters(l10n),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           if (widget.controller.loading)
             widget.studioPresentation
                 ? _buildStudioLoadingBody(context)
@@ -487,7 +490,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
 
     return <Widget>[
-      FilterChip(
+      StudioFilterChip(
         selected: _unreadOnly,
         onSelected: (selected) {
           setState(() {
@@ -553,7 +556,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -631,7 +634,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
-            child: FilterChip(
+            child: StudioFilterChip(
               selected: _customTemplatesOnly,
               label: Text(l10n.notificationsComplianceCustomTemplatesOnly),
               onSelected: (selected) {
@@ -658,7 +661,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ActionChip(
+                          StudioActionChip(
                             label: Text(
                               l10n.notificationsComplianceTemplateChip(
                                 template.label,
@@ -731,7 +734,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          ActionChip(
+                          StudioActionChip(
                             label: Text(
                               l10n.notificationsComplianceSharedChip(
                                 template.label,
@@ -959,8 +962,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             .trim()
             .isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
-          Card(
-            margin: EdgeInsets.zero,
+          StudioCard(
+            padding: EdgeInsets.zero,
             child: ListTile(
               dense: true,
               leading: Icon(
@@ -1105,7 +1108,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               label: Text(l10n.notificationsComplianceMoreExportRecords),
             ),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         ...widget.controller.workspaceSharedComplianceAudit
             .take(6)
             .map(
@@ -1152,7 +1155,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ? theme.colorScheme.primary.withValues(alpha: 0.35)
               : studioPanelBorderColor(context),
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         color: item.isUnread
             ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.18)
             : null,
@@ -1179,7 +1182,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ],
         ),
         subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
+          padding: const EdgeInsets.only(top: StudioLayoutSpacing.microGap),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1859,7 +1862,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           return StudioAlertDialog(
             title: Text(dl10n.notificationsDialogImportTemplatesJsonTitle),
             content: SizedBox(
-              width: 560,
+              width: studioConstrainedDialogWidth(context, maxWidth: 560),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

@@ -84,27 +84,27 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(l10n.shortVideoTimelineSubtitlesTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: StudioSpacing.xs),
+        const SizedBox(height: 8),
         _SubtitleCueList(
           cues: _tracks.subtitles,
           onChanged: (next) => setState(() {
             _tracks = _tracks.copyWith(subtitles: next);
           }),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(l10n.shortVideoTimelineTransitionsTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: StudioSpacing.xs),
+        const SizedBox(height: 8),
         _TransitionList(
           transitions: _tracks.transitions,
           onChanged: (next) => setState(() {
             _tracks = _tracks.copyWith(transitions: next);
           }),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(l10n.shortVideoTimelineVoiceoverTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: StudioSpacing.xs),
+        const SizedBox(height: 8),
         _VoiceoverTrackPanel(
           clips: _tracks.voiceover,
           peaks: widget.timeline.voiceoverWaveformPeaks,
@@ -256,7 +256,7 @@ class _TransitionList extends StatelessWidget {
                 l10n.shortVideoTimelineTransitionBetweenShots(idx + 1, idx + 2),
                 style: Theme.of(context).textTheme.labelMedium,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               StudioDropdownButton<String>(
                 value: tr.type,
                 items: [

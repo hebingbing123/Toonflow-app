@@ -32,6 +32,7 @@ Preset configs (from repo root):
 | `.kiro/audit-config.yaml` | Full audit (static + runtime) |
 | `.kiro/audit-config-ci.yaml` | CI preset (spacing + typography, static, `--fail-on=high`) |
 | `.kiro/audit-config-quick.yaml` | Spacing + typography, static only |
+| `.kiro/audit-config-burn-down.yaml` | Full static inventory (local burn-down, `maxFindings: 10000`) |
 | `.kiro/audit-config-accessibility.yaml` | Accessibility + interactive elements |
 
 ### Run Full Audit (static + runtime fixtures)
@@ -80,6 +81,23 @@ dart run ui_audit:ui_audit --ci --fail-on=critical
 ```bash
 dart run ui_audit:ui_audit --incremental --static-only
 ```
+
+### Apply automated fixes
+
+```bash
+dart run ui_audit:ui_audit fix --report=.kiro/audit-reports/audit-<timestamp>.json --dry-run
+dart run ui_audit:ui_audit fix --report=.kiro/audit-reports/audit-<timestamp>.json
+```
+
+### Metrics and trends
+
+Each audit appends to `.kiro/audit-metrics/history.jsonl`.
+
+```bash
+dart run ui_audit:ui_audit report --trend
+```
+
+See also [docs/extension-guide.md](docs/extension-guide.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Configuration
 

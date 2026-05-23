@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../design_system/tokens.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_decorative_icon.dart';
@@ -91,7 +92,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
                 style: Theme.of(ctx).textTheme.bodyMedium,
               ),
               if (active.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 ...active.map(
                   (s) => Padding(
                     padding: const EdgeInsets.only(bottom: 6),
@@ -149,7 +150,7 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(dl10n.riskyPrefsResetBody),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 active.isEmpty
                     ? dl10n.riskyPrefsResetNoSavedLabel

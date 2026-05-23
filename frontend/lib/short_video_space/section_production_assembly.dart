@@ -1159,7 +1159,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             return StudioAlertDialog(
               title: Text(l10n.shortVideoSpaceProductionAssemblyBasicOpsTitle),
               content: SizedBox(
-                width: 760,
+                width: studioConstrainedDialogWidth(context, maxWidth: 760),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1167,7 +1167,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     Text(
                       l10n.shortVideoSpaceProductionAssemblyBasicOpsDescription,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       l10n.shortVideoSpaceProductionAssemblyBasicOpsNote,
                       style: Theme.of(ctx).textTheme.bodySmall,
@@ -1546,7 +1546,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   l10n.shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle,
                 ),
                 content: SizedBox(
-                  width: 760,
+                  width: studioConstrainedDialogWidth(context, maxWidth: 760),
                   height: 420,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2141,7 +2141,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       actualIndex + 1,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     paused
                         ? l10n.shortVideoSpaceProductionAssemblyStatusPaused
@@ -2149,7 +2149,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             item.selectedMediaKind,
                           ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(l10n.shortVideoSpaceProductionAssemblyDurationLabel),
@@ -2172,14 +2172,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   // 配音状态展示
                   Text(
                     '${item.voiceoverScriptReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady} · '
                     '${item.voiceoverAssetReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady}',
                   ),
                   if (item.voiceoverState.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
@@ -2195,7 +2195,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     ),
                   ],
                   if (item.voiceoverAudioUrl.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
@@ -2215,7 +2215,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   ],
                   if (item.voiceoverState == 'failed' &&
                       item.voiceoverError.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
@@ -2235,7 +2235,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ],
                     ),
                   ],
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     '${l10n.shortVideoSpaceProductionAssemblyMismatchCheckLabel}${subtitleMismatchLine(item)}',
                   ),
@@ -2434,7 +2434,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle,
             ),
             content: SizedBox(
-              width: 520,
+              width: studioConstrainedDialogWidth(context, maxWidth: 520),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -2447,7 +2447,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           .shortVideoSpaceProductionAssemblySubtitleStyleHint,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: bgmCtrl,
                     decoration: InputDecoration(

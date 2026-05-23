@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../design_system/tokens.dart';
 
 import '../design_system/components/studio_primary_button.dart';
 import '../l10n/app_localizations.dart';
@@ -93,7 +94,7 @@ class _StudioVideoStepPanelState extends State<StudioVideoStepPanel> {
           selected: <StudioVideoFrameMode>{_mode},
           onSelectionChanged: (s) => _saveMode(s.first),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         StudioPrimaryButton(
           label: l10n.studioStepOpenProduction,
           onPressed: widget.onOpenProduction,

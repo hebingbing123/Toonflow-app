@@ -189,7 +189,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
             return StudioAlertDialog(
               title: Text(dl10n.helpHubManageDialogTitle),
               content: SizedBox(
-                width: 720,
+                width: studioConstrainedDialogWidth(context, maxWidth: 720),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,13 +201,13 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 : dl10n.helpHubManageWorkspaceLocked),
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       if (canManageWorkspace)
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            FilterChip(
+                            StudioFilterChip(
                               label: Text(dl10n.helpHubTabPersonal),
                               selected: !activeIsWorkspace,
                               onSelected: (v) => setInner(() {
@@ -215,7 +215,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 errorText = '';
                               }),
                             ),
-                            FilterChip(
+                            StudioFilterChip(
                               label: Text(dl10n.helpHubTabWorkspace),
                               selected: activeIsWorkspace,
                               onSelected: (v) => setInner(() {
@@ -225,7 +225,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             ),
                           ],
                         ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _helpHubNewIdController,
                         decoration: InputDecoration(
@@ -269,7 +269,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       if (activeItems.isEmpty)
                         StudioEmptyState.emptyData(
                           title: dl10n.helpHubNoCustomInScope,
@@ -294,7 +294,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                           ctx,
                                         ).textTheme.titleSmall,
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                                       SelectableText(item.url),
                                     ],
                                   ),
@@ -467,7 +467,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               Expanded(
                 child: Text(
                   l10n.helpHubDocsTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: studioCardTitleStyle(context),
                 ),
               ),
               RiskyOperationConfirmPrefsOverflowMenu(
@@ -549,8 +549,8 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             item.title,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 4),
-                          Chip(
+                          const SizedBox(height: StudioLayoutSpacing.titleTight),
+                          StudioChip(
                             label: Text(
                               _helpHubCategoryLabelForSlug(
                                 _helpHubCategorySlug(item),
@@ -558,7 +558,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: StudioLayoutSpacing.titleTight),
                           SelectableText(item.url),
                           const SizedBox(height: 8),
                           Wrap(

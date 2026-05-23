@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
@@ -124,7 +125,7 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
                           (row.tokenEfficiencySampleCount ?? 0) >= 5)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: Chip(
+                          child: StudioChip(
                             label: Text(
                               tokenEfficiencyRoiLabel(
                                 l10n,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/tokens.dart';
@@ -101,9 +102,9 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
 
     return Material(
       color: tokens.bgSurface,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         onTap: () => context.go(
           '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
         ),
@@ -123,7 +124,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Chip(
+                  StudioChip(
                     label: Text(statusLabel),
                     labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: statusColor,
@@ -164,7 +165,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                         ],
                     icon: const Icon(Icons.rate_review_outlined, size: 20),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: StudioSpacing.xs),
                   Icon(
                     row.readyForGeneration
                         ? Icons.check_circle_outline
@@ -177,7 +178,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                 ],
               ),
               if (row.scriptNumericId != null) ...<Widget>[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.studioReviewPackScriptLine(row.scriptNumericId!),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(

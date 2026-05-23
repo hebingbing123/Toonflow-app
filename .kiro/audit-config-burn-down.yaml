@@ -1,0 +1,38 @@
+# Full inventory for UI/UX burn-down (local / scheduled only — not CI).
+audit:
+  projectPath: frontend/
+
+  include:
+    - lib/**/*.dart
+
+  exclude:
+    - lib/generated/**
+    - lib/**/*.g.dart
+    - lib/**/*.freezed.dart
+
+  categories:
+    - visualHierarchy
+    - spacing
+    - typography
+    - colorSystem
+    - interactiveElements
+    - emptyStates
+    - responsiveness
+    - componentConsistency
+    - accessibility
+
+  minimumSeverity: low
+
+  runtime:
+    enabled: false
+
+  output:
+    formats: [json, markdown]
+    directory: .kiro/audit-reports/
+    includeBeforeAfter: true
+    includeScreenshots: false
+
+  thresholds:
+    failOnCritical: false
+    failOnHigh: false
+    maxFindings: 10000

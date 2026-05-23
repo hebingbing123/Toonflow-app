@@ -204,7 +204,7 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -347,7 +347,7 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
           taskDetailUuidLine: widget.taskDetailUuidLine,
         ),
         if (widget.taskApiJobs != null) ...<Widget>[
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           TaskCenterJobsPreview(
             jobs: widget.taskApiJobs!,
             onSelectTaskJob: widget.onSelectTaskJob,

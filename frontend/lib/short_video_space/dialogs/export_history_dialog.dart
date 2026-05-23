@@ -618,7 +618,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               ? constraints.maxHeight
               : fallbackHeight;
           return SizedBox(
-            width: 800,
+            width: studioConstrainedDialogWidth(context, maxWidth: 800),
             height: height,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,7 +809,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: StudioTokens.of(context).accentSoft,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         ),
         child: Text(
           'Task ID: ${_focusedTaskId!}',
@@ -823,7 +823,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: StudioTokens.of(context).accentSoft,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         border: Border.all(
           color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.18),
         ),
@@ -853,7 +853,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   'Task ID: ${focused.taskId}',
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -950,7 +950,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryCreatedAt(
                 _formatDateTime(item.createdAt),
@@ -979,7 +979,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 style: theme.textTheme.bodySmall,
               ),
             if (structuredFailureLine != null || rawErrorLine != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -1008,7 +1008,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                             ),
                           if (rawErrorLine != null) ...[
                             if (structuredFailureLine != null)
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 8),
                             Text(
                               rawErrorLine,
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -1023,7 +1023,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 ),
               ),
             ],
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               l10n.shortVideoSpaceDialogExportHistorySettings(
                 getBitrateDisplayName(l10n, item.bitrate),

@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -105,7 +107,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     child: Text(l10n.projectEditorAssetHistoryClearFilter),
                   ),
                   ...const ['role', 'clip', 'props', 'scene'].map(
-                    (type) => ActionChip(
+                    (type) => StudioActionChip(
                       label: Text(type),
                       onPressed: model.loading
                           ? null
@@ -121,7 +123,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               if (model.assets.isEmpty)
                 model.loading
                     ? Text(
@@ -211,7 +213,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                   )
                 else if (model.selectedPreviewBytes != null)
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                     child: Image.memory(
                       model.selectedPreviewBytes!,
                       height: 180,

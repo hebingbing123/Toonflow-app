@@ -574,7 +574,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: StudioSpacing.sm),
                     ],
 
                     // 当前镜头进度条

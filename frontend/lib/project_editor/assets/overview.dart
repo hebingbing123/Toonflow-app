@@ -152,7 +152,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
                 l10n.projectEditorAssetsMainWorkbenchTitle,
                 style: theme.textTheme.titleSmall,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.projectEditorAssetsOverviewCardIntro,
                 style: studioHintStyle(context),

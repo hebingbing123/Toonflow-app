@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_model_picker.dart';
 import '../design_system/tokens.dart';
@@ -306,7 +307,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                       runSpacing: 6,
                       children: <Widget>[
                         for (final entry in inherited)
-                          Chip(
+                          StudioChip(
                             materialTapTargetSize:
                                 MaterialTapTargetSize.padded,
                             label: Text(
@@ -354,7 +355,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   tokens: tokens,
                   onOpenSettings: widget.onOpenGlobalModelVendorSettings,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
               ],
               ...slots.map((slot) {
                 final models = _modelsForSlot(slot);
@@ -375,7 +376,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                             ),
                           ),
                           if (effective != null)
-                            Chip(
+                            StudioChip(
                               label: Text(
                                 _sourceLabel(l10n, effective.source),
                                 style: Theme.of(context).textTheme.labelSmall,
@@ -400,10 +401,10 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
               }),
               if (_saving)
                 const Padding(
-                  padding: EdgeInsets.only(top: 4),
+                  padding: EdgeInsets.only(top: StudioSpacing.xs),
                   child: LinearProgressIndicator(minHeight: 2),
                 ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.studioModelRoutingPrimaryFootnote,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -445,7 +446,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
     return Material(
       color: tokens.bgSurface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         side: BorderSide(color: tokens.borderSubtle),
       ),
       clipBehavior: Clip.antiAlias,
@@ -481,7 +482,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           expanded
                               ? l10n.studioModelRoutingPrimarySubtitle

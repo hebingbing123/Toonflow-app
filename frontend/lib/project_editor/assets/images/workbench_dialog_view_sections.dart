@@ -55,7 +55,7 @@ List<Widget> buildAssetImagesWorkbenchSections(
     ),
     if (model.previewBytes != null)
       ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         child: Image.memory(
           model.previewBytes!,
           height: 160,

@@ -319,7 +319,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildM4Toolbar(l10n),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(l10n.shortVideoTimelineEffectApplyAll, style: theme.textTheme.labelMedium),
         _buildEffectPresetDropdown(
           l10n,
@@ -390,9 +390,9 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildM2M3TracksPanel(l10n, theme),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         ...widget.timeline.scripts.map((group) {
           return _TimelineScriptGroup(
             group: group,
@@ -606,7 +606,7 @@ class _TimelineShotCard extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           border: Border.all(color: studioPanelBorderColor(context)),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,7 +625,7 @@ class _TimelineShotCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall,
                 ),
               ),
-            const SizedBox(height: StudioSpacing.xs),
+            const SizedBox(height: 8),
             _TrimField(
               label: l10n.shortVideoTimelineTrimInMs,
               value: inMs,

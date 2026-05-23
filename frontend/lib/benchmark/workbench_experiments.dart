@@ -110,7 +110,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             TextField(
               controller: experimentNameController,
               decoration: InputDecoration(
@@ -210,7 +210,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                   ),
             ],
             if (experimentDetail != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.benchmarkExperimentDetailHeader(
                   experimentDetail!.experiment.name.trim().isEmpty
@@ -229,7 +229,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
               ),
             ],
             if (roiSummary != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.benchmarkRoiHeader(
                   roiSummary!.overallConclusionType,

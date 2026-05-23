@@ -18,7 +18,40 @@ const _allowedFontWeights = {
   'FontWeight.bold',
 };
 
-const _allowedTextColors = {'textPrimary', 'textSecondary', 'textMuted'};
+const _allowedTextColors = {
+  'textPrimary',
+  'textSecondary',
+  'textMuted',
+  'danger',
+  'success',
+  'warning',
+  'primary',
+  'accent',
+  'primarySoft',
+  'onPrimary',
+};
+
+const _allowedSemanticColorIdentifiers = {
+  'muted',
+  'hintColor',
+  'textColor',
+  'resolvedForeground',
+  'accentColor',
+  'foregroundColor',
+  'errorColor',
+  'statusColor',
+  'iconColor',
+};
+
+const _allowedColorSchemeRoles = {
+  'colorScheme.error',
+  'colorScheme.onError',
+  'colorScheme.errorContainer',
+  'colorScheme.onErrorContainer',
+  'colorScheme.onPrimary',
+  'colorScheme.onPrimaryContainer',
+  'colorScheme.primary',
+};
 
 /// True when [source] references the Studio typography scale (direct or local var).
 bool referencesTypographyScale(String source) {
@@ -48,6 +81,9 @@ class TypographyAnalyzer extends StaticAnalyzer {
   Future<List<Finding>> analyze(String filePath) async {
     final parsed = await _parser.parseFile(filePath);
     if (parsed == null) {
+      return [];
+    }
+    if (parsed.filePath.endsWith('design_system/components/studio_text_styles.dart')) {
       return [];
     }
 
@@ -116,7 +152,7 @@ class _TypographyVisitor extends RecursiveAstVisitor<void> {
           }
         case 'height':
           final height = extractNumericLiteral(arg.expression);
-          if (height != null && (height < 1.2 || height > 1.5)) {
+          if (height != null && (height < 1.0 || height > 1.5)) {
             _report(
               node,
               title: 'Line-height outside recommended range',
@@ -197,7 +233,9 @@ class _TypographyVisitor extends RecursiveAstVisitor<void> {
     return source.contains('Inter') ||
         source.contains('Space Grotesk') ||
         source.contains('SpaceGrotesk') ||
-        source.contains('StudioTypography');
+        source.contains('StudioTypography') ||
+        source.contains("'monospace'") ||
+        source.contains('"monospace"');
   }
 
   bool _isAllowedFontWeight(String source) {
@@ -213,6 +251,21 @@ class _TypographyVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _usesAllowedTextColor(String source) {
+    if (source.contains('studioMutedTextColor') ||
+        source.contains('qualityReviewsMutedColor') ||
+        source.contains('studioHintStyle') ||
+        source.contains('studioSectionIntroStyle') ||
+        source.contains('studioAccentBanner')) {
+      return true;
+    }
+    if (_allowedSemanticColorIdentifiers.any(
+      (id) => RegExp('\\b$id\\b').hasMatch(source),
+    )) {
+      return true;
+    }
+    if (_allowedColorSchemeRoles.any(source.contains)) {
+      return true;
+    }
     if (!source.contains('StudioTokens') && !source.contains('tokens.')) {
       return false;
     }

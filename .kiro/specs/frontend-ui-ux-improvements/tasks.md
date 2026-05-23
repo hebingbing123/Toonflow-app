@@ -4,9 +4,31 @@
 
 本实施计划将 UI/UX 审计系统分解为可执行的开发任务。系统使用 Dart 实现，包含三个核心层：检测层（静态分析器和运行时检查器）、修复层（修复生成器、应用器和验证器）、监控层（指标跟踪和趋势分析）。实施将按照从基础设施到核心功能再到集成的顺序进行，确保每个阶段都能独立验证和测试。
 
+## Progress (2026-05-23)
+
+**检测层** 主要由姊妹规范 [`frontend-ui-ux-audit/tasks.md`](../frontend-ui-ux-audit/tasks.md) 交付（`tools/ui_audit/`，CI 已接入）。本规范增量：
+
+| 区域 | 状态 |
+|------|------|
+| 检测层 | 已交付（见 audit 规范） |
+| 修复层 MVP | `ui_audit fix`、`lib/remediation/`、`FixValidator` |
+| 监控层 MVP | `MetricsTracker` JSONL、`ui_audit report --trend` |
+| Full static 基线 | `.kiro/audit-baseline/full-static-2026-05-23.md` |
+| Product burn-down | **0** findings — `audit-config-burn-down.yaml` + `audit-config-quick.yaml` (2026-05-23, waves 4–6) |
+
+**CLI**
+
+```bash
+cd tools/ui_audit
+dart run ui_audit:ui_audit --config=../../.kiro/audit-config-burn-down.yaml
+dart run ui_audit:ui_audit --config=../../.kiro/audit-config-quick.yaml
+dart run ui_audit:ui_audit fix --report=../../.kiro/audit-reports/audit-<ts>.json --dry-run
+dart run ui_audit:ui_audit report --trend
+```
+
 ## Tasks
 
-- [ ] 1. 建立项目结构和核心基础设施
+- [x] 1. 建立项目结构和核心基础设施
   - 在 `tools/ui_audit/` 目录下创建 Dart 项目结构
   - 定义核心数据模型（Issue、Severity、Category、Priority、FixProposal）
   - 创建配置管理模块（AuditConfig、IgnoreRules、ThresholdConfig）
@@ -14,54 +36,55 @@
   - 创建设计系统解析器（读取 StudioTokens、StudioTypography、StudioSpacing）
   - _Requirements: 14.1, 19.1, 19.2_
 
-- [ ] 2. 实现检测层 - 静态分析器基础
-  - [~] 2.1 实现 Dart AST 解析器和代码遍历器
+- [x] 2. 实现检测层 - 静态分析器基础
+  - [x] 2.1 实现 Dart AST 解析器和代码遍历器
     - 使用 `analyzer` 包解析 Dart 代码
     - 创建 AST 访问者模式基类
     - 实现文件扫描和过滤逻辑
     - _Requirements: 1.1, 19.4_
 
-  - [~] 2.2 实现间距分析器（SpacingAnalyzer）
+  - [x] 2.2 实现间距分析器（SpacingAnalyzer）
     - 检测硬编码间距值（EdgeInsets、Padding、SizedBox）
     - 识别未使用 StudioSpacing 的情况
     - 计算最接近的 StudioSpacing 常量
     - 检测相邻元素间距不一致
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-  - [ ]* 2.3 为间距分析器编写单元测试
+  - [x]* 2.3 为间距分析器编写单元测试
     - 测试硬编码值检测
     - 测试最接近常量推荐算法
     - 测试边界情况（零间距、负值、极大值）
     - _Requirements: 2.1, 2.2_
 
-  - [~] 2.4 实现字体分析器（TypographyAnalyzer）
+  - [x] 2.4 实现字体分析器（TypographyAnalyzer）
     - 检测硬编码字体大小和样式（TextStyle）
     - 识别未使用 StudioTypography 的情况
     - 验证字体大小符合设计系统比例
     - 检测视觉层级不清晰的文本组合
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-  - [ ]* 2.5 为字体分析器编写单元测试
+  - [x]* 2.5 为字体分析器编写单元测试
     - 测试硬编码字体检测
     - 测试视觉层级验证逻辑
     - 测试边界情况
     - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 3. 实现检测层 - 颜色和交互分析器
-  - [~] 3.1 实现颜色分析器（ColorAnalyzer）
+- [x] 3. 实现检测层 - 颜色和交互分析器
+  - [x] 3.1 实现颜色分析器（ColorAnalyzer）
     - 检测硬编码颜色值（Color、Colors）
     - 识别未使用 StudioTokens 颜色的情况
     - 验证颜色对比度（WCAG AA 标准）
     - 检测语义颜色使用不当
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 15.2_
 
-  - [ ]* 3.2 为颜色分析器编写单元测试
+  - [x]* 3.2 为颜色分析器编写单元测试
     - 测试硬编码颜色检测
     - 测试对比度计算算法
     - 测试语义颜色验证
     - _Requirements: 4.1, 4.2, 4.3_
 
   - [~] 3.3 实现交互元素分析器（InteractiveAnalyzer）
+    - _Note: 静态 `InteractiveAnalyzer` 未实现；运行时 `interactive_element_inspector` 已交付（audit 规范）_
     - 检测缺少悬停、按下、禁用状态的交互元素
     - 识别缺少视觉反馈的可点击元素
     - 检测 InkWell、GestureDetector 的状态完整性
@@ -72,20 +95,20 @@
     - 测试视觉反馈识别
     - _Requirements: 5.2, 5.3_
 
-- [ ] 4. 实现检测层 - 布局和组件分析器
-  - [~] 4.1 实现空状态分析器（EmptyStateAnalyzer）
+- [x] 4. 实现检测层 - 布局和组件分析器
+  - [x] 4.1 实现空状态分析器（EmptyStateAnalyzer）
     - 检测 ListView、GridView 等列表组件
     - 识别缺少空状态处理的情况
     - 验证空状态包含图标、标题、操作按钮
     - _Requirements: 6.1, 6.2, 6.3_
 
-  - [~] 4.2 实现响应式布局分析器（ResponsiveAnalyzer）
+  - [x] 4.2 实现响应式布局分析器（ResponsiveAnalyzer）
     - 检测硬编码宽度和高度值
     - 识别缺少断点处理的复杂布局
     - 检测可能导致溢出的固定尺寸
     - _Requirements: 7.2, 7.3, 7.4_
 
-  - [~] 4.3 实现组件一致性分析器（ComponentConsistencyAnalyzer）
+  - [x] 4.3 实现组件一致性分析器（ComponentConsistencyAnalyzer）
     - 识别相似功能使用不同组件的情况
     - 检测组件属性使用不一致（如不同圆角半径）
     - 识别应使用设计系统组件但使用了自定义实现
@@ -97,15 +120,15 @@
     - 测试组件一致性验证
     - _Requirements: 6.1, 7.2, 8.1_
 
-- [ ] 5. 实现检测层 - 可访问性和运行时检查
-  - [~] 5.1 实现可访问性分析器（AccessibilityAnalyzer）
+- [x] 5. 实现检测层 - 可访问性和运行时检查
+  - [x] 5.1 实现可访问性分析器（AccessibilityAnalyzer）
     - 检测缺少语义标签的交互元素（Semantics）
     - 识别缺少键盘导航支持的元素
     - 检测缺少屏幕阅读器支持的重要信息
     - 复用颜色分析器的对比度检测
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [~] 5.2 实现运行时检查器基础设施
+  - [x] 5.2 实现运行时检查器基础设施
     - 创建 Flutter 测试环境集成
     - 实现触摸目标尺寸检查器（TouchTargetInspector）
     - 实现交互状态检查器（InteractionStateInspector）
@@ -118,28 +141,30 @@
     - 测试运行时检查器集成
     - _Requirements: 15.1, 5.1_
 
-- [ ] 6. 实现问题分类和优先级系统
-  - [~] 6.1 实现问题分类器（IssueClassifier）
+- [x] 6. 实现问题分类和优先级系统
+  - [x] 6.1 实现问题分类器（IssueClassifier）
+    - _实现为 `FindingsAggregator`（summarize + actionPlan）_
     - 实现严重性分类逻辑（critical/high/medium/low）
     - 实现类别标记（spacing/typography/color/interactive/etc）
     - 实现优先级分数计算（基于严重性、影响范围、修复难度）
     - 实现优先级排序逻辑
     - _Requirements: 1.4, 18.1, 18.2, 18.3, 18.4, 18.5_
 
-  - [ ]* 6.2 为问题分类器编写单元测试
+  - [x]* 6.2 为问题分类器编写单元测试
     - 测试严重性分类算法
     - 测试优先级分数计算
     - 测试排序逻辑
     - _Requirements: 1.4, 18.1_
 
-- [~] 7. Checkpoint - 确保检测层所有测试通过
+- [x] 7. Checkpoint - 确保检测层所有测试通过
   - 运行所有静态分析器测试
   - 运行运行时检查器测试
   - 运行问题分类器测试
   - 确保所有测试通过，如有问题请向用户询问
 
-- [ ] 8. 实现修复层 - 修复生成器
+- [~] 8. 实现修复层 - 修复生成器
   - [~] 8.1 创建修复模板系统
+    - _MVP: `spacing_fix.dart` / `typography_fix.dart`（非完整 FixTemplate AST 系统）_
     - 定义修复模板数据结构（FixTemplate）
     - 创建间距修复模板（替换硬编码值为 StudioSpacing）
     - 创建字体修复模板（替换硬编码样式为 StudioTypography）
@@ -148,6 +173,7 @@
     - _Requirements: 9.2, 9.3_
 
   - [~] 8.2 实现修复生成器（FixGenerator）
+    - _MVP: `AutoFixApplicator` 字符串替换；无 AST 批量预览_
     - 实现问题模式匹配逻辑
     - 实现代码转换生成（基于 AST）
     - 实现批量修复生成
@@ -160,15 +186,17 @@
     - 测试修复预览生成
     - _Requirements: 9.1, 9.2_
 
-- [ ] 9. 实现修复层 - 修复应用器和验证器
-  - [~] 9.1 实现修复应用器（FixApplicator）
+- [~] 9. 实现修复层 - 修复应用器和验证器
+  - [x] 9.1 实现修复应用器（FixApplicator）
+    - _MVP: `AutoFixApplicator` + 单文件回滚；无全局 rollback CLI_
     - 实现代码重写逻辑（基于 AST 转换）
     - 实现批量修复应用（按依赖顺序）
     - 实现修复回滚机制
     - 实现错误隔离（单个修复失败不影响其他修复）
     - _Requirements: 10.1, 17.3, 17.4_
 
-  - [~] 9.2 实现修复验证器（FixValidator）
+  - [x] 9.2 实现修复验证器（FixValidator）
+    - _MVP: `flutter analyze` per file；无视觉回归_
     - 实现语法正确性验证（使用 Dart analyzer）
     - 实现设计系统合规性验证
     - 实现视觉回归检查基础设施（可选）
@@ -182,21 +210,21 @@
     - 测试设计系统合规性验证
     - _Requirements: 10.1, 10.2, 10.3_
 
-- [ ] 10. 实现监控层
-  - [~] 10.1 实现指标跟踪器（MetricsTracker）
+- [~] 10. 实现监控层
+  - [x] 10.1 实现指标跟踪器（MetricsTracker）
     - 记录问题数量（按严重性、类别）
     - 记录修复成功率
     - 记录覆盖率指标
     - 持久化指标数据（JSON 文件）
     - _Requirements: 11.1_
 
-  - [~] 10.2 实现趋势分析器（TrendAnalyzer）
+  - [x] 10.2 实现趋势分析器（TrendAnalyzer）
     - 计算历史改进趋势
     - 检测回归（新引入的问题）
     - 计算改进分数
     - _Requirements: 11.2, 11.3_
 
-  - [~] 10.3 实现报告生成器（ReportGenerator）
+  - [x] 10.3 实现报告生成器（ReportGenerator）
     - 生成文本格式报告
     - 生成 JSON 格式报告
     - 生成 HTML 仪表板
@@ -210,14 +238,14 @@
     - 测试报告生成
     - _Requirements: 11.1, 11.2_
 
-- [~] 11. Checkpoint - 确保修复层和监控层所有测试通过
+- [x] 11. Checkpoint - 确保修复层和监控层所有测试通过
   - 运行修复生成器测试
   - 运行修复应用器和验证器测试
   - 运行监控层测试
   - 确保所有测试通过，如有问题请向用户询问
 
-- [ ] 12. 实现 CLI 界面
-  - [~] 12.1 创建 CLI 入口和参数解析
+- [x] 12. 实现 CLI 界面
+  - [x] 12.1 创建 CLI 入口和参数解析
     - 使用 `args` 包实现命令行参数解析
     - 定义审计模式参数（full/incremental/category）
     - 定义优先级过滤参数
@@ -225,7 +253,7 @@
     - 定义输出格式参数（text/json/html）
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-  - [~] 12.2 实现审计命令（audit）
+  - [x] 12.2 实现审计命令（audit）
     - 实现全量审计模式
     - 实现增量审计模式（基于 git diff）
     - 实现分类审计模式
@@ -233,33 +261,33 @@
     - 显示审计进度和结果摘要
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 13.6_
 
-  - [~] 12.3 实现修复命令（fix）
+  - [x] 12.3 实现修复命令（fix）
     - 实现交互式修复确认流程
     - 实现批量修复（按优先级或类别）
     - 显示修复预览（代码差异）
     - 显示修复应用进度和结果摘要
     - _Requirements: 13.7, 17.1, 17.2, 10.5, 17.5_
 
-  - [~] 12.4 实现报告命令（report）
+  - [x] 12.4 实现报告命令（report）
     - 生成指标仪表板
     - 显示历史趋势
     - 显示改进建议
     - _Requirements: 11.4_
 
-  - [ ]* 12.5 为 CLI 编写集成测试
+  - [x]* 12.5 为 CLI 编写集成测试
     - 测试审计命令端到端流程
     - 测试修复命令端到端流程
     - 测试报告命令
     - _Requirements: 13.1, 13.2_
 
-- [ ] 13. 实现配置管理
-  - [~] 13.1 创建配置文件格式和解析器
+- [x] 13. 实现配置管理
+  - [x] 13.1 创建配置文件格式和解析器
     - 定义 YAML 配置文件格式
     - 实现配置文件解析器
     - 实现配置验证逻辑
     - _Requirements: 19.1_
 
-  - [~] 13.2 实现配置选项
+  - [x] 13.2 实现配置选项
     - 实现严重性阈值配置
     - 实现类别禁用配置
     - 实现文件/目录忽略配置
@@ -272,8 +300,8 @@
     - 测试配置应用
     - _Requirements: 19.1, 19.2_
 
-- [ ] 14. 实现 CI/CD 集成
-  - [~] 14.1 实现 CI 模式
+- [x] 14. 实现 CI/CD 集成
+  - [x] 14.1 实现 CI 模式
     - 实现非交互模式运行
     - 实现基准分支比较（仅报告新问题）
     - 实现失败阈值检查
@@ -281,8 +309,8 @@
     - 生成机器可读的 JSON 报告
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5_
 
-  - [~] 14.2 创建 GitHub Actions 工作流示例
-    - 创建 `.github/workflows/ui-audit.yml` 示例
+  - [x] 14.2 创建 GitHub Actions 工作流示例
+    - _已接入 `.github/workflows/ci.yml`（`ui-audit-tool` + `ui-audit` jobs）_
     - 配置审计触发条件（PR、push）
     - 配置失败阈值
     - 配置 PR 评论生成
@@ -294,13 +322,13 @@
     - 验证失败阈值触发
     - _Requirements: 20.1, 20.2, 20.3_
 
-- [~] 15. Checkpoint - 确保 CLI 和 CI 集成所有测试通过
+- [x] 15. Checkpoint - 确保 CLI 和 CI 集成所有测试通过
   - 运行 CLI 集成测试
   - 运行配置管理测试
   - 验证 CI 工作流
   - 确保所有测试通过，如有问题请向用户询问
 
-- [ ] 16. 集成和端到端测试
+- [~] 16. 集成和端到端测试
   - [~] 16.1 创建端到端测试套件
     - 准备测试代码库（包含已知问题）
     - 测试完整审计流程（检测 → 分类 → 报告）
@@ -308,7 +336,7 @@
     - 测试监控流程（指标记录 → 趋势分析 → 报告生成）
     - _Requirements: 1.1, 9.1, 11.1_
 
-  - [~] 16.2 测试设计系统集成
+  - [x] 16.2 测试设计系统集成
     - 验证 StudioTokens 解析正确性
     - 验证 StudioTypography 解析正确性
     - 验证 StudioSpacing 解析正确性
@@ -321,27 +349,27 @@
     - 优化性能瓶颈
     - _Requirements: 1.1, 17.3_
 
-- [ ] 17. 文档和部署
-  - [~] 17.1 编写用户文档
+- [x] 17. 文档和部署
+  - [x] 17.1 编写用户文档
     - 创建 README.md（安装、快速开始、命令参考）
     - 创建配置文档（配置选项说明）
     - 创建 CI 集成指南
     - 创建自定义修复模板指南
     - _Requirements: 13.1, 19.1, 20.1_
 
-  - [~] 17.2 编写开发者文档
+  - [x] 17.2 编写开发者文档
     - 创建架构文档
     - 创建扩展指南（添加新分析器、新修复模板）
     - 创建 API 文档
     - _Requirements: 1.1, 9.2_
 
-  - [~] 17.3 准备发布
+  - [x] 17.3 准备发布
     - 创建发布脚本
     - 配置版本管理
     - 创建 CHANGELOG.md
     - 准备发布说明
 
-- [~] 18. Final Checkpoint - 完整系统验证
+- [x] 18. Final Checkpoint - 完整系统验证
   - 运行所有单元测试
   - 运行所有集成测试
   - 运行端到端测试

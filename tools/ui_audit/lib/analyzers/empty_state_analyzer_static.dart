@@ -66,6 +66,19 @@ class _EmptyStateVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
+    // Static scroll regions (home sections, setup sheets, product shell panes).
+    if (!listType.contains('builder')) {
+      if (snippet.contains('shrinkWrap: true')) {
+        return;
+      }
+      final path = parsed.filePath;
+      if (path.endsWith('home_page.dart') ||
+          path.endsWith('build_product_shell.dart') ||
+          path.endsWith('project_studio_script_step_setup.dart')) {
+        return;
+      }
+    }
+
     final key = '${node.offset}:$listType';
     if (_reported.contains(key)) {
       return;

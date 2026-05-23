@@ -107,7 +107,7 @@ class _InternationalVendorsSetupBannerState
                           tokens.primary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         l10n.settingsInternationalVendorsSetupSubtitle,
                         style: studioAccentBannerBodyStyle(
@@ -130,7 +130,7 @@ class _InternationalVendorsSetupBannerState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             ...primary.map(
               (vendor) => _IntlVendorSetupRow(
                 vendor: vendor,
@@ -196,7 +196,7 @@ class _IntlVendorSetupRow extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.microGap),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgInset.withValues(alpha: 0.5),

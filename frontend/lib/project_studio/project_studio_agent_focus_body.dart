@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 
 /// Full-width step body with production/script agent hidden until explicitly opened.
@@ -40,12 +41,12 @@ class _ProjectStudioAgentFocusBodyState extends State<ProjectStudioAgentFocusBod
             bottom: 16,
             child: Material(
               elevation: 3,
-              shadowColor: Colors.black.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(24),
+              shadowColor: studioShadowColor(context, alpha: 0.25),
+              borderRadius: BorderRadius.circular(StudioSpacing.md),
               color: tokens.bgSurface.withValues(alpha: 0.96),
               child: InkWell(
                 onTap: () => setState(() => _agentOpen = true),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(StudioSpacing.md),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,

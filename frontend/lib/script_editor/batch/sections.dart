@@ -144,7 +144,7 @@ extension _StoryboardBatchWorkbenchSections
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             l10n.scriptEditorStoryboardBatchQuickGenerateHint,
             style: studioHintStyle(context),
@@ -231,12 +231,12 @@ extension _StoryboardBatchWorkbenchSections
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (exportEstimate != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: StudioSpacing.xs),
+            const SizedBox(height: 8),
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateContent(
                 exportEstimate.shotCount,
@@ -280,12 +280,12 @@ extension _StoryboardBatchWorkbenchSections
             ),
           ],
           if (_exportSummary != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               l10n.scriptEditorStoryboardBatchLastExportHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: StudioSpacing.xs),
+            const SizedBox(height: 8),
             Text(
               l10n.scriptEditorStoryboardBatchExportFileLine(
                 _exportSummary!.filename,
@@ -334,7 +334,7 @@ extension _StoryboardBatchWorkbenchSections
               style: studioHintStyle(context),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Expanded(
             child: _previewUrl == null
                 ? Center(

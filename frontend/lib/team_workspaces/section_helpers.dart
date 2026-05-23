@@ -395,7 +395,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                 l10n.teamWorkspaceMembersDialogTitle(row.workspace.name),
               ),
               content: SizedBox(
-                width: 480,
+                width: studioConstrainedDialogWidth(context, maxWidth: 480),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -538,7 +538,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       if (showWorkspaceOpsStats &&
                           (currentWorkspaceRole == 'owner' ||
                               currentWorkspaceRole == 'admin')) ...<Widget>[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         Row(
                           children: <Widget>[
                             Text(
@@ -563,21 +563,21 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             spacing: 8,
                             runSpacing: 8,
                             children: <Widget>[
-                              Chip(
+                              StudioChip(
                                 label: Text(
                                   l10n.teamWorkspaceStatsMembers(
                                     workspaceStats!.workspaceMemberCount,
                                   ),
                                 ),
                               ),
-                              Chip(
+                              StudioChip(
                                 label: Text(
                                   l10n.teamWorkspaceStatsProjects(
                                     workspaceStats!.workspaceProjectCount,
                                   ),
                                 ),
                               ),
-                              Chip(
+                              StudioChip(
                                 label: Text(
                                   l10n.teamWorkspaceStatsActiveJobs(
                                     workspaceStats!.workspaceActiveJobCount,
@@ -632,7 +632,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                           onChanged: (_) => setModalState(() {}),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioLayoutSpacing.titleTight),
                         if (pendingInvites.isEmpty && !loading)
                           StudioEmptyState.emptyData(
                             title: l10n.teamWorkspaceNoInviteRecords,
@@ -673,7 +673,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                             context,
                                           ).textTheme.bodySmall,
                                         ),
-                                        Chip(
+                                        StudioChip(
                                           label: Text(label),
                                           backgroundColor: chipColor,
                                         ),
@@ -826,7 +826,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                               ),
                             ),
                           ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         Text(
                           l10n.teamWorkspaceActivityRecordsTitle,
                           style: Theme.of(context).textTheme.labelMedium,
@@ -840,7 +840,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                           onChanged: (_) => setModalState(() {}),
                         ),
-                        const SizedBox(height: StudioSpacing.xs),
+                        const SizedBox(height: 8),
                         if (auditRows.isEmpty && !loading)
                           StudioEmptyState.emptyData(
                             title: l10n.teamWorkspaceNoActivityRecords,
@@ -912,7 +912,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       SelectableText(
                         l10n.teamWorkspaceCurrentOwnerLine(currentOwnerUserId),
                         style: Theme.of(context).textTheme.bodySmall,
@@ -1006,7 +1006,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                           },
                                   )
                                 else
-                                  Chip(
+                                  StudioChip(
                                     label: Text(
                                       roleOptionLabel(
                                         isPrimaryOwner ? 'owner' : m.role,
@@ -1261,7 +1261,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                 l10n.teamWorkspaceInvitesDialogTitle(row.workspace.name),
               ),
               content: SizedBox(
-                width: 560,
+                width: studioConstrainedDialogWidth(context, maxWidth: 560),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -1392,7 +1392,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Row(
                         children: <Widget>[
                           Expanded(

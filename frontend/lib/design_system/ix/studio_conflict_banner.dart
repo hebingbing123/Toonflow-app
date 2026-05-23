@@ -30,7 +30,7 @@ class StudioConflictBanner extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Icon(Icons.warning_amber_rounded, color: tokens.danger, size: 20),
-            const SizedBox(width: 12),
+            const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: Text(
                 message,

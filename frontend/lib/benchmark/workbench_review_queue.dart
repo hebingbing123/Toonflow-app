@@ -75,7 +75,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                   : onSubmitReview,
               child: Text(l10n.benchmarkActionSubmitReview),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             TextField(
               controller: reviewSkipReasonController,
               decoration: InputDecoration(

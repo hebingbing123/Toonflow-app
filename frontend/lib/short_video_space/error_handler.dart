@@ -206,7 +206,7 @@ class ShortVideoErrorHandler {
       action: result.shouldRetry && onRetry != null
           ? SnackBarAction(
               label: l10n.shortVideoSpaceErrorRetryButton,
-              textColor: Colors.white,
+              textColor: Theme.of(context).colorScheme.onPrimary,
               onPressed: onRetry,
             )
           : null,

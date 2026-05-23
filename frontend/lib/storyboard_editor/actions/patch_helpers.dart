@@ -62,7 +62,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
               return StudioAlertDialog(
                 title: Text(l10n.storyboardPatchDialogTitle),
                 content: SizedBox(
-                  width: 620,
+                  width: studioConstrainedDialogWidth(context, maxWidth: 620),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -139,7 +139,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               ),
                         ),
                         if (submitSummary != null) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           Text(
                             submitSummary!,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -161,7 +161,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                             l10n.storyboardPatchRepairPriorityHeading,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           for (final item in repairPriority)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),

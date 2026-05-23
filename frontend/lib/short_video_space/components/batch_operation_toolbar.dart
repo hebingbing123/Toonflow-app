@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:flutter/services.dart';
@@ -168,7 +169,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
               color: hasSelection
                   ? StudioTokens.of(context).primarySoft
                   : Theme.of(context).colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(StudioSpacing.sm),
             ),
             child: Text(
               l10n.shortVideoBatchSelectedCount(
@@ -405,7 +406,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
     return StudioAlertDialog(
       title: Text(title),
       content: SizedBox(
-        width: 500,
+        width: studioConstrainedDialogWidth(context, maxWidth: 500),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

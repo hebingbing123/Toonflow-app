@@ -457,7 +457,7 @@ class _ProjectGridCard extends StatelessWidget {
                           ],
                         ),
                         if (scopeSelectionEnabled && !selected) ...<Widget>[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: StudioSpacing.xs),
                           Text(
                             l10n.studioProjectCardTapToSelect,
                             style: Theme.of(context).textTheme.labelSmall

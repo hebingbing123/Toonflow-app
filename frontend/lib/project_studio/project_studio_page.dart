@@ -1087,7 +1087,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 if (hub.reusableRoleAssets.isNotEmpty)
                   _AssetHubListCard(
                     title: l10n.projectStudioAssetHubReusableRolesTitle,
-                    width: 420,
+                    width: studioConstrainedDialogWidth(context, maxWidth: 420),
                     children: hub.reusableRoleAssets
                         .map(
                           (asset) => _AssetHubLine(
@@ -1389,7 +1389,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Row(
@@ -1445,7 +1445,7 @@ class _AssetHubListCard extends StatelessWidget {
         padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
         decoration: BoxDecoration(
           color: tokens.bgInset,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Column(
@@ -1544,7 +1544,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -1565,7 +1565,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
       button: true,
       label: metric.label,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         onTap: onTap,
         child: card,
       ),

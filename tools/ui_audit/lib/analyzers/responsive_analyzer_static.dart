@@ -73,7 +73,9 @@ class _ResponsiveVisitor extends RecursiveAstVisitor<void> {
       final source = arg.expression.toSource();
       if (source.contains('MediaQuery') ||
           source.contains('LayoutBuilder') ||
-          source.contains('double.infinity')) {
+          source.contains('double.infinity') ||
+          source.contains('studioConstrainedDialogWidth') ||
+          source.contains('kStudio')) {
         continue;
       }
 

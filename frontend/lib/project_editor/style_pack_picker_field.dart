@@ -74,7 +74,7 @@ class StylePackPickerField extends StatelessWidget {
                     onChanged((value == null || value.isEmpty) ? null : value)
               : null,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           selected?.description ??
               (hasSelectedOutsideList

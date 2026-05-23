@@ -217,7 +217,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -401,7 +401,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               layout.isPhone ? StudioSpacing.sm : 0,
               0,
               layout.isPhone ? StudioSpacing.sm : 0,
-              24,
+              StudioSpacing.md,
             );
 
             return Align(
@@ -527,16 +527,16 @@ class _RecentProjectChip extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: selected
                 ? tokens.primarySoft.withValues(alpha: 0.42)
                 : tokens.bgInset.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
             border: Border.all(
               color: selected ? tokens.primary : tokens.borderSubtle,
               width: selected ? 1.5 : 1,
@@ -664,7 +664,7 @@ class _SelectProjectHintBanner extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.primarySoft.withValues(alpha: 0.44),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.primary.withValues(alpha: 0.22)),
       ),
       child: Padding(

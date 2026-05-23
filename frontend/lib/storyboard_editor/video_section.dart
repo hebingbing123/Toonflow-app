@@ -187,21 +187,21 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.storyboardVideoWorkbenchPrimaryHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.storyboardVideoWorkbenchPatchAttributionHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         CheckboxListTile(
           value: autoQualityReviewOnGeneratePrompt,
           onChanged: saving
@@ -290,26 +290,26 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         if (promptDiagnostics != null) ...[
-          const SizedBox(height: StudioSpacing.xs),
+          const SizedBox(height: 8),
           Text(
             buildStoryboardVideoPromptDiagnosticsLine(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             buildStoryboardVideoPromptSourceSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             buildStoryboardVideoPromptAnchorSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             buildStoryboardVideoPromptBudgetHint(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -317,7 +317,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ),
           if (repairSuggestions.isNotEmpty) ...[
-            const SizedBox(height: StudioSpacing.xs),
+            const SizedBox(height: 8),
             Text(
               l10n.storyboardVideoWorkbenchRepairSuggestionsPrefix(
                 repairSuggestions.join(' / '),
@@ -351,7 +351,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: StudioDropdownButtonFormField<String>(
                 initialValue: resolution,
@@ -420,7 +420,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                       },
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: StudioModelCostControls(
                 accessToken: accessToken,
@@ -475,7 +475,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.storyboardVideoWorkbenchSingleTrackHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -509,12 +509,12 @@ class _StoryboardVideoSection extends StatelessWidget {
           const SizedBox(height: 8),
           Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
           l10n.storyboardVideoWorkbenchSelectedVideoHeading,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           hasSelectedVideo
               ? l10n.storyboardVideoWorkbenchSelectedVideoDetailSelected
@@ -553,12 +553,12 @@ class _StoryboardVideoSection extends StatelessWidget {
             l10n.storyboardVideoWorkbenchPickCandidateFirst,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
           l10n.storyboardVideoWorkbenchCandidatesHeading,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         if (storyboardVideos.isEmpty)
           StudioEmptyState.emptyData(
             title: l10n.storyboardVideoWorkbenchCandidatesEmpty,
@@ -583,7 +583,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 [
                   if (isCurrent)
@@ -603,7 +603,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ].join(' · '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: StudioSpacing.xs),
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -678,7 +678,7 @@ class _StoryboardVideoSection extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           ...generateData!.generatingJobs
               .take(3)
               .map(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../design_system/tokens.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
@@ -24,7 +26,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
       return StudioAlertDialog(
         title: Text(l10n.projectsDialogCreateTitle),
         content: SizedBox(
-          width: 560,
+          width: studioConstrainedDialogWidth(context, maxWidth: 560),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -36,7 +38,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
                     labelText: l10n.projectsDialogFieldName,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 TextField(
                   controller: introController,
                   maxLines: 2,

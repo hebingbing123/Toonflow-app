@@ -442,7 +442,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
             children: <Widget>[
               Text(
                 l10n.billingAuditTitle,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: studioCardTitleStyle(context),
               ),
               const SizedBox(height: 8),
               StudioCollapsibleFilterPanel(
@@ -514,7 +514,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             },
                           ),
                         ),
-                        FilterChip(
+                        StudioFilterChip(
                           label: Text(l10n.billingAuditOnlyInformational),
                           selected: _billingInformationalOnly == true,
                           onSelected: (selected) {
@@ -525,7 +525,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             });
                           },
                         ),
-                        FilterChip(
+                        StudioFilterChip(
                           label: Text(l10n.billingAuditOnlyStateful),
                           selected: _billingInformationalOnly == false,
                           onSelected: (selected) {
@@ -769,13 +769,13 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                     ...(_billingEventCountsByProvider(l10n).entries.toList()
                           ..sort((a, b) => b.value.compareTo(a.value)))
                         .map(
-                          (entry) => Chip(
+                          (entry) => StudioChip(
                             label: Text(
                               l10n.billingChipCount(entry.key, entry.value),
                             ),
                           ),
                         ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.billingSnapInformational(
                           _billingEvents
@@ -784,7 +784,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.billingSnapStateful(
                           _billingEvents
@@ -804,7 +804,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           ..sort((a, b) => b.value.compareTo(a.value)))
                         .take(8)
                         .map(
-                          (entry) => Chip(
+                          (entry) => StudioChip(
                             label: Text(
                               l10n.billingChipCount(entry.key, entry.value),
                             ),
@@ -829,7 +829,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           item.providerEventId,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioLayoutSpacing.titleTight),
                         SelectableText(_formatBillingEventMeta(l10n, item)),
                         if (item.rawEventId != null &&
                             item.rawEventId!.isNotEmpty)

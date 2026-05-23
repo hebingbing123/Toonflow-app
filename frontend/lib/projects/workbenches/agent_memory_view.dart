@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import '../../design_system/tokens.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
@@ -170,7 +172,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: muted),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -338,14 +340,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.agentMemoryIsolateHint,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: muted),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.agentMemoryOptimizeScopeHint,
                 style: Theme.of(
@@ -353,7 +355,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               if (!model.canOptimizeVideoMemory) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.agentMemoryOptimizeEnableHint,
                   style: Theme.of(
@@ -371,7 +373,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (costOverviewLine != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   costOverviewLine,
                   style: Theme.of(
@@ -380,7 +382,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryInsights.summary != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   memoryInsights.summary!,
                   style: Theme.of(
@@ -389,7 +391,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryInsights.videoSummary != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   memoryInsights.videoSummary!,
                   style: Theme.of(
@@ -398,7 +400,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryInsights.efficiencySummary != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   memoryInsights.efficiencySummary!,
                   style: Theme.of(
@@ -407,7 +409,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryInsights.bucketPrioritySummary != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   memoryInsights.bucketPrioritySummary!,
                   style: Theme.of(
@@ -416,7 +418,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryInsights.recommendation != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   '${l10n.agentMemoryRecommendationPrefix}'
                   '${memoryInsights.recommendation}',
@@ -509,7 +511,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           title: Text(titleSegments.join(' · ')),
                           subtitle: Text(subtitleSegments.join(' · ')),
                           trailing: preview.isDuplicated
-                              ? Chip(
+                              ? StudioChip(
                                   label: Text(l10n.agentMemoryDuplicateChip),
                                 )
                               : null,
@@ -519,7 +521,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   );
                 }),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.agentMemoryAppendSection,
                 style: Theme.of(context).textTheme.titleSmall,
@@ -626,7 +628,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.agentMemoryFieldMemoryContent,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.agentMemoryClearSection,
                 style: Theme.of(context).textTheme.titleSmall,

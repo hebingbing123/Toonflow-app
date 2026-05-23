@@ -285,7 +285,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
       ),
       child: Column(
@@ -299,7 +299,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.projectMembersTitle, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       _aclEnabled
                           ? l10n.projectMembersAclEnabledIntro
@@ -311,7 +311,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: StudioSpacing.sm),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -359,7 +359,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             _buildForbiddenNotice(theme, l10n)
           else ...[
             _buildAddSection(theme, l10n, assignableCandidates),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             _buildExplicitMembersSection(theme, l10n),
           ],
           const SizedBox(height: 8),
@@ -389,7 +389,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.projectMembersForbiddenTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectMembersForbiddenBody,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -418,7 +418,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.projectMembersAddSectionTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectMembersAddSectionIntro,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -567,7 +567,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.projectMembersExplicitSectionTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             _projectRows.isEmpty
                 ? l10n.projectMembersExplicitEmptyIntro
@@ -605,7 +605,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         width: double.infinity,
         padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           border: Border.all(color: studioPanelBorderColor(context)),
         ),
         child: Column(

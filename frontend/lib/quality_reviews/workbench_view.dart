@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
@@ -270,13 +271,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     if (model.filterBadCasesOnly)
-                      Chip(label: Text(l10n.qualityReviewsOnlyBadCases)),
+                      StudioChip(label: Text(l10n.qualityReviewsOnlyBadCases)),
                     if (model.filterDeliveryPriorityOnly)
-                      Chip(
+                      StudioChip(
                         label: Text(l10n.qualityReviewsOnlyDeliveryPriorityHit),
                       ),
                     if (model.filterAutoSourceOnly)
-                      Chip(label: Text(l10n.qualityReviewsSourceAuto)),
+                      StudioChip(label: Text(l10n.qualityReviewsSourceAuto)),
                   ],
                 ),
                 if (model.activeFilterQuerySummary != null) ...[
@@ -327,7 +328,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.qualityReviewsFilterAndReadSection,
                 style: Theme.of(context).textTheme.titleSmall,
@@ -344,7 +345,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: TextField(
                       controller: model.scriptIdFilterCtrl,
@@ -408,7 +409,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: StudioDropdownButtonFormField<String>(
                       initialValue: model.gradeFilterCtrl.text.trim().isEmpty
@@ -562,7 +563,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.qualityReviewsDetailsQuerySection,
                 style: Theme.of(context).textTheme.titleSmall,
@@ -585,7 +586,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       : l10n.qualityReviewsViewReviewDetails,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.qualityReviewsCreateReviewSection,
                 style: Theme.of(context).textTheme.titleSmall,
@@ -603,7 +604,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: TextField(
                       controller: model.createScriptIdCtrl,
@@ -680,7 +681,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: StudioCodeDropdownField(
                       width: null,
@@ -747,13 +748,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               if (model.statusLine != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsStatusLine(model.statusLine!),
                 ),
               ],
               if (model.reviewDetails != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryReviewDetails(model.reviewDetails!),
                 ),
@@ -765,13 +766,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.statsSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryStats(model.statsSummary!),
                 ),
               ],
               if (model.scopeInsightsSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryScopeInsights(
                     model.scopeInsightsSummary!,
@@ -779,7 +780,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.tokenEfficiencySummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryTokenAggregate(
                     model.tokenEfficiencySummary!,
@@ -787,7 +788,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.tokenEfficiencyActionPlan != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryMemoryAction(
                     model.tokenEfficiencyActionPlan!,
@@ -795,7 +796,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.tokenEfficiencyExecutionChecklist != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -826,7 +827,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.tokenEfficiencySamplesSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryTokenSavingSamples(
                     model.tokenEfficiencySamplesSummary!,
@@ -834,7 +835,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.stagePassRateSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryStagePassRate(
                     model.stagePassRateSummary!,
@@ -842,7 +843,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.badCaseStatsSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryBadCaseDistribution(
                     model.badCaseStatsSummary!,
@@ -856,7 +857,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   l10n.qualityReviewsLoadBadCaseDistribution,
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 BadCaseStatsPanel(
                   items: model.badCaseStatItems,
                   loading: model.loadingBadCaseStats,
@@ -864,7 +865,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.stageGradeRows.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   l10n.qualityReviewsGradeDistribution,
                   style: Theme.of(context).textTheme.labelLarge,
@@ -893,7 +894,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (promptDiagnosticsSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsPromptDiagnostics(
                     promptDiagnosticsSummary,
@@ -901,13 +902,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (memoryScopePressureSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsScopePressure(memoryScopePressureSummary),
                 ),
               ],
               if (memoryOptimizationSavingsSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsMemorySlimming(
                     memoryOptimizationSavingsSummary,
@@ -915,25 +916,25 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (scopeRepairQueueSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsPriorityFix(scopeRepairQueueSummary),
                 ),
               ],
               if (repairPlanSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsRepairSuggestions(repairPlanSummary),
                 ),
               ],
               if (suggestedActionSummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   'Suggested action hotspots: $suggestedActionSummary',
                 ),
               ],
               if (tokenEfficiencySummary != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(
                   l10n.qualityReviewsSummaryTokenEfficiency(
                     tokenEfficiencySummary,
@@ -941,7 +942,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.reviews.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   activeFilters.isEmpty
                       ? l10n.qualityReviewsCount(model.reviews.length)
@@ -1020,21 +1021,21 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if (review.memoryDeliveryPriorityApplied == true)
                           Padding(
                             padding: EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(l10n.qualityReviewsDeliveryTag),
                             ),
                           ),
                         if (review.source == 'auto')
                           Padding(
                             padding: EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(l10n.qualityReviewsAutoTag),
                             ),
                           ),
                         if ((review.grade ?? '').trim().isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(review.grade!.trim()),
                               backgroundColor: _qualityGradeColor(
                                 context,
@@ -1045,7 +1046,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if ((review.suggestedAction ?? '').trim().isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(
                                 _qualitySuggestedActionLabel(
                                   review.suggestedAction!.trim(),
@@ -1057,7 +1058,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if (hasDimensionRisk(review.dimensionScores))
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(l10n.qualityReviewsDimensionRiskBadge),
                               backgroundColor: Theme.of(
                                 context,
@@ -1067,7 +1068,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         if (writebackSummary != null)
                           Padding(
                             padding: EdgeInsets.only(right: 8),
-                            child: Chip(
+                            child: StudioChip(
                               label: Text(l10n.qualityReviewsMemoryTag),
                             ),
                           ),

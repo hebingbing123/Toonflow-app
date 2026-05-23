@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
@@ -72,20 +73,20 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(l10n.studioModelPricingTitle, style: theme.textTheme.titleMedium),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.studioModelPricingSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Wrap(
           spacing: 8,
           children: <String>['all', 'text', 'image', 'video'].map((value) {
             final selected = _typeFilter == value;
             final label = studioModelPricingTypeLabel(l10n, value);
-            return FilterChip(
+            return StudioFilterChip(
               label: Text(label),
               selected: selected,
               onSelected: (_) {
@@ -95,7 +96,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
             );
           }).toList(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         if (_loading) const StudioSkeleton(height: 160),
         if (_error != null) Text(_error!),
         if (!_loading && _error == null)
@@ -123,7 +124,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
                       ],
                     ),
                     if (p != null) ...<Widget>[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.studioModelPricingPerUnit(
                           p.creditsPerUnit,

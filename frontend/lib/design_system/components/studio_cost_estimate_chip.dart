@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
@@ -22,12 +23,12 @@ class StudioCostEstimateChip extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (loading) {
-      return Chip(
+      return StudioChip(
         label: Text(l10n.studioCostEstimateLoading),
       );
     }
     if (error != null) {
-      return Chip(
+      return StudioChip(
         label: Text(error!, maxLines: 2),
         backgroundColor: theme.colorScheme.errorContainer,
       );
@@ -42,20 +43,20 @@ class StudioCostEstimateChip extends StatelessWidget {
       runSpacing: 4,
       children: <Widget>[
         if (est.platformBillingExempt)
-          Chip(
+          StudioChip(
             label: Text(l10n.studioCostEstimateByok),
             backgroundColor: theme.colorScheme.secondaryContainer,
           )
         else
-          Chip(
+          StudioChip(
             label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
           ),
         if (est.quotaImpactJobs > 0)
-          Chip(
+          StudioChip(
             label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
           ),
         if (pct != null && est.dailyJobQuota != null)
-          Chip(
+          StudioChip(
             label: Text(
               l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
             ),

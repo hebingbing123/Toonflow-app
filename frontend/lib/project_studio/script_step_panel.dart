@@ -431,8 +431,8 @@ class _ProjectStudioScriptStepPanelState
       isScrollable: true,
       dividerColor: Colors.transparent,
       labelPadding: EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: widget.focusMode ? 2 : 0,
+        horizontal: StudioLayoutSpacing.insetDense,
+        vertical: widget.focusMode ? StudioLayoutSpacing.titleTight / 2 : 0,
       ),
       indicatorSize: TabBarIndicatorSize.label,
       tabAlignment: TabAlignment.start,
@@ -473,7 +473,7 @@ class _ProjectStudioScriptStepPanelState
           DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
@@ -575,12 +575,12 @@ class _ProjectStudioScriptStepPanelState
     final tokens = StudioTokens.of(context);
     return Material(
       elevation: 3,
-      shadowColor: Colors.black.withValues(alpha: 0.25),
-      borderRadius: BorderRadius.circular(24),
+      shadowColor: studioShadowColor(context, alpha: 0.25),
+      borderRadius: BorderRadius.circular(StudioSpacing.md),
       color: tokens.bgSurface.withValues(alpha: 0.96),
       child: InkWell(
         onTap: () => setState(() => _agentPaneOpen = true),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(StudioSpacing.md),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(

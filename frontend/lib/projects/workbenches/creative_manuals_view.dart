@@ -56,7 +56,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
     return StudioAlertDialog(
       title: Text(l10n.projectsCreativeManualTitle),
       content: SizedBox(
-        width: 820,
+        width: studioConstrainedDialogWidth(context, maxWidth: 820),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -66,7 +66,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 l10n.projectsCreativeManualIntro,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               SegmentedButton<_CreativeManualKind>(
                 segments: <ButtonSegment<_CreativeManualKind>>[
                   ButtonSegment<_CreativeManualKind>(
@@ -88,7 +88,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                         }
                       },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -115,7 +115,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               if (activeRows.isNotEmpty)
                 StudioDropdownButtonFormField<String>(
                   initialValue: selected?.path,
@@ -144,7 +144,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                   l10n.projectsCreativeManualEmptyKind,
                   style: studioHintStyle(context),
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextField(
                 controller: nameCtrl,
                 decoration: InputDecoration(
@@ -177,12 +177,12 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 ),
               ),
               if (selected != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   l10n.projectsCreativeManualSummaryTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 SelectableText(
                   l10n.projectsCreativeManualSummaryLine(
                     selected!.name,
@@ -193,7 +193,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 ),
               ],
               if (statusLine != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 SelectableText(statusLine!),
               ],
             ],

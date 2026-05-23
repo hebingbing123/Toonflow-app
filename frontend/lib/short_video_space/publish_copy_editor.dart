@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
@@ -207,7 +208,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           runSpacing: 6,
           children: [
             for (final id in ids)
-              ChoiceChip(
+              StudioChoiceChip(
                 label: Text(widget.platformLabels[id] ?? id),
                 selected: _platformId == id,
                 onSelected: widget.busy ? null : (_) => _selectPlatform(id),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_code_dropdown_field.dart';
 import '../design_system/components/studio_filter_row.dart';
@@ -181,7 +183,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             ).copyWith(
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: studioShadowColor(context, alpha: 0.12),
                   blurRadius: 10,
                   spreadRadius: -8,
                   offset: const Offset(0, 4),
@@ -202,7 +204,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 l10n.contentComplianceIntro,
                 style: studioSectionIntroStyle(context),
               ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             StudioCollapsibleFilterPanel(
               title: l10n.contentComplianceSubmitReportTitle,
               child: Column(
@@ -269,7 +271,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       isDense: true,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: StudioSpacing.sm),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: FilledButton.tonalIcon(
@@ -371,7 +373,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           border: Border.all(
                             color: _alertBorderColor(context, topAlert.level),
                           ),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,7 +477,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                         alert.level,
                                       ),
                                     ),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -485,7 +487,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                         '${alert.title} (${alert.count})',
                                         style: theme.textTheme.titleSmall,
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                                       Text(
                                         alert.message,
                                         style: theme.textTheme.bodySmall
@@ -741,7 +743,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         );
                       },
                     ),
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(l10n.contentComplianceClaimedOnly),
                       selected: _queueClaimedOnly,
                       onSelected: (selected) {
@@ -864,47 +866,47 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricPending(
                           queue.summary.pending,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricClaimed(
                           queue.summary.claimed,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricResolved(
                           queue.summary.resolved,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricDismissed(
                           queue.summary.dismissed,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricCritical(
                           queue.summary.critical,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceMetricHigh(queue.summary.high),
                       ),
                     ),
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(
                         l10n.contentComplianceSlaOpenOver24h(
                           queue.sla.openOver24h,
@@ -917,7 +919,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             : 'open_over_24h',
                       ),
                     ),
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(
                         l10n.contentComplianceSlaOpenOver72h(
                           queue.sla.openOver72h,
@@ -930,7 +932,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             : 'open_over_72h',
                       ),
                     ),
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(
                         l10n.contentComplianceSlaClaimedOver24h(
                           queue.sla.claimedOver24h,
@@ -943,7 +945,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             : 'claimed_over_24h',
                       ),
                     ),
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(
                         l10n.contentComplianceSlaUnclaimedCritical(
                           queue.sla.unclaimedCritical,
@@ -956,14 +958,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             : 'unclaimed_critical',
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceOldestHours(
                           queue.sla.oldestOpenAgeHours,
                         ),
                       ),
                     ),
-                    Chip(
+                    StudioChip(
                       label: Text(
                         l10n.contentComplianceCapacityPerReviewer(
                           queue.capacity.reviewerCapacityLimit,
@@ -971,7 +973,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     ),
                     if (queue.capacity.overloadedReviewerCount > 0)
-                      Chip(
+                      StudioChip(
                         label: Text(
                           l10n.contentComplianceOverloadedReviewers(
                             queue.capacity.overloadedReviewerCount,
@@ -979,7 +981,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         ),
                       ),
                     if (queue.capacity.overloadedClaimedCount > 0)
-                      Chip(
+                      StudioChip(
                         label: Text(
                           l10n.contentComplianceRebalanceNeeded(
                             queue.capacity.overloadedClaimedCount,
@@ -1027,7 +1029,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ),
                                     style: theme.textTheme.bodySmall,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                                   Text(
                                     l10n.contentComplianceOwnerDetail(
                                       [
@@ -1072,7 +1074,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     runSpacing: 8,
                     children: queue.escalationSummaries
                         .map(
-                          (item) => FilterChip(
+                          (item) => StudioFilterChip(
                             label: Text(
                               '${_escalationStageLabel(l10n, item.escalationStage)} ${item.reportCount}',
                             ),
@@ -1128,7 +1130,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ),
                                     style: theme.textTheme.bodySmall,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                                   Text(
                                     l10n.contentComplianceWorkspaceDetail(
                                       workspace.criticalOpenCount,
@@ -1204,22 +1206,22 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     crossAxisAlignment:
                                         WrapCrossAlignment.center,
                                     children: [
-                                      Chip(
+                                      StudioChip(
                                         label: Text(
                                           '${_targetTypeLabel(l10n, item.targetType)} · ${_categoryLabel(l10n, item.category)}',
                                         ),
                                       ),
-                                      Chip(
+                                      StudioChip(
                                         label: Text(
                                           _severityLabel(l10n, item.severity),
                                         ),
                                       ),
-                                      Chip(
+                                      StudioChip(
                                         label: Text(
                                           _statusLabel(l10n, item.status),
                                         ),
                                       ),
-                                      Chip(
+                                      StudioChip(
                                         label: Text(
                                           _escalationStageLabel(
                                             l10n,
@@ -1228,9 +1230,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                         ),
                                       ),
                                       if ((item.projectName ?? '').isNotEmpty)
-                                        Chip(label: Text(item.projectName!)),
+                                        StudioChip(label: Text(item.projectName!)),
                                       if ((item.workspaceName ?? '').isNotEmpty)
-                                        Chip(label: Text(item.workspaceName!)),
+                                        StudioChip(label: Text(item.workspaceName!)),
                                     ],
                                   ),
                                 ),
@@ -1399,7 +1401,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      FilterChip(
+                      StudioFilterChip(
                         label: Text(
                           l10n.contentComplianceSelectedCount(
                             _selectedReportIds.length,

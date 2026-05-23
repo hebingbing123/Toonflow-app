@@ -8,6 +8,7 @@ import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../rust_api.dart';
 

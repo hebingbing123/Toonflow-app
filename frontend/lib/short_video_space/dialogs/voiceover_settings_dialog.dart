@@ -217,7 +217,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
       maxWidth: 560,
       title: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsTitle),
       content: SizedBox(
-        width: 520,
+        width: studioConstrainedDialogWidth(context, maxWidth: 520),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -233,8 +233,8 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: [
@@ -274,8 +274,8 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: availableVoices
@@ -306,8 +306,8 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: [
@@ -394,7 +394,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                       label: Text(l10n.shortVideoCharactersPreviewVoice),
                     ),
                     if (_previewStatusLine != null) ...[
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Text(
                           _previewStatusLine!,
@@ -414,7 +414,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: Row(
                   children: [

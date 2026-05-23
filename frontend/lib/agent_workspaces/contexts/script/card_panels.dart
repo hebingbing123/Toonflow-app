@@ -2,6 +2,7 @@
 // Keeps agent_workspaces/panels/script.dart ≤800 lines.
 
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_chip.dart';
 
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
@@ -56,7 +57,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
-                      Chip(label: Text(stage.statusLabel)),
+                      StudioChip(label: Text(stage.statusLabel)),
                     ],
                   ),
                   Text(
@@ -150,7 +151,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                           recipe.title,
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           recipe.detail,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -161,7 +162,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                           runSpacing: 8,
                           children: <Widget>[
                             if (recipe.domainTool != null)
-                              Chip(
+                              StudioChip(
                                 label: Text(
                                   agentWorkspaceScriptDomainToolLabel(
                                     l10n,
@@ -170,7 +171,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                                 ),
                               ),
                             if (recipe.subAgentTool != null)
-                              Chip(
+                              StudioChip(
                                 label: Text(
                                   agentWorkspaceScriptSubAgentLabel(
                                     l10n,

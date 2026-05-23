@@ -174,21 +174,45 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          l10n.settingsModelVendorsTitle,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.settingsModelVendorsSubtitle,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: StudioTokens.of(context).textSecondary,
+    final tokens = StudioTokens.of(context);
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          DecoratedBox(
+            decoration:
+                studioInsetPanelDecoration(
+                  context,
+                  backgroundColor: tokens.bgSurface.withValues(alpha: 0.96),
+                ).copyWith(
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: studioShadowColor(context, alpha: 0.12),
+                      blurRadius: 10,
+                      spreadRadius: -8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+            child: Padding(
+              padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    l10n.settingsModelVendorsTitle,
+                    style: studioPaneTitleStyle(context),
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+                  Text(
+                    l10n.settingsModelVendorsSubtitle,
+                    style: studioSectionIntroStyle(context),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: StudioLayoutSpacing.insetDense),
         if (!_loading && _error == null && _vendors.isNotEmpty) ...<Widget>[
           DomesticVendorsSetupBanner(
             vendors: _vendors,
@@ -236,7 +260,8 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
                 onManageCredential: () => _openCredentialDialog(vendor),
                 onTestModel: (m) => _testModel(vendor, m),
               )),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -478,7 +503,7 @@ class _VendorCardState extends State<_VendorCard> {
                 l10n.settingsModelVendorsModelsHeading,
                 style: theme.textTheme.labelLarge,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioLayoutSpacing.titleTight),
               ...widget.models.map(
                 (m) => CheckboxListTile(
                   value: _selected.contains(m.value),

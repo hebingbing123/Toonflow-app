@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../rust_api.dart';
 
@@ -36,7 +37,7 @@ class OutboundWebhookEventChips extends StatelessWidget {
       runSpacing: 6,
       children: [
         for (final slug in kOutboundWebhookPlatformEventTypes)
-          FilterChip(
+          StudioFilterChip(
             label: Text(outboundWebhookPlatformEventLabel(l10n, slug)),
             selected: selected.contains(slug),
             onSelected: enabled

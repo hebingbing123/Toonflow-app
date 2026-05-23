@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 
 import '../design_system/components/studio_empty_state.dart';
@@ -74,7 +75,7 @@ class _AccountSectionState extends State<AccountSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -206,7 +207,7 @@ class _AccountSectionState extends State<AccountSection> {
                 spacing: 8,
                 runSpacing: 8,
                 children: <Widget>[
-                  Chip(
+                  StudioChip(
                     label: Text(
                       l10n.accountExportActiveCount(
                         widget.controller.activeCount,
@@ -214,7 +215,7 @@ class _AccountSectionState extends State<AccountSection> {
                     ),
                   ),
                   if (widget.controller.lastSavedPath != null)
-                    ActionChip(
+                    StudioActionChip(
                       label: Text(l10n.accountExportCopyLastSavedPath),
                       onPressed: () => Clipboard.setData(
                         ClipboardData(text: widget.controller.lastSavedPath!),
@@ -273,12 +274,12 @@ class _AccountSectionState extends State<AccountSection> {
                 spacing: 10,
                 runSpacing: 10,
                 children: <Widget>[
-                  FilterChip(
+                  StudioFilterChip(
                     selected: widget.controller.includeAuditLogs,
                     onSelected: widget.controller.setIncludeAuditLogs,
                     label: Text(l10n.accountExportIncludeAuditLogs),
                   ),
-                  FilterChip(
+                  StudioFilterChip(
                     selected: widget.controller.includeNotifications,
                     onSelected: widget.controller.setIncludeNotifications,
                     label: Text(l10n.accountExportIncludeNotifications),
@@ -342,7 +343,7 @@ class _AccountSectionState extends State<AccountSection> {
                   style: studioCardTitleStyle(context),
                 ),
                 const SizedBox(height: 8),
-                Chip(label: Text(_statusLabel(item.status))),
+                StudioChip(label: Text(_statusLabel(item.status))),
               ] else
                 Row(
                   children: <Widget>[
@@ -356,7 +357,7 @@ class _AccountSectionState extends State<AccountSection> {
                       ),
                     ),
                     const SizedBox(width: StudioLayoutSpacing.inlineGap),
-                    Chip(label: Text(_statusLabel(item.status))),
+                    StudioChip(label: Text(_statusLabel(item.status))),
                   ],
                 ),
               const SizedBox(height: 8),
@@ -370,7 +371,7 @@ class _AccountSectionState extends State<AccountSection> {
                 ),
               ),
               if (item.byteSize != null) ...<Widget>[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(
                   l10n.accountExportSizeLine(
                     _formatBytes(context, item.byteSize!),
@@ -382,7 +383,7 @@ class _AccountSectionState extends State<AccountSection> {
               ],
               if (item.errorMessage != null &&
                   item.errorMessage!.trim().isNotEmpty) ...<Widget>[
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(
                   item.errorMessage!,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -488,7 +489,7 @@ class _AccountSectionState extends State<AccountSection> {
                   border: Border.all(
                     color: theme.colorScheme.error.withValues(alpha: 0.24),
                   ),
-                  color: Colors.white.withValues(alpha: 0.03),
+                  color: tokens.textPrimary.withValues(alpha: 0.03),
                 ),
                 child: Text(
                   l10n.accountDeleteLastResponse(
@@ -511,7 +512,7 @@ class _AccountSectionState extends State<AccountSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _buildDeleteConfirmPrompt(context, l10n),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: _confirmController,
                 onChanged: (_) => setState(() {}),
@@ -536,9 +537,9 @@ class _AccountSectionState extends State<AccountSection> {
                   isDense: true,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               _buildAcknowledgeTile(context, l10n),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               SizedBox(
                 width: split ? null : double.infinity,
                 child: FilledButton.icon(
@@ -568,7 +569,7 @@ class _AccountSectionState extends State<AccountSection> {
         return DecoratedBox(
           decoration:
               studioInsetPanelDecoration(context).copyWith(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
                 border: Border.all(
                   color: theme.colorScheme.error.withValues(alpha: 0.24),
                 ),
@@ -601,7 +602,7 @@ class _AccountSectionState extends State<AccountSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(flex: 11, child: summary),
-                    const SizedBox(width: 18),
+                    const SizedBox(width: StudioSpacing.sm),
                     Expanded(
                       flex: 9,
                       child: Align(alignment: Alignment.topRight, child: form),
@@ -653,7 +654,7 @@ class _AccountSectionState extends State<AccountSection> {
             ),
             color: _acknowledgeIrreversible
                 ? theme.colorScheme.error.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.02),
+                : tokens.textPrimary.withValues(alpha: 0.02),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -666,7 +667,7 @@ class _AccountSectionState extends State<AccountSection> {
               const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: StudioLayoutSpacing.microGap),
                   child: Text(
                     l10n.accountDeleteIrreversibleAck,
                     style: theme.textTheme.bodySmall,

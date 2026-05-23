@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../design_system/tokens.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -131,7 +133,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
     return StudioAlertDialog(
       title: Text(l10n.settingsModelVendorsCredentialDialogTitle(widget.vendorName)),
       content: SizedBox(
-        width: 420,
+        width: studioConstrainedDialogWidth(context, maxWidth: 420),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -151,7 +153,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             TextField(
               controller: _apiKeyCtrl,
               obscureText: true,

@@ -14,6 +14,29 @@ Color studioPanelMutedColor(BuildContext context) {
   return StudioTokens.of(context).textMuted;
 }
 
+/// Elevation shadow color from [StudioTokens.overlay].
+Color studioShadowColor(BuildContext context, {double alpha = 0.12}) {
+  return StudioTokens.of(context).overlay.withValues(alpha: alpha);
+}
+
+/// Standard inset panel drop shadow (replaces hardcoded `Colors.black`).
+List<BoxShadow> studioInsetElevationShadow(
+  BuildContext context, {
+  double alpha = 0.12,
+  double blurRadius = 10,
+  double spreadRadius = -8,
+  Offset offset = const Offset(0, 4),
+}) {
+  return <BoxShadow>[
+    BoxShadow(
+      color: studioShadowColor(context, alpha: alpha),
+      blurRadius: blurRadius,
+      spreadRadius: spreadRadius,
+      offset: offset,
+    ),
+  ];
+}
+
 /// Flat panel chrome (no gradient/glow). Prefer over `colorScheme.outline*`.
 BoxDecoration studioInsetPanelDecoration(
   BuildContext context, {
@@ -40,7 +63,7 @@ ButtonStyle _studioFormButtonDimensions(BuildContext context) {
       Size(0, typography.buttonHeight),
     ),
     padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     ),
     tapTargetSize: MaterialTapTargetSize.padded,
     visualDensity: VisualDensity.standard,

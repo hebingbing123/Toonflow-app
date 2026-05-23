@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../rust_api.dart';
 
@@ -53,7 +54,7 @@ class StudioStepModelChip extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 8,
         children: <Widget>[
-          Chip(
+          StudioChip(
             avatar: const Icon(Icons.smart_toy_outlined, size: 16),
             label: Text(modelId, overflow: TextOverflow.ellipsis),
           ),

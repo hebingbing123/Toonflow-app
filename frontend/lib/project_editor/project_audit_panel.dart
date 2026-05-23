@@ -132,7 +132,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         color: theme.colorScheme.surfaceContainerHighest.withValues(
           alpha: 0.35,
         ),
@@ -141,7 +141,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.projectEditorAuditTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectEditorAuditSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(

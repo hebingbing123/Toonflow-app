@@ -46,7 +46,7 @@ class CreatorStarterTemplatesStrip extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     for (var i = 0; i < children.length; i++) ...<Widget>[
-                      if (i > 0) const SizedBox(width: 12),
+                      if (i > 0) const SizedBox(width: StudioSpacing.sm),
                       Expanded(child: children[i]),
                     ],
                   ],

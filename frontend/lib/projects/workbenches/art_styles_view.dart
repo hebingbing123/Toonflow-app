@@ -90,7 +90,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 l10n.projectsArtWorkbenchIntro,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -134,7 +134,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               if (model.rows.isNotEmpty)
                 StudioDropdownButtonFormField<int>(
                   initialValue: model.selected?.numericId,
@@ -199,12 +199,12 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectsArtWorkbenchFieldPrompt,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.projectsArtWorkbenchExtractTitle,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.extractImagesCtrl,
                 minLines: 3,
@@ -222,7 +222,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   child: Text(l10n.projectsArtWorkbenchExtractButton),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               if (model.coverBytes != null)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +233,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
                       child: Image.memory(
                         model.coverBytes!,
                         height: 180,
@@ -243,7 +243,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   ],
                 ),
               if (model.statusLine != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(model.statusLine!),
               ],
             ],

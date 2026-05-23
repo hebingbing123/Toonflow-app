@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
@@ -74,7 +75,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
     return StudioAlertDialog(
       title: Text(l10n.projectScriptPlanWorkbenchTitle),
       content: SizedBox(
-        width: 720,
+        width: studioConstrainedDialogWidth(context, maxWidth: 720),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +100,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               Text(model.draftSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: 8),
               Text(model.guidanceSummaryLine, style: studioHintStyle(context)),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -136,7 +137,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.storySkeletonCtrl,
                 minLines: 6,
@@ -146,7 +147,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   helperText: l10n.projectScriptPlanWorkbenchStorySkeletonHelper,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.adaptationStrategyCtrl,
                 minLines: 6,
@@ -187,7 +188,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                                 draft.name,
                                 style: theme.textTheme.titleSmall,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${draft.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : draft.chapterIndexes.join(', ')}'
                                 '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
@@ -234,7 +235,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                                 guidance.name,
                                 style: theme.textTheme.titleSmall,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${guidance.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : guidance.chapterIndexes.join(', ')}'
                                 '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',

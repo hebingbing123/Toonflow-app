@@ -266,7 +266,7 @@ class _StoryboardBatchWorkbenchDialogState
     return StudioAlertDialog(
       title: Text(l10n.scriptEditorStoryboardBatchDialogTitle),
       content: SizedBox(
-        width: 820,
+        width: studioConstrainedDialogWidth(context, maxWidth: 820),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,20 +275,20 @@ class _StoryboardBatchWorkbenchDialogState
               l10n.scriptEditorStoryboardBatchDialogIntro,
               style: studioHintStyle(context),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildDiagnosisCard(
               context,
               diagnosis,
               recommendedAction,
               recommendedActionLabel,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildBatchWorkbenchTopActions(),
             const SizedBox(height: 8),
             _buildBatchWorkbenchPromptSection(),
             const SizedBox(height: 8),
             _buildBatchWorkbenchModelSection(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildBatchWorkbenchMutationActions(
               selected: selected,
               singleSelectedId: singleSelectedId,
@@ -297,7 +297,7 @@ class _StoryboardBatchWorkbenchDialogState
               const SizedBox(height: 8),
               Text(_statusLine!, style: Theme.of(context).textTheme.bodySmall),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             SizedBox(
               height: 280,
               child: Row(
@@ -346,7 +346,7 @@ class _StoryboardBatchWorkbenchDialogState
             diagnosis.summary,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: StudioSpacing.xs),
+          const SizedBox(height: 8),
           Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 8),
           FilledButton.tonal(

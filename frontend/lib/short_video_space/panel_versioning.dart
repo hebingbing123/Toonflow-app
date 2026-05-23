@@ -265,13 +265,13 @@ class PanelConsistencyAlert extends StatelessWidget {
       padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         border: Border.all(color: textColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Icon(icon, color: textColor, size: 24),
-          const SizedBox(width: 12),
+          const SizedBox(width: StudioSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +280,7 @@ class PanelConsistencyAlert extends StatelessWidget {
                   l10n.shortVideoPanelVersionDataInconsistencyTitle,
                   style: studioAccentBannerTitleStyle(context, textColor),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.shortVideoPanelVersionStaleSummary(
                     status.stalePanels.length,
@@ -308,7 +308,7 @@ class PanelConsistencyAlert extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: StudioSpacing.sm),
           ElevatedButton.icon(
             onPressed: onRefresh,
             icon: const Icon(Icons.refresh, size: 16),

@@ -28,7 +28,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
           scopeHint,
           style: studioHintStyle(context),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SizedBox(
           height: 280,
           child: ListView.builder(

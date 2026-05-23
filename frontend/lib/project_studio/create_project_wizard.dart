@@ -225,7 +225,9 @@ class _WizardStepIndicator extends StatelessWidget {
                     '${i + 1}',
                     style: studioWizardStepNumberStyle(
                       context,
-                      active ? Colors.white : tokens.textMuted,
+                      active
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : tokens.textMuted,
                     ),
                   ),
                 ),
@@ -278,7 +280,7 @@ class _StepBasics extends StatelessWidget {
             l10n.studioWizardStepBasics,
             style: studioPaneTitleStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             controller: name,
             autofocus: true,
@@ -318,14 +320,14 @@ class _StepNovelPaste extends StatelessWidget {
             l10n.studioWizardStepContent,
             style: studioPaneTitleStyle(context),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.studioWizardPasteNovelHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: StudioTokens.of(context).textSecondary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             controller: controller,
             maxLines: 12,
@@ -363,20 +365,20 @@ class _StepReview extends StatelessWidget {
             l10n.studioWizardStepReview,
             style: studioPaneTitleStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.projectsDialogFieldName,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           Text(name.isEmpty ? '—' : name),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.projectsDialogFieldIntro,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           Text(intro.isEmpty ? '—' : intro),
           if (hasNovel) ...<Widget>[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.studioWizardPasteNovelHint,
               style: Theme.of(context).textTheme.labelLarge,

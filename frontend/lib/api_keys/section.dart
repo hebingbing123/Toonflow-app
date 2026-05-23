@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -155,7 +157,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             return StudioAlertDialog(
               title: Text(l10n.apiKeysRotateTitle(item.displayName)),
               content: SizedBox(
-                width: 420,
+                width: studioConstrainedDialogWidth(context, maxWidth: 420),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +166,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       l10n.apiKeysRotateBody,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: StudioSpacing.sm),
                     Text(
                       l10n.apiKeysExpiryPolicy,
                       style: Theme.of(context).textTheme.titleSmall,
@@ -301,7 +303,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 l10n.apiKeysRevokeBody,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: reasonController,
                 maxLines: 3,
@@ -347,7 +349,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ).copyWith(
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: studioShadowColor(context, alpha: 0.12),
                 blurRadius: 10,
                 spreadRadius: -8,
                 offset: const Offset(0, 4),
@@ -497,7 +499,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Text(l10n.apiKeysExpiryPolicy, style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Wrap(
@@ -578,7 +580,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 color: StudioTokens.of(context).accentSoft.withValues(
                   alpha: 0.45,
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +589,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     l10n.apiKeysPlaintextOnceTitle,
                     style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                   Text(
                     l10n.apiKeysPlaintextOnceBody,
                     style: theme.textTheme.bodySmall,
@@ -670,17 +672,17 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                Chip(
+                StudioChip(
                   label: Text(
                     l10n.apiKeysStatActive(widget.controller.activeCount),
                   ),
                 ),
-                Chip(
+                StudioChip(
                   label: Text(
                     l10n.apiKeysStatRevoked(widget.controller.revokedCount),
                   ),
                 ),
-                Chip(
+                StudioChip(
                   label: Text(
                     l10n.apiKeysStatTotal(widget.controller.items.length),
                   ),
@@ -783,7 +785,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       padding: EdgeInsets.all(compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -796,19 +798,19 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.displayName, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        Chip(
+                        StudioChip(
                           label: Text(
                             item.isUsable
                                 ? l10n.apiKeysChipUsable
                                 : l10n.apiKeysChipUnusable,
                           ),
                         ),
-                        Chip(
+                        StudioChip(
                           label: Text(
                             item.isActive
                                 ? l10n.apiKeysChipActive
@@ -816,10 +818,10 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           ),
                         ),
                         if (item.isExpired)
-                          Chip(
+                          StudioChip(
                             label: Text(l10n.apiKeysChipExpired),
                           ),
-                        Chip(
+                        StudioChip(
                           label: Text(
                             item.scope == ApiKeyScopeV1.readOnly
                                 ? l10n.apiKeysScopeReadOnly
@@ -842,14 +844,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ),
           const SizedBox(height: StudioSpacing.xs),
           SelectableText(item.keyHint),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioLayoutSpacing.titleTight),
           Text(
             l10n.apiKeysPublicIdLine(item.publicId),
             style: theme.textTheme.bodySmall?.copyWith(
               color: StudioTokens.of(context).textSecondary,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioLayoutSpacing.titleTight),
           Text(
             l10n.apiKeysMetaLine(
               _fmt(item.createdAt),
@@ -955,13 +957,13 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 padding: EdgeInsets.all(compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
                 decoration: BoxDecoration(
                   border: Border.all(color: studioPanelBorderColor(context)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.eventSummary, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Text(
                       '${item.eventType} · ${_fmt(item.createdAt)}',
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -975,7 +977,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                         runSpacing: 8,
                         children: item.metadata.entries
                             .map(
-                              (entry) => Chip(
+                              (entry) => StudioChip(
                                 label: Text(
                                   '${entry.key}: ${_metadataValue(entry.value)}',
                                 ),
@@ -994,12 +996,12 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
   }
 
-  ChoiceChip _choiceChip({
+  Widget _choiceChip({
     required String label,
     required bool selected,
     required VoidCallback onSelected,
   }) {
-    return ChoiceChip(
+    return StudioChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/tokens.dart';
 
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../l10n/app_localizations.dart';
@@ -234,7 +235,7 @@ Future<void> openNovelWorkbenchDialog({
                             ],
                           ),
                         ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildSearchSection(
                         l10n: l10n,
                         ctx: ctx,

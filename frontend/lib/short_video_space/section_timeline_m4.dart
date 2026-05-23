@@ -122,7 +122,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
           }
           return SafeArea(
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: revisions.length,
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {

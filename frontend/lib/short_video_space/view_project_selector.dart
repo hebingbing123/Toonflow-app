@@ -101,7 +101,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             l10n.shortVideoSpaceConfigurationDescription,
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -125,7 +125,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                   onChanged: loadingProjects ? null : onProjectChanged,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               OutlinedButton.icon(
                 onPressed: loadingProjects ? null : onRefreshProjects,
                 icon: const Icon(Icons.refresh_outlined),
@@ -151,9 +151,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           SegmentedButton<String>(
             segments: [
               ButtonSegment(
@@ -221,7 +221,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                     }
                   },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             l10n.shortVideoSpaceTargetPlatformsHint,
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
@@ -245,7 +245,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                 )
                 .toList(growable: false),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             l10n.shortVideoSpaceDurationStrategyTitle,
             style: theme.textTheme.labelLarge,
@@ -310,7 +310,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ),
             onChanged: onBgmStrategyChanged,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -350,7 +350,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                     : operationFeedbackIsSuccess == false
                         ? theme.colorScheme.errorContainer
                         : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 border: Border.all(
                   color: operationFeedbackIsSuccess == true
                       ? theme.colorScheme.primary

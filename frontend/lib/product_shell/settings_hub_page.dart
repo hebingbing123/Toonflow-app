@@ -310,7 +310,7 @@ class _SettingsHeroCard extends StatelessWidget {
                   if (scrollableTabs)
                     DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
                         border: Border.all(
                           color: tokens.borderSubtle.withValues(alpha: 0.55),
                         ),
@@ -385,7 +385,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
                     color: tokens.bgInset.withValues(alpha: 0.84),
                     border: Border.all(color: tokens.borderSubtle),
                   ),
@@ -429,7 +429,7 @@ class _SettingsSummaryTile extends StatelessWidget {
               ],
             ),
             if (!compact) ...<Widget>[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               _SettingsProgressDots(
                 count: modules.length,
                 selectedIndex: selectedIndex,
@@ -485,7 +485,7 @@ class _SettingsModuleTab extends StatelessWidget {
         vertical: compact ? 10 : 12,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(StudioSpacing.sm),
         border: Border.all(
           color: selected ? tokens.primary : tokens.borderSubtle,
           width: selected ? 1.5 : 1,

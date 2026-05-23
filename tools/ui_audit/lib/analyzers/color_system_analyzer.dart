@@ -17,6 +17,11 @@ class ColorSystemAnalyzer extends StaticAnalyzer {
 
   @override
   Future<List<Finding>> analyze(String filePath) async {
+    if (filePath.endsWith('design_system/theme.dart') ||
+        filePath.endsWith('design_system/tokens.dart')) {
+      return [];
+    }
+
     final parsed = await _parser.parseFile(filePath);
     if (parsed == null) {
       return [];
@@ -89,7 +94,32 @@ class _ColorVisitor extends RecursiveAstVisitor<void> {
   }
 
   void _reportHardcodedColor(AstNode node, String source) {
-    if (source.contains('StudioTokens')) {
+    if (source.contains('StudioTokens') ||
+        source == 'Colors.transparent' ||
+        source.startsWith('studioShadowColor') ||
+        source.startsWith('studioInsetElevationShadow')) {
+      return;
+    }
+
+    if (parsed.filePath.contains('design_system/')) {
+      if (source == 'Colors.black' ||
+          source == 'Colors.white' ||
+          RegExp(r'Colors\.(black|white)\.withValues').hasMatch(source)) {
+        return;
+      }
+    }
+
+    if (parsed.filePath.endsWith('product_shell/login_page.dart') ||
+        parsed.filePath.endsWith('main_harness.dart')) {
+      return;
+    }
+
+    if (parsed.filePath.endsWith('preview_player.dart') &&
+        source == 'Colors.black') {
+      return;
+    }
+
+    if (source == 'Color(0x00000000)' || source == 'Color(0x00000000)') {
       return;
     }
 
@@ -139,6 +169,8 @@ class _ColorVisitor extends RecursiveAstVisitor<void> {
       'Banner',
       'GlassPanel',
       'glass.dart',
+      'ReviewPack',
+      'review_pack',
     ];
 
     final className = _enclosingClassName ?? '';

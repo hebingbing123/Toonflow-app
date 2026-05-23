@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 
+import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
@@ -293,7 +295,7 @@ class _VersionComparisonState extends State<VersionComparison> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             action: SnackBarAction(
               label: l10n.shortVideoVersionComparisonSnackbarView,
-              textColor: Colors.white,
+              textColor: Theme.of(context).colorScheme.onPrimary,
               onPressed: () {
                 _showReportDialog(report);
               },
@@ -551,7 +553,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                   size: 24,
                   color: theme.colorScheme.primary,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: StudioSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +562,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         l10n.shortVideoVersionComparisonTitle,
                         style: studioDialogTitleStyle(context),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         '${widget.baseVersion.name} → ${widget.compareVersion.name}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -656,13 +658,13 @@ class _VersionComparisonState extends State<VersionComparison> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: StudioSpacing.sm),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    FilterChip(
+                    StudioFilterChip(
                       label: Text(
                         l10n.shortVideoVersionComparisonShowChangesOnly,
                       ),
@@ -711,7 +713,8 @@ class _VersionComparisonState extends State<VersionComparison> {
                               icon: Icons.check_circle_outline,
                             ),
                     )
-                  : Card(
+                  : StudioCard(
+                      padding: EdgeInsets.zero,
                       child: ListView.builder(
                         itemCount: filteredDiffs.length,
                         itemBuilder: (context, index) {
@@ -752,7 +755,7 @@ class _StatisticItem extends StatelessWidget {
           value,
           style: studioStatHeroValueStyle(context, color),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           label,
           style: studioAccentBannerBodyStyle(
@@ -818,7 +821,7 @@ class _DifferenceListItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: typeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
               border: Border.all(color: typeColor.withValues(alpha: 0.3)),
             ),
             child: Text(
@@ -874,7 +877,7 @@ class _DifferenceListItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: StudioSpacing.xs),
                   Row(
                     children: [
                       Container(

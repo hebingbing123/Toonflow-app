@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
 /// Shared width gates for studio / product-shell responsive layout.
 ///
 /// Use [LayoutBuilder] `constraints.maxWidth`, not [MediaQuery] full viewport,
@@ -27,3 +31,13 @@ const double kProjectsHomeSplitOverviewMinWidth = 1360;
 
 /// Shortest-side gate for phone / handset layout (iOS, Android, narrow Web).
 const double kProjectsHomePhoneShortestSide = 600;
+
+/// Dialog / sheet content width capped to viewport minus [horizontalMargin].
+double studioConstrainedDialogWidth(
+  BuildContext context, {
+  double maxWidth = 520,
+  double horizontalMargin = 48,
+}) {
+  final viewport = MediaQuery.sizeOf(context).width;
+  return math.min(maxWidth, math.max(280, viewport - horizontalMargin));
+}

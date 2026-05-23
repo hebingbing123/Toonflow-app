@@ -22,7 +22,7 @@ class _ProjectAssetsWorkbenchLaunchers extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.projectEditorAssetsSpecializedWorkbenchesTitle, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.projectEditorAssetsSpecializedWorkbenchesSubtitle,
           style: Theme.of(context).textTheme.bodySmall,

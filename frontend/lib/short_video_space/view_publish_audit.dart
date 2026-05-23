@@ -30,7 +30,7 @@ class _PublishAuditPanel extends StatelessWidget {
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: StudioSpacing.xs),
+        const SizedBox(height: 8),
         // P11: Delivery mode breakdown
         if (publishPanelUi.jobsByDeliveryMode.isNotEmpty) ...[
           Container(
@@ -48,7 +48,7 @@ class _PublishAuditPanel extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: StudioSpacing.xs),
+                const SizedBox(height: 8),
                 Wrap(
                   spacing: 12,
                   runSpacing: 6,
@@ -57,7 +57,7 @@ class _PublishAuditPanel extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DeliveryModeBadge(deliveryMode: e.key),
-                        const SizedBox(width: StudioSpacing.xs),
+                        const SizedBox(width: 8),
                         Text(
                           l10n.shortVideoPublishAuditJobCount(e.value),
                           style: theme.textTheme.bodySmall,

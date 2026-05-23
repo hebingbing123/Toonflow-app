@@ -48,7 +48,7 @@ class _AuthSectionContent extends StatelessWidget {
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -92,7 +92,7 @@ class _AuthSignedInPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(l10n.authSignedInUser(model.session?.user.id ?? '')),
         const SizedBox(height: 8),
         FilledButton.tonal(

@@ -94,7 +94,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
           color: ready
               ? tokens.primary.withValues(alpha: 0.12)
               : theme.colorScheme.errorContainer.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
           border: Border.all(
             color: ready
                 ? tokens.primary.withValues(alpha: 0.35)
@@ -123,7 +123,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         detail,
                         style: theme.textTheme.bodySmall?.copyWith(

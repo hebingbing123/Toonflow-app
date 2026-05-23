@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -260,7 +261,7 @@ class WorkspaceContextView extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioLayoutSpacing.titleTight),
               _buildTitleBarProjectScopeRow(
                 context: context,
                 theme: theme,
@@ -313,7 +314,7 @@ class WorkspaceContextView extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: StudioLayoutSpacing.titleTight),
             // 第二行：项目
             Row(
               children: <Widget>[
@@ -391,7 +392,7 @@ class WorkspaceContextView extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: tokens.bgSurface.withValues(alpha: 0.78),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
             border: Border.all(color: tokens.surfaceHighlight),
           ),
           child: Padding(
@@ -413,7 +414,7 @@ class WorkspaceContextView extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface.withValues(alpha: 0.94),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
@@ -448,7 +449,7 @@ class WorkspaceContextView extends StatelessWidget {
                     label: scopeLine,
                   ),
                   if (workspaceTypeLabel != null)
-                    Chip(
+                    StudioChip(
                       label: Text(workspaceTypeLabel),
                       visualDensity: VisualDensity.standard,
                       materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -517,7 +518,7 @@ class WorkspaceContextView extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: tokens.bgSurface.withValues(alpha: 0.94),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
             border: Border.all(color: tokens.borderSubtle),
           ),
           child: ExpansionTile(
@@ -542,7 +543,7 @@ class WorkspaceContextView extends StatelessWidget {
                 if (workspaceTypeLabel != null)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: Chip(
+                    child: StudioChip(
                       label: Text(workspaceTypeLabel),
                       visualDensity: VisualDensity.standard,
                       materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -563,7 +564,7 @@ class WorkspaceContextView extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgSurface.withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Padding(
@@ -584,14 +585,14 @@ class WorkspaceContextView extends StatelessWidget {
                           style: theme.textTheme.titleSmall,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioLayoutSpacing.titleTight),
                         Text(scopeLine, style: theme.textTheme.bodySmall),
                       ],
                     ),
                   ),
                   if (workspaceTypeLabel != null) ...<Widget>[
-                    const SizedBox(width: 12),
-                    Chip(
+                    const SizedBox(width: StudioSpacing.sm),
+                    StudioChip(
                       label: Text(workspaceTypeLabel),
                     ),
                   ],
@@ -599,9 +600,9 @@ class WorkspaceContextView extends StatelessWidget {
               ),
               // Display workspace billing when billing_scope = workspace (Task 6.2)
               if (billingScope == 'workspace' && workspacePlanTier != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 const Divider(height: 1),
-                const SizedBox(height: 12),
+                const SizedBox(height: StudioSpacing.sm),
                 _buildWorkspaceBillingInfo(context, l10n),
               ],
             ],
@@ -656,7 +657,7 @@ class WorkspaceContextView extends StatelessWidget {
                     ),
                     style: theme.textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                   Text(
                     l10n.workspaceBillingDailyQuota(quotaText),
                     style: theme.textTheme.bodySmall,
@@ -673,7 +674,7 @@ class WorkspaceContextView extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(
                   l10n.workspaceBillingPercentUsed(usagePercent),
                   style: theme.textTheme.bodySmall?.copyWith(

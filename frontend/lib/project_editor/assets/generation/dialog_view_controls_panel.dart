@@ -73,7 +73,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                       },
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: StudioDropdownButtonFormField<String>(
                 initialValue: selectedType,
@@ -129,7 +129,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             SizedBox(
               width: 140,
               child: TextField(

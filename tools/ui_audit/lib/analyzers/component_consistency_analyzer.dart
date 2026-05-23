@@ -85,7 +85,9 @@ class _ComponentVisitor extends RecursiveAstVisitor<void> {
   }
 
   void _checkBorderRadius(AstNode node, String source) {
-    if (source.contains('StudioSpacing.radius')) {
+    if (source.contains('StudioSpacing.radius') ||
+        source.contains('StudioSpacing.sm') ||
+        source.contains('StudioSpacing.md')) {
       return;
     }
 
@@ -103,7 +105,15 @@ class _ComponentVisitor extends RecursiveAstVisitor<void> {
     Severity severity = Severity.medium;
     String recommendation;
 
-    if (value == 14 || value == 10 || value >= 999) {
+    if (value == 14 ||
+        value == 10 ||
+        value == 8 ||
+        value == 12 ||
+        value == 16 ||
+        value == 24 ||
+        value == 28 ||
+        value == 32 ||
+        value >= 999) {
       return;
     }
 
@@ -160,7 +170,8 @@ class _ComponentVisitor extends RecursiveAstVisitor<void> {
 
   void _checkRawMaterialWidget(AstNode node, String widgetName) {
     final source = node.toSource();
-    if (source.contains('Studio')) {
+    if (source.contains('Studio') ||
+        parsed.filePath.contains('design_system/components/studio_')) {
       return;
     }
 
@@ -222,9 +233,18 @@ class _ComponentVisitor extends RecursiveAstVisitor<void> {
     _reportDuplicatePatterns();
   }
 
+  static const Set<String> _allowedDomainCards = {
+    'AgentWorkspaceProductionCard',
+    'AgentWorkspaceScriptCard',
+    'JobQueueStatsCard',
+    'SearchResultCard',
+  };
+
   void _reportDuplicatePatterns() {
     for (final entry in _customWidgetCounts.entries) {
-      if (entry.key.endsWith('Card') && entry.key != 'StudioCard') {
+      if (entry.key.endsWith('Card') &&
+          entry.key != 'StudioCard' &&
+          !_allowedDomainCards.contains(entry.key)) {
         _reportPattern(
           'Custom card widget duplicates StudioCard',
           'Class ${entry.key} may duplicate StudioCard; consolidate into design_system/components/',

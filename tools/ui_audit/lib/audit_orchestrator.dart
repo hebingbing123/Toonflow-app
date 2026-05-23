@@ -3,6 +3,7 @@ import 'dart:io';
 import 'analyzers/static_analysis_runner.dart';
 import 'config/config_parser.dart';
 import 'models/models.dart';
+import 'monitoring/metrics_tracker.dart';
 import 'report/findings_aggregator.dart';
 import 'report/report_generator.dart';
 import 'runtime/default_runtime_inspector.dart';
@@ -16,16 +17,19 @@ class AuditOrchestrator {
   final RuntimeInspector runtimeInspector;
   final FindingsAggregator aggregator;
   final ReportGenerator reportGenerator;
+  final MetricsTracker metricsTracker;
 
   AuditOrchestrator({
     StaticAnalysisRunner? staticRunner,
     RuntimeInspector? runtimeInspector,
     FindingsAggregator? aggregator,
     ReportGenerator? reportGenerator,
+    MetricsTracker? metricsTracker,
   })  : staticRunner = staticRunner ?? StaticAnalysisRunner(),
         runtimeInspector = runtimeInspector ?? defaultRuntimeInspector(),
         aggregator = aggregator ?? FindingsAggregator(),
-        reportGenerator = reportGenerator ?? ReportGenerator();
+        reportGenerator = reportGenerator ?? ReportGenerator(),
+        metricsTracker = metricsTracker ?? MetricsTracker();
 
   Future<AuditRunResult> run(
     AuditConfiguration config, {
@@ -71,6 +75,10 @@ class AuditOrchestrator {
     List<String> reportPaths = [];
     if (writeReports) {
       reportPaths = await reportGenerator.writeReports(auditResult, config);
+    }
+
+    if (writeReports) {
+      await metricsTracker.record(auditResult);
     }
 
     return AuditRunResult(

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_chip.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
@@ -449,13 +450,13 @@ class _FilterPanelState extends State<FilterPanel> {
               children: [
                 Text(l10n.shortVideoFilterPanelSearchScopeLabel),
                 const SizedBox(width: 8),
-                FilterChip(
+                StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipSubtitle),
                   selected: _currentFilter.searchInSubtitles,
                   onSelected: _onSearchInSubtitlesChanged,
                 ),
                 const SizedBox(width: 8),
-                FilterChip(
+                StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipVoiceover),
                   selected: _currentFilter.searchInVoiceover,
                   onSelected: _onSearchInVoiceoverChanged,
@@ -466,13 +467,13 @@ class _FilterPanelState extends State<FilterPanel> {
 
           // Active filter tags
           if (hasActiveFilters) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 for (final tag in activeTags)
-                  Chip(
+                  StudioInputChip(
                     label: Text(tag.label),
                     onDeleted: () => _removeFilter(tag),
                     deleteIcon: const Icon(Icons.close, size: 18),
@@ -503,7 +504,7 @@ class _StatusFilterDropdown extends StatelessWidget {
     return StudioMultiSelectField<ShotStatusFilter>(
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
       ).copyWith(labelText: l10n.shortVideoFilterPanelStatusLabel),
       valueLabel: selectedFilters.isEmpty
           ? l10n.shortVideoFilterPanelDropdownAll
@@ -539,7 +540,7 @@ class _QualityFilterDropdown extends StatelessWidget {
     return StudioMultiSelectField<QualityFilter>(
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
       ).copyWith(labelText: l10n.shortVideoFilterPanelQualityLabel),
       valueLabel: selectedFilters.isEmpty
           ? l10n.shortVideoFilterPanelDropdownAll

@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/tokens.dart';
 import '../../rust_api.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
+import 'package:openflow_app/design_system/components/studio_card.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 
@@ -239,7 +240,7 @@ class _VersionManagerState extends State<VersionManager> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   ),
                   child: Row(
                     children: [
@@ -276,7 +277,7 @@ class _VersionManagerState extends State<VersionManager> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: StudioTokens.of(context).primarySoft,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               ),
               child: Row(
                 children: [
@@ -299,7 +300,7 @@ class _VersionManagerState extends State<VersionManager> {
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoVersionManagerCurrentVersionMeta(
                             currentVersion.shotCount,
@@ -441,9 +442,11 @@ class _VersionManagerState extends State<VersionManager> {
                     Builder(builder: (context) {
                   final draft = widget.drafts[index];
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: StudioCard(
+                      padding: EdgeInsets.zero,
+                      child: ListTile(
                       leading: Icon(
                         Icons.drafts_outlined,
                         color: theme.colorScheme.secondary,
@@ -476,7 +479,8 @@ class _VersionManagerState extends State<VersionManager> {
                         ],
                       ),
                     ),
-                  );
+                  ),
+                );
                     }),
                 ],
               ),
@@ -851,9 +855,11 @@ class _VersionManagerState extends State<VersionManager> {
                       final draft = widget.drafts[index];
                       final theme = Theme.of(context);
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: StudioCard(
+                          padding: EdgeInsets.zero,
+                          child: ListTile(
                           leading: Icon(
                             Icons.drafts_outlined,
                             color: theme.colorScheme.secondary,
@@ -890,7 +896,8 @@ class _VersionManagerState extends State<VersionManager> {
                             ],
                           ),
                         ),
-                      );
+                      ),
+                    );
                     },
                   ),
           ),
@@ -1053,8 +1060,8 @@ class _VersionManagerState extends State<VersionManager> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: StudioLayoutSpacing.insetDense,
+                          vertical: StudioSpacing.xs,
                         ),
                       ),
                       hint: Text(l10n.shortVideoVersionManagerCompareBaseHint),
@@ -1085,8 +1092,8 @@ class _VersionManagerState extends State<VersionManager> {
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: StudioLayoutSpacing.insetDense,
+                          vertical: StudioSpacing.xs,
                         ),
                       ),
                       hint: Text(l10n.shortVideoVersionManagerCompareTargetHint),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/studio_typography.dart';
+import '../design_system/tokens.dart';
 import '../rust_api.dart';
 
 typedef PublishCalendarDayCallback = void Function(
@@ -105,7 +106,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
               ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -141,10 +142,10 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                 onTap: widget.busy
                     ? null
                     : () => widget.onDayTap(context, day),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                     border: Border.all(color: outline),
                     color: theme.colorScheme.surfaceContainerHighest.withValues(
                       alpha: isToday ? 0.65 : 0.35,
@@ -156,7 +157,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(l10n.l10nBatch_775383c7b6(day.day), style: labelStyle),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           countLabel,
                           style: theme.textTheme.bodySmall?.copyWith(

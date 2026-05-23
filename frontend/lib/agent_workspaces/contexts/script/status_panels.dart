@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../design_system/tokens.dart';
 
 import '../../../rust_api.dart';
 
@@ -52,7 +53,7 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
             l10n.agentWorkspaceScriptLatestAssistantResult,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             previewAssistantText(workspaceAssistantText.trim(), maxChars: 720),
             style: bodySmall,

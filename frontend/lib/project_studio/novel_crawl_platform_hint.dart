@@ -107,7 +107,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
             DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
@@ -121,7 +121,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -173,10 +173,10 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4),
       child: Material(
         color: tokens.primarySoft.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: StudioSpacing.xs),
             child: Row(

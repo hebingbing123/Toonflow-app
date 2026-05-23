@@ -107,7 +107,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +120,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
                         suggested.title,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         suggested.detail,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -128,7 +128,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 FilledButton(
                   onPressed: suggested.enabled ? suggested.onPressed : null,
                   child: Text(suggested.ctaLabel),

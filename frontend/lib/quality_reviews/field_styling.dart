@@ -22,14 +22,15 @@ InputDecoration qualityReviewsInputDecoration(
   String? hintText,
 }) {
   final muted = qualityReviewsMutedColor(context);
+  final mutedStyle = studioHintStyle(context);
   return InputDecoration(
     labelText: labelText,
     helperText: helperText,
     hintText: hintText,
-    labelStyle: TextStyle(color: muted),
-    floatingLabelStyle: TextStyle(color: muted),
-    helperStyle: TextStyle(color: muted),
-    hintStyle: TextStyle(color: muted.withValues(alpha: 0.85)),
+    labelStyle: mutedStyle,
+    floatingLabelStyle: mutedStyle,
+    helperStyle: mutedStyle,
+    hintStyle: mutedStyle?.copyWith(color: muted.withValues(alpha: 0.85)),
   );
 }
 
@@ -79,14 +80,18 @@ class QualityReviewIdLookupRow extends StatelessWidget {
     if (width < 520) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[field, const SizedBox(height: 8), action],
+        children: <Widget>[
+          field,
+          const SizedBox(height: StudioSpacing.xs),
+          action,
+        ],
       );
     }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         Expanded(child: field),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         action,
       ],
     );
@@ -97,17 +102,19 @@ class QualityReviewIdLookupRow extends StatelessWidget {
 ThemeData qualityReviewsFormTheme(BuildContext context) {
   final base = Theme.of(context);
   final scheme = base.colorScheme;
-  final muted = StudioTokens.of(context).textSecondary;
+  final mutedStyle = studioHintStyle(context);
   return base.copyWith(
     textTheme: base.textTheme.apply(
       bodyColor: scheme.onSurface,
       displayColor: scheme.onSurface,
     ),
     inputDecorationTheme: base.inputDecorationTheme.copyWith(
-      labelStyle: TextStyle(color: muted),
-      floatingLabelStyle: TextStyle(color: muted),
-      helperStyle: TextStyle(color: muted),
-      hintStyle: TextStyle(color: muted.withValues(alpha: 0.85)),
+      labelStyle: mutedStyle,
+      floatingLabelStyle: mutedStyle,
+      helperStyle: mutedStyle,
+      hintStyle: mutedStyle?.copyWith(
+        color: StudioTokens.of(context).textSecondary.withValues(alpha: 0.85),
+      ),
     ),
   );
 }

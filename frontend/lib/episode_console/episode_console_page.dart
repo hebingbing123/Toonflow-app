@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/components/studio_chip.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_text_styles.dart';
@@ -46,7 +47,7 @@ class EpisodeConsolePage extends StatelessWidget {
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: Chip(
+            child: StudioChip(
               label: Text(l10n.studioEpisodeConsoleBetaLabel),
             ),
           ),

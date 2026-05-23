@@ -189,6 +189,15 @@ abstract final class StudioSpacing {
   static const double radiusButton = 10;
   static const double radiusCard = 14;
 
+  /// Dense chips / compact panels (8px corners).
+  static const double radiusDense = 8;
+
+  /// Legacy medium corners (12px); prefer [radiusCard] for new surfaces.
+  static const double radiusComfort = 12;
+
+  /// Large sheets / modals (28px).
+  static const double radiusSheet = 28;
+
   /// Minimum square hit target for chrome icon buttons (desktop).
   static const double iconTouchTarget = 36;
 
@@ -207,6 +216,12 @@ abstract final class StudioLayoutSpacing {
   static const double titleSubtitle = StudioSpacing.xs;
   static const double actionRow = StudioSpacing.sm;
   static const double listItem = StudioSpacing.xs;
+
+  /// Dense icon-to-label gap (replaces legacy `6` in chrome rows).
+  static const double microGap = 6;
+
+  /// Title to subtitle in compact headers (replaces legacy `4`).
+  static const double titleTight = 4;
 
   /// Tight stack gap (replaces legacy `10` in cards and forms).
   static const double inlineGap = 10;

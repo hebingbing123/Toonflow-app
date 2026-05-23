@@ -525,7 +525,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
             onPressed: canUndo ? () => _performUndo() : null,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 8),
         Tooltip(
           message: canRedo
               ? l10n.shortVideoRedoTooltipWithDescription(redoDescription!)
@@ -535,7 +535,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
             onPressed: canRedo ? () => _performRedo() : null,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 8),
         Tooltip(
           message: l10n.shortVideoOperationHistoryToolbarTooltip,
           child: IconButton(
@@ -561,7 +561,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         return StudioAlertDialog(
           title: Text(l10n.shortVideoOperationHistoryTitle),
           content: SizedBox(
-            width: 600,
+            width: studioConstrainedDialogWidth(context, maxWidth: 600),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,7 +571,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,7 +590,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             size: 16,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 8),
                           Text(
                             l10n.shortVideoOperationHistoryUndoStack(
                               summary['undoCount'] as int,
@@ -602,7 +602,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             size: 16,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 8),
                           Text(
                             l10n.shortVideoOperationHistoryRedoStack(
                               summary['redoCount'] as int,
@@ -610,7 +610,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         l10n.shortVideoOperationHistoryLimitLine(
                           summary['maxHistorySize'] as int,

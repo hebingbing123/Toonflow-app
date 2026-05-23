@@ -257,12 +257,12 @@ class ProjectsArtStylesPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.projectsArtStyleCount(artStyles.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: StudioSpacing.xs),
         ...artStyles.take(5).map(
           (style) => ListTile(
             dense: true,
@@ -302,7 +302,7 @@ class ProjectsListPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.projectsProjectCount(projects.length),
           style: Theme.of(context).textTheme.labelLarge,

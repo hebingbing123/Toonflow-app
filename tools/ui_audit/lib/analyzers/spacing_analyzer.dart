@@ -74,6 +74,8 @@ class SpacingAnalyzer extends StaticAnalyzer {
       16 => 'StudioSpacing.sm',
       24 => 'StudioSpacing.md',
       32 => 'StudioSpacing.lg',
+      4 => 'StudioLayoutSpacing.titleTight',
+      6 => 'StudioLayoutSpacing.microGap',
       10 => 'StudioLayoutSpacing.inlineGap',
       12 => 'StudioLayoutSpacing.insetDense',
       14 => 'StudioLayoutSpacing.stackMedium',
@@ -215,6 +217,11 @@ class _SpacingVisitor extends RecursiveAstVisitor<void> {
 
     final value = extractNumericLiteral(expression);
     if (value == null) {
+      return;
+    }
+
+    // Zero is valid for asymmetric EdgeInsets (e.g. no horizontal inset on desktop).
+    if (value == 0) {
       return;
     }
 

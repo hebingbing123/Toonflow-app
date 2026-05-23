@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../../design_system/components/studio_filter_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
@@ -81,7 +82,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
     return StudioAlertDialog(
       title: Text(l10n.projectEditorScriptsWorkbenchDialogTitle),
       content: SizedBox(
-        width: 820,
+        width: studioConstrainedDialogWidth(context, maxWidth: 820),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -91,7 +92,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 model.infoLine,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               StudioWorkbenchSection(
                 title: l10n.projectEditorScriptsWorkbenchDialogNameFilterLabel,
                 child: Column(
@@ -168,7 +169,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       l10n.projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               StudioWorkbenchSection(
                 title: l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel,
                 child: StudioFilterRow(

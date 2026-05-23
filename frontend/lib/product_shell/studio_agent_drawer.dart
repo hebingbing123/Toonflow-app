@@ -139,7 +139,7 @@ class _StudioAgentDrawerHeader extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.padded,
               visualDensity: VisualDensity.standard,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
                 side: BorderSide(color: tokens.surfaceHighlight),
               ),
             ),

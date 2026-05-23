@@ -200,7 +200,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(
           color: studioPanelBorderColor(context).withValues(alpha: 0.2),
         ),
@@ -241,7 +241,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               ),
               child: Row(
                 children: [

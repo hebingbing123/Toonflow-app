@@ -4,6 +4,7 @@ import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -86,7 +87,7 @@ Future<void> showArtStepBriefContextSheet({
                         style: studioSectionIntroStyle(sheetCtx),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: StudioSpacing.sm),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),

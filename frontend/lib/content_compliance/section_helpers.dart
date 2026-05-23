@@ -1081,7 +1081,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
         return StudioAlertDialog(
           title: Text(l10n.contentComplianceAuditTitle(item.id)),
           content: SizedBox(
-            width: 640,
+            width: studioConstrainedDialogWidth(context, maxWidth: 640),
             child: rows.isEmpty
                 ? StudioEmptyState.emptyData(
                     title: l10n.contentComplianceAuditEmpty,
@@ -1101,7 +1101,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                   border: Border.all(
                                     color: studioPanelBorderColor(context),
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1110,7 +1110,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                       _auditSummary(l10n, audit),
                                       style: theme.textTheme.titleSmall,
                                     ),
-                                    const SizedBox(height: StudioSpacing.xs),
+                                    const SizedBox(height: 8),
                                     Text(
                                       audit.createdAt,
                                       style: theme.textTheme.bodySmall
@@ -1118,7 +1118,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                             color: tokens.textSecondary,
                                           ),
                                     ),
-                                    const SizedBox(height: StudioSpacing.xs),
+                                    const SizedBox(height: 8),
                                     SelectableText(
                                       _auditDetails(audit),
                                       style: theme.textTheme.bodySmall,

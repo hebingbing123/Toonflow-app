@@ -239,7 +239,7 @@ class _StudioNovelCrawlAuthSectionState
       children: <Widget>[
         InkWell(
           onTap: _loading ? null : () => setState(() => _expanded = !_expanded),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
@@ -249,7 +249,7 @@ class _StudioNovelCrawlAuthSectionState
                   size: 20,
                   color: outline,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
                     l10n.studioNovelCrawlAuthSectionTitle,

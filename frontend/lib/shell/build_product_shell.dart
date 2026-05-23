@@ -463,10 +463,10 @@ extension _HomePageProductShell on _HomePageState {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          borderRadius: BorderRadius.circular(10),
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+              borderRadius: BorderRadius.circular(10),
               color: selected
                   ? tokens.primarySoft.withValues(alpha: 0.72)
                   : tokens.bgSurface.withValues(alpha: 0.42),
@@ -592,7 +592,7 @@ extension _HomePageProductShell on _HomePageState {
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
     );
-    const columnGap = StudioSpacing.sm;
+    const columnGap = 16.0;
 
     Widget destinationTile(
       ProductShellDestination dest, {
@@ -680,7 +680,7 @@ extension _HomePageProductShell on _HomePageState {
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.16),
+              color: studioShadowColor(context, alpha: 0.16),
               blurRadius: 16,
               spreadRadius: -6,
               offset: const Offset(0, 8),
@@ -688,7 +688,7 @@ extension _HomePageProductShell on _HomePageState {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+          borderRadius: BorderRadius.circular(14),
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               StudioLayoutSpacing.insetDense,
@@ -977,14 +977,14 @@ extension _HomePageProductShell on _HomePageState {
   }) {
     return InkWell(
       onTap: _goToProjectsHome,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const OpenFlowBrandMark(size: 36, borderRadius: 10),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,7 +1119,7 @@ extension _HomePageProductShell on _HomePageState {
               enabled: canBack,
               onPressed: canBack ? _handleProductShellBack : null,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             _buildMacOSNavChevronButton(
               context: context,
               icon: Icons.arrow_forward,
@@ -1203,7 +1203,7 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 _buildMacOSNavChevrons(context),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 Expanded(child: searchBar),
               ],
             ),
@@ -1216,7 +1216,7 @@ extension _HomePageProductShell on _HomePageState {
   EdgeInsets _macOSTitleBarContentPadding({required bool hasWorkspaceContext}) {
     // Extra top inset: equal top/bottom reads visually high under traffic lights.
     return hasWorkspaceContext
-        ? const EdgeInsets.only(left: 0, right: 10, top: 6, bottom: 5)
+        ? const EdgeInsets.only(left: 0, right: 10, top: StudioLayoutSpacing.microGap, bottom: 5)
         : const EdgeInsets.only(left: 0, right: 10, top: 5, bottom: 3);
   }
 
@@ -1248,7 +1248,7 @@ extension _HomePageProductShell on _HomePageState {
       width: slotWidth,
       child: Material(
         elevation: 12,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        borderRadius: BorderRadius.circular(14),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: panelHeight),
@@ -1323,7 +1323,7 @@ extension _HomePageProductShell on _HomePageState {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 16),
           ],
           Expanded(child: _titleBarFlexibleGap()),
           searchCluster,
@@ -1377,7 +1377,7 @@ extension _HomePageProductShell on _HomePageState {
                       onPressed: canBack ? _handleProductShellBack : null,
                       icon: const Icon(Icons.arrow_back_ios_new, size: 22),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     IconButton(
                       style: studioChromeIconButtonStyle(context),
                       tooltip: 'Forward',
@@ -1484,7 +1484,7 @@ extension _HomePageProductShell on _HomePageState {
         : desktopWide
         ? 18.0
         : 16.0;
-    final shellPanelRadius = BorderRadius.circular(StudioSpacing.radiusCard);
+    final shellPanelRadius = BorderRadius.circular(14);
     final globalSearchBar = GlobalSearchBar(
       accessToken: accessToken,
       currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
@@ -1524,7 +1524,7 @@ extension _HomePageProductShell on _HomePageState {
               },
             ),
             if (!compactTopChrome) ...<Widget>[
-              const SizedBox(width: StudioSpacing.chromeActionGap),
+              const SizedBox(width: StudioSpacing.xs),
               StudioIconMenuButton<String>(
                 style: studioChromeIconButtonStyle(context),
                 tooltip: l10n.localeSectionTitle,
@@ -1545,7 +1545,7 @@ extension _HomePageProductShell on _HomePageState {
                 ],
                 onSelected: AppLocaleNotifier.instance.setLocaleCode,
               ),
-              const SizedBox(width: StudioSpacing.chromeActionGap),
+              const SizedBox(width: StudioSpacing.xs),
               IconButton(
                 style: studioChromeIconButtonStyle(context),
                 tooltip: l10n.authSignOut,
@@ -1644,8 +1644,8 @@ extension _HomePageProductShell on _HomePageState {
               ),
             ),
             padding: EdgeInsets.only(
-              left: desktopXWide ? 24 : desktopWide ? 20 : 16,
-              right: desktopXWide ? 24 : desktopWide ? 20 : 16,
+              left: desktopXWide ? 24 : 16,
+              right: desktopXWide ? 24 : 16,
               top: 0,
               bottom: 0,
             ),
@@ -1694,7 +1694,7 @@ extension _HomePageProductShell on _HomePageState {
                             showPageTitle: titleBarWorkspaceContext == null,
                           ),
                           if (titleBarWorkspaceContext != null) ...<Widget>[
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 16),
                             Flexible(child: titleBarWorkspaceContext),
                           ],
                           const SizedBox(width: 8),
@@ -1708,7 +1708,7 @@ extension _HomePageProductShell on _HomePageState {
                                 _notificationsController.unreadCount,
                             onSelectPane: _selectProductUtilityPane,
                           ),
-                          const SizedBox(width: StudioSpacing.xs),
+                          const SizedBox(width: 8),
                           moreMenuChrome,
                         ],
                       ),
@@ -1730,7 +1730,7 @@ extension _HomePageProductShell on _HomePageState {
                         showPageTitle: titleBarWorkspaceContext == null,
                       ),
                       if (titleBarWorkspaceContext != null) ...<Widget>[
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 16),
                         Flexible(
                           flex: 2,
                           fit: FlexFit.loose,
@@ -1742,7 +1742,7 @@ extension _HomePageProductShell on _HomePageState {
                       ],
                       const SizedBox(width: 8),
                       _buildNavigationButtons(context),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
@@ -1763,7 +1763,7 @@ extension _HomePageProductShell on _HomePageState {
                             _notificationsController.unreadCount,
                         onSelectPane: _selectProductUtilityPane,
                       ),
-                      const SizedBox(width: StudioSpacing.xs),
+                      const SizedBox(width: 8),
                       moreMenuChrome,
                     ],
                   ),
@@ -1776,7 +1776,7 @@ extension _HomePageProductShell on _HomePageState {
               Padding(
             padding: EdgeInsets.fromLTRB(
               shellHorizontalPadding,
-              14,
+              StudioLayoutSpacing.stackMedium,
               shellHorizontalPadding,
               shellHorizontalPadding,
             ),

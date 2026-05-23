@@ -214,7 +214,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
             helperText: l10n.scriptEditorStoryboardAddDurationOptionalHelper,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Align(
           alignment: Alignment.centerRight,
           child: StudioPrimaryButton(
@@ -251,7 +251,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
             helperText: l10n.scriptEditorStoryboardBatchAddUnifiedDurationHelper,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: StudioSpacing.sm),
         Align(
           alignment: Alignment.centerRight,
           child: StudioPrimaryButton(
@@ -280,7 +280,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(intro, style: studioSectionIntroStyle(context)),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             if (widget.compact)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -316,15 +316,15 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
                 ],
               ),
             if (_mode == _StoryboardIntakeMode.single) ...<Widget>[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               _buildSingleForm(l10n),
             ],
             if (_mode == _StoryboardIntakeMode.batch) ...<Widget>[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               _buildBatchForm(l10n),
             ],
             if (_busy) ...<Widget>[
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               const LinearProgressIndicator(minHeight: 2),
             ],
           ],

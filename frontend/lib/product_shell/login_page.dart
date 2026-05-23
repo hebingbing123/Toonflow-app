@@ -15,6 +15,7 @@ import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_theme.dart';
+import '../design_system/components/studio_surfaces.dart';
 
 /// Full-screen sign-in for [HomeShellMode.product].
 class ProductLoginPage extends StatefulWidget {
@@ -418,7 +419,7 @@ class _BrandBanner extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: StudioLayoutSpacing.titleTight),
               Text(
                 eyebrow,
                 maxLines: 1,
@@ -455,7 +456,7 @@ class _AiStagePanel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusSheet),
         border: Border.all(color: tokens.borderSubtle),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -869,7 +870,7 @@ class _StageLabel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.22),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Padding(
@@ -922,11 +923,11 @@ class _AuthPanel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgSurface.withValues(alpha: 0.98),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusSheet),
         border: Border.all(color: tokens.borderSubtle),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: studioShadowColor(context, alpha: 0.12),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -977,7 +978,7 @@ class _AuthPanel extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: StudioSpacing.sm),
             _AuthModeToggle(mode: mode, onChanged: onModeChanged),
             const SizedBox(height: StudioSpacing.md),
             if (!kSupabaseConfigured)
@@ -1049,7 +1050,7 @@ class _AuthPanel extends StatelessWidget {
                     color: theme.colorScheme.errorContainer.withValues(
                       alpha: 0.40,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
                     border: Border.all(
                       color: theme.colorScheme.error.withValues(alpha: 0.24),
                     ),
@@ -1079,7 +1080,7 @@ class _AuthPanel extends StatelessWidget {
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: studio.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: tokens.primary.withValues(alpha: 0.10),
@@ -1100,7 +1101,7 @@ class _AuthPanel extends StatelessWidget {
                   label: Text(title),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 mode == _AuthMode.signIn
                     ? l10n.productLoginSignInHint

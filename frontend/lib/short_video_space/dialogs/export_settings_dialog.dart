@@ -172,7 +172,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
       maxWidth: 560,
       title: Text(l10n.shortVideoExportSettingsTitle),
       content: SizedBox(
-        width: 520,
+        width: studioConstrainedDialogWidth(context, maxWidth: 520),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -188,8 +188,8 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: kSupportedExportFormats
@@ -220,8 +220,8 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: kSupportedResolutions
@@ -252,8 +252,8 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: kSupportedBitrates
@@ -284,8 +284,8 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: StudioLayoutSpacing.insetDense,
+                    vertical: StudioSpacing.xs,
                   ),
                 ),
                 items: kSupportedFramerates
@@ -310,7 +310,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: StudioTokens.of(context).primarySoft,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,7 +341,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                           ),
                     ),
                     if (widget.estimatedDurationSeconds != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         l10n.shortVideoExportSettingsBasedOnDuration(
                           widget.estimatedDurationSeconds!,
@@ -359,7 +359,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                 ),
                 child: Row(
                   children: [

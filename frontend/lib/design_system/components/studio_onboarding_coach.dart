@@ -94,7 +94,7 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
             bottom: 24,
             child: Material(
               elevation: 12,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
               color: StudioTokens.of(context).bgElevated,
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -105,7 +105,7 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(messages[_step.clamp(0, messages.length - 1)]),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: StudioSpacing.sm),
                       Row(
                         children: <Widget>[
                           Text(

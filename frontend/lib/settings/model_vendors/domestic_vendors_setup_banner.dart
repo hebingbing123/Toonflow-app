@@ -108,7 +108,7 @@ class _DomesticVendorsSetupBannerState extends State<DomesticVendorsSetupBanner>
                           tokens.primary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         l10n.settingsDomesticVendorsSetupSubtitle,
                         style: studioAccentBannerBodyStyle(
@@ -131,7 +131,7 @@ class _DomesticVendorsSetupBannerState extends State<DomesticVendorsSetupBanner>
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: StudioSpacing.sm),
             ...primary.map(
               (vendor) => _DomesticVendorSetupRow(
                 vendor: vendor,
@@ -197,7 +197,7 @@ class _DomesticVendorSetupRow extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.microGap),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgInset.withValues(alpha: 0.5),

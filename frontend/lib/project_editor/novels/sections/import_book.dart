@@ -48,7 +48,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           l10n.projectEditorNovelsWorkbenchImportSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.projectEditorNovelsWorkbenchImportStudioHint,
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
@@ -100,7 +100,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: TextField(
                 controller: importScheduleRepeatMinutesCtrl,
@@ -679,7 +679,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             ),
                           ],
                         ),
-                        const SizedBox(height: StudioSpacing.xs),
+                        const SizedBox(height: 8),
                         TextFormField(
                           key: ValueKey(
                             'import-preview-title-${row.chapterIndex}-${row.chapter}',
@@ -736,7 +736,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
                 if (importPreviewRows.length > 12) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     l10n.projectEditorNovelsActionImportPreviewLongListHint,
                     style: Theme.of(ctx).textTheme.bodySmall,
