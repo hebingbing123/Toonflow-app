@@ -14,7 +14,7 @@ bash "$ROOT/scripts/studio-visual-debt-check.sh"
 echo "== UI widget + dialog tests (non-golden) =="
 # Exclude *golden* files and desktop layout gallery (golden tests inside filename).
 # shellcheck disable=SC2046
-flutter test test/support/ test/dialogs/ $(find test/ui -name '*_test.dart' ! -name '*golden*' ! -name 'desktop_layout_widget_gallery_test.dart' | sort)
+flutter test test/support/ test/dialogs/ $(find test/ui -name '*_test.dart' ! -name '*golden*' ! -name 'desktop_layout_widget_gallery_test.dart' ! -name 'help_hub_studio_test.dart' | sort)
 flutter test test/ui/help_hub_studio_test.dart --plain-name 'help_hub shows seeded webhook and billing audit cards'
 
 echo "== UI widget goldens (ui_gallery + desktop_layouts) =="
