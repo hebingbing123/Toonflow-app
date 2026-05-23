@@ -60,11 +60,11 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/billing/plans", get(get_billing_plans))
         .route("/api/v1/billing/checkout", post(post_billing_checkout))
         .route(
-            "/api/v1/billing/checkout/:session_id",
+            "/api/v1/billing/checkout/{session_id}",
             get(get_checkout_session),
         )
         .route(
-            "/api/v1/billing/checkout/:session_id/mock-pay",
+            "/api/v1/billing/checkout/{session_id}/mock-pay",
             get(get_mock_pay),
         )
         .route("/api/v1/billing/portal", post(post_billing_portal))
