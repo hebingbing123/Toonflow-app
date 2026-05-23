@@ -9,7 +9,7 @@ String _exceptionMessage(Object? error) {
     return error.message?.toString() ?? error.toString();
   }
   if (error is FlutterError) {
-    return error.message ?? error.toString();
+    return error.message;
   }
   return error.toString();
 }
