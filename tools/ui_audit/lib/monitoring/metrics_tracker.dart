@@ -1,13 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+import 'package:ui_audit/config/config_parser.dart';
 import 'package:ui_audit/models/models.dart';
 
 /// Persists audit run summaries for trend analysis.
 class MetricsTracker {
   final String historyPath;
 
-  MetricsTracker({this.historyPath = '.kiro/audit-metrics/history.jsonl'});
+  MetricsTracker({String? historyPath})
+      : historyPath = historyPath ?? _defaultHistoryPath();
+
+  static String _defaultHistoryPath() {
+    final frontendDir = ConfigParser.resolveProjectDirectory('frontend');
+    return p.join(
+      p.dirname(frontendDir),
+      '.kiro',
+      'audit-metrics',
+      'history.jsonl',
+    );
+  }
 
   /// Appends one record from [result] and returns the written line map.
   Future<Map<String, dynamic>> record(AuditResult result) async {

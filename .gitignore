@@ -93,6 +93,13 @@ frontend/.l10n_batch/
 # Kiro: local per-workspace tooling config (keep specs markdown in Git if desired)
 .kiro/**/.config.kiro
 
+# Local UI audit runs (tracked baselines live in .kiro/audit-baseline/; CI uploads artifacts)
+.kiro/audit-reports/audit-*.json
+.kiro/audit-reports/audit-*.md
+.kiro/audit-reports/audit-*.html
+.kiro/audit-metrics/
+tools/ui_audit/.kiro/
+
 # Local automation scripts (machine-specific)
 auto-refactor.sh
 cursorpro_watch_click.applescript

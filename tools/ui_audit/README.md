@@ -91,10 +91,18 @@ dart run ui_audit:ui_audit fix --report=.kiro/audit-reports/audit-<timestamp>.js
 
 ### Metrics and trends
 
-Each audit appends to `.kiro/audit-metrics/history.jsonl`.
+Each audit appends to `<repo>/.kiro/audit-metrics/history.jsonl` (gitignored).
 
 ```bash
 dart run ui_audit:ui_audit report --trend
+```
+
+### Burn-down verification (local)
+
+```bash
+cd tools/ui_audit
+dart run ui_audit:ui_audit --config=../../.kiro/audit-config-burn-down.yaml
+dart run ui_audit:ui_audit --config=../../.kiro/audit-config-quick.yaml
 ```
 
 See also [docs/extension-guide.md](docs/extension-guide.md) and [CHANGELOG.md](CHANGELOG.md).
