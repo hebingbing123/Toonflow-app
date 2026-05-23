@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _routerApp(GoRouter router) {
   return MaterialApp.router(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

@@ -7,7 +7,7 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 
 Widget _appWithRouter(GoRouter router) {
   return MaterialApp.router(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
@@ -33,7 +33,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

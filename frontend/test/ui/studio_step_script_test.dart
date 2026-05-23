@@ -13,7 +13,7 @@ import '../support/studio_workbench_section_test_support.dart';
 
 Widget _wrap(Widget child) {
   return MaterialApp(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('zh'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

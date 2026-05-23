@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:google_fonts/src/google_fonts_base.dart' as google_fonts_base;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
@@ -12,9 +13,12 @@ const Set<String> _kGoogleFontsHosts = <String>{
   'fonts.googleapis.com',
 };
 
+/// Disables runtime Google Fonts HTTP fetch; product UI uses bundled TTFs in
+/// `assets/fonts/` via [buildStudioDarkTheme].
 void configureGoogleFontsRuntime({
   String proxyBaseUrl = kGoogleFontsProxyBaseUrl,
 }) {
+  GoogleFonts.config.allowRuntimeFetching = false;
   final proxyBaseUri = resolveGoogleFontsProxyBaseUri(proxyBaseUrl);
   google_fonts_base.httpClient = proxyBaseUri == null
       ? http.Client()

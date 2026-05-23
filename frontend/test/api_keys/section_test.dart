@@ -11,7 +11,7 @@ import '../support/studio_collapsible_filter_test_support.dart';
 
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

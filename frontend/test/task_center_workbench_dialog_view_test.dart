@@ -9,7 +9,7 @@ import 'package:openflow_app/rust_api.dart';
 import 'support/studio_workbench_section_test_support.dart';
 
 Widget _appWithZh({required Widget child}) => MaterialApp(
-  theme: buildStudioDarkTheme(useGoogleFonts: false),
+  theme: buildStudioDarkTheme(useBundledFonts: true),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('zh'),

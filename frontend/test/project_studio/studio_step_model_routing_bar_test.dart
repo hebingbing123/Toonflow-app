@@ -29,7 +29,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -70,7 +70,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

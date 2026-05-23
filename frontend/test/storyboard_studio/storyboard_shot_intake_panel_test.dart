@@ -8,7 +8,7 @@ void main() {
   testWidgets('expands single-add form without opening a dialog', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

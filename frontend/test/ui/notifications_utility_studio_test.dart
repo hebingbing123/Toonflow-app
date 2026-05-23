@@ -33,7 +33,7 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         routerConfig: router,
       ),
     );

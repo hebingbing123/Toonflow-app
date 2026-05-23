@@ -7,6 +7,6 @@ export '../design_system/theme.dart' show StudioColors, buildStudioDarkTheme;
 /// Back-compat entry for product shell.
 abstract final class StudioTheme {
   StudioTheme._();
-  static ThemeData build({bool useGoogleFonts = true}) =>
-      buildStudioDarkTheme(useGoogleFonts: useGoogleFonts);
+  static ThemeData build({bool useBundledFonts = true}) =>
+      buildStudioDarkTheme(useBundledFonts: useBundledFonts);
 }

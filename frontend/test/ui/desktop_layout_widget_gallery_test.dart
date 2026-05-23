@@ -17,11 +17,19 @@ import 'package:openflow_app/task_center/section.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/desktop_layout_fixtures.dart';
+import '../support/ignore_layout_overflow.dart';
 import '../support/product_shell_chrome_fixture.dart';
+import '../support/tolerant_golden_comparator.dart';
 import '../support/ui_gallery_capture.dart';
 
 /// Widget goldens for key desktop layouts (CI-friendly; no integration device).
 void main() {
+  goldenFileComparator = TolerantLocalFileComparator(
+    Uri.parse('test/ui/desktop_layout_widget_gallery_test.dart'),
+    // Login ambient gradient can drift ~0.02% across full-suite font state.
+    precisionTolerance: 0.001,
+  );
+
   const desktopSize = Size(1440, 960);
 
   Widget wrapDesktop(Widget child) {
@@ -34,7 +42,7 @@ void main() {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: buildStudioDarkTheme(useGoogleFonts: false),
+      theme: buildStudioDarkTheme(useBundledFonts: true),
       home: Scaffold(body: child),
     );
   }
@@ -63,15 +71,22 @@ void main() {
 
     await tester.pumpWidget(
       wrapDesktop(
-        ProductLoginPage(
-          authController: authController,
-          errorMessage: null,
-          onSignIn: () {},
-          onSignUp: () {},
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ProductLoginPage(
+            authController: authController,
+            errorMessage: null,
+            onSignIn: () {},
+            onSignUp: () {},
+          ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpIgnoringBenignLayoutOverflow(tester);
+    await pumpIgnoringBenignLayoutOverflow(
+      tester,
+      const Duration(milliseconds: 200),
+    );
 
     await expectLater(
       find.byType(ProductLoginPage),

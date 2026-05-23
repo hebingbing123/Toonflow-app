@@ -11,7 +11,7 @@ import '../support/project_studio_fixture.dart';
 
 Widget _wrap(Widget child) {
   return MaterialApp(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('zh'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

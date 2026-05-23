@@ -8,7 +8,7 @@ void main() {
   testWidgets('plan usage shows login hint without token', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildStudioDarkTheme(useGoogleFonts: false),
+        theme: buildStudioDarkTheme(useBundledFonts: true),
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

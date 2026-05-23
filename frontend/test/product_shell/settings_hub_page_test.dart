@@ -9,7 +9,7 @@ import 'package:openflow_app/product_shell/settings_hub_page.dart';
 
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

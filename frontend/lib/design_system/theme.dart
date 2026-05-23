@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import 'studio_bundled_text_theme.dart';
 import 'studio_typography.dart';
 import 'tokens.dart';
 
 /// Full-dark studio theme (product shell).
+///
+/// When [useBundledFonts] is true (default), uses **bundled** Inter / Space Grotesk /
+/// Noto Sans SC from `assets/fonts/` — no network fetch. When false, uses platform
+/// system fonts only (legacy test escape hatch).
 ThemeData buildStudioDarkTheme({
-  bool useGoogleFonts = true,
+  bool useBundledFonts = true,
   StudioTypography typography = StudioTypography.regular,
 }) {
   const tokens = StudioTokens.dark;
@@ -35,12 +39,9 @@ ThemeData buildStudioDarkTheme({
       );
 
   final fallbackTextTheme = ThemeData(brightness: Brightness.dark).textTheme;
-  final bodyFont = useGoogleFonts
-      ? GoogleFonts.interTextTheme(fallbackTextTheme)
+  final displayFont = useBundledFonts
+      ? buildStudioBundledTextTheme(fallbackTextTheme)
       : fallbackTextTheme;
-  final displayFont = useGoogleFonts
-      ? GoogleFonts.spaceGroteskTextTheme(bodyFont)
-      : bodyFont;
   final textTheme = displayFont
       .apply(bodyColor: tokens.textPrimary, displayColor: tokens.textPrimary)
       .copyWith(
@@ -133,10 +134,12 @@ ThemeData buildStudioDarkTheme({
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
         ),
-        textStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: typography.label,
-          height: 1.2,
+        textStyle: studioBundledTextStyle(
+          TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: typography.label,
+            height: 1.2,
+          ),
         ),
       ),
     ),
@@ -163,10 +166,12 @@ ThemeData buildStudioDarkTheme({
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
-        textStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: typography.label,
-          height: 1.2,
+        textStyle: studioBundledTextStyle(
+          TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: typography.label,
+            height: 1.2,
+          ),
         ),
       ),
     ),
@@ -177,10 +182,12 @@ ThemeData buildStudioDarkTheme({
         minimumSize: Size(0, typography.buttonHeight),
         tapTargetSize: MaterialTapTargetSize.padded,
         visualDensity: VisualDensity.standard,
-        textStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: typography.label,
-          height: 1.2,
+        textStyle: studioBundledTextStyle(
+          TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: typography.label,
+            height: 1.2,
+          ),
         ),
       ),
     ),
@@ -368,9 +375,10 @@ class StudioColors extends ThemeExtension<StudioColors> {
   final Gradient panelGradient;
   final Gradient signalGradient;
 
+  /// Marketing / shell gradients. Flat chrome colors match [StudioTokens.dark].
   static const StudioColors dark = StudioColors(
-    sidebar: Color(0xFF0D1524),
-    sidebarBorder: Color(0xFF1B2841),
+    sidebar: Color(0xFF0A1320),
+    sidebarBorder: Color(0xFF15273B),
     canvas: Color(0xFF08101A),
     brandGradient: LinearGradient(
       begin: Alignment.topLeft,

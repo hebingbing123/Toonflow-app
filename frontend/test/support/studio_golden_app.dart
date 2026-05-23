@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
-/// Shared MaterialApp wrapper for UI gallery goldens (zh, no network fonts).
+/// Shared MaterialApp wrapper for UI gallery goldens (zh, bundled fonts).
 Widget studioGoldenApp({
   required Widget child,
   Size? surfaceSize,
@@ -23,10 +24,7 @@ Widget studioGoldenApp({
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    theme: ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F46E5)),
-    ),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     home: Scaffold(body: body),
   );
 }

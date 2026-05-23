@@ -16,7 +16,7 @@ import 'studio_workbench_test_helpers.dart';
 
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
-    theme: buildStudioDarkTheme(useGoogleFonts: false),
+    theme: buildStudioDarkTheme(useBundledFonts: true),
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
