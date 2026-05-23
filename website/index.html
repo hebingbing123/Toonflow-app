@@ -38,7 +38,7 @@
           <a href="#product" data-i18n="nav.product">工作流</a>
           <a href="#platforms" data-i18n="nav.platforms">平台</a>
           <a href="#pricing" data-i18n="nav.pricing">定价</a>
-          <a href="#start" data-link="docs" data-i18n="nav.docs">文档</a>
+          <a href="#docs" data-i18n="nav.docs">文档</a>
         </nav>
         <div class="nav-actions">
           <button
@@ -94,8 +94,7 @@
               </button>
             </div>
             <p class="hero-proof reveal reveal-delay-4" data-i18n="hero.proof" data-i18n-html>
-              <strong>开源可部署</strong> · 支持 macOS、Windows、Linux 与 Web ·
-              Harness + PostgreSQL 企业级架构
+              <strong>商业产品</strong> · 云端 SaaS + 企业私有化 · macOS / Windows / Linux / Web
             </p>
           </div>
           <div class="hero-visual reveal reveal-delay-2" aria-hidden="true">
@@ -110,11 +109,16 @@
                 <img
                   class="device-shot device-shot--hero"
                   src="assets/screenshots/hero-main.png"
+                  srcset="
+                    assets/screenshots/hero-main.png    1x,
+                    assets/screenshots/hero-main@2x.png 2x
+                  "
                   data-i18n="shots.hero"
                   alt="OpenFlow 分镜工作区概念界面"
-                  width="500"
-                  height="320"
+                  width="707"
+                  height="317"
                   fetchpriority="high"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -150,34 +154,21 @@
           <p class="section-desc reveal reveal-delay-2" data-i18n="features.desc">
             从灵感一句话到可交付分镜，OpenFlow 将策划、生成、审阅与协作收敛在同一工作区。
           </p>
-          <figure class="features-banner reveal">
-            <img
-              src="assets/screenshots/features-trio.png"
-              srcset="
-                assets/screenshots/features-trio.png    1x,
-                assets/screenshots/features-trio@2x.png 2x
-              "
-              data-i18n="features.bannerAlt"
-              alt="AI 剧本、智能分镜、团队协作三大能力"
-              loading="lazy"
-              width="556"
-              height="303"
-            />
-          </figure>
           <div class="features-grid">
             <article class="feature-card glow-card reveal">
               <div class="feature-thumb">
                 <img
-                  src="assets/screenshots/feature-script.png"
+                  src="assets/screenshots/feature-script-card.png"
                   srcset="
-                    assets/screenshots/feature-script.png    1x,
-                    assets/screenshots/feature-script@2x.png 2x
+                    assets/screenshots/feature-script-card.png    1x,
+                    assets/screenshots/feature-script-card@2x.png 2x
                   "
                   data-i18n="features.1.imgAlt"
                   alt="AI 剧本助手界面"
                   loading="lazy"
-                  width="360"
-                  height="652"
+                  width="238"
+                  height="385"
+                  decoding="async"
                 />
               </div>
               <div class="feature-copy">
@@ -190,16 +181,17 @@
             <article class="feature-card glow-card reveal reveal-delay-1">
               <div class="feature-thumb">
                 <img
-                  src="assets/screenshots/feature-storyboard.png"
+                  src="assets/screenshots/feature-storyboard-card.png"
                   srcset="
-                    assets/screenshots/feature-storyboard.png    1x,
-                    assets/screenshots/feature-storyboard@2x.png 2x
+                    assets/screenshots/feature-storyboard-card.png    1x,
+                    assets/screenshots/feature-storyboard-card@2x.png 2x
                   "
                   data-i18n="features.2.imgAlt"
                   alt="智能分镜板界面"
                   loading="lazy"
-                  width="360"
-                  height="652"
+                  width="245"
+                  height="385"
+                  decoding="async"
                 />
               </div>
               <div class="feature-copy">
@@ -212,16 +204,17 @@
             <article class="feature-card glow-card reveal reveal-delay-2">
               <div class="feature-thumb">
                 <img
-                  src="assets/screenshots/feature-collab.png"
+                  src="assets/screenshots/feature-collab-card.png"
                   srcset="
-                    assets/screenshots/feature-collab.png    1x,
-                    assets/screenshots/feature-collab@2x.png 2x
+                    assets/screenshots/feature-collab-card.png    1x,
+                    assets/screenshots/feature-collab-card@2x.png 2x
                   "
                   data-i18n="features.3.imgAlt"
                   alt="团队协作界面"
                   loading="lazy"
-                  width="360"
-                  height="652"
+                  width="238"
+                  height="385"
+                  decoding="async"
                 />
               </div>
               <div class="feature-copy">
@@ -234,16 +227,17 @@
             <article class="feature-card glow-card reveal reveal-delay-3">
               <div class="feature-thumb">
                 <img
-                  src="assets/screenshots/feature-private.png"
+                  src="assets/screenshots/feature-private-card.png"
                   srcset="
-                    assets/screenshots/feature-private.png    1x,
-                    assets/screenshots/feature-private@2x.png 2x
+                    assets/screenshots/feature-private-card.png    1x,
+                    assets/screenshots/feature-private-card@2x.png 2x
                   "
                   data-i18n="features.4.imgAlt"
                   alt="私有化部署"
                   loading="lazy"
-                  width="336"
-                  height="390"
+                  width="192"
+                  height="192"
+                  decoding="async"
                 />
               </div>
               <div class="feature-copy">
@@ -326,8 +320,8 @@
                   <li data-i18n="platforms.desktop.p2">Rust 后端本地或内网部署</li>
                   <li data-i18n="platforms.desktop.p3">Harness Agent 与长时任务队列</li>
                 </ul>
-                <a class="btn btn-primary" href="#" data-link="releases" data-i18n="platforms.desktop.cta"
-                  >下载桌面版</a
+                <a class="btn btn-primary" href="#" data-link="contact" data-i18n="platforms.desktop.cta"
+                  >获取安装包</a
                 >
               </div>
             </article>
@@ -434,39 +428,15 @@
         <div class="container">
           <span class="section-label" data-i18n="pricing.label">定价</span>
           <h2 class="section-title" id="pricing-title" data-i18n="pricing.title">
-            两种模式：自托管免费 · 云端按量升级
+            云端订阅 · 私有化按合同约定
           </h2>
           <p class="section-desc" data-i18n="pricing.desc">
-            核心创作能力在自托管场景下随 Apache-2.0 开源免费使用；云端 SaaS 提供 Free
-            默认可用与可选付费档。大模型调用费用（Token / 按图 / 按秒）由你自备 API Key 或按 Workspace 计量，详见模型定价配置。
+            OpenFlow 为商业产品：提供云端 SaaS（Free 试用与付费档）与企业私有化部署。大模型按 Token /
+            按图 / 按秒计量；私有化场景由客户自备或托管 LLM 密钥。
           </p>
 
-          <div class="pricing-grid" role="list">
-            <article class="pricing-tier glow-card reveal" role="listitem">
-              <span class="tier-badge tier-badge--live" data-i18n="pricing.badge.live">现已可用</span>
-              <h3 data-i18n="pricing.tier.community.title">社区版 · 自托管</h3>
-              <p class="tier-price">
-                <span class="tier-price__amount" data-i18n="pricing.tier.community.price">¥0</span>
-                <span class="tier-price__period" data-i18n="pricing.tier.community.period"
-                  >软件授权</span
-                >
-              </p>
-              <p class="tier-lead" data-i18n="pricing.tier.community.lead">
-                在你自己的服务器或内网部署完整 Studio；仅需承担机器与 LLM 供应商账单。
-              </p>
-              <ul class="tier-features">
-                <li data-i18n="pricing.tier.community.f1">Apache-2.0 源码，可 fork 与二次开发</li>
-                <li data-i18n="pricing.tier.community.f2">Harness Agent、任务队列、WebSocket 全功能</li>
-                <li data-i18n="pricing.tier.community.f3">Personal / Enterprise Workspace、RLS 多租户</li>
-                <li data-i18n="pricing.tier.community.f4">自带 PostgreSQL（Supabase 本地或托管）</li>
-                <li data-i18n="pricing.tier.community.f5">7 种界面语言 · 桌面 + Web 客户端</li>
-              </ul>
-              <a class="btn btn-primary" href="#" data-link="repo" data-i18n="pricing.tier.community.cta"
-                >克隆仓库部署</a
-              >
-            </article>
-
-            <article class="pricing-tier pricing-tier--featured glow-card reveal reveal-delay-1" role="listitem">
+          <div class="pricing-grid pricing-grid--3" role="list">
+            <article class="pricing-tier pricing-tier--featured glow-card reveal" role="listitem">
               <span class="tier-badge tier-badge--live" data-i18n="pricing.badge.live">现已可用</span>
               <h3 data-i18n="pricing.tier.free.title">云端 Free</h3>
               <p class="tier-price">
@@ -486,7 +456,7 @@
               <a class="btn btn-primary" href="#start" data-i18n="pricing.tier.free.cta">免费开始</a>
             </article>
 
-            <article class="pricing-tier glow-card reveal reveal-delay-2" role="listitem">
+            <article class="pricing-tier glow-card reveal reveal-delay-1" role="listitem">
               <span class="tier-badge tier-badge--soon" data-i18n="pricing.badge.soon">订阅筹备中</span>
               <h3 data-i18n="pricing.tier.paid.title">创作者 · Pro · 工作室</h3>
               <p class="tier-price">
@@ -508,7 +478,7 @@
               >
             </article>
 
-            <article class="pricing-tier glow-card reveal reveal-delay-3" role="listitem">
+            <article class="pricing-tier glow-card reveal reveal-delay-2" role="listitem">
               <span class="tier-badge tier-badge--soon" data-i18n="pricing.badge.enterprise">企业洽谈</span>
               <h3 data-i18n="pricing.tier.enterprise.title">企业版</h3>
               <p class="tier-price">
@@ -525,12 +495,7 @@
                 <li data-i18n="pricing.tier.enterprise.f4">模型路由与 <code class="inline">model_pricing.json</code> 运营可配</li>
                 <li data-i18n="pricing.tier.enterprise.f5">可选 SSO、DPA 与内容合规流程</li>
               </ul>
-              <a
-                class="btn btn-outline"
-                href="https://github.com/HBAI-Ltd/Openflow-app/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-i18n="pricing.tier.enterprise.cta"
+              <a class="btn btn-outline" href="#" data-link="contact" data-i18n="pricing.tier.enterprise.cta"
                 >商务与部署咨询</a
               >
             </article>
@@ -543,45 +508,97 @@
                 <thead>
                   <tr>
                     <th scope="col" data-i18n="pricing.compare.col.feature">能力</th>
-                    <th scope="col" data-i18n="pricing.compare.col.community">自托管</th>
                     <th scope="col" data-i18n="pricing.compare.col.free">云端 Free</th>
-                    <th scope="col" data-i18n="pricing.compare.col.paid">付费档</th>
+                    <th scope="col" data-i18n="pricing.compare.col.paid">付费订阅</th>
+                    <th scope="col" data-i18n="pricing.compare.col.private">私有化 / 企业</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th scope="row" data-i18n="pricing.compare.row.deploy">部署位置</th>
-                    <td data-i18n="pricing.compare.val.deploy.community">你的服务器 / 内网</td>
-                    <td data-i18n="pricing.compare.val.deploy.free">托管 PostgreSQL + API</td>
-                    <td data-i18n="pricing.compare.val.deploy.paid">同左 + 更高配额</td>
+                    <td data-i18n="pricing.compare.val.deploy.free">OpenFlow 托管云</td>
+                    <td data-i18n="pricing.compare.val.deploy.paid">托管云 + 更高配额</td>
+                    <td data-i18n="pricing.compare.val.deploy.private">客户内网 / 专有云</td>
                   </tr>
                   <tr>
                     <th scope="row" data-i18n="pricing.compare.row.llm">大模型费用</th>
-                    <td data-i18n="pricing.compare.val.llm.community">自备 API Key</td>
                     <td data-i18n="pricing.compare.val.llm.free">平台路由 + 积分计量</td>
                     <td data-i18n="pricing.compare.val.llm.paid">含更高月度积分</td>
+                    <td data-i18n="pricing.compare.val.llm.private">客户自备或托管 Key</td>
                   </tr>
                   <tr>
                     <th scope="row" data-i18n="pricing.compare.row.workspace">Workspace</th>
-                    <td data-i18n="pricing.compare.val.workspace.community">Personal + Enterprise</td>
                     <td data-i18n="pricing.compare.val.workspace.free">Personal 为主</td>
                     <td data-i18n="pricing.compare.val.workspace.paid">团队 / 工作室扩展</td>
+                    <td data-i18n="pricing.compare.val.workspace.private">Enterprise 多租户</td>
                   </tr>
                   <tr>
                     <th scope="row" data-i18n="pricing.compare.row.support">支持</th>
-                    <td data-i18n="pricing.compare.val.support.community">社区 Issue / 文档</td>
-                    <td data-i18n="pricing.compare.val.support.free">文档 + 社区</td>
+                    <td data-i18n="pricing.compare.val.support.free">在线文档 + 工单</td>
                     <td data-i18n="pricing.compare.val.support.paid">优先响应（规划）</td>
+                    <td data-i18n="pricing.compare.val.support.private">专属 SLA / 驻场（合同约定）</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p class="pricing-footnote" data-i18n="pricing.footnote">
-              上表付费档价格为路线图参考量级，非最终对外标价；自托管不产生 OpenFlow 软件授权费，LLM
-              与云资源仍按实际用量计费。模型单价见仓库
-              <code class="inline">backend/data/model_pricing.json</code>。
+              付费档价格为路线图参考量级，非最终对外标价；私有化软件授权与实施费用另签合同。LLM 与云资源按实际用量计费。
             </p>
           </div>
+        </div>
+      </section>
+
+      <section id="docs" class="section-docs" aria-labelledby="docs-title">
+        <div class="container">
+          <span class="section-label" data-i18n="docs.label">文档</span>
+          <h2 class="section-title" id="docs-title" data-i18n="docs.title">文档与帮助</h2>
+          <p class="section-desc" data-i18n="docs.desc">
+            用户手册与运维 Runbook 随商务授权交付。创作者请优先阅读<strong>《OpenFlow 用户操作手册》</strong>（覆盖 Studio 六步全链路）。
+          </p>
+          <div class="docs-grid">
+            <article class="docs-card docs-card--featured glow-card reveal is-visible">
+              <h3 data-i18n="docs.card.manual.title">用户操作手册</h3>
+              <p data-i18n="docs.card.manual.body">
+                从登录、建项到剧本→美术→资产→分镜→视频→成片交付；含任务中心、质检、多平台分发与常见问题。
+              </p>
+              <a class="btn btn-primary" href="#" data-link="user-manual" data-i18n="docs.card.manual.cta"
+                >阅读用户手册</a
+              >
+            </article>
+            <article class="docs-card glow-card reveal reveal-delay-1 is-visible">
+              <h3 data-i18n="docs.card.hub.title">文档中心</h3>
+              <p data-i18n="docs.card.hub.body">
+                总索引：架构、API、功能规格、运维 Runbook、路线图与安全说明。面向研发与运维的主入口。
+              </p>
+              <a class="btn btn-outline" href="#" data-link="docs" data-i18n="docs.card.hub.cta">打开文档中心</a>
+            </article>
+            <article class="docs-card glow-card reveal reveal-delay-2 is-visible">
+              <h3 data-i18n="docs.card.user.title">短视频剪辑补充</h3>
+              <p data-i18n="docs.card.user.body">
+                交付步「多平台分发」内的预览、批量镜头、TTS 配音、导出与快捷键等细节说明。
+              </p>
+              <a class="btn btn-outline" href="#" data-link="user-guide" data-i18n="docs.card.user.cta"
+                >短视频用户指南</a
+              >
+            </article>
+            <article class="docs-card glow-card reveal reveal-delay-3 is-visible">
+              <h3 data-i18n="docs.card.tech.title">技术实施</h3>
+              <p data-i18n="docs.card.tech.body">
+                开发者环境搭建、OpenAPI（<code class="inline">/api/v1/docs</code>）、WebSocket 协议；运维侧 Runbook（Workspace、计费、任务队列等）。
+              </p>
+              <div class="docs-card__actions">
+                <a class="btn btn-outline" href="#" data-link="getting-started" data-i18n="docs.card.tech.cta1"
+                  >开发者指南</a
+                >
+                <a class="btn btn-ghost" href="#" data-link="operators" data-i18n="docs.card.tech.cta2"
+                  >运维手册</a
+                >
+              </div>
+            </article>
+          </div>
+          <p class="docs-note" data-i18n="docs.note">
+            需要 Studio 全链路操作手册或私有化交付文档？请通过商务/支持渠道联系我们，我们会按合同提供配套文档包。
+          </p>
         </div>
       </section>
 
@@ -592,7 +609,7 @@
             按角色选择路径，跟着做就能跑通
           </h2>
           <p class="section-desc" data-i18n="start.desc">
-            下面三条路径分别面向创作者、开发者与运维；命令与仓库 README 保持一致，默认 API 端口
+            下面三条路径分别面向创作者、技术合作方与运维；默认 API 端口
             <code class="inline">8666</code>（根路径为宣传页，<code class="inline">/api/v1</code> 为接口）。
           </p>
 
@@ -604,7 +621,7 @@
               </header>
               <ol class="start-steps">
                 <li data-i18n="start.path.creator.s1">
-                  在 GitHub Releases 下载 macOS / Windows / Linux 安装包（或从源码自行构建 Flutter 桌面版）。
+                  从官方渠道获取 macOS / Windows / Linux 客户端安装包（由商务或管理员发放）。
                 </li>
                 <li data-i18n="start.path.creator.s2">
                   准备可访问的 OpenFlow API 地址（团队内网地址或你自建的
@@ -618,8 +635,8 @@
                 </li>
               </ol>
               <div class="start-path__actions">
-                <a class="btn btn-primary" href="#" data-link="releases" data-i18n="start.path.creator.cta1"
-                  >前往 Releases</a
+                <a class="btn btn-primary" href="#" data-link="contact" data-i18n="start.path.creator.cta1"
+                  >获取安装包</a
                 >
                 <a class="btn btn-outline" href="#platforms" data-i18n="start.path.creator.cta2"
                   >查看全平台说明</a
@@ -629,45 +646,29 @@
 
             <article class="start-path glow-card reveal reveal-delay-1 is-visible">
               <header class="start-path__head">
-                <span class="path-badge path-badge--dev" data-i18n="start.path.dev.badge">开发者</span>
-                <h3 data-i18n="start.path.dev.title">本地开发环境 · 约 30–60 分钟</h3>
+                <span class="path-badge path-badge--dev" data-i18n="start.path.dev.badge">技术合作</span>
+                <h3 data-i18n="start.path.dev.title">API 与私有化接入 · 商务开通</h3>
               </header>
-              <p class="start-prereq" data-i18n="start.path.dev.prereq">
-                <strong>前置：</strong>Rust stable、Flutter 3.10+、Docker、Supabase CLI、Node 18+ / Yarn（跑门禁脚本）。
-              </p>
               <ol class="start-steps">
-                <li data-i18n="start.path.dev.s1">克隆仓库并进入项目根目录。</li>
-              </ol>
-              <pre class="code-block" tabindex="0"><code>git clone https://github.com/HBAI-Ltd/Openflow-app.git
-cd Openflow-app</code></pre>
-              <ol class="start-steps" start="2">
-                <li data-i18n="start.path.dev.s2">启动本地数据库（PostgreSQL + Auth）。</li>
-              </ol>
-              <pre class="code-block" tabindex="0"><code>supabase start
-supabase status   # 记下 DATABASE_URL、JWT secret</code></pre>
-              <ol class="start-steps" start="3">
-                <li data-i18n="start.path.dev.s3">配置并启动 Rust 后端（默认监听 8666）。</li>
-              </ol>
-              <pre class="code-block" tabindex="0"><code>cd backend
-cp .env.example .env   # 填入 DATABASE_URL 等
-cargo run --bin openflow-server</code></pre>
-              <ol class="start-steps" start="4">
-                <li data-i18n="start.path.dev.s4">另开终端启动 Flutter（Web 或桌面）。</li>
-              </ol>
-              <pre class="code-block" tabindex="0"><code>cd frontend
-flutter pub get
-flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
-              <ol class="start-steps" start="5">
-                <li data-i18n="start.path.dev.s5">
-                  浏览器打开 <code class="inline">http://127.0.0.1:8666/api/v1/docs</code> 查看 OpenAPI；宣传页即
-                  <code class="inline">http://127.0.0.1:8666/</code>。
+                <li data-i18n="start.path.dev.s1">
+                  联系商务签署授权，获取客户端、服务端制品与接入文档（不对外提供公开源码）。
+                </li>
+                <li data-i18n="start.path.dev.s2">
+                  按交付 Runbook 在约定环境部署服务端，配置数据库、JWT、对象存储与 LLM 密钥。
+                </li>
+                <li data-i18n="start.path.dev.s3">
+                  依据交付的 OpenAPI 与 WebSocket 说明完成联调；验收
+                  <code class="inline">/api/v1/health</code> 与 Swagger。
+                </li>
+                <li data-i18n="start.path.dev.s4">
+                  需要二次开发或深度定制时，由商务安排技术对接与沙箱环境。
                 </li>
               </ol>
               <div class="start-path__actions">
-                <a class="btn btn-primary" href="#" data-link="getting-started" data-i18n="start.path.dev.cta1"
-                  >开发者完整指南</a
+                <a class="btn btn-primary" href="#" data-link="contact" data-i18n="start.path.dev.cta1"
+                  >联系商务</a
                 >
-                <a class="btn btn-outline" href="#" data-link="docs" data-i18n="start.path.dev.cta2">文档中心</a>
+                <a class="btn btn-outline" href="#docs" data-i18n="start.path.dev.cta2">文档与帮助</a>
               </div>
             </article>
 
@@ -678,11 +679,10 @@ flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
               </header>
               <ol class="start-steps">
                 <li data-i18n="start.path.ops.s1">
-                  生产数据库使用 Supabase 云端或自建 PostgreSQL，执行
-                  <code class="inline">supabase/migrations/</code> 迁移。
+                  生产数据库使用 Supabase 云端或自建 PostgreSQL，执行交付包内的数据库迁移脚本。
                 </li>
                 <li data-i18n="start.path.ops.s2">
-                  以 release 模式构建 <code class="inline">openflow-server</code>，配置
+                  部署授权交付的 <code class="inline">openflow-server</code> 制品（容器镜像或安装包），配置
                   <code class="inline">DATABASE_URL</code>、JWT、对象存储与 LLM 密钥（仅服务端）。
                 </li>
                 <li data-i18n="start.path.ops.s3">
@@ -697,16 +697,10 @@ flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
                 </li>
               </ol>
               <div class="start-path__actions">
-                <a class="btn btn-primary" href="#" data-link="operators" data-i18n="start.path.ops.cta1"
-                  >运维快速开始</a
+                <a class="btn btn-primary" href="#" data-link="contact" data-i18n="start.path.ops.cta1"
+                  >预约部署评估</a
                 >
-                <a
-                  class="btn btn-outline"
-                  href="#"
-                  data-link="getting-started-index"
-                  data-i18n="start.path.ops.cta2"
-                  >按角色索引</a
-                >
+                <a class="btn btn-outline" href="#docs" data-i18n="start.path.ops.cta2">文档与帮助</a>
               </div>
             </article>
           </div>
@@ -738,15 +732,13 @@ flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
         </div>
       </section>
 
-      <section class="cta-band" aria-labelledby="cta-title">
+      <section id="contact" class="cta-band" aria-labelledby="cta-title">
         <div class="container">
           <h2 id="cta-title" data-i18n="cta.title">准备好加速你的短剧产线了吗？</h2>
-          <p data-i18n="cta.body">加入开源社区，反馈需求、参与贡献，或部署专属创作工厂。</p>
+          <p data-i18n="cta.body">申请试用、预约演示，或洽谈企业私有化部署与专属文档包。</p>
           <div class="btn-group">
             <a class="btn btn-primary btn-lg" href="#start" data-i18n="cta.primary">立即开始</a>
-            <a class="btn btn-outline btn-lg" href="#" data-link="docs" data-i18n="cta.docs"
-              >阅读文档</a
-            >
+            <a class="btn btn-outline btn-lg" href="#docs" data-i18n="cta.docs">文档与帮助</a>
           </div>
         </div>
       </section>
@@ -776,27 +768,25 @@ flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
           <div class="footer-col">
             <h4 data-i18n="footer.resources">资源</h4>
             <ul>
-              <li><a href="#" data-link="docs" data-i18n="footer.docs">文档中心</a></li>
+              <li><a href="#docs" data-i18n="footer.docs">文档与帮助</a></li>
+              <li><a href="#" data-link="docs" data-i18n="footer.docsHub">文档中心</a></li>
+              <li><a href="#" data-link="user-manual" data-i18n="footer.userManual">用户操作手册</a></li>
+              <li><a href="#" data-link="user-guide" data-i18n="footer.userGuide">短视频用户指南</a></li>
               <li>
                 <a href="#" data-link="getting-started" data-i18n="footer.quickstart">快速开始</a>
               </li>
-              <li><a href="#" data-link="releases" data-i18n="footer.releases">版本发布</a></li>
             </ul>
           </div>
           <div class="footer-col">
-            <h4 data-i18n="footer.community">社区</h4>
+            <h4 data-i18n="footer.support">支持</h4>
             <ul>
-              <li><a href="#" data-link="repo">GitHub</a></li>
-              <li>
-                <a href="https://github.com/HBAI-Ltd/Openflow-app/issues" data-i18n="footer.feedback"
-                  >问题反馈</a
-                >
-              </li>
+              <li><a href="#" data-link="contact" data-i18n="footer.contact">联系我们</a></li>
+              <li><a href="#" data-link="contact" data-i18n="footer.feedback">问题反馈</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <span data-i18n="footer.copy">© OpenFlow · Apache-2.0 License</span>
+          <span data-i18n="footer.copy">© OpenFlow · 保留所有权利</span>
           <span data-i18n="footer.stack">Rust + Flutter + PostgreSQL</span>
         </div>
       </div>

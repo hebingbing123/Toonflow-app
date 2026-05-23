@@ -12,6 +12,7 @@
 //! - `reconciliation_worker` — 定期对账任务（Task 4.3）
 //! - `ops_view` — Internal ops endpoints for workspace billing queries (Task 8.1)
 
+mod checkout;
 mod estimate_enrich;
 mod events_list;
 mod ingest;
@@ -46,12 +47,33 @@ use utoipa::ToSchema;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use checkout::{
+    get_billing_plans, get_checkout_session, get_mock_pay, post_alipay_notify,
+    post_billing_checkout, post_billing_portal, post_bitpay_notify, post_stripe_checkout_webhook,
+};
 use events_list::list_billing_webhook_events;
 use ops_view::{get_workspace_job_aggregates, get_workspace_subscription};
 use user_pricing::{get_billing_spend_summary, post_billing_estimate};
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/billing/plans", get(get_billing_plans))
+        .route("/api/v1/billing/checkout", post(post_billing_checkout))
+        .route(
+            "/api/v1/billing/checkout/:session_id",
+            get(get_checkout_session),
+        )
+        .route(
+            "/api/v1/billing/checkout/:session_id/mock-pay",
+            get(get_mock_pay),
+        )
+        .route("/api/v1/billing/portal", post(post_billing_portal))
+        .route("/api/v1/webhooks/billing/alipay", post(post_alipay_notify))
+        .route(
+            "/api/v1/webhooks/billing/stripe",
+            post(post_stripe_checkout_webhook),
+        )
+        .route("/api/v1/webhooks/billing/bitpay", post(post_bitpay_notify))
         .route("/api/v1/webhooks/billing", post(post_billing_webhook))
         .route(
             "/api/v1/webhooks/billing/events",

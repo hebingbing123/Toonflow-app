@@ -8,6 +8,7 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
 import 'package:openflow_app/project_studio/project_studio_scope.dart';
 import 'package:openflow_app/project_studio/studio_readiness.dart';
+import 'package:openflow_app/project_studio/studio_snapshot_bus.dart';
 import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -142,6 +143,51 @@ void main() {
     expect(received.last.completedSteps, 4);
     expect(find.text('4/6'), findsOneWidget);
   });
+
+  testWidgets(
+    'project studio scope silently reloads when readiness snapshot is invalidated',
+    (tester) async {
+      final received = <StudioReadinessSnapshot>[];
+      var loadCount = 0;
+
+      await tester.pumpWidget(
+        _wrapApp(
+          child: ProjectStudioScope(
+            accessToken: 'token',
+            projectNumericId: 42,
+            projectUuid: 'project-42',
+            projectName: 'Project Delta',
+            initialStep: StudioStep.script,
+            loadSnapshot: (accessToken, projectUuid) async {
+              loadCount += 1;
+              return StudioReadinessSnapshot(completedSteps: loadCount + 2);
+            },
+            hostFactory: (readiness, refreshSnapshot) =>
+                _hostFor(readiness, received: received),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(loadCount, 1);
+      expect(find.text('3/6'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      kStudioSnapshotBus.invalidate(
+        StudioSnapshotInvalidation.projectOnboarding,
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(loadCount, 2);
+      expect(received, hasLength(2));
+      expect(received.last.completedSteps, 4);
+      expect(find.text('4/6'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      kStudioSnapshotBus.clearPending(StudioSnapshotKey.values);
+    },
+  );
 
   testWidgets(
     'project studio scope renders cockpit content from project home',

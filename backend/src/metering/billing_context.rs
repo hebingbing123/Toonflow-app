@@ -208,7 +208,7 @@ pub async fn get_effective_billing_context(
     match billing_scope {
         BillingScope::User => {
             // Load billing data from app_user_profile
-            type UserBillingRow = (String, Option<i64>, Option<String>, Option<String>);
+            type UserBillingRow = (Option<String>, Option<i64>, Option<String>, Option<String>);
             let row: Option<UserBillingRow> = sqlx::query_as(
                 r#"
                 SELECT plan_tier, daily_job_quota::bigint, billing_currency, billing_provider
@@ -222,7 +222,10 @@ pub async fn get_effective_billing_context(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
             let (plan_tier, daily_job_quota, billing_currency, billing_provider) =
-                row.unwrap_or_else(|| ("free".to_string(), None, None, None));
+                row.unwrap_or((None, None, None, None));
+            let plan_tier = plan_tier
+                .filter(|t| !t.trim().is_empty())
+                .unwrap_or_else(|| "free".to_string());
 
             Ok(EffectiveBillingContext {
                 billing_scope: BillingScope::User,

@@ -94,6 +94,18 @@ extension _HomePageProductShell on _HomePageState {
     _selectProductUtilityPane(ProductWorkspacePane.account);
   }
 
+  void _openBillingSubscribeFromShell({bool checkoutSuccess = false}) {
+    if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    StudioSettingsHubNavigation.requestPlanTab(
+      openSubscribe: true,
+      checkoutSuccess: checkoutSuccess,
+    );
+    setState(() => _settingsHubInitialTabIndex = 1);
+    _selectProductUtilityPane(ProductWorkspacePane.account);
+  }
+
   Future<void> _maybeNudgeDomesticVendorOnProjectsHome() async {
     if (!mounted || widget.shellMode != HomeShellMode.product) {
       return;
@@ -433,6 +445,12 @@ extension _HomePageProductShell on _HomePageState {
     }
     final uri = GoRouterState.of(context).uri;
     if (!studioUriIsShellHome(uri)) {
+      return;
+    }
+    final tab = uri.queryParameters['tab']?.trim();
+    if (tab == 'plan') {
+      final checkout = uri.queryParameters['checkout']?.trim();
+      _openBillingSubscribeFromShell(checkoutSuccess: checkout == 'success');
       return;
     }
     final pane = studioPaneFromUri(uri);
@@ -1017,8 +1035,13 @@ extension _HomePageProductShell on _HomePageState {
   /// VS Code–style macOS integrated title bar (38px shell, 30px search field).
   static const double _kMacOSTitleBarHeight = 38;
   static const double _kMacOSTitleBarInnerHeight = 30;
-  static const double _kMacOSTitleBarHeightWithContext = 44;
+  /// Vertical padding when workspace context is shown (`microGap` top + 5 bottom).
+  static const double _kMacOSTitleBarContextPaddingVertical =
+      StudioLayoutSpacing.microGap + 5;
   static const double _kMacOSTitleBarInnerHeightWithContext = 38;
+  static const double _kMacOSTitleBarHeightWithContext =
+      _kMacOSTitleBarInnerHeightWithContext +
+      _kMacOSTitleBarContextPaddingVertical;
   static const double _kTitleBarWorkspaceContextMaxWidth = 300;
   /// Reserved width for traffic lights + left drag target (macOS HIG ~12–14px margin).
   static const double _kMacOSTrafficLightInset = 72;

@@ -62,4 +62,9 @@ abstract final class StudioSnapshotInvalidation {
   static const assemblyVersionsOnly = <StudioSnapshotKey>[
     StudioSnapshotKey.assemblyVersions,
   ];
+
+  /// Brief / brand / onboarding fields shown on the Art step readiness card.
+  static const projectOnboarding = <StudioSnapshotKey>[
+    StudioSnapshotKey.readiness,
+  ];
 }

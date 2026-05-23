@@ -8,6 +8,7 @@ import 'project_studio_host.dart';
 import 'project_studio_page.dart';
 import 'creator_journey_telemetry.dart';
 import 'studio_readiness.dart';
+import 'studio_snapshot_bus.dart';
 import 'studio_step.dart';
 
 typedef ProjectStudioReadinessLoader =
@@ -61,14 +62,27 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
       projectUuid: widget.projectUuid,
       projectNumericId: widget.projectNumericId,
     );
+    kStudioSnapshotBus.addListener(_onSnapshotBusChanged);
     _load();
   }
 
   @override
   void dispose() {
+    kStudioSnapshotBus.removeListener(_onSnapshotBusChanged);
     _jobPollTimer?.cancel();
     CreatorJourneyTelemetry.clearProject();
     super.dispose();
+  }
+
+  void _onSnapshotBusChanged() {
+    final pending = kStudioSnapshotBus.pendingKeys;
+    if (!pending.contains(StudioSnapshotKey.readiness)) {
+      return;
+    }
+    kStudioSnapshotBus.clearPending(const <StudioSnapshotKey>[
+      StudioSnapshotKey.readiness,
+    ]);
+    unawaited(_load(showLoadingIndicator: false));
   }
 
   void _scheduleJobPollIfNeeded(StudioReadinessSnapshot snap) {
@@ -81,11 +95,13 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
     });
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  Future<void> _load({bool showLoadingIndicator = true}) async {
+    if (showLoadingIndicator) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final snapshot = await (widget.loadSnapshot ?? _defaultLoadSnapshot)(
         widget.accessToken,
@@ -94,15 +110,19 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
       if (!mounted) return;
       setState(() {
         _readiness = snapshot;
-        _loading = false;
+        if (showLoadingIndicator) {
+          _loading = false;
+        }
       });
       _scheduleJobPollIfNeeded(snapshot);
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e;
-        _loading = false;
-        _readiness = const StudioReadinessSnapshot(completedSteps: 1);
+        if (showLoadingIndicator) {
+          _error = e;
+          _loading = false;
+          _readiness = const StudioReadinessSnapshot(completedSteps: 1);
+        }
       });
     }
   }

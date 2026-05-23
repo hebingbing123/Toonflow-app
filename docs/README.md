@@ -6,6 +6,7 @@
 
 | 角色 | 入口 |
 |------|------|
+| **创作者 / 制片 / 运营** | [**OpenFlow 用户操作手册**](./product/user-manual.md)（Studio 六步全链路） |
 | 开发者 | [开发者快速开始](./getting-started/for-developers.md) |
 | 运维人员 | [运维人员快速开始](./getting-started/for-operators.md) |
 
@@ -49,6 +50,7 @@
 
 ### 📱 产品
 
+- [**用户操作手册**](./product/user-manual.md) — Studio 六步：剧本 → 成片（创作者主文档）
 - [深链接](./product/deep-links.md)
 - **UX**：[竞品 UI 基准](./product/ux/competitive-ui-benchmark.md) · [设计 Token](./product/ux/design-tokens.md) · [交互约定](./product/ux/ix-covenant.md)
 - **规格**：[AI 短剧质量](./product/specs/ai-drama-quality-token-memory.md) · [模型定价](./product/specs/model-pricing-prd.md) · [小说采集](./product/specs/novel-intake-crawler.md)

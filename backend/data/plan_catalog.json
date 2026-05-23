@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "disclaimer": "List prices in CNY cents unless noted. Checkout integration maps provider SKUs to plan_tier.",
+  "period_days": 30,
+  "plans": [
+    {
+      "plan_tier": "creator",
+      "display_name_zh": "创作者档",
+      "display_name_en": "Creator",
+      "description_zh": "适合个人创作者试制与 PoC，日任务配额约为 Free 的 40 倍。",
+      "description_en": "For solo creators; about 40× Free daily job quota.",
+      "prices": {
+        "CNY": { "amount_cents": 7900, "label": "¥79/月" },
+        "USD": { "amount_cents": 1200, "label": "$12/mo" }
+      },
+      "alipay": { "product_code": "openflow_creator_monthly" },
+      "stripe": {
+        "price_id_cny": "",
+        "price_id_usd": ""
+      },
+      "bitpay": { "enabled": true }
+    },
+    {
+      "plan_tier": "pro",
+      "display_name_zh": "Pro 档",
+      "display_name_en": "Pro",
+      "description_zh": "团队小规模产线，更高日任务配额与并发（按工程默认）。",
+      "description_en": "Small teams; higher daily job quota.",
+      "prices": {
+        "CNY": { "amount_cents": 24900, "label": "¥249/月" },
+        "USD": { "amount_cents": 3500, "label": "$35/mo" }
+      },
+      "alipay": { "product_code": "openflow_pro_monthly" },
+      "stripe": {
+        "price_id_cny": "",
+        "price_id_usd": ""
+      },
+      "bitpay": { "enabled": true }
+    },
+    {
+      "plan_tier": "studio",
+      "display_name_zh": "工作室档",
+      "display_name_en": "Studio tier",
+      "description_zh": "短剧产线团队；最高自助档位（企业定制请商务洽谈）。",
+      "description_en": "Production teams; top self-serve tier.",
+      "prices": {
+        "CNY": { "amount_cents": 69900, "label": "¥699/月" },
+        "USD": { "amount_cents": 9900, "label": "$99/mo" }
+      },
+      "alipay": { "product_code": "openflow_studio_monthly" },
+      "stripe": {
+        "price_id_cny": "",
+        "price_id_usd": ""
+      },
+      "bitpay": { "enabled": true }
+    }
+  ]
+}

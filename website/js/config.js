@@ -1,22 +1,26 @@
 /**
- * 部署时按需修改：Web 版应用地址、文档与下载链接。
+ * 部署时按需修改：Web 版应用地址、文档与商务联系入口。
+ * OpenFlow 为商业授权产品，宣传页链接默认指向站内锚点，勿指向公开源码仓库。
  */
 window.OpenFlowSiteConfig = {
   appUrl: "",
-  docsUrl: "https://github.com/HBAI-Ltd/Openflow-app/tree/master/docs",
-  docsEnUrl: "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/README.en.md",
-  gettingStartedUrl:
-    "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/getting-started/for-developers.md",
-  gettingStartedEnUrl:
-    "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/getting-started/for-developers.md",
-  operatorsUrl:
-    "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/getting-started/for-operators.md",
-  operatorsEnUrl:
-    "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/getting-started/for-operators.md",
-  gettingStartedIndexUrl:
-    "https://github.com/HBAI-Ltd/Openflow-app/blob/master/docs/getting-started/README.md",
-  releasesUrl: "https://github.com/HBAI-Ltd/Openflow-app/releases",
-  repoUrl: "https://github.com/HBAI-Ltd/Openflow-app",
+  /** 文档与手册：随授权交付；未配置时滚动到本站 #docs */
+  docsUrl: "#docs",
+  docsEnUrl: "#docs",
+  userManualUrl: "#docs",
+  userManualEnUrl: "#docs",
+  userGuideUrl: "#docs",
+  userGuideEnUrl: "#docs",
+  /** 商务联系 / 试用申请 */
+  contactUrl: "#contact",
+  gettingStartedUrl: "#contact",
+  gettingStartedEnUrl: "#contact",
+  operatorsUrl: "#contact",
+  operatorsEnUrl: "#contact",
+  gettingStartedIndexUrl: "#docs",
+  /** 客户端安装包由商务发放，非公开下载页 */
+  releasesUrl: "#contact",
+  repoUrl: "",
   demoVideoUrl: "",
   /** 产品预览轮播 — 从设计稿拼板裁剪（见 scripts/crop-website-assets.sh） */
   demoSlides: [

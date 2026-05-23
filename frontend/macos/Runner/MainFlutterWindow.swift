@@ -4,7 +4,7 @@ import FlutterMacOS
 class MainFlutterWindow: NSWindow {
   private static let minimumWindowSize = NSSize(width: 960, height: 640)
   /// Matches integrated macOS title bar + padding (Flutter `fullSizeContentView` chrome).
-  private static let titleBarChromeHeight: CGFloat = 44
+  private static let titleBarChromeHeight: CGFloat = 49
   private var localMouseMonitor: Any?
 
   private func toggleTitleBarDisplayMode() {

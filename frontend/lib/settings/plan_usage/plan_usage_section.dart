@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_primary_button.dart';
 import '../../design_system/components/studio_skeleton.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
@@ -7,6 +8,8 @@ import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
+import '../../shell/studio_settings_hub_navigation.dart';
+import '../billing/subscribe_plan_page.dart';
 import '../model_pricing/spend_summary_panel.dart';
 
 /// Plan tier, quota, and usage summary for Studio settings.
@@ -29,6 +32,50 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
   void initState() {
     super.initState();
     _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpenSubscribeFromNavigation());
+  }
+
+  Future<void> _maybeOpenSubscribeFromNavigation() async {
+    if (!mounted || !StudioSettingsHubNavigation.consumeOpenSubscribe()) {
+      return;
+    }
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final success = StudioSettingsHubNavigation.consumeCheckoutSuccess();
+    final tier = _me?.user.planTier;
+    final upgraded = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (context) => SubscribePlanPage(
+          accessToken: token,
+          currentPlanTier: tier,
+          checkoutSuccess: success,
+        ),
+      ),
+    );
+    if (upgraded == true && mounted) {
+      await _load();
+    }
+  }
+
+  Future<void> _openSubscribe() async {
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    final tier = _me?.user.planTier;
+    final upgraded = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (context) => SubscribePlanPage(
+          accessToken: token,
+          currentPlanTier: tier,
+        ),
+      ),
+    );
+    if (upgraded == true && mounted) {
+      await _load();
+    }
   }
 
   @override
@@ -173,6 +220,11 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
                 Text(
                   l10n.studioPlanUsageEstimateDisclaimer,
                   style: studioSectionIntroStyle(context),
+                ),
+                const SizedBox(height: StudioSpacing.md),
+                StudioPrimaryButton(
+                  label: l10n.billingUpgradePlan,
+                  onPressed: _openSubscribe,
                 ),
               ],
                 ),

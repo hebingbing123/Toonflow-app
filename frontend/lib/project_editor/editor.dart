@@ -617,6 +617,8 @@ class _ProjectEditorDialogState {
     } catch (_) {
       novelEventsRef[0] = null;
     }
+
+    kStudioSnapshotBus.invalidate(StudioSnapshotInvalidation.projectOnboarding);
   }
 }
 

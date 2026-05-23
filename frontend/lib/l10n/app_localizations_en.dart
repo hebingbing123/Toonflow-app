@@ -24870,6 +24870,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingUpgradePlan => 'Upgrade Plan';
 
   @override
+  String get billingSubscribeTitle => 'Subscribe';
+
+  @override
+  String get billingCheckoutSuccess =>
+      'Payment received. Your plan will update shortly.';
+
+  @override
+  String billingCurrentPlan(String name) {
+    return 'Current plan: $name';
+  }
+
+  @override
+  String get billingPayWithAlipay => 'Pay with Alipay';
+
+  @override
+  String get billingPayWithStripe => 'Pay with Stripe';
+
+  @override
+  String get billingPayWithBitpay => 'Pay with crypto (BitPay)';
+
+  @override
+  String get billingManageSubscription => 'Manage subscription';
+
+  @override
   String get billingErrorPaymentFailed =>
       'Payment failed. Please update your payment method to continue.';
 

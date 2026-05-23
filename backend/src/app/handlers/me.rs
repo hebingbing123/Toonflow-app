@@ -43,7 +43,7 @@ fn request_id_from_headers(headers: &HeaderMap) -> Option<&str> {
 
 #[derive(FromRow)]
 struct UserProfileRow {
-    plan_tier: String,
+    plan_tier: Option<String>,
     billing_currency: Option<String>,
     billing_provider: Option<String>,
     subscription_status: Option<String>,
@@ -131,7 +131,9 @@ pub(crate) async fn me(
             current_workspace_id,
         ) = match row {
             Some(r) => (
-                r.plan_tier,
+                r.plan_tier
+                    .filter(|t| !t.trim().is_empty())
+                    .unwrap_or_else(|| "free".to_string()),
                 r.billing_currency,
                 r.billing_provider,
                 r.subscription_status,

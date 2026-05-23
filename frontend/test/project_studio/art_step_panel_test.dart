@@ -54,11 +54,59 @@ Future<StylePackCatalog> _sampleCatalog(
   );
 }
 
+const _fixtureHome = ProjectHome(
+  project: _testProject,
+  stats: ProjectStats(
+    scriptCount: 0,
+    storyboardCount: 0,
+    roleCount: 0,
+    novelCount: 0,
+    videoCount: 0,
+  ),
+  readinessScore: 35,
+  readinessSummary: 'Early setup',
+  onboarding: ProjectHomeOnboarding(
+    complete: false,
+    nextStep: 'Complete brief',
+    checklist: <ProjectHomeChecklistItem>[
+      ProjectHomeChecklistItem(
+        key: 'brief',
+        label: 'Complete project brief',
+        done: false,
+        detail: 'Add premise and audience',
+      ),
+      ProjectHomeChecklistItem(
+        key: 'source',
+        label: 'Connect upstream content',
+        done: true,
+      ),
+    ],
+  ),
+  styleBibleReady: false,
+  cockpit: ProjectHomeCockpit(
+    headline: 'Headline',
+    subheadline: 'Sub',
+    primaryAction: ProjectHomeAction(
+      key: 'finish_onboarding',
+      title: 'Finish',
+      detail: '',
+      targetStep: 'art',
+      ctaLabel: 'Continue',
+    ),
+    secondaryActions: <ProjectHomeAction>[],
+    metrics: <ProjectHomeMetric>[],
+    starterTemplates: <ProjectHomeStarterTemplate>[],
+  ),
+);
+
 Widget _artPanelApp({
   required ProjectRow project,
   required ValueChanged<ProjectRow> onProjectUpdated,
   StylePackCatalogLoader? catalogLoader,
   ArtStepPanelSaver? saver,
+  ProjectHome? projectHome,
+  VoidCallback? onOpenBriefContext,
+  VoidCallback? onNavigateToScriptStep,
 }) {
   return MaterialApp(
     theme: buildStudioDarkTheme(useGoogleFonts: false),
@@ -72,7 +120,9 @@ Widget _artPanelApp({
         saver: saver,
         project: project,
         onProjectUpdated: onProjectUpdated,
-        onOpenBriefContext: () {},
+        projectHome: projectHome,
+        onOpenBriefContext: onOpenBriefContext ?? () {},
+        onNavigateToScriptStep: onNavigateToScriptStep,
       ),
     ),
   );
@@ -117,6 +167,42 @@ void main() {
     expect(find.text('Current selection'), findsOneWidget);
     expect(find.text('Reset'), findsOneWidget);
     expect(find.text('Brief & brand constraints'), findsOneWidget);
+  });
+
+  testWidgets('art step shows inline readiness checklist when home provided', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    var briefOpened = false;
+    var scriptNavigated = false;
+
+    await tester.pumpWidget(
+      _artPanelApp(
+        catalogLoader: _emptyCatalog,
+        project: _testProject,
+        projectHome: _fixtureHome,
+        onProjectUpdated: (_) {},
+        onOpenBriefContext: () => briefOpened = true,
+        onNavigateToScriptStep: () => scriptNavigated = true,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('studio_art_step_readiness')), findsOneWidget);
+    expect(find.text('Complete project brief'), findsOneWidget);
+    expect(find.text('Connect upstream content'), findsOneWidget);
+    expect(find.text('Add premise and audience'), findsOneWidget);
+    expect(find.text('35%'), findsOneWidget);
+
+    await tester.tap(find.text('Complete project brief'));
+    await tester.pump();
+    expect(briefOpened, isTrue);
+
+    await tester.tap(find.text('Connect upstream content'));
+    await tester.pump();
+    expect(scriptNavigated, isFalse);
   });
 
   testWidgets('save invokes saver, onProjectUpdated, and success snackbar', (

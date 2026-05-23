@@ -38185,6 +38185,48 @@ abstract class AppLocalizations {
   /// **'Upgrade Plan'**
   String get billingUpgradePlan;
 
+  /// No description provided for @billingSubscribeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get billingSubscribeTitle;
+
+  /// No description provided for @billingCheckoutSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received. Your plan will update shortly.'**
+  String get billingCheckoutSuccess;
+
+  /// No description provided for @billingCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current plan: {name}'**
+  String billingCurrentPlan(String name);
+
+  /// No description provided for @billingPayWithAlipay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with Alipay'**
+  String get billingPayWithAlipay;
+
+  /// No description provided for @billingPayWithStripe.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with Stripe'**
+  String get billingPayWithStripe;
+
+  /// No description provided for @billingPayWithBitpay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with crypto (BitPay)'**
+  String get billingPayWithBitpay;
+
+  /// No description provided for @billingManageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get billingManageSubscription;
+
   /// No description provided for @billingErrorPaymentFailed.
   ///
   /// In en, this message translates to:

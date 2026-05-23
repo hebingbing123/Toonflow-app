@@ -23731,6 +23731,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingUpgradePlan => '升级套餐';
 
   @override
+  String get billingSubscribeTitle => 'Subscribe';
+
+  @override
+  String get billingCheckoutSuccess =>
+      'Payment received. Your plan will update shortly.';
+
+  @override
+  String billingCurrentPlan(String name) {
+    return 'Current plan: $name';
+  }
+
+  @override
+  String get billingPayWithAlipay => 'Pay with Alipay';
+
+  @override
+  String get billingPayWithStripe => 'Pay with Stripe';
+
+  @override
+  String get billingPayWithBitpay => 'Pay with crypto (BitPay)';
+
+  @override
+  String get billingManageSubscription => 'Manage subscription';
+
+  @override
   String get billingErrorPaymentFailed => '付款失败，请更新支付方式以继续使用。';
 
   @override

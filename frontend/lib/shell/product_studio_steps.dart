@@ -157,14 +157,14 @@ extension _HomePageProductStudioSteps on _HomePageState {
             }
             setState(() {});
           },
-          onOpenBriefContext: () => showArtStepBriefContextSheet(
-            context: context,
-            accessToken: artToken,
-            project: artRow,
-            home: projectHome,
-            onOpenFullProjectSettings: () => _openProjectDetail(artRow),
-          ),
           onOpenFullProjectSettings: () => _openProjectDetail(artRow),
+          onNavigateToScriptStep: () {
+            goProjectStudioStepIfScoped(
+              context,
+              projectNumericId: artRow.numericId,
+              step: StudioStep.script,
+            );
+          },
         );
       case StudioStep.assets:
         final pendingAssetId = _pendingStudioAssetNumericId;

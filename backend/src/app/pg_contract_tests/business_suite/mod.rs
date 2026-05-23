@@ -1,5 +1,6 @@
 mod art_styles_base64_cover_roundtrip;
 mod art_styles_crud_roundtrip;
+mod billing_checkout_roundtrip;
 mod billing_estimate_roundtrip;
 mod billing_webhook_dual_write_roundtrip;
 mod billing_webhook_events_roundtrip;

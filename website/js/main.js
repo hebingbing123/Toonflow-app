@@ -22,18 +22,23 @@
   function applyLinks() {
     const links = {
       docs: docsUrlForLocale(locale),
+      "user-manual":
+        locale === "en" && cfg.userManualEnUrl ? cfg.userManualEnUrl : cfg.userManualUrl,
+      "user-guide":
+        locale === "en" && cfg.userGuideEnUrl ? cfg.userGuideEnUrl : cfg.userGuideUrl,
       "getting-started": gettingStartedForLocale(locale),
       operators: operatorsForLocale(locale),
       "getting-started-index": cfg.gettingStartedIndexUrl,
       releases: cfg.releasesUrl,
       repo: cfg.repoUrl,
+      contact: cfg.contactUrl,
       login: cfg.appUrl || "#start",
     };
 
     document.querySelectorAll("[data-link]").forEach((el) => {
       const key = el.getAttribute("data-link");
       const href = links[key];
-      if (!href) return;
+      if (!href || href === "#") return;
       el.setAttribute("href", href);
       if (href.startsWith("http")) {
         el.setAttribute("target", "_blank");
@@ -152,7 +157,7 @@
     // 锚点跳转（#start / #pricing）时立即展示该区块，避免只看到空卡片壳
     const revealFromHash = () => {
       const id = (location.hash || "").replace(/^#/, "");
-      if (id === "start" || id === "pricing") {
+      if (id === "start" || id === "pricing" || id === "docs") {
         revealSectionById(id);
       }
     };
@@ -161,7 +166,7 @@
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener("click", () => {
         const id = (link.getAttribute("href") || "").replace(/^#/, "");
-        if (id === "start" || id === "pricing") {
+        if (id === "start" || id === "pricing" || id === "docs") {
           requestAnimationFrame(() => revealSectionById(id));
         }
       });

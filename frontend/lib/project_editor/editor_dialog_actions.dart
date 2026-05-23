@@ -165,6 +165,9 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                       steps: stepPatch,
                     );
                   }
+                  kStudioSnapshotBus.invalidate(
+                    StudioSnapshotInvalidation.projectOnboarding,
+                  );
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   if (!mounted) return;

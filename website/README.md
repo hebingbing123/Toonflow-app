@@ -37,11 +37,12 @@ cargo run --bin openflow-server
 | 字段 | 说明 |
 |------|------|
 | `appUrl` | Flutter Web / 应用登录地址；留空时「登录」滚动到「快速上手」 |
-| `docsUrl` / `docsEnUrl` | 中文 / 英文文档 |
-| `releasesUrl` | GitHub Releases |
+| `docsUrl` / `docsEnUrl` | 授权文档入口（默认 `#docs` 站内锚点） |
+| `contactUrl` | 商务联系（默认 `#contact`） |
+| `releasesUrl` | 客户端安装包入口（默认 `#contact`，由商务发放） |
 | `demoVideoUrl` | 演示视频（可选） |
 
-同域部署 API 时，文档链接可改为相对路径或 `http://127.0.0.1:8666/api/v1/docs`。
+产品为商业授权，宣传页**不应**再指向公开 GitHub 仓库或 Releases。
 
 ## 目录
 

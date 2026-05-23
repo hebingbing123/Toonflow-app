@@ -10,6 +10,10 @@
         super::ops_view::get_workspace_job_aggregates,
         super::user_pricing::post_billing_estimate,
         super::user_pricing::get_billing_spend_summary,
+        super::checkout::handlers::get_billing_plans,
+        super::checkout::handlers::post_billing_checkout,
+        super::checkout::handlers::get_checkout_session,
+        super::checkout::handlers::post_billing_portal,
     ),
     components(schemas(
         super::BillingWebhookResponse,
@@ -27,6 +31,12 @@
         crate::vendor::catalog::pricing::BillingSpendSummaryResponse,
         crate::vendor::catalog::pricing::ModelSpendRow,
         crate::vendor::catalog::pricing::ModelPricingPublic,
+        super::checkout::BillingPlansResponse,
+        super::checkout::BillingPlanPublic,
+        super::checkout::CheckoutRequest,
+        super::checkout::CheckoutResponse,
+        super::checkout::CheckoutSessionResponse,
+        super::checkout::BillingPortalResponse,
         crate::error::ErrorBody,
     )),
     tags(

@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_card.dart';
-import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/style_pack_catalog.dart';
 import '../project_editor/style_pack_picker_field.dart';
 import '../rust_api.dart';
+import 'art_step_brief_sheet.dart';
+import 'art_step_checklist_actions.dart';
+import 'art_step_readiness_card.dart';
+import 'studio_snapshot_bus.dart';
 
 /// Art-direction step: edit style packs, legacy art-style text, and save in place.
 typedef StylePackCatalogLoader =
@@ -31,8 +36,9 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
     required this.accessToken,
     required this.project,
     required this.onProjectUpdated,
-    required this.onOpenBriefContext,
+    this.onOpenBriefContext,
     this.onOpenFullProjectSettings,
+    this.onNavigateToScriptStep,
     this.projectHome,
     this.catalogLoader,
     this.saver,
@@ -41,8 +47,9 @@ class ProjectStudioArtStepPanel extends StatefulWidget {
   final String accessToken;
   final ProjectRow project;
   final ValueChanged<ProjectRow> onProjectUpdated;
-  final VoidCallback onOpenBriefContext;
+  final VoidCallback? onOpenBriefContext;
   final VoidCallback? onOpenFullProjectSettings;
+  final VoidCallback? onNavigateToScriptStep;
   final ProjectHome? projectHome;
 
   /// Overrides catalog HTTP for tests; production uses [loadProjectStylePackCatalog].
@@ -73,6 +80,8 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
 
   bool _saving = false;
   late final TextEditingController _artStyleCtrl;
+  final ScrollController _scrollCtrl = ScrollController();
+  final GlobalKey _styleFormKey = GlobalKey();
 
   @override
   void initState() {
@@ -93,7 +102,53 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   @override
   void dispose() {
     _artStyleCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _onChecklistItemTap(String key) {
+    switch (key) {
+      case ArtStepChecklistKey.brief:
+      case ArtStepChecklistKey.brandBible:
+        _openBriefContext(focusKey: key);
+        return;
+      case ArtStepChecklistKey.source:
+        widget.onNavigateToScriptStep?.call();
+        return;
+      case ArtStepChecklistKey.styleBible:
+        unawaited(_scrollToStyleForm());
+        return;
+    }
+  }
+
+  void _openBriefContext({String? focusKey}) {
+    final override = widget.onOpenBriefContext;
+    if (override != null) {
+      override();
+      return;
+    }
+    showArtStepBriefContextSheet(
+      context: context,
+      accessToken: widget.accessToken,
+      project: widget.project,
+      home: widget.projectHome,
+      onOpenFullProjectSettings:
+          widget.onOpenFullProjectSettings ?? () {},
+      onNavigateToScriptStep: widget.onNavigateToScriptStep,
+      onFocusStylePacks: _scrollToStyleForm,
+      initialChecklistFocusKey: focusKey,
+    );
+  }
+
+  Future<void> _scrollToStyleForm() async {
+    final target = _styleFormKey.currentContext;
+    if (target == null) return;
+    await Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      alignment: 0.05,
+    );
   }
 
   @override
@@ -204,6 +259,9 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
         _saving = false;
       });
       widget.onProjectUpdated(updated);
+      kStudioSnapshotBus.invalidate(
+        StudioSnapshotInvalidation.projectOnboarding,
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.studioArtStepSaveSuccess)),
       );
@@ -222,38 +280,13 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     setState(() => _seedFromProject(widget.project));
   }
 
-  Widget _buildReadinessStrip(AppLocalizations l10n) {
+  Widget? _buildReadinessCard(AppLocalizations l10n) {
     final home = widget.projectHome;
-    if (home == null) return const SizedBox.shrink();
-    final theme = Theme.of(context);
-    final tokens = StudioTokens.of(context);
-    return Container(
-      key: const Key('studio_art_step_readiness'),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-        border: Border.all(color: tokens.borderSubtle),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            l10n.projectEditorBasicsHomeReadinessLine(
-              home.readinessScore,
-              home.readinessSummary,
-            ),
-            style: theme.textTheme.bodyMedium,
-          ),
-          if (home.onboarding.nextStep != null) ...<Widget>[
-            const SizedBox(height: StudioSpacing.xs),
-            Text(
-              l10n.projectEditorBasicsHomeNextStep(home.onboarding.nextStep!),
-              style: studioHintStyle(context),
-            ),
-          ],
-        ],
-      ),
+    if (home == null) return null;
+    return ArtStepReadinessCard(
+      home: home,
+      l10n: l10n,
+      onChecklistItemTap: _onChecklistItemTap,
     );
   }
 
@@ -264,6 +297,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     StylePackCatalog catalog,
   ) {
     return Container(
+      key: _styleFormKey,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
@@ -374,6 +408,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: SingleChildScrollView(
+              controller: _scrollCtrl,
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -411,8 +446,10 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildReadinessStrip(l10n),
-                  if (widget.projectHome != null) const SizedBox(height: 16),
+                  if (_buildReadinessCard(l10n) case final card?) ...<Widget>[
+                    card,
+                    const SizedBox(height: 16),
+                  ],
                   catalogBody,
                   const SizedBox(height: 16),
                   Wrap(
@@ -444,7 +481,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                         child: Text(l10n.studioArtStepResetButton),
                       ),
                       TextButton.icon(
-                        onPressed: widget.onOpenBriefContext,
+                        onPressed: _openBriefContext,
                         icon: const Icon(Icons.article_outlined, size: 18),
                         label: Text(l10n.studioArtStepOpenSettings),
                       ),

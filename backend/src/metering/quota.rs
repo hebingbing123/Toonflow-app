@@ -87,7 +87,7 @@ pub async fn effective_daily_job_quota_and_tier_for_user(
     pool: &PgPool,
     user_id: Uuid,
 ) -> Result<(Option<i64>, String), sqlx::Error> {
-    let row: Option<(String, Option<i64>)> = sqlx::query_as(
+    let row: Option<(Option<String>, Option<i64>)> = sqlx::query_as(
         r#"
         SELECT plan_tier, daily_job_quota::bigint
         FROM app_user_profile
@@ -98,7 +98,10 @@ pub async fn effective_daily_job_quota_and_tier_for_user(
     .fetch_optional(pool)
     .await?;
 
-    let (tier, per_user_override) = row.unwrap_or_else(|| ("free".to_string(), None));
+    let (tier, per_user_override) = row.unwrap_or((None, None));
+    let tier = tier
+        .filter(|t| !t.trim().is_empty())
+        .unwrap_or_else(|| "free".to_string());
 
     if let Some(cap) = per_user_override {
         return Ok((Some(cap), tier));

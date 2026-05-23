@@ -132,7 +132,6 @@ import 'project_studio/studio_step.dart';
 import 'project_studio/studio_video_step_panel.dart';
 import 'project_studio/script_step_panel.dart';
 import 'project_studio/novel_crawl_auth_section.dart';
-import 'project_studio/art_step_brief_sheet.dart';
 import 'project_studio/art_step_panel.dart';
 import 'project_studio/project_studio_agent_focus_body.dart';
 import 'product_shell/studio_agent_drawer.dart';
@@ -643,6 +642,11 @@ class _HomePageState extends State<HomePage> {
       _authController.attachAuthListener();
     }
     _syncSessionContext();
+    if (widget.shellMode == HomeShellMode.product) {
+      StudioSettingsHubNavigation.registerOpenSubscribeHandler(
+        _openBillingSubscribeFromShell,
+      );
+    }
   }
 
   @override
@@ -1463,6 +1467,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    StudioSettingsHubNavigation.registerOpenSubscribeHandler(null);
     _detachStudioRouteListener();
     _authController.removeListener(_handleAuthChanged);
     _accountProbesController.removeListener(_handleAccountProbesChanged);

@@ -5,6 +5,7 @@ import '../design_system/ix/studio_toast_overlay.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
+import '../shell/studio_settings_hub_navigation.dart';
 
 /// Root [ScaffoldMessenger] for API errors when no local [BuildContext] is in scope.
 final GlobalKey<ScaffoldMessengerState> kRustApiRootScaffoldMessengerKey =
@@ -72,6 +73,7 @@ void showRustApiErrorSnackBar(Object error) {
   if (context == null || !context.mounted) {
     return;
   }
+  final l10n = AppLocalizations.of(context)!;
   final text = describeRustApiError(error);
   final isRate = isRustApiQuotaOrRateError(error);
   showStudioToast(
@@ -79,6 +81,8 @@ void showRustApiErrorSnackBar(Object error) {
     message: text,
     tone: isRate ? StudioToastTone.warning : StudioToastTone.error,
     duration: Duration(seconds: isRate ? 8 : 5),
+    actionLabel: isRate ? l10n.billingUpgradePlan : null,
+    onAction: isRate ? StudioSettingsHubNavigation.openSubscribe : null,
   );
 }
 

@@ -187,8 +187,8 @@ class WorkspaceContextView extends StatelessWidget {
           : '$summary\n$billingSummary';
 
       if (titleBarChrome) {
-        if (titleBarDense) {
-          final denseBody = Row(
+        Widget buildTitleBarDenseRow() {
+          return Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
@@ -211,22 +211,10 @@ class WorkspaceContextView extends StatelessWidget {
               ),
             ],
           );
-          return Tooltip(
-            message: tooltip,
-            waitDuration: const Duration(milliseconds: 350),
-            child: _wrapProjectScopeTapTarget(
-              context: context,
-              l10n: l10n,
-              tokens: tokens,
-              scopeLine: scopeLine,
-              child: denseBody,
-            ),
-          );
         }
-        return Tooltip(
-          message: tooltip,
-          waitDuration: const Duration(milliseconds: 350),
-          child: Column(
+
+        Widget buildTitleBarTwoLineColumn() {
+          return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -275,6 +263,27 @@ class WorkspaceContextView extends StatelessWidget {
                     : tokens.textSecondary,
               ),
             ],
+          );
+        }
+
+        return Tooltip(
+          message: tooltip,
+          waitDuration: const Duration(milliseconds: 350),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final useDense =
+                  titleBarDense || constraints.maxHeight < 36;
+              final body = useDense
+                  ? buildTitleBarDenseRow()
+                  : buildTitleBarTwoLineColumn();
+              return _wrapProjectScopeTapTarget(
+                context: context,
+                l10n: l10n,
+                tokens: tokens,
+                scopeLine: scopeLine,
+                child: body,
+              );
+            },
           ),
         );
       }

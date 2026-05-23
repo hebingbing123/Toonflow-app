@@ -1,32 +1,30 @@
 # 宣传页截图（从设计稿裁剪）
 
-素材来自 `website/assets/source/` 两张设计拼板（**非**当前 Flutter 产品 UI）：
+## 源文件
 
 | 源文件 | 说明 |
 |--------|------|
-| `ChatGPT Image 2026年5月23日 12_39_47.png` | 横版高清（1309×1201）：手机五屏、桌面/Web、底部四能力卡 |
-| `1582682143637361566.jpg` | 竖版（572×1024）：功能三栏、Hero 大界面 |
+| `Gemini_Generated_Image_5vxlmk5vxlmk5vxl.png` | **主源**（768×1376）：顶部三能力、四宫格图标、底部 Hero 大界面 |
+| `ChatGP*.png` / `design-board.png` | 横版（约 1309×1201）：手机五屏、桌面/Web 全平台区 |
+| `design-vertical.png` | 仅脚本回退 |
 
-旧版 `design-board.png` / `design-vertical.png` 仅作脚本回退。
-
-重新生成全部裁剪：
+重新生成：
 
 ```bash
 bash scripts/crop-website-assets.sh
 ```
 
-坐标在 `scripts/crop-website-assets.py`（百分比框，换源图尺寸时一般不用改像素）。
+坐标在 `scripts/crop-website-assets.py`（百分比框；换源图尺寸时一般只需微调比例）。
 
 ## 页面引用
 
 | 文件 | 用途 |
 |------|------|
-| `features-trio.png` / `@2x` | 核心能力横幅 |
-| `feature-*.png` / `@2x` | 四大能力卡片（竖版顶部三栏 + 私有化） |
-| `feature-*-card.png` / `@2x` | 横版底部四宫格（备用，更清晰图标卡） |
-| `hero-main.png` | 首页 Hero 主视觉 |
-| `desktop-studio.png` | 桌面端卡片 |
-| `web-app.png` | Web 卡片 |
-| `mobile-app.png` | 移动端卡片 |
-| `design-board-full.png` | 底部设计总览（高清横版） |
-| `mobile-01` … `05` | 预览弹层轮播 |
+| `hero-main.png` / `@2x` | 首页 Hero 主视觉（Gemini 底部大界面） |
+| `feature-*-card.png` / `@2x` | 核心能力四宫格（Gemini 顶栏三格 + 中部私有化图标） |
+| `features-trio.png` / `@2x` | 预览弹层三能力横条 |
+| `desktop-studio.png` 等 | 全平台介绍（横版 board） |
+| `design-gemini-full.png` | Gemini 源图归档 |
+| `design-board-full.png` | 横版 board 归档 |
+
+`feature-*.png`（旧竖版 572px 裁切）已停用，勿再引用。

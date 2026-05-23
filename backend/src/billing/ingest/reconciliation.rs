@@ -12,6 +12,20 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
+/// Returns true when user and workspace billing field values are consistent.
+///
+/// `NULL` workspace values mean "inherit user-scope billing" per
+/// `app_workspace.plan_tier` migration semantics — not a mismatch.
+fn workspace_billing_field_matches_user(
+    user_value: &Option<String>,
+    workspace_value: &Option<String>,
+) -> bool {
+    match workspace_value {
+        None => true,
+        Some(ws) => user_value.as_deref() == Some(ws.as_str()),
+    }
+}
+
 /// Billing state mismatch detected during reconciliation.
 #[derive(Debug, Clone)]
 pub struct BillingMismatch {
@@ -75,7 +89,7 @@ pub async fn check_personal_workspace_billing_consistency(
     let mut mismatches = Vec::new();
 
     // Compare plan_tier
-    if user_plan_tier != workspace_plan_tier {
+    if !workspace_billing_field_matches_user(&user_plan_tier, &workspace_plan_tier) {
         mismatches.push(BillingMismatch {
             user_id,
             workspace_id,
@@ -86,7 +100,7 @@ pub async fn check_personal_workspace_billing_consistency(
     }
 
     // Compare billing_currency
-    if user_billing_currency != workspace_billing_currency {
+    if !workspace_billing_field_matches_user(&user_billing_currency, &workspace_billing_currency) {
         mismatches.push(BillingMismatch {
             user_id,
             workspace_id,
@@ -97,7 +111,7 @@ pub async fn check_personal_workspace_billing_consistency(
     }
 
     // Compare billing_provider
-    if user_billing_provider != workspace_billing_provider {
+    if !workspace_billing_field_matches_user(&user_billing_provider, &workspace_billing_provider) {
         mismatches.push(BillingMismatch {
             user_id,
             workspace_id,
@@ -168,6 +182,19 @@ pub async fn reconcile_all_personal_workspaces(pool: &PgPool) -> Result<usize, s
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn workspace_null_inherits_user_scope() {
+        assert!(workspace_billing_field_matches_user(
+            &Some("free".into()),
+            &None,
+        ));
+        assert!(!workspace_billing_field_matches_user(
+            &Some("free".into()),
+            &Some("pro".into()),
+        ));
+        assert!(workspace_billing_field_matches_user(&None, &None));
+    }
 
     #[test]
     fn test_billing_mismatch_struct() {

@@ -7,8 +7,17 @@ VENV="$ROOT/.tmp/website-crop-venv"
 PY="$ROOT/scripts/crop-website-assets.py"
 
 SRC_DIR="$ROOT/website/assets/source"
-if ! ls "$SRC_DIR"/ChatGPT*.png "$SRC_DIR"/158268*.jpg "$SRC_DIR"/design-board.png "$SRC_DIR"/design-vertical.png 2>/dev/null | head -1 >/dev/null; then
-  echo "Missing design sources under $SRC_DIR" >&2
+shopt -s nullglob 2>/dev/null || true
+_found=0
+for _g in \
+  "$SRC_DIR"/Gemini*.png \
+  "$SRC_DIR"/ChatGP*.png \
+  "$SRC_DIR"/design-board.png \
+  "$SRC_DIR"/design-vertical.png; do
+  if [[ -f "$_g" ]]; then _found=1; break; fi
+done
+if [[ "$_found" -ne 1 ]]; then
+  echo "Missing design sources under $SRC_DIR (need Gemini*.png or board fallback)" >&2
   exit 1
 fi
 

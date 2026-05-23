@@ -14,6 +14,15 @@ pub async fn ingest_webhook(
     pool: &sqlx::PgPool,
     v: &Value,
 ) -> Result<(bool, Option<i64>, bool, String, bool), ApiError> {
+    let enriched = if v.get("type").and_then(Value::as_str).is_some() {
+        let mut cloned = v.clone();
+        crate::billing::checkout::stripe_checkout::enrich_stripe_webhook_payload(&mut cloned);
+        Some(cloned)
+    } else {
+        None
+    };
+    let v = enriched.as_ref().unwrap_or(v);
+
     let raw_event_id = parse_raw_event_id(v).ok_or_else(|| {
         bad_request_i18n(
             "JSON body must include a non-empty id (or event_id/eventId/notify_id/notifyId) for deduplication",
