@@ -24,6 +24,24 @@ class ConfirmationResult {
   });
 }
 
+/// [CheckboxListTile] inside [StudioAlertDialog] (Flutter 3.44+ Material ancestor).
+Widget studioDialogCheckboxListTile({
+  required bool value,
+  required ValueChanged<bool?>? onChanged,
+  required Widget title,
+}) {
+  return Material(
+    type: MaterialType.transparency,
+    child: CheckboxListTile(
+      value: value,
+      onChanged: onChanged,
+      title: title,
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
+    ),
+  );
+}
+
 /// Preference keys for "don't show again" settings (short-video destructive flows).
 ///
 /// Prefer [RiskyOperationConfirmPreferenceKeys] for new code; this alias keeps
@@ -299,7 +317,7 @@ class _DeleteVersionConfirmationDialogState
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
-            CheckboxListTile(
+            studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
                 setState(() {
@@ -307,8 +325,6 @@ class _DeleteVersionConfirmationDialogState
                 });
               },
               title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],
@@ -366,7 +382,7 @@ class _BatchDisableConfirmationDialogState
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
-            CheckboxListTile(
+            studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
                 setState(() {
@@ -374,8 +390,6 @@ class _BatchDisableConfirmationDialogState
                 });
               },
               title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],
@@ -430,7 +444,7 @@ class _RestoreDraftConfirmationDialogState
           ),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
-            CheckboxListTile(
+            studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
                 setState(() {
@@ -438,8 +452,6 @@ class _RestoreDraftConfirmationDialogState
                 });
               },
               title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],
@@ -488,7 +500,7 @@ class _CancelExportConfirmationDialogState
           Text(l10n.shortVideoSpaceDialogConfirmCancelExportMessage),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
-            CheckboxListTile(
+            studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
                 setState(() {
@@ -496,8 +508,6 @@ class _CancelExportConfirmationDialogState
                 });
               },
               title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],
@@ -550,7 +560,7 @@ class _BatchArchivePublishConfirmationDialogState
           Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveMessage(widget.draftCount)),
           if (widget.showDontShowAgain) ...[
             const SizedBox(height: 16),
-            CheckboxListTile(
+            studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
                 setState(() {
@@ -558,8 +568,6 @@ class _BatchArchivePublishConfirmationDialogState
                 });
               },
               title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionDontShow),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],

@@ -35,21 +35,25 @@ class StudioCollapsibleFilterPanel extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final panelTitle = title ?? l10n.studioFilterToolbarTitle;
     final summary = subtitle?.trim();
-    return ExpansionTile(
-      key: const Key('studio_collapsible_filter_panel'),
-      initiallyExpanded: initiallyExpanded,
-      tilePadding: EdgeInsets.zero,
-      childrenPadding: const EdgeInsets.only(bottom: 8),
-      title: Text(panelTitle),
-      subtitle: summary != null && summary.isNotEmpty
-          ? Text(
-              summary,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: studioHintStyle(context),
-            )
-          : null,
-      children: <Widget>[child],
+    // Flutter 3.44+: ListTile needs a Material ancestor before any colored DecoratedBox.
+    return Material(
+      type: MaterialType.transparency,
+      child: ExpansionTile(
+        key: const Key('studio_collapsible_filter_panel'),
+        initiallyExpanded: initiallyExpanded,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        title: Text(panelTitle),
+        subtitle: summary != null && summary.isNotEmpty
+            ? Text(
+                summary,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: studioHintStyle(context),
+              )
+            : null,
+        children: <Widget>[child],
+      ),
     );
   }
 }
