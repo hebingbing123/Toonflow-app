@@ -40,15 +40,20 @@ window.OpenFlowI18n = {
       "features.title": "为短剧团队打造的全链路工具",
       "features.desc":
         "从灵感一句话到可交付分镜，OpenFlow 将策划、生成、审阅与协作收敛在同一工作区。",
+      "features.bannerAlt": "AI 剧本、智能分镜、团队协作三大能力预览",
+      "features.1.imgAlt": "AI 剧本助手界面预览",
       "features.1.title": "AI 剧本助手",
       "features.1.body":
         "一句话生成完整剧本：情节、场景、角色设定一次到位，支持多轮改写与版本管理。",
+      "features.2.imgAlt": "智能分镜板界面预览",
       "features.2.title": "智能分镜板",
       "features.2.body":
         "自动产出镜头描述与配图，统一画风，支持专业格式导出，缩短前期筹备周期。",
+      "features.3.imgAlt": "团队协作界面预览",
       "features.3.title": "团队协作",
       "features.3.body":
         "多角色权限、Workspace 隔离、实时任务与 WebSocket 推送，适合流水线式生产。",
+      "features.4.imgAlt": "私有化部署能力",
       "features.4.title": "私有化部署",
       "features.4.body":
         "企业级数据安全：素材库本地可控，支持私有云与 Supabase 托管，满足合规需求。",
@@ -99,26 +104,128 @@ window.OpenFlowI18n = {
       "platforms.footerNote":
         "同一套 Harness 工作流与 PostgreSQL 任务队列，无论在桌面、浏览器还是未来的移动端。",
       "pricing.label": "定价",
-      "pricing.title": "灵活部署，按需扩展",
-      "pricing.card.title": "开源 + 自托管",
-      "pricing.card.body":
-        "本地或私有云部署核心能力免费使用；企业 Workspace、计费与高级用量策略可按里程碑启用。详见仓库路线图与 SaaS 计划文档。",
-      "pricing.card.cta": "查看 GitHub 仓库",
+      "pricing.title": "两种模式：自托管免费 · 云端按量升级",
+      "pricing.desc":
+        "核心创作能力在自托管场景下随 Apache-2.0 开源免费使用；云端 SaaS 提供 Free 默认可用与可选付费档。大模型调用费用（Token / 按图 / 按秒）由你自备 API Key 或按 Workspace 计量，详见模型定价配置。",
+      "pricing.badge.live": "现已可用",
+      "pricing.badge.soon": "订阅筹备中",
+      "pricing.badge.enterprise": "企业洽谈",
+      "pricing.tier.community.title": "社区版 · 自托管",
+      "pricing.tier.community.price": "¥0",
+      "pricing.tier.community.period": "软件授权",
+      "pricing.tier.community.lead":
+        "在你自己的服务器或内网部署完整 Studio；仅需承担机器与 LLM 供应商账单。",
+      "pricing.tier.community.f1": "Apache-2.0 源码，可 fork 与二次开发",
+      "pricing.tier.community.f2": "Harness Agent、任务队列、WebSocket 全功能",
+      "pricing.tier.community.f3": "Personal / Enterprise Workspace、RLS 多租户",
+      "pricing.tier.community.f4": "自带 PostgreSQL（Supabase 本地或托管）",
+      "pricing.tier.community.f5": "7 种界面语言 · 桌面 + Web 客户端",
+      "pricing.tier.community.cta": "克隆仓库部署",
+      "pricing.tier.free.title": "云端 Free",
+      "pricing.tier.free.price": "¥0",
+      "pricing.tier.free.period": "/ 月",
+      "pricing.tier.free.lead":
+        "注册即可使用核心流水线，无需绑卡；适合个人试制与 PoC（配额为工程默认，上线前可能调整）。",
+      "pricing.tier.free.f1": "<strong>20</strong> 次主线生成任务 / 自然日 / 用户",
+      "pricing.tier.free.f2": "<strong>1</strong> 路并发生成（第二路排队或限流）",
+      "pricing.tier.free.f3": "<strong>60</strong> 次 API 请求 / 分钟 / 用户",
+      "pricing.tier.free.f4": "<strong>1 GB</strong> 用户资产存储",
+      "pricing.tier.free.f5": "导出与协作能力按产品 PRD 开放",
+      "pricing.tier.free.cta": "免费开始",
+      "pricing.tier.paid.title": "创作者 · Pro · 工作室",
+      "pricing.tier.paid.price": "¥58 起",
+      "pricing.tier.paid.period": "/ 月（参考）",
+      "pricing.tier.paid.lead":
+        "更高积分 / 月、更多并发与存储；首期 CNY 收单 + Webhook 升级 plan_tier，USD 收银为后续里程碑。",
+      "pricing.tier.paid.f1": "<strong>创作者</strong> ~600–800 积分/月 · 2 并发 · ~20 GB",
+      "pricing.tier.paid.f2": "<strong>Pro</strong> ~2000–2500 积分/月 · 4 并发 · ~100 GB",
+      "pricing.tier.paid.f3": "<strong>工作室</strong> ~6000–8000 积分/月 · 8 并发 · ~500 GB",
+      "pricing.tier.paid.f4": "用量事件 <code class=\"inline\">usage_events</code> 对账与超额策略",
+      "pricing.tier.paid.f5": "支持 Stripe / Alipay / Paddle 事件（按阶段启用）",
+      "pricing.tier.paid.cta": "查看路线图 §12",
+      "pricing.tier.enterprise.title": "企业版",
+      "pricing.tier.enterprise.price": "定制",
+      "pricing.tier.enterprise.period": "合同约定",
+      "pricing.tier.enterprise.lead":
+        "私有化交付、专属 SLA、合规与公平使用条款；适合短剧产线与内容工厂。",
+      "pricing.tier.enterprise.f1": "内网 / 专有云部署与数据不出域",
+      "pricing.tier.enterprise.f2": "组织成员、角色与 Workspace 隔离",
+      "pricing.tier.enterprise.f3": "审计、用量报表与运维 Runbook 对接",
+      "pricing.tier.enterprise.f4": "模型路由与 <code class=\"inline\">model_pricing.json</code> 运营可配",
+      "pricing.tier.enterprise.f5": "可选 SSO、DPA 与内容合规流程",
+      "pricing.tier.enterprise.cta": "商务与部署咨询",
+      "pricing.compare.title": "能力对照（摘要）",
+      "pricing.compare.col.feature": "能力",
+      "pricing.compare.col.community": "自托管",
+      "pricing.compare.col.free": "云端 Free",
+      "pricing.compare.col.paid": "付费档",
+      "pricing.compare.row.deploy": "部署位置",
+      "pricing.compare.val.deploy.community": "你的服务器 / 内网",
+      "pricing.compare.val.deploy.free": "托管 PostgreSQL + API",
+      "pricing.compare.val.deploy.paid": "同左 + 更高配额",
+      "pricing.compare.row.llm": "大模型费用",
+      "pricing.compare.val.llm.community": "自备 API Key",
+      "pricing.compare.val.llm.free": "平台路由 + 积分计量",
+      "pricing.compare.val.llm.paid": "含更高月度积分",
+      "pricing.compare.row.workspace": "Workspace",
+      "pricing.compare.val.workspace.community": "Personal + Enterprise",
+      "pricing.compare.val.workspace.free": "Personal 为主",
+      "pricing.compare.val.workspace.paid": "团队 / 工作室扩展",
+      "pricing.compare.row.support": "支持",
+      "pricing.compare.val.support.community": "社区 Issue / 文档",
+      "pricing.compare.val.support.free": "文档 + 社区",
+      "pricing.compare.val.support.paid": "优先响应（规划）",
+      "pricing.footnote":
+        "上表付费档价格为路线图参考量级，非最终对外标价；自托管不产生 OpenFlow 软件授权费，LLM 与云资源仍按实际用量计费。模型单价见仓库 <code class=\"inline\">backend/data/model_pricing.json</code>。",
       "start.label": "快速上手",
-      "start.title": "三步开始使用 OpenFlow",
-      "start.desc": "选择适合你的路径：下载桌面版、运行 Web 客户端，或从源码搭建开发环境。",
-      "start.1.title": "① 下载客户端",
-      "start.1.body":
-        "在 GitHub Releases 获取 macOS / Windows / Linux 构建包，安装后配置 API 地址即可登录。",
-      "start.1.cta": "前往下载",
-      "start.2.title": "② 本地开发环境",
-      "start.2.body":
-        '克隆仓库后启动 Supabase 与 Rust 后端（默认 <code class="inline">8666</code>），再运行 Flutter 前端连接 <code class="inline">API_BASE_URL</code>。',
-      "start.2.cta": "开发者指南",
-      "start.3.title": "③ Web 版访问",
-      "start.3.body":
-        '构建 Flutter Web 并部署到静态托管；在 <code class="inline">website/js/config.js</code> 填写 <code class="inline">appUrl</code> 后，本站「登录」将直达你的应用。',
-      "start.3.cta": "打开 Web 应用",
+      "start.title": "按角色选择路径，跟着做就能跑通",
+      "start.desc":
+        "下面三条路径分别面向创作者、开发者与运维；命令与仓库 README 保持一致，默认 API 端口 <code class=\"inline\">8666</code>（根路径为宣传页，<code class=\"inline\">/api/v1</code> 为接口）。",
+      "start.path.creator.badge": "创作者",
+      "start.path.creator.title": "下载客户端 · 约 10 分钟",
+      "start.path.creator.s1":
+        "在 GitHub Releases 下载 macOS / Windows / Linux 安装包（或从源码自行构建 Flutter 桌面版）。",
+      "start.path.creator.s2":
+        "准备可访问的 OpenFlow API 地址（团队内网地址或你自建的 <code class=\"inline\">https://api.example.com</code>）。",
+      "start.path.creator.s3":
+        "首次启动时在设置中填写 API Base URL，使用 Supabase 账号登录（与后端同一 Auth 项目）。",
+      "start.path.creator.s4":
+        "创建项目 → 进入工作室 → 从「剧本」步开始：导入网文或一句话生成剧本，再进入分镜与素材任务。",
+      "start.path.creator.cta1": "前往 Releases",
+      "start.path.creator.cta2": "查看全平台说明",
+      "start.path.dev.badge": "开发者",
+      "start.path.dev.title": "本地开发环境 · 约 30–60 分钟",
+      "start.path.dev.prereq":
+        "<strong>前置：</strong>Rust stable、Flutter 3.10+、Docker、Supabase CLI、Node 18+ / Yarn（跑门禁脚本）。",
+      "start.path.dev.s1": "克隆仓库并进入项目根目录。",
+      "start.path.dev.s2": "启动本地数据库（PostgreSQL + Auth）。",
+      "start.path.dev.s3": "配置并启动 Rust 后端（默认监听 8666）。",
+      "start.path.dev.s4": "另开终端启动 Flutter（Web 或桌面）。",
+      "start.path.dev.s5":
+        "浏览器打开 <code class=\"inline\">http://127.0.0.1:8666/api/v1/docs</code> 查看 OpenAPI；宣传页即 <code class=\"inline\">http://127.0.0.1:8666/</code>。",
+      "start.path.dev.cta1": "开发者完整指南",
+      "start.path.dev.cta2": "文档中心",
+      "start.path.ops.badge": "运维",
+      "start.path.ops.title": "私有化 / 生产部署要点",
+      "start.path.ops.s1":
+        "生产数据库使用 Supabase 云端或自建 PostgreSQL，执行 <code class=\"inline\">supabase/migrations/</code> 迁移。",
+      "start.path.ops.s2":
+        "以 release 模式构建 <code class=\"inline\">openflow-server</code>，配置 <code class=\"inline\">DATABASE_URL</code>、JWT、对象存储与 LLM 密钥（仅服务端）。",
+      "start.path.ops.s3":
+        "反向代理终止 TLS，暴露 <code class=\"inline\">/api/v1</code> 与 WebSocket <code class=\"inline\">/api/v1/ws</code>；静态 Flutter Web 可放 CDN 或同域。",
+      "start.path.ops.s4":
+        "启用 OpenTelemetry / 任务队列监控；计费 Webhook 按环境配置 Stripe / Alipay / Paddle。",
+      "start.path.ops.s5": "危险操作（清库等）走受控 CLI，生产 HTTP 清库接口保持 501 设计。",
+      "start.path.ops.cta1": "运维快速开始",
+      "start.path.ops.cta2": "按角色索引",
+      "start.verify.title": "如何确认已经跑通？",
+      "start.verify.i1": "<code class=\"inline\">GET /api/v1/health</code> 或 Swagger 页面可打开且无 5xx。",
+      "start.verify.i2": "Flutter 客户端能登录并看到「项目」首页与流水线导航。",
+      "start.verify.i3": "创建测试项目后，剧本步可触发 AI 任务（需配置 LLM Key）。",
+      "start.verify.i4": "任务中心可见队列状态，WebSocket 能收到任务进度推送。",
+      "start.verify.web":
+        "<strong>Web 版：</strong>构建 Flutter Web 后，在 <code class=\"inline\">website/js/config.js</code> 设置 <code class=\"inline\">appUrl</code>，本站「登录」将跳转到你的应用。",
+      "start.verify.cta": "打开 Web 应用",
       "cta.title": "准备好加速你的短剧产线了吗？",
       "cta.body": "加入开源社区，反馈需求、参与贡献，或部署专属创作工厂。",
       "cta.primary": "立即开始",
@@ -187,15 +294,20 @@ window.OpenFlowI18n = {
       "features.title": "End-to-end tools for short-drama teams",
       "features.desc":
         "From a one-line idea to deliverable storyboards — planning, generation, review, and collaboration in one studio.",
+      "features.bannerAlt": "Script, storyboard, and collaboration previews",
+      "features.1.imgAlt": "AI script assistant preview",
       "features.1.title": "AI script assistant",
       "features.1.body":
         "Generate full scripts from a single prompt: plot, scenes, and characters—with revisions and version history.",
+      "features.2.imgAlt": "Smart storyboard preview",
       "features.2.title": "Smart storyboard",
       "features.2.body":
         "Auto shot descriptions and matched visuals, consistent style, pro export formats, shorter pre-production.",
+      "features.3.imgAlt": "Team collaboration preview",
       "features.3.title": "Team collaboration",
       "features.3.body":
         "Role-based access, Workspace isolation, live jobs and WebSocket updates—built for pipeline production.",
+      "features.4.imgAlt": "Private deployment",
       "features.4.title": "Private deployment",
       "features.4.body":
         "Enterprise-grade control: on-prem asset libraries, private cloud or Supabase—compliance-friendly.",
@@ -246,27 +358,128 @@ window.OpenFlowI18n = {
       "platforms.footerNote":
         "One Harness workflow and PostgreSQL job queue—desktop, browser, and future mobile.",
       "pricing.label": "Pricing",
-      "pricing.title": "Flexible deployment, scale on demand",
-      "pricing.card.title": "Open source + self-hosted",
-      "pricing.card.body":
-        "Core features free on-prem or private cloud; enterprise Workspace, billing, and advanced usage roll out per roadmap.",
-      "pricing.card.cta": "View on GitHub",
+      "pricing.title": "Self-host free · Cloud tiers when you scale",
+      "pricing.desc":
+        "Core studio features are free under Apache-2.0 when you self-host. Cloud SaaS offers a default Free tier plus optional paid plans. LLM usage (tokens / images / video seconds) uses your own API keys on-prem or workspace metering in the cloud—see model pricing config.",
+      "pricing.badge.live": "Available now",
+      "pricing.badge.soon": "Subscriptions upcoming",
+      "pricing.badge.enterprise": "Contact sales",
+      "pricing.tier.community.title": "Community · Self-hosted",
+      "pricing.tier.community.price": "$0",
+      "pricing.tier.community.period": "software license",
+      "pricing.tier.community.lead":
+        "Run the full studio on your servers or private cloud—you pay for infra and LLM providers only.",
+      "pricing.tier.community.f1": "Apache-2.0 source—fork and customize",
+      "pricing.tier.community.f2": "Harness agents, job queue, WebSocket—full stack",
+      "pricing.tier.community.f3": "Personal / Enterprise workspaces, RLS multi-tenant",
+      "pricing.tier.community.f4": "Your PostgreSQL (local Supabase or hosted)",
+      "pricing.tier.community.f5": "7 UI languages · desktop + web clients",
+      "pricing.tier.community.cta": "Clone & deploy",
+      "pricing.tier.free.title": "Cloud Free",
+      "pricing.tier.free.price": "$0",
+      "pricing.tier.free.period": "/ month",
+      "pricing.tier.free.lead":
+        "Sign up for the core pipeline—no card required. Great for solo trials and PoC (quotas are engineering defaults and may change before GA).",
+      "pricing.tier.free.f1": "<strong>20</strong> main pipeline jobs / calendar day / user",
+      "pricing.tier.free.f2": "<strong>1</strong> concurrent generation lane",
+      "pricing.tier.free.f3": "<strong>60</strong> API requests / minute / user",
+      "pricing.tier.free.f4": "<strong>1 GB</strong> user asset storage",
+      "pricing.tier.free.f5": "Export & collaboration per product PRD",
+      "pricing.tier.free.cta": "Start free",
+      "pricing.tier.paid.title": "Creator · Pro · Studio",
+      "pricing.tier.paid.price": "From ¥58",
+      "pricing.tier.paid.period": "/ mo (reference)",
+      "pricing.tier.paid.lead":
+        "Higher monthly credits, concurrency, and storage. CNY checkout + webhooks first; USD (Stripe/Paddle) in a later milestone.",
+      "pricing.tier.paid.f1": "<strong>Creator</strong> ~600–800 credits/mo · 2 lanes · ~20 GB",
+      "pricing.tier.paid.f2": "<strong>Pro</strong> ~2000–2500 credits/mo · 4 lanes · ~100 GB",
+      "pricing.tier.paid.f3": "<strong>Studio</strong> ~6000–8000 credits/mo · 8 lanes · ~500 GB",
+      "pricing.tier.paid.f4": "<code class=\"inline\">usage_events</code> metering & overage policy",
+      "pricing.tier.paid.f5": "Stripe / Alipay / Paddle webhooks (phased rollout)",
+      "pricing.tier.paid.cta": "Roadmap §12",
+      "pricing.tier.enterprise.title": "Enterprise",
+      "pricing.tier.enterprise.price": "Custom",
+      "pricing.tier.enterprise.period": "contract",
+      "pricing.tier.enterprise.lead":
+        "Private delivery, SLA, compliance, and fair-use terms—for production short-drama lines.",
+      "pricing.tier.enterprise.f1": "On-prem / dedicated cloud, data residency",
+      "pricing.tier.enterprise.f2": "Org members, roles, workspace isolation",
+      "pricing.tier.enterprise.f3": "Audit, usage reports, ops runbooks",
+      "pricing.tier.enterprise.f4": "Model routing & <code class=\"inline\">model_pricing.json</code> ops config",
+      "pricing.tier.enterprise.f5": "Optional SSO, DPA, content policy workflows",
+      "pricing.tier.enterprise.cta": "Talk to us",
+      "pricing.compare.title": "At a glance",
+      "pricing.compare.col.feature": "Capability",
+      "pricing.compare.col.community": "Self-hosted",
+      "pricing.compare.col.free": "Cloud Free",
+      "pricing.compare.col.paid": "Paid tiers",
+      "pricing.compare.row.deploy": "Where it runs",
+      "pricing.compare.val.deploy.community": "Your servers / VPC",
+      "pricing.compare.val.deploy.free": "Hosted PostgreSQL + API",
+      "pricing.compare.val.deploy.paid": "Same + higher quotas",
+      "pricing.compare.row.llm": "LLM cost",
+      "pricing.compare.val.llm.community": "Bring your own API keys",
+      "pricing.compare.val.llm.free": "Platform routing + credits",
+      "pricing.compare.val.llm.paid": "Higher monthly credits",
+      "pricing.compare.row.workspace": "Workspace",
+      "pricing.compare.val.workspace.community": "Personal + Enterprise",
+      "pricing.compare.val.workspace.free": "Mostly Personal",
+      "pricing.compare.val.workspace.paid": "Team / studio expansion",
+      "pricing.compare.row.support": "Support",
+      "pricing.compare.val.support.community": "Community issues / docs",
+      "pricing.compare.val.support.free": "Docs + community",
+      "pricing.compare.val.support.paid": "Priority (planned)",
+      "pricing.footnote":
+        "Paid prices are roadmap reference ranges, not final list prices. Self-host has no OpenFlow license fee; LLM and cloud infra are still usage-based. Model unit prices: <code class=\"inline\">backend/data/model_pricing.json</code>.",
       "start.label": "Get started",
-      "start.title": "Three ways to use OpenFlow",
+      "start.title": "Pick your path—follow through to a working stack",
       "start.desc":
-        "Download the desktop app, run the web client, or build from source for development.",
-      "start.1.title": "① Download the app",
-      "start.1.body":
-        "Get macOS / Windows / Linux builds from GitHub Releases, set your API URL, and sign in.",
-      "start.1.cta": "Download",
-      "start.2.title": "② Local development",
-      "start.2.body":
-        'Clone the repo, start Supabase and the Rust API (default <code class="inline">8666</code>), then run Flutter with <code class="inline">API_BASE_URL</code>.',
-      "start.2.cta": "Developer guide",
-      "start.3.title": "③ Web access",
-      "start.3.body":
-        'Build Flutter Web and host statically; set <code class="inline">appUrl</code> in <code class="inline">website/js/config.js</code> so Sign in opens your app.',
-      "start.3.cta": "Open web app",
+        "Three paths for creators, developers, and operators. Commands match the repo README. Default API port <code class=\"inline\">8666</code> (marketing site at <code class=\"inline\">/</code>, API at <code class=\"inline\">/api/v1</code>).",
+      "start.path.creator.badge": "Creator",
+      "start.path.creator.title": "Download the app · ~10 min",
+      "start.path.creator.s1":
+        "Download macOS / Windows / Linux from GitHub Releases (or build the Flutter desktop app from source).",
+      "start.path.creator.s2":
+        "Point the client at a reachable OpenFlow API (team intranet or your own <code class=\"inline\">https://api.example.com</code>).",
+      "start.path.creator.s3":
+        "On first launch set API Base URL and sign in with Supabase Auth (same project as the backend).",
+      "start.path.creator.s4":
+        "Create a project → open Studio → start on Script: import a novel or one-line prompt, then storyboard & asset jobs.",
+      "start.path.creator.cta1": "Go to Releases",
+      "start.path.creator.cta2": "All platforms",
+      "start.path.dev.badge": "Developer",
+      "start.path.dev.title": "Local dev · ~30–60 min",
+      "start.path.dev.prereq":
+        "<strong>Prerequisites:</strong> Rust stable, Flutter 3.10+, Docker, Supabase CLI, Node 18+ / Yarn (for refactor scripts).",
+      "start.path.dev.s1": "Clone the repo.",
+      "start.path.dev.s2": "Start local Postgres + Auth.",
+      "start.path.dev.s3": "Configure and run the Rust API (listens on 8666 by default).",
+      "start.path.dev.s4": "In another terminal, run Flutter (web or desktop).",
+      "start.path.dev.s5":
+        "Open <code class=\"inline\">http://127.0.0.1:8666/api/v1/docs</code> for OpenAPI; marketing site at <code class=\"inline\">http://127.0.0.1:8666/</code>.",
+      "start.path.dev.cta1": "Full developer guide",
+      "start.path.dev.cta2": "Documentation",
+      "start.path.ops.badge": "Ops",
+      "start.path.ops.title": "Private / production deployment",
+      "start.path.ops.s1":
+        "Use hosted Supabase or your own PostgreSQL; apply <code class=\"inline\">supabase/migrations/</code>.",
+      "start.path.ops.s2":
+        "Build <code class=\"inline\">openflow-server</code> in release mode; set <code class=\"inline\">DATABASE_URL</code>, JWT, storage, and LLM keys (server-side only).",
+      "start.path.ops.s3":
+        "Terminate TLS at your proxy; expose <code class=\"inline\">/api/v1</code> and WebSocket <code class=\"inline\">/api/v1/ws</code>; host Flutter Web on CDN or same origin.",
+      "start.path.ops.s4":
+        "Enable OpenTelemetry / queue monitoring; configure billing webhooks (Stripe / Alipay / Paddle) per environment.",
+      "start.path.ops.s5": "Destructive ops (DB wipe) use controlled CLI—production HTTP wipe stays 501 by design.",
+      "start.path.ops.cta1": "Operator quick start",
+      "start.path.ops.cta2": "Role index",
+      "start.verify.title": "How do I know it works?",
+      "start.verify.i1": "<code class=\"inline\">GET /api/v1/health</code> or Swagger loads without 5xx.",
+      "start.verify.i2": "Flutter client signs in and shows Projects home + pipeline nav.",
+      "start.verify.i3": "Create a test project and trigger an AI job on Script (LLM key required).",
+      "start.verify.i4": "Task center shows queue state; WebSocket pushes job progress.",
+      "start.verify.web":
+        "<strong>Web:</strong> After building Flutter Web, set <code class=\"inline\">appUrl</code> in <code class=\"inline\">website/js/config.js</code> so Sign in opens your app.",
+      "start.verify.cta": "Open web app",
       "cta.title": "Ready to speed up your short-drama line?",
       "cta.body": "Join the community, share feedback, contribute—or deploy your own studio.",
       "cta.primary": "Get started",
@@ -323,7 +536,7 @@ window.OpenFlowI18n = {
         el.alt = value;
         return;
       }
-      if (el.hasAttribute("data-i18n-html")) {
+      if (el.hasAttribute("data-i18n-html") || (value.includes("<") && value.includes(">"))) {
         el.innerHTML = value;
       } else {
         el.textContent = value;

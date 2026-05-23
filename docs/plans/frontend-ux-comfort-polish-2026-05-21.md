@@ -132,12 +132,13 @@ This pass will prioritize shared design-system surfaces plus the projects home i
 | Phase 13 | Done — 平台状态 / Benchmark / 团队工作区：inset 标题区、骨架加载、空态刷新、状态卡片分区 |
 | Phase 14 | Done — 平台配置 / API 密钥：inset 标题区、可折叠操作条、配置层 inset 分区、列表骨架 |
 | Phase 15 | Done — 账户页 inset 统一；typography 扫尾（横幅/壳层硬编码字号 → StudioTypography / 共享样式） |
+| Phase 16 | Done — 管理台/套餐/模型供应商 inset；Help Hub 子 Tab 标题；`StudioLayoutSpacing.microGap/titleTight`；utility 路径 spacing 批量 token 化 |
 
 与 Studio 视觉阶段 6–9 同里程碑交付；真源见 [`studio-visual-guidelines.md`](../product/ux/studio-visual-guidelines.md)。
 
 **2026-05-21 收尾核对**：Phase 1–2 代码与黄金图已对齐；Phase 3 曾因并行落地的 `StudioToastOverlay` 关闭钮仍用 `VisualDensity.compact` 导致 `studio-visual-debt-check.sh` 失败，已修复；加载骨架栅格间距与主网格统一为 `StudioLayoutSpacing.stackMedium`。
 
-**2026-05-23 续**：`studio_text_styles.dart` 已提供 `studioAccentBanner*` / `studioWizardStep*` 等共享样式；Phase 15 将供应商设置横幅、工作区上下文、全局搜索 palette、套餐用量等残余硬编码 `fontSize` 收口到 `StudioTypography`；`tools/ui_audit` 需 `dart run build_runner build` 后可用 quick 配置验收 high 计数。
+**2026-05-23 续**：typography quick 审计 **high = 0**；utility 横切路径 spacing 从 215 降至约 15（余下多为 `EdgeInsets.fromLTRB` 等半网格值，可后续按需收口）。CI 配置 `.kiro/audit-config-ci.yaml` 已可启用 `failOnHigh: true`。
 
 ### Phase 9: 项目首页抛光续（2026-05-23）
 
@@ -176,6 +177,12 @@ This pass will prioritize shared design-system surfaces plus the projects home i
 
 - **账户**（`account/section.dart`）：inset 标题区；导出/删除面板统一 `studioInsetPanelDecoration`（删除区保留 error 渐变）；导出列表加载骨架；整页可滚动。
 - **Typography**：国内/国际供应商横幅 → `studioAccentBanner*`；`workspace_context_view` / `global_search_bar` / `plan_usage` / `creator_journey_compact_bar` 去除裸 `fontSize`；`platform_config` 分区标题 → `studioCardTitleStyle`。
+
+### Phase 16: 横切 spacing + 剩余 utility inset（2026-05-23）
+
+- **Design tokens**：`StudioLayoutSpacing.microGap`（6）、`titleTight`（4）；`ui_audit` spacing 分析器识别上述 token。
+- **Utility inset**：管理控制台、套餐用量、模型供应商设置；Help Hub 文档/Webhooks/计费 Tab 内区段标题统一 `studioCardTitleStyle`。
+- **Spacing 批量**：shell / account / api_keys / admin / jobs / 通知 / 任务 / 质量 / 合规 / 团队 / settings / product_shell 等路径将 `6/4/16` 等裸值改为语义 token。
 
 ### Phase 8: Studio 筛选工具栏（2026-05-21 续）
 

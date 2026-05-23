@@ -109,7 +109,7 @@
               <div class="hero-shot-frame device-screen-shimmer">
                 <img
                   class="device-shot device-shot--hero"
-                  src="assets/screenshots/hero-app.png"
+                  src="assets/screenshots/hero-main.png"
                   data-i18n="shots.hero"
                   alt="OpenFlow 分镜工作区概念界面"
                   width="500"
@@ -150,42 +150,108 @@
           <p class="section-desc reveal reveal-delay-2" data-i18n="features.desc">
             从灵感一句话到可交付分镜，OpenFlow 将策划、生成、审阅与协作收敛在同一工作区。
           </p>
+          <figure class="features-banner reveal">
+            <img
+              src="assets/screenshots/features-trio.png"
+              srcset="
+                assets/screenshots/features-trio.png    1x,
+                assets/screenshots/features-trio@2x.png 2x
+              "
+              data-i18n="features.bannerAlt"
+              alt="AI 剧本、智能分镜、团队协作三大能力"
+              loading="lazy"
+              width="556"
+              height="303"
+            />
+          </figure>
           <div class="features-grid">
             <article class="feature-card glow-card reveal">
               <div class="feature-thumb">
-                <img src="assets/screenshots/feature-script.png" alt="" loading="lazy" />
+                <img
+                  src="assets/screenshots/feature-script.png"
+                  srcset="
+                    assets/screenshots/feature-script.png    1x,
+                    assets/screenshots/feature-script@2x.png 2x
+                  "
+                  data-i18n="features.1.imgAlt"
+                  alt="AI 剧本助手界面"
+                  loading="lazy"
+                  width="360"
+                  height="652"
+                />
               </div>
-              <h3 data-i18n="features.1.title">AI 剧本助手</h3>
-              <p data-i18n="features.1.body">
-                一句话生成完整剧本：情节、场景、角色设定一次到位，支持多轮改写与版本管理。
-              </p>
+              <div class="feature-copy">
+                <h3 data-i18n="features.1.title">AI 剧本助手</h3>
+                <p data-i18n="features.1.body">
+                  一句话生成完整剧本：情节、场景、角色设定一次到位，支持多轮改写与版本管理。
+                </p>
+              </div>
             </article>
             <article class="feature-card glow-card reveal reveal-delay-1">
               <div class="feature-thumb">
-                <img src="assets/screenshots/feature-storyboard.png" alt="" loading="lazy" />
+                <img
+                  src="assets/screenshots/feature-storyboard.png"
+                  srcset="
+                    assets/screenshots/feature-storyboard.png    1x,
+                    assets/screenshots/feature-storyboard@2x.png 2x
+                  "
+                  data-i18n="features.2.imgAlt"
+                  alt="智能分镜板界面"
+                  loading="lazy"
+                  width="360"
+                  height="652"
+                />
               </div>
-              <h3 data-i18n="features.2.title">智能分镜板</h3>
-              <p data-i18n="features.2.body">
-                自动产出镜头描述与配图，统一画风，支持专业格式导出，缩短前期筹备周期。
-              </p>
+              <div class="feature-copy">
+                <h3 data-i18n="features.2.title">智能分镜板</h3>
+                <p data-i18n="features.2.body">
+                  自动产出镜头描述与配图，统一画风，支持专业格式导出，缩短前期筹备周期。
+                </p>
+              </div>
             </article>
             <article class="feature-card glow-card reveal reveal-delay-2">
               <div class="feature-thumb">
-                <img src="assets/screenshots/feature-collab.png" alt="" loading="lazy" />
+                <img
+                  src="assets/screenshots/feature-collab.png"
+                  srcset="
+                    assets/screenshots/feature-collab.png    1x,
+                    assets/screenshots/feature-collab@2x.png 2x
+                  "
+                  data-i18n="features.3.imgAlt"
+                  alt="团队协作界面"
+                  loading="lazy"
+                  width="360"
+                  height="652"
+                />
               </div>
-              <h3 data-i18n="features.3.title">团队协作</h3>
-              <p data-i18n="features.3.body">
-                多角色权限、Workspace 隔离、实时任务与 WebSocket 推送，适合流水线式生产。
-              </p>
+              <div class="feature-copy">
+                <h3 data-i18n="features.3.title">团队协作</h3>
+                <p data-i18n="features.3.body">
+                  多角色权限、Workspace 隔离、实时任务与 WebSocket 推送，适合流水线式生产。
+                </p>
+              </div>
             </article>
             <article class="feature-card glow-card reveal reveal-delay-3">
               <div class="feature-thumb">
-                <img src="assets/screenshots/feature-private.png" alt="" loading="lazy" />
+                <img
+                  src="assets/screenshots/feature-private.png"
+                  srcset="
+                    assets/screenshots/feature-private.png    1x,
+                    assets/screenshots/feature-private@2x.png 2x
+                  "
+                  data-i18n="features.4.imgAlt"
+                  alt="私有化部署"
+                  loading="lazy"
+                  width="336"
+                  height="390"
+                />
               </div>
-              <h3 data-i18n="features.4.title">私有化部署</h3>
-              <p data-i18n="features.4.body">
-                企业级数据安全：素材库本地可控，支持私有云与 Supabase 托管，满足合规需求。
-              </p>
+              <div class="feature-copy">
+                <h3 data-i18n="features.4.title">私有化部署</h3>
+                <p data-i18n="features.4.body">
+                  企业级数据安全：素材库本地可控，支持私有云与 Supabase 托管，满足合规需求。
+                </p>
+              </div>
             </article>
           </div>
         </div>
@@ -364,75 +430,311 @@
         </div>
       </section>
 
-      <section id="pricing" aria-labelledby="pricing-title">
+      <section id="pricing" class="section-pricing" aria-labelledby="pricing-title">
         <div class="container">
           <span class="section-label" data-i18n="pricing.label">定价</span>
           <h2 class="section-title" id="pricing-title" data-i18n="pricing.title">
-            灵活部署，按需扩展
+            两种模式：自托管免费 · 云端按量升级
           </h2>
-          <div class="pricing-card">
-            <h3 data-i18n="pricing.card.title">开源 + 自托管</h3>
-            <p data-i18n="pricing.card.body">
-              本地或私有云部署核心能力免费使用；企业 Workspace、计费与高级用量策略可按里程碑启用。
+          <p class="section-desc" data-i18n="pricing.desc">
+            核心创作能力在自托管场景下随 Apache-2.0 开源免费使用；云端 SaaS 提供 Free
+            默认可用与可选付费档。大模型调用费用（Token / 按图 / 按秒）由你自备 API Key 或按 Workspace 计量，详见模型定价配置。
+          </p>
+
+          <div class="pricing-grid" role="list">
+            <article class="pricing-tier glow-card reveal" role="listitem">
+              <span class="tier-badge tier-badge--live" data-i18n="pricing.badge.live">现已可用</span>
+              <h3 data-i18n="pricing.tier.community.title">社区版 · 自托管</h3>
+              <p class="tier-price">
+                <span class="tier-price__amount" data-i18n="pricing.tier.community.price">¥0</span>
+                <span class="tier-price__period" data-i18n="pricing.tier.community.period"
+                  >软件授权</span
+                >
+              </p>
+              <p class="tier-lead" data-i18n="pricing.tier.community.lead">
+                在你自己的服务器或内网部署完整 Studio；仅需承担机器与 LLM 供应商账单。
+              </p>
+              <ul class="tier-features">
+                <li data-i18n="pricing.tier.community.f1">Apache-2.0 源码，可 fork 与二次开发</li>
+                <li data-i18n="pricing.tier.community.f2">Harness Agent、任务队列、WebSocket 全功能</li>
+                <li data-i18n="pricing.tier.community.f3">Personal / Enterprise Workspace、RLS 多租户</li>
+                <li data-i18n="pricing.tier.community.f4">自带 PostgreSQL（Supabase 本地或托管）</li>
+                <li data-i18n="pricing.tier.community.f5">7 种界面语言 · 桌面 + Web 客户端</li>
+              </ul>
+              <a class="btn btn-primary" href="#" data-link="repo" data-i18n="pricing.tier.community.cta"
+                >克隆仓库部署</a
+              >
+            </article>
+
+            <article class="pricing-tier pricing-tier--featured glow-card reveal reveal-delay-1" role="listitem">
+              <span class="tier-badge tier-badge--live" data-i18n="pricing.badge.live">现已可用</span>
+              <h3 data-i18n="pricing.tier.free.title">云端 Free</h3>
+              <p class="tier-price">
+                <span class="tier-price__amount" data-i18n="pricing.tier.free.price">¥0</span>
+                <span class="tier-price__period" data-i18n="pricing.tier.free.period">/ 月</span>
+              </p>
+              <p class="tier-lead" data-i18n="pricing.tier.free.lead">
+                注册即可使用核心流水线，无需绑卡；适合个人试制与 PoC（配额为工程默认，上线前可能调整）。
+              </p>
+              <ul class="tier-features">
+                <li data-i18n="pricing.tier.free.f1"><strong>20</strong> 次主线生成任务 / 自然日 / 用户</li>
+                <li data-i18n="pricing.tier.free.f2"><strong>1</strong> 路并发生成（第二路排队或限流）</li>
+                <li data-i18n="pricing.tier.free.f3"><strong>60</strong> 次 API 请求 / 分钟 / 用户</li>
+                <li data-i18n="pricing.tier.free.f4"><strong>1 GB</strong> 用户资产存储</li>
+                <li data-i18n="pricing.tier.free.f5">导出与协作能力按产品 PRD 开放</li>
+              </ul>
+              <a class="btn btn-primary" href="#start" data-i18n="pricing.tier.free.cta">免费开始</a>
+            </article>
+
+            <article class="pricing-tier glow-card reveal reveal-delay-2" role="listitem">
+              <span class="tier-badge tier-badge--soon" data-i18n="pricing.badge.soon">订阅筹备中</span>
+              <h3 data-i18n="pricing.tier.paid.title">创作者 · Pro · 工作室</h3>
+              <p class="tier-price">
+                <span class="tier-price__amount" data-i18n="pricing.tier.paid.price">¥58 起</span>
+                <span class="tier-price__period" data-i18n="pricing.tier.paid.period">/ 月（参考）</span>
+              </p>
+              <p class="tier-lead" data-i18n="pricing.tier.paid.lead">
+                更高积分 / 月、更多并发与存储；首期 CNY 收单 + Webhook 升级 plan_tier，USD 收银为后续里程碑。
+              </p>
+              <ul class="tier-features">
+                <li data-i18n="pricing.tier.paid.f1"><strong>创作者</strong> ~600–800 积分/月 · 2 并发 · ~20 GB</li>
+                <li data-i18n="pricing.tier.paid.f2"><strong>Pro</strong> ~2000–2500 积分/月 · 4 并发 · ~100 GB</li>
+                <li data-i18n="pricing.tier.paid.f3"><strong>工作室</strong> ~6000–8000 积分/月 · 8 并发 · ~500 GB</li>
+                <li data-i18n="pricing.tier.paid.f4">用量事件 <code class="inline">usage_events</code> 对账与超额策略</li>
+                <li data-i18n="pricing.tier.paid.f5">支持 Stripe / Alipay / Paddle 事件（按阶段启用）</li>
+              </ul>
+              <a class="btn btn-outline" href="#" data-link="docs" data-i18n="pricing.tier.paid.cta"
+                >查看路线图 §12</a
+              >
+            </article>
+
+            <article class="pricing-tier glow-card reveal reveal-delay-3" role="listitem">
+              <span class="tier-badge tier-badge--soon" data-i18n="pricing.badge.enterprise">企业洽谈</span>
+              <h3 data-i18n="pricing.tier.enterprise.title">企业版</h3>
+              <p class="tier-price">
+                <span class="tier-price__amount" data-i18n="pricing.tier.enterprise.price">定制</span>
+                <span class="tier-price__period" data-i18n="pricing.tier.enterprise.period">合同约定</span>
+              </p>
+              <p class="tier-lead" data-i18n="pricing.tier.enterprise.lead">
+                私有化交付、专属 SLA、合规与公平使用条款；适合短剧产线与内容工厂。
+              </p>
+              <ul class="tier-features">
+                <li data-i18n="pricing.tier.enterprise.f1">内网 / 专有云部署与数据不出域</li>
+                <li data-i18n="pricing.tier.enterprise.f2">组织成员、角色与 Workspace 隔离</li>
+                <li data-i18n="pricing.tier.enterprise.f3">审计、用量报表与运维 Runbook 对接</li>
+                <li data-i18n="pricing.tier.enterprise.f4">模型路由与 <code class="inline">model_pricing.json</code> 运营可配</li>
+                <li data-i18n="pricing.tier.enterprise.f5">可选 SSO、DPA 与内容合规流程</li>
+              </ul>
+              <a
+                class="btn btn-outline"
+                href="https://github.com/HBAI-Ltd/Openflow-app/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-i18n="pricing.tier.enterprise.cta"
+                >商务与部署咨询</a
+              >
+            </article>
+          </div>
+
+          <div class="pricing-compare reveal">
+            <h3 class="pricing-compare__title" data-i18n="pricing.compare.title">能力对照（摘要）</h3>
+            <div class="table-scroll">
+              <table class="pricing-table">
+                <thead>
+                  <tr>
+                    <th scope="col" data-i18n="pricing.compare.col.feature">能力</th>
+                    <th scope="col" data-i18n="pricing.compare.col.community">自托管</th>
+                    <th scope="col" data-i18n="pricing.compare.col.free">云端 Free</th>
+                    <th scope="col" data-i18n="pricing.compare.col.paid">付费档</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row" data-i18n="pricing.compare.row.deploy">部署位置</th>
+                    <td data-i18n="pricing.compare.val.deploy.community">你的服务器 / 内网</td>
+                    <td data-i18n="pricing.compare.val.deploy.free">托管 PostgreSQL + API</td>
+                    <td data-i18n="pricing.compare.val.deploy.paid">同左 + 更高配额</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" data-i18n="pricing.compare.row.llm">大模型费用</th>
+                    <td data-i18n="pricing.compare.val.llm.community">自备 API Key</td>
+                    <td data-i18n="pricing.compare.val.llm.free">平台路由 + 积分计量</td>
+                    <td data-i18n="pricing.compare.val.llm.paid">含更高月度积分</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" data-i18n="pricing.compare.row.workspace">Workspace</th>
+                    <td data-i18n="pricing.compare.val.workspace.community">Personal + Enterprise</td>
+                    <td data-i18n="pricing.compare.val.workspace.free">Personal 为主</td>
+                    <td data-i18n="pricing.compare.val.workspace.paid">团队 / 工作室扩展</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" data-i18n="pricing.compare.row.support">支持</th>
+                    <td data-i18n="pricing.compare.val.support.community">社区 Issue / 文档</td>
+                    <td data-i18n="pricing.compare.val.support.free">文档 + 社区</td>
+                    <td data-i18n="pricing.compare.val.support.paid">优先响应（规划）</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="pricing-footnote" data-i18n="pricing.footnote">
+              上表付费档价格为路线图参考量级，非最终对外标价；自托管不产生 OpenFlow 软件授权费，LLM
+              与云资源仍按实际用量计费。模型单价见仓库
+              <code class="inline">backend/data/model_pricing.json</code>。
             </p>
-            <a class="btn btn-primary" href="#" data-link="repo" data-i18n="pricing.card.cta"
-              >查看 GitHub 仓库</a
-            >
           </div>
         </div>
       </section>
 
-      <section id="start" aria-labelledby="start-title">
+      <section id="start" class="section-start" aria-labelledby="start-title">
         <div class="container">
           <span class="section-label" data-i18n="start.label">快速上手</span>
           <h2 class="section-title" id="start-title" data-i18n="start.title">
-            三步开始使用 OpenFlow
+            按角色选择路径，跟着做就能跑通
           </h2>
           <p class="section-desc" data-i18n="start.desc">
-            选择适合你的路径：下载桌面版、运行 Web 客户端，或从源码搭建开发环境。
+            下面三条路径分别面向创作者、开发者与运维；命令与仓库 README 保持一致，默认 API 端口
+            <code class="inline">8666</code>（根路径为宣传页，<code class="inline">/api/v1</code> 为接口）。
           </p>
-          <div class="start-grid">
-            <article class="start-card">
-              <h3 data-i18n="start.1.title">① 下载客户端</h3>
-              <p data-i18n="start.1.body">
-                在 GitHub Releases 获取 macOS / Windows / Linux 构建包，安装后配置 API 地址即可登录。
-              </p>
-              <a class="btn btn-primary" href="#" data-link="releases" data-i18n="start.1.cta"
-                >前往下载</a
-              >
+
+          <div class="start-paths">
+            <article class="start-path glow-card reveal is-visible">
+              <header class="start-path__head">
+                <span class="path-badge" data-i18n="start.path.creator.badge">创作者</span>
+                <h3 data-i18n="start.path.creator.title">下载客户端 · 约 10 分钟</h3>
+              </header>
+              <ol class="start-steps">
+                <li data-i18n="start.path.creator.s1">
+                  在 GitHub Releases 下载 macOS / Windows / Linux 安装包（或从源码自行构建 Flutter 桌面版）。
+                </li>
+                <li data-i18n="start.path.creator.s2">
+                  准备可访问的 OpenFlow API 地址（团队内网地址或你自建的
+                  <code class="inline">https://api.example.com</code>）。
+                </li>
+                <li data-i18n="start.path.creator.s3">
+                  首次启动时在设置中填写 API Base URL，使用 Supabase 账号登录（与后端同一 Auth 项目）。
+                </li>
+                <li data-i18n="start.path.creator.s4">
+                  创建项目 → 进入工作室 → 从「剧本」步开始：导入网文或一句话生成剧本，再进入分镜与素材任务。
+                </li>
+              </ol>
+              <div class="start-path__actions">
+                <a class="btn btn-primary" href="#" data-link="releases" data-i18n="start.path.creator.cta1"
+                  >前往 Releases</a
+                >
+                <a class="btn btn-outline" href="#platforms" data-i18n="start.path.creator.cta2"
+                  >查看全平台说明</a
+                >
+              </div>
             </article>
-            <article class="start-card">
-              <h3 data-i18n="start.2.title">② 本地开发环境</h3>
-              <p data-i18n="start.2.body" data-i18n-html>
-                克隆仓库后启动 Supabase 与 Rust 后端（默认
-                <code class="inline">8666</code>），再运行 Flutter 前端连接
-                <code class="inline">API_BASE_URL</code>。
+
+            <article class="start-path glow-card reveal reveal-delay-1 is-visible">
+              <header class="start-path__head">
+                <span class="path-badge path-badge--dev" data-i18n="start.path.dev.badge">开发者</span>
+                <h3 data-i18n="start.path.dev.title">本地开发环境 · 约 30–60 分钟</h3>
+              </header>
+              <p class="start-prereq" data-i18n="start.path.dev.prereq">
+                <strong>前置：</strong>Rust stable、Flutter 3.10+、Docker、Supabase CLI、Node 18+ / Yarn（跑门禁脚本）。
               </p>
-              <a
-                class="btn btn-outline"
-                href="#"
-                data-link="getting-started"
-                data-i18n="start.2.cta"
-                >开发者指南</a
-              >
+              <ol class="start-steps">
+                <li data-i18n="start.path.dev.s1">克隆仓库并进入项目根目录。</li>
+              </ol>
+              <pre class="code-block" tabindex="0"><code>git clone https://github.com/HBAI-Ltd/Openflow-app.git
+cd Openflow-app</code></pre>
+              <ol class="start-steps" start="2">
+                <li data-i18n="start.path.dev.s2">启动本地数据库（PostgreSQL + Auth）。</li>
+              </ol>
+              <pre class="code-block" tabindex="0"><code>supabase start
+supabase status   # 记下 DATABASE_URL、JWT secret</code></pre>
+              <ol class="start-steps" start="3">
+                <li data-i18n="start.path.dev.s3">配置并启动 Rust 后端（默认监听 8666）。</li>
+              </ol>
+              <pre class="code-block" tabindex="0"><code>cd backend
+cp .env.example .env   # 填入 DATABASE_URL 等
+cargo run --bin openflow-server</code></pre>
+              <ol class="start-steps" start="4">
+                <li data-i18n="start.path.dev.s4">另开终端启动 Flutter（Web 或桌面）。</li>
+              </ol>
+              <pre class="code-block" tabindex="0"><code>cd frontend
+flutter pub get
+flutter run -d chrome --dart-define-from-file=dart_defines.dev.json</code></pre>
+              <ol class="start-steps" start="5">
+                <li data-i18n="start.path.dev.s5">
+                  浏览器打开 <code class="inline">http://127.0.0.1:8666/api/v1/docs</code> 查看 OpenAPI；宣传页即
+                  <code class="inline">http://127.0.0.1:8666/</code>。
+                </li>
+              </ol>
+              <div class="start-path__actions">
+                <a class="btn btn-primary" href="#" data-link="getting-started" data-i18n="start.path.dev.cta1"
+                  >开发者完整指南</a
+                >
+                <a class="btn btn-outline" href="#" data-link="docs" data-i18n="start.path.dev.cta2">文档中心</a>
+              </div>
             </article>
-            <article class="start-card">
-              <h3 data-i18n="start.3.title">③ Web 版访问</h3>
-              <p data-i18n="start.3.body" data-i18n-html>
-                构建 Flutter Web 并部署到静态托管；在
-                <code class="inline">website/js/config.js</code> 填写
-                <code class="inline">appUrl</code> 后，本站「登录」将直达你的应用。
-              </p>
-              <a
-                class="btn btn-outline"
-                href="#"
-                data-link="login"
-                id="start-web-login"
-                data-i18n="start.3.cta"
-                >打开 Web 应用</a
-              >
+
+            <article class="start-path glow-card reveal reveal-delay-2 is-visible">
+              <header class="start-path__head">
+                <span class="path-badge path-badge--ops" data-i18n="start.path.ops.badge">运维</span>
+                <h3 data-i18n="start.path.ops.title">私有化 / 生产部署要点</h3>
+              </header>
+              <ol class="start-steps">
+                <li data-i18n="start.path.ops.s1">
+                  生产数据库使用 Supabase 云端或自建 PostgreSQL，执行
+                  <code class="inline">supabase/migrations/</code> 迁移。
+                </li>
+                <li data-i18n="start.path.ops.s2">
+                  以 release 模式构建 <code class="inline">openflow-server</code>，配置
+                  <code class="inline">DATABASE_URL</code>、JWT、对象存储与 LLM 密钥（仅服务端）。
+                </li>
+                <li data-i18n="start.path.ops.s3">
+                  反向代理终止 TLS，暴露 <code class="inline">/api/v1</code> 与 WebSocket
+                  <code class="inline">/api/v1/ws</code>；静态 Flutter Web 可放 CDN 或同域。
+                </li>
+                <li data-i18n="start.path.ops.s4">
+                  启用 OpenTelemetry / 任务队列监控；计费 Webhook 按环境配置 Stripe / Alipay / Paddle。
+                </li>
+                <li data-i18n="start.path.ops.s5">
+                  危险操作（清库等）走受控 CLI，生产 HTTP 清库接口保持 501 设计。
+                </li>
+              </ol>
+              <div class="start-path__actions">
+                <a class="btn btn-primary" href="#" data-link="operators" data-i18n="start.path.ops.cta1"
+                  >运维快速开始</a
+                >
+                <a
+                  class="btn btn-outline"
+                  href="#"
+                  data-link="getting-started-index"
+                  data-i18n="start.path.ops.cta2"
+                  >按角色索引</a
+                >
+              </div>
             </article>
           </div>
+
+          <aside class="start-verify glow-card reveal is-visible">
+            <h3 data-i18n="start.verify.title">如何确认已经跑通？</h3>
+            <ul class="start-checklist">
+              <li data-i18n="start.verify.i1">
+                <code class="inline">GET /api/v1/health</code> 或 Swagger 页面可打开且无 5xx。
+              </li>
+              <li data-i18n="start.verify.i2">Flutter 客户端能登录并看到「项目」首页与流水线导航。</li>
+              <li data-i18n="start.verify.i3">创建测试项目后，剧本步可触发 AI 任务（需配置 LLM Key）。</li>
+              <li data-i18n="start.verify.i4">任务中心可见队列状态，WebSocket 能收到任务进度推送。</li>
+            </ul>
+            <p class="start-verify__web" data-i18n="start.verify.web" data-i18n-html>
+              <strong>Web 版：</strong>构建 Flutter Web 后，在
+              <code class="inline">website/js/config.js</code> 设置
+              <code class="inline">appUrl</code>，本站「登录」将跳转到你的应用。
+            </p>
+            <a
+              class="btn btn-outline"
+              href="#"
+              data-link="login"
+              id="start-web-login"
+              data-i18n="start.verify.cta"
+              >打开 Web 应用</a
+            >
+          </aside>
         </div>
       </section>
 

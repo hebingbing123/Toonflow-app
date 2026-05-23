@@ -14,10 +14,17 @@
     return cfg.gettingStartedUrl;
   }
 
+  function operatorsForLocale(loc) {
+    if (loc === "en" && cfg.operatorsEnUrl) return cfg.operatorsEnUrl;
+    return cfg.operatorsUrl;
+  }
+
   function applyLinks() {
     const links = {
       docs: docsUrlForLocale(locale),
       "getting-started": gettingStartedForLocale(locale),
+      operators: operatorsForLocale(locale),
+      "getting-started-index": cfg.gettingStartedIndexUrl,
       releases: cfg.releasesUrl,
       repo: cfg.repoUrl,
       login: cfg.appUrl || "#start",
@@ -82,13 +89,41 @@
     );
   }
 
+  function markRevealed(el) {
+    el.classList.add("is-visible");
+    if (!el.classList.contains("reveal")) {
+      el.style.opacity = "";
+      el.style.transform = "";
+      el.style.transition = "";
+    }
+    if (el.classList.contains("stat-card")) {
+      animateStatCard(el);
+    }
+  }
+
+  function revealInView(el, margin = 80) {
+    const r = el.getBoundingClientRect();
+    const h = window.innerHeight || document.documentElement.clientHeight;
+    if (r.top < h - margin && r.bottom > margin) {
+      markRevealed(el);
+      return true;
+    }
+    return false;
+  }
+
+  function revealSectionById(id) {
+    const section = document.getElementById(id);
+    if (!section) return;
+    section.querySelectorAll(".reveal, .start-path, .start-verify, .pricing-tier").forEach(markRevealed);
+  }
+
   function initReveal() {
     const targets = document.querySelectorAll(
-      ".reveal, .feature-card, .workflow-step, .start-card, .stat-card, .pricing-card, .cta-band .container > *"
+      ".reveal, .feature-card, .workflow-step, .start-path, .start-verify, .stat-card, .pricing-tier, .pricing-compare, .cta-band .container > *"
     );
 
     if (prefersReducedMotion) {
-      targets.forEach((el) => el.classList.add("is-visible"));
+      targets.forEach((el) => markRevealed(el));
       return;
     }
 
@@ -96,14 +131,11 @@
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
-          if (entry.target.classList.contains("stat-card")) {
-            animateStatCard(entry.target);
-          }
+          markRevealed(entry.target);
           observer.unobserve(entry.target);
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px 0px 0px" }
     );
 
     targets.forEach((el) => {
@@ -112,7 +144,27 @@
         el.style.transform = "translateY(20px)";
         el.style.transition = "opacity 0.55s ease, transform 0.55s ease";
       }
-      observer.observe(el);
+      if (!revealInView(el)) {
+        observer.observe(el);
+      }
+    });
+
+    // 锚点跳转（#start / #pricing）时立即展示该区块，避免只看到空卡片壳
+    const revealFromHash = () => {
+      const id = (location.hash || "").replace(/^#/, "");
+      if (id === "start" || id === "pricing") {
+        revealSectionById(id);
+      }
+    };
+    revealFromHash();
+    window.addEventListener("hashchange", revealFromHash);
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        const id = (link.getAttribute("href") || "").replace(/^#/, "");
+        if (id === "start" || id === "pricing") {
+          requestAnimationFrame(() => revealSectionById(id));
+        }
+      });
     });
   }
 
