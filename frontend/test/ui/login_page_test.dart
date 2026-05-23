@@ -46,7 +46,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('账号或密码错误'), findsOneWidget);
     expect(find.textContaining('Exception'), findsNothing);

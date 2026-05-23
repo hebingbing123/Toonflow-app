@@ -311,12 +311,14 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (widget.studioPresentation)
-            ExpansionTile(
-              initiallyExpanded: false,
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: const EdgeInsets.only(bottom: 8),
-              title: Text(l10n.studioNotificationsAdvanced),
-              children: [
+            Material(
+              type: MaterialType.transparency,
+              child: ExpansionTile(
+                initiallyExpanded: false,
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                title: Text(l10n.studioNotificationsAdvanced),
+                children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: RiskyOperationConfirmPrefsOverflowMenu(
@@ -325,7 +327,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 ),
                 const SizedBox(height: 8),
                 _buildComplianceAdminPanel(context, theme, l10n),
-              ],
+                ],
+              ),
             )
           else
             _buildComplianceAdminPanel(context, theme, l10n),

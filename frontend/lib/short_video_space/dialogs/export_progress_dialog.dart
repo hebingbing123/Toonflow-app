@@ -540,17 +540,19 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
               ),
             ),
             const SizedBox(height: 8),
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: const EdgeInsets.only(top: 4, bottom: 8),
-              initiallyExpanded: false,
-              title: Text(
-                l10n.qualityReviewsFreshnessShowDetails,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: tokens.textSecondary,
+            Material(
+              type: MaterialType.transparency,
+              child: ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(top: 4, bottom: 8),
+                initiallyExpanded: false,
+                title: Text(
+                  l10n.qualityReviewsFreshnessShowDetails,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: tokens.textSecondary,
+                  ),
                 ),
-              ),
-              children: [
+                children: [
                 SelectableText(
                   l10n.shortVideoSpaceDialogExportProgressTaskId(
                     widget.taskId,
@@ -561,6 +563,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   ),
                 ),
               ],
+              ),
             ),
           ],
         ),

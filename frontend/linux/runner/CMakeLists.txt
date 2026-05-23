@@ -24,3 +24,14 @@ target_link_libraries(${BINARY_NAME} PRIVATE flutter)
 target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
 
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
+
+# Stage Rust bridge next to the binary (target is defined in this directory).
+add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+  COMMAND "${CMAKE_COMMAND}"
+    -DREPO_ROOT=${OPENFLOW_REPO_ROOT}
+    -DCONFIG=$<CONFIG>
+    -DTARGET_DIR=$<TARGET_FILE_DIR:${BINARY_NAME}>/lib
+    -DTARGET_OS=linux
+    -P "${OPENFLOW_STAGE_BRIDGE_SCRIPT}"
+  VERBATIM
+)
