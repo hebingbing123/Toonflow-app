@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/models/models.dart';
 import 'package:ui_audit/monitoring/metrics_tracker.dart';
 

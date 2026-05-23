@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/analyzers/static_analysis_runner.dart';
 import 'package:ui_audit/audit_orchestrator.dart';
 import 'package:ui_audit/models/models.dart';

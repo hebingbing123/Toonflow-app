@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/analyzers/accessibility_analyzer_static.dart';
 import 'package:ui_audit/models/models.dart';
 

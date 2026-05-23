@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/models/models.dart';
 import 'package:ui_audit/config/config_parser.dart';
 

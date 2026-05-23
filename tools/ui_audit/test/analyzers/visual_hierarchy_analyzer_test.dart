@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/analyzers/visual_hierarchy_analyzer.dart';
 import 'package:ui_audit/models/models.dart';
 

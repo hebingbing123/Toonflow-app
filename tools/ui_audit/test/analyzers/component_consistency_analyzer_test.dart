@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_audit/analyzers/component_consistency_analyzer.dart';
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
         ..writeAsStringSync('''
 class C {
   void m() {
-    final r = BorderRadius.circular(12);
+    final r = BorderRadius.circular(11);
   }
 }
 ''');
