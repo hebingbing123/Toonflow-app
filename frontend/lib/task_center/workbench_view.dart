@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_filter_row.dart';
@@ -151,7 +152,10 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
             ? l10n.taskCenterWorkbenchRealtimeConnected
             : '',
       ),
-      leading: Icon(Icons.hub_outlined, color: StudioTokens.of(context).accent),
+      leading: studioDecorativeIcon(
+        Icons.hub_outlined,
+        color: StudioTokens.of(context).accent,
+      ),
       onClose: callbacks.onClose,
       actions: <Widget>[
         TextButton(

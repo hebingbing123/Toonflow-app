@@ -10,6 +10,7 @@ audit:
   categories:
     - spacing
     - typography
+    - accessibility
   minimumSeverity: medium
   runtime:
     enabled: false

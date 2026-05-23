@@ -125,6 +125,7 @@ class _UtilityIconButton extends StatelessWidget {
       size: iconSize,
       fill: dense ? 0.35 : 0.0,
       weight: dense ? 500 : 400,
+      semanticLabel: tooltip,
       color: selected
           ? tokens.primary
           : tokens.textSecondary.withValues(alpha: dense ? 0.86 : 1.0),

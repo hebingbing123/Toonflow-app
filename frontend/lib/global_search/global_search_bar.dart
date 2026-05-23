@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design_system/studio_typography.dart';
+import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -1093,11 +1094,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     );
 
     Widget searchGlyph({required Color color}) {
-      return Icon(
+      return studioDecorativeIcon(
         Icons.search_rounded,
         size: 16,
-        fill: 0.22,
-        weight: 500,
         color: color,
       );
     }
@@ -1256,11 +1255,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               // Search icon
               Padding(
                 padding: EdgeInsets.only(left: leadingPadding, right: iconGap),
-                child: Icon(
+                child: studioDecorativeIcon(
                   Icons.search_rounded,
                   size: iconSize,
-                  fill: titleBarDense ? 0.2 : 0.0,
-                  weight: titleBarDense ? 500 : 400,
                   color: _focusNode.hasFocus
                       ? tokens.accent.withValues(alpha: titleBarDense ? 0.75 : 1.0)
                       : (titleBarDense ? mutedIconColor : tokens.textMuted),

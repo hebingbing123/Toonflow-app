@@ -7,6 +7,7 @@ import '../design_system/tokens.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -1596,7 +1597,7 @@ class _FlowArrowIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = studioMutedTextColor(context);
-    return Icon(
+    return studioDecorativeIcon(
       Icons.arrow_forward_rounded,
       size: 18,
       color: muted.withValues(alpha: 0.78),

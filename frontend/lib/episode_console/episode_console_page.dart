@@ -29,6 +29,7 @@ class EpisodeConsolePage extends StatelessWidget {
       backgroundColor: tokens.bgBase,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             if (context.canPop()) {

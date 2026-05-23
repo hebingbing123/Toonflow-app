@@ -277,25 +277,29 @@ class _DimensionRow extends StatelessWidget {
                 const SizedBox(width: 8),
                 SizedBox(
                   width: 56,
-                  child: TextFormField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(2),
-                    ],
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
+                  child: Semantics(
+                    label: label,
+                    textField: true,
+                    child: TextFormField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(2),
+                      ],
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        border: const OutlineInputBorder(),
+                        errorText: errorText,
+                        errorMaxLines: 2,
                       ),
-                      border: const OutlineInputBorder(),
-                      errorText: errorText,
-                      errorMaxLines: 2,
+                      onChanged: onTextChanged,
                     ),
-                    onChanged: onTextChanged,
                   ),
                 ),
               ],

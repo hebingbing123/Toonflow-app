@@ -5,6 +5,7 @@ import '../account/section.dart';
 import '../api_keys/controller.dart';
 import '../api_keys/section.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -489,7 +490,7 @@ class _SettingsModuleTab extends StatelessWidget {
       child: Row(
         mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
         children: <Widget>[
-          Icon(
+          studioDecorativeIcon(
             module.icon,
             size: compact ? 18 : 19,
             color: selected ? tokens.textPrimary : tokens.textSecondary,

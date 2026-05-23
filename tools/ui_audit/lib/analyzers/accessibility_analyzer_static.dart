@@ -141,7 +141,9 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
       }
     }
 
-    if (hasLabelOrHint) {
+    if (hasLabelOrHint ||
+        _formFieldHasExternalLabel(node) ||
+        _hasSemanticsLabelAncestor(node)) {
       return;
     }
 
@@ -199,7 +201,8 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
   bool _iconHasAccessibleContext(AstNode node) {
     if (_isDecorativeInputIcon(node) ||
         _iconHasAdjacentTextLabel(node) ||
-        _isLabeledTextButtonIcon(node)) {
+        _isLabeledTextButtonIcon(node) ||
+        _isInputDecoratorAffordance(node)) {
       return true;
     }
 
@@ -209,7 +212,8 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
           _isListTileWithTitle(current) ||
           _isLabeledMenuItem(current) ||
           _isSemanticsWithLabel(current) ||
-          _isExcludeSemantics(current)) {
+          _isExcludeSemantics(current) ||
+          _widgetTypeName(current) == 'Tooltip') {
         return true;
       }
       current = current.parent;
@@ -223,6 +227,42 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
       if (_widgetTypeName(current) == 'InputDecoration') {
         return _hasNamedArgument(current, 'prefixIcon') ||
             _hasNamedArgument(current, 'suffixIcon');
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  bool _isInputDecoratorAffordance(AstNode node) {
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (_widgetTypeName(current) == 'InputDecorator') {
+        final source = current.toSource();
+        return source.contains('suffixIcon:') ||
+            source.contains('prefixIcon:');
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  bool _formFieldHasExternalLabel(AstNode node) {
+    final column = _findAncestorWidget(node, 'Column');
+    if (column != null &&
+        RegExp(r'Text\s*\(').hasMatch(column.toSource())) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _hasSemanticsLabelAncestor(AstNode node) {
+    AstNode? current = node.parent;
+    while (current != null) {
+      if (_widgetTypeName(current) == 'Semantics') {
+        final source = current.toSource();
+        if (source.contains('label:') || source.contains('textField:')) {
+          return true;
+        }
       }
       current = current.parent;
     }
@@ -259,15 +299,14 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
   bool _isLabeledTextButtonIcon(AstNode node) {
     AstNode? current = node.parent;
     while (current != null) {
-      if (current is MethodInvocation &&
-          current.methodName.name == 'icon' &&
-          current.target is SimpleIdentifier) {
-        final target = (current.target! as SimpleIdentifier).name;
-        if (target == 'TextButton' ||
-            target == 'FilledButton' ||
-            target == 'OutlinedButton' ||
-            target == 'ElevatedButton') {
-          return current.toSource().contains('label:');
+      if (current is MethodInvocation) {
+        final name = current.methodName.name;
+        if (name == 'icon' || name.endsWith('Icon')) {
+          final source = current.toSource();
+          if (source.contains('label:') &&
+              (source.contains('Button') || source.contains('FilledButton'))) {
+            return true;
+          }
         }
       }
       current = current.parent;
@@ -296,7 +335,8 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
       'MenuItemButton' ||
       'CheckboxListTile' ||
       'RadioListTile' ||
-      'SwitchListTile' =>
+      'SwitchListTile' ||
+      'ButtonSegment' =>
         true,
       _ => false,
     };

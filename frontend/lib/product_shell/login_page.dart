@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../auth/controller.dart';
 import '../config.dart'
     show kDevAdminEmail, kDevAdminPassword, kSupabaseConfigured;
+import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/openflow_brand.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -743,7 +744,7 @@ class _StageCoreCluster extends StatelessWidget {
             ),
             child: Transform.rotate(
               angle: progress * math.pi * 2,
-              child: const Icon(
+              child: studioDecorativeIcon(
                 Icons.auto_mode_rounded,
                 color: Colors.white,
                 size: 34,

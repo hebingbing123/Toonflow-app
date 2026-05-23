@@ -252,6 +252,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
             ),
           ],
           leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.go(
               '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',
@@ -288,6 +289,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
             ),
           ],
           leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.go(
               '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',
@@ -327,6 +329,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
           ),
         ],
         leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go(
             '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',

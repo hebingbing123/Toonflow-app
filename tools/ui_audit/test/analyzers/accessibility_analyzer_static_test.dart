@@ -74,6 +74,38 @@ class C {
       expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
     });
 
+    test('does not flag Icon inside FilledButton.tonalIcon with label', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m() => FilledButton.tonalIcon(
+    onPressed: () {},
+    icon: Icon(Icons.download_outlined),
+    label: Text('Download'),
+  );
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
+    });
+
+    test('does not flag Icon inside ButtonSegment with label', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m() => ButtonSegment(
+    value: 0,
+    icon: Icon(Icons.auto_awesome_outlined),
+    label: Text('Animated'),
+  );
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
+    });
+
     test('does not flag Icon with semanticLabel', () async {
       final file = File('${tempDir.path}/w.dart')
         ..writeAsStringSync('''

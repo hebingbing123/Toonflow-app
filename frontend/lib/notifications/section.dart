@@ -481,7 +481,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
           const SizedBox(height: 6),
-          child,
+          Semantics(
+            label: label,
+            textField: true,
+            child: child,
+          ),
         ],
       ),
     );

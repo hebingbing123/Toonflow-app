@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../studio_typography.dart';
 import '../tokens.dart';
+import 'studio_decorative_icon.dart';
 
 /// One selectable row in a [StudioDropdownField] menu.
 @immutable
@@ -679,7 +680,7 @@ class StudioSelectFieldTrigger extends StatelessWidget {
           turns: expanded ? 0.5 : 0,
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
-          child: Icon(
+          child: studioDecorativeIcon(
             Icons.keyboard_arrow_down_rounded,
             color: !enabled
                 ? tokens.textMuted.withValues(alpha: 0.5)

@@ -1140,7 +1140,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: color, size: 24),
+      child: studioDecorativeIcon(icon, color: color, size: 24),
     );
   }
 

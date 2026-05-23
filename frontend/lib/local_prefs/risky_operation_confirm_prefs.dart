@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
+import '../design_system/components/studio_decorative_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -240,7 +241,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
           value: _RiskyPrefsOverflowValue.viewActiveSilences,
           label: l10n.riskyPrefsMenuViewSilencesTitle,
           subtitle: l10n.riskyPrefsMenuViewSilencesSubtitle,
-          leading: Icon(
+          leading: studioDecorativeIcon(
             Icons.visibility_outlined,
             size: 22,
             color: Theme.of(context).colorScheme.primary,
@@ -250,7 +251,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
           value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
           label: l10n.riskyPrefsMenuResetTitle,
           subtitle: l10n.riskyPrefsMenuResetSubtitle,
-          leading: const Icon(Icons.notifications_active_outlined, size: 22),
+          leading: studioDecorativeIcon(Icons.notifications_active_outlined, size: 22),
         ),
       ],
       onSelected: (value) {
