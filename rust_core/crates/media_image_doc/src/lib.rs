@@ -61,10 +61,7 @@ pub struct InvalidImageDimensions {
 
 impl ImageDocument {
     pub fn try_new(width: u32, height: u32) -> Result<Self, InvalidImageDimensions> {
-        if width == 0
-            || height == 0
-            || width > MAX_IMAGE_DIMENSION
-            || height > MAX_IMAGE_DIMENSION
+        if width == 0 || height == 0 || width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION
         {
             return Err(InvalidImageDimensions { width, height });
         }
