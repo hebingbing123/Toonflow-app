@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_model_picker.dart';
 import '../design_system/tokens.dart';
+import '../design_system/studio_motion.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'project_studio_model_routing_scope.dart';
@@ -512,8 +513,11 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
             crossFadeState: expanded
                 ? CrossFadeState.showSecond
                 : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 180),
-            sizeCurve: Curves.easeOut,
+            duration: studioAnimationDuration(
+              context,
+              const Duration(milliseconds: 180),
+            ),
+            sizeCurve: studioAnimationCurve(context, Curves.easeOut),
           ),
         ],
       ),

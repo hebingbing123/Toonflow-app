@@ -58,7 +58,7 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
         break;
     }
 
-    if (_isAnimatedCall(name, node)) {
+    if (_isAnimatedCall(name, node) && name != 'AnimatedBuilder') {
       _checkReducedMotion(node);
     }
 
@@ -76,7 +76,7 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
       _checkFormFieldLabels(node);
     }
 
-    if (type.startsWith('Animated')) {
+    if (type.startsWith('Animated') && type != 'AnimatedBuilder') {
       _checkReducedMotion(node);
     }
 
@@ -159,8 +159,15 @@ class _AccessibilityVisitor extends RecursiveAstVisitor<void> {
   }
 
   void _checkReducedMotion(AstNode node) {
+    if (_widgetTypeName(node) == 'AnimatedBuilder') {
+      return;
+    }
+
     final source = node.toSource();
     if (source.contains('MediaQuery.disableAnimationsOf') ||
+        source.contains('studioAnimationDuration') ||
+        source.contains('studioAnimationCurve') ||
+        source.contains('studioDisableAnimations') ||
         source.contains('disableAnimations') ||
         source.contains('prefers-reduced-motion') ||
         source.contains('accessibleNavigation')) {

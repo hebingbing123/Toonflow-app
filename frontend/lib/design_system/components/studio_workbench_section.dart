@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import '../studio_motion.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
@@ -128,8 +129,11 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
             crossFadeState: _expanded
                 ? CrossFadeState.showSecond
                 : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 180),
-            sizeCurve: Curves.easeOut,
+            duration: studioAnimationDuration(
+              context,
+              const Duration(milliseconds: 180),
+            ),
+            sizeCurve: studioAnimationCurve(context, Curves.easeOut),
           ),
         ],
       ),

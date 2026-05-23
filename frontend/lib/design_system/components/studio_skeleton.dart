@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../tokens.dart';
+import '../studio_motion.dart';
 
 class StudioSkeleton extends StatefulWidget {
   const StudioSkeleton({
@@ -20,15 +21,30 @@ class StudioSkeleton extends StatefulWidget {
 
 class _StudioSkeletonState extends State<StudioSkeleton>
     with SingleTickerProviderStateMixin {
+  static const _pulseDuration = Duration(milliseconds: 1200);
+
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
+    _controller = AnimationController(vsync: this, duration: _pulseDuration)
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final duration = studioAnimationDuration(context, _pulseDuration);
+    if (_controller.duration != duration) {
+      _controller.duration = duration;
+      if (duration == Duration.zero) {
+        _controller.stop();
+        _controller.value = 0;
+      } else if (!_controller.isAnimating) {
+        _controller.repeat(reverse: true);
+      }
+    }
   }
 
   @override

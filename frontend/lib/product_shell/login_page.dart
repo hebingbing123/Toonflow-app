@@ -10,6 +10,7 @@ import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/openflow_brand.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/studio_motion.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -65,6 +66,18 @@ class _ProductLoginPageState extends State<ProductLoginPage>
       _sceneController.repeat();
     } else {
       _sceneController.value = 0.18;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (studioDisableAnimations(context)) {
+      _sceneController.stop();
+      _sceneController.value = 0.18;
+    } else if (_ambientAnimationEnabled && !_sceneController.isAnimating) {
+      _sceneController.duration = const Duration(seconds: 24);
+      _sceneController.repeat();
     }
   }
 
@@ -1125,8 +1138,11 @@ class _AuthModeToggle extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             AnimatedAlign(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
+              duration: studioAnimationDuration(
+                context,
+                const Duration(milliseconds: 220),
+              ),
+              curve: studioAnimationCurve(context, Curves.easeOutCubic),
               alignment: mode == _AuthMode.signIn
                   ? Alignment.centerLeft
                   : Alignment.centerRight,

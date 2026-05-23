@@ -508,7 +508,7 @@ impl SearchService {
             )
             SELECT * FROM search_results
             ORDER BY rank DESC, updated_at DESC
-            LIMIT $3 OFFSET $4
+            LIMIT $4 OFFSET $5
             "#,
             union_parts.join(" UNION ALL ")
         );
@@ -549,7 +549,7 @@ impl SearchService {
                 result_type,
                 title: row.get("title"),
                 snippet: row.get("snippet"),
-                rank: row.get("rank"),
+                rank: row.get::<f64, _>("rank") as f32,
                 created_at: row.get("created_at"),
                 updated_at: row.get("updated_at"),
                 metadata,

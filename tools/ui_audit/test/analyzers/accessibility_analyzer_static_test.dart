@@ -106,6 +106,42 @@ class C {
       expect(findings.where((f) => f.title.contains('Icon missing')), isEmpty);
     });
 
+    test('does not flag AnimatedBuilder used as Listenable rebuild', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m() => AnimatedBuilder(
+    animation: controller,
+    builder: (context, _) => Text('x'),
+  );
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(
+        findings.where((f) => f.title.contains('reduced-motion')),
+        isEmpty,
+      );
+    });
+
+    test('does not flag AnimatedContainer with studioAnimationDuration', () async {
+      final file = File('${tempDir.path}/w.dart')
+        ..writeAsStringSync('''
+class C {
+  Widget m(BuildContext context) => AnimatedContainer(
+    duration: studioAnimationDuration(context, const Duration(milliseconds: 220)),
+    child: Text('x'),
+  );
+}
+''');
+
+      final findings = await analyzer.analyze(file.path);
+      expect(
+        findings.where((f) => f.title.contains('reduced-motion')),
+        isEmpty,
+      );
+    });
+
     test('does not flag Icon with semanticLabel', () async {
       final file = File('${tempDir.path}/w.dart')
         ..writeAsStringSync('''

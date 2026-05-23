@@ -6,6 +6,7 @@ import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
+import '../design_system/studio_motion.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
@@ -588,8 +589,11 @@ class _AccountSectionState extends State<AccountSection> {
         borderRadius: BorderRadius.circular(14),
         onTap: () => setAcknowledged(!_acknowledgeIrreversible),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
+          duration: studioAnimationDuration(
+            context,
+            const Duration(milliseconds: 220),
+          ),
+          curve: studioAnimationCurve(context, Curves.easeOutCubic),
           padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),

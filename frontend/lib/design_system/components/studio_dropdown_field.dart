@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../studio_typography.dart';
+import '../studio_motion.dart';
 import '../tokens.dart';
 import 'studio_decorative_icon.dart';
 
@@ -678,8 +679,11 @@ class StudioSelectFieldTrigger extends StatelessWidget {
         isDense: isDense,
         suffixIcon: AnimatedRotation(
           turns: expanded ? 0.5 : 0,
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
+          duration: studioAnimationDuration(
+            context,
+            const Duration(milliseconds: 180),
+          ),
+          curve: studioAnimationCurve(context, Curves.easeOutCubic),
           child: studioDecorativeIcon(
             Icons.keyboard_arrow_down_rounded,
             color: !enabled

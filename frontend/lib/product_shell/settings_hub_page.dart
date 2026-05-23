@@ -6,6 +6,7 @@ import '../api_keys/controller.dart';
 import '../api_keys/section.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_decorative_icon.dart';
+import '../design_system/studio_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -350,9 +351,12 @@ class _SettingsSummaryTile extends StatelessWidget {
     final totalIndexLabel = modules.length.toString().padLeft(2, '0');
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 260),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
+      duration: studioAnimationDuration(
+        context,
+        const Duration(milliseconds: 260),
+      ),
+      switchInCurve: studioAnimationCurve(context, Curves.easeOutCubic),
+      switchOutCurve: studioAnimationCurve(context, Curves.easeInCubic),
       transitionBuilder: (child, animation) {
         final slide = Tween<Offset>(
           begin: const Offset(0.05, 0),
@@ -467,8 +471,11 @@ class _SettingsModuleTab extends StatelessWidget {
     );
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 240),
-      curve: Curves.easeOutCubic,
+      duration: studioAnimationDuration(
+        context,
+        const Duration(milliseconds: 240),
+      ),
+      curve: studioAnimationCurve(context, Curves.easeOutCubic),
       constraints: BoxConstraints(
         minWidth: expand ? 0 : (compact ? 120 : 148),
         minHeight: compact ? 50 : 54,
@@ -533,8 +540,11 @@ class _SettingsProgressDots extends StatelessWidget {
         for (var index = 0; index < count; index++) ...<Widget>[
           if (index > 0) SizedBox(width: compact ? 6 : 8),
           AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
+            duration: studioAnimationDuration(
+              context,
+              const Duration(milliseconds: 220),
+            ),
+            curve: studioAnimationCurve(context, Curves.easeOutCubic),
             width: index == selectedIndex
                 ? (compact ? 18 : 22)
                 : (compact ? 8 : 10),
