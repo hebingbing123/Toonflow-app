@@ -292,7 +292,7 @@ pub async fn mark_notifications_read_state(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    rows.sort_by(|left, right| right.id.cmp(&left.id));
+    rows.sort_by_key(|row| std::cmp::Reverse(row.id));
 
     for row in &rows {
         notify
@@ -338,7 +338,7 @@ pub async fn mark_all_notifications_read(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    rows.sort_by(|left, right| right.id.cmp(&left.id));
+    rows.sort_by_key(|row| std::cmp::Reverse(row.id));
 
     for row in &rows {
         notify

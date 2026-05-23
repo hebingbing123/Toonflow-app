@@ -11,11 +11,16 @@ flutter pub get
 echo "== Studio visual debt baseline =="
 bash "$ROOT/scripts/studio-visual-debt-check.sh"
 
-echo "== UI widget + dialog tests =="
-flutter test test/ui/ test/support/ test/dialogs/
+echo "== UI widget + dialog tests (non-golden) =="
+# shellcheck disable=SC2046
+flutter test test/support/ test/dialogs/ $(find test/ui -name '*_test.dart' ! -name '*golden*' | sort)
 
 echo "== UI widget goldens (ui_gallery + desktop_layouts) =="
-flutter test test/ui/ --name golden
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  flutter test test/ui/ --name golden
+else
+  echo "Skipping goldens on $(uname -s) (font raster differs from macOS baselines)."
+fi
 
 echo "== Export history dialog suite =="
 flutter test test/export_history_dialog_test.dart

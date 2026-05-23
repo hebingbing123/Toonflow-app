@@ -40,12 +40,18 @@ class StaticAnalysisRunner {
     List<String>? files,
   }) async {
     final analyzers = analyzersFor(config);
-    final dartFiles = files ??
-        await parser.collectDartFiles(
-          projectPath: config.projectPath,
-          includePaths: config.includePaths,
-          excludePaths: config.excludePaths,
-        );
+    final dartFiles = files == null
+        ? await parser.collectDartFiles(
+            projectPath: config.projectPath,
+            includePaths: config.includePaths,
+            excludePaths: config.excludePaths,
+          )
+        : AstParser.filterDartFiles(
+            absolutePaths: files,
+            projectPath: config.projectPath,
+            includePaths: config.includePaths,
+            excludePaths: config.excludePaths,
+          );
 
     final findings = <Finding>[];
     final errors = <AuditError>[];

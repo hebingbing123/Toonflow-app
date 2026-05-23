@@ -147,6 +147,27 @@ class AstParser {
     return results;
   }
 
+  /// Applies [includePaths] / [excludePaths] (relative to [projectPath]) to absolute paths.
+  static List<String> filterDartFiles({
+    required List<String> absolutePaths,
+    required String projectPath,
+    required List<String> includePaths,
+    required List<String> excludePaths,
+  }) {
+    final root = p.normalize(projectPath);
+    return absolutePaths.where((file) {
+      final relative = p.relative(file, from: root).replaceAll(r'\', '/');
+      if (!_matchesAny(relative, includePaths)) {
+        return false;
+      }
+      if (_matchesAny(relative, excludePaths)) {
+        return false;
+      }
+      return true;
+    }).toList()
+      ..sort();
+  }
+
   /// Builds a [SymbolTable] by scanning design-system references and widget nodes.
   SymbolTable buildSymbolTable(ParsedDartFile parsed) {
     final table = SymbolTable();

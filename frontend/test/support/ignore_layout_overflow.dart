@@ -52,8 +52,6 @@ void expectNoUnexpectedLayoutExceptions(WidgetTester tester) {
   }
 }
 
-bool _overflowIgnoreInstalled = false;
-
 /// Clears benign overflow exceptions recorded during a pump window.
 void takeBenignLayoutOverflowExceptions(WidgetTester tester) {
   Object? error;
@@ -79,13 +77,12 @@ Future<void> pumpIgnoringBenignLayoutOverflow(
 
 /// Suppresses RenderFlex overflow noise in tight desktop test viewports.
 ///
-/// Must be called as the first statement in `main()` for files that need it.
+/// Installs test binding + handlers (call from [test/flutter_test_config.dart]).
 void installLayoutOverflowIgnoreForTests() {
-  if (!_overflowIgnoreInstalled) {
-    OverflowIgnoringBinding();
-    _overflowIgnoreInstalled = true;
-  }
+  OverflowIgnoringBinding();
+}
 
+void _installBenignFlutterErrorHandler() {
   final previousOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
     if (_isBenignLayoutOverflow(details.exception) ||
@@ -105,18 +102,7 @@ class OverflowIgnoringBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    final previousOnError = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      if (_isBenignLayoutOverflow(details.exception) ||
-          _isBenignLayoutOverflow(details)) {
-        return;
-      }
-      if (previousOnError != null) {
-        previousOnError(details);
-      } else {
-        FlutterError.presentError(details);
-      }
-    };
+    _installBenignFlutterErrorHandler();
   }
 
   @override
