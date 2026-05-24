@@ -1,11 +1,17 @@
 //! BitPay invoice creation (fixed-period authorization, non-recurring MVP).
 
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use hmac::{Hmac, Mac};
 use serde::Deserialize;
+use sha2::Sha256;
+use subtle::ConstantTimeEq;
 use uuid::Uuid;
 
 use super::catalog::find_plan;
 use super::session::{insert_session, set_provider_session_id, NewCheckoutSession};
 use crate::error::ApiError;
+
+type HmacSha256 = Hmac<Sha256>;
 
 pub struct BitpayConfig {
     pub api_token: String,
@@ -118,6 +124,28 @@ pub async fn create_invoice(
     })?;
     set_provider_session_id(pool, row.id, &inv.data.id, Some(&inv.data.url)).await?;
     Ok((row.id, inv.data.url))
+}
+
+/// Verify BitPay webhook `X-Signature` (HMAC-SHA256 of raw body, base64, API token secret).
+pub fn verify_webhook_signature(
+    api_token: &str,
+    body: &[u8],
+    signature_header: &str,
+) -> Result<(), ApiError> {
+    let token = api_token.trim();
+    let sig = signature_header.trim();
+    if token.is_empty() || sig.is_empty() {
+        return Err(ApiError::InvalidWebhookSignature);
+    }
+
+    let mut mac = HmacSha256::new_from_slice(token.as_bytes()).map_err(|_| ApiError::Internal)?;
+    mac.update(body);
+    let expected = BASE64.encode(mac.finalize().into_bytes());
+
+    if expected.len() != sig.len() || expected.as_bytes().ct_eq(sig.as_bytes()).unwrap_u8() != 1 {
+        return Err(ApiError::InvalidWebhookSignature);
+    }
+    Ok(())
 }
 
 pub fn parse_pos_data(pos_data: &str) -> Option<Uuid> {

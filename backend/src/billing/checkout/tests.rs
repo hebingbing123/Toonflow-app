@@ -26,3 +26,28 @@ mod alipay_tests {
         assert_eq!(m.get("out_trade_no").map(String::as_str), Some("abc"));
     }
 }
+
+#[cfg(test)]
+mod bitpay_tests {
+    use crate::billing::checkout::bitpay;
+
+    #[test]
+    fn verify_webhook_signature_accepts_valid_hmac() {
+        use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+        use hmac::{Hmac, Mac};
+        use sha2::Sha256;
+
+        let token = "test-bitpay-token";
+        let body = br#"{"event":{"name":"invoice_completed"},"data":{"id":"inv1"}}"#;
+        let mut mac = Hmac::<Sha256>::new_from_slice(token.as_bytes()).unwrap();
+        mac.update(body);
+        let sig = BASE64.encode(mac.finalize().into_bytes());
+        assert!(bitpay::verify_webhook_signature(token, body, &sig).is_ok());
+    }
+
+    #[test]
+    fn verify_webhook_signature_rejects_wrong_hmac() {
+        let body = br#"{"event":{"name":"invoice_completed"}}"#;
+        assert!(bitpay::verify_webhook_signature("token", body, "not-valid-base64==").is_err());
+    }
+}

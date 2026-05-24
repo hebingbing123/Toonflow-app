@@ -427,14 +427,12 @@ pub async fn post_bitpay_notify(
     headers: HeaderMap,
     body: axum::body::Bytes,
 ) -> Result<impl IntoResponse, ApiError> {
-    let _cfg = BitpayConfig::from_env().ok_or(ApiError::WebhookNotConfigured)?;
+    let cfg = BitpayConfig::from_env().ok_or(ApiError::WebhookNotConfigured)?;
     let sig = headers
         .get("X-Signature")
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
-    if sig.is_empty() {
-        return Err(ApiError::InvalidWebhookSignature);
-    }
+    super::bitpay::verify_webhook_signature(&cfg.api_token, &body, sig)?;
     let v: serde_json::Value = serde_json::from_slice(&body)
         .map_err(|_| ApiError::BadRequest("invalid bitpay webhook json".into()))?;
     let event_name = v
@@ -506,13 +504,13 @@ pub async fn post_stripe_checkout_webhook(
                         .pointer("/data/object/id")
                         .and_then(|x| x.as_str())
                         .unwrap_or(ref_id);
-                    let _ = complete_checkout_session(
+                    complete_checkout_session(
                         pool,
                         &session,
                         &format!("stripe-{stripe_id}"),
                         v.clone(),
                     )
-                    .await;
+                    .await?;
                 }
             }
         }

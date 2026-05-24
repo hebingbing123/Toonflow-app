@@ -39,7 +39,11 @@ pub(in crate::scripting::scripts) async fn export_scripts_zip(
             AND wm.user_id = "#,
     );
     qb.push_bind(uid);
-    qb.push(" AND s.numeric_id IN (");
+    qb.push(
+        r#"
+        )
+        AND s.numeric_id IN ("#,
+    );
     {
         let mut separated = qb.separated(", ");
         for id in &numeric_ids {

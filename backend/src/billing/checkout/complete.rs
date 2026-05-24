@@ -15,10 +15,7 @@ pub async fn complete_checkout_session(
     provider_event_id: &str,
     extra: Value,
 ) -> Result<(bool, bool), ApiError> {
-    if session.status == "paid" {
-        return Ok((true, false));
-    }
-    if session.status != "pending" {
+    if session.status != "pending" && session.status != "paid" {
         return Err(ApiError::Conflict("checkout session is not pending".into()));
     }
 
@@ -43,9 +40,15 @@ pub async fn complete_checkout_session(
         }
     }
 
-    let _marked = mark_paid(pool, session.id).await?;
+    // Apply plan before marking paid so webhook retries can succeed if ingest fails.
+    // When status is already paid, ingest still runs to reconcile sessions that
+    // were marked paid before plan application (legacy ordering bug).
     let (duplicate, _row_id, profile_updated, _peid, _info) =
         ingest_webhook(pool, &payload).await?;
+
+    if session.status == "pending" {
+        let _marked = mark_paid(pool, session.id).await?;
+    }
 
     Ok((duplicate, profile_updated))
 }
