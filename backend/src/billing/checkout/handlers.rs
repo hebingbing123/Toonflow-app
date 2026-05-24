@@ -483,10 +483,10 @@ pub async fn post_stripe_checkout_webhook(
     headers: HeaderMap,
     body: axum::body::Bytes,
 ) -> Result<Json<serde_json::Value>, ApiError> {
-    if headers.contains_key("stripe-signature") {
-        let secret = crate::billing::verify::billing_secret()?;
-        crate::billing::verify::verify_signature(&secret, body.as_ref(), &headers)?;
-    }
+    // Always verify (Stripe-Signature or X-Openflow-Signature). Optional verification
+    // allowed forged checkout.session.completed events to upgrade plans without payment.
+    let secret = crate::billing::verify::billing_secret()?;
+    crate::billing::verify::verify_signature(&secret, body.as_ref(), &headers)?;
     let mut v: serde_json::Value = serde_json::from_slice(&body)
         .map_err(|_| ApiError::BadRequest("body must be valid JSON".into()))?;
     super::stripe_checkout::enrich_stripe_webhook_payload(&mut v);

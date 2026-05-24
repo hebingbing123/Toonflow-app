@@ -28,6 +28,21 @@ mod alipay_tests {
 }
 
 #[cfg(test)]
+mod stripe_webhook_tests {
+    use axum::http::HeaderMap;
+
+    use crate::billing::verify::verify_signature;
+
+    /// Mirrors `post_stripe_checkout_webhook`: unsigned bodies must fail before ingest.
+    #[test]
+    fn unsigned_stripe_checkout_webhook_is_rejected() {
+        let secret = b"whsec_unit_test";
+        let body = br#"{"type":"checkout.session.completed","id":"evt_forged","user_id":"00000000-0000-0000-0000-000000000001","plan_tier":"studio"}"#;
+        assert!(verify_signature(secret, body, &HeaderMap::new()).is_err());
+    }
+}
+
+#[cfg(test)]
 mod bitpay_tests {
     use crate::billing::checkout::bitpay;
 
