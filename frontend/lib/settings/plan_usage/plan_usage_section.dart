@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../config.dart';
 import '../../design_system/components/studio_primary_button.dart';
 import '../../design_system/components/studio_skeleton.dart';
 import '../../design_system/components/studio_surfaces.dart';
@@ -26,6 +27,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
   bool _loading = true;
   String? _error;
   MeV2Response? _me;
+  MeResponse? _meV1;
   UsageSummaryResponse? _usage;
 
   @override
@@ -44,7 +46,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
       return;
     }
     final success = StudioSettingsHubNavigation.consumeCheckoutSuccess();
-    final tier = _me?.user.planTier;
+    final tier = _me?.user.planTier ?? _meV1?.planTier;
     final upgraded = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (context) => SubscribePlanPage(
@@ -64,7 +66,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
     if (token == null || token.isEmpty) {
       return;
     }
-    final tier = _me?.user.planTier;
+    final tier = _me?.user.planTier ?? _meV1?.planTier;
     final upgraded = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (context) => SubscribePlanPage(
@@ -93,6 +95,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
         _loading = false;
         _error = null;
         _me = null;
+        _meV1 = null;
         _usage = null;
       });
       return;
@@ -102,15 +105,47 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
       _error = null;
     });
     try {
-      final me = await fetchMeV2(token);
-      final scope = me.billingScope == 'workspace' ? 'workspace' : 'user';
+      late final String billingScope;
+      if (kEnableWorkspaceBilling) {
+        MeV2Response? meV2;
+        try {
+          meV2 = await fetchMeV2(token);
+        } catch (_) {
+          // V2 might not be available yet; fall back to v1 only.
+        }
+        if (meV2 != null) {
+          billingScope = meV2.billingScope == 'workspace' ? 'workspace' : 'user';
+          if (!mounted) return;
+          setState(() {
+            _me = meV2;
+            _meV1 = null;
+          });
+        } else {
+          final me = await fetchMeV1(token);
+          billingScope = 'user';
+          if (!mounted) return;
+          setState(() {
+            _meV1 = me;
+            _me = null;
+          });
+        }
+      } else {
+        final me = await fetchMeV1(token);
+        billingScope = 'user';
+        if (!mounted) return;
+        setState(() {
+          _meV1 = me;
+          _me = null;
+        });
+      }
       final usage = await fetchUsageSummary(
         token,
-        scope: scope == 'workspace' ? UsageSummaryScope.workspace : UsageSummaryScope.user,
+        scope: billingScope == 'workspace'
+            ? UsageSummaryScope.workspace
+            : UsageSummaryScope.user,
       );
       if (!mounted) return;
       setState(() {
-        _me = me;
         _usage = usage;
         _loading = false;
       });
@@ -150,16 +185,27 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
         ),
       );
     }
-    final me = _me!;
+    final meV2 = _me;
+    final meV1 = _meV1;
+    if (meV2 == null && meV1 == null) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 16),
+        child: StudioSkeleton(height: 120),
+      );
+    }
     final usage = _usage;
-    final billing = me.billingScope == 'workspace'
-        ? me.currentWorkspaceBilling
-        : null;
-    final planTier = billing?.planTier ?? me.user.planTier;
-    final jobsToday = usage?.jobsToday ?? billing?.jobsToday ?? me.user.jobsToday ?? 0;
-    final quota = usage?.dailyJobQuota ?? billing?.dailyJobQuota ?? me.user.dailyJobQuota;
+    final billingScope = meV2?.billingScope ?? 'user';
+    final billing = billingScope == 'workspace' ? meV2?.currentWorkspaceBilling : null;
+    final planTier = billing?.planTier ?? meV2?.user.planTier ?? meV1!.planTier;
+    final jobsToday =
+        usage?.jobsToday ?? billing?.jobsToday ?? meV2?.user.jobsToday ?? meV1?.jobsToday ?? 0;
+    final quota =
+        usage?.dailyJobQuota ?? billing?.dailyJobQuota ?? meV2?.user.dailyJobQuota ?? meV1?.dailyJobQuota;
     final quotaLabel = quota == null ? '∞' : quota.toString();
-    final subStatus = subscriptionStatusLabel(l10n, me.user.subscriptionStatus);
+    final subStatus = subscriptionStatusLabel(
+      l10n,
+      meV2?.user.subscriptionStatus ?? meV1?.subscriptionStatus,
+    );
 
     final tokens = StudioTokens.of(context);
     return Padding(
@@ -205,7 +251,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
                 ),
                 const SizedBox(height: StudioSpacing.xs),
                 Text(
-                  l10n.studioPlanUsageBillingScope(me.billingScope),
+                  l10n.studioPlanUsageBillingScope(billingScope),
                   style: studioSectionIntroStyle(context),
                 ),
                 const SizedBox(height: StudioLayoutSpacing.titleTight),

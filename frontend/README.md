@@ -19,7 +19,7 @@ cd frontend
 flutter run -d chrome -t lib/main_product.dart --dart-define-from-file=dart_defines.dev.json
 ```
 
-或：`--dart-define=PRODUCT_SHELL=true` 配合默认 `lib/main.dart`。
+开发者 Harness：`flutter run -d chrome -t lib/main_harness.dart --dart-define-from-file=dart_defines.dev.json`
 
 默认 API：`http://127.0.0.1:8666`。仅测后端连通性时可不设 Supabase：
 

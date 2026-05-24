@@ -64,13 +64,6 @@ const bool kEnableWorkspaceBilling = bool.fromEnvironment(
   defaultValue: false,
 );
 
-/// End-user studio shell. Default entry is Studio ([main.dart]); Harness: `-t lib/main_harness.dart`.
-/// Legacy: `--dart-define=PRODUCT_SHELL=false` with harness entry if needed.
-const bool kProductShell = bool.fromEnvironment(
-  'PRODUCT_SHELL',
-  defaultValue: true,
-);
-
 /// Optional proxy base for Google Fonts runtime fetching.
 ///
 /// Leave empty to fetch directly from Google-hosted font endpoints.
