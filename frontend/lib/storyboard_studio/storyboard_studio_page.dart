@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_empty_state.dart';
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/tokens.dart';
@@ -604,10 +605,12 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                            child: _buildShotIntake(l10n, compact: true) ??
-                                const SizedBox.shrink(),
+                          Flexible(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                              child: _buildShotIntake(l10n, compact: true) ??
+                                  const SizedBox.shrink(),
+                            ),
                           ),
                           if (_loadingShots)
                             const Expanded(
@@ -695,13 +698,11 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                             ? Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(24),
-                                  child: Text(
-                                    l10n.studioStoryboardStudioSelectShot,
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: tokens.textMuted),
+                                  child: StudioEmptyState(
+                                    title: l10n.studioStoryboardStudioSelectShot,
+                                    icon: Icons.touch_app_outlined,
+                                    variant: StudioEmptyStateVariant.emptyData,
+                                    weight: StudioEmptyStateWeight.quiet,
                                   ),
                                 ),
                               )
@@ -734,7 +735,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       spacing: 8,
                                       runSpacing: 8,
                                       children: <Widget>[
-                                        StudioPrimaryButton(
+                                        StudioToolbarButton(
                                           label: l10n.studioStepOpenProduction,
                                           onPressed: _openProductionWorkspace,
                                         ),
@@ -807,10 +808,15 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              StudioPrimaryButton(
-                                label:
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: FilledButton(
+                                  style: studioFormPrimaryButtonStyle(context),
+                                  onPressed: _savingPrompt ? null : _savePrompt,
+                                  child: Text(
                                     l10n.studioStoryboardStudioSaveProperties,
-                                onPressed: _savingPrompt ? null : _savePrompt,
+                                  ),
+                                ),
                               ),
                             ],
                           ),

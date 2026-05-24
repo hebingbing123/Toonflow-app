@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -171,17 +170,21 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
     final selected = _mode == mode;
     return FilledButton.tonal(
       onPressed: _busy ? null : () => _setMode(mode),
-      style: FilledButton.styleFrom(
-        backgroundColor: selected
-            ? StudioTokens.of(context).accent.withValues(alpha: 0.18)
-            : null,
+      style: studioToolbarTonalButtonStyle(context).merge(
+        ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(
+            selected
+                ? StudioTokens.of(context).accent.withValues(alpha: 0.18)
+                : null,
+          ),
+        ),
       ),
       child: Row(
-        mainAxisSize: widget.compact ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 18),
+          Icon(icon, size: 16),
           const SizedBox(width: StudioSpacing.xs),
-          Expanded(
+          Flexible(
             child: Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
           ),
         ],
@@ -217,9 +220,10 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
         const SizedBox(height: StudioSpacing.sm),
         Align(
           alignment: Alignment.centerRight,
-          child: StudioPrimaryButton(
-            label: l10n.scriptEditorStoryboardAddConfirmButton,
+          child: FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: _busy ? null : () => _submitSingle(l10n),
+            child: Text(l10n.scriptEditorStoryboardAddConfirmButton),
           ),
         ),
       ],
@@ -254,9 +258,10 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
         const SizedBox(height: StudioSpacing.sm),
         Align(
           alignment: Alignment.centerRight,
-          child: StudioPrimaryButton(
-            label: l10n.scriptEditorStoryboardBatchAddConfirmButton,
+          child: FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: _busy ? null : () => _submitBatch(l10n),
+            child: Text(l10n.scriptEditorStoryboardBatchAddConfirmButton),
           ),
         ),
       ],

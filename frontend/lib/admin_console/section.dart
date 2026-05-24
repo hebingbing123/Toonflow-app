@@ -225,6 +225,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               child: Padding(
                 padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: StudioCollapsibleFilterPanel(
+              collapsible: true,
               title: l10n.adminConsoleSearchLabel,
               subtitle: _searchController.text.trim().isNotEmpty
                   ? _searchController.text.trim()

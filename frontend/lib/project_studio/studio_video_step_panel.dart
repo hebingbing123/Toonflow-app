@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../design_system/tokens.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../l10n/app_localizations.dart';
 
 enum StudioVideoFrameMode { firstFrame, lastFrame, storyboardBoard }
@@ -95,7 +95,7 @@ class _StudioVideoStepPanelState extends State<StudioVideoStepPanel> {
           onSelectionChanged: (s) => _saveMode(s.first),
         ),
         const SizedBox(height: StudioSpacing.sm),
-        StudioPrimaryButton(
+        StudioToolbarButton(
           label: l10n.studioStepOpenProduction,
           onPressed: widget.onOpenProduction,
         ),

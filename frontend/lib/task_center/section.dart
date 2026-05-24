@@ -216,19 +216,18 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StudioPaneHeader(
+            StudioPaneToolbar(
               title: l10n.productNavTasks,
               subtitle: l10n.taskCenterSectionIntro,
               showBack: false,
-              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              menu: RiskyOperationConfirmPrefsOverflowMenu(
                 tooltip: l10n.taskCenterLocalClientPrefs,
               ),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.section - 6),
-            TaskCenterActionsBar(
-              loadingTaskApi: widget.loadingTaskApi,
-              onOpenWorkbench: () => _openTaskWorkbench(context),
-              onLoadTaskApi: widget.onLoadTaskApi,
+              actions: TaskCenterActionsBar(
+                loadingTaskApi: widget.loadingTaskApi,
+                onOpenWorkbench: () => _openTaskWorkbench(context),
+                onLoadTaskApi: widget.onLoadTaskApi,
+              ),
             ),
           ],
         ),
@@ -305,19 +304,18 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
 
     final header = <Widget>[
       const SizedBox(height: StudioSpacing.sm),
-      StudioPaneHeader(
+      StudioPaneToolbar(
         title: l10n.productNavTasks,
         subtitle: l10n.taskCenterSectionIntro,
         showBack: widget.studioPresentation,
-        trailing: RiskyOperationConfirmPrefsOverflowMenu(
+        menu: RiskyOperationConfirmPrefsOverflowMenu(
           tooltip: l10n.taskCenterLocalClientPrefs,
         ),
-      ),
-      const SizedBox(height: StudioLayoutSpacing.stackMedium),
-      TaskCenterActionsBar(
-        loadingTaskApi: widget.loadingTaskApi,
-        onOpenWorkbench: () => _openTaskWorkbench(context),
-        onLoadTaskApi: widget.onLoadTaskApi,
+        actions: TaskCenterActionsBar(
+          loadingTaskApi: widget.loadingTaskApi,
+          onOpenWorkbench: () => _openTaskWorkbench(context),
+          onLoadTaskApi: widget.onLoadTaskApi,
+        ),
       ),
     ];
 

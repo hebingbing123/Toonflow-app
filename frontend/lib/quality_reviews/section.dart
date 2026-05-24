@@ -8,7 +8,6 @@ import 'support.dart';
 import 'workbench_view.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
-import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_pane_scaffold.dart';
 import '../design_system/components/studio_empty_state.dart';
@@ -220,25 +219,15 @@ class _QualityReviewsSectionState extends State<QualityReviewsSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StudioPaneHeader(
+            StudioPaneToolbar(
               title: l10n.productNavQuality,
               subtitle: l10n.qualityReviewsSectionIntro,
               showBack: false,
-              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              menu: RiskyOperationConfirmPrefsOverflowMenu(
                 tooltip: l10n.taskCenterLocalClientPrefs,
               ),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.section - 6),
-            StudioCollapsibleFilterPanel(
-              title: l10n.qualityReviewsFilterAndReadSection,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  actionsBar,
-                  const SizedBox(height: 8),
-                  _buildReviewIdLookupRow(context),
-                ],
-              ),
+              actions: actionsBar,
+              secondary: _buildReviewIdLookupRow(context),
             ),
           ],
         ),

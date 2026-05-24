@@ -454,6 +454,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       child: Padding(
         padding: EdgeInsets.all(panelPadding),
         child: StudioCollapsibleFilterPanel(
+        collapsible: true,
         title: l10n.apiKeysCreateNewTitle,
         subtitle: _displayNameController.text.trim().isNotEmpty
             ? _displayNameController.text.trim()

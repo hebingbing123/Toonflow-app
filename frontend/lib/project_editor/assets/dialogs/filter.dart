@@ -29,6 +29,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                 content: SizedBox(
                   width: studioConstrainedDialogWidth(context, maxWidth: 520),
                   child: StudioCollapsibleFilterPanel(
+                    collapsible: true,
                     title: l10n.projectEditorAssetFilterDialogTitle,
                     initiallyExpanded: true,
                     child: Column(

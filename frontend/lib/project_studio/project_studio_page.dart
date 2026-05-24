@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_conflict_banner.dart';
@@ -576,13 +577,32 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         creatorJourneyCompactBarNextStep(_step) != null ||
         creatorJourneyCompactBarNextOpensReviewPack(_step);
     final tokens = StudioTokens.of(context);
-    final button = StudioPrimaryButton(
-      icon: Icons.arrow_forward_rounded,
-      label: l10n.studioCreatorJourneyNext,
-      onPressed: hasNext
-          ? () => _handleCreatorJourneyNext(telemetrySource: 'next_cta')
-          : null,
-    );
+    final onNext = hasNext
+        ? () => _handleCreatorJourneyNext(telemetrySource: 'next_cta')
+        : null;
+    // Deliver step: merge bar owns the emphasized CTA; footer stays compact.
+    final Widget button = _step == StudioStep.deliver
+        ? SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              style: studioToolbarTonalButtonStyle(context),
+              onPressed: onNext,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Icon(Icons.arrow_forward_rounded, size: 16),
+                  SizedBox(width: StudioLayoutSpacing.microGap),
+                  Text(l10n.studioCreatorJourneyNext),
+                ],
+              ),
+            ),
+          )
+        : StudioPrimaryButton(
+            icon: Icons.arrow_forward_rounded,
+            label: l10n.studioCreatorJourneyNext,
+            onPressed: onNext,
+          );
     return Material(
       elevation: 4,
       shadowColor: Colors.black.withValues(alpha: 0.2),

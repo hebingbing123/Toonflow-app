@@ -6,13 +6,14 @@ import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import '../support/studio_golden_app.dart';
 
 void main() {
-  testWidgets('StudioCollapsibleFilterPanel is collapsed by default', (
+  testWidgets('StudioCollapsibleFilterPanel is collapsed when collapsible', (
     WidgetTester tester,
   ) async {
     const marker = Key('filter_child_marker');
     await tester.pumpWidget(
       studioGoldenApp(
         child: StudioCollapsibleFilterPanel(
+          collapsible: true,
           child: const SizedBox(key: marker, height: 40),
         ),
       ),
@@ -28,14 +29,13 @@ void main() {
     expect(find.byKey(marker), findsOneWidget);
   });
 
-  testWidgets('non-collapsible mode shows filter row inline', (
+  testWidgets('default inline mode shows filter row without ExpansionTile', (
     WidgetTester tester,
   ) async {
     const marker = Key('inline_filter');
     await tester.pumpWidget(
       studioGoldenApp(
         child: const StudioCollapsibleFilterPanel(
-          collapsible: false,
           child: SizedBox(key: marker, height: 24),
         ),
       ),

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_empty_state.dart';
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_filter_row.dart';
@@ -56,10 +57,11 @@ class QualityReviewsActionsBar extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final actionButtons = <Widget>[
       if (studioPresentation)
-        StudioPrimaryButton(
+        StudioToolbarButton(
           label: l10n.qualityReviewsOpenWorkbench,
           icon: Icons.dashboard_customize_outlined,
           onPressed: onOpenWorkbench,
+          primary: true,
         )
       else
         FilledButton.tonal(
@@ -68,15 +70,14 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
       if (showDashboardControls)
         (studioPresentation
-            ? FilledButton.tonal(
+            ? StudioToolbarButton(
+                label: loadingQualityDashboard
+                    ? l10n.projectsBusyProcessing
+                    : l10n.qualityReviewsFreshnessRefresh,
                 onPressed: loadingQualityDashboard
                     ? null
                     : onLoadQualityDashboard,
-                child: Text(
-                  loadingQualityDashboard
-                      ? l10n.projectsBusyProcessing
-                      : l10n.qualityReviewsFreshnessRefresh,
-                ),
+                busy: loadingQualityDashboard,
               )
             : FilledButton(
                 onPressed: loadingQualityDashboard
@@ -99,14 +100,23 @@ class QualityReviewsActionsBar extends StatelessWidget {
                 : l10n.qualityReviewsRefreshReadModel,
           ),
         ),
-      FilledButton.tonal(
-        onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
-        child: Text(
-          loadingQualityReviews
+      if (studioPresentation)
+        StudioToolbarButton(
+          label: loadingQualityReviews
               ? l10n.projectsBusyProcessing
               : l10n.qualityReviewsLoadReviewList,
+          onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
+          busy: loadingQualityReviews,
+        )
+      else
+        FilledButton.tonal(
+          onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
+          child: Text(
+            loadingQualityReviews
+                ? l10n.projectsBusyProcessing
+                : l10n.qualityReviewsLoadReviewList,
+          ),
         ),
-      ),
       if (!studioPresentation)
         FilledButton.tonal(
           onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,

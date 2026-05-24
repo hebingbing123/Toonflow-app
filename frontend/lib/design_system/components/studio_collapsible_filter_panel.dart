@@ -5,8 +5,8 @@ import 'studio_text_styles.dart';
 
 /// Collapsible filter / action toolbar for Studio list panes.
 ///
-/// Defaults collapsed so list content stays primary; expands on tap (PC / web).
-/// Set [collapsible] to false for harness layouts that need filters always visible.
+/// Prefer [StudioPaneToolbar] for page headers with few actions.
+/// Use [collapsible] only for dense filter forms (named [title] sections).
 class StudioCollapsibleFilterPanel extends StatelessWidget {
   const StudioCollapsibleFilterPanel({
     super.key,
@@ -14,7 +14,7 @@ class StudioCollapsibleFilterPanel extends StatelessWidget {
     this.title,
     this.subtitle,
     this.initiallyExpanded = false,
-    this.collapsible = true,
+    this.collapsible = false,
   });
 
   final Widget child;
@@ -24,7 +24,7 @@ class StudioCollapsibleFilterPanel extends StatelessWidget {
   /// Filter panels stay collapsed until the user expands them.
   final bool initiallyExpanded;
 
-  /// When false, [child] is shown inline (non-Studio / QA harness).
+  /// When false, [child] is shown inline (default — no separate 「筛选」 row).
   final bool collapsible;
 
   @override

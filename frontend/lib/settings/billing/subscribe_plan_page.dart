@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../design_system/components/studio_primary_button.dart';
+import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
@@ -233,13 +233,14 @@ class _PlanCard extends StatelessWidget {
             Text(plan.description, style: studioSectionIntroStyle(context)),
             const SizedBox(height: StudioSpacing.md),
             if (onAlipay != null)
-              StudioPrimaryButton(
+              StudioToolbarButton(
                 label: l10n.billingPayWithAlipay,
                 onPressed: onAlipay,
+                primary: highlighted,
               ),
             if (onStripe != null) ...<Widget>[
               const SizedBox(height: StudioSpacing.sm),
-              StudioPrimaryButton(
+              StudioToolbarButton(
                 label: l10n.billingPayWithStripe,
                 onPressed: onStripe,
               ),

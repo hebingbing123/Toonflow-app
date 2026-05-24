@@ -384,6 +384,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             _buildStudioHeader(context, l10n),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
         StudioCollapsibleFilterPanel(
+          collapsible: true,
           title: l10n.teamWorkspaceCreateAction,
           child: StudioFilterRow(
             wideLayout: StudioFilterWideLayout.toolbarRow,
@@ -422,6 +423,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         ],
         const SizedBox(height: StudioSpacing.sm),
         StudioCollapsibleFilterPanel(
+          collapsible: true,
           title: l10n.teamWorkspaceAcceptInviteAction,
           subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
               ? l10n.teamWorkspaceInviteTokenInputLabel

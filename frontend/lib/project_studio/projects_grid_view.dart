@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -245,7 +245,7 @@ class _ProjectGridCard extends StatelessWidget {
               Expanded(child: selectBody),
             SizedBox(
               width: double.infinity,
-              child: StudioPrimaryButton(
+              child: StudioToolbarButton(
                 key: Key('project_enter_studio_${project.numericId}'),
                 label: l10n.studioEnterStudio,
                 icon: Icons.arrow_outward,

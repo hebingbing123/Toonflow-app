@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_filter_row.dart';
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
@@ -26,12 +27,18 @@ class TaskCenterActionsBar extends StatelessWidget {
     return StudioFilterRow(
       wideBreakpoint: 560,
       children: [
-        StudioPrimaryButton(
+        StudioToolbarButton(
           label: l10n.taskCenterOpenWorkbench,
           icon: Icons.dashboard_customize_outlined,
           onPressed: onOpenWorkbench,
+          primary: true,
         ),
         OutlinedButton.icon(
+          style: studioToolbarTonalButtonStyle(context).copyWith(
+            side: WidgetStatePropertyAll(
+              BorderSide(color: StudioTokens.of(context).borderSubtle),
+            ),
+          ),
           onPressed: loadingTaskApi ? null : onLoadTaskApi,
           icon: const Icon(Icons.refresh, size: 16),
           label: Text(

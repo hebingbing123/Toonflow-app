@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../design_system/tokens.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../l10n/app_localizations.dart';
 
 /// Grid generate → split → assign (production API).
@@ -31,7 +31,7 @@ class GridStoryboardPanel extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-          StudioPrimaryButton(
+          StudioToolbarButton(
             label: l10n.studioGridStoryboardCta,
             icon: Icons.grid_on_outlined,
             onPressed: busy ? null : onGenerateGrid,

@@ -6,7 +6,8 @@
 
 | 级别 | 内容 | 样式 |
 |------|------|------|
-| 一级 | 页面标题、当前任务、主 CTA | `studioPageTitleStyle` / `FilledButton` / 单块 `StudioCard(emphasized: true)` |
+| 一级 | 页面标题、当前任务、主 CTA | `studioPageTitleStyle` / **`StudioPrimaryButton`（每屏至多一个）** / 单块 `StudioCard(emphasized: true)` |
+| 工具栏 | Pane 头、筛选行、卡片内并列操作 | `StudioPaneToolbar` + **`StudioToolbarButton`**（`primary: true` 仅该屏唯一强调操作） |
 | 二级 | 流程节点、Tab 选中、侧栏选中 | `primarySoft` 填充 + `primary` 描边/左侧条，**不用** `signalGradient` 叠光晕 |
 | 三级 | 说明、统计、次要入口 | 平面 `bgSurface` / `bgInset`，`borderSubtle`，无 `panelGlow` 阴影 |
 
@@ -55,6 +56,26 @@
 
 可选 `weight: quiet` 或 `noResults` 以降低图标光晕。次要操作：`secondaryActionLabel` + `onSecondaryAction`。
 
+## 加载 / 错误 / 空（三态决策）
+
+| 场景 | 组件 |
+|------|------|
+| 首屏列表加载 | `StudioSkeleton` 或网格骨架（`ProjectsGridView(loading: true)`） |
+| Pane 内刷新 / 保存 | `LinearProgressIndicator(minHeight: 2)` + 按钮文案「同步中」 |
+| 全页阻塞加载 | `Center(CircularProgressIndicator())` |
+| 可重试 API 失败 | `StudioApiErrorCallout` + `onRetry` |
+| 表单 / 登录校验 | inline 错误横幅（`errorContainer` 或 token 边框） |
+| 瞬时操作失败 | `SnackBar` / `StudioToastOverlay` |
+| 主空态 | `StudioEmptyState` 三工厂；**勿**用 `emptyData` 表示 load error |
+
+认证提交须 `authInFlight`（或等效）禁用主 CTA，防重复提交。
+
+## 移动 Web 与窄窗
+
+- **手机布局**：`MediaQuery.shortestSide < kProjectsHomePhoneShortestSide`（600）仅项目首页完整适配；其余路由按「窄桌面」折叠，不承诺 handset 级 IA。
+- **移动浏览器**：短剧等桌面桥能力见 `desktop_capability.dart`；可展示「下载桌面客户端」而非强行压缩三栏工作台。
+- **布局宽度**：内容区用 `LayoutBuilder` + `layout_breakpoints.dart`；Shell 顶栏可用全屏 `MediaQuery` 宽度。
+
 ## 导航区
 
 - **侧栏**为次级导航：选中 `primarySoft` + 左指示条；badge 用 `tokens.danger`。
@@ -79,6 +100,8 @@
 | 文本样式 | `frontend/lib/design_system/components/studio_text_styles.dart` |
 | 面板装饰 / 工具钮样式 | `frontend/lib/design_system/components/studio_surfaces.dart`（含 `studioUtilityIconButtonStyle` / `studioChromeIconButtonStyle`） |
 | 工作台折叠区 | `frontend/lib/design_system/components/studio_workbench_section.dart` |
+| Pane 标题 + 工具栏 | `studio_pane_header.dart`（`StudioPaneToolbar`）、`studio_toolbar_button.dart` |
+| 列表筛选（内联/折叠） | `studio_collapsible_filter_panel.dart`（默认内联；仅密集表单 `collapsible: true`） |
 | 空状态 | `frontend/lib/design_system/components/studio_empty_state.dart` |
 | Token 色值表 | [`design-tokens.md`](design-tokens.md) |
 

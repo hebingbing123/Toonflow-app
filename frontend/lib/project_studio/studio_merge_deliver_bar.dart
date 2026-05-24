@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 
@@ -43,10 +43,11 @@ class StudioMergeDeliverBar extends StatelessWidget {
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 );
-                final action = StudioPrimaryButton(
+                final action = StudioToolbarButton(
                   label: l10n.studioMergeAndPreview,
                   icon: Icons.movie_filter_outlined,
-                  loading: busy,
+                  busy: busy,
+                  primary: true,
                   onPressed: busy ? null : onMergeAndPreview,
                 );
                 if (stacked) {

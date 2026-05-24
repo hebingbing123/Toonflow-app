@@ -19,6 +19,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
     required void Function(List<NovelRow> rows, String infoLine) applyResult,
   }) {
     return StudioCollapsibleFilterPanel(
+      collapsible: true,
       title: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
       subtitle: searchCtrl.text.trim().isEmpty
           ? null

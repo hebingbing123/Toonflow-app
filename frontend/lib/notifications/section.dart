@@ -391,6 +391,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       return filters;
     }
     return StudioCollapsibleFilterPanel(
+      collapsible: true,
       subtitle: _notificationListFilterSummary(l10n),
       child: filters,
     );
@@ -565,6 +566,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           StudioCollapsibleFilterPanel(
+            collapsible: true,
             title: l10n.notificationsComplianceClearedThrottleTitle,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -783,6 +785,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
           StudioCollapsibleFilterPanel(
+            collapsible: true,
             title: l10n.studioFilterToolbarTitle,
             subtitle: l10n.notificationsComplianceStageOverrideHint,
             child: Column(
@@ -847,6 +850,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         StudioCollapsibleFilterPanel(
+          collapsible: true,
           title: l10n.notificationsComplianceSharedAuditTitle,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -988,6 +992,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         ],
         const SizedBox(height: 16),
         StudioCollapsibleFilterPanel(
+          collapsible: true,
           title: l10n.notificationsComplianceExportHistoryTitle,
           child: StudioFilterRow(
             wideBreakpoint: 720,

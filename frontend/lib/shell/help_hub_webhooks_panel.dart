@@ -649,6 +649,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
           ),
           const SizedBox(height: 8),
           StudioCollapsibleFilterPanel(
+            collapsible: true,
             title: l10n.opsWhCreate,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

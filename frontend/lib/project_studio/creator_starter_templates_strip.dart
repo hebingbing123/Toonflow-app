@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -114,7 +114,7 @@ class _StarterCard extends StatelessWidget {
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           SizedBox(
             width: expanded ? null : double.infinity,
-            child: StudioPrimaryButton(
+            child: StudioToolbarButton(
               icon: Icons.bolt_rounded,
               label: applyLabel,
               onPressed: () => onApply(starter),

@@ -88,6 +88,38 @@ ButtonStyle studioFormSecondaryButtonStyle(BuildContext context) {
   return OutlinedButton.styleFrom().merge(_studioFormButtonDimensions(context));
 }
 
+ButtonStyle _studioToolbarButtonDimensions(BuildContext context) {
+  final typography = StudioTypography.of(context);
+  final toolbarHeight = (typography.buttonHeight - 8).clamp(32.0, 40.0);
+  final labelStyle = studioControlLabelStyle(context)?.copyWith(
+    fontWeight: FontWeight.w600,
+  );
+  return ButtonStyle(
+    minimumSize: WidgetStatePropertyAll<Size>(Size(0, toolbarHeight)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(
+      EdgeInsets.symmetric(
+        horizontal: StudioSpacing.sm,
+        vertical: StudioLayoutSpacing.microGap,
+      ),
+    ),
+    tapTargetSize: MaterialTapTargetSize.padded,
+    visualDensity: VisualDensity.compact,
+    textStyle: WidgetStatePropertyAll<TextStyle>(
+      labelStyle ?? const TextStyle(fontWeight: FontWeight.w600),
+    ),
+  );
+}
+
+/// Dense tonal actions in pane headers and filter toolbars.
+ButtonStyle studioToolbarTonalButtonStyle(BuildContext context) {
+  return FilledButton.styleFrom().merge(_studioToolbarButtonDimensions(context));
+}
+
+/// Single emphasized action in a pane toolbar row (not full-bleed hero CTA).
+ButtonStyle studioToolbarPrimaryButtonStyle(BuildContext context) {
+  return FilledButton.styleFrom().merge(_studioToolbarButtonDimensions(context));
+}
+
 /// Smaller tab labels for focus-mode workbench rails (小说 / 剧本 / 提取).
 TabBarThemeData studioWorkbenchTabBarTheme(BuildContext context) {
   return TabBarThemeData(

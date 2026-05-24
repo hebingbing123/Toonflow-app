@@ -8,6 +8,72 @@ import '../tokens.dart';
 import 'studio_ellipsis_tooltip_text.dart';
 import 'studio_text_styles.dart';
 
+/// Merges [StudioPaneHeader] with inline toolbar actions (no separate 「筛选」 row).
+class StudioPaneToolbar extends StatelessWidget {
+  const StudioPaneToolbar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actions,
+    this.secondary,
+    this.menu,
+    this.showBack = true,
+    this.onBack,
+    this.titleStyle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? actions;
+  final Widget? secondary;
+  final Widget? menu;
+  final bool showBack;
+  final VoidCallback? onBack;
+  final TextStyle? titleStyle;
+
+  Widget? _mergedTrailing() {
+    if (actions == null && menu == null) {
+      return null;
+    }
+    if (actions == null) {
+      return menu;
+    }
+    if (menu == null) {
+      return actions;
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        actions!,
+        const SizedBox(width: StudioSpacing.sm),
+        menu!,
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        StudioPaneHeader(
+          title: title,
+          subtitle: subtitle,
+          showBack: showBack,
+          onBack: onBack,
+          titleStyle: titleStyle,
+          trailing: _mergedTrailing(),
+        ),
+        if (secondary != null) ...<Widget>[
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
+          secondary!,
+        ],
+      ],
+    );
+  }
+}
+
 /// Title row for secondary studio panes (tasks, jobs, quality, short-video, …).
 class StudioPaneHeader extends StatelessWidget {
   const StudioPaneHeader({

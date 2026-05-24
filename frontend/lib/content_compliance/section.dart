@@ -206,6 +206,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               ),
             const SizedBox(height: StudioSpacing.sm),
             StudioCollapsibleFilterPanel(
+              collapsible: true,
               title: l10n.contentComplianceSubmitReportTitle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

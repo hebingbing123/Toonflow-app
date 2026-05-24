@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api/project/overview_models_assembly.dart';
@@ -152,11 +152,12 @@ class StudioReviewPackExportBridge extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                StudioPrimaryButton(
+                StudioToolbarButton(
                   icon: ready ? Icons.upload_outlined : Icons.build_outlined,
                   label: ready
                       ? l10n.studioReviewPackExportOpenPublish
                       : l10n.studioReviewPackExportFixInAssembly,
+                  primary: true,
                   onPressed: () => _openDeliver(
                     context,
                     tab: ready ? 'publish' : 'assembly',

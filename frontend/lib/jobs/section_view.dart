@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
-import '../../design_system/components/studio_collapsible_filter_panel.dart';
 import '../../design_system/components/studio_filter_row.dart';
+import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
 import '../../design_system/components/studio_skeleton.dart';
@@ -339,6 +339,24 @@ class JobsSectionView extends StatelessWidget {
     );
   }
 
+  Widget _buildJobsToolbarActions(BuildContext context, AppLocalizations l10n) {
+    return StudioFilterRow(
+      wideLayout: StudioFilterWideLayout.toolbarRow,
+      wideBreakpoint: 480,
+      children: <Widget>[
+        StudioToolbarButton(
+          label: model.loadingJobs ? '…' : l10n.jobsLoadList,
+          onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+          busy: model.loadingJobs,
+        ),
+        StudioToolbarButton(
+          label: l10n.jobsLoadFailed,
+          onPressed: model.loadingJobs ? null : callbacks.onLoadJobsStatusFailed,
+        ),
+      ],
+    );
+  }
+
   Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
     final tokens = StudioTokens.of(context);
     return DecoratedBox(
@@ -361,32 +379,14 @@ class JobsSectionView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StudioPaneHeader(
+            StudioPaneToolbar(
               title: l10n.jobsTitle,
               subtitle: l10n.jobsSubtitle,
               showBack: false,
-              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              menu: RiskyOperationConfirmPrefsOverflowMenu(
                 tooltip: l10n.jobsPrefsTooltip,
               ),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.section - 6),
-            StudioCollapsibleFilterPanel(
-              child: StudioFilterRow(
-                wideLayout: StudioFilterWideLayout.toolbarRow,
-                wideBreakpoint: 480,
-                children: <Widget>[
-                  FilledButton.tonal(
-                    onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
-                    child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: model.loadingJobs
-                        ? null
-                        : callbacks.onLoadJobsStatusFailed,
-                    child: Text(l10n.jobsLoadFailed),
-                  ),
-                ],
-              ),
+              actions: _buildJobsToolbarActions(context, l10n),
             ),
           ],
         ),
@@ -460,35 +460,28 @@ class JobsSectionView extends StatelessWidget {
 
     final header = <Widget>[
       const SizedBox(height: 16),
-      StudioPaneHeader(
-        title: l10n.jobsTitle,
-        subtitle: l10n.jobsSubtitle,
-        showBack: false,
-        trailing: RiskyOperationConfirmPrefsOverflowMenu(
-          tooltip: l10n.jobsPrefsTooltip,
-        ),
-      ),
-      const SizedBox(height: StudioSpacing.sm),
       if (studioPresentation)
-        StudioCollapsibleFilterPanel(
-          child: StudioFilterRow(
-            wideLayout: StudioFilterWideLayout.toolbarRow,
-            wideBreakpoint: 480,
-            children: <Widget>[
-              FilledButton.tonal(
-                onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
-                child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
-              ),
-              FilledButton.tonal(
-                onPressed: model.loadingJobs
-                    ? null
-                    : callbacks.onLoadJobsStatusFailed,
-                child: Text(l10n.jobsLoadFailed),
-              ),
-            ],
+        StudioPaneToolbar(
+          title: l10n.jobsTitle,
+          subtitle: l10n.jobsSubtitle,
+          showBack: false,
+          menu: RiskyOperationConfirmPrefsOverflowMenu(
+            tooltip: l10n.jobsPrefsTooltip,
           ),
+          actions: _buildJobsToolbarActions(context, l10n),
         )
-      else
+      else ...<Widget>[
+        StudioPaneHeader(
+          title: l10n.jobsTitle,
+          subtitle: l10n.jobsSubtitle,
+          showBack: false,
+          trailing: RiskyOperationConfirmPrefsOverflowMenu(
+            tooltip: l10n.jobsPrefsTooltip,
+          ),
+        ),
+        const SizedBox(height: StudioSpacing.sm),
+      ],
+      if (!studioPresentation)
         Wrap(
           spacing: 8,
           runSpacing: 8,

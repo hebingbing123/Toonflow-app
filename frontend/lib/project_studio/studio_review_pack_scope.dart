@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_empty_state.dart';
-import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -389,7 +389,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
               spacing: 10,
               runSpacing: 10,
               children: <Widget>[
-                StudioPrimaryButton(
+                StudioToolbarButton(
                   label: l10n.studioReviewPackOpenAssembly,
                   icon: Icons.movie_filter_outlined,
                   onPressed: () => context.go(

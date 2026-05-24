@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../support/ignore_layout_overflow.dart';
 import 'package:go_router/go_router.dart';
-import 'package:openflow_app/design_system/components/studio_primary_button.dart';
+import 'package:openflow_app/design_system/components/studio_toolbar_button.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
@@ -2001,14 +2001,14 @@ void main() {
     expect(find.text('Plot narrative'), findsOneWidget);
     expect(find.text('Shot rhythm sample'), findsOneWidget);
 
-    final applyButtons = find.widgetWithText(StudioPrimaryButton, 'Apply template');
+    final applyButtons = find.widgetWithText(StudioToolbarButton, 'Apply template');
     expect(applyButtons, findsNWidgets(2));
 
-    tester.widget<StudioPrimaryButton>(applyButtons.at(0)).onPressed!.call();
+    tester.widget<StudioToolbarButton>(applyButtons.at(0)).onPressed!.call();
     await tester.pump();
     expect(find.text('body-script'), findsOneWidget);
 
-    tester.widget<StudioPrimaryButton>(applyButtons.at(1)).onPressed!.call();
+    tester.widget<StudioToolbarButton>(applyButtons.at(1)).onPressed!.call();
     await tester.pumpAndSettle();
 
     expect(agentKinds, contains('storyboard_breaker'));

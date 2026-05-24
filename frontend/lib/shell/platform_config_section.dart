@@ -598,6 +598,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
           StudioCollapsibleFilterPanel(
+            collapsible: true,
             title: l10n.platformConfigButtonRefresh,
             subtitle: _loading
                 ? l10n.platformConfigButtonRefreshing
