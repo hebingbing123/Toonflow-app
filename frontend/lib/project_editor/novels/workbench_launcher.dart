@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design_system/tokens.dart';
 
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
@@ -211,26 +212,29 @@ Future<void> openNovelWorkbenchDialog({
                                 style: Theme.of(dialogCtx).textTheme.labelLarge,
                               ),
                               const SizedBox(height: StudioSpacing.xs),
-                              ...local.previewRows.map(
-                                (row) => Padding(
-                                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                                  child: Text(
-                                    l10n.projectEditorNovelsChapterWorkbenchPreviewRow(
-                                      row.numericId,
-                                      row.chapter,
-                                      row.intakeSource ??
-                                          l10n
-                                              .projectEditorNovelsChapterWorkbenchValueUnknown,
-                                      row.intakeStatus ??
-                                          l10n
-                                              .projectEditorNovelsChapterWorkbenchValueUnset,
-                                      row.eventState.toString(),
+                              ...studioStaggeredChildren(
+                                local.previewRows.map(
+                                  (row) => Padding(
+                                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                                    child: Text(
+                                      l10n.projectEditorNovelsChapterWorkbenchPreviewRow(
+                                        row.numericId,
+                                        row.chapter,
+                                        row.intakeSource ??
+                                            l10n
+                                                .projectEditorNovelsChapterWorkbenchValueUnknown,
+                                        row.intakeStatus ??
+                                            l10n
+                                                .projectEditorNovelsChapterWorkbenchValueUnset,
+                                        row.eventState.toString(),
+                                      ),
+                                      style: Theme.of(
+                                        dialogCtx,
+                                      ).textTheme.bodySmall,
                                     ),
-                                    style: Theme.of(
-                                      dialogCtx,
-                                    ).textTheme.bodySmall,
                                   ),
                                 ),
+                                entranceKey: local.previewRows.length,
                               ),
                             ],
                           ),

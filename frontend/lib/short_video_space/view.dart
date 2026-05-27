@@ -2064,7 +2064,7 @@ class _WritebackStatusChip extends StatelessWidget {
         children: [
           Icon(
             incomplete ? Icons.sync_problem : Icons.check_circle_outline,
-            size: 14,
+            size: StudioIconSize.xxs,
             color: onColor,
           ),
           const SizedBox(width: StudioSpacing.xs),

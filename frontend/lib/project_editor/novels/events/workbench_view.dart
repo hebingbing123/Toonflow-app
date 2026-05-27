@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
@@ -100,18 +101,21 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: StudioSpacing.xs),
-                      ...model.previewRows.map(
-                        (row) => Padding(
-                          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                          child: Text(
-                            l10n.projectEditorNovelsEventsPreviewRow(
-                              row.numericId,
-                              row.name,
-                              row.chapterIndexes.join('/'),
+                      ...studioStaggeredChildren(
+                        model.previewRows.map(
+                          (row) => Padding(
+                            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                            child: Text(
+                              l10n.projectEditorNovelsEventsPreviewRow(
+                                row.numericId,
+                                row.name,
+                                row.chapterIndexes.join('/'),
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
-                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
+                        entranceKey: model.previewRows.length,
                       ),
                     ],
                   ),

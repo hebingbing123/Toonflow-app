@@ -16,9 +16,9 @@ import 'search_result_card.dart';
 import 'advanced_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
-import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search results page displaying grouped search results by type.
@@ -541,17 +541,16 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       builder: (sheetContext) {
         if (views.isEmpty) {
           return Padding(
-            padding: EdgeInsets.all(24),
+            padding: EdgeInsets.all(StudioSpacing.md),
             child: Text(l10n.globalSearchNoSavedViews),
           );
         }
         return SafeArea(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: views.length,
-            itemBuilder: (context, index) {
-              final view = views[index];
-              return ListTile(
+          child: ListView(
+            padding: const EdgeInsets.all(StudioSpacing.sm),
+            children: views
+                .map(
+                  (view) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       view.title,
@@ -685,8 +684,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         ),
                       );
                     },
-                  );
-            },
+                  ),
+                )
+                .toList(growable: false),
           ),
         );
       },
@@ -848,8 +848,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final isMobile =
-        MediaQuery.of(context).size.width < kStudioHandsetMaxWidth;
+    final isMobile = MediaQuery.of(context).size.width < kStudioHandsetMaxWidth;
 
     return Focus(
       focusNode: _focusNode,
@@ -877,7 +876,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             // Filter button with badge
             Badge(
               isLabelVisible: _filters.hasActiveFilters,
-              label: Text(l10n.l10nBatch_775383c7b6(_filters.activeFilterCount)),
+              label: Text(
+                l10n.l10nBatch_775383c7b6(_filters.activeFilterCount),
+              ),
               child: StudioIconButton(
                 icon: Icons.filter_list,
                 label: l10n.globalSearchTooltipFilter,
@@ -899,7 +900,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   if (!_isLoading && _response != null)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(StudioSpacing.sm),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest,
                         border: Border(
@@ -939,7 +940,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       (_filters.timeFrom != null || _filters.timeTo != null))
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                      padding: const EdgeInsets.fromLTRB(
+                        StudioSpacing.sm,
+                        0,
+                        StudioSpacing.sm,
+                        StudioSpacing.radiusButton,
+                      ),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: StudioChip(
@@ -959,7 +965,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   if (!_isLoading && _response != null)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                      padding: const EdgeInsets.fromLTRB(
+                        StudioSpacing.sm,
+                        StudioSpacing.radiusButton,
+                        StudioSpacing.sm,
+                        StudioSpacing.radiusButton,
+                      ),
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
@@ -979,7 +990,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             ResultType.novelEvent,
                           ])
                             StudioFilterChip(
-                              avatar: Icon(_getTypeIcon(type), size: StudioIconSize.xs),
+                              avatar: Icon(
+                                _getTypeIcon(type),
+                                size: StudioIconSize.xs,
+                              ),
                               label: Text(
                                 l10n.globalSearchTypeCountChipLabel(
                                   _getTypeDisplayName(type),
@@ -995,7 +1009,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   if (!_isLoading && _response != null)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                      padding: const EdgeInsets.fromLTRB(
+                        StudioSpacing.sm,
+                        0,
+                        StudioSpacing.sm,
+                        StudioSpacing.radiusButton,
+                      ),
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -1059,13 +1078,13 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget _buildLoadingState() {
     // Eager children (not ListView.builder) so first frame builds placeholders.
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       children: List<Widget>.generate(
         6,
         (index) => Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(StudioSpacing.sm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1076,7 +1095,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       height: 40,
                       decoration: BoxDecoration(
                         color: StudioTokens.of(context).borderSubtle,
-                        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                        borderRadius: BorderRadius.circular(
+                          StudioSpacing.radiusDense,
+                        ),
                       ),
                     ),
                     const SizedBox(width: StudioSpacing.sm),
@@ -1137,7 +1158,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(StudioSpacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1184,6 +1205,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   /// Build results list grouped by type
   Widget _buildResultsList() {
     final grouped = _groupResultsByType();
+    int currentIndex = 0;
     const typeOrder = <ResultType>[
       ResultType.project,
       ResultType.script,
@@ -1192,80 +1214,24 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       ResultType.novelEvent,
     ];
 
-    final sections = <_SearchResultSection>[];
-    var startIndex = 0;
-    for (final type in typeOrder) {
-      final items = grouped[type];
-      if (items == null || items.isEmpty) {
-        continue;
-      }
-      sections.add(
-        _SearchResultSection(
-          type: type,
-          results: items,
-          startIndex: startIndex,
-        ),
-      );
-      startIndex += items.length;
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = studioGridCrossAxisCount(
-          constraints.maxWidth,
-          handset: 1,
-          tablet: 2,
-          desktop: 3,
-        );
-
-        return CustomScrollView(
-          slivers: <Widget>[
-            for (final section in sections) ...<Widget>[
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                sliver: SliverToBoxAdapter(
-                  child: _buildTypeHeader(section.type, section.results.length),
-                ),
-              ),
-              if (crossAxisCount <= 1)
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
-                        final result = section.results[i];
-                        final index = section.startIndex + i;
-                        return _buildResultCard(result, index);
-                      },
-                      childCount: section.results.length,
-                    ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 2.8,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
-                        final result = section.results[i];
-                        final index = section.startIndex + i;
-                        return _buildResultCard(result, index);
-                      },
-                      childCount: section.results.length,
-                    ),
-                  ),
-                ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
+    return ListView(
+      padding: const EdgeInsets.all(StudioSpacing.sm),
+      children: [
+        for (final t in typeOrder) ...[
+          if (grouped[t] != null && grouped[t]!.isNotEmpty) ...[
+            _buildTypeHeader(t, grouped[t]!.length),
+            const SizedBox(height: StudioSpacing.xs),
+            ...studioStaggeredChildren(
+              grouped[t]!.map((result) {
+                final index = currentIndex++;
+                return _buildResultCard(result, index);
+              }),
+              entranceKey: '${t.wireName}_${grouped[t]!.length}',
+            ),
+            const SizedBox(height: StudioSpacing.md),
           ],
-        );
-      },
+        ],
+      ],
     );
   }
 
@@ -1281,10 +1247,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         ),
         const SizedBox(width: StudioSpacing.xs),
         Text(
-          l10n.globalSearchTypeSectionHeader(
-            _getTypeDisplayName(type),
-            count,
-          ),
+          l10n.globalSearchTypeSectionHeader(_getTypeDisplayName(type), count),
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1312,12 +1275,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     final canGoPrevious = _currentPage > 1;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: studioPanelBorderColor(context)),
-        ),
+        border: Border(top: BorderSide(color: studioPanelBorderColor(context))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1491,16 +1452,4 @@ class _SearchViewTemplate {
   final String id;
   final Set<ResultType> resultTypes;
   final int? daysBack;
-}
-
-class _SearchResultSection {
-  const _SearchResultSection({
-    required this.type,
-    required this.results,
-    required this.startIndex,
-  });
-
-  final ResultType type;
-  final List<SearchResult> results;
-  final int startIndex;
 }

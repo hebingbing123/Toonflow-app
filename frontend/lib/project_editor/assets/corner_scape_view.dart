@@ -111,13 +111,16 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loading ? null : callbacks.onClearFilter,
                     child: Text(l10n.projectEditorAssetHistoryClearFilter),
                   ),
-                  ...const ['role', 'clip', 'props', 'scene'].map(
-                    (type) => StudioActionChip(
-                      label: Text(type),
-                      onPressed: model.loading
-                          ? null
-                          : () => callbacks.onPresetType(type),
+                  ...studioStaggeredChildren(
+                    const ['role', 'clip', 'props', 'scene'].map(
+                      (type) => StudioActionChip(
+                        label: Text(type),
+                        onPressed: model.loading
+                            ? null
+                            : () => callbacks.onPresetType(type),
+                      ),
                     ),
+                    entranceKey: 'corner_scape_preset_types',
                   ),
                 ],
               ),

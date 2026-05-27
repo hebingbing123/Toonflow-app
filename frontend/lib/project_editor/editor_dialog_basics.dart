@@ -62,20 +62,23 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
                 const SizedBox(height: StudioSpacing.xs),
-                ...home.onboarding.checklist.map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
-                    child: Text(
-                      item.done
-                          ? l10n.projectEditorBasicsHomeChecklistItemDone(
-                              item.label,
-                            )
-                          : l10n.projectEditorBasicsHomeChecklistItemTodo(
-                              item.label,
-                            ),
-                      style: Theme.of(ctx).textTheme.bodySmall,
+                ...studioStaggeredChildren(
+                  home.onboarding.checklist.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
+                      child: Text(
+                        item.done
+                            ? l10n.projectEditorBasicsHomeChecklistItemDone(
+                                item.label,
+                              )
+                            : l10n.projectEditorBasicsHomeChecklistItemTodo(
+                                item.label,
+                              ),
+                        style: Theme.of(ctx).textTheme.bodySmall,
+                      ),
                     ),
                   ),
+                  entranceKey: home.onboarding.checklist.length,
                 ),
               ],
             ),

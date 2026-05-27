@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/studio_responsive_layout.dart';
-import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
@@ -137,7 +137,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                                   constraints.maxWidth,
                                   maxColumns: drafts.length.clamp(1, 4),
                                   minTileWidth: 200,
-                                  maxTileWidth: StudioLayoutSize.fieldStandard,
+                                  maxTileWidth: 280,
                                   gap: StudioSpacing.radiusComfort,
                                 ),
                                 child: _DraftCompareCard(draft: d),

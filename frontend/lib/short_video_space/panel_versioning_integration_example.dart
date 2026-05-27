@@ -12,10 +12,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
-import '../l10n/app_localizations.dart';
 import 'panel_versioning.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -124,17 +124,20 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
               children: [
                 Text(l10n.shortVideoPanelVersionStaleDialogBody),
                 const SizedBox(height: StudioSpacing.sm),
-                ...status.stalePanels.map(
-                  (p) => Padding(
-                    padding: const EdgeInsets.only(left: StudioSpacing.xs, top: StudioSpacing.chromeActionGap),
-                    child: Text(
-                      l10n.shortVideoPanelVersionStaleRow(
-                        shortVideoPanelVersionPanelTitle(l10n, p.panel),
-                        PanelVersionManager.formatAge(p.ageSeconds, l10n),
+                ...studioStaggeredChildren(
+                  status.stalePanels.map(
+                    (p) => Padding(
+                      padding: const EdgeInsets.only(left: StudioSpacing.xs, top: StudioSpacing.chromeActionGap),
+                      child: Text(
+                        l10n.shortVideoPanelVersionStaleRow(
+                          shortVideoPanelVersionPanelTitle(l10n, p.panel),
+                          PanelVersionManager.formatAge(p.ageSeconds, l10n),
+                        ),
+                        style: studioAccentBannerBodyStyle(context, StudioTokens.of(context).textPrimary),
                       ),
-                      style: studioAccentBannerBodyStyle(context, StudioTokens.of(context).textPrimary),
                     ),
                   ),
+                  entranceKey: status.stalePanels.length,
                 ),
               ],
             ),
@@ -248,7 +251,7 @@ class PanelFreshnessIndicator extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: color),
+        Icon(icon, size: StudioIconSize.xxs, color: color),
         const SizedBox(width: StudioSpacing.xs),
         Text(
           PanelVersionManager.formatAge(age, l10n),

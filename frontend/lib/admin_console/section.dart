@@ -260,7 +260,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.travel_explore_outlined),
                     label: Text(l10n.adminConsoleSearchAction),
@@ -685,7 +685,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.xs),
         SizedBox(
-          width: studioAdaptiveFieldWidth(context, max: StudioLayoutSize.fieldStandard),
+          width: studioAdaptiveFieldWidth(context, max: 280),
           child: TextField(
             controller: _dailyQuotaController,
             enabled: _quotaRequiresValue,
@@ -723,7 +723,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.admin_panel_settings_outlined),
           label: Text(
@@ -820,7 +820,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               const SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: StudioSpacing.xs),
               Text(
@@ -985,7 +985,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.domain_verification_outlined),
           label: Text(
@@ -1487,7 +1487,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.playlist_add_check_circle_outlined),
           label: Text(
@@ -1781,7 +1781,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.folder_special_outlined),
           label: Text(
