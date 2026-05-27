@@ -3,6 +3,10 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildDebugSections on _HomePageState {
+  void _applyDebugPreviewDataIfNeeded() {
+    _applyDemoCatalogIfNeeded();
+  }
+
   Future<void> _openComplianceOpsTarget(
     ContentComplianceReportItemV1 item,
   ) async {

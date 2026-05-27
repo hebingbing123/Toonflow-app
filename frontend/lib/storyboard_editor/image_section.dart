@@ -42,11 +42,11 @@ class _StoryboardImageSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: saving ? null : onReadCurrentPreview,
               child: Text(
                 saving

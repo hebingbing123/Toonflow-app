@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 
 import '../rust_api.dart';
@@ -47,6 +48,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onFetchCases,
               child: Text(l10n.benchmarkActionFetchSamplePool),
             ),
@@ -120,6 +122,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy ||
                           qualityReviewIdController.text.trim().isEmpty ||
                           promoteSummaryController.text.trim().isEmpty

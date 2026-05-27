@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../demo/product_demo_mode.dart';
+import '../demo/studio_demo_data.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
@@ -84,6 +86,31 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
       _loading = true;
       _error = null;
     });
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      final readiness = buildDemoStudioShortVideoReadiness();
+      final production = buildDemoStudioProductionOverview();
+      if (!mounted) return;
+      CreatorJourneyTelemetry.record(
+        CreatorJourneyEvent(
+          'review_pack_load_ok',
+          <String, Object?>{
+            'project_id': widget.projectNumericId,
+            'storyboard_count': readiness.storyboards.length,
+            'demo': true,
+            if (isRetry) 'retry': true,
+          },
+        ),
+      );
+      setState(() {
+        _readiness = readiness;
+        _production = production;
+        _exportCheck = null;
+        _exportCheckLoadFailed = false;
+        _feedbackByStoryboard = const <int, ReviewPackRowFeedback>{};
+        _loading = false;
+      });
+      return;
+    }
     try {
       final readiness = await fetchProjectShortVideoReadinessByProjectId(
         widget.accessToken,

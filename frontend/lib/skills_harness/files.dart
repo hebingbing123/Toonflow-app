@@ -158,9 +158,9 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                                 .errorContainer
                                                 .withValues(alpha: 0.32)
                                           : null,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 6,
+                                        padding: const EdgeInsets.symmetric(
+                                        horizontal: StudioSpacing.xs,
+                                        vertical: StudioLayoutSpacing.microGap,
                                       ),
                                       child: Row(
                                         crossAxisAlignment:
@@ -196,6 +196,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                 actions: [
                   if (selected != null)
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(ctx),
                       onPressed: rollingBackSkillVersion
                           ? null
                           : () async {
@@ -220,6 +221,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                       child: Text(l10n.skillsHarnessCancel),
                                     ),
                                     FilledButton(
+                                      style: studioFormPrimaryButtonStyle(confirmCtx),
                                       onPressed: () =>
                                           Navigator.of(confirmCtx).pop(true),
                                       child: Text(

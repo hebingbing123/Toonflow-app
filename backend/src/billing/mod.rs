@@ -31,6 +31,8 @@ pub use ingest::{
     BillingMismatch,
 };
 // Re-export ingest_webhook for integration tests (Task 4.2)
+#[cfg(test)]
+pub(crate) use checkout::{complete_checkout_session, find_checkout_session, mark_checkout_paid};
 pub use ingest::ingest_webhook;
 // Re-export reconciliation worker (Task 4.3)
 pub use reconciliation_worker::run as run_reconciliation_worker;
@@ -45,6 +47,9 @@ use serde_json::Value;
 use utoipa::ToSchema;
 
 use crate::error::ApiError;
+use crate::internal_ops::{
+    expected_internal_ops_token, request_internal_ops_token, INTERNAL_OPS_TOKEN_ENV,
+};
 use crate::state::AppState;
 
 use checkout::{
@@ -164,6 +169,23 @@ async fn post_billing_webhook(
 
 // ── POST /api/v1/webhooks/billing/reconcile ──────────────────────────────────
 
+fn internal_ops_token_expected() -> Option<String> {
+    expected_internal_ops_token()
+}
+
+fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
+    let Some(expected) = internal_ops_token_expected() else {
+        return Err(ApiError::Forbidden(format!(
+            "billing reconcile disabled (set {INTERNAL_OPS_TOKEN_ENV})"
+        )));
+    };
+    let got = request_internal_ops_token(headers).unwrap_or_default();
+    if got != expected.as_str() {
+        return Err(ApiError::Unauthorized);
+    }
+    Ok(())
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 struct BillingReconcileResponse {
     total_users_checked: usize,
@@ -188,15 +210,16 @@ struct BillingMismatchDetail {
     tag = "webhooks",
     responses(
         (status = 200, description = "Reconciliation completed", body = BillingReconcileResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
         (status = 503, description = "Database not configured", body = crate::error::ErrorBody)
-    ),
-    security(
-        ("bearer" = [])
     )
 )]
 async fn post_billing_reconcile(
     State(state): State<AppState>,
+    headers: HeaderMap,
 ) -> Result<Json<BillingReconcileResponse>, ApiError> {
+    require_internal_ops_token(&headers)?;
     let pool = state.require_pool()?;
 
     // Get all users with personal workspaces
@@ -240,4 +263,17 @@ async fn post_billing_reconcile(
         mismatch_count,
         mismatches,
     }))
+}
+
+#[cfg(test)]
+mod reconcile_auth_tests {
+    use super::*;
+
+    #[test]
+    fn require_internal_ops_token_rejects_empty_headers() {
+        let headers = HeaderMap::new();
+        let result = require_internal_ops_token(&headers);
+        // Forbidden when OPENFLOW_INTERNAL_OPS_TOKEN is unset, Unauthorized when mismatched.
+        assert!(result.is_err());
+    }
 }

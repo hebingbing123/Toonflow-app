@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
 
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -65,16 +67,16 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: <Widget>[
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: busy ? null : () => onApplyStage(stage),
                         child: Text(l10n.agentWorkspaceScriptApplyStage),
                       ),
                       if (stage.domainTool != null)
                         FilledButton.tonal(
+                          style: studioFormTonalButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
@@ -82,6 +84,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
+                          style: studioFormPrimaryButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunStageSubAgent(stage),
@@ -157,9 +160,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                        StudioDenseActionRow(
                           children: <Widget>[
                             if (recipe.domainTool != null)
                               StudioChip(
@@ -180,6 +181,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                                 ),
                               ),
                             OutlinedButton(
+                              style: studioFormSecondaryButtonStyle(context),
                               onPressed: busy
                                   ? null
                                   : () => onApplyRecipe(recipe),
@@ -189,6 +191,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                             ),
                             if (recipe.domainTool != null)
                               FilledButton.tonal(
+                                style: studioFormTonalButtonStyle(context),
                                 onPressed: busy
                                     ? null
                                     : () => onRunRecipeDomainTool(recipe),
@@ -198,6 +201,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                               ),
                             if (recipe.subAgentTool != null)
                               FilledButton(
+                                style: studioFormPrimaryButtonStyle(context),
                                 onPressed: busy
                                     ? null
                                     : () => onRunRecipeSubAgent(recipe),

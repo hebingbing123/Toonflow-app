@@ -59,8 +59,8 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     meta: 12,
     label: 12,
     display: 28,
-    buttonHeight: 40,
-    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
+    buttonHeight: StudioSpacing.controlHeight,
+    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: 6),
     textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );
@@ -77,8 +77,8 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     meta: 12,
     label: 12,
     display: 30,
-    buttonHeight: 42,
-    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
+    buttonHeight: StudioSpacing.controlHeight,
+    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: 6),
     textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.xs),
     inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );
@@ -95,8 +95,8 @@ class StudioTypography extends ThemeExtension<StudioTypography> {
     meta: 12,
     label: 13,
     display: 32,
-    buttonHeight: 44,
-    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.md, vertical: StudioSpacing.md),
+    buttonHeight: 38,
+    buttonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.md, vertical: 8),
     textButtonPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
     inputPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
   );

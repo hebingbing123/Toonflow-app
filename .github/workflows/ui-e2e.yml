@@ -1,3 +1,4 @@
+# Proprietary OpenFlow — full-stack UI E2E (authorized CI).
 name: UI E2E (full stack)
 
 on:

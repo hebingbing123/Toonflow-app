@@ -12,6 +12,7 @@ import 'field_styling.dart';
 import 'support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -459,11 +460,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
+              StudioDenseActionRow(
+                children: <Widget>[
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingReviews || model.creatingReview
                         ? null
                         : callbacks.onLoadReviews,
@@ -474,6 +474,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingBadCases || model.creatingReview
                         ? null
                         : callbacks.onLoadBadCases,
@@ -484,6 +485,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed:
                         model.loadingReviews ||
                             model.loadingBadCases ||
@@ -493,6 +495,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: Text(l10n.qualityReviewsOnlyDeliveryPriorityHit),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed:
                         model.loadingReviews ||
                             model.loadingBadCases ||
@@ -502,6 +505,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     child: Text(l10n.qualityReviewsOnlyAutoSamples),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingStats
                         ? null
                         : callbacks.onLoadStats,
@@ -512,6 +516,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingScopeInsights
                         ? null
                         : callbacks.onLoadScopeInsights,
@@ -522,6 +527,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingTokenEfficiency
                         ? null
                         : callbacks.onLoadTokenEfficiency,
@@ -532,6 +538,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingTokenEfficiencySamples
                         ? null
                         : callbacks.onLoadTokenEfficiencySamples,
@@ -542,6 +549,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingStagePassRate
                         ? null
                         : callbacks.onLoadStagePassRate,
@@ -552,6 +560,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.loadingBadCaseStats
                         ? null
                         : callbacks.onLoadBadCaseStats,
@@ -577,6 +586,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.loadingReviewById || model.creatingReview
                     ? null
                     : callbacks.onLoadReviewById,
@@ -738,6 +748,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.creatingReview
                     ? null
                     : callbacks.onCreateReview,
@@ -965,125 +976,128 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     review,
                     l10n: l10n,
                   );
-                  return ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      l10n.qualityReviewsReviewRowTitle(
-                        qualityTargetTypeLabel(review.targetType, l10n),
-                        review.source,
-                        (review.overallScore ?? l10n.qualityReviewsNotAvailable)
-                            .toString(),
+                  return InkWell(
+                    onTap: () => callbacks.onSelectReview(review),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.qualityReviewsReviewRowTitle(
+                              qualityTargetTypeLabel(review.targetType, l10n),
+                              review.source,
+                              (review.overallScore ??
+                                      l10n.qualityReviewsNotAvailable)
+                                  .toString(),
+                            ),
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            [
+                              if ((review.stage ?? '').trim().isNotEmpty)
+                                l10n.qualityReviewsFilterStage(
+                                  _qualityStageLabel(
+                                    review.stage!.trim(),
+                                    l10n,
+                                  ),
+                                ),
+                              if ((review.grade ?? '').trim().isNotEmpty)
+                                l10n.qualityReviewsFilterGrade(review.grade!),
+                            ].join(' · '),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            formatQualityReviewCoreDetails(review),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (diagnosticSummary != null)
+                            Text(
+                              diagnosticSummary,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          if (writebackSummary != null)
+                            Text(
+                              writebackSummary,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          if (repairSuggestions.isNotEmpty)
+                            Text(
+                              l10n.qualityReviewsSuggestions(
+                                repairSuggestions.join(' / '),
+                              ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              if (review.memoryDeliveryPriorityApplied == true)
+                                StudioChip(
+                                  label: Text(l10n.qualityReviewsDeliveryTag),
+                                ),
+                              if (review.source == 'auto')
+                                StudioChip(
+                                  label: Text(l10n.qualityReviewsAutoTag),
+                                ),
+                              if ((review.grade ?? '').trim().isNotEmpty)
+                                StudioChip(
+                                  label: Text(review.grade!.trim()),
+                                  backgroundColor: _qualityGradeColor(
+                                    context,
+                                    review.grade!.trim(),
+                                  ),
+                                ),
+                              if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                                StudioChip(
+                                  label: Text(
+                                    _qualitySuggestedActionLabel(
+                                      review.suggestedAction!.trim(),
+                                      l10n,
+                                    ),
+                                  ),
+                                ),
+                              if (hasDimensionRisk(review.dimensionScores))
+                                StudioChip(
+                                  label: Text(
+                                    l10n.qualityReviewsDimensionRiskBadge,
+                                  ),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.errorContainer,
+                                ),
+                              if (writebackSummary != null)
+                                StudioChip(
+                                  label: Text(l10n.qualityReviewsMemoryTag),
+                                ),
+                              if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                                IconButton(
+                                  style: studioUtilityIconButtonStyle(context),
+                                  tooltip: l10n
+                                      .qualityReviewsApplySuggestedActionTooltip,
+                                  onPressed: () =>
+                                      callbacks.onApplySuggestedAction(review),
+                                  icon: const Icon(Icons.open_in_new_rounded),
+                                ),
+                              Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          [
-                            if ((review.stage ?? '').trim().isNotEmpty)
-                              l10n.qualityReviewsFilterStage(
-                                _qualityStageLabel(review.stage!.trim(), l10n),
-                              ),
-                            if ((review.grade ?? '').trim().isNotEmpty)
-                              l10n.qualityReviewsFilterGrade(review.grade!),
-                          ].join(' · '),
-                        ),
-                        Text(formatQualityReviewCoreDetails(review)),
-                        if (diagnosticSummary != null)
-                          Text(
-                            diagnosticSummary,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(color: muted),
-                          ),
-                        if (writebackSummary != null)
-                          Text(
-                            writebackSummary,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(color: muted),
-                          ),
-                        if (repairSuggestions.isNotEmpty)
-                          Text(
-                            l10n.qualityReviewsSuggestions(
-                              repairSuggestions.join(' / '),
-                            ),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(color: muted),
-                          ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (review.memoryDeliveryPriorityApplied == true)
-                          Padding(
-                            padding: EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(l10n.qualityReviewsDeliveryTag),
-                            ),
-                          ),
-                        if (review.source == 'auto')
-                          Padding(
-                            padding: EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(l10n.qualityReviewsAutoTag),
-                            ),
-                          ),
-                        if ((review.grade ?? '').trim().isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(review.grade!.trim()),
-                              backgroundColor: _qualityGradeColor(
-                                context,
-                                review.grade!.trim(),
-                              ),
-                            ),
-                          ),
-                        if ((review.suggestedAction ?? '').trim().isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(
-                                _qualitySuggestedActionLabel(
-                                  review.suggestedAction!.trim(),
-                                  l10n,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (hasDimensionRisk(review.dimensionScores))
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(l10n.qualityReviewsDimensionRiskBadge),
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.errorContainer,
-                            ),
-                          ),
-                        if (writebackSummary != null)
-                          Padding(
-                            padding: EdgeInsets.only(right: 8),
-                            child: StudioChip(
-                              label: Text(l10n.qualityReviewsMemoryTag),
-                            ),
-                          ),
-                        if ((review.suggestedAction ?? '').trim().isNotEmpty)
-                          IconButton(
-                            style: studioUtilityIconButtonStyle(context),
-                            tooltip: l10n.qualityReviewsApplySuggestedActionTooltip,
-                            onPressed: () =>
-                                callbacks.onApplySuggestedAction(review),
-                            icon: const Icon(Icons.open_in_new_rounded),
-                          ),
-                        const Icon(Icons.chevron_right),
-                      ],
-                    ),
-                    onTap: () => callbacks.onSelectReview(review),
                   );
                 }),
               ] else if (activeFilters.isNotEmpty) ...[

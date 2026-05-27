@@ -10,13 +10,19 @@ import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
+import '../demo/platform_status_demo_data.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 
 class PlatformStatusSection extends StatefulWidget {
-  const PlatformStatusSection({super.key, this.onOverallHealthChanged});
+  const PlatformStatusSection({
+    super.key,
+    this.debugSnapshot,
+    this.onOverallHealthChanged,
+  });
 
+  final PlatformStatusDemoSnapshot? debugSnapshot;
   final void Function(bool overallHealthy, List<String> degradedEndpoints)?
   onOverallHealthChanged;
 
@@ -41,6 +47,16 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   @override
   void initState() {
     super.initState();
+    final snap = widget.debugSnapshot;
+    if (snap != null) {
+      _health = snap.health;
+      _ready = snap.ready;
+      _version = snap.version;
+      _loading = false;
+      _lastUpdatedAt = DateTime.now().toUtc();
+      _previousHealthy = true;
+      return;
+    }
     _startAutoRefreshTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -67,6 +83,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   }
 
   Future<void> _refresh() async {
+    if (widget.debugSnapshot != null) {
+      return;
+    }
     final l10n = resolveAppLocalizationsForErrors(context);
     if (_loading) {
       return;

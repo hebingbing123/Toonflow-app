@@ -51,6 +51,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                           child: Text(dlgL10n.storyboardEditorDialogCancel),
                         ),
                         FilledButton(
+                          style: studioFormPrimaryButtonStyle(c),
                           onPressed: () => Navigator.of(c).pop(true),
                           child: Text(
                             dlgL10n.storyboardEditorDialogConfirmDelete,
@@ -88,6 +89,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
         child: Text(l10n.projectEditorDeleteProjectButton),
       ),
       FilledButton(
+        style: studioFormPrimaryButtonStyle(context),
         onPressed: dialogState.saving[0]
             ? null
             : () async {

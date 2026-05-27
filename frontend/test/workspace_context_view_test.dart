@@ -233,6 +233,31 @@ void main() {
     },
   );
 
+  testWidgets(
+    'title bar dense chrome does not overflow at handset width',
+    (tester) async {
+      await tester.pumpWidget(
+        _l10nApp(
+          const SizedBox(
+            width: 320,
+            child: WorkspaceContextView(
+              loading: false,
+              workspaceName: 'Personal Workspace',
+              workspaceType: 'personal',
+              projectLabel:
+                  'Project #999 · Very Long Palace Episode Title That Should Ellipsize',
+              inline: true,
+              titleBarChrome: true,
+              titleBarDense: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('title bar chrome renders compact two-line scope', (tester) async {
     await tester.pumpWidget(
       _l10nApp(

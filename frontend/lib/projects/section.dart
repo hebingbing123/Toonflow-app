@@ -14,6 +14,7 @@ import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -35,6 +36,7 @@ class ProjectsSection extends StatelessWidget {
     this.currentWorkspaceName,
     this.currentWorkspaceType,
     this.onOpenModelVendorSettings,
+    this.onExploreDemo,
   });
 
   final String? accessToken;
@@ -50,6 +52,7 @@ class ProjectsSection extends StatelessWidget {
   final String? currentWorkspaceName;
   final String? currentWorkspaceType;
   final VoidCallback? onOpenModelVendorSettings;
+  final VoidCallback? onExploreDemo;
 
   bool get _showEnterpriseProjectEmptyState =>
       currentWorkspaceType == 'enterprise' &&
@@ -134,6 +137,7 @@ class ProjectsSection extends StatelessWidget {
         currentWorkspaceType: currentWorkspaceType,
         onOpenTeamWorkspaces: onOpenTeamWorkspaces,
         onOpenModelVendorSettings: onOpenModelVendorSettings,
+        onExploreDemo: onExploreDemo,
       );
     }
 
@@ -166,6 +170,7 @@ class ProjectsSection extends StatelessWidget {
             Row(
               children: <Widget>[
                 FilledButton.icon(
+                  style: studioFormIconLabeledButtonStyle(context),
                   onPressed: controller.creatingProject
                       ? null
                       : () => _createEmptyProject(context),

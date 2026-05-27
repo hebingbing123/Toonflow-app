@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
+import '../demo/benchmark_demo_data.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -20,9 +22,16 @@ import 'workbench_gate.dart';
 import 'workbench_review_queue.dart';
 
 class BenchmarkSection extends StatefulWidget {
-  const BenchmarkSection({super.key, required this.accessToken});
+  const BenchmarkSection({
+    super.key,
+    required this.accessToken,
+    this.debugSnapshot,
+    this.demoMode = false,
+  });
 
   final String? accessToken;
+  final BenchmarkDemoSnapshot? debugSnapshot;
+  final bool demoMode;
 
   @override
   State<BenchmarkSection> createState() => _BenchmarkSectionState();
@@ -121,6 +130,18 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   ABCompareRunDetailV1? _abRunDetail;
   String? _selectedAbRunId;
 
+  @override
+  void initState() {
+    super.initState();
+    final snap = widget.debugSnapshot;
+    if (snap != null) {
+      _cases = snap.cases;
+      _experiments = snap.experiments;
+      _reviewQueue = snap.reviewQueue;
+      _statusLine = snap.statusLine;
+    }
+  }
+
   String? get _token => widget.accessToken;
 
   List<ABCompareCaseV1> _parseAbCompareCases(AppLocalizations l10n) {
@@ -163,6 +184,12 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     String label,
     Future<void> Function(String token) action,
   ) async {
+    if (widget.demoMode) {
+      setState(() {
+        _statusLine = l10n.productDemoModeMutationBlocked;
+      });
+      return;
+    }
     final token = _token;
     if (token == null || token.isEmpty) {
       setState(() {
@@ -307,6 +334,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   wideBreakpoint: 720,
                   children: <Widget>[
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy
                           ? null
                           : () => _runAction(
@@ -322,6 +350,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       child: Text(l10n.benchmarkActionFetchSamplePool),
                     ),
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy
                           ? null
                           : () => _runAction(
@@ -335,6 +364,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       child: Text(l10n.benchmarkActionFetchExperiments),
                     ),
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy
                           ? null
                           : () => _runAction(
@@ -348,6 +378,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       child: Text(l10n.benchmarkActionFetchReviewQueue),
                     ),
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy
                           ? null
                           : () => _runAction(
@@ -361,6 +392,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       child: Text(l10n.benchmarkActionFetchMemoryTier),
                     ),
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy
                           ? null
                           : () => _runAction(
@@ -935,6 +967,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: _busy
                   ? null
                   : () => _runAction(l10n, l10n.benchmarkActionRunAbCompare, (token) async {
@@ -950,6 +983,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: _busy
                   ? null
                   : () => _runAction(l10n, l10n.benchmarkActionSaveRunAbCompare, (token) async {
@@ -967,11 +1001,11 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               child: Text(l10n.benchmarkButtonSaveAndRun),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
               children: [
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: _busy
                       ? null
                       : () => _runAction(l10n, l10n.benchmarkActionFetchAbHistory, (token) async {
@@ -1003,6 +1037,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                           },
                   ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: _busy || _selectedAbRunId == null
                       ? null
                       : () => _runAction(l10n, l10n.benchmarkActionFetchAbDetail, (token) async {
@@ -1031,6 +1066,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   child: Text(l10n.benchmarkButtonLoadDetailAndFill),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: _busy || _abRunDetail == null
                       ? null
                       : () => _runAction(l10n, l10n.benchmarkActionReplaySave, (token) async {

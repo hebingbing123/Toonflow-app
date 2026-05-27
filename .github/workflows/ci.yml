@@ -1,3 +1,4 @@
+# Quality gates for proprietary OpenFlow (Rust + Flutter). Passing CI does not imply open source.
 name: CI
 
 on:
@@ -292,3 +293,19 @@ jobs:
           export SUPABASE_JWT_SECRET="${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}"
           cd backend
           cargo test settings_workspace_shared_audit_export -- --ignored --nocapture --test-threads=1
+      - name: PG contract — billing checkout completion + scripts export membership
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          export DATABASE_URL="${DB_URL:?missing DB_URL from supabase status}"
+          export SUPABASE_JWT_SECRET="${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}"
+          cd backend
+          for filter in \
+            checkout_complete_upgrades \
+            checkout_paid_session_reconciles \
+            checkout_pending_session_upgrades \
+            scripts_export_membership
+          do
+            echo "=== cargo test ${filter} (ignored) ==="
+            cargo test "${filter}" --lib -- --ignored --nocapture --test-threads=1
+          done

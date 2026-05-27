@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -17,7 +18,7 @@ List<Widget> buildAssetImagesWorkbenchSections(
   final sections = <Widget>[
     _buildAssetField(l10n: l10n, model: model, callbacks: callbacks),
     _buildDiagnosisCard(context, l10n: l10n, model: model, callbacks: callbacks),
-    _buildToolbar(l10n: l10n, model: model, callbacks: callbacks),
+    _buildToolbar(context, l10n: l10n, model: model, callbacks: callbacks),
     if (model.statusLine != null)
       Text(model.statusLine!, style: Theme.of(context).textTheme.bodySmall),
     _buildImageField(l10n: l10n, model: model, callbacks: callbacks),
@@ -116,6 +117,7 @@ Widget _buildDiagnosisCard(
         const SizedBox(height: 8),
         FilledButton.tonal(
           key: const Key('asset-images-workbench-recommended-action'),
+          style: studioFormTonalButtonStyle(context),
           onPressed: callbacks.onRecommendedAction,
           child: Text(
             describeAssetImagesWorkbenchRecommendedAction(
@@ -129,16 +131,17 @@ Widget _buildDiagnosisCard(
   );
 }
 
-Widget _buildToolbar({
+Widget _buildToolbar(
+  BuildContext context, {
   required AppLocalizations l10n,
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
-  return Wrap(
+  return StudioDenseActionRow(
     spacing: 8,
-    runSpacing: 8,
     children: [
       FilledButton(
+        style: studioFormPrimaryButtonStyle(context),
         onPressed: callbacks.onReloadImages,
         child: Text(
           model.loadingList

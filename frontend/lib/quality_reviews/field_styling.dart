@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 
@@ -55,17 +56,13 @@ class QualityReviewIdLookupRow extends StatelessWidget {
   final String actionLabel;
   final String? busyLabel;
 
-  static const double _controlHeight = 48;
-
   @override
   Widget build(BuildContext context) {
     final enabled = !loading && controller.text.trim().isNotEmpty;
-    final action = SizedBox(
-      height: _controlHeight,
-      child: FilledButton.tonal(
-        onPressed: enabled ? onSubmit : null,
-        child: Text(loading ? (busyLabel ?? '…') : actionLabel),
-      ),
+    final action = FilledButton.tonal(
+      style: studioFormTonalButtonStyle(context),
+      onPressed: enabled ? onSubmit : null,
+      child: Text(loading ? (busyLabel ?? '…') : actionLabel),
     );
     final field = TextField(
       controller: controller,

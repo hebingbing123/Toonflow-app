@@ -130,6 +130,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(context),
                   onPressed: suggested.enabled ? suggested.onPressed : null,
                   child: Text(suggested.ctaLabel),
                 ),
@@ -138,50 +139,57 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: localBusy || assetsBusy ? null : onCreate,
               child: Text(l10n.projectEditorAssetsWorkbenchNewAsset),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canMutateAssets ? onEdit : null,
               child: Text(l10n.projectEditorAssetsWorkbenchEditAsset),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canMutateAssets ? onDelete : null,
               child: Text(l10n.projectEditorAssetsWorkbenchDeleteAsset),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canMutateAssets ? onFilter : null,
               child: Text(l10n.projectEditorAssetsWorkbenchFilterAssets),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canLinkScripts ? onLink : null,
               child: Text(l10n.projectEditorAssetsWorkbenchLinkScript),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canLinkScripts ? onUnlink : null,
               child: Text(l10n.projectEditorAssetsWorkbenchUnlink),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canMutateAssets ? onReviewCandidates : null,
               child: Text(l10n.projectEditorAssetsWorkbenchReviewCandidates),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: canUploadEditImage ? onUploadEditImage : null,
               child: Text(l10n.projectEditorAssetsWorkbenchUploadEditImage),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: localBusy || assetsBusy ? null : onUploadClip,
               child: Text(l10n.projectEditorAssetsWorkbenchUploadClipAsset),
             ),

@@ -47,11 +47,11 @@ class _AssetGenerationActionsPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSummary || busyMutation
                   ? null
                   : onSyncWorkbenchSnapshot,
@@ -88,11 +88,11 @@ class _AssetGenerationActionsPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: busyMutation || selectedIds.isEmpty
                   ? null
                   : onBatchGenerateImages,

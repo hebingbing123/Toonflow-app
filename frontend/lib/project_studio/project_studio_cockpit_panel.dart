@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -241,19 +242,8 @@ class _CompactCockpitBar extends StatelessWidget {
             child: Text(expandLabel),
           );
           final primaryButton = FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: () => onExecuteAction(primaryAction),
-            style: FilledButton.styleFrom(
-              minimumSize: Size(
-                dense ? 48 : 56,
-                dense ? StudioSpacing.iconTouchTarget : 40,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: dense ? StudioSpacing.sm : StudioSpacing.sm,
-                vertical: dense ? StudioSpacing.xs : StudioSpacing.xs,
-              ),
-              tapTargetSize: MaterialTapTargetSize.padded,
-              visualDensity: VisualDensity.standard,
-            ),
             child: Text(primaryAction.ctaLabel),
           );
 
@@ -427,6 +417,7 @@ class _CockpitActionRow extends StatelessWidget {
       runSpacing: 8,
       children: <Widget>[
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () => onExecuteAction(primaryAction),
           child: Text(primaryAction.ctaLabel),
         ),
@@ -434,6 +425,7 @@ class _CockpitActionRow extends StatelessWidget {
             .take(2)
             .map(
               (action) => OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: () => onExecuteAction(action),
                 child: Text(action.ctaLabel),
               ),

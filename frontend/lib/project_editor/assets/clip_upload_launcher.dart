@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 Future<void> openProjectAssetClipUploadDialog({
   required BuildContext ctx,
@@ -64,6 +65,7 @@ Future<void> openProjectAssetClipUploadDialog({
               child: Text(dlgL10n.projectEditorAssetClipUploadCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogCtx),
               onPressed: () => Navigator.of(dialogCtx).pop(true),
               child: Text(dlgL10n.projectEditorAssetClipUploadUpload),
             ),

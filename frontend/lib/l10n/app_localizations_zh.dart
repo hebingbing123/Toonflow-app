@@ -1065,6 +1065,80 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioProjectsEmptyStep3 => '需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。';
 
   @override
+  String get productDemoModeBannerTitle => '演示模式';
+
+  @override
+  String get productDemoModeBannerBody => '当前为示例数据，可浏览全部页面与弹窗流程；不会写入真实项目。';
+
+  @override
+  String get productDemoModeExit => '退出演示';
+
+  @override
+  String get productDemoModeExploreGuest => '先体验演示';
+
+  @override
+  String get productDemoModeExploreLoggedIn => '用示例数据体验';
+
+  @override
+  String get productDemoModeMutationBlocked => '演示模式下无法保存更改';
+
+  @override
+  String get productDemoAutoplayPause => '暂停导览';
+
+  @override
+  String get productDemoAutoplayResume => '继续导览';
+
+  @override
+  String productDemoAutoplayStepBody(String step) {
+    return '自动导览：$step';
+  }
+
+  @override
+  String productDemoGuideStepCounter(int current, int total) {
+    return '第 $current / $total 步';
+  }
+
+  @override
+  String get productDemoGuidePrevious => '上一步';
+
+  @override
+  String get productDemoGuideNext => '下一步';
+
+  @override
+  String get productDemoGuideStartAutoplay => '自动导览';
+
+  @override
+  String get productDemoGuideExpandDetails => '展开';
+
+  @override
+  String get productDemoGuideCollapseDetails => '收起';
+
+  @override
+  String productDemoGuideMainlineCounter(int step, int total) {
+    return '制作主线 · $step/$total';
+  }
+
+  @override
+  String productDemoGuideLaunchCounter(int part, int total) {
+    return '上线路径 · $part/$total';
+  }
+
+  @override
+  String get productDemoGuideOptionalTag => '可选';
+
+  @override
+  String get productDemoGuideSectionGoal => '你要完成';
+
+  @override
+  String get productDemoGuideSectionWhere => '看这里';
+
+  @override
+  String get productDemoGuideSectionDemo => '演示说明';
+
+  @override
+  String get productDemoGuideSectionNext => '下一步';
+
+  @override
   String get studioGettingStartedTitle => '快速入门';
 
   @override
@@ -23731,28 +23805,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingUpgradePlan => '升级套餐';
 
   @override
-  String get billingSubscribeTitle => 'Subscribe';
+  String get billingSubscribeTitle => '订阅套餐';
 
   @override
-  String get billingCheckoutSuccess =>
-      'Payment received. Your plan will update shortly.';
+  String get billingCheckoutSuccess => '支付已收到，套餐将很快更新。';
 
   @override
   String billingCurrentPlan(String name) {
-    return 'Current plan: $name';
+    return '当前套餐：$name';
   }
 
   @override
-  String get billingPayWithAlipay => 'Pay with Alipay';
+  String get billingPayWithAlipay => '支付宝购买';
 
   @override
-  String get billingPayWithStripe => 'Pay with Stripe';
+  String get billingPayWithStripe => 'Stripe 购买';
 
   @override
-  String get billingPayWithBitpay => 'Pay with crypto (BitPay)';
+  String get billingPayWithBitpay => '加密货币支付 (BitPay)';
 
   @override
-  String get billingManageSubscription => 'Manage subscription';
+  String get billingManageSubscription => '管理订阅';
 
   @override
   String get billingErrorPaymentFailed => '付款失败，请更新支付方式以继续使用。';

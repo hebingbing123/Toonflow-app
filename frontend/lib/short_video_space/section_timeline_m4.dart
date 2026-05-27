@@ -203,7 +203,8 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
     required String? value,
     required ValueChanged<String?> onChanged,
   }) {
-    final selected = (value ?? 'none').trim().isEmpty ? 'none' : value!.trim();
+    final normalized = (value ?? 'none').trim();
+    final selected = normalized.isEmpty ? 'none' : normalized;
     return StudioDropdownButtonFormField<String>(
       isExpanded: true,
       initialValue: kShortVideoTimelineEffectPresets.contains(selected)

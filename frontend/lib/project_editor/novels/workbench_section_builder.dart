@@ -83,10 +83,12 @@ Widget buildProjectNovelsWorkbenchSection({
             wideBreakpoint: 560,
             children: <Widget>[
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(ctx),
                 onPressed: disabled ? null : openWorkbench,
                 child: Text(l10n.projectEditorNovelsWorkbenchCardOpenButton),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(ctx),
                 onPressed: disabled ? null : () => refreshNovels(),
                 child: Text(
                   novelsLoading[0]
@@ -95,6 +97,7 @@ Widget buildProjectNovelsWorkbenchSection({
                 ),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(ctx),
                 onPressed: disabled || novels.isEmpty
                     ? null
                     : () => generateEvents(),

@@ -21,7 +21,7 @@ bash scripts/crop-website-assets.sh
 | 文件 | 用途 |
 |------|------|
 | `hero-main.png` / `@2x` | 首页 Hero 主视觉（Gemini 底部大界面） |
-| `feature-*-card.png` / `@2x` | 核心能力四宫格（Gemini 顶栏三格 + 中部私有化图标） |
+| `feature-*-card.png` / `@2x` | 核心能力配图（仅裁三栏内 UI 窗口 + 私有化图标卡，不含营销大标题） |
 | `features-trio.png` / `@2x` | 预览弹层三能力横条 |
 | `desktop-studio.png` 等 | 全平台介绍（横版 board） |
 | `design-gemini-full.png` | Gemini 源图归档 |

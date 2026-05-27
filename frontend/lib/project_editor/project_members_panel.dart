@@ -522,6 +522,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonalIcon(
+                    style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _adding ? null : _addWorkspaceCandidate,
                     icon: const Icon(Icons.person_add_alt_1_outlined),
                     label: Text(l10n.projectMembersButtonAdd),
@@ -544,6 +545,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               ),
               const SizedBox(width: 8),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: _adding ? null : _addManual,
                 child: Text(l10n.projectMembersButtonAddByUuid),
               ),
@@ -710,7 +712,10 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioLayoutSpacing.inlineGap,
+        vertical: StudioLayoutSpacing.microGap,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: studioPanelBorderColor(context)),

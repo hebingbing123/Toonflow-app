@@ -68,6 +68,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
             ),
             const SizedBox(height: StudioSpacing.sm),
             FilledButton.icon(
+              style: studioFormIconLabeledButtonStyle(context),
               onPressed: _loading ? null : _load,
               icon: const Icon(Icons.sync),
               label: Text(_loading ? l10n.helpHubLoading : l10n.helpHubRefresh),

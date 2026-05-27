@@ -20,6 +20,10 @@ String subscriptionStatusLabel(AppLocalizations l10n, String? status) {
       return l10n.billingSubscriptionStatusPaused;
     case 'unpaid':
       return l10n.billingSubscriptionStatusUnpaid;
+    case 'unknown':
+    case 'none':
+    case 'inactive':
+      return l10n.billingSubscriptionStatusNotSet;
     default:
       return l10n.billingSubscriptionStatusUnknown;
   }

@@ -6,6 +6,7 @@ import '../../design_system/tokens.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
@@ -173,11 +174,11 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: StudioSpacing.sm),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingProjects
                         ? null
                         : callbacks.onReloadProjects,
@@ -188,6 +189,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingMemory
                         ? null
                         : callbacks.onQueryMemory,
@@ -198,6 +200,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingCostOverview
                         ? null
                         : callbacks.onLoadCostOverview,
@@ -208,6 +211,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: optimizeEnabled
                         ? callbacks.onOptimizeVideoMemory
                         : null,
@@ -607,6 +611,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: model.appendingMemory
                           ? null
                           : callbacks.onAppendMemory,
@@ -663,6 +668,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: model.clearingMemory
                           ? null
                           : callbacks.onClearMemory,

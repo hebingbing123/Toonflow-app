@@ -47,26 +47,38 @@ extension _HomePageProjectEditor on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     try {
-      final detail = await fetchProjectByProjectId(token, p.id);
-      final scriptList = List<ScriptBrief>.from(detail.scripts);
+      final ProjectDetail detail;
       ListAssetsResponse? assetsSnap;
-      try {
-        assetsSnap = await fetchProjectAssetsByProjectId(token, p.id);
-      } catch (_) {
-        assetsSnap = null;
-      }
       ListAssetsResponse? assetsForScriptSnap;
-      if (target.preferredScriptNumericId != null) {
+      if (ProductDemoMode.instance.shouldSkipLiveApi) {
+        detail = buildDemoProjectDetail();
+        assetsSnap = buildDemoProjectAssetsList();
+        assetsForScriptSnap = target.preferredScriptNumericId == null
+            ? null
+            : buildDemoProjectAssetsList();
+      } else {
+        final fetched = await fetchProjectByProjectId(token, p.id);
+        detail = fetched;
         try {
-          assetsForScriptSnap = await fetchProjectAssetsByProjectId(
-            token,
-            p.id,
-            scriptNumericId: target.preferredScriptNumericId,
-          );
+          assetsSnap = await fetchProjectAssetsByProjectId(token, p.id);
         } catch (_) {
+          assetsSnap = null;
+        }
+        if (target.preferredScriptNumericId != null) {
+          try {
+            assetsForScriptSnap = await fetchProjectAssetsByProjectId(
+              token,
+              p.id,
+              scriptNumericId: target.preferredScriptNumericId,
+            );
+          } catch (_) {
+            assetsForScriptSnap = null;
+          }
+        } else {
           assetsForScriptSnap = null;
         }
       }
+      final scriptList = List<ScriptBrief>.from(detail.scripts);
       if (!mounted) return;
 
       final assetsRef = <ListAssetsResponse?>[assetsSnap];

@@ -170,7 +170,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
     final selected = _mode == mode;
     return FilledButton.tonal(
       onPressed: _busy ? null : () => _setMode(mode),
-      style: studioToolbarTonalButtonStyle(context).merge(
+      style: studioFormTonalButtonStyle(context).merge(
         ButtonStyle(
           backgroundColor: WidgetStatePropertyAll(
             selected

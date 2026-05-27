@@ -200,6 +200,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
                   child: Text(dlgL10n.notificationsActionCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(dialogCtx),
                   onPressed: () => Navigator.pop(dialogCtx, true),
                   child: Text(dlgL10n.shortVideoPublishScheduleCalendarChooseTime),
                 ),

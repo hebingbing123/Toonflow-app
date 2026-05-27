@@ -2032,6 +2032,138 @@ abstract class AppLocalizations {
   /// **'Before AI generation, add models and API keys under Settings → Model vendors.'**
   String get studioProjectsEmptyStep3;
 
+  /// No description provided for @productDemoModeBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo mode'**
+  String get productDemoModeBannerTitle;
+
+  /// No description provided for @productDemoModeBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample data only — explore every page and dialog; nothing is saved to your account.'**
+  String get productDemoModeBannerBody;
+
+  /// No description provided for @productDemoModeExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit demo'**
+  String get productDemoModeExit;
+
+  /// No description provided for @productDemoModeExploreGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Try demo first'**
+  String get productDemoModeExploreGuest;
+
+  /// No description provided for @productDemoModeExploreLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore with sample data'**
+  String get productDemoModeExploreLoggedIn;
+
+  /// No description provided for @productDemoModeMutationBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes cannot be saved in demo mode'**
+  String get productDemoModeMutationBlocked;
+
+  /// No description provided for @productDemoAutoplayPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause tour'**
+  String get productDemoAutoplayPause;
+
+  /// No description provided for @productDemoAutoplayResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume tour'**
+  String get productDemoAutoplayResume;
+
+  /// No description provided for @productDemoAutoplayStepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto tour: {step}'**
+  String productDemoAutoplayStepBody(String step);
+
+  /// No description provided for @productDemoGuideStepCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String productDemoGuideStepCounter(int current, int total);
+
+  /// No description provided for @productDemoGuidePrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get productDemoGuidePrevious;
+
+  /// No description provided for @productDemoGuideNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get productDemoGuideNext;
+
+  /// No description provided for @productDemoGuideStartAutoplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto tour'**
+  String get productDemoGuideStartAutoplay;
+
+  /// No description provided for @productDemoGuideExpandDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get productDemoGuideExpandDetails;
+
+  /// No description provided for @productDemoGuideCollapseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get productDemoGuideCollapseDetails;
+
+  /// No description provided for @productDemoGuideMainlineCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line · {step}/{total}'**
+  String productDemoGuideMainlineCounter(int step, int total);
+
+  /// No description provided for @productDemoGuideLaunchCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch path · {part}/{total}'**
+  String productDemoGuideLaunchCounter(int part, int total);
+
+  /// No description provided for @productDemoGuideOptionalTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get productDemoGuideOptionalTag;
+
+  /// No description provided for @productDemoGuideSectionGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do'**
+  String get productDemoGuideSectionGoal;
+
+  /// No description provided for @productDemoGuideSectionWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'On this screen'**
+  String get productDemoGuideSectionWhere;
+
+  /// No description provided for @productDemoGuideSectionDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'In this demo'**
+  String get productDemoGuideSectionDemo;
+
+  /// No description provided for @productDemoGuideSectionNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Up next'**
+  String get productDemoGuideSectionNext;
+
   /// No description provided for @studioGettingStartedTitle.
   ///
   /// In en, this message translates to:

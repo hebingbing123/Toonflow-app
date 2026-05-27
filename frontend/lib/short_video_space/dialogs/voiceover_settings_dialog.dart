@@ -445,6 +445,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
           child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () {
             Navigator.of(context).pop(
               _currentSettings,

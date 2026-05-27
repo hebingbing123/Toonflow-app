@@ -2,6 +2,8 @@
 
 感谢你为 OpenFlow 文档做出贡献！本指南将帮助你了解如何创建和维护高质量的文档。
 
+> **产品许可**：OpenFlow 为**闭源 SaaS 平台**，非开源项目。本文档贡献流程面向**已获授权**的团队成员；请勿在文档中暗示公开源码、Apache 许可或无需登录即可使用受保护 API。
+
 ## 📋 目录
 
 - [文档类型](#文档类型)
@@ -150,7 +152,7 @@ related:
 
 1. 克隆仓库：
    ```bash
-   git clone https://github.com/HBAI-Ltd/Openflow-app.git
+   git clone <your-authorized-remote-url>
    ```
 
 2. 安装依赖：
@@ -400,7 +402,7 @@ A: 目前优先维护中文文档，英文文档可选：
 ## 联系方式
 
 如有问题或建议，请：
-- 提交 Issue：https://github.com/HBAI-Ltd/Openflow-app/issues
+- 内部缺陷跟踪：使用团队指定的 Issue 系统（勿将源码或客户数据贴到公开 Issue）
 - 发送邮件：ltlctools@outlook.com
 
 ---

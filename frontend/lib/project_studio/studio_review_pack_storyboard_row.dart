@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/short_video_readiness_localized.dart';
@@ -57,6 +58,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
               child: Text(MaterialLocalizations.of(dialogContext).cancelButtonLabel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: () =>
                   Navigator.pop(dialogContext, controller.text.trim()),
               child: Text(l10n.studioReviewPackFeedbackSave),

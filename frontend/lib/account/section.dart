@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_surfaces.dart';
@@ -225,12 +226,12 @@ class _AccountSectionState extends State<AccountSection> {
               ),
             ],
           );
-          final actions = Wrap(
+          final actions = StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
             alignment: WrapAlignment.end,
             children: <Widget>[
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: widget.controller.loading
                     ? null
                     : widget.controller.refresh,
@@ -238,6 +239,7 @@ class _AccountSectionState extends State<AccountSection> {
                 label: Text(l10n.notificationsRefresh),
               ),
               FilledButton.tonalIcon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: widget.controller.creatingExport
                     ? null
                     : widget.controller.requestExport,
@@ -392,12 +394,12 @@ class _AccountSectionState extends State<AccountSection> {
                 ),
               ],
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: <Widget>[
                   if (item.downloadReady)
                     FilledButton.tonalIcon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed: downloading
                           ? null
                           : () async {
@@ -425,6 +427,7 @@ class _AccountSectionState extends State<AccountSection> {
                     ),
                   if (item.fileName != null)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: () => Clipboard.setData(
                         ClipboardData(text: item.fileName!),
                       ),
@@ -544,14 +547,7 @@ class _AccountSectionState extends State<AccountSection> {
                 width: split ? null : double.infinity,
                 child: FilledButton.icon(
                   onPressed: canDelete ? _deleteAccount : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: theme.colorScheme.error,
-                    foregroundColor: theme.colorScheme.onError,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
+                  style: studioFormDestructiveIconLabeledButtonStyle(context),
                   icon: widget.controller.deletingAccount
                       ? const SizedBox(
                           width: 16,
@@ -717,7 +713,10 @@ class _AccountSectionState extends State<AccountSection> {
               ),
             ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.inlineGap, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioLayoutSpacing.inlineGap,
+              vertical: StudioLayoutSpacing.microGap,
+            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               border: Border.all(

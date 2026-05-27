@@ -1,13 +1,3 @@
-<p>
-  <a href="https://github.com/HBAI-Ltd/Openflow-app">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" />
-  </a>
-  &nbsp;|&nbsp;
-  <a href="https://gitee.com/HBAI-Ltd/Openflow-app">
-    <img src="https://img.shields.io/badge/Gitee-C71D23?style=flat-square&logo=gitee&logoColor=white" alt="Gitee" />
-  </a>
-</p>
-
 <p align="center">
   <strong>简体中文</strong> |
   <a href="./docs/README.en.md">English</a>
@@ -23,29 +13,24 @@
       <br />
       基于 Harness Engineering 的智能创作平台
       <br />
-      Rust + Flutter + PostgreSQL 🚀
+      闭源云端 SaaS · 注册登录后使用
     </b>
   </p>
   <p align="center">
-    <a href="https://github.com/HBAI-Ltd/Openflow-app/stargazers">
-      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Openflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
-    </a>
-    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
-      <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="Apache-2.0 License Badge" />
-    </a>
-    <a href="https://github.com/HBAI-Ltd/Openflow-app/releases">
-      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Openflow-app?style=for-the-badge" />
-    </a>
+    <img src="https://img.shields.io/badge/产品-闭源%20SaaS-7C97FF?style=for-the-badge" alt="Proprietary SaaS" />
+    <img src="https://img.shields.io/badge/访问-注册登录-34C8F0?style=for-the-badge" alt="Registration required" />
+    <img src="https://img.shields.io/badge/技术栈-Rust%20%2B%20Flutter%20%2B%20PostgreSQL-1a1a2e?style=for-the-badge" alt="Tech stack" />
   </p>
   
-  > 🚀 **现代化技术栈**：Rust 后端 + Flutter 前端 + PostgreSQL 数据库，从文本到视频的完整 AI 创作工作流
+  > 🚀 **现代化技术栈**：Rust 后端 + Flutter 前端 + PostgreSQL 数据库，从文本到视频的完整 AI 创作工作流  
+  > 🔒 **非开源产品**：不提供公开源码或开源自部署版本；客户端与接入文档由商务授权发放。
 </div>
 
 ---
 
 ## 📖 项目简介
 
-OpenFlow 是基于 **Harness Engineering** 架构的 AI 短剧生产平台，采用 **Rust + Flutter + PostgreSQL** 技术栈，提供从策划到成片的完整工作流。
+OpenFlow 是基于 **Harness Engineering** 架构的 **闭源云端 SaaS** AI 短剧生产平台，采用 **Rust + Flutter + PostgreSQL** 技术栈，提供从策划到成片的完整工作流。用户须**注册并登录**后进入 Workspace 进行创作；业务 API 使用 Supabase Auth 签发的 JWT，并配合数据库 RLS 做租户隔离。
 
 ### 核心特性
 
@@ -56,16 +41,15 @@ OpenFlow 是基于 **Harness Engineering** 架构的 AI 短剧生产平台，采
 - ✅ **进程隔离沙箱**：子进程池 + WASM 运行时，安全执行用户代码
 - ✅ **OpenTelemetry 集成**：OTLP traces 导出，完整的可观测性支持
 - ✅ **计费 Webhook**：支持 Stripe/Alipay/Paddle 多供应商事件处理
-- ✅ **多语言支持**：简体中文、繁體中文、English、ไทย、Tiếng Việt、日本語、Русский
+- ✅ **多语言支持**：简体中文、English
 
 ### 应用场景
 
 - 🎬 网文/小说快速影视化改编
 - 🏭 短剧团队流水线协作生产
 - 🚀 多项目并行的 AI 内容工厂
-- 🏢 私有化部署的企业级内容平台
+- 🏢 企业团队订阅与多成员协作生产
 - 🧪 低成本验证剧情与镜头方案
-- 📚 教学与研究场景下的 AIGC 创作实验
 
 ---
 
@@ -112,7 +96,20 @@ Openflow-app/
 
 ---
 
-## 🚀 快速开始
+## 🌐 平台使用（终端用户）
+
+1. **注册账号**：通过官方 Web 或桌面客户端完成注册（Supabase Auth）。
+2. **登录平台**：获取会话与 JWT，未登录仅可访问登录/注册等公开页面。
+3. **进入 Workspace**：创建或加入 Personal / Enterprise 工作空间，开始剧本、分镜与资产生成。
+4. **订阅与计费**：按 Workspace 套餐与用量结算（Stripe / Alipay / Paddle 等，以环境配置为准）。
+
+客户端安装包与生产环境地址由运营或商务提供，**不在此仓库公开发布**。
+
+---
+
+## 🚀 本地开发（授权团队成员）
+
+> 本仓库为**专有软件**源码树，仅供经授权的内部研发与合作伙伴使用。克隆与部署须遵守 [LICENSE](./LICENSE)。
 
 ### 前置条件
 
@@ -168,11 +165,13 @@ yarn --version
 
 ### 启动开发环境
 
-#### 1. 克隆仓库
+#### 1. 获取源码
+
+由团队负责人授予 Git 访问权限后，从**内部/授权远程仓库**克隆（勿将源码上传至公开仓库或对外分发）：
 
 ```bash
-git clone https://github.com/HBAI-Ltd/Openflow-app.git
-cd Openflow-app
+git clone <your-authorized-remote-url>
+cd Openflow-app   # 或你的本地目录名
 ```
 
 #### 2. 启动数据库
@@ -326,14 +325,7 @@ supabase db push   # 生产环境
 
 ---
 
-## 🔗 相关仓库
-
-| 仓库 | 说明 | 链接 |
-|------|------|------|
-| **Openflow-app** | 主仓库（本仓库） | [GitHub](https://github.com/HBAI-Ltd/Openflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-app) |
-| **Openflow-web** | 旧版 Web 前端（历史参考） | [GitHub](https://github.com/HBAI-Ltd/Openflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-web) |
-
-> 💡 **提示**：当前主客户端在 **`frontend/`**（Flutter）。**Openflow-web** 为旧栈参考仓库。
+> 💡 **提示**：当前主客户端在 **`frontend/`**（Flutter）。历史 Web 栈仅作内部参考，不对外开源。
 
 ---
 
@@ -343,48 +335,24 @@ supabase db push   # 生产环境
 
 ---
 
-## 📜 许可证
+## 📜 许可与授权
 
-OpenFlow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
+OpenFlow 为**闭源专有软件**，**非开源**；完整条款见 **[LICENSE](./LICENSE)**。
 
-许可证详情：https://www.apache.org/licenses/LICENSE-2.0
+摘要：
 
-### 补充协议
+- **SaaS 使用**：注册登录后，在授权订阅范围内使用云端平台。
+- **源码与制品**：不对外提供公开源码；客户端/服务端分发须商务授权。
+- **再分发**：向 **≥2 个独立第三方** 提供本软件产品须书面商业授权；≤5 法人纯内部联合使用见 LICENSE。
+- **商业定价**（年费摘要）：扶持期年收入不足 10 万可申请免费 → 初创 ¥5,000 → 成长 ¥2 万 → 规模 ¥8 万 → 企业面议。
 
-- 若将本软件以产品形式分发给 **2 个及以上独立第三方**使用，须取得 HBAI-Ltd **书面商业授权**。
-- **≤ 5 个法人**联合运营内部使用，不对外提供服务的，视为内部使用，**无需授权**。
-- 不得删除或修改 OpenFlow 中的标识或版权信息。
-
-### 永久免费场景
-
-- ✅ 用 OpenFlow 制作内容并获得平台分账
-- ✅ 二次开发供自己团队内部使用
-- ✅ ≤ 5 个法人联合运营内部使用
-- ✅ 个人学习、研究、非商业用途
-
-### 商业授权定价
-
-| 阶段 | 年销售额 | 年费 |
-|------|---------|------|
-| 🌱 扶持期 | < ¥10 万 | **申请即可免费授权** |
-| 🚀 初创期 | ¥10–50 万 | ¥5,000/年 |
-| 📈 成长期 | ¥50–150 万 | ¥20,000/年 |
-| 🏢 规模期 | ¥150–500 万 | ¥80,000/年 |
-| 🌐 企业级 | > ¥500 万 | 面议 |
-
-完整协议详见 [LICENSE](./LICENSE) 文件。
+📧 授权咨询：[ltlctools@outlook.com](mailto:ltlctools@outlook.com?subject=OpenFlow%E6%8E%88%E6%9D%83%E5%92%A8%E8%AF%A2)
 
 ---
 
-## ⭐️ 星标历史
+## 🙏 第三方组件致谢
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)
-
----
-
-## 🙏 致谢
-
-感谢以下开源项目为 OpenFlow 提供支持：
+OpenFlow 产品本身为闭源，但构建时使用了以下**第三方开源**库（其许可独立于本产品）：
 
 - [Rust](https://www.rust-lang.org/) / [Tokio](https://tokio.rs/) / [Axum](https://github.com/tokio-rs/axum)
 - [Flutter](https://flutter.dev/)

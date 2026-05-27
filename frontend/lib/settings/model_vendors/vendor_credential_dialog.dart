@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 /// Store or remove LLM vendor API credentials (never shown in plain text after save).
 Future<bool?> showVendorCredentialDialog({
@@ -191,6 +192,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
           child: Text(l10n.notificationsActionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: _busy ? null : _save,
           child: _busy
               ? const SizedBox(

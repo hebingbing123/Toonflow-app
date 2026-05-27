@@ -250,6 +250,13 @@ extension _ShortVideoSpaceSectionProductionExtension
   }
 
   Future<void> _loadProjectOverview() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      final snap = widget.debugOverviewSnapshot;
+      if (snap != null && _selectedProject != null) {
+        _applyDemoOverviewSnapshot(snap);
+      }
+      return;
+    }
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {

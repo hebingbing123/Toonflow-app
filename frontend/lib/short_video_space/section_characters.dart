@@ -263,6 +263,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
             child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(ctx),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(MaterialLocalizations.of(ctx).saveButtonLabel),
           ),
@@ -325,6 +326,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
             child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(ctx),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
           ),

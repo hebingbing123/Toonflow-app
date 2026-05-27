@@ -339,12 +339,14 @@ class _FilterPanelState extends State<FilterPanel> {
                 ),
                 if (hasActiveFilters)
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: _clearAllFilters,
                     icon: const Icon(Icons.clear_all, size: 18),
                     label: Text(l10n.shortVideoFilterPanelClearButton),
                   ),
                 if (hasActiveFilters)
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: _savePreset,
                     icon: const Icon(Icons.bookmark_add, size: 18),
                     label: Text(l10n.shortVideoFilterPanelSavePresetButton),
@@ -833,6 +835,7 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
           child: Text(l10n.notificationsActionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () {
             final name = _nameController.text.trim();
             if (name.isNotEmpty) {

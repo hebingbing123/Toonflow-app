@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openflow_app/home_page.dart';
 import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/project_studio/studio_overlay_mode.dart';
+import 'package:openflow_app/project_studio/studio_readiness.dart';
+import 'package:openflow_app/shell/home_shell_mode.dart';
 
 import 'support/ignore_layout_overflow.dart';
 import 'support/product_shell_overlay_harness.dart';
 
 void main() {
-  installLayoutOverflowIgnoreForTests();
-
   testWidgets(
     'home page can render storyboard overlay with injected auth seam',
     (tester) async {
@@ -88,13 +89,24 @@ void main() {
         routes: <RouteBase>[
           GoRoute(
             path: '/projects/:projectNumericId/:stepSlug',
-            builder: (context, state) => productShellOverlayHomePage(
-              overlay: StudioOverlayMode.projectStudio,
-              projectNumericId: int.parse(
-                state.pathParameters['projectNumericId']!,
-              ),
-              stepSlug: state.pathParameters['stepSlug'],
-            ),
+            builder: (context, state) {
+              const projectNumericId = 7;
+              final projectUuid =
+                  '00000000-0000-0000-0000-${projectNumericId.toString().padLeft(12, '0')}';
+              return HomePage(
+                shellMode: HomeShellMode.product,
+                studioOverlay: StudioOverlayMode.projectStudio,
+                studioProjectNumericId: projectNumericId,
+                studioStepSlug: state.pathParameters['stepSlug'],
+                debugAuthenticatedAccessToken: 'test-token',
+                debugSkipSessionContextSync: true,
+                debugSkipAuthListenerAttach: true,
+                debugStudioProjectUuid: projectUuid,
+                debugStudioProjectName: '春季短剧 · E2E 预览',
+                debugProjectStudioSnapshotLoader: (_, _) async =>
+                    const StudioReadinessSnapshot(completedSteps: 4),
+              );
+            },
           ),
         ],
       );
@@ -103,10 +115,9 @@ void main() {
       await tester.pumpWidget(
         productShellOverlayTestApp(router, size: const Size(2560, 1440)),
       );
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
 
-      expect(find.text('Project Delta'), findsOneWidget);
+      expect(find.text('春季短剧 · E2E 预览'), findsOneWidget);
       expect(find.byKey(const Key('product-auth-submit')), findsNothing);
     },
   );

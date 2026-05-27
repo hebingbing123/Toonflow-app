@@ -4,6 +4,18 @@ part of 'section.dart';
 
 extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionState {
   Future<void> _loadShortVideoTimeline() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      final snap = widget.debugOverviewSnapshot;
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _shortVideoTimeline =
+            snap?.timeline ?? buildDemoStudioShortVideoTimeline();
+        _loadingTimeline = false;
+      });
+      return;
+    }
     final token = widget.accessToken?.trim();
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -355,11 +367,10 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
               Text(_bgm.volume.toStringAsFixed(2)),
             ],
           ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        StudioDenseActionRow(
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: widget.saveBusy
                   ? null
                   : () => widget.onSave(_buildTracksPayload()),
@@ -372,6 +383,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
                   : Text(l10n.shortVideoTimelineSave),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: widget.previewBusy ? null : widget.onPreview,
               child: widget.previewBusy
                   ? Text(l10n.shortVideoTimelinePreviewBusy)
@@ -379,6 +391,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
             ),
             if (widget.previewUrl != null && widget.previewUrl!.isNotEmpty)
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: () async {
                   final uri = Uri.tryParse(widget.previewUrl!);
                   if (uri != null) {
@@ -556,6 +569,7 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: _busy ? null : _persist,
               child: Text(l10n.shortVideoTimelinePersistOrder),
             ),

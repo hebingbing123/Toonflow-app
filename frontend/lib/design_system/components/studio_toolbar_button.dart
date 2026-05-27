@@ -35,7 +35,7 @@ class StudioToolbarButton extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Icon(icon, size: 16),
-                    SizedBox(width: StudioLayoutSpacing.microGap),
+                    const SizedBox(width: StudioSpacing.xs),
                     Text(label),
                   ],
                 )

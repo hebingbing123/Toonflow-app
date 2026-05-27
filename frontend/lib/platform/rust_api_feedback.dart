@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../design_system/ix/studio_toast.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../l10n/app_localizations.dart';
@@ -35,6 +36,9 @@ void reportRustApiError(
   required void Function(String? error) onErrorChanged,
   bool showGlobalSnackBar = true,
 }) {
+  if (ProductDemoMode.shouldSuppressDemoApiError(error)) {
+    return;
+  }
   onErrorChanged(describeRustApiError(error));
   if (showGlobalSnackBar && error is RustApiException) {
     showRustApiErrorSnackBar(error);
@@ -50,6 +54,9 @@ void reportRustOrDescribeApiError(
   AppLocalizations? l10n,
   bool showGlobalSnackBar = true,
 }) {
+  if (ProductDemoMode.shouldSuppressDemoApiError(error)) {
+    return;
+  }
   if (error is RustApiException) {
     reportRustApiError(
       error,
@@ -68,12 +75,17 @@ void reportRustOrDescribeApiError(
 
 /// Shows a top-right toast using [describeRustApiError].
 void showRustApiErrorSnackBar(Object error) {
+  if (ProductDemoMode.shouldSuppressDemoApiError(error)) {
+    return;
+  }
   final messenger = kRustApiRootScaffoldMessengerKey.currentState;
   final context = messenger?.context;
   if (context == null || !context.mounted) {
     return;
   }
-  final l10n = AppLocalizations.of(context)!;
+  final l10n =
+      AppLocalizations.of(context) ??
+      lookupAppLocalizations(const Locale('en'));
   final text = describeRustApiError(error);
   final isRate = isRustApiQuotaOrRateError(error);
   showStudioToast(

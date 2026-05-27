@@ -94,7 +94,7 @@ void main() {
           body: JobsSectionView(
             studioPresentation: true,
             model: JobsSectionViewModel(
-              loadingJobs: true,
+              loadingJobs: false,
               loadingJobKinds: false,
               loadingJobKindSummary: false,
               loadingJobStatusSummary: false,

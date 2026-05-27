@@ -125,11 +125,11 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             ),
           ),
           const SizedBox(height: 8),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
             children: [
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(ctx),
                 onPressed: () {
                   // Close dialog first, then navigate.
                   Navigator.of(ctx).pop();
@@ -147,6 +147,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                 child: Text(l10n.projectEditorPublishOpenWorkspace),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(ctx),
                 onPressed: () async {
                   try {
                     final overview = await fetchPublishOverview(token, p.id);

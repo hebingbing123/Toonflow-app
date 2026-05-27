@@ -6,6 +6,7 @@ import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -1318,6 +1319,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                       if (onOpenProductionForShotReadiness != null) ...[
                         const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         OutlinedButton.icon(
+                          style: studioFormOutlinedIconLabeledButtonStyle(context),
                           onPressed: onOpenProductionForShotReadiness,
                           icon: const Icon(Icons.movie_creation_outlined),
                           label: Text(
@@ -1378,6 +1380,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                     Text(nextStepDetail, style: studioMutedBodyMedium(context)),
                     const SizedBox(height: StudioSpacing.sm),
                     FilledButton.icon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed: onNextStep,
                       icon: const Icon(Icons.arrow_forward_outlined),
                       label: Text(nextStepButtonLabel),
@@ -1814,17 +1817,18 @@ class _CandidateCompareCard extends StatelessWidget {
               }),
             ],
             const SizedBox(height: 8),
-            Wrap(
+            StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
               children: [
                 if (item.onSetCurrent != null)
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: item.onSetCurrent,
                     child: Text(l10n.shortVideoCandidateSetCurrent),
                   ),
                 if (item.onOpenRework != null)
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: item.onOpenRework,
                     child: Text(l10n.shortVideoCandidatePartialRework),
                   ),
@@ -1928,7 +1932,10 @@ class _ReadinessFlowNode extends StatelessWidget {
           border: Border.all(color: border),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StudioSpacing.xs,
+            vertical: StudioLayoutSpacing.microGap,
+          ),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Row(

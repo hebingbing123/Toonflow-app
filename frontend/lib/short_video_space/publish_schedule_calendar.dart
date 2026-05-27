@@ -153,19 +153,41 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(l10n.l10nBatch_775383c7b6(day.day), style: labelStyle),
-                        const SizedBox(height: StudioSpacing.xs),
-                        Text(
-                          countLabel,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: outline,
-                            fontSize: StudioTypography.of(context).meta,
-                          ),
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact = constraints.maxHeight < 40;
+                        if (compact) {
+                          return Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '${day.day}',
+                                style: labelStyle,
+                              ),
+                            ),
+                          );
+                        }
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.l10nBatch_775383c7b6(day.day),
+                              style: labelStyle,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              countLabel,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: outline,
+                                fontSize: StudioTypography.of(context).meta,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

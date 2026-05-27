@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 /// Confirmation dialog utilities for short video editing operations
 ///
@@ -337,11 +338,9 @@ class _DeleteVersionConfirmationDialogState
           child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
+          style: studioFormDestructivePrimaryButtonStyle(context),
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
           ),
           child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionConfirm),
         ),
@@ -402,6 +401,7 @@ class _BatchDisableConfirmationDialogState
           child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
@@ -464,6 +464,7 @@ class _RestoreDraftConfirmationDialogState
           child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
@@ -520,6 +521,7 @@ class _CancelExportConfirmationDialogState
           child: Text(l10n.shortVideoSpaceDialogConfirmCancelExportContinue),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
           ),
@@ -580,11 +582,9 @@ class _BatchArchivePublishConfirmationDialogState
           child: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () => Navigator.of(context).pop(
             ConfirmationResult(confirmed: true, dontShowAgain: _dontShowAgain),
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
           child: Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveConfirm),
         ),

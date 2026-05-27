@@ -191,12 +191,12 @@ class _PublishDraftsPanel extends StatelessWidget {
                       ),
                       if (publishPanelUi.selectedDraftIds.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        Wrap(
+                        StudioDenseActionRow(
                           spacing: 8,
-                          runSpacing: 8,
                           children: [
                             if (publishPanelUi.onBatchScheduleDrafts != null)
                               FilledButton.tonalIcon(
+                                style: studioFormIconLabeledButtonStyle(context),
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : () => publishPanelUi.onBatchScheduleDrafts
@@ -208,6 +208,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                               ),
                             if (publishPanelUi.onBatchPublishDrafts != null)
                               FilledButton.icon(
+                                style: studioFormIconLabeledButtonStyle(context),
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onBatchPublishDrafts,
@@ -218,6 +219,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                               ),
                             if (publishPanelUi.onBatchArchiveDrafts != null)
                               OutlinedButton.icon(
+                                style: studioFormOutlinedIconLabeledButtonStyle(context),
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onBatchArchiveDrafts,
@@ -228,6 +230,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                               ),
                             if (publishPanelUi.onCompareDrafts != null)
                               OutlinedButton.icon(
+                                style: studioFormOutlinedIconLabeledButtonStyle(context),
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onCompareDrafts,
@@ -510,12 +513,12 @@ class _PublishDraftsPanel extends StatelessWidget {
                 publishPanelUi.onScheduleAllDraftsSameTime != null ||
                 publishPanelUi.onOpenPublishTroubleshooting != null) ...[
               const SizedBox(height: 16),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   if (publishPanelUi.onRefreshPublish != null)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onRefreshPublish,
@@ -524,6 +527,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onBootstrapPublishDraft != null)
                     FilledButton.tonalIcon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onBootstrapPublishDraft,
@@ -538,6 +542,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onEnqueuePublishJob != null)
                     FilledButton.icon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed:
                           (publishPanelUi.publishBusy ||
                               !publishPanelUi.exportReady)
@@ -558,6 +563,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onEnqueueAllDrafts != null)
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed:
                           (publishPanelUi.publishBusy ||
                               !publishPanelUi.exportReady)
@@ -571,6 +577,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onRetryFailedPublishJobs != null)
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onRetryFailedPublishJobs,
@@ -578,6 +585,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onSuggestPublishCopy != null)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onSuggestPublishCopy,
@@ -586,6 +594,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onClearPublishSchedule != null)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onClearPublishSchedule,
@@ -595,6 +604,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                   if (publishPanelUi.onScheduleFirstDraft != null &&
                       publishPanelUi.publishPrimaryDraftId.isNotEmpty)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : () => publishPanelUi.onScheduleFirstDraft?.call(
@@ -608,6 +618,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                   if (publishPanelUi.onScheduleAllDraftsSameTime != null &&
                       publishPanelUi.draftLines.length > 1)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : () => publishPanelUi.onScheduleAllDraftsSameTime
@@ -617,6 +628,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onOpenPublishTroubleshooting != null)
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onOpenPublishTroubleshooting,

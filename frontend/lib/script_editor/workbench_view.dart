@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
@@ -108,6 +109,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
               padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
               decoration: studioRecessedPanelDecoration(context),
               child: FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.recommendedAction,
                 child: Text(model.recommendedActionLabel),
               ),
@@ -143,11 +145,11 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             ],
           ],
           const SizedBox(height: StudioLayoutSpacing.listItem),
-          Wrap(
+          StudioDenseActionRow(
             spacing: StudioSpacing.xs,
-            runSpacing: StudioSpacing.xs,
             children: [
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: callbacks.onExportCurrentScript,
                 child: Text(l10n.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip),
               ),

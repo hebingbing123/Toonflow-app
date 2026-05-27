@@ -81,11 +81,12 @@ mod helpers_test;
 #[allow(unused_imports)]
 pub use api_error::{ApiError, ErrorBody};
 pub use helpers::{
-    bad_request_i18n, concurrent_modification_i18n, conflict_i18n, conflict_with_details_i18n,
-    db_error, deprecated_endpoint_i18n, duplicate_resource_i18n, feature_not_enabled_i18n,
-    forbidden_i18n, insufficient_permissions_i18n, internal_error, invalid_format_i18n,
-    invalid_value_i18n, missing_field_i18n, not_implemented_i18n, validate_enum, validate_input,
-    validate_max_length, validate_non_empty_string, validate_positive, validate_range,
+    assert_server_fetchable_url, assert_server_fetchable_url_resolved, bad_request_i18n,
+    concurrent_modification_i18n, conflict_i18n, conflict_with_details_i18n, db_error,
+    deprecated_endpoint_i18n, duplicate_resource_i18n, feature_not_enabled_i18n, forbidden_i18n,
+    insufficient_permissions_i18n, internal_error, invalid_format_i18n, invalid_value_i18n,
+    missing_field_i18n, not_implemented_i18n, validate_enum, validate_input, validate_max_length,
+    validate_non_empty_string, validate_positive, validate_range, validate_server_fetch_url,
     version_conflict_i18n, workspace_access_denied_i18n,
 };
 pub use locale::ApiLocale;

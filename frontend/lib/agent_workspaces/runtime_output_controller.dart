@@ -58,6 +58,19 @@ class WorkspaceOutputController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void applyDemoPreview({
+    required String assistantText,
+    String? lastToolResultLine,
+    String? writebackLine,
+    String? suggestedFlowKey,
+  }) {
+    _assistantText = assistantText;
+    _lastToolResultLine = lastToolResultLine;
+    _writebackLine = writebackLine;
+    _suggestedFlowKey = suggestedFlowKey;
+    notifyListeners();
+  }
+
   void clearWritebackLine() {
     if (_writebackLine == null) {
       return;

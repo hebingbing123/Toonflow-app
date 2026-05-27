@@ -69,8 +69,6 @@ HomePage _shellPage({int? initialProjectNumericId}) {
 }
 
 void main() {
-  installLayoutOverflowIgnoreForTests();
-
   testWidgets('storyboard overlay route renders through GoRouter', (
     tester,
   ) async {

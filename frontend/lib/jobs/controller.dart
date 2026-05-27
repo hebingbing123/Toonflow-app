@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -44,6 +45,7 @@ class JobsController extends ChangeNotifier {
   bool loadingJobStatusSummary = false;
   bool creatingJob = false;
   bool loadingJobById = false;
+  bool skipDemoApi = false;
   String? cancellingJobId;
   String? retryingJobId;
   List<JobRow>? jobs;
@@ -95,6 +97,7 @@ class JobsController extends ChangeNotifier {
     _lastKindFilter = null;
     _lastStatusFilter = null;
     jobIdController.clear();
+    skipDemoApi = false;
     notifyListeners();
   }
 
@@ -119,6 +122,9 @@ class JobsController extends ChangeNotifier {
   }
 
   Future<void> _loadJobsList({String? kind, String? status}) async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     await _ensureLiveUpdates(token);
@@ -150,6 +156,9 @@ class JobsController extends ChangeNotifier {
   }
 
   Future<void> loadJobKinds() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingJobKinds = true;
@@ -170,6 +179,9 @@ class JobsController extends ChangeNotifier {
   }
 
   Future<void> loadJobKindSummary() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingJobKindSummary = true;
@@ -197,6 +209,9 @@ class JobsController extends ChangeNotifier {
   }
 
   Future<void> loadJobStatusSummary() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingJobStatusSummary = true;

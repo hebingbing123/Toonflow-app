@@ -286,7 +286,7 @@ dart run tool/ast_parser_example.dart
 
 ## License
 
-This module is part of the Toonflow application and follows the same license.
+Proprietary — part of OpenFlow. See the repository root `LICENSE` file (not open source).
 
 ## References
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import '../../design_system/components/studio_dense_action_row.dart';
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
@@ -101,35 +102,39 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(model.guidanceSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: StudioSpacing.sm),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillStorySkeletonSeed,
                     child: Text(l10n.projectScriptPlanWorkbenchFillSkeletonFromEvents),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillAdaptationStrategySeed,
                     child: Text(l10n.projectScriptPlanWorkbenchFillStrategyFromEvents),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateDraftPackets,
                     child: Text(l10n.projectScriptPlanWorkbenchGenerateDraftPackets),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateGuidance,
                     child: Text(l10n.projectScriptPlanWorkbenchGenerateStructuredGuidance),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: model.localBusy || model.draftPackets.isEmpty
                         ? null
                         : callbacks.onWriteDraftPackets,
@@ -266,6 +271,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
           ),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: model.localBusy ? null : callbacks.onSave,
           child: Text(
             model.localBusy

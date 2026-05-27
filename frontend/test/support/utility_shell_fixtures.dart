@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:openflow_app/debug/product_shell_debug_preview.dart';
 import 'package:openflow_app/home_page.dart';
 import 'package:openflow_app/rust_api/settings/billing_webhook_events.dart';
 import 'package:openflow_app/rust_api/settings/outbound_webhooks.dart';
@@ -11,12 +12,14 @@ import 'help_hub_fixtures.dart';
 GoRouter buildProductShellTestRouter({
   String initialLocation = '/',
   ProductWorkspacePane? initialPane,
+  ProductShellDebugPreviewData? debugPreviewData,
   OutboundWebhookListResponseV1? debugHelpHubWebhooks,
   OutboundWebhookCreatedResponseV1? debugHelpHubLatestCreatedWebhook,
   BillingWebhookEventsResponseV1? debugHelpHubBillingEventsPage,
   Map<String, OutboundWebhookDeliveryListResponseV1>? debugHelpHubWebhookDeliveries,
   Map<String, OutboundWebhookTestResponseV1>? debugHelpHubWebhookLastTestResults,
 }) {
+  final preview = debugPreviewData;
   HomePage shellHome({ProductWorkspacePane? pane}) {
     return HomePage(
       shellMode: HomeShellMode.product,
@@ -24,11 +27,20 @@ GoRouter buildProductShellTestRouter({
       debugAuthenticatedAccessToken: 'test-token',
       debugSkipSessionContextSync: true,
       debugSkipAuthListenerAttach: true,
-      debugHelpHubWebhooks: debugHelpHubWebhooks,
-      debugHelpHubLatestCreatedWebhook: debugHelpHubLatestCreatedWebhook,
-      debugHelpHubBillingEventsPage: debugHelpHubBillingEventsPage,
-      debugHelpHubWebhookDeliveries: debugHelpHubWebhookDeliveries,
-      debugHelpHubWebhookLastTestResults: debugHelpHubWebhookLastTestResults,
+      debugPreviewData: preview,
+      debugProjectStudioSnapshotLoader: preview?.studioSnapshotLoader,
+      debugHelpHubWebhooks:
+          preview?.helpHubWebhooks ?? debugHelpHubWebhooks,
+      debugHelpHubLatestCreatedWebhook:
+          preview?.helpHubLatestCreatedWebhook ??
+          debugHelpHubLatestCreatedWebhook,
+      debugHelpHubBillingEventsPage:
+          preview?.helpHubBillingEventsPage ?? debugHelpHubBillingEventsPage,
+      debugHelpHubWebhookDeliveries:
+          preview?.helpHubWebhookDeliveries ?? debugHelpHubWebhookDeliveries,
+      debugHelpHubWebhookLastTestResults:
+          preview?.helpHubWebhookLastTestResults ??
+          debugHelpHubWebhookLastTestResults,
     );
   }
 

@@ -1,6 +1,6 @@
 //! Server-side novel URL preview fetch (HTML → title + body text). Preview only; does not write `app_novel` rows.
 
-use std::{collections::HashSet, net::IpAddr};
+use std::collections::HashSet;
 
 use super::super::crawl_auth::{
     apply_crawl_auth, build_crawl_http_client, resolve_crawl_auth_for_request, ResolvedCrawlAuth,
@@ -16,7 +16,10 @@ use serde_json::{Map, Value};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::{bad_request_i18n, validate_enum, validate_non_empty_string, ApiError};
+use crate::error::{
+    assert_server_fetchable_url, bad_request_i18n, validate_enum, validate_non_empty_string,
+    ApiError,
+};
 use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
@@ -51,49 +54,7 @@ pub(crate) struct CrawlAuditSummary {
 }
 
 fn assert_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
-    match url.scheme() {
-        "http" | "https" => {}
-        _ => {
-            return Err(bad_request_i18n(
-                "url must use http or https",
-                "url 必须使用 http 或 https",
-            ))
-        }
-    }
-    let host = url
-        .host_str()
-        .ok_or_else(|| bad_request_i18n("url missing host", "url 缺少 host"))?;
-    if host.eq_ignore_ascii_case("localhost")
-        || host == "127.0.0.1"
-        || host == "::1"
-        || host.ends_with(".localhost")
-    {
-        return Err(bad_request_i18n(
-            "localhost and loopback URLs are not allowed",
-            "不允许使用 localhost 或 loopback URL",
-        ));
-    }
-    if let Ok(ip) = host.parse::<IpAddr>() {
-        match ip {
-            IpAddr::V4(v4) => {
-                if v4.is_private() || v4.is_loopback() || v4.is_link_local() {
-                    return Err(bad_request_i18n(
-                        "private or loopback IP URLs are not allowed",
-                        "不允许使用私有网段或 loopback IP URL",
-                    ));
-                }
-            }
-            IpAddr::V6(v6) => {
-                if v6.is_loopback() || v6.is_unique_local() || v6.is_unicast_link_local() {
-                    return Err(bad_request_i18n(
-                        "private or loopback IP URLs are not allowed",
-                        "不允许使用私有网段或 loopback IP URL",
-                    ));
-                }
-            }
-        }
-    }
-    Ok(())
+    assert_server_fetchable_url(url)
 }
 
 fn strip_scripts_and_styles(html: &str) -> String {

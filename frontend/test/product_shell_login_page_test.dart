@@ -25,7 +25,7 @@ void main() {
     Size size = const Size(1440, 1024),
   }) {
     return MediaQuery(
-      data: MediaQueryData(size: size),
+      data: MediaQueryData(size: size, disableAnimations: true),
       child: MaterialApp(
         locale: const Locale('zh'),
         localizationsDelegates: const [
@@ -50,6 +50,33 @@ void main() {
     );
   }
 
+  testWidgets('product login submit shows loading while auth is in flight', (
+    WidgetTester tester,
+  ) async {
+    final authController = buildAuthController();
+    addTearDown(authController.dispose);
+
+    await tester.binding.setSurfaceSize(const Size(1440, 1024));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      buildTestApp(
+        authController: authController,
+        onSignIn: () {},
+        onSignUp: () {},
+      ),
+    );
+    await tester.pump();
+
+    authController.debugSetAuthInFlight(true);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+
+    authController.debugSetAuthInFlight(false);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets('product login page keeps wide layout and forwards actions', (
     WidgetTester tester,
   ) async {
@@ -68,7 +95,8 @@ void main() {
         onSignUp: () => signUpTapped++,
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.text('OpenFlow'), findsOneWidget);
     expect(find.byKey(const Key('product-auth-submit')), findsOneWidget);
@@ -78,10 +106,12 @@ void main() {
     await tester.tap(find.byKey(const Key('product-auth-submit')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('auth-mode-sign-up')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.enterText(find.byType(TextField).at(2), 'mismatch');
     await tester.tap(find.byKey(const Key('product-auth-submit')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('两次输入的密码不一致。'), findsOneWidget);
 
     await tester.enterText(
@@ -114,7 +144,8 @@ void main() {
         size: const Size(390, 844),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(SingleChildScrollView), findsWidgets);
     expect(find.text('账号或密码错误'), findsOneWidget);
@@ -122,7 +153,8 @@ void main() {
 
     await tester.ensureVisible(find.byKey(const Key('auth-mode-sign-up')));
     await tester.tap(find.byKey(const Key('auth-mode-sign-up')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.text('确认密码'), findsOneWidget);
 
@@ -146,7 +178,8 @@ void main() {
         size: const Size(799, 452),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(SingleChildScrollView), findsWidgets);
     expect(find.byKey(const Key('product-auth-submit')), findsOneWidget);

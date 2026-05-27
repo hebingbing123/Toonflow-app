@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -401,14 +402,16 @@ class _StudioNovelCrawlAuthSectionState
             ),
           ],
           const SizedBox(height: 8),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
             children: <Widget>[
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: _loading || _saving ? null : _loadConfig,
                 child: Text(l10n.studioNovelCrawlAuthReload),
               ),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: _loading || _saving || _authMode == 'none'
                     ? null
                     : _saveConfig,

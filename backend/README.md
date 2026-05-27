@@ -1,5 +1,7 @@
 # OpenFlow `backend` (Rust)
 
+> **许可**：OpenFlow 为闭源 SaaS 平台（见仓库根目录 [LICENSE](../LICENSE)）。API 受 Supabase Auth JWT 保护；终端用户须注册登录。
+
 Axum HTTP 服务，默认端口 **8666**（环境变量 `PORT` 可覆盖）。
 
 ## 本地数据库（Supabase CLI）

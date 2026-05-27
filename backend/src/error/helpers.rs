@@ -8,6 +8,8 @@
 //! 新增双语辅助函数（[`bad_request_i18n`] / [`forbidden_i18n`] / [`validate_positive`] / [`validate_max_length`]）
 //! 用于常见错误场景的中英文消息。
 
+use std::net::IpAddr;
+
 use crate::error::locale::{current_locale, ApiLocale};
 use crate::error::ApiError;
 use tracing::error;
@@ -527,6 +529,117 @@ pub fn validate_url(value: &str, field_name: &str) -> Result<(), ApiError> {
     }
 }
 
+fn is_blocked_server_fetch_host(host: &str) -> bool {
+    let host = host.trim().trim_end_matches('.');
+    if host.eq_ignore_ascii_case("localhost") || host.ends_with(".localhost") {
+        return true;
+    }
+    matches!(
+        host,
+        "127.0.0.1" | "::1" | "metadata.google.internal" | "metadata.google"
+    )
+}
+
+fn is_blocked_server_fetch_ip(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            v4.is_private()
+                || v4.is_loopback()
+                || v4.is_link_local()
+                || v4.is_unspecified()
+                || v4.is_broadcast()
+        }
+        IpAddr::V6(v6) => {
+            v6.is_loopback()
+                || v6.is_unique_local()
+                || v6.is_unicast_link_local()
+                || v6.is_unspecified()
+        }
+    }
+}
+
+/// Rejects URLs that must not be fetched server-side (SSRF guard for outbound HTTP).
+pub fn assert_server_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
+    match url.scheme() {
+        "http" | "https" => {}
+        _ => {
+            return Err(bad_request_i18n(
+                "url must use http or https",
+                "url 必须使用 http 或 https",
+            ));
+        }
+    }
+    let host = url
+        .host_str()
+        .ok_or_else(|| bad_request_i18n("url missing host", "url 缺少 host"))?;
+    if is_blocked_server_fetch_host(host) {
+        return Err(bad_request_i18n(
+            "localhost and loopback URLs are not allowed",
+            "不允许使用 localhost 或 loopback URL",
+        ));
+    }
+    if let Ok(ip) = host.parse::<IpAddr>() {
+        if is_blocked_server_fetch_ip(ip) {
+            return Err(bad_request_i18n(
+                "private or loopback IP URLs are not allowed",
+                "不允许使用私有网段或 loopback IP URL",
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// SSRF guard: static checks plus DNS resolution for hostname targets.
+pub async fn assert_server_fetchable_url_resolved(url: &url::Url) -> Result<(), ApiError> {
+    assert_server_fetchable_url(url)?;
+    let host = url
+        .host_str()
+        .ok_or_else(|| bad_request_i18n("url missing host", "url 缺少 host"))?;
+    if host.parse::<IpAddr>().is_ok() {
+        return Ok(());
+    }
+    let port = url.port_or_known_default().unwrap_or(443);
+    let mut resolved_any = false;
+    let addrs = tokio::net::lookup_host((host, port)).await.map_err(|e| {
+        bad_request_i18n(
+            &format!("url host could not be resolved: {e}"),
+            &format!("url 主机名无法解析：{e}"),
+        )
+    })?;
+    for addr in addrs {
+        resolved_any = true;
+        if is_blocked_server_fetch_ip(addr.ip()) {
+            return Err(bad_request_i18n(
+                "private or loopback IP URLs are not allowed",
+                "不允许使用私有网段或 loopback IP URL",
+            ));
+        }
+    }
+    if !resolved_any {
+        return Err(bad_request_i18n(
+            "url host could not be resolved",
+            "url 主机名无法解析",
+        ));
+    }
+    Ok(())
+}
+
+/// Parse and validate a server-side fetch URL; returns the trimmed input on success.
+pub fn validate_server_fetch_url(raw: &str) -> Result<String, ApiError> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return Err(bad_request_i18n("url must be non-empty", "url 不能为空"));
+    }
+    let parsed = url::Url::parse(trimmed).map_err(|_| {
+        bad_request_i18n(
+            "url must be a valid absolute URL",
+            "url 必须是有效的绝对 URL",
+        )
+    })?;
+    assert_server_fetchable_url(&parsed)?;
+    Ok(trimmed.to_string())
+}
+
 /// 验证 Email 格式。
 ///
 /// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
@@ -758,6 +871,27 @@ mod tests {
             }
             _ => panic!("expected BadRequestI18n"),
         }
+    }
+
+    #[test]
+    fn validate_server_fetch_url_rejects_loopback_and_private_ips() {
+        for bad in [
+            "http://127.0.0.1/hook",
+            "http://localhost/hook",
+            "http://169.254.169.254/latest/meta-data/",
+            "http://10.0.0.1/internal",
+            "http://192.168.1.1/internal",
+        ] {
+            assert!(
+                validate_server_fetch_url(bad).is_err(),
+                "expected reject for {bad}"
+            );
+        }
+    }
+
+    #[test]
+    fn validate_server_fetch_url_accepts_public_https() {
+        assert!(validate_server_fetch_url("https://example.com/hooks/openflow").is_ok());
     }
 
     #[tokio::test]

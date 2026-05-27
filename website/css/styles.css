@@ -1,13 +1,14 @@
 /* OpenFlow marketing site — Dark Tech (design: #7C97FF, #34C8F0) */
 
 :root {
-  --bg-base: #07090f;
-  --bg-surface: #0d1018;
-  --bg-elevated: #141820;
-  --bg-card: #1a1f2b;
-  --text-primary: #f0f2f8;
-  --text-secondary: #a8b0c4;
-  --text-muted: #6b7389;
+  /* Aligned with Flutter StudioTokens.dark (frontend/lib/design_system/tokens.dart) */
+  --bg-base: #070d15;
+  --bg-surface: #101825;
+  --bg-elevated: #152033;
+  --bg-card: #101825;
+  --text-primary: #e8f1ff;
+  --text-secondary: #a2b4cd;
+  --text-muted: #667892;
   --glow-purple: #7c97ff;
   --glow-cyan: #34c8f0;
   --primary: #7c97ff;
@@ -221,10 +222,14 @@ a:hover {
   display: none;
   flex-direction: column;
   gap: 5px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px;
   background: none;
   border: none;
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-toggle span {
@@ -523,20 +528,31 @@ section {
 
 .feature-thumb {
   margin: 0;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 20px 20px 12px;
   border: none;
   border-bottom: 1px solid var(--border-subtle);
-  background: linear-gradient(165deg, rgba(124, 151, 255, 0.1) 0%, var(--bg-base) 55%);
+  background: radial-gradient(
+    120% 80% at 50% 0%,
+    rgba(124, 151, 255, 0.12) 0%,
+    var(--bg-base) 55%
+  );
   line-height: 0;
 }
 
 .feature-thumb img {
   width: 100%;
-  height: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
   display: block;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
 .feature-copy {

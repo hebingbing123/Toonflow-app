@@ -83,6 +83,14 @@ const String kOpenflowNativeLibDir = String.fromEnvironment(
   defaultValue: '',
 );
 
+/// Desktop client download / 商务领取入口（非公开 GitHub Releases）。
+/// Override: `--dart-define=OPENFLOW_DESKTOP_DOWNLOADS_URL=https://...`
+const String kOpenflowDesktopDownloadsUrl = String.fromEnvironment(
+  'OPENFLOW_DESKTOP_DOWNLOADS_URL',
+  defaultValue:
+      'mailto:ltlctools@outlook.com?subject=OpenFlow%20%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8B%E8%BD%BD',
+);
+
 String resolveRustApiUrl(String pathOrUrl) {
   final raw = pathOrUrl.trim();
   if (raw.isEmpty) {

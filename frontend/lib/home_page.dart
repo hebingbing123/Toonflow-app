@@ -14,6 +14,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'demo/product_demo_tour.dart';
+import 'demo/product_demo_tour_shell_navigator.dart';
+import 'demo/product_demo_tour_anchors.dart';
+import 'demo/help_hub_demo_data.dart';
+import 'demo/product_demo_mode.dart';
+import 'demo/studio_demo_data.dart';
+import 'debug/product_shell_debug_preview.dart';
 import 'desktop/desktop_window_constraints.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/studio_code_labels.dart';
@@ -91,6 +98,7 @@ import 'design_system/components/studio_onboarding_coach.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
 import 'design_system/components/studio_skeleton.dart';
+import 'design_system/components/studio_dense_action_row.dart';
 import 'design_system/components/studio_surfaces.dart';
 import 'design_system/components/studio_collapsible_filter_panel.dart';
 import 'design_system/components/studio_filter_row.dart';
@@ -214,6 +222,7 @@ part 'shell/help_hub_webhooks_panel.dart';
 part 'shell/help_hub_billing_panel.dart';
 part 'shell/build_product_shell.dart';
 part 'shell/build_sections_debug.dart';
+part 'shell/product_demo_mode_shell.dart';
 part 'shell/runtime_helpers.dart';
 part 'script_editor/editor.dart';
 part 'script_editor/edit_image/workbench.dart';
@@ -258,6 +267,7 @@ class HomePage extends StatefulWidget {
     this.debugHelpHubBillingEventsPage,
     this.debugHelpHubWebhookDeliveries,
     this.debugHelpHubWebhookLastTestResults,
+    this.debugPreviewData,
   });
 
   /// [HomeShellMode.product] = studio sidebar + login gate ([waoowaoo]-style).
@@ -309,6 +319,9 @@ class HomePage extends StatefulWidget {
   /// Optional per-webhook test result seeds for widget tests.
   final Map<String, OutboundWebhookTestResponseV1>?
   debugHelpHubWebhookLastTestResults;
+
+  /// Seeds pane controllers with mock lists for widget / overflow tests.
+  final ProductShellDebugPreviewData? debugPreviewData;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -576,6 +589,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   String? get _effectiveAccessToken {
+    if (ProductDemoMode.instance.isGuestDemo) {
+      return ProductDemoMode.guestAccessToken;
+    }
     final injected = widget.debugAuthenticatedAccessToken?.trim();
     if (injected != null && injected.isNotEmpty) {
       return injected;
@@ -602,6 +618,15 @@ class _HomePageState extends State<HomePage> {
 
   void _setSharedError(String? error) {
     if (!mounted) return;
+    if (_isDemoModeActive && error != null) {
+      final lower = error.toLowerCase();
+      if (lower.contains('jwt') ||
+          lower.contains('invalid_token') ||
+          lower.contains('invalid token') ||
+          lower.contains('401')) {
+        return;
+      }
+    }
     void apply() {
       if (!mounted) return;
       if (_error == error) return;
@@ -638,10 +663,26 @@ class _HomePageState extends State<HomePage> {
     if (widget.studioProjectNumericId != null) {
       _productScopedProjectNumericId = widget.studioProjectNumericId;
     }
+    _registerDemoModeListener();
+    unawaited(
+      ProductDemoMode.instance.loadFromPrefs().then((_) {
+        if (!mounted) {
+          return;
+        }
+        if (_isDemoModeActive) {
+          _applyDemoSessionFromCatalog();
+          _configureDemoTour(forceRestart: false);
+        } else if (_hasDemoCatalog) {
+          _applyDebugPreviewDataIfNeeded();
+        }
+        unawaited(_syncSessionContext());
+        setState(() {});
+      }),
+    );
+    _applyDebugPreviewDataIfNeeded();
     if (kSupabaseConfigured && !widget.debugSkipAuthListenerAttach) {
       _authController.attachAuthListener();
     }
-    _syncSessionContext();
     if (widget.shellMode == HomeShellMode.product) {
       StudioSettingsHubNavigation.registerOpenSubscribeHandler(
         _openBillingSubscribeFromShell,
@@ -654,6 +695,9 @@ class _HomePageState extends State<HomePage> {
     super.didChangeDependencies();
     _bindSharedShellNavigationIfNeeded();
     _initializeProductShellNavigationIfNeeded();
+    if (widget.shellMode == HomeShellMode.product && _isDemoModeActive) {
+      _ensureDemoTourConfigured();
+    }
     if (widget.shellMode == HomeShellMode.product &&
         widget.studioOverlay == StudioOverlayMode.none) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -714,12 +758,16 @@ class _HomePageState extends State<HomePage> {
     }
     if (oldWidget.navigationShell != widget.navigationShell ||
         oldWidget.studioOverlay != widget.studioOverlay ||
+        oldWidget.studioStepSlug != widget.studioStepSlug ||
         oldWidget.initialProductPane != widget.initialProductPane) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;
         }
         _attachStudioRouteListener();
+        if (_isDemoModeActive) {
+          _syncDemoTourFromShell();
+        }
         if (widget.studioOverlay == StudioOverlayMode.none) {
           if (GoRouter.maybeOf(context) != null) {
             _syncStudioPaneFromRoute();
@@ -1174,6 +1222,8 @@ class _HomePageState extends State<HomePage> {
     if (!_authController.signedIn) {
       StudioToastOverlay.hide();
     }
+    // Guest demo exits only via “Exit demo”; do not auto-disable here when
+    // Supabase still has a persisted session (breaks autoplay after navigation).
     _syncSessionContext();
     if (!mounted) return;
     setState(() {});
@@ -1238,6 +1288,11 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _loadingSessionMe = false;
       });
+      return;
+    }
+
+    if (_isDemoModeActive) {
+      _applyDemoSessionFromCatalog();
       return;
     }
 
@@ -1360,6 +1415,9 @@ class _HomePageState extends State<HomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         unawaited(_maybeNudgeDomesticVendorOnProjectsHome());
+        if (_isDemoModeActive) {
+          _syncDemoTourFromShell();
+        }
       });
     }
     setState(() {});
@@ -1469,6 +1527,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     StudioSettingsHubNavigation.registerOpenSubscribeHandler(null);
     _detachStudioRouteListener();
+    _unregisterDemoModeListener();
     _authController.removeListener(_handleAuthChanged);
     _accountProbesController.removeListener(_handleAccountProbesChanged);
     _contentProbesController.removeListener(_handleContentProbesChanged);

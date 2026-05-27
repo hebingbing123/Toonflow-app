@@ -44,7 +44,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
     if (widget.debugBillingEventsPage != null) {
       _billingEventsPage = widget.debugBillingEventsPage;
       _billingEvents.addAll(widget.debugBillingEventsPage!.items);
-    } else {
+    } else if (!ProductDemoMode.instance.shouldSkipLiveApi) {
       unawaited(_loadBillingEvents());
     }
   }
@@ -641,6 +641,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       wideBreakpoint: 560,
                       children: <Widget>[
                         FilledButton.tonal(
+                          style: studioFormTonalButtonStyle(context),
                           onPressed: _loadingBillingEvents
                               ? null
                               : _loadBillingEvents,
@@ -651,6 +652,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           ),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed:
                               _loadingBillingEvents || _loadingMoreBillingEvents
                               ? null
@@ -675,6 +677,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           child: Text(l10n.billingAuditResetRefresh),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: _billingEvents.isEmpty
                               ? null
                               : () async {
@@ -695,10 +698,12 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           child: Text(l10n.billingAuditCopyCsv),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: _copyBillingEventsQuerySummary,
                           child: Text(l10n.billingAuditCopyQuerySummary),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: () async {
                             await Clipboard.setData(
                               ClipboardData(
@@ -719,6 +724,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           child: Text(l10n.billingAuditCopyQueryUrl),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: _exportingAllBillingEvents
                               ? null
                               : _copyAllBillingEventsCsv,
@@ -811,6 +817,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           ),
                         ),
                     OutlinedButton(
+                      style: studioFormSecondaryButtonStyle(context),
                       onPressed: _copyBillingEventsSnapshotSummary,
                       child: Text(l10n.billingAuditCopySnapshot),
                     ),
@@ -838,11 +845,11 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                           ),
                         SelectableText(l10n.billingRowId('${item.id}')),
                         const SizedBox(height: 8),
-                        Wrap(
+                        StudioDenseActionRow(
                           spacing: 8,
-                          runSpacing: 8,
                           children: <Widget>[
                             OutlinedButton(
+                              style: studioFormSecondaryButtonStyle(context),
                               onPressed: () => _copyBillingAuditText(
                                 item.providerEventId,
                                 'provider_event_id',
@@ -852,6 +859,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             if (item.rawEventId != null &&
                                 item.rawEventId!.isNotEmpty)
                               OutlinedButton(
+                                style: studioFormSecondaryButtonStyle(context),
                                 onPressed: () => _copyBillingAuditText(
                                   item.rawEventId!,
                                   'raw_event_id',
@@ -861,6 +869,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             if (item.provider != null &&
                                 item.provider!.trim().isNotEmpty)
                               FilledButton.tonal(
+                                style: studioFormTonalButtonStyle(context),
                                 onPressed: () => _applyBillingRowFilters(
                                   provider: item.provider,
                                 ),
@@ -873,6 +882,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             if (item.eventType != null &&
                                 item.eventType!.trim().isNotEmpty)
                               FilledButton.tonal(
+                                style: studioFormTonalButtonStyle(context),
                                 onPressed: () => _applyBillingRowFilters(
                                   eventType: item.eventType,
                                 ),
@@ -883,6 +893,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                                 ),
                               ),
                             FilledButton.tonal(
+                              style: studioFormTonalButtonStyle(context),
                               onPressed: () => _applyBillingRowFilters(
                                 providerEventId: item.providerEventId,
                                 rawEventId: item.rawEventId,
@@ -901,6 +912,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: _loadingBillingEvents || _loadingMoreBillingEvents
                         ? null
                         : () => _loadBillingEvents(append: true),

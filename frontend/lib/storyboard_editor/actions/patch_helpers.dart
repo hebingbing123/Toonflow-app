@@ -186,6 +186,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                     child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(ctx),
                     onPressed: submitting
                         ? null
                         : () async {

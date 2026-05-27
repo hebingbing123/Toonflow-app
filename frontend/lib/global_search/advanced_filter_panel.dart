@@ -445,6 +445,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         children: [
           // Apply filters button
           FilledButton.icon(
+            style: studioFormIconLabeledButtonStyle(context),
             onPressed: _applyFilters,
             icon: const Icon(Icons.check, size: 18),
             label: Text(l10n.globalSearchApplyFilter),
@@ -454,6 +455,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           
           // Clear filters button
           OutlinedButton.icon(
+            style: studioFormOutlinedIconLabeledButtonStyle(context),
             onPressed: hasActiveFilters ? _clearAllFilters : null,
             icon: const Icon(Icons.clear_all, size: 18),
             label: Text(l10n.globalSearchClearFilters),

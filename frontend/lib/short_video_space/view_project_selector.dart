@@ -311,11 +311,11 @@ class _ProjectSelectorPanel extends StatelessWidget {
             onChanged: onBgmStrategyChanged,
           ),
           const SizedBox(height: 16),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
             children: [
               FilledButton.tonalIcon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: creatingProject ? null : onCreateProject,
                 icon: const Icon(Icons.add_circle_outline),
                 label: Text(
@@ -325,6 +325,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                 ),
               ),
               FilledButton.icon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: savingProjectConfig ? null : onSaveProjectConfig,
                 icon: const Icon(Icons.save_outlined),
                 label: Text(
@@ -334,6 +335,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                 ),
               ),
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: onOpenProjects,
                 icon: const Icon(Icons.tune_outlined),
                 label: Text(l10n.shortVideoSpaceOpenProjectsRefine),

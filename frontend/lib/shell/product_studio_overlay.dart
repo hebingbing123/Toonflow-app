@@ -72,7 +72,8 @@ extension _HomePageProductStudioOverlay on _HomePageState {
         widget.studioOverlay == StudioOverlayMode.storyboardStudio ||
         widget.studioOverlay == StudioOverlayMode.episodeConsole;
     if (needsProjectUuid && effectiveProjectUuid.trim().isEmpty) {
-      if (_projectsController.projects == null) {
+      if (_projectsController.projects == null &&
+          !ProductDemoMode.instance.shouldSkipLiveApi) {
         unawaited(_projectsController.loadProjects());
       }
       return <Widget>[const Center(child: CircularProgressIndicator())];
@@ -88,6 +89,8 @@ extension _HomePageProductStudioOverlay on _HomePageState {
         projectNumericId: projectNumericId,
         projectUuid: effectiveProjectUuid,
         accessToken: token,
+        debugScripts: _storyboardDebugScripts,
+        debugShots: _storyboardDebugShots,
         onClose: () => context.go(
           '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
         ),
@@ -128,7 +131,10 @@ extension _HomePageProductStudioOverlay on _HomePageState {
             projectUuid: projectUuid,
             projectName: effectiveProjectName,
             initialStep: StudioStep.fromSlug(widget.studioStepSlug),
-            loadSnapshot: widget.debugProjectStudioSnapshotLoader,
+            loadSnapshot:
+                widget.debugProjectStudioSnapshotLoader ??
+                widget.debugPreviewData?.studioSnapshotLoader ??
+                _activeDemoCatalog?.studioSnapshotLoader,
             hostFactory: (readiness, refreshSnapshot) => ProjectStudioHost(
               projectNumericId: projectNumericId,
               projectUuid: projectUuid,
@@ -163,7 +169,17 @@ extension _HomePageProductStudioOverlay on _HomePageState {
               runningJobCount: readiness.runningJobCount,
               failedJobCount: readiness.failedJobCount,
               onExit: () => context.go('/'),
-              onStepChanged: (_) {},
+              onStepChanged: (step) {
+                if (!_isDemoModeActive) {
+                  return;
+                }
+                ProductDemoTour.instance.syncFromProjectStudioStep(
+                  projectNumericId: projectNumericId,
+                  step: step,
+                  languageCode:
+                      Localizations.localeOf(context).languageCode,
+                );
+              },
               onOpenAgentDrawer: () =>
                   showStudioAgentDrawer(context, onRunAgent: _runStudioAgent),
               onRunHarnessAgent: _runStudioAgent,

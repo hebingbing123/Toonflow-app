@@ -23,14 +23,15 @@ void main() {
     await tester.pumpWidget(
       productShellRouterTestApp(router, size: const Size(1440, 900)),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.tap(find.byIcon(Icons.apps_outlined));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     await tester.tap(find.text(zh.productNavTasks));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.byType(TaskCenterSection), findsOneWidget);
     expect(find.text(zh.productNavTasks), findsWidgets);

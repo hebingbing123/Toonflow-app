@@ -41,6 +41,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
           runSpacing: 8,
           children: [
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -107,6 +108,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
               ? null
               : () => _runNovelWorkbenchAction(

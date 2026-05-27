@@ -45,6 +45,7 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
         ),
         const SizedBox(height: 8),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(ctx),
           onPressed: localBusy
               ? null
               : () => _runNovelWorkbenchAction(

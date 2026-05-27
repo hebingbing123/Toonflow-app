@@ -89,11 +89,11 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                       },
               ),
               const SizedBox(height: 16),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: busy ? null : onReloadAll,
                     child: Text(
                       busy
@@ -102,14 +102,17 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                     ),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: busy ? null : onCreate,
                     child: Text(createLabel),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: busy || selected == null ? null : onSave,
                     child: Text(saveLabel),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: busy || selected == null ? null : onDelete,
                     child: Text(deleteLabel),
                   ),

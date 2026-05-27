@@ -58,26 +58,25 @@ def save_crop(
 
 
 def crop_gemini_hero_and_features(gemini: Image.Image) -> None:
-    """Gemini 竖版：顶部三能力栏 + 四宫格图标 + 底部 Hero 大界面。"""
+    """Gemini 竖版：只裁窗口级 UI（去掉营销大标题/列表），避免页面重复文案与 cover 拉伸发糊。"""
     print("Gemini / hero & features:")
-    # 顶部介绍：底部分镜工作区大截图
-    save_crop(gemini, (0.04, 0.76, 0.96, 0.99), "hero-main.png", scale2=True)
-    save_crop(gemini, (0.04, 0.74, 0.96, 0.99), "hero-app.png", scale2=True)
+    # Hero：仅底部分镜工作区窗口（跳过导航与标题条）
+    save_crop(gemini, (0.06, 0.82, 0.94, 0.985), "hero-main.png", scale2=True)
+    save_crop(gemini, (0.06, 0.80, 0.94, 0.985), "hero-app.png", scale2=True)
 
-    # 核心能力：顶部三栏（含界面预览，比旧竖版 572px 更清晰）
-    trio_pct = (0.02, 0.06, 0.98, 0.34)
-    save_crop(gemini, trio_pct, "features-trio.png", scale2=True)
-
-    top_cols = [
-        ("script", (0.02, 0.06, 0.33, 0.34)),
-        ("storyboard", (0.34, 0.06, 0.66, 0.34)),
-        ("collab", (0.67, 0.06, 0.98, 0.34)),
+    # 核心能力：三栏内软件截图区域（跳过「输入一句话…」标题与底部 emoji 列表）
+    ui_cols = [
+        ("script", (0.03, 0.11, 0.32, 0.27)),
+        ("storyboard", (0.35, 0.11, 0.64, 0.27)),
+        ("collab", (0.68, 0.11, 0.97, 0.27)),
     ]
-    for key, pct in top_cols:
+    for key, pct in ui_cols:
         save_crop(gemini, pct, f"feature-{key}-card.png", scale2=True)
 
-    # 私有化：中部四宫格图标卡（第四格）
-    save_crop(gemini, (0.73, 0.54, 0.98, 0.68), "feature-private-card.png", scale2=True)
+    save_crop(gemini, (0.03, 0.11, 0.97, 0.27), "features-trio.png", scale2=True)
+
+    # 私有化：中部四宫格整卡（图标 + 短说明，与 HTML 标题不重复）
+    save_crop(gemini, (0.73, 0.545, 0.98, 0.675), "feature-private-card.png", scale2=True)
 
     gemini.save(OUT / "design-gemini-full.png", "PNG", optimize=True)
     print(f"  design-gemini-full.png: {gemini.size}")

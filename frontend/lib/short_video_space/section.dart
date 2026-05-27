@@ -8,6 +8,9 @@ import 'package:flutter_list_view/flutter_list_view.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../demo/product_demo_mode.dart';
+import '../demo/short_video_demo_data.dart';
+import '../demo/studio_demo_data.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/short_video_generation_blocked.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -18,6 +21,7 @@ import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
@@ -112,6 +116,9 @@ class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
     super.key,
     required this.accessToken,
+    this.debugProjects,
+    this.debugPublishDrafts,
+    this.debugOverviewSnapshot,
     this.initialProjectUuid,
     this.initialFocus = ShortVideoSpaceInitialFocus.none,
     this.embedScope = ShortVideoSpaceEmbedScope.full,
@@ -125,6 +132,9 @@ class ShortVideoSpaceSection extends StatefulWidget {
   });
 
   final String? accessToken;
+  final List<ProjectRow>? debugProjects;
+  final List<PublishDraftRow>? debugPublishDrafts;
+  final ShortVideoDemoSnapshot? debugOverviewSnapshot;
   final String? initialProjectUuid;
   final ShortVideoSpaceInitialFocus initialFocus;
   final ShortVideoSpaceEmbedScope embedScope;
@@ -243,8 +253,27 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     super.initState();
     _snapshotBus.addListener(_onSnapshotBusChanged);
     _nativeBridgeBootstrap.addListener(_onNativeBridgeChanged);
+    if (widget.debugProjects != null) {
+      _projects = widget.debugProjects!;
+      if (_projects.isNotEmpty) {
+        _selectedProjectId = _projects.first.id;
+      }
+    }
+    if (widget.debugPublishDrafts != null) {
+      _publishDrafts = widget.debugPublishDrafts!;
+      _syncSelectedPublishDraftWith(_publishDrafts);
+    }
+    if (widget.debugOverviewSnapshot != null) {
+      _applyDemoOverviewSnapshot(widget.debugOverviewSnapshot!);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadProjects();
+      if (widget.debugProjects == null &&
+          !ProductDemoMode.instance.shouldSkipLiveApi) {
+        _loadProjects();
+      } else if (widget.debugOverviewSnapshot != null &&
+          _selectedProject != null) {
+        _syncSelectedProjectContext();
+      }
       _maybeScrollToInitialFocus();
     });
   }

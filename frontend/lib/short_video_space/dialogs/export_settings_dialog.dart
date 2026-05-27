@@ -390,6 +390,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
           child: Text(l10n.notificationsActionCancel),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: () {
             Navigator.of(context).pop(
               ExportSettings(

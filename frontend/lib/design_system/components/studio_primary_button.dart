@@ -118,7 +118,10 @@ class StudioPrimaryButton extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: StudioLayoutSpacing.insetDense + 2,
-                  vertical: math.max(8, (buttonHeight - 20) / 2),
+                  vertical: math
+                      .max(6, (buttonHeight - 20) / 2)
+                      .clamp(6.0, 8.0)
+                      .toDouble(),
                 ),
                 child: Center(
                   child: IconTheme(

@@ -565,6 +565,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               child: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(ctx),
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
               child: Text(
                 l10n.shortVideoSpaceProductionAssemblyWriteBackVersion,
@@ -1337,11 +1338,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                      child: StudioDenseActionRow(
                         children: [
                           FilledButton.tonalIcon(
+                            style: studioFormIconLabeledButtonStyle(context),
                             onPressed: operationInProgress
                                 ? null
                                 : () => unawaited(persistReorder()),
@@ -1351,6 +1351,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             ),
                           ),
                           OutlinedButton.icon(
+                            style: studioFormOutlinedIconLabeledButtonStyle(context),
                             onPressed: operationInProgress
                                 ? null
                                 : () {
@@ -1366,6 +1367,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             ),
                           ),
                           OutlinedButton.icon(
+                            style: studioFormOutlinedIconLabeledButtonStyle(context),
                             onPressed: operationInProgress
                                 ? null
                                 : () => unawaited(
@@ -2240,11 +2242,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     '${l10n.shortVideoSpaceProductionAssemblyMismatchCheckLabel}${subtitleMismatchLine(item)}',
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: [
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: (canMoveUp && !operationInProgress)
                             ? () {
                                 final current = ordered[actualIndex];
@@ -2258,6 +2259,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         ),
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: (canMoveDown && !operationInProgress)
                             ? () {
                                 final current = ordered[actualIndex];
@@ -2271,6 +2273,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         ),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed: operationInProgress
                             ? null
                             : () {
@@ -2287,6 +2290,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         ),
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: operationInProgress
                             ? null
                             : () async {
@@ -2322,6 +2326,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                         ),
                                       ),
                                       FilledButton(
+                                        style: studioFormPrimaryButtonStyle(context),
                                         onPressed: () {
                                           final sec = int.tryParse(
                                             ctrl.text.trim(),
@@ -2373,6 +2378,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       // Generate voiceover button
                       if (item.voiceoverScriptReady)
                         FilledButton.icon(
+                          style: studioFormIconLabeledButtonStyle(context),
                           onPressed: operationInProgress
                               ? null
                               : () async {
@@ -2471,6 +2477,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 child: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(ctx),
                 onPressed: () async {
                   final nextSubtitle = subtitleCtrl.text.trim();
                   final nextBgm = bgmCtrl.text.trim();

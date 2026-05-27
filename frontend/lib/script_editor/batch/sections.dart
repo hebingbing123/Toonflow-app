@@ -12,6 +12,7 @@ extension _StoryboardBatchWorkbenchSections
         wideLayout: StudioFilterWideLayout.toolbarRow,
         children: <Widget>[
           FilledButton.tonal(
+            style: studioFormTonalButtonStyle(context),
             onPressed: _loadingProduction || _busyMutation
                 ? null
                 : _refreshProduction,
@@ -107,6 +108,7 @@ extension _StoryboardBatchWorkbenchSections
             wideLayout: StudioFilterWideLayout.toolbarRow,
             children: <Widget>[
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: _busyMutation || !canQuickGenerate
                     ? null
                     : () => _runMutation(_batchGenerate),

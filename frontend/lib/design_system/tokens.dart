@@ -198,8 +198,11 @@ abstract final class StudioSpacing {
   /// Large sheets / modals (28px).
   static const double radiusSheet = 28;
 
+  /// Shared height for dense inputs, text buttons, and labeled actions.
+  static const double controlHeight = 36;
+
   /// Minimum square hit target for chrome icon buttons (desktop).
-  static const double iconTouchTarget = 36;
+  static const double iconTouchTarget = controlHeight;
 
   /// Collapsed sidebar nav tile size.
   static const double navItemTouchTarget = 44;
@@ -217,8 +220,8 @@ abstract final class StudioLayoutSpacing {
   static const double actionRow = StudioSpacing.sm;
   static const double listItem = StudioSpacing.xs;
 
-  /// Dense icon-to-label gap (replaces legacy `6` in chrome rows).
-  static const double microGap = 6;
+  /// Dense icon-to-label gap; prefer [StudioSpacing.xs] for new toolbar rows.
+  static const double microGap = StudioSpacing.xs;
 
   /// Title to subtitle in compact headers (replaces legacy `4`).
   static const double titleTight = 4;

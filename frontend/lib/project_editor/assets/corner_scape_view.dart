@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
@@ -92,11 +93,11 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     : (_) => callbacks.onRefresh(),
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: model.busy || model.loading
                         ? null
                         : callbacks.onRefresh,

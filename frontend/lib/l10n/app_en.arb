@@ -537,6 +537,53 @@
   "studioProjectsEmptyStep1": "Tap Create project, name it, and pick a story premise.",
   "studioProjectsEmptyStep2": "Open the project — you land on Script to write or import your story.",
   "studioProjectsEmptyStep3": "Before AI generation, add models and API keys under Settings → Model vendors.",
+  "productDemoModeBannerTitle": "Demo mode",
+  "productDemoModeBannerBody": "Sample data only — explore every page and dialog; nothing is saved to your account.",
+  "productDemoModeExit": "Exit demo",
+  "productDemoModeExploreGuest": "Try demo first",
+  "productDemoModeExploreLoggedIn": "Explore with sample data",
+  "productDemoModeMutationBlocked": "Changes cannot be saved in demo mode",
+  "productDemoAutoplayPause": "Pause tour",
+  "productDemoAutoplayResume": "Resume tour",
+  "productDemoAutoplayStepBody": "Auto tour: {step}",
+  "@productDemoAutoplayStepBody": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "productDemoGuideStepCounter": "Step {current} of {total}",
+  "@productDemoGuideStepCounter": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuidePrevious": "Previous",
+  "productDemoGuideNext": "Next",
+  "productDemoGuideStartAutoplay": "Auto tour",
+  "productDemoGuideExpandDetails": "Expand",
+  "productDemoGuideCollapseDetails": "Collapse",
+  "productDemoGuideMainlineCounter": "Main line · {step}/{total}",
+  "@productDemoGuideMainlineCounter": {
+    "placeholders": {
+      "step": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuideLaunchCounter": "Launch path · {part}/{total}",
+  "@productDemoGuideLaunchCounter": {
+    "placeholders": {
+      "part": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuideOptionalTag": "Optional",
+  "productDemoGuideSectionGoal": "What to do",
+  "productDemoGuideSectionWhere": "On this screen",
+  "productDemoGuideSectionDemo": "In this demo",
+  "productDemoGuideSectionNext": "Up next",
   "studioGettingStartedTitle": "Quick start",
   "studioGettingStartedStepSemantics": "Step {stepNumber} of {stepTotal}: {stepText}",
   "@studioGettingStartedStepSemantics": {

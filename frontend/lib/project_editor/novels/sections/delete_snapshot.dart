@@ -64,6 +64,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
               ? null
               : () => _runNovelWorkbenchAction(
@@ -123,11 +124,11 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -146,6 +147,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
               child: Text(l10n.projectEditorNovelsWorkbenchSnapshotReadNovelDataButton),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -166,6 +168,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
               ),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: localBusy
                   ? null
                   : () => _runNovelWorkbenchAction(
@@ -199,6 +202,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
               ? null
               : () => _runNovelWorkbenchAction(
@@ -273,6 +277,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
               ? null
               : () => _runNovelWorkbenchAction(

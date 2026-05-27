@@ -15,6 +15,7 @@ const Set<ProductWorkspacePane> kStudioUtilityPanes = <ProductWorkspacePane>{
 const Set<ProductWorkspacePane> kStudioPaneUriSyncedPanes =
     <ProductWorkspacePane>{
       ...kStudioUtilityPanes,
+      ProductWorkspacePane.scriptWorkspace,
       ProductWorkspacePane.productionWorkspace,
       ProductWorkspacePane.tasks,
       ProductWorkspacePane.jobs,

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../short_video_space/desktop_capability.dart';
@@ -127,6 +128,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
             runSpacing: 8,
             children: <Widget>[
               FilledButton.icon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: () => unawaited(_openDownloads(downloadUrl)),
                 icon: const Icon(Icons.download_outlined, size: 18),
                 label: Text(l10n.shortVideoDownloadDesktopApp),

@@ -116,6 +116,7 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
               child: Text(confirmL10n.projectEditorScriptsBatchAddCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(c),
               onPressed: () => Navigator.of(c).pop(true),
               child: Text(confirmL10n.scriptEditorDeleteConfirmDelete),
             ),
@@ -280,6 +281,7 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
           child: Text(l10n.scriptEditorDeleteScriptButton),
         ),
         FilledButton(
+          style: studioFormPrimaryButtonStyle(context),
           onPressed: _saving ? null : () => _saveChanges(l10n),
           child: Text(
             _saving ? l10n.scriptEditorSaveSaving : l10n.scriptEditorSaveChanges,

@@ -151,11 +151,11 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: saving ? null : onAddTrack,
               child: Text(l10n.storyboardVideoWorkbenchAddTrack),
             ),
@@ -228,26 +228,22 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              TextButton(
-                onPressed: saving ? null : onSaveVideoDescription,
-                child: Text(l10n.storyboardVideoWorkbenchSaveSubtitle),
+        StudioDenseActionRow(
+          spacing: 8,
+          children: [
+            TextButton(
+              onPressed: saving ? null : onSaveVideoDescription,
+              child: Text(l10n.storyboardVideoWorkbenchSaveSubtitle),
+            ),
+            TextButton(
+              onPressed: saving ? null : onGenerateVoiceover,
+              child: Text(
+                (productionRow?.voiceoverState ?? '').trim() == 'completed'
+                    ? l10n.storyboardVideoWorkbenchRegenerateVoiceover
+                    : l10n.storyboardVideoWorkbenchGenerateVoiceover,
               ),
-              TextButton(
-                onPressed: saving ? null : onGenerateVoiceover,
-                child: Text(
-                  (productionRow?.voiceoverState ?? '').trim() == 'completed'
-                      ? l10n.storyboardVideoWorkbenchRegenerateVoiceover
-                      : l10n.storyboardVideoWorkbenchGenerateVoiceover,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
@@ -443,37 +439,34 @@ class _StoryboardVideoSection extends StatelessWidget {
           controlAffinity: ListTileControlAffinity.leading,
           onChanged: saving ? null : (value) => onAudioChanged(value ?? false),
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              FilledButton(
-                onPressed: saving ? null : onSubmitVideoGeneration,
-                child: Text(
-                  saving
-                      ? l10n.storyboardVideoWorkbenchGenerating
-                      : l10n.storyboardVideoWorkbenchGenerateVideoOneClick,
-                ),
+        StudioDenseActionRow(
+          spacing: 8,
+          children: [
+            FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
+              onPressed: saving ? null : onSubmitVideoGeneration,
+              child: Text(
+                saving
+                    ? l10n.storyboardVideoWorkbenchGenerating
+                    : l10n.storyboardVideoWorkbenchGenerateVideoOneClick,
               ),
-              OutlinedButton(
-                onPressed: saving ? null : onExportCurrentVideo,
-                child: Text(l10n.storyboardVideoWorkbenchExportCurrentVideoJob),
+            ),
+            OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
+              onPressed: saving ? null : onExportCurrentVideo,
+              child: Text(l10n.storyboardVideoWorkbenchExportCurrentVideoJob),
+            ),
+            TextButton(
+              onPressed: saving || loadingExportJob
+                  ? null
+                  : onRefreshExportJob,
+              child: Text(
+                loadingExportJob
+                    ? l10n.storyboardVideoWorkbenchRefreshingExportJob
+                    : l10n.storyboardVideoWorkbenchRefreshExportJobStatus,
               ),
-              TextButton(
-                onPressed: saving || loadingExportJob
-                    ? null
-                    : onRefreshExportJob,
-                child: Text(
-                  loadingExportJob
-                      ? l10n.storyboardVideoWorkbenchRefreshingExportJob
-                      : l10n.storyboardVideoWorkbenchRefreshExportJobStatus,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(
@@ -530,11 +523,11 @@ class _StoryboardVideoSection extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
             children: [
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: saving ? null : onExportCurrentVideo,
                 child: Text(l10n.storyboardVideoWorkbenchExportSelectedVideo),
               ),
@@ -604,12 +597,12 @@ class _StoryboardVideoSection extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   if (isCurrent)
                     FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: null,
                       child: Text(
                         l10n.storyboardVideoWorkbenchCurrentSelectedBadge,

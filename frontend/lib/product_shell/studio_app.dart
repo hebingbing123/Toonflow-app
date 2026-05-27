@@ -7,6 +7,8 @@ import '../design_system/studio_adaptive_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../locale/app_locale_notifier.dart';
 import '../platform/rust_api_feedback.dart';
+import '../demo/product_demo_app_coach_host.dart';
+import '../demo/product_demo_tour_shell_navigator.dart';
 import '../shell/navigation_controller.dart';
 import 'router.dart';
 import 'studio_shell_navigation_scope.dart';
@@ -24,6 +26,15 @@ class _StudioProductAppState extends State<StudioProductApp> {
   late final GoRouter _router = createStudioRouter();
   late final ShellNavigationController _shellNavigation =
       ShellNavigationController();
+
+  @override
+  void initState() {
+    super.initState();
+    ProductDemoTourShellNavigator.instance.attach(
+      router: _router,
+      shellNavigation: _shellNavigation,
+    );
+  }
 
   @override
   void dispose() {
@@ -65,8 +76,10 @@ class _StudioProductAppState extends State<StudioProductApp> {
               final adaptiveTheme = studioAdaptiveDesktopTheme(context);
               return Theme(
                 data: adaptiveTheme,
-                child: StudioToastHost(
-                  child: child ?? const SizedBox.shrink(),
+                child: ProductDemoAppCoachHost(
+                  child: StudioToastHost(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               );
             },

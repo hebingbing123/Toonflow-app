@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'download_stub.dart'
@@ -34,6 +35,7 @@ class AccountController extends ChangeNotifier {
   List<AccountExportJobRecordV1> items = const <AccountExportJobRecordV1>[];
   final Set<String> _downloadingJobIds = <String>{};
   bool _primed = false;
+  bool skipDemoApi = false;
 
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider();
@@ -56,6 +58,9 @@ class AccountController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) {
       reset();
@@ -191,6 +196,17 @@ class AccountController extends ChangeNotifier {
       return;
     }
     includeNotifications = value;
+    notifyListeners();
+  }
+
+  void applyDemoPreview({required int activeCount}) {
+    skipDemoApi = true;
+    loading = false;
+    creatingExport = false;
+    deletingAccount = false;
+    this.activeCount = activeCount;
+    items = const <AccountExportJobRecordV1>[];
+    _primed = true;
     notifyListeners();
   }
 

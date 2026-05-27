@@ -1,6 +1,7 @@
 //! Outbound HTTP POST with exponential backoff retries + platform event hooks.
 
 use std::collections::HashSet;
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use chrono::SecondsFormat;
@@ -8,12 +9,26 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::error::helpers::assert_server_fetchable_url_resolved;
+use crate::error::ApiError;
+
 use super::sign_openflow;
 
 /// Max HTTP attempts per logical delivery (initial try + retries). Matches WH2.4.
 const MAX_DELIVERY_ATTEMPTS: u32 = 3;
 
 const PER_ATTEMPT_TIMEOUT: Duration = Duration::from_secs(15);
+
+pub(super) fn outbound_webhook_http_client() -> &'static reqwest::Client {
+    static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+    CLIENT.get_or_init(|| {
+        reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .timeout(PER_ATTEMPT_TIMEOUT)
+            .build()
+            .expect("outbound webhook reqwest client")
+    })
+}
 
 #[inline]
 pub(crate) fn webhook_matches_workspace(
@@ -78,7 +93,7 @@ pub(crate) async fn persist_delivery_attempt(
 /// POST signed JSON to the subscriber URL, retry on transport / non-success HTTP, persist one audit row.
 #[allow(clippy::too_many_arguments, unreachable_code)]
 pub(crate) async fn deliver_outbound_event(
-    http: &reqwest::Client,
+    _http: &reqwest::Client,
     pool: &PgPool,
     webhook_id: Uuid,
     owner_user_id: Uuid,
@@ -113,6 +128,56 @@ pub(crate) async fn deliver_outbound_event(
 
     let secret_bytes = secret.as_bytes();
 
+    let parsed_url = match url::Url::parse(url.trim()) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            let msg = format!("invalid outbound webhook url: {e}");
+            persist_delivery_attempt(
+                pool,
+                webhook_id,
+                owner_user_id,
+                event_type,
+                payload,
+                "failed",
+                None,
+                Some(&msg),
+                0,
+                None,
+            )
+            .await?;
+            return Ok(DeliveryAttemptOutcome {
+                delivered: false,
+                http_status: None,
+                error: Some(msg),
+            });
+        }
+    };
+    if let Err(e) = assert_server_fetchable_url_resolved(&parsed_url).await {
+        let msg = match e {
+            ApiError::BadRequestI18n { en, .. } => en,
+            ApiError::BadRequest(s) => s,
+            other => format!("{other:?}"),
+        };
+        persist_delivery_attempt(
+            pool,
+            webhook_id,
+            owner_user_id,
+            event_type,
+            payload,
+            "failed",
+            None,
+            Some(&msg),
+            0,
+            None,
+        )
+        .await?;
+        return Ok(DeliveryAttemptOutcome {
+            delivered: false,
+            http_status: None,
+            error: Some(msg),
+        });
+    }
+
     for attempt in 0..MAX_DELIVERY_ATTEMPTS {
         if attempt > 0 {
             let backoff_secs = 1u64 << (attempt - 1);
@@ -125,7 +190,7 @@ pub(crate) async fn deliver_outbound_event(
             .unwrap_or(0);
         let signature = sign_openflow(secret_bytes, ts, &body_bytes);
 
-        let send_res = http
+        let send_res = outbound_webhook_http_client()
             .post(url)
             .timeout(PER_ATTEMPT_TIMEOUT)
             .header("Content-Type", "application/json")

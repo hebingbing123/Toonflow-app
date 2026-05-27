@@ -6,6 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../content_compliance/controller.dart';
 import '../config.dart';
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'download_stub.dart'
@@ -33,6 +34,9 @@ class NotificationsController extends ChangeNotifier {
   String? _wsToken;
   bool _primed = false;
   bool _disposed = false;
+
+  /// Widget tests: skip network prime when preview data is injected.
+  bool skipAutoPrime = false;
 
   bool loading = false;
   bool loadingPreferences = false;
@@ -250,7 +254,21 @@ class NotificationsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void applyDebugPreview({
+    required List<NotificationRecordV1> items,
+    int unreadCount = 0,
+  }) {
+    skipAutoPrime = true;
+    this.items = items;
+    this.unreadCount = unreadCount;
+    _primed = true;
+    notifyListeners();
+  }
+
   Future<void> prime() async {
+    if (skipAutoPrime || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) {
       reset();
@@ -1083,6 +1101,9 @@ class NotificationsController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) {
       reset();
@@ -1107,6 +1128,9 @@ class NotificationsController extends ChangeNotifier {
   }
 
   Future<void> loadMore() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null || loadingMore || !hasMore || nextBeforeId == null) {
       return;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
+import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_workbench_section.dart';
 import '../../design_system/components/studio_text_styles.dart';
@@ -89,12 +90,14 @@ class ProjectScriptsSectionView extends StatelessWidget {
             wideBreakpoint: 480,
             children: <Widget>[
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.saving || model.scriptTaskBusy
                     ? null
                     : callbacks.onOpenWorkbench,
                 child: Text(l10n.projectEditorScriptsSectionOpenBatchWorkbench),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: model.saving || model.scriptTaskBusy
                     ? null
                     : callbacks.onOpenPlanWorkbench,
@@ -116,6 +119,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
               ),
               const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.overviewAction,
                 child: Text(model.overviewActionLabel),
               ),

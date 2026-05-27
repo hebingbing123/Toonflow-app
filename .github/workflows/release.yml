@@ -1,3 +1,5 @@
+# Proprietary OpenFlow — desktop build artifacts for authorized distribution only.
+# Do not treat GitHub Releases as a public open-source download channel.
 name: Build and Release
 
 on:
@@ -189,21 +191,28 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: OpenFlow ${{ github.ref_name }}
-          draft: false
-          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
-          generate_release_notes: true
+          draft: true
+          prerelease: true
+          generate_release_notes: false
           body: |
-            ## Downloads
+            **OpenFlow 为闭源商业软件，非开源产品。**
 
-            - Windows x64 bundle: `openflow-windows-x64.zip`
-            - macOS app bundle: `openflow-macos-app.zip`
-            - Linux bundle: `openflow-linux-x64.tar.gz`
+            本 Release 仅供**已授权**团队内部分发桌面安装包，不对外公开源码或开放注册。
+            终端用户须通过官方 SaaS **注册并登录**后使用；客户端领取请联系商务。
+
+            ## Artifacts (authorized recipients only)
+
+            - Windows x64: `openflow-windows-x64.zip`
+            - macOS: `openflow-macos-app.zip`
+            - Linux: `openflow-linux-x64.tar.gz`
 
             ## Install
 
-            - Windows: unzip `openflow-windows-x64.zip`, then run `openflow_app.exe`.
-            - macOS: unzip `openflow-macos-app.zip`, then move `openflow_app.app` into `Applications`.
-            - Linux: extract `openflow-linux-x64.tar.gz`, then run `bundle/openflow_app`.
+            - Windows: unzip, then run `openflow_app.exe`.
+            - macOS: unzip, move `openflow_app.app` to Applications.
+            - Linux: extract, run `bundle/openflow_app`.
+
+            License: see repository `LICENSE` (proprietary).
           files: |
             dist/openflow-windows-x64.zip
             dist/openflow-macos-app.zip

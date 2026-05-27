@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -53,15 +54,16 @@ Widget buildProjectNovelEventsWorkbenchSection({
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(ctx),
               onPressed: disabled ? null : openWorkbench,
               child: Text(l10n.projectEditorNovelsEventsOpenWorkbench),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(ctx),
               onPressed: disabled ? null : refreshEvents,
               child: Text(
                 novelEventsLoading[0]

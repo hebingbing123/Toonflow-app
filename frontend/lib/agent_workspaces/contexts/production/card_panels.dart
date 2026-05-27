@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
+import '../../../design_system/components/studio_dense_action_row.dart';
+import '../../../design_system/components/studio_surfaces.dart';
 
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
@@ -97,9 +99,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     _buildPromptPreview(context, stage.prompt!.trim()),
                   ],
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: <Widget>[
                       StudioChip(
                         label: Text(
@@ -107,11 +107,13 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                         ),
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: busy ? null : () => onApplyStage(stage),
                         child: Text(l10n.agentWorkspaceProductionApplyStage),
                       ),
                       if (stage.domainTool != null)
                         FilledButton.tonal(
+                          style: studioFormTonalButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
@@ -121,6 +123,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
+                          style: studioFormPrimaryButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunStageSubAgent(stage),
@@ -223,9 +226,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     _buildPromptPreview(context, recipe.prompt!.trim()),
                   ],
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: <Widget>[
                       StudioChip(
                         label: Text(
@@ -251,6 +252,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                           ),
                         ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: busy ? null : () => onApplyRecipe(recipe),
                         child: Text(
                           l10n.agentWorkspaceProductionApplySuggestion,
@@ -258,6 +260,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                       ),
                       if (recipe.domainTool != null)
                         FilledButton.tonal(
+                          style: studioFormTonalButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
@@ -267,6 +270,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                         ),
                       if (recipe.subAgentTool != null)
                         FilledButton(
+                          style: studioFormPrimaryButtonStyle(context),
                           onPressed: busy
                               ? null
                               : () => onRunRecipeSubAgent(recipe),
@@ -313,31 +317,35 @@ class ProductionWorkspaceGuidedTasksPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return StudioDenseActionRow(
       children: <Widget>[
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onPullAssetsFlow,
           child: Text(l10n.agentWorkspaceProductionStepPullAssetsFlow),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onRunAssetsSubAgent,
           child: Text(l10n.agentWorkspaceProductionStepRunAssetsSubAgent),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onPullStoryboardFlow,
           child: Text(l10n.agentWorkspaceProductionStepPullStoryboardFlow),
         ),
         OutlinedButton(
+          style: studioFormSecondaryButtonStyle(context),
           onPressed: busy || !hasLastResult ? null : onWriteBackFlow,
           child: Text(l10n.agentWorkspaceProductionStepWritebackFlow),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onRunStoryboardSubAgent,
           child: Text(l10n.agentWorkspaceProductionStepRunStoryboardSubAgent),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onRunDirectorPlanSubAgent,
           child: Text(l10n.agentWorkspaceProductionStepRunDirectorPlanSubAgent),
         ),

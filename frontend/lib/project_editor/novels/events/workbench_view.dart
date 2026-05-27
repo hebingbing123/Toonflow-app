@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -124,15 +125,16 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: callbacks.onSearch,
                     child: Text(l10n.projectEditorNovelsEventsSearchButton),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: callbacks.onRefresh,
                     child: Text(l10n.projectEditorNovelsEventsRefreshListButton),
                   ),
@@ -166,6 +168,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: callbacks.onCreate,
                 child: Text(l10n.projectEditorNovelsEventsCreateButton),
               ),
@@ -205,17 +208,18 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: callbacks.onSave,
                 child: Text(l10n.projectEditorNovelsEventsSaveButton),
               ),
               const SizedBox(height: 16),
               Text(l10n.projectEditorNovelsEventsDeleteHeading, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: callbacks.onDeleteCurrent,
                     child: Text(l10n.projectEditorNovelsEventsDeleteCurrentButton),
                   ),
@@ -231,6 +235,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: callbacks.onBatchDelete,
                 child: Text(l10n.projectEditorNovelsEventsBatchDeleteButton),
               ),

@@ -4,6 +4,7 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 Future<void> openProjectAssetLinkDialog({
   required BuildContext ctx,
@@ -96,6 +97,7 @@ Future<void> openProjectAssetLinkDialog({
                 child: Text(dlgL10n.storyboardEditorDialogCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogCtx),
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
                 child: Text(
                   unlink

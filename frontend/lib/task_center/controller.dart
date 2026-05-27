@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/studio_load_state.dart';
 import '../rust_api.dart';
@@ -34,6 +35,7 @@ class TaskCenterController extends ChangeNotifier {
   bool loadingTaskApi = false;
   bool loadingTaskDetailsByNumericId = false;
   bool loadingTaskDetailsUuid = false;
+  bool skipDemoApi = false;
   bool _disposed = false;
   List<TaskCenterProjectItem>? taskProjects;
   List<JobRow>? taskApiJobs;
@@ -59,6 +61,7 @@ class TaskCenterController extends ChangeNotifier {
     taskDetailNumericIdLine = null;
     taskDetailUuidLine = null;
     taskDetailJobIdController.clear();
+    skipDemoApi = false;
     _notifyListenersIfMounted();
   }
 
@@ -90,6 +93,9 @@ class TaskCenterController extends ChangeNotifier {
 
   Future<void> loadTaskProjects() async {
     if (_disposed) return;
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     loadingTaskProjects = true;
@@ -119,6 +125,9 @@ class TaskCenterController extends ChangeNotifier {
 
   Future<void> loadTaskCategories() async {
     if (_disposed) return;
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     loadingTaskCategories = true;
@@ -150,6 +159,9 @@ class TaskCenterController extends ChangeNotifier {
 
   Future<void> loadTaskApi() async {
     if (_disposed) return;
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     loadingTaskApi = true;

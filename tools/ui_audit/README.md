@@ -197,4 +197,4 @@ See [docs/ci-integration.md](docs/ci-integration.md) for GitHub Actions examples
 
 ## License
 
-See LICENSE file in the project root.
+OpenFlow is proprietary software. See the `LICENSE` file in the project root.

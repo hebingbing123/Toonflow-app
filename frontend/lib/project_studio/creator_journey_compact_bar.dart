@@ -268,12 +268,15 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         border: Border.all(color: tokens.primary.withValues(alpha: 0.45)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioLayoutSpacing.inlineGap,
+          vertical: StudioLayoutSpacing.microGap,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(Icons.menu_book_outlined, size: 16, color: tokens.primary),
-            const SizedBox(width: 6),
+            const SizedBox(width: StudioSpacing.xs),
             Flexible(
               child: Text(
                 l10n.studioCreatorJourneyCompactCurrent(currentLabel),

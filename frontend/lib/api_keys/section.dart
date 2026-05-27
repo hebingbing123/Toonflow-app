@@ -9,6 +9,7 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
@@ -251,6 +252,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   child: Text(l10n.globalSearchCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(context),
                   onPressed: () {
                     final expiresAt = switch (expiryPreset) {
                       _ExpiryPreset.none => null,
@@ -320,6 +322,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               child: Text(l10n.globalSearchCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.apiKeysActionRevoke),
             ),
@@ -434,6 +437,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             label: Text(l10n.apiKeysRefresh),
           );
     final createButton = FilledButton.tonalIcon(
+      style: studioFormIconLabeledButtonStyle(context),
       onPressed: widget.controller.creating ? null : _createKey,
       icon: widget.controller.creating
           ? const SizedBox(
@@ -619,11 +623,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       ],
                     )
                   else
-                    Wrap(
+                    StudioDenseActionRow(
                       spacing: 8,
-                      runSpacing: 8,
                       children: [
                         OutlinedButton.icon(
+                          style: studioFormOutlinedIconLabeledButtonStyle(context),
                           onPressed: () => _copyText(
                             widget.controller.latestPlaintextToken!,
                             l10n.apiKeysCopiedPlaintextSnack,
@@ -726,6 +730,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final busy = widget.controller.busyKeyId == item.id;
     final theme = Theme.of(context);
     final primaryAction = FilledButton.tonalIcon(
+      style: studioFormIconLabeledButtonStyle(context),
       onPressed: busy ? null : () => _showRotateDialog(item),
       icon: busy
           ? const SizedBox(
@@ -738,10 +743,12 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     );
     final stateAction = item.isActive
         ? OutlinedButton(
+            style: studioFormSecondaryButtonStyle(context),
             onPressed: busy ? null : () => _showRevokeDialog(item),
             child: Text(l10n.apiKeysActionRevoke),
           )
         : OutlinedButton(
+            style: studioFormSecondaryButtonStyle(context),
             onPressed: busy || item.isExpired
                 ? null
                 : () => widget.controller.activateKey(item.id),
@@ -752,6 +759,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ),
           );
     final deleteAction = OutlinedButton(
+      style: studioFormSecondaryButtonStyle(context),
       onPressed: busy
           ? null
           : () async {
@@ -768,6 +776,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       child: Text(l10n.globalSearchCancel),
                     ),
                     FilledButton(
+                      style: studioFormPrimaryButtonStyle(context),
                       onPressed: () => Navigator.of(context).pop(true),
                       child: Text(l10n.apiKeysDelete),
                     ),
@@ -919,9 +928,8 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ],
             )
           else
-            Wrap(
+            StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
               children: [primaryAction, stateAction, deleteAction],
             ),
         ],

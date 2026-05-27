@@ -1,4 +1,4 @@
-# Implementation Plan: Frontend UI/UX Improvements
+低优先级# Implementation Plan: Frontend UI/UX Improvements
 
 ## Overview
 
@@ -83,7 +83,7 @@ dart run ui_audit:ui_audit report --trend
     - 测试语义颜色验证
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [~] 3.3 实现交互元素分析器（InteractiveAnalyzer）
+  - [ ] 3.3 实现交互元素分析器（InteractiveAnalyzer）
     - _Note: 静态 `InteractiveAnalyzer` 未实现；运行时 `interactive_element_inspector` 已交付（audit 规范）_
     - 检测缺少悬停、按下、禁用状态的交互元素
     - 识别缺少视觉反馈的可点击元素
@@ -162,8 +162,8 @@ dart run ui_audit:ui_audit report --trend
   - 运行问题分类器测试
   - 确保所有测试通过，如有问题请向用户询问
 
-- [~] 8. 实现修复层 - 修复生成器
-  - [~] 8.1 创建修复模板系统
+- [ ] 8. 实现修复层 - 修复生成器
+  - [ ] 8.1 创建修复模板系统
     - _MVP: `spacing_fix.dart` / `typography_fix.dart`（非完整 FixTemplate AST 系统）_
     - 定义修复模板数据结构（FixTemplate）
     - 创建间距修复模板（替换硬编码值为 StudioSpacing）
@@ -172,7 +172,7 @@ dart run ui_audit:ui_audit report --trend
     - 创建交互元素修复模板（添加缺失状态）
     - _Requirements: 9.2, 9.3_
 
-  - [~] 8.2 实现修复生成器（FixGenerator）
+  - [ ] 8.2 实现修复生成器（FixGenerator）
     - _MVP: `AutoFixApplicator` 字符串替换；无 AST 批量预览_
     - 实现问题模式匹配逻辑
     - 实现代码转换生成（基于 AST）
@@ -186,7 +186,7 @@ dart run ui_audit:ui_audit report --trend
     - 测试修复预览生成
     - _Requirements: 9.1, 9.2_
 
-- [~] 9. 实现修复层 - 修复应用器和验证器
+- [ ] 9. 实现修复层 - 修复应用器和验证器
   - [x] 9.1 实现修复应用器（FixApplicator）
     - _MVP: `AutoFixApplicator` + 单文件回滚；无全局 rollback CLI_
     - 实现代码重写逻辑（基于 AST 转换）
@@ -210,7 +210,7 @@ dart run ui_audit:ui_audit report --trend
     - 测试设计系统合规性验证
     - _Requirements: 10.1, 10.2, 10.3_
 
-- [~] 10. 实现监控层
+- [ ] 10. 实现监控层
   - [x] 10.1 实现指标跟踪器（MetricsTracker）
     - 记录问题数量（按严重性、类别）
     - 记录修复成功率
@@ -328,8 +328,8 @@ dart run ui_audit:ui_audit report --trend
   - 验证 CI 工作流
   - 确保所有测试通过，如有问题请向用户询问
 
-- [~] 16. 集成和端到端测试
-  - [~] 16.1 创建端到端测试套件
+- [ ] 16. 集成和端到端测试
+  - [ ] 16.1 创建端到端测试套件
     - 准备测试代码库（包含已知问题）
     - 测试完整审计流程（检测 → 分类 → 报告）
     - 测试完整修复流程（生成 → 应用 → 验证）
@@ -343,7 +343,7 @@ dart run ui_audit:ui_audit report --trend
     - 验证修复使用正确的设计系统值
     - _Requirements: 14.1, 14.2, 14.3_
 
-  - [~] 16.3 性能和可扩展性测试
+  - [ ] 16.3 性能和可扩展性测试
     - 测试大型代码库扫描性能
     - 测试批量修复性能
     - 优化性能瓶颈

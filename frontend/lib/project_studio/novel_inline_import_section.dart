@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -21,12 +23,14 @@ class StudioScriptNovelInlineImport extends StatefulWidget {
     required this.project,
     required this.onReload,
     required this.onOpenFullWorkbench,
+    this.skipLiveResumeCheckpoint = false,
   });
 
   final String accessToken;
   final ProjectRow project;
   final Future<void> Function() onReload;
   final VoidCallback onOpenFullWorkbench;
+  final bool skipLiveResumeCheckpoint;
 
   @override
   State<StudioScriptNovelInlineImport> createState() =>
@@ -148,6 +152,10 @@ class _StudioScriptNovelInlineImportState
   }
 
   Future<void> _refreshResumeCheckpoint() async {
+    if (widget.skipLiveResumeCheckpoint ||
+        ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final checkpoint = await loadWholeBookImportCheckpoint(
       widget.project.id,
       accessToken: widget.accessToken,
@@ -446,9 +454,8 @@ class _StudioScriptNovelInlineImportState
             ),
           ),
           const SizedBox(height: 8),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
             children: <Widget>[
               if (_resumeCheckpoint != null)
                 FutureBuilder<bool>(
@@ -465,9 +472,7 @@ class _StudioScriptNovelInlineImportState
                             wholeBookContentHash(paste) ==
                                 cp.effectiveContentHash);
                     return FilledButton.tonal(
-                      style: FilledButton.styleFrom().merge(
-                        studioFormButtonStyle(context),
-                      ),
+                      style: studioFormTonalButtonStyle(context),
                       onPressed: _busy ? null : _resumeWholeBookImport,
                       child: Text(
                         inPlace
@@ -505,9 +510,7 @@ class _StudioScriptNovelInlineImportState
                 ),
               ),
               FilledButton.tonal(
-                style: FilledButton.styleFrom().merge(
-                  studioFormButtonStyle(context),
-                ),
+                style: studioFormTonalButtonStyle(context),
                 onPressed: _busy || _previewChapters.isEmpty
                     ? null
                     : () => _runAction(_importParsedChapters),

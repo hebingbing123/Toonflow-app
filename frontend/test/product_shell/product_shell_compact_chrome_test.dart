@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
 import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/design_system/components/openflow_brand.dart';
 
 import '../support/product_shell_overlay_harness.dart';
 
+void expectNoLayoutExceptions(WidgetTester tester) {
+  expect(tester.takeException(), isNull);
+}
+
 void main() {
+  testWidgets('handset product chrome at 375px has no layout overflow', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(375, 667));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final router = productShellStoryboardOverlayRouter();
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      productShellOverlayTestApp(router, size: const Size(375, 667)),
+    );
+    await tester.pumpAndSettle();
+
+    expectNoLayoutExceptions(tester);
+  });
+
   testWidgets('compact product chrome keeps title and search visible', (
     tester,
   ) async {
@@ -27,7 +47,7 @@ void main() {
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
     expect(find.byType(OpenFlowBrandMark), findsWidgets);
-    expectNoBenignQueuedExceptions(tester);
+    expectNoLayoutExceptions(tester);
   });
 
   testWidgets('stacked product chrome keeps title and search visible', (
@@ -48,6 +68,6 @@ void main() {
     expect(find.text(l10n.appTitle), findsOneWidget);
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
-    expectNoBenignQueuedExceptions(tester);
+    expectNoLayoutExceptions(tester);
   });
 }

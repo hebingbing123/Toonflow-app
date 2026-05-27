@@ -12,6 +12,7 @@ import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
@@ -229,12 +230,14 @@ class TeamWorkspacesSection extends StatefulWidget {
   const TeamWorkspacesSection({
     super.key,
     required this.accessToken,
+    this.debugInitialItems,
     this.onWorkspaceContextChanged,
     this.initialInviteToken,
     this.currentWorkspaceId,
   });
 
   final String? accessToken;
+  final List<WorkspaceListItem>? debugInitialItems;
   final Future<void> Function()? onWorkspaceContextChanged;
   final String? initialInviteToken;
   final String? currentWorkspaceId;
@@ -273,6 +276,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     if (invitePrefill.token != null && invitePrefill.token!.isNotEmpty) {
       _acceptInviteTokenController.text = invitePrefill.token!;
       _inviteTokenFromUri = invitePrefill.tokenFromUri;
+    }
+    if (widget.debugInitialItems != null) {
+      _items = widget.debugInitialItems;
+      return;
     }
     final token = widget.accessToken;
     if (token != null && token.isNotEmpty) {
@@ -399,6 +406,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 ),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: _creating ? null : _create,
                 child: Text(
                   _creating
@@ -442,6 +450,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 ),
               ),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: _acceptingInvite ? null : _acceptInvite,
                 child: Text(
                   _acceptingInvite

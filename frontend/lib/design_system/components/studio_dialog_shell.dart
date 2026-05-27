@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../tokens.dart';
+import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
 /// Opens a modal with studio overlay and transparent [Dialog] chrome.
@@ -90,14 +91,13 @@ Future<bool?> showStudioConfirmDialog({
           ),
           if (destructive)
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: StudioTokens.of(ctx).danger,
-              ),
+              style: studioFormDestructivePrimaryButtonStyle(ctx),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: Text(resolvedConfirm),
             )
           else
             FilledButton(
+              style: studioFormPrimaryButtonStyle(ctx),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: Text(resolvedConfirm),
             ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/rust_api_feedback.dart';
 import '../rust_api/core.dart';
@@ -576,6 +577,9 @@ class ContentComplianceController extends ChangeNotifier {
     String? escalationStage,
     bool? claimedOnly,
   }) async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     if (!queueEnabled || loadingQueue) {
       return;
     }

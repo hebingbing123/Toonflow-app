@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 description = "Openflow API (Harness-oriented Rust backend; work in progress)"
+license = "LicenseRef-OpenFlow-Proprietary"
+license-file = "../LICENSE"
+publish = false
 
 [[bin]]
 name = "openflow-sqlite-import"

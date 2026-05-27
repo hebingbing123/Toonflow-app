@@ -6,12 +6,14 @@ class _PlatformConfigSection extends StatefulWidget {
     required this.currentWorkspaceId,
     required this.initialConfig,
     required this.onConfigSaved,
+    this.debugResponse,
   });
 
   final String? accessToken;
   final String? currentWorkspaceId;
   final PlatformConfigToggleSetV1 initialConfig;
   final ValueChanged<PlatformConfigToggleSetV1> onConfigSaved;
+  final PlatformConfigResponseV1? debugResponse;
 
   @override
   State<_PlatformConfigSection> createState() => _PlatformConfigSectionState();
@@ -30,6 +32,13 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
   @override
   void initState() {
     super.initState();
+    final debug = widget.debugResponse;
+    if (debug != null) {
+      _userDraft = debug.userOverride;
+      _workspaceDraft = _workspaceDraftForResponse(debug);
+      _response = debug;
+      return;
+    }
     _userDraft = widget.initialConfig;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -93,6 +102,12 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
   }
 
   Future<void> _load() async {
+    if (widget.debugResponse != null) {
+      return;
+    }
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = widget.accessToken;
     final workspaceId = widget.currentWorkspaceId;
     if (token == null || token.isEmpty) {
@@ -603,11 +618,12 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
             subtitle: _loading
                 ? l10n.platformConfigButtonRefreshing
                 : null,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            child: StudioFilterRow(
+              wideLayout: StudioFilterWideLayout.toolbarRow,
+              wideBreakpoint: 560,
               children: <Widget>[
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: _loading ? null : _load,
                   child: Text(
                     _loading
@@ -616,6 +632,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                   ),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(context),
                   onPressed: _savingUser || !userDraftDirty ? null : _saveUser,
                   child: Text(
                     _savingUser
@@ -624,6 +641,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                   ),
                 ),
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed:
                       _savingUser || !(_response?.hasUserOverride ?? false)
                       ? null
@@ -631,6 +649,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                   child: Text(l10n.platformConfigButtonResetUser),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed:
                       _savingWorkspace ||
                           !workspaceDraftDirty ||
@@ -645,6 +664,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                   ),
                 ),
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed:
                       _savingWorkspace ||
                           workspace == null ||
@@ -655,6 +675,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                   child: Text(l10n.platformConfigButtonResetWorkspace),
                 ),
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed: _response == null ? null : _copyConfig,
                   child: Text(l10n.platformConfigButtonCopyJson),
                 ),

@@ -950,13 +950,12 @@ class _ProductionPanel extends StatelessWidget {
                             ),
                         ],
                         const SizedBox(height: 8 + 2),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                        StudioDenseActionRow(
                           children: [
                             if (latestExportUi.isWarning &&
                                 onStartExport != null)
                               FilledButton.icon(
+                                style: studioFormIconLabeledButtonStyle(context),
                                 onPressed: exportActionBusy
                                     ? null
                                     : onStartExport,
@@ -976,6 +975,7 @@ class _ProductionPanel extends StatelessWidget {
                                 ),
                               ),
                             FilledButton.tonalIcon(
+                              style: studioFormIconLabeledButtonStyle(context),
                               onPressed: onDownloadLatestExport,
                               icon: const Icon(Icons.download_outlined),
                               label: Text(
@@ -984,6 +984,7 @@ class _ProductionPanel extends StatelessWidget {
                             ),
                             if (onCancelLatestExportTask != null)
                               OutlinedButton.icon(
+                                style: studioFormOutlinedIconLabeledButtonStyle(context),
                                 onPressed: onCancelLatestExportTask,
                                 icon: const Icon(Icons.stop_circle_outlined),
                                 label: Text(
@@ -994,6 +995,7 @@ class _ProductionPanel extends StatelessWidget {
                               (latestExportUi.recommendedAction ==
                                       ShortVideoLatestExportAction.retry)
                                   ? FilledButton.icon(
+                                      style: studioFormIconLabeledButtonStyle(context),
                                       onPressed: onRetryLatestExportTask,
                                       icon: const Icon(Icons.refresh),
                                       label: Text(
@@ -1001,6 +1003,7 @@ class _ProductionPanel extends StatelessWidget {
                                       ),
                                     )
                                   : FilledButton.tonalIcon(
+                                      style: studioFormIconLabeledButtonStyle(context),
                                       onPressed: onRetryLatestExportTask,
                                       icon: const Icon(Icons.refresh),
                                       label: Text(
@@ -1013,6 +1016,7 @@ class _ProductionPanel extends StatelessWidget {
                                       ShortVideoLatestExportAction
                                           .openProductionWorkspace)
                                   ? FilledButton.icon(
+                                      style: studioFormIconLabeledButtonStyle(context),
                                       onPressed:
                                           onOpenProductionForAssemblyExport,
                                       icon: const Icon(
@@ -1023,6 +1027,7 @@ class _ProductionPanel extends StatelessWidget {
                                       ),
                                     )
                                   : OutlinedButton.icon(
+                                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                                       onPressed:
                                           onOpenProductionForAssemblyExport,
                                       icon: const Icon(
@@ -1033,6 +1038,7 @@ class _ProductionPanel extends StatelessWidget {
                                       ),
                                     ),
                             OutlinedButton.icon(
+                              style: studioFormOutlinedIconLabeledButtonStyle(context),
                               onPressed: onOpenExportHistory,
                               icon: const Icon(Icons.history),
                               label: Text(l10n.shortVideoSpaceExportHistory),
@@ -1074,11 +1080,10 @@ class _ProductionPanel extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8 + 2),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                StudioDenseActionRow(
                   children: [
                     FilledButton.icon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed:
                           exportActionBusy ||
                               !exportCheckPanelUi.exportReady ||
@@ -1101,6 +1106,7 @@ class _ProductionPanel extends StatelessWidget {
                     Tooltip(
                       message: preAssemblyBlockedTooltip ?? '',
                       child: OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
                         onPressed:
                             (exportActionBusy ||
                                 preAssemblyActionBusy ||
@@ -1125,6 +1131,7 @@ class _ProductionPanel extends StatelessWidget {
                       ),
                     ),
                     OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
                       onPressed: exportActionBusy ? null : onOpenExportHistory,
                       icon: const Icon(Icons.history),
                       label: Text(l10n.shortVideoSpaceExportHistory),

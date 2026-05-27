@@ -89,7 +89,7 @@ class StudioGettingStartedSteps extends StatelessWidget {
                                     width: 1,
                                     height: 22,
                                     margin: const EdgeInsets.symmetric(
-                                      vertical: 6,
+                                      vertical: StudioLayoutSpacing.microGap,
                                     ),
                                     color: tokens.borderSubtle,
                                   ),

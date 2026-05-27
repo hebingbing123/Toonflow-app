@@ -750,6 +750,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: _loadHistory,
                 icon: const Icon(Icons.refresh),
                 label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
@@ -1051,6 +1052,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }) {
     if (item.status == ExportTaskStatus.completed && item.outputUrl != null) {
       return FilledButton.icon(
+        style: studioFormIconLabeledButtonStyle(context),
         onPressed: isDownloading ? null : () => _downloadExport(item),
         icon: isDownloading
             ? const SizedBox(
@@ -1088,6 +1090,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               ShortVideoLatestExportAction.openProductionWorkspace &&
           widget.onOpenProductionWorkspace != null) {
         return FilledButton.icon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: _openProductionWorkspace,
           icon: const Icon(Icons.movie_creation_outlined),
           label: Text(l10n.shortVideoSpaceOpenProductionWorkspace),
@@ -1095,6 +1098,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       }
       if (recommendedAction == ShortVideoLatestExportAction.retry) {
         return FilledButton.icon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: _loading ? null : () => _retryExport(item),
           icon: const Icon(Icons.refresh),
           label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),

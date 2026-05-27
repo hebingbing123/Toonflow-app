@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
@@ -55,17 +57,18 @@ class BenchmarkGateWorkbench extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
               children: [
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy || experimentIdController.text.trim().isEmpty
                       ? null
                       : onFetchGate,
                   child: Text(l10n.benchmarkActionFetchGate),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy ? null : onFetchTrends,
                   child: Text(l10n.benchmarkActionFetchTrends),
                 ),
@@ -111,6 +114,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed:
                   busy ||
                       experimentIdController.text.trim().isEmpty ||

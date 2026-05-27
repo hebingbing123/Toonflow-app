@@ -571,6 +571,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       actions: [
         if (progress == null && _errorMessage != null)
           FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: () => Navigator.of(
               context,
             ).pop(const ExportProgressDialogResult(completed: false)),
@@ -600,12 +601,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         if (progress?.status == ExportTaskStatus.completed &&
             (progress?.outputUrl?.trim().isNotEmpty ?? false))
           FilledButton.tonalIcon(
+            style: studioFormIconLabeledButtonStyle(context),
             onPressed: () => _downloadExportOutput(progress!),
             icon: const Icon(Icons.download_outlined),
             label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
           ),
         if (progress?.status.isTerminal == true)
           FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(
               ExportProgressDialogResult(
                 completed: progress?.status == ExportTaskStatus.completed,

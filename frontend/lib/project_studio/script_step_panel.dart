@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -14,6 +15,7 @@ import 'novel_inline_import_section.dart';
 import '../project_editor/novels/workbench_section_builder.dart';
 import '../project_editor/scripts/section_builder.dart';
 import '../rust_api.dart';
+import '../debug/project_studio_script_debug_preview.dart';
 import '../settings/model_vendors/vendor_setup_nudge.dart';
 import 'project_studio_focus_scope.dart';
 
@@ -60,6 +62,7 @@ class ProjectStudioScriptStepPanel extends StatefulWidget {
     this.onContentChanged,
     this.openNovelWorkbenchOnMount = false,
     this.focusMode = false,
+    this.debugContentLoader,
   });
 
   final String accessToken;
@@ -76,6 +79,9 @@ class ProjectStudioScriptStepPanel extends StatefulWidget {
 
   /// Hides the duplicate «小说与剧本» rail header; counts go to shell subtitle.
   final bool focusMode;
+
+  /// Widget-test seam: skip novel/script HTTP when set.
+  final ProjectStudioScriptStepContentLoader? debugContentLoader;
 
   @override
   State<ProjectStudioScriptStepPanel> createState() =>
@@ -120,6 +126,38 @@ class _ProjectStudioScriptStepPanelState
       _loadError = null;
     });
     try {
+      if (widget.debugContentLoader != null) {
+        final content = await widget.debugContentLoader!(
+          widget.accessToken,
+          widget.project.id,
+        );
+        if (!mounted) return;
+        final scripts = content.scripts;
+        setState(() {
+          _novelsRef
+            ..clear()
+            ..add(content.novels);
+          _scriptList
+            ..clear()
+            ..addAll(scripts);
+          _statsRef[0] = content.stats;
+          _loading = false;
+          if (_selectedScriptId == null && scripts.isNotEmpty) {
+            _selectedScriptId = scripts.first.numericId;
+            widget.onScriptSelected?.call(scripts.first);
+          }
+        });
+        widget.onContentChanged?.call();
+        if (widget.focusMode) {
+          ProjectStudioFocusScope.reportScriptContentCounts(
+            context,
+            novelCount: _novelCount,
+            scriptCount: _scriptCount,
+          );
+        }
+        await _maybeOpenPendingNovelWorkbench();
+        return;
+      }
       final novels = await fetchProjectNovelsByProjectId(
         widget.accessToken,
         widget.project.id,
@@ -357,6 +395,7 @@ class _ProjectStudioScriptStepPanelState
           StudioScriptNovelInlineImport(
             accessToken: widget.accessToken,
             project: widget.project,
+            skipLiveResumeCheckpoint: widget.debugContentLoader != null,
             onReload: _reloadContent,
             onOpenFullWorkbench: () => widget.onOpenNovelWorkbench(
               _novelsRef,
@@ -497,12 +536,14 @@ class _ProjectStudioScriptStepPanelState
       return const Center(child: CircularProgressIndicator());
     }
     if (_loadError != null) {
-      return StudioEmptyState.emptyData(
-        icon: Icons.cloud_off_outlined,
-        title: l10n.studioScriptStepLoadErrorTitle,
-        subtitle: _loadError!,
-        actionLabel: l10n.studioScriptStepRetry,
-        onAction: _reloadContent,
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+          child: StudioApiErrorCallout(
+            error: _loadError!,
+            onRetry: _reloadContent,
+          ),
+        ),
       );
     }
 

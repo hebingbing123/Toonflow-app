@@ -124,7 +124,20 @@ class WorkspaceWritebackController {
   AppLocalizations get _l10nResolved =>
       _l10nProvider() ?? lookupAppLocalizations(const Locale('en'));
 
+  bool skipDemoMutations = false;
+
+  bool _blockDemoMutation() {
+    if (!skipDemoMutations) {
+      return false;
+    }
+    _onErrorChanged(_l10nResolved.productDemoModeMutationBlocked);
+    return true;
+  }
+
   Future<void> writeBackScriptWorkspaceResult() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -175,6 +188,9 @@ class WorkspaceWritebackController {
   }
 
   Future<void> writeBackScriptPlanWorkspaceResult() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -233,6 +249,9 @@ class WorkspaceWritebackController {
   }
 
   Future<void> writeBackScriptPlanViaUpdateData() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -282,6 +301,9 @@ class WorkspaceWritebackController {
   }
 
   Future<void> writeBackProductionFlowResult() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;

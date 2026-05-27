@@ -72,7 +72,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
       _webhookDeliveries.addAll(widget.debugWebhookDeliveries ?? const {});
       _webhookLastTestResultById.addAll(widget.debugWebhookLastTestResults ?? const {});
       _syncWebhookWorkspaceDraftControllers();
-    } else {
+    } else if (!ProductDemoMode.instance.shouldSkipLiveApi) {
       unawaited(_loadWebhooks());
     }
   }
@@ -399,6 +399,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                 child: Text(dl10n.notificationsActionCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogContext),
                 onPressed: () => Navigator.of(dialogContext).pop(true),
                 child: Text(dl10n.opsWhDeleteConfirmButton),
               ),
@@ -712,6 +713,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: _creatingWebhook ? null : _createWebhook,
                     child: Text(
                       _creatingWebhook ? l10n.opsWhCreating : l10n.opsWhCreate,
@@ -761,23 +763,25 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                       l10n.opsWhFieldSecret(_latestCreatedWebhook!.secret),
                     ),
                     const SizedBox(height: 8),
-                    Wrap(
+                    StudioDenseActionRow(
                       spacing: 8,
-                      runSpacing: 8,
                       children: [
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.id),
                           ),
                           child: Text(l10n.opsWhCopyId),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.url),
                           ),
                           child: Text(l10n.opsWhCopyUrl),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: () => Clipboard.setData(
                             ClipboardData(text: _latestCreatedWebhook!.secret),
                           ),
@@ -800,6 +804,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
               wideBreakpoint: 560,
               children: <Widget>[
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed: _loadingWebhooks ? null : _loadWebhooks,
                   child: Text(l10n.opsWhRefreshList),
                 ),
@@ -982,11 +987,13 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                   enabled: !_loadingWebhooks && !rowBusy,
                                 ),
                                 const SizedBox(height: 8),
-                                Wrap(
+                                StudioDenseActionRow(
                                   spacing: 8,
-                                  runSpacing: 8,
                                   children: [
                                     OutlinedButton(
+                                      style: studioFormSecondaryButtonStyle(
+                                        context,
+                                      ),
                                       onPressed: _loadingWebhooks || rowBusy
                                           ? null
                                           : () => _patchWebhookWorkspaceScope(
@@ -1049,9 +1056,8 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                               ),
                             ),
                           const SizedBox(height: 8),
-                          Wrap(
+                          StudioDenseActionRow(
                             spacing: 8,
-                            runSpacing: 8,
                             children: [
                               IconButton(
                                 style: studioUtilityIconButtonStyle(context),
@@ -1072,6 +1078,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                 icon: const Icon(Icons.copy_outlined),
                               ),
                               OutlinedButton(
+                                style: studioFormSecondaryButtonStyle(context),
                                 onPressed: _loadingWebhooks || rowBusy
                                     ? null
                                     : () => _testWebhook(wh.id),
@@ -1082,6 +1089,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                 ),
                               ),
                               OutlinedButton(
+                                style: studioFormSecondaryButtonStyle(context),
                                 onPressed:
                                     _loadingWebhooks ||
                                         rowBusy ||
@@ -1095,6 +1103,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                 ),
                               ),
                               OutlinedButton(
+                                style: studioFormSecondaryButtonStyle(context),
                                 onPressed: _loadingWebhooks || rowBusy
                                     ? null
                                     : () => _deleteWebhook(wh.id),

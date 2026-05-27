@@ -78,6 +78,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                 child: Text(dlgL10n.projectEditorAssetCrudCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogCtx),
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
                 child: Text(dlgL10n.projectEditorAssetCrudCreate),
               ),
@@ -234,6 +235,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     child: Text(dlgL10n.projectEditorAssetCrudCancel),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(dialogCtx),
                     onPressed: () => Navigator.of(dialogCtx).pop(true),
                     child: Text(dlgL10n.projectEditorAssetCrudSave),
                   ),

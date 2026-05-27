@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../../rust_api.dart';
@@ -202,30 +204,39 @@ class _VersionManagerState extends State<VersionManager> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // 标题栏
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.history, size: 20, color: theme.colorScheme.primary),
-                  Text(
-                    l10n.shortVideoVersionManagerTitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: StudioSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      l10n.shortVideoVersionManagerTitle,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: StudioSpacing.xs),
+              StudioDenseActionRow(
+                children: [
                   if (widget.versions.length >= 2)
                     FilledButton.tonalIcon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed: _isLoading ? null : _showCompareVersionsDialog,
                       icon: const Icon(Icons.compare_arrows, size: 18),
                       label: Text(l10n.shortVideoVersionManagerCompareVersions),
                     ),
                   FilledButton.tonalIcon(
+                    style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _isLoading ? null : _showCreateVersionDialog,
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(l10n.shortVideoVersionManagerCreateNewVersion),
                   ),
                   FilledButton.tonalIcon(
+                    style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _isLoading ? null : _showSaveDraftDialog,
                     icon: const Icon(Icons.save_outlined, size: 18),
                     label: Text(l10n.shortVideoVersionManagerSaveDraft),
@@ -544,6 +555,7 @@ class _VersionManagerState extends State<VersionManager> {
                 child: Text(l10n.notificationsActionCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogContext),
                 onPressed: () {
                   final name = draftName.trim();
                   if (name.isNotEmpty) {
@@ -717,6 +729,7 @@ class _VersionManagerState extends State<VersionManager> {
                   child: Text(l10n.shortVideoVersionManagerGotIt),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(context),
                   onPressed: () {
                     Navigator.of(context).pop();
                     _showDraftsDialog();
@@ -775,6 +788,7 @@ class _VersionManagerState extends State<VersionManager> {
                 child: Text(l10n.notificationsActionCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogContext),
                 onPressed: () {
                   final name = draftName.trim();
                   if (name.isNotEmpty) {
@@ -979,10 +993,8 @@ class _VersionManagerState extends State<VersionManager> {
               child: Text(l10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormDestructivePrimaryButtonStyle(context),
               onPressed: () => Navigator.of(context).pop(true),
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
               child: Text(l10n.notificationsActionDelete),
             ),
           ],
@@ -1126,6 +1138,7 @@ class _VersionManagerState extends State<VersionManager> {
                   child: Text(l10n.notificationsActionCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(dialogContext),
                   onPressed: baseVersion != null &&
                           compareVersion != null &&
                           baseVersion!.id != compareVersion!.id

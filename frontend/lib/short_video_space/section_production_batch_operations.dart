@@ -223,6 +223,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
               child: Text(dlgL10n.storyboardEditorDialogCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(ctx),
               onPressed: () {
                 final sec = int.tryParse(ctrl.text.trim());
                 Navigator.of(ctx).pop(sec);
@@ -330,6 +331,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
               child: Text(dlgL10n.storyboardEditorDialogCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(ctx),
               onPressed: () {
                 Navigator.of(ctx).pop({
                   'pattern': patternCtrl.text.trim(),
@@ -562,6 +564,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
               actions: [
                 if (totalProcessed >= eligibleShots.length)
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(ctx),
                     onPressed: () => Navigator.of(ctx).pop(),
                     child: Text(dlgL10n.shortVideoBatchVoiceoverQueueDone),
                   )

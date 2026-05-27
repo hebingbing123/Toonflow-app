@@ -410,8 +410,8 @@ class _SettingsSummaryTile extends StatelessWidget {
                 else
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+                      horizontal: StudioLayoutSpacing.inlineGap,
+                      vertical: StudioLayoutSpacing.microGap,
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),

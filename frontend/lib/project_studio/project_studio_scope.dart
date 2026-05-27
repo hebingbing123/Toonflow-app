@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../design_system/ix/studio_api_error_callout.dart';
+import '../demo/product_demo_mode.dart';
+import '../demo/studio_demo_data.dart';
 import '../rust_api.dart';
 import 'project_studio_host.dart';
 import 'project_studio_page.dart';
@@ -153,6 +155,9 @@ Future<StudioReadinessSnapshot> _defaultLoadSnapshot(
   String accessToken,
   String projectUuid,
 ) async {
+  if (ProductDemoMode.instance.shouldSkipLiveApi) {
+    return buildDemoStudioReadinessSnapshot(accessToken, projectUuid);
+  }
   ProjectShortVideoReadiness? readiness;
   ProjectProductionOverview? production;
   ProjectHome? home;

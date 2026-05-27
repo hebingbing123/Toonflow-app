@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:flutter/services.dart';
@@ -164,7 +165,10 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
           
           // Selected count indicator
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioLayoutSpacing.insetDense,
+              vertical: StudioLayoutSpacing.microGap,
+            ),
             decoration: BoxDecoration(
               color: hasSelection
                   ? StudioTokens.of(context).primarySoft
@@ -193,12 +197,11 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
             const SizedBox(width: 8),
             
             Expanded(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              child: StudioDenseActionRow(
                 children: [
                   // Batch enable
                   FilledButton.tonalIcon(
+                    style: studioFormIconLabeledButtonStyle(context),
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchEnable),
@@ -208,6 +211,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                   
                   // Batch disable
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchDisable),
@@ -217,6 +221,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                   
                   // Batch update duration
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchUpdateDuration),
@@ -226,6 +231,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                   
                   // Batch replace
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchReplace),
@@ -235,6 +241,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                   
                   // Batch generate voiceover
                   OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchGenerateVoiceover),
@@ -487,11 +494,13 @@ class BatchOperationProgressDialog extends StatelessWidget {
           ),
         if (isComplete && hasFailures && onRetryFailed != null)
           FilledButton.tonal(
+            style: studioFormTonalButtonStyle(context),
             onPressed: onRetryFailed,
             child: Text(l10n.shortVideoBatchProgressRetryFailed),
           ),
         if (isComplete)
           FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.shortVideoBatchProgressClose),
           ),

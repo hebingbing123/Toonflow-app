@@ -57,6 +57,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
                 child: Text(l10n.projectEditorScriptsBatchAddCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(dialogCtx),
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
                 child: Text(l10n.projectEditorScriptsBatchAddCreate),
               ),

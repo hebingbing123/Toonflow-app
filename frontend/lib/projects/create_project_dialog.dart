@@ -4,6 +4,7 @@ import '../design_system/tokens.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   final nameController = TextEditingController();
@@ -139,6 +140,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
             child: Text(l10n.notificationsActionCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(dialogContext),
             onPressed: () {
               List<String> splitLines(String raw) => raw
                   .split('\n')

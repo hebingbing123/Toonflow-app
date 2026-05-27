@@ -137,6 +137,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                                     child: Text(l10n.storyboardEditorDialogCancel),
                                   ),
                                   FilledButton(
+                                    style: studioFormPrimaryButtonStyle(c),
                                     onPressed: () => Navigator.of(c).pop(true),
                                     child: Text(
                                       l10n.storyboardEditorDialogConfirmDelete,
@@ -175,6 +176,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                     child: Text(l10n.storyboardEditorDeleteStoryboard),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: saving[0]
                         ? null
                         : () async {

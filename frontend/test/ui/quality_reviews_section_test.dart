@@ -99,7 +99,7 @@ void main() {
       onErrorChanged: (_) {},
     );
     controller.qualityReviewsLoadState = StudioLoadState.loading;
-    controller.loadingQualityReviews = true;
+    controller.loadingQualityReviews = false;
 
     await tester.pumpWidget(
       _wrap(

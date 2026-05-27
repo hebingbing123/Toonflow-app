@@ -74,48 +74,67 @@ class _CandidateComparePanel extends StatelessWidget {
                   candidateCardUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                 ),
-                if (candidateCardUi.onConfirmStoryboardCandidates != null) ...[
+                if (candidateCardUi.onConfirmStoryboardCandidates != null ||
+                    candidateCardUi.onBatchGenerateCandidateClips != null ||
+                    onOpenProjectsForCandidateAssets != null) ...[
                   const SizedBox(height: StudioLayoutSpacing.inlineGap),
-                  OutlinedButton.icon(
-                    onPressed: candidateCardUi.confirmStoryboardCandidatesBusy
-                        ? null
-                        : candidateCardUi.onConfirmStoryboardCandidates,
-                    icon: candidateCardUi.confirmStoryboardCandidatesBusy
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.check_circle_outline),
-                    label: Text(l10n.globalSearchConfirm),
-                  ),
-                ],
-                if (candidateCardUi.onBatchGenerateCandidateClips != null) ...[
-                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
-                  FilledButton.tonalIcon(
-                    onPressed: candidateCardUi.batchGenerateCandidateClipsBusy
-                        ? null
-                        : candidateCardUi.onBatchGenerateCandidateClips,
-                    icon: candidateCardUi.batchGenerateCandidateClipsBusy
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.movie_creation_outlined),
-                    label: Text(
-                      candidateCardUi.batchGenerateCandidateClipsBusy
-                          ? l10n.shortVideoCandidateBatchGenerateSubmitting
-                          : l10n.shortVideoCandidateBatchGenerateLabel,
-                    ),
-                  ),
-                ],
-                if (onOpenProjectsForCandidateAssets != null) ...[
-                  const SizedBox(height: StudioLayoutSpacing.inlineGap),
-                  OutlinedButton.icon(
-                    onPressed: onOpenProjectsForCandidateAssets,
-                    icon: const Icon(Icons.folder_open_outlined),
-                    label: Text(l10n.shortVideoCandidateOpenProjectsForAssets),
+                  StudioDenseActionRow(
+                    children: <Widget>[
+                      if (candidateCardUi.onConfirmStoryboardCandidates != null)
+                        OutlinedButton.icon(
+                          style: studioFormOutlinedIconLabeledButtonStyle(
+                            context,
+                          ),
+                          onPressed:
+                              candidateCardUi.confirmStoryboardCandidatesBusy
+                              ? null
+                              : candidateCardUi.onConfirmStoryboardCandidates,
+                          icon: candidateCardUi.confirmStoryboardCandidatesBusy
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.check_circle_outline),
+                          label: Text(l10n.globalSearchConfirm),
+                        ),
+                      if (candidateCardUi.onBatchGenerateCandidateClips !=
+                          null)
+                        FilledButton.tonalIcon(
+                          style: studioFormIconLabeledButtonStyle(context),
+                          onPressed:
+                              candidateCardUi.batchGenerateCandidateClipsBusy
+                              ? null
+                              : candidateCardUi.onBatchGenerateCandidateClips,
+                          icon: candidateCardUi.batchGenerateCandidateClipsBusy
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.movie_creation_outlined),
+                          label: Text(
+                            candidateCardUi.batchGenerateCandidateClipsBusy
+                                ? l10n.shortVideoCandidateBatchGenerateSubmitting
+                                : l10n.shortVideoCandidateBatchGenerateLabel,
+                          ),
+                        ),
+                      if (onOpenProjectsForCandidateAssets != null)
+                        OutlinedButton.icon(
+                          style: studioFormOutlinedIconLabeledButtonStyle(
+                            context,
+                          ),
+                          onPressed: onOpenProjectsForCandidateAssets,
+                          icon: const Icon(Icons.folder_open_outlined),
+                          label: Text(
+                            l10n.shortVideoCandidateOpenProjectsForAssets,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ],

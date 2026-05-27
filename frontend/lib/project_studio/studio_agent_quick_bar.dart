@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../design_system/tokens.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
 
@@ -28,8 +28,6 @@ class StudioAgentQuickBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final tokens = StudioTokens.of(context);
-    final theme = Theme.of(context);
     final chips = <Widget>[];
 
     void add(StudioAgentAction action, String label, VoidCallback? fn) {
@@ -37,17 +35,7 @@ class StudioAgentQuickBar extends StatelessWidget {
       chips.add(
         FilledButton.tonal(
           onPressed: fn,
-          style: FilledButton.styleFrom(
-            minimumSize: const Size(0, StudioSpacing.iconTouchTarget),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            backgroundColor: tokens.bgInset,
-            foregroundColor: tokens.textPrimary,
-            side: BorderSide(color: tokens.borderDefault),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            textStyle: theme.textTheme.labelLarge,
-          ),
+          style: studioFormInsetTonalChipStyle(context),
           child: Text(label),
         ),
       );

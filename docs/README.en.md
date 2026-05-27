@@ -1,13 +1,3 @@
-<p>
-  <a href="https://github.com/HBAI-Ltd/Openflow-app">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" />
-  </a>
-  &nbsp;|&nbsp;
-  <a href="https://gitee.com/HBAI-Ltd/Openflow-app">
-    <img src="https://img.shields.io/badge/Gitee-C71D23?style=flat-square&logo=gitee&logoColor=white" alt="Gitee" />
-  </a>
-</p>
-
 <p align="center">
   <a href="../README.md">简体中文</a> |
   <strong>English</strong>
@@ -23,29 +13,24 @@
       <br />
       Intelligent Creation Platform Based on Harness Engineering
       <br />
-      Rust + Flutter + PostgreSQL 🚀
+      Proprietary Cloud SaaS · Sign in required
     </b>
   </p>
   <p align="center">
-    <a href="https://github.com/HBAI-Ltd/Openflow-app/stargazers">
-      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Openflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
-    </a>
-    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
-      <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="Apache-2.0 License Badge" />
-    </a>
-    <a href="https://github.com/HBAI-Ltd/Openflow-app/releases">
-      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Openflow-app?style=for-the-badge" />
-    </a>
+    <img src="https://img.shields.io/badge/Product-Proprietary%20SaaS-7C97FF?style=for-the-badge" alt="Proprietary SaaS" />
+    <img src="https://img.shields.io/badge/Access-Registration%20required-34C8F0?style=for-the-badge" alt="Registration required" />
+    <img src="https://img.shields.io/badge/Stack-Rust%20%2B%20Flutter%20%2B%20PostgreSQL-1a1a2e?style=for-the-badge" alt="Tech stack" />
   </p>
   
-  > 🚀 **Modern Tech Stack**: Rust backend + Flutter frontend + PostgreSQL database, complete AI creation workflow from text to video
+  > 🚀 **Modern Tech Stack**: Rust backend + Flutter frontend + PostgreSQL database, complete AI creation workflow from text to video  
+  > 🔒 **Not open source**: No public source or self-hosted OSS distribution; clients and integration docs are provided under commercial license.
 </div>
 
 ---
 
 ## 📖 Project Overview
 
-OpenFlow is an AI short drama production platform based on **Harness Engineering** architecture, using **Rust + Flutter + PostgreSQL** tech stack, providing a complete workflow from planning to finished product.
+OpenFlow is a **proprietary cloud SaaS** AI short drama production platform based on **Harness Engineering**, using **Rust + Flutter + PostgreSQL**. Users must **register and sign in** before accessing Workspace creation features. Protected APIs require Supabase Auth JWTs with database RLS for tenant isolation.
 
 ### Core Features
 
@@ -56,16 +41,15 @@ OpenFlow is an AI short drama production platform based on **Harness Engineering
 - ✅ **Process Isolation Sandbox**: Subprocess pool + WASM runtime for secure user code execution
 - ✅ **OpenTelemetry Integration**: OTLP traces export with complete observability support
 - ✅ **Billing Webhook**: Multi-provider event handling for Stripe/Alipay/Paddle
-- ✅ **Multilingual Support**: Simplified Chinese, Traditional Chinese, English, Thai, Vietnamese, Japanese, Russian
+- ✅ **Multilingual Support**: Simplified Chinese, English
 
 ### Application Scenarios
 
 - 🎬 Rapid film/TV adaptation of web novels
 - 🏭 Short drama team pipeline collaborative production
 - 🚀 Multi-project parallel AI content factory
-- 🏢 Enterprise-level content platform for private deployment
+- 🏢 Enterprise team subscriptions and multi-member collaboration
 - 🧪 Low-cost validation of plot and shot schemes
-- 📚 AIGC creation experiments in teaching and research scenarios
 
 ---
 
@@ -110,7 +94,20 @@ For detailed descriptions:
 
 ---
 
-## 🚀 Quick Start
+## 🌐 Using the Platform (End Users)
+
+1. **Register** via the official Web or desktop client (Supabase Auth).
+2. **Sign in** to obtain a session and JWT; unauthenticated users only see public pages such as login/register.
+3. **Enter a Workspace** (Personal or Enterprise) to create scripts, storyboards, and assets.
+4. **Subscription & billing** per Workspace plan and usage (Stripe / Alipay / Paddle, depending on deployment).
+
+Installers and production URLs are provided by operations or sales—not published from this repository.
+
+---
+
+## 🚀 Local Development (Authorized Team Members)
+
+> This repository is **proprietary** source code for authorized internal development and partners only. See [LICENSE](../LICENSE).
 
 ### Prerequisites
 
@@ -166,10 +163,12 @@ yarn --version
 
 ### Start Development Environment
 
-#### 1. Clone Repository
+#### 1. Obtain Source Code
+
+After your lead grants Git access, clone from your **authorized remote** (do not publish source to public repositories):
 
 ```bash
-git clone https://github.com/HBAI-Ltd/Openflow-app.git
+git clone <your-authorized-remote-url>
 cd Openflow-app
 ```
 
@@ -315,14 +314,7 @@ supabase db push   # Production
 
 ---
 
-## 🔗 Related Repositories
-
-| Repository | Description | Links |
-|------------|-------------|-------|
-| **Openflow-app** | Main repository (this repo) | [GitHub](https://github.com/HBAI-Ltd/Openflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-app) |
-| **Openflow-web** | Legacy Web frontend (historical reference) | [GitHub](https://github.com/HBAI-Ltd/Openflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-web) |
-
-> 💡 **Tip**: Current main client is in **`frontend/`** (Flutter). **Openflow-web** is a legacy stack reference repository.
+> 💡 **Tip**: The main client lives in **`frontend/`** (Flutter). Legacy Web stack references are internal only—not open source.
 
 ---
 
@@ -332,48 +324,24 @@ supabase db push   # Production
 
 ---
 
-## 📜 License
+## 📜 License & Authorization
 
-OpenFlow is released as open source under the Apache-2.0 license with supplementary commercial terms.
+OpenFlow is **proprietary, closed-source software**—**not open source**. Full terms: **[LICENSE](../LICENSE)**.
 
-License details: https://www.apache.org/licenses/LICENSE-2.0
+Summary:
 
-### Supplementary Terms
+- **SaaS use**: Register and sign in; use the hosted platform within your subscription.
+- **Source & artifacts**: No public source release; client/server distribution requires commercial authorization.
+- **Redistribution**: Providing the product to **≥2 independent third parties** requires written license; ≤5 legal entities internal joint use—see LICENSE.
+- **Pricing** (annual, summary): support tier under ¥100k may apply free → startup ¥5,000 → growth ¥20k → scale ¥80k → enterprise negotiable.
 
-- If distributing this software as a product to **2 or more independent third parties**, written commercial authorization from HBAI-Ltd is required.
-- **≤ 5 legal entities** jointly operating for internal use without external services is considered internal use and **requires no authorization**.
-- Do not remove or modify OpenFlow identifiers or copyright information.
-
-### Permanently Free Scenarios
-
-- ✅ Create content with OpenFlow and earn platform revenue sharing
-- ✅ Secondary development for your own team's internal use
-- ✅ ≤ 5 legal entities jointly operating for internal use
-- ✅ Personal learning, research, non-commercial use
-
-### Commercial Authorization Pricing
-
-| Stage | Annual Revenue | Annual Fee |
-|-------|---------------|------------|
-| 🌱 Support | < ¥100k | **Free upon application** |
-| 🚀 Startup | ¥100k–500k | ¥5,000/year |
-| 📈 Growth | ¥500k–1.5M | ¥20,000/year |
-| 🏢 Scale | ¥1.5M–5M | ¥80,000/year |
-| 🌐 Enterprise | > ¥5M | Negotiable |
-
-Complete terms in [LICENSE](../LICENSE) file.
+📧 Licensing: [ltlctools@outlook.com](mailto:ltlctools@outlook.com?subject=OpenFlow%20Licensing)
 
 ---
 
-## ⭐️ Star History
+## 🙏 Third-Party Open Source Components
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)
-
----
-
-## 🙏 Acknowledgments
-
-Thanks to the following open source projects for supporting OpenFlow:
+The OpenFlow **product** is proprietary, but it is built with these **third-party open source** libraries (each under its own license):
 
 - [Rust](https://www.rust-lang.org/) / [Tokio](https://tokio.rs/) / [Axum](https://github.com/tokio-rs/axum)
 - [Flutter](https://flutter.dev/)

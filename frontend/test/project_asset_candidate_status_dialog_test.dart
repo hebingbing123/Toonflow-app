@@ -78,8 +78,6 @@ Future<void> _pumpDialog(WidgetTester tester) async {
 }
 
 void main() {
-  installLayoutOverflowIgnoreForTests();
-
   testWidgets('defaults to pending-only queue for pending focus', (
     tester,
   ) async {

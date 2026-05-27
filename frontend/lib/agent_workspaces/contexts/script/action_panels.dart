@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
@@ -39,23 +41,25 @@ class ScriptWorkspaceGuidedTasksPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return StudioDenseActionRow(
       children: <Widget>[
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onFetchPlanData,
           child: Text(l10n.agentWorkspaceScriptStepFetchPlanData),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onFetchScriptContent,
           child: Text(l10n.agentWorkspaceScriptStepFetchContent),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: busy ? null : onGenerateDraft,
           child: Text(l10n.agentWorkspaceScriptStepGenerateDraft),
         ),
         OutlinedButton(
+          style: studioFormSecondaryButtonStyle(context),
           onPressed: busy || !canWriteBackScriptResult
               ? null
               : onWriteBackScript,
@@ -167,11 +171,10 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        StudioDenseActionRow(
           children: <Widget>[
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onRunScriptWorkspace,
               child: Text(
                 loadingScriptWorkspaceRun
@@ -211,6 +214,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onProbeScriptDomainTool,
               child: Text(
                 loadingScriptDomainProbe
@@ -260,6 +264,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onRunScriptSubAgentTool,
               child: Text(
                 loadingScriptSubAgentRun
@@ -268,6 +273,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: busy || !canWriteBackScriptResult
                   ? null
                   : onWriteBackScriptResult,
@@ -278,6 +284,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy || !canWriteBackScriptPlanResult
                   ? null
                   : onWriteBackScriptPlanResult,
@@ -288,6 +295,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             OutlinedButton(
+              style: studioFormSecondaryButtonStyle(context),
               onPressed: busy || !canWriteBackScriptPlanViaUpdateData
                   ? null
                   : onWriteBackScriptPlanViaUpdateData,

@@ -147,7 +147,7 @@ class _ChecklistRow extends StatelessWidget {
                   ),
                 ),
                 if (!item.done && detail != null && detail.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                   Text(
                     detail,
                     style: theme.textTheme.bodySmall?.copyWith(

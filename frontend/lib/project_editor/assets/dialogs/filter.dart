@@ -117,6 +117,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                     child: Text(l10n.storyboardEditorDialogCancel),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(dialogCtx),
                     onPressed: () => Navigator.of(dialogCtx).pop(true),
                     child: Text(l10n.projectEditorAssetFilterApply),
                   ),

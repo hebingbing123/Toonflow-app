@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'version_manager.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
   if (value == null) return l10n.shortVideoVersionComparisonValueEmpty;
@@ -500,6 +501,7 @@ class _VersionComparisonState extends State<VersionComparison> {
               child: Text(dialogL10n.shortVideoSpaceProductionAssemblyClose),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: report));
                 if (context.mounted) {

@@ -169,6 +169,7 @@ class _NovelCrawlLoginWebViewDialogState
           child: Text(l10n.studioNovelCrawlLoginDialogCancel),
         ),
         FilledButton.icon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: _capturing || startUri == null ? null : _captureCookies,
           icon: _capturing
               ? const SizedBox(

@@ -5,7 +5,35 @@
 part of 'section.dart';
 
 extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
+  void _applyDemoOverviewSnapshot(ShortVideoDemoSnapshot snap) {
+    setState(() {
+      _loadingProjectOverview = false;
+      _loadingTimeline = false;
+      _projectStats = snap.projectStats;
+      _productionOverview = snap.productionOverview;
+      _projectAssetsOverview = snap.assetsOverview;
+      _shotReadiness = snap.shotReadiness;
+      _shotReadinessUnavailable = snap.shotReadinessUnavailable;
+      _publishDrafts = snap.publishDrafts;
+      _syncSelectedPublishDraftWith(_publishDrafts);
+      _candidateCompareRows = snap.candidateCompareRows;
+      _candidateCompareReviews = snap.candidateCompareReviews;
+      _scopedRunningJobCount = snap.scopedRunningJobCount;
+      _shortVideoAssembly = snap.assembly;
+      _shortVideoExportCheck = snap.exportCheck;
+      _shortVideoTimeline = snap.timeline;
+      _recentProjectTasks = snap.recentProjectTasks;
+      if (snap.projectConfigLine != null) {
+        _projectConfigLine = snap.projectConfigLine;
+      }
+    });
+  }
+
   Future<void> _loadProjects() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi &&
+        widget.debugProjects != null) {
+      return;
+    }
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       final l10n = resolveAppLocalizationsForErrors(context);

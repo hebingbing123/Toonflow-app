@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/studio_load_state.dart';
 import '../../rust_api.dart';
@@ -34,6 +35,7 @@ class QualityReviewsController extends ChangeNotifier {
   bool refreshingQualityDashboardReadModel = false;
   bool creatingQualityReview = false;
   bool loadingQualityReviewById = false;
+  bool skipDemoApi = false;
   String? qualityStatsLine;
   String? qualityStagePassRateLine;
   String? qualityStageGradeLine;
@@ -156,6 +158,7 @@ class QualityReviewsController extends ChangeNotifier {
     qualityReviewsLoadState = StudioLoadState.initial;
     qualityReviewsLastError = null;
     qualityReviewIdController.clear();
+    skipDemoApi = false;
     notifyListeners();
   }
 
@@ -168,6 +171,9 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   Future<void> _loadQualityReviews({bool onlyBadCases = false}) async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     if (onlyBadCases) {
@@ -236,6 +242,9 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   Future<void> fetchSelectedQualityReview() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     final id = qualityReviewIdController.text.trim();
@@ -268,6 +277,9 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   Future<void> loadQualityStats() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingQualityStats = true;
@@ -294,6 +306,9 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   Future<void> loadQualityStagePassRate() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingQualityStagePassRate = true;
@@ -330,6 +345,9 @@ class QualityReviewsController extends ChangeNotifier {
     int? projectId,
     bool refreshReadModel = false,
   }) async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingQualityDashboard = true;

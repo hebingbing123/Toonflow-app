@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_dropdown_field.dart';
+import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
 import '../../../l10n/app_localizations.dart';

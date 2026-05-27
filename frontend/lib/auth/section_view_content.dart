@@ -49,15 +49,16 @@ class _AuthSectionContent extends StatelessWidget {
                   autofillHints: const [AutofillHints.password],
                 ),
                 const SizedBox(height: 16),
-                Wrap(
+                StudioDenseActionRow(
                   spacing: 8,
-                  runSpacing: 8,
                   children: [
                     FilledButton(
+                      style: studioFormPrimaryButtonStyle(context),
                       onPressed: callbacks.onSignIn,
                       child: Text(l10n.authSignIn),
                     ),
                     OutlinedButton(
+                      style: studioFormSecondaryButtonStyle(context),
                       onPressed: callbacks.onSignUp,
                       child: Text(l10n.authSignUp),
                     ),
@@ -96,6 +97,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         Text(l10n.authSignedInUser(model.session?.user.id ?? '')),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingMe ? null : callbacks.onCallMe,
           child: Text(
             model.loadingMe ? l10n.authRequestInProgress : l10n.authGetMeBearer,
@@ -107,6 +109,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingDevSwitchProbe
               ? null
               : callbacks.onCallDevSwitchProbe,
@@ -122,6 +125,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingMemoryConfigProbe
               ? null
               : callbacks.onCallMemoryConfigProbe,
@@ -139,6 +143,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingAboutProbe
               ? null
               : callbacks.onCallAboutProbe,
@@ -154,6 +159,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingUsageSummary
               ? null
               : callbacks.onCallUsageSummary,
@@ -169,6 +175,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingPromptsProbe
               ? null
               : callbacks.onCallPromptsProbe,
@@ -184,6 +191,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingVisualManualProbe
               ? null
               : callbacks.onCallVisualManualProbe,
@@ -201,6 +209,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingDirectorManualProbe
               ? null
               : callbacks.onCallDirectorManualProbe,
@@ -218,6 +227,7 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingSkillsBinaryProbe
               ? null
               : callbacks.onCallSkillsBinaryProbe,
@@ -234,11 +244,11 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingModelsCatalog
                   ? null
                   : callbacks.onCallModelsCatalog,
@@ -249,6 +259,7 @@ class _AuthSignedInPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingTextModelDefault
                   ? null
                   : callbacks.onCallTextModelDefault,
@@ -259,6 +270,7 @@ class _AuthSignedInPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingModelDetail
                   ? null
                   : callbacks.onCallModelDetail,

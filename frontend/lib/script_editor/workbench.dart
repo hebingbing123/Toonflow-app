@@ -114,35 +114,45 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   Future<void> _pollExtractState() async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final rows = await pollScriptExtractState(widget.token, [
-      widget.scriptNumericId,
-    ]);
-    final current = findScriptExtractStateByNumericId(
-      rows,
-      widget.scriptNumericId,
-    );
-    if (!mounted) return;
-    final diagnosis = diagnoseScriptWorkbench(
-      l10n,
-      scriptContext: _scriptContext,
-      extractStateRow: current,
-    );
-    final stateLine = describeScriptExtractState(
-      l10n,
-      extractState: current?.extractState,
-      errorReason: current?.errorReason,
-    );
-    setState(() {
-      _extractStateRow = current;
-      _extractStateLine = buildScriptWorkbenchFollowUp(
-        l10n,
-        actionSummary: l10n.projectEditorScriptsSingleWorkbenchFollowUpPollState(
-          stateLine,
-        ),
-        diagnosis: diagnosis,
+    try {
+      final rows = await pollScriptExtractState(widget.token, [
+        widget.scriptNumericId,
+      ]);
+      final current = findScriptExtractStateByNumericId(
+        rows,
+        widget.scriptNumericId,
       );
-    });
-    widget.onExtractStateSynced(current?.extractState);
+      if (!mounted) return;
+      final diagnosis = diagnoseScriptWorkbench(
+        l10n,
+        scriptContext: _scriptContext,
+        extractStateRow: current,
+      );
+      final stateLine = describeScriptExtractState(
+        l10n,
+        extractState: current?.extractState,
+        errorReason: current?.errorReason,
+      );
+      setState(() {
+        _extractStateRow = current;
+        _extractStateLine = buildScriptWorkbenchFollowUp(
+          l10n,
+          actionSummary:
+              l10n.projectEditorScriptsSingleWorkbenchFollowUpPollState(
+            stateLine,
+          ),
+          diagnosis: diagnosis,
+        );
+      });
+      widget.onExtractStateSynced(current?.extractState);
+    } catch (e) {
+      if (!mounted) return;
+      setState(
+        () => _extractStateLine = l10n.projectEditorScriptsWorkbenchPollAllFailed(
+          describeUserVisibleApiErrorResolved(context, e),
+        ),
+      );
+    }
   }
 
   Future<void> _refreshWorkbench() async {

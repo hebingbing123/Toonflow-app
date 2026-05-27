@@ -73,8 +73,12 @@ jobs:
             projects_create_stats_delete_roundtrip \
             promote_staging_populates_assets_and_links \
             art_styles_crud_roundtrip \
-            settings_workspace_shared_audit_export
+            settings_workspace_shared_audit_export \
+            checkout_complete_upgrades \
+            checkout_paid_session_reconciles \
+            checkout_pending_session_upgrades \
+            scripts_export_membership
           do
             echo "=== cargo test ${filter} (ignored) ==="
-            cargo test "${filter}" -- --ignored --nocapture --test-threads=1
+            cargo test "${filter}" --lib -- --ignored --nocapture --test-threads=1
           done

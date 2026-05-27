@@ -350,6 +350,7 @@ class _StoryboardBatchWorkbenchDialogState
           Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 8),
           FilledButton.tonal(
+            style: studioFormTonalButtonStyle(context),
             onPressed: recommendedAction,
             child: Text(recommendedActionLabel),
           ),

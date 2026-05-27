@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
@@ -246,6 +247,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     ),
                   ),
                   FilledButton.tonalIcon(
+                    style: studioFormIconLabeledButtonStyle(context),
                     onPressed: widget.controller.searching
                         ? null
                         : () =>
@@ -654,6 +656,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: widget.controller.savingGovernance
               ? null
               : () => widget.controller.updateUserGovernance(
@@ -721,11 +724,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed: widget.controller.savingWorkspaceContext
                   ? null
                   : () => widget.controller.updateUserWorkspaceContext(
@@ -741,6 +744,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
             ...switchTargets.map(
               (item) => OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: widget.controller.savingWorkspaceContext
                     ? null
                     : () => widget.controller.updateUserWorkspaceContext(
@@ -914,6 +918,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: widget.controller.savingGovernance
               ? null
               : () => widget.controller.updateWorkspaceGovernance(
@@ -962,10 +967,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             SizedBox(
               width: 260,
@@ -998,6 +1001,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               },
             ),
             FilledButton.tonalIcon(
+              style: studioFormIconLabeledButtonStyle(context),
               onPressed: widget.controller.savingWorkspaceMembership
                   ? null
                   : () => widget.controller.updateWorkspaceMemberRemediation(
@@ -1020,10 +1024,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           final isOwner = member.role == 'owner';
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Wrap(
+            child: StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   '${member.email ?? member.userId} · ${member.role}',
@@ -1031,6 +1033,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 ),
                 if (!isOwner) ...[
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: widget.controller.savingWorkspaceMembership
                         ? null
                         : () => widget.controller
@@ -1044,6 +1047,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     child: Text(l10n.adminConsoleSetAsMember),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: widget.controller.savingWorkspaceMembership
                         ? null
                         : () => widget.controller
@@ -1057,6 +1061,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     child: Text(l10n.adminConsoleSetAsAdmin),
                   ),
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: widget.controller.savingWorkspaceMembership
                         ? null
                         : () => widget.controller
@@ -1108,10 +1113,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         if (!isPersonal) ...[
           const SizedBox(height: 8),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
                 width: 260,
@@ -1124,6 +1127,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 ),
               ),
               FilledButton.tonalIcon(
+                style: studioFormIconLabeledButtonStyle(context),
                 onPressed: widget.controller.savingOwnershipRemediation
                     ? null
                     : () => widget.controller.transferWorkspaceOwner(
@@ -1145,16 +1149,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               .map(
                 (member) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Wrap(
+                  child: StudioDenseActionRow(
                     spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         '${member.email ?? member.userId} · ${member.role}',
                         style: theme.textTheme.bodySmall,
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: widget.controller.savingOwnershipRemediation
                             ? null
                             : () => widget.controller.transferWorkspaceOwner(
@@ -1400,6 +1403,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: widget.controller.savingBatchGovernance
               ? null
               : () async {
@@ -1569,6 +1573,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ),
             ),
             FilledButton.tonalIcon(
+              style: studioFormIconLabeledButtonStyle(context),
               onPressed: widget.controller.savingOwnershipRemediation
                   ? null
                   : () => widget.controller.transferProjectOwner(
@@ -1703,6 +1708,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.sm),
         FilledButton.tonalIcon(
+          style: studioFormIconLabeledButtonStyle(context),
           onPressed: widget.controller.savingGovernance
               ? null
               : () => widget.controller.updateProjectGovernance(

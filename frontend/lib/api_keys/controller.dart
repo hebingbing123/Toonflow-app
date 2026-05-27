@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -29,6 +30,7 @@ class ApiKeysController extends ChangeNotifier {
   int activeCount = 0;
   int revokedCount = 0;
   bool _primed = false;
+  bool skipDemoApi = false;
 
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider();
@@ -47,6 +49,9 @@ class ApiKeysController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) {
       reset();
@@ -183,6 +188,24 @@ class ApiKeysController extends ChangeNotifier {
 
   void clearLatestPlaintextToken() {
     latestPlaintextToken = null;
+    notifyListeners();
+  }
+
+  void applyDemoPreview({
+    required List<ApiKeyRecordV1> items,
+    required List<ApiKeyAuditRecordV1> auditItems,
+    required int activeCount,
+    required int revokedCount,
+  }) {
+    skipDemoApi = true;
+    loading = false;
+    creating = false;
+    busyKeyId = null;
+    this.items = items;
+    this.auditItems = auditItems;
+    this.activeCount = activeCount;
+    this.revokedCount = revokedCount;
+    _primed = true;
     notifyListeners();
   }
 

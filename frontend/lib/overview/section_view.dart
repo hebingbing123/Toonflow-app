@@ -173,6 +173,7 @@ class _ProbeTile extends StatelessWidget {
               Text(endpoint, style: studioCardTitleStyle(context)),
               const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: onPressed,
                 child: Text(actionLabel),
               ),

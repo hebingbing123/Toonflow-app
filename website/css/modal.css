@@ -217,9 +217,11 @@
 
 .hero-shot-frame .device-shot--hero {
   width: 100%;
-  min-height: 320px;
-  object-fit: cover;
-  object-position: center 75%;
+  height: auto;
+  max-height: 360px;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 /* Mobile sticky CTA */

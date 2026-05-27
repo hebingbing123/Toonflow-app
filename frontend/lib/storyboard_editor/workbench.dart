@@ -251,6 +251,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                 const SizedBox(height: StudioLayoutSpacing.listItem),
               ],
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: viewState.recommendedAction,
                 child: Text(viewState.recommendedActionLabel),
               ),

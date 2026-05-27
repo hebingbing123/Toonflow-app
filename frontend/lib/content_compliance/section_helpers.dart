@@ -811,6 +811,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
             child: Text(l10n.taskCenterCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(dialogContext),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.contentComplianceDialogContinue),
           ),
@@ -953,6 +954,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
             child: Text(l10n.taskCenterCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(dialogContext),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.contentComplianceDialogContinue),
           ),
@@ -1021,6 +1023,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
             child: Text(l10n.taskCenterCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(dialogContext),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(
               dryRun

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -731,9 +732,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       ).textTheme.bodyMedium,
                                     ),
                                     const SizedBox(height: 16),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
+                                    StudioDenseActionRow(
                                       children: <Widget>[
                                         StudioToolbarButton(
                                           label: l10n.studioStepOpenProduction,
@@ -741,6 +740,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                         ),
                                         if (widget.onOpenShotEditor != null)
                                           OutlinedButton(
+                                            style: studioFormSecondaryButtonStyle(
+                                              context,
+                                            ),
                                             onPressed: _openShotEditor,
                                             child: Text(
                                               l10n.studioStoryboardStudioOpenEditor,

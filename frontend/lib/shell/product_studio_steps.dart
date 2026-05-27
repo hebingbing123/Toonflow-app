@@ -108,6 +108,9 @@ extension _HomePageProductStudioSteps on _HomePageState {
           StudioSnapshotInvalidation.workbenchMedia,
         );
       },
+      debugContentLoader:
+          _activeDemoCatalog?.scriptStepContentLoader ??
+          widget.debugPreviewData?.scriptStepContentLoader,
       agentWorkspace: _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.script,
         sectionTitle: resolveAppLocalizationsForErrors(
@@ -219,6 +222,8 @@ extension _HomePageProductStudioSteps on _HomePageState {
           projectNumericId: projectNumericId,
           projectUuid: storyboardRow.id,
           accessToken: storyboardToken,
+          debugScripts: _storyboardDebugScripts,
+          debugShots: _storyboardDebugShots,
           initialScriptNumericId: initialScriptId,
           embeddedInProjectStudio: true,
           onOpenBatchImageWorkbench:
@@ -358,8 +363,12 @@ extension _HomePageProductStudioSteps on _HomePageState {
   Widget _buildShortVideoSpaceSection({
     ShortVideoSpaceEmbedScope embedScope = ShortVideoSpaceEmbedScope.full,
   }) {
+    final catalog = _activeDemoCatalog;
     return ShortVideoSpaceSection(
-      accessToken: _session?.accessToken,
+      accessToken: _effectiveAccessToken,
+      debugProjects: catalog?.projects,
+      debugPublishDrafts: catalog?.publishDrafts,
+      debugOverviewSnapshot: catalog?.shortVideoOverviewSnapshot,
       initialFocus: _shortVideoSpaceInitialFocus,
       embedScope: embedScope,
       initialProjectUuid:

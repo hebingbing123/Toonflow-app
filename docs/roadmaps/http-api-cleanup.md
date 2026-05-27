@@ -362,7 +362,7 @@
 | 类别 | 说明 |
 |------|------|
 | **契约与路线** | **`openapi.yaml`**、**`websocket-events.md`**、**`plans/*.md`**、**`migration/*.md`** — **保留**；其中 migration 文档描述 SQLite→PG，与 **在线 历史 API** 是两件事，但同属「旧栈退场」叙事。 |
-| **多语言 README** | **`docs/README.{en,ja,ru,th,vi,zhtw}.md`** 已截断为 **短入口**：删除 Docker/PM2/开发/目录树/相关仓库/**微信社群**/长版许可证与致谢；统一指向根 **`README.md`** + **`LICENSE`** + `backend`/`frontend`/路线图链接。 |
+| **多语言 README** | 文档仅 **简体中文**（根 `README.md`）与 **English**（`docs/README.en.md`）；统一指向 **`LICENSE`** + `backend`/`frontend`/路线图链接。 |
 | **静态图** | **`docs/*.png`**、`sponsored/`、`atomgitLogo.svg` 等 — 营销/展示用，非 API 历史；仅在做 **文档归档** 时评估是否迁出仓库。 |
 
 ### 8.4 `.gitignore` 中与旧栈相关的条目（提示）

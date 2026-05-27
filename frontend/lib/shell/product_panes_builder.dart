@@ -50,6 +50,13 @@ extension _HomePageProductPanesBuilder on _HomePageState {
         sectionDescription: agentSubtitle,
       );
     }
+    if (_isDemoModeActive && ProductDemoTour.instance.isEngaged) {
+      return _buildAgentWorkspacePane(
+        initialPane: agentPane,
+        sectionTitle: agentTitle,
+        sectionDescription: agentSubtitle,
+      );
+    }
     final projectId = _resolvedProductNumericIdForPipeline();
     if (projectId == null) {
       return _buildProductHarnessRedirectHint(
@@ -107,13 +114,22 @@ extension _HomePageProductPanesBuilder on _HomePageState {
           title: l10n.productNavHelp,
           reason: l10n.productPaneDisabledHelpHub,
           child: _HelpHubSection(
-            accessToken: _session?.accessToken,
-            debugWebhooks: widget.debugHelpHubWebhooks,
-            debugLatestCreatedWebhook: widget.debugHelpHubLatestCreatedWebhook,
-            debugBillingEventsPage: widget.debugHelpHubBillingEventsPage,
-            debugWebhookDeliveries: widget.debugHelpHubWebhookDeliveries,
+            accessToken: _effectiveAccessToken,
+            debugWebhooks:
+                widget.debugHelpHubWebhooks ??
+                _activeDemoCatalog?.helpHubWebhooks,
+            debugLatestCreatedWebhook:
+                widget.debugHelpHubLatestCreatedWebhook ??
+                _activeDemoCatalog?.helpHubLatestCreatedWebhook,
+            debugBillingEventsPage:
+                widget.debugHelpHubBillingEventsPage ??
+                _activeDemoCatalog?.helpHubBillingEventsPage,
+            debugWebhookDeliveries:
+                widget.debugHelpHubWebhookDeliveries ??
+                _activeDemoCatalog?.helpHubWebhookDeliveries,
             debugWebhookLastTestResults:
-                widget.debugHelpHubWebhookLastTestResults,
+                widget.debugHelpHubWebhookLastTestResults ??
+                _activeDemoCatalog?.helpHubWebhookLastTestResults,
           ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
@@ -122,7 +138,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.projects)
         ProjectsSection(
-          accessToken: _session?.accessToken,
+          accessToken: _effectiveAccessToken,
           controller: _projectsController,
           productPresentation: widget.shellMode == HomeShellMode.product,
           currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
@@ -139,6 +155,16 @@ extension _HomePageProductPanesBuilder on _HomePageState {
               ProductWorkspacePane.teamWorkspaces,
             );
           },
+          onExploreDemo: _isDemoModeActive
+              ? null
+              : () => unawaited(
+                  _enterProductDemoMode(
+                    guest:
+                        _effectiveAccessToken == null ||
+                        _effectiveAccessToken ==
+                            ProductDemoMode.guestAccessToken,
+                  ),
+                ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.account)
@@ -146,7 +172,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
             ? SettingsHubPage(
                 accountController: _accountController,
                 apiKeysController: _apiKeysController,
-                accessToken: _session?.accessToken,
+                accessToken: _effectiveAccessToken,
                 onAccountDeleted: _handleAccountDeleted,
                 onWorkspaceContextChanged: _handleWorkspaceContextChanged,
                 currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
@@ -181,6 +207,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
           title: l10n.productNavPlatformStatus,
           reason: l10n.productPaneDisabledPlatformStatus,
           child: PlatformStatusSection(
+            debugSnapshot: _activeDemoCatalog?.platformStatusSnapshot,
             onOverallHealthChanged: (healthy, degradedEndpoints) {
               _notificationsController.addPlatformStatusTransitionNotification(
                 healthy: healthy,
@@ -192,7 +219,8 @@ extension _HomePageProductPanesBuilder on _HomePageState {
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.teamWorkspaces)
         TeamWorkspacesSection(
-          accessToken: _session?.accessToken,
+          accessToken: _effectiveAccessToken,
+          debugInitialItems: _activeDemoCatalog?.workspaceListItems,
           onWorkspaceContextChanged: _handleWorkspaceContextChanged,
           currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
         ),
@@ -240,13 +268,17 @@ extension _HomePageProductPanesBuilder on _HomePageState {
           enabled: _platformConfig.benchmarkPaneEnabled,
           title: l10n.productNavBenchmark,
           reason: l10n.productPaneDisabledBenchmark,
-          child: BenchmarkSection(accessToken: _session?.accessToken),
+          child: BenchmarkSection(
+            accessToken: _effectiveAccessToken,
+            debugSnapshot: _activeDemoCatalog?.benchmarkSnapshot,
+            demoMode: _isDemoModeActive,
+          ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.tasks)
         TaskCenterSection(
           studioPresentation: widget.shellMode == HomeShellMode.product,
-          accessToken: _session?.accessToken,
+          accessToken: _effectiveAccessToken,
           initialProjectNumericId: _productScopedProjectNumericId,
           initialProjectUuid:
               _workspaceInputController.projectUuidController.text
@@ -329,7 +361,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
           title: l10n.productNavQuality,
           reason: l10n.productPaneDisabledQuality,
           child: QualityReviewsSection(
-            accessToken: _session?.accessToken,
+            accessToken: _effectiveAccessToken,
             controller: _qualityReviewsController,
             initialProjectNumericId: _productScopedProjectNumericId,
             initialProjectUuid:
@@ -348,9 +380,10 @@ extension _HomePageProductPanesBuilder on _HomePageState {
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.platformConfig)
         _PlatformConfigSection(
-          accessToken: _session?.accessToken,
+          accessToken: _effectiveAccessToken,
           currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
           initialConfig: _platformConfig,
+          debugResponse: _activeDemoCatalog?.platformConfigResponse,
           onConfigSaved: (config) {
             if (!mounted) {
               return;

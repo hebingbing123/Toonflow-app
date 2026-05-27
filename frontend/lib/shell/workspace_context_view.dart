@@ -106,7 +106,6 @@ class WorkspaceContextView extends StatelessWidget {
     required Color textColor,
   }) {
     final row = Row(
-      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Icon(
           Icons.folder_open_outlined,
@@ -116,7 +115,7 @@ class WorkspaceContextView extends StatelessWidget {
               : tokens.textMuted,
         ),
         const SizedBox(width: StudioSpacing.xs),
-        Flexible(
+        Expanded(
           child: Text(
             scopeLine,
             maxLines: 1,
@@ -189,7 +188,6 @@ class WorkspaceContextView extends StatelessWidget {
       if (titleBarChrome) {
         Widget buildTitleBarDenseRow() {
           return Row(
-            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
                 Icons.workspaces_outline,
@@ -197,7 +195,7 @@ class WorkspaceContextView extends StatelessWidget {
                 color: tokens.accent,
               ),
               const SizedBox(width: StudioSpacing.xs),
-              Flexible(
+              Expanded(
                 child: Text(
                   summary,
                   maxLines: 1,
@@ -216,10 +214,9 @@ class WorkspaceContextView extends StatelessWidget {
         Widget buildTitleBarTwoLineColumn() {
           return Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Row(
-                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Icon(
                     Icons.workspaces_outline,
@@ -227,7 +224,7 @@ class WorkspaceContextView extends StatelessWidget {
                     color: tokens.accent,
                   ),
                   const SizedBox(width: StudioSpacing.xs),
-                  Flexible(
+                  Expanded(
                     child: Text(
                       workspaceLine,
                       maxLines: 1,
@@ -242,9 +239,12 @@ class WorkspaceContextView extends StatelessWidget {
                   ),
                   if (workspaceTypeLabel != null) ...<Widget>[
                     const SizedBox(width: StudioSpacing.xs),
-                    _InlineContextChip(
-                      label: workspaceTypeLabel,
-                      compact: true,
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: _InlineContextChip(
+                        label: workspaceTypeLabel,
+                        compact: true,
+                      ),
                     ),
                   ],
                 ],
@@ -281,7 +281,12 @@ class WorkspaceContextView extends StatelessWidget {
                 l10n: l10n,
                 tokens: tokens,
                 scopeLine: scopeLine,
-                child: body,
+                child: SizedBox(
+                  width: constraints.maxWidth.isFinite
+                      ? constraints.maxWidth
+                      : double.infinity,
+                  child: body,
+                ),
               );
             },
           ),

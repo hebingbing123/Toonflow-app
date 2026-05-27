@@ -7,6 +7,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 enum ProjectAssetCandidateStatusDialogAction {
   save,
@@ -324,11 +325,13 @@ class _ProjectAssetCandidateStatusDialogState
                 child: Text(l10n.projectEditorAssetCrudCancel),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: () =>
                     _submit(ProjectAssetCandidateStatusDialogAction.save),
                 child: Text(l10n.projectEditorAssetCandidateSaveStatus),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: visibleAssets.length < 2
                     ? null
                     : () => _submit(
@@ -340,6 +343,7 @@ class _ProjectAssetCandidateStatusDialogState
                 child: Text(l10n.projectEditorAssetCandidateSaveToVisible),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(context),
                 onPressed: remainingAssetNumericIds.length < 2
                     ? null
                     : () => _submit(
@@ -349,6 +353,7 @@ class _ProjectAssetCandidateStatusDialogState
                 child: Text(l10n.projectEditorAssetCandidateSaveToRemaining),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: nextAssetNumericId == null
                     ? null
                     : () => _submit(

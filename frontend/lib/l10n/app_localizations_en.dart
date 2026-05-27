@@ -1143,6 +1143,82 @@ class AppLocalizationsEn extends AppLocalizations {
       'Before AI generation, add models and API keys under Settings → Model vendors.';
 
   @override
+  String get productDemoModeBannerTitle => 'Demo mode';
+
+  @override
+  String get productDemoModeBannerBody =>
+      'Sample data only — explore every page and dialog; nothing is saved to your account.';
+
+  @override
+  String get productDemoModeExit => 'Exit demo';
+
+  @override
+  String get productDemoModeExploreGuest => 'Try demo first';
+
+  @override
+  String get productDemoModeExploreLoggedIn => 'Explore with sample data';
+
+  @override
+  String get productDemoModeMutationBlocked =>
+      'Changes cannot be saved in demo mode';
+
+  @override
+  String get productDemoAutoplayPause => 'Pause tour';
+
+  @override
+  String get productDemoAutoplayResume => 'Resume tour';
+
+  @override
+  String productDemoAutoplayStepBody(String step) {
+    return 'Auto tour: $step';
+  }
+
+  @override
+  String productDemoGuideStepCounter(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get productDemoGuidePrevious => 'Previous';
+
+  @override
+  String get productDemoGuideNext => 'Next';
+
+  @override
+  String get productDemoGuideStartAutoplay => 'Auto tour';
+
+  @override
+  String get productDemoGuideExpandDetails => 'Expand';
+
+  @override
+  String get productDemoGuideCollapseDetails => 'Collapse';
+
+  @override
+  String productDemoGuideMainlineCounter(int step, int total) {
+    return 'Main line · $step/$total';
+  }
+
+  @override
+  String productDemoGuideLaunchCounter(int part, int total) {
+    return 'Launch path · $part/$total';
+  }
+
+  @override
+  String get productDemoGuideOptionalTag => 'Optional';
+
+  @override
+  String get productDemoGuideSectionGoal => 'What to do';
+
+  @override
+  String get productDemoGuideSectionWhere => 'On this screen';
+
+  @override
+  String get productDemoGuideSectionDemo => 'In this demo';
+
+  @override
+  String get productDemoGuideSectionNext => 'Up next';
+
+  @override
   String get studioGettingStartedTitle => 'Quick start';
 
   @override

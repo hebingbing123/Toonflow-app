@@ -5,6 +5,7 @@ import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -479,6 +480,7 @@ class _WorkbenchToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (emphasized) {
       return FilledButton.icon(
+        style: studioFormIconLabeledButtonStyle(context),
         onPressed: onPressed,
         icon: Icon(icon, size: 16),
         label: Text(label),

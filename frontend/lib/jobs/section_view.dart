@@ -6,6 +6,7 @@ import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
 import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_dense_action_row.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
@@ -202,7 +203,10 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   ),
                   if (!compact && actionButtons.isNotEmpty)
-                    Wrap(spacing: 4, children: actionButtons),
+                    StudioDenseActionRow(
+                      spacing: 4,
+                      children: actionButtons,
+                    ),
                   if (!compact) ...<Widget>[
                     const SizedBox(width: StudioSpacing.xs),
                     Icon(Icons.chevron_right, size: 20, color: tokens.textMuted),
@@ -228,7 +232,10 @@ class JobsSectionView extends StatelessWidget {
               ),
               if (compact && actionButtons.isNotEmpty) ...<Widget>[
                 const SizedBox(height: 8),
-                Wrap(spacing: 8, runSpacing: 4, children: actionButtons),
+                StudioDenseActionRow(
+                  spacing: 8,
+                  children: actionButtons,
+                ),
               ],
             ],
           ),
@@ -320,9 +327,8 @@ class JobsSectionView extends StatelessWidget {
                   ],
                   if (compact && actionButtons.isNotEmpty) ...<Widget>[
                     const SizedBox(height: 8),
-                    Wrap(
+                    StudioDenseActionRow(
                       spacing: 8,
-                      runSpacing: 4,
                       children: actionButtons,
                     ),
                   ],
@@ -332,7 +338,10 @@ class JobsSectionView extends StatelessWidget {
             onTap: () => callbacks.onSelectJob(job),
             trailing: compact || actionButtons.isEmpty
                 ? null
-                : Wrap(spacing: 4, children: actionButtons),
+                : StudioDenseActionRow(
+                    spacing: 4,
+                    children: actionButtons,
+                  ),
           );
         }),
       ],
@@ -482,25 +491,27 @@ class JobsSectionView extends StatelessWidget {
         const SizedBox(height: StudioSpacing.sm),
       ],
       if (!studioPresentation)
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        StudioDenseActionRow(
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
               child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingJobs
                   ? null
                   : callbacks.onLoadJobsStatusFailed,
               child: Text(l10n.jobsLoadFailed),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingJobKinds ? null : callbacks.onLoadJobKinds,
               child: Text(model.loadingJobKinds ? '…' : l10n.jobsLoadKinds),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingJobKindSummary
                   ? null
                   : callbacks.onLoadJobKindSummary,
@@ -509,6 +520,7 @@ class JobsSectionView extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: model.loadingJobStatusSummary
                   ? null
                   : callbacks.onLoadJobStatusSummary,
@@ -572,23 +584,25 @@ class JobsSectionView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingJobs
                         ? null
                         : callbacks.onLoadJobsKindFlutterProbe,
                     child: Text(l10n.jobsFilterFlutterProbe),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingJobs
                         ? null
                         : callbacks.onLoadJobsKindProbeStatusQueued,
                     child: Text(l10n.jobsFilterFlutterProbeQueued),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.creatingJob
                         ? null
                         : callbacks.onCreateProbeJob,
@@ -597,6 +611,7 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingJobKinds
                         ? null
                         : callbacks.onLoadJobKinds,
@@ -605,6 +620,7 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingJobKindSummary
                         ? null
                         : callbacks.onLoadJobKindSummary,
@@ -615,6 +631,7 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loadingJobStatusSummary
                         ? null
                         : callbacks.onLoadJobStatusSummary,
@@ -636,6 +653,7 @@ class JobsSectionView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           FilledButton.tonal(
+            style: studioFormTonalButtonStyle(context),
             onPressed:
                 (model.loadingJobById ||
                     model.jobIdController.text.trim().isEmpty)

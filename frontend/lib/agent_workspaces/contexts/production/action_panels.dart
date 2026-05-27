@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../../../rust_api.dart';
@@ -266,6 +268,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             }
 
             final workflowButton = FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onRunProductionWorkspace,
               child: Text(
                 loadingProductionWorkspaceRun
@@ -274,6 +277,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               ),
             );
             final probeButton = FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onProbeProductionDomainTool,
               child: Text(
                 loadingProductionFlowProbe
@@ -282,6 +286,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               ),
             );
             final subAgentButton = FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy ? null : onRunProductionSubAgentTool,
               child: Text(
                 loadingProductionSubAgentRun
@@ -290,6 +295,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               ),
             );
             final writebackButton = FilledButton(
+              style: studioFormPrimaryButtonStyle(context),
               onPressed: busy || !hasLastToolResult
                   ? null
                   : onWriteBackProductionFlowResult,
@@ -336,10 +342,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                StudioDenseActionRow(
                   children: <Widget>[
                     workflowButton,
                     domainToolDropdown(),

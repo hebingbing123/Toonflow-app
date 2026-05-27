@@ -26,6 +26,23 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     String token,
     String? preferredDraftId,
   ) async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return (
+        matrix: null,
+        matrixLoaded: false,
+        unavailable: false,
+        drafts: widget.debugPublishDrafts ?? _publishDrafts,
+        draftsLoaded: true,
+        prepare: null,
+        prepareLoaded: false,
+        jobs: const <PublishJobRow>[],
+        jobsLoaded: true,
+        perfAlerts: const <PublishPerformanceAlertRow>[],
+        perfAlertsLoaded: true,
+        audits: const <PublishAttemptAuditRow>[],
+        auditsLoaded: true,
+      );
+    }
     var unavailable = false;
 
     PublishPlatformMatrixResponse? matrix;
@@ -166,6 +183,9 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final requestId = _beginPublishRefreshRequest();
     ProjectShortVideoExportCheck? exportCheckSnapshot = _shortVideoExportCheck;
     try {

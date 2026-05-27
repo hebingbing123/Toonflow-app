@@ -1,4 +1,5 @@
 mod novel_events_crud_roundtrip;
 mod novel_events_generate_events_async_fallback_roundtrip;
 mod script_agent_plan_roundtrip;
+mod scripts_export_membership_roundtrip;
 mod task_center_jobs_rest_roundtrip;

@@ -8,10 +8,13 @@ import '../config.dart'
     show kDevAdminEmail, kDevAdminPassword, kSupabaseConfigured;
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/openflow_brand.dart';
+import '../design_system/components/studio_primary_button.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/studio_motion.dart';
 import '../design_system/studio_typography.dart';
+import '../demo/product_demo_coach_keys.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_theme.dart';
@@ -25,12 +28,14 @@ class ProductLoginPage extends StatefulWidget {
     this.errorMessage,
     required this.onSignIn,
     required this.onSignUp,
+    this.onExploreDemo,
   });
 
   final AuthController authController;
   final String? errorMessage;
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
+  final VoidCallback? onExploreDemo;
 
   @override
   State<ProductLoginPage> createState() => _ProductLoginPageState();
@@ -52,7 +57,9 @@ class _ProductLoginPageState extends State<ProductLoginPage>
 
   bool get _ambientAnimationEnabled {
     final bindingName = WidgetsBinding.instance.runtimeType.toString();
+    // Includes [OverflowIgnoringBinding] from test/flutter_test_config.dart.
     return !bindingName.contains('TestWidgetsFlutterBinding') &&
+        !bindingName.contains('OverflowIgnoringBinding') &&
         !bindingName.contains('IntegrationTestWidgetsFlutterBinding') &&
         !bindingName.contains('LiveTestWidgetsFlutterBinding');
   }
@@ -158,7 +165,10 @@ class _ProductLoginPageState extends State<ProductLoginPage>
         ? authError
         : _localErrorMessage;
 
-    return Scaffold(
+    return ListenableBuilder(
+      listenable: widget.authController,
+      builder: (context, _) {
+        return Scaffold(
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: studio.loginBackdrop),
         child: Stack(
@@ -185,10 +195,12 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                 builder: (context, constraints) {
                   final contentWidth = constraints.maxWidth;
                   final contentHeight = constraints.maxHeight;
-                  final wide = contentWidth >= 1120;
-                  final ultraCompact = contentWidth < 480;
+                  final wide = contentWidth >= kStudioLoginWideMinWidth;
+                  final ultraCompact =
+                      contentWidth < kStudioLoginUltraCompactMaxWidth;
                   // Short windows (split pane, small flutter-view): keep auth above the fold.
-                  final shortViewport = contentHeight < 560;
+                  final shortViewport =
+                      contentHeight < kStudioLoginShortViewportMaxHeight;
                   final simplifiedHero = ultraCompact || shortViewport;
                   final pagePadding = EdgeInsets.all(
                     wide
@@ -199,7 +211,10 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                   );
                   if (wide) {
                     final authPanelWidth = (constraints.maxWidth * 0.34)
-                        .clamp(392.0, 456.0)
+                        .clamp(
+                          kStudioLoginAuthPanelMinWidth,
+                          kStudioLoginAuthPanelMaxWidth,
+                        )
                         .toDouble();
                     return Padding(
                       padding: pagePadding,
@@ -231,6 +246,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                                       _confirmPasswordController,
                                   onModeChanged: _setMode,
                                   onSubmit: _handleSubmit,
+                                  onExploreDemo: widget.onExploreDemo,
                                   compact: false,
                                 ),
                               ),
@@ -276,6 +292,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           confirmPasswordController: _confirmPasswordController,
                           onModeChanged: _setMode,
                           onSubmit: _handleSubmit,
+                          onExploreDemo: widget.onExploreDemo,
                           compact: true,
                         ),
                       ],
@@ -287,6 +304,8 @@ class _ProductLoginPageState extends State<ProductLoginPage>
           ],
         ),
       ),
+    );
+      },
     );
   }
 }
@@ -317,18 +336,22 @@ class _HeroStage extends StatelessWidget {
           ),
           const SizedBox(height: StudioLayoutSpacing.insetComfortable),
         ],
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: compact ? double.infinity : 560,
-          ),
-          child: Text(
-            l10n.productShellLoginHeroTitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontSize: compact ? math.min(typography.paneTitle + 1, 24).toDouble() : math.min(typography.display, 28).toDouble(),
-              height: 1.08,
-              fontWeight: FontWeight.w700,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.productShellLoginHeroTitle,
+              maxLines: 1,
+              softWrap: false,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontSize: compact
+                    ? math.min(typography.paneTitle + 1, 24).toDouble()
+                    : math.min(typography.display, 28).toDouble(),
+                height: 1.08,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -898,6 +921,7 @@ class _AuthPanel extends StatelessWidget {
     required this.confirmPasswordController,
     required this.onModeChanged,
     required this.onSubmit,
+    this.onExploreDemo,
     required this.compact,
   });
 
@@ -908,13 +932,13 @@ class _AuthPanel extends StatelessWidget {
   final TextEditingController confirmPasswordController;
   final ValueChanged<_AuthMode> onModeChanged;
   final VoidCallback onSubmit;
+  final VoidCallback? onExploreDemo;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
-    final studio = StudioColors.of(context);
     final title = mode == _AuthMode.signIn ? l10n.authSignIn : l10n.authSignUp;
     final submitIcon = mode == _AuthMode.signIn
         ? Icons.login_rounded
@@ -964,8 +988,8 @@ class _AuthPanel extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+                      horizontal: StudioLayoutSpacing.inlineGap,
+                      vertical: StudioLayoutSpacing.microGap,
                     ),
                     child: Text(
                       l10n.productLoginAiRuntime,
@@ -1077,28 +1101,14 @@ class _AuthPanel extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: StudioSpacing.md),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: studio.primaryGradient,
-                  borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: tokens.primary.withValues(alpha: 0.10),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: FilledButton.icon(
+              SizedBox(
+                width: double.infinity,
+                child: StudioPrimaryButton(
                   key: const Key('product-auth-submit'),
-                  onPressed: onSubmit,
-                  icon: Icon(submitIcon, size: 16),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    minimumSize: const Size.fromHeight(46),
-                  ),
-                  label: Text(title),
+                  label: title,
+                  icon: submitIcon,
+                  loading: authController.authInFlight,
+                  onPressed: authController.authInFlight ? null : onSubmit,
                 ),
               ),
               const SizedBox(height: StudioSpacing.sm),
@@ -1111,6 +1121,20 @@ class _AuthPanel extends StatelessWidget {
                   color: tokens.textSecondary,
                 ),
               ),
+              if (mode == _AuthMode.signIn && onExploreDemo != null) ...<Widget>[
+                const SizedBox(height: StudioSpacing.sm),
+                Semantics(
+                  label:
+                      '${l10n.productDemoModeExploreGuest}, ${ProductDemoCoachKeys.semanticsExploreGuest}',
+                  button: true,
+                  onTap: authController.authInFlight ? null : onExploreDemo,
+                  child: TextButton(
+                    key: ProductDemoCoachKeys.exploreGuestLogin,
+                    onPressed: authController.authInFlight ? null : onExploreDemo,
+                    child: Text(l10n.productDemoModeExploreGuest),
+                  ),
+                ),
+              ],
             ],
           ],
         ),
@@ -1153,8 +1177,11 @@ class _AuthModeToggle extends StatelessWidget {
                   padding: const EdgeInsets.all(4),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: <Color>[Color(0xFF7C6CF0), Color(0xFF6355D4)],
+                      gradient: LinearGradient(
+                        colors: <Color>[
+                          tokens.primary,
+                          Color.lerp(tokens.primary, tokens.bgInset, 0.35)!,
+                        ],
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),

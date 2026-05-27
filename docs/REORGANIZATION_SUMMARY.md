@@ -247,7 +247,7 @@ cp -r docs docs.backup
 
 如有问题或建议，请联系：
 - Email: ltlctools@outlook.com
-- GitHub Issues: https://github.com/HBAI-Ltd/Openflow-app/issues
+- 内部缺陷跟踪：使用团队指定的 Issue 系统
 
 ---
 

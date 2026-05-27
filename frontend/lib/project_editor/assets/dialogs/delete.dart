@@ -59,6 +59,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                   child: Text(dlgL10n.projectEditorAssetDeleteDialogCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(dialogCtx),
                   onPressed: () => Navigator.of(dialogCtx).pop(true),
                   child: Text(dlgL10n.projectEditorAssetDeleteDialogConfirm),
                 ),

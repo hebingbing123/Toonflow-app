@@ -12,6 +12,8 @@ tags:
 
 欢迎加入 OpenFlow 开发团队！本指南将帮助你快速上手项目开发。
 
+> **许可说明**：OpenFlow 为**闭源专有软件**（见仓库根目录 [LICENSE](../../LICENSE)）。本仓库仅供经授权成员使用，不得对外公开或分发源码。
+
 ## 📋 前置要求
 
 ### 必需工具
@@ -30,10 +32,12 @@ tags:
 
 ## 🚀 快速开始
 
-### 1. 克隆仓库
+### 1. 获取源码
+
+由负责人授予 Git 权限后，从**授权远程**克隆：
 
 ```bash
-git clone https://github.com/HBAI-Ltd/Openflow-app.git
+git clone <your-authorized-remote-url>
 cd Openflow-app
 ```
 

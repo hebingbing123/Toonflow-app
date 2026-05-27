@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
@@ -48,6 +49,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy ? null : onFetchReviewQueue,
                   child: Text(l10n.benchmarkActionFetchReviewQueue),
                 ),
@@ -70,6 +72,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy || reviewQueueIdController.text.trim().isEmpty
                   ? null
                   : onSubmitReview,
@@ -84,6 +87,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy || reviewQueueIdController.text.trim().isEmpty
                   ? null
                   : onSkipReview,

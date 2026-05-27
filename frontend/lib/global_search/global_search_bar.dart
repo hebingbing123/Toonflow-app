@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_empty_state.dart';
@@ -165,6 +166,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   Future<void> _fetchSuggestions(String q) async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty || q.length < _minQueryLength) {
+      return;
+    }
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      if (!mounted) return;
+      setState(() {
+        _suggestions = const <SearchResult>[];
+        _loadingSuggestions = false;
+      });
       return;
     }
     if (!mounted) return;

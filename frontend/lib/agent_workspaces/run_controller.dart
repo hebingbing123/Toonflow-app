@@ -51,7 +51,20 @@ class WorkspaceRunController {
   AppLocalizations get _l10nResolved =>
       _l10nProvider() ?? lookupAppLocalizations(const Locale('en'));
 
+  bool skipDemoMutations = false;
+
+  bool _blockDemoMutation() {
+    if (!skipDemoMutations) {
+      return false;
+    }
+    _onErrorChanged(_l10nResolved.productDemoModeMutationBlocked);
+    return true;
+  }
+
   Future<void> runScriptWorkspaceAgent() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -89,6 +102,9 @@ class WorkspaceRunController {
   }
 
   Future<void> probeScriptDomainTool(String toolName, String rawArgs) async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -144,6 +160,9 @@ class WorkspaceRunController {
   }
 
   Future<void> runScriptSubAgentTool() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -191,6 +210,9 @@ class WorkspaceRunController {
   }
 
   Future<void> runProductionWorkspaceAgent() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -230,6 +252,9 @@ class WorkspaceRunController {
   }
 
   Future<void> probeProductionDomainTool() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
@@ -295,6 +320,9 @@ class WorkspaceRunController {
   }
 
   Future<void> runProductionSubAgentTool() async {
+    if (_blockDemoMutation()) {
+      return;
+    }
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;

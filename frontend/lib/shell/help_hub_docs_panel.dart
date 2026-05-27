@@ -46,6 +46,22 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
   }
 
   Future<void> _load() async {
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+      final cfg = buildDemoHelpHubConfig();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _helpHubConfig = cfg;
+        _resp = HelpHubLinksResponseV1(items: cfg.effectiveItems);
+        _loading = false;
+      });
+      return;
+    }
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {
@@ -252,11 +268,11 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                         enabled: !_savingHelpHubLinks,
                       ),
                       const SizedBox(height: 8),
-                      Wrap(
+                      StudioDenseActionRow(
                         spacing: 8,
-                        runSpacing: 8,
                         children: [
                           FilledButton.tonal(
+                            style: studioFormTonalButtonStyle(ctx),
                             onPressed: _savingHelpHubLinks ? null : addNew,
                             child: Text(dl10n.helpHubAdd),
                           ),
@@ -357,6 +373,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                   child: Text(dl10n.helpHubDialogClose),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(ctx),
                   onPressed: _savingHelpHubLinks
                       ? null
                       : () async {
@@ -487,10 +504,12 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               wideBreakpoint: 480,
               children: <Widget>[
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed: _loading ? null : _load,
                   child: Text(l10n.helpHubRefresh),
                 ),
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed: (_loading || _helpHubConfig == null)
                       ? null
                       : _openHelpHubManageDialog,

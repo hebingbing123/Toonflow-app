@@ -138,6 +138,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
             wideBreakpoint: 520,
             children: <Widget>[
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(ctx),
                 onPressed: localBusy
                     ? null
                     : () => _runNovelWorkbenchAction(
@@ -159,6 +160,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                 child: Text(l10n.projectEditorNovelsWorkbenchSearchButton),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(ctx),
                 onPressed: localBusy
                     ? null
                     : () {
@@ -174,6 +176,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                 child: Text(l10n.projectEditorNovelsWorkbenchSearchClearFilters),
               ),
               OutlinedButton(
+                style: studioFormSecondaryButtonStyle(ctx),
                 onPressed: localBusy
                     ? null
                     : () => _runNovelWorkbenchAction(

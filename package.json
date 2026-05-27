@@ -3,16 +3,9 @@
   "version": "1.0.9",
   "description": "Openflow 是一款 AI 短剧漫剧工具，能够利用 AI 技术将小说自动转化为剧本，并结合 AI 生成的图片和视频，实现高效的短剧创作。",
   "author": "HBAI-Ltd <ltlctools@outlook.com>",
-  "license": "Apache-2.0",
-  "homepage": "https://github.com/HBAI-Ltd/Openflow-app#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/HBAI-Ltd/Openflow-app.git"
-  },
-  "bugs": {
-    "url": "https://github.com/HBAI-Ltd/Openflow-app/issues",
-    "email": "ltlctools@outlook.com"
-  },
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
+  "homepage": "mailto:ltlctools@outlook.com?subject=OpenFlow%E5%95%86%E5%8A%A1%E5%92%A8%E8%AF%A2",
   "packageManager": "yarn@1.0.0",
   "engines": {
     "node": ">=1.0.0"
@@ -25,6 +18,12 @@
     "test:ui:e2e": "bash scripts/run-ui-e2e.sh",
     "test:ui:e2e:gallery": "bash scripts/run-ui-e2e.sh --gallery",
     "test:ui:e2e:local": "bash scripts/run-ui-e2e-local.sh",
+    "dev:product:web": "bash scripts/run-product-web-dev.sh",
+    "test:demo-tour:web": "bash scripts/run-demo-tour-web-e2e.sh",
+    "test:demo-tour:web:full": "bash scripts/run-demo-tour-web-full-e2e.sh",
+    "test:demo-tour:desktop:full": "bash scripts/run-demo-tour-desktop-full-e2e.sh",
+    "test:demo-tour:modes:unit": "cd frontend && flutter test test/demo/product_demo_tour_modes_test.dart --dart-define-from-file=dart_defines.dev.json",
+    "test:demo-tour:all:full": "bash scripts/run-demo-tour-all-full-e2e.sh",
     "test:backend:search": "bash scripts/run_search_api_tests.sh",
     "test:backend:search:db": "bash scripts/run_search_api_tests.sh --db",
     "refactor:agent": "bash scripts/agent-refactor-check.sh",

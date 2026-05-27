@@ -537,6 +537,53 @@
   "studioProjectsEmptyStep1": "点击「创建项目」，填写名称并选择故事前提。",
   "studioProjectsEmptyStep2": "打开项目后从「剧本」步开始写作或导入内容。",
   "studioProjectsEmptyStep3": "需要 AI 生成前，在「设置 → 模型厂商」配置模型与 API Key。",
+  "productDemoModeBannerTitle": "演示模式",
+  "productDemoModeBannerBody": "当前为示例数据，可浏览全部页面与弹窗流程；不会写入真实项目。",
+  "productDemoModeExit": "退出演示",
+  "productDemoModeExploreGuest": "先体验演示",
+  "productDemoModeExploreLoggedIn": "用示例数据体验",
+  "productDemoModeMutationBlocked": "演示模式下无法保存更改",
+  "productDemoAutoplayPause": "暂停导览",
+  "productDemoAutoplayResume": "继续导览",
+  "productDemoAutoplayStepBody": "自动导览：{step}",
+  "@productDemoAutoplayStepBody": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "productDemoGuideStepCounter": "第 {current} / {total} 步",
+  "@productDemoGuideStepCounter": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuidePrevious": "上一步",
+  "productDemoGuideNext": "下一步",
+  "productDemoGuideStartAutoplay": "自动导览",
+  "productDemoGuideExpandDetails": "展开",
+  "productDemoGuideCollapseDetails": "收起",
+  "productDemoGuideMainlineCounter": "制作主线 · {step}/{total}",
+  "@productDemoGuideMainlineCounter": {
+    "placeholders": {
+      "step": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuideLaunchCounter": "上线路径 · {part}/{total}",
+  "@productDemoGuideLaunchCounter": {
+    "placeholders": {
+      "part": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "productDemoGuideOptionalTag": "可选",
+  "productDemoGuideSectionGoal": "你要完成",
+  "productDemoGuideSectionWhere": "看这里",
+  "productDemoGuideSectionDemo": "演示说明",
+  "productDemoGuideSectionNext": "下一步",
   "studioGettingStartedTitle": "快速入门",
   "studioGettingStartedStepSemantics": "第 {stepNumber} 步，共 {stepTotal} 步：{stepText}",
   "@studioGettingStartedStepSemantics": {

@@ -71,6 +71,29 @@ void main() {
       );
     });
 
+    testWidgets('unknown sentinel statuses map to not-set label', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              for (final status in <String>['unknown', 'none', 'inactive']) {
+                expect(
+                  subscriptionStatusLabel(l10n, status),
+                  l10n.billingSubscriptionStatusNotSet,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+    });
+
     testWidgets('planTierDisplayName localizes tiers', (tester) async {
       await tester.pumpWidget(
         MaterialApp(

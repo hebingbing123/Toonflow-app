@@ -215,6 +215,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                     child: Text(l10n.helpHubDialogClose),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(l10n.teamWorkspaceConfirmTransferOwner),
                   ),
@@ -433,6 +434,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       Row(
                         children: <Widget>[
                           FilledButton(
+                            style: studioFormPrimaryButtonStyle(context),
                             onPressed: adding
                                 ? null
                                 : () async {
@@ -492,6 +494,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       ),
                       const SizedBox(height: 8),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed: inviting
                             ? null
                             : () async {
@@ -1296,11 +1299,12 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             : (v) => setModalState(() => role = v ?? 'member'),
                       ),
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                      StudioFilterRow(
+                        wideLayout: StudioFilterWideLayout.toolbarRow,
+                        wideBreakpoint: 480,
                         children: <Widget>[
                           FilledButton.tonal(
+                            style: studioFormTonalButtonStyle(context),
                             onPressed: inviting
                                 ? null
                                 : () async {
@@ -1347,12 +1351,14 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             ),
                           ),
                           OutlinedButton(
+                            style: studioFormSecondaryButtonStyle(context),
                             onPressed: loading
                                 ? null
                                 : () => loadInvites(setModalState),
                             child: Text(l10n.teamWorkspaceRefreshInvitesAction),
                           ),
                           OutlinedButton(
+                            style: studioFormSecondaryButtonStyle(context),
                             onPressed: selectedInviteIds.isEmpty
                                 ? null
                                 : () async {
@@ -1484,10 +1490,8 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           title: l10n.teamWorkspaceNoInvitesForCurrentFilters,
                         ),
                       if (pagedInvites.isNotEmpty) ...<Widget>[
-                        Wrap(
+                        StudioDenseActionRow(
                           spacing: 8,
-                          runSpacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: <Widget>[
                             Text(
                               l10n.teamWorkspacePagingLine(
@@ -1497,12 +1501,14 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                               ),
                             ),
                             OutlinedButton(
+                              style: studioFormSecondaryButtonStyle(context),
                               onPressed: safePageIndex <= 0
                                   ? null
                                   : () => setModalState(() => pageIndex -= 1),
                               child: Text(l10n.teamWorkspacePrevPageAction),
                             ),
                             OutlinedButton(
+                              style: studioFormSecondaryButtonStyle(context),
                               onPressed: safePageIndex + 1 >= pageCount
                                   ? null
                                   : () => setModalState(() => pageIndex += 1),
@@ -1686,6 +1692,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
             child: Text(l10n.helpHubDialogClose),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(ctx),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.teamWorkspaceArchiveAction),
           ),

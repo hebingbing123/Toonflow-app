@@ -7,6 +7,7 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../support/studio_collapsible_filter_test_support.dart';
 import '../support/ui_gallery_capture.dart';
 import '../support/utility_shell_fixtures.dart';
 
@@ -56,14 +57,10 @@ void main() {
 
     await tester.tap(find.text(zh.billingAuditTitle));
     await tester.pumpAndSettle();
+    await expandStudioCollapsibleFilterPanel(tester);
 
     expect(find.text('evt_101'), findsOneWidget);
     expect(find.text(zh.billingAuditCurrentLoadTitle), findsOneWidget);
-    expect(find.text(zh.studioFilterToolbarTitle), findsOneWidget);
-
-    await tester.tap(find.text(zh.studioFilterToolbarTitle));
-    await tester.pumpAndSettle();
-
     expect(find.text(zh.billingAuditQuery), findsOneWidget);
     expect(find.text(zh.billingAuditLoadMore), findsOneWidget);
     expectNoBenignQueuedExceptions(tester);

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -64,17 +66,18 @@ class ProjectsActionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Wrap(
+    return StudioDenseActionRow(
       spacing: 8,
-      runSpacing: 8,
       children: [
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: (loadingProjects || creatingProject) ? null : onLoadProjects,
           child: Text(
             loadingProjects ? l10n.projectsLoading : l10n.projectsLoadProjectList,
           ),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed:
               (loadingProjectsSummary || creatingProject)
               ? null
@@ -86,24 +89,29 @@ class ProjectsActionsBar extends StatelessWidget {
           ),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: (loadingArtStyles || creatingProject) ? null : onLoadArtStyles,
           child: Text(
             loadingArtStyles ? l10n.projectsLoading : l10n.projectsLoadArtStyles,
           ),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: creatingProject ? null : onOpenArtStylesWorkbench,
           child: Text(l10n.projectsOpenArtStylesWorkbench),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: creatingProject ? null : onOpenCreativeManualsWorkbench,
           child: Text(l10n.projectsOpenCreativeManualsWorkbench),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: creatingProject ? null : onOpenAgentMemoryWorkbench,
           child: Text(l10n.projectsOpenAgentMemoryWorkbench),
         ),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: (loadingProjects || creatingProject)
               ? null
               : onCreateEmptyProject,
@@ -149,6 +157,7 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: FilledButton.tonal(
+            style: studioFormTonalButtonStyle(context),
             onPressed: loadingAgentMemory ? null : onProbeAgentMemory,
             child: Text(
               loadingAgentMemory

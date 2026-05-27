@@ -128,8 +128,8 @@ ThemeData buildStudioDarkTheme({
         shadowColor: Colors.transparent,
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.padded,
-        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
@@ -149,9 +149,9 @@ ThemeData buildStudioDarkTheme({
           StudioSpacing.iconTouchTarget,
           StudioSpacing.iconTouchTarget,
         ),
-        tapTargetSize: MaterialTapTargetSize.padded,
-        visualDensity: VisualDensity.standard,
-        iconSize: 22,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        iconSize: 20,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -161,8 +161,8 @@ ThemeData buildStudioDarkTheme({
         side: BorderSide(color: tokens.surfaceHighlight),
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.padded,
-        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
@@ -180,8 +180,8 @@ ThemeData buildStudioDarkTheme({
         foregroundColor: tokens.accent,
         padding: typography.textButtonPadding,
         minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.padded,
-        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
         textStyle: studioBundledTextStyle(
           TextStyle(
             fontWeight: FontWeight.w600,

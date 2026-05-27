@@ -100,6 +100,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                   child: Text(dlgL10n.notificationsActionCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(ctx),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: Text(dlgL10n.shortVideoPublishBatchContinueScheduleReady),
                 ),
@@ -219,6 +220,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                   child: Text(dlgL10n.notificationsActionCancel),
                 ),
                 FilledButton(
+                  style: studioFormPrimaryButtonStyle(ctx),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: Text(dlgL10n.shortVideoPublishBatchContinuePublishReady),
                 ),

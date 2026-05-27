@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
@@ -67,6 +69,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy ? null : onFetchExperiments,
                   child: Text(l10n.benchmarkActionFetchExperiments),
                 ),
@@ -80,29 +83,32 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            StudioDenseActionRow(
               spacing: 8,
-              runSpacing: 8,
               children: [
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy || experimentIdController.text.trim().isEmpty
                       ? null
                       : onFetchExperimentDetail,
                   child: Text(l10n.benchmarkButtonLoadDetail),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy || experimentIdController.text.trim().isEmpty
                       ? null
                       : onStartExperiment,
                   child: Text(l10n.benchmarkButtonStart),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy || experimentIdController.text.trim().isEmpty
                       ? null
                       : onCancelExperiment,
                   child: Text(l10n.benchmarkButtonCancel),
                 ),
                 FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: busy || experimentIdController.text.trim().isEmpty
                       ? null
                       : onFetchRoi,
@@ -168,6 +174,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: busy || experimentNameController.text.trim().isEmpty
                   ? null
                   : onCreateExperiment,

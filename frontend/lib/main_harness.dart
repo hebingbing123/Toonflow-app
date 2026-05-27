@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'bootstrap/global_error_handling.dart';
 import 'config.dart';
 import 'design_system/ix/studio_scaffold_messenger.dart';
 import 'design_system/ix/studio_toast_overlay.dart';
@@ -17,6 +18,7 @@ import 'global_search/search_results_page.dart';
 /// QA / developer Harness entry (probe panels, debug navigation).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configureGlobalErrorHandling();
 
   await AppLocaleNotifier.instance.load();
   configureGoogleFontsRuntime();

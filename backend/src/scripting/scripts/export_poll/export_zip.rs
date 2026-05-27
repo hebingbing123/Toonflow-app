@@ -82,3 +82,50 @@ pub(in crate::scripting::scripts) async fn export_scripts_zip(
             ApiError::Internal
         })
 }
+
+#[cfg(test)]
+mod sql_tests {
+    use sqlx::{Execute, Postgres, QueryBuilder};
+    use uuid::Uuid;
+
+    fn export_zip_sql(uid: Uuid, numeric_ids: &[i32]) -> String {
+        let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+            r#"
+        SELECT s.numeric_id, s.name, s.content
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE EXISTS (
+          SELECT 1
+          FROM app_workspace_member wm
+          WHERE wm.workspace_id = p.workspace_id
+            AND wm.user_id = "#,
+        );
+        qb.push_bind(uid);
+        qb.push(
+            r#"
+        )
+        AND s.numeric_id IN ("#,
+        );
+        {
+            let mut separated = qb.separated(", ");
+            for id in numeric_ids {
+                separated.push_bind(*id);
+            }
+        }
+        qb.push(") ORDER BY s.numeric_id");
+        qb.build().sql().to_string()
+    }
+
+    #[test]
+    fn export_sql_closes_exists_before_numeric_id_filter() {
+        let sql = export_zip_sql(Uuid::nil(), &[1, 2]);
+        assert!(
+            sql.contains("AND s.numeric_id IN ($2"),
+            "expected workspace filter then numeric_id IN, got: {sql}"
+        );
+        assert!(
+            !sql.contains("wm.user_id = $1 AND s.numeric_id"),
+            "numeric_id filter must be outside EXISTS, got: {sql}"
+        );
+    }
+}

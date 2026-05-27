@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -91,11 +93,11 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 style: studioHintStyle(context),
               ),
               const SizedBox(height: StudioSpacing.sm),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.busy ? null : callbacks.onReloadRows,
                     child: Text(
                       model.busy
@@ -104,6 +106,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed:
                         model.busy ||
                             model.loadingCover ||
@@ -117,16 +120,19 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: model.busy ? null : callbacks.onCreateStyle,
                     child: Text(l10n.projectsArtWorkbenchNew),
                   ),
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: model.busy || model.selected == null
                         ? null
                         : callbacks.onSaveSelected,
                     child: Text(l10n.projectsArtWorkbenchSave),
                   ),
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.busy || model.selected == null
                         ? null
                         : callbacks.onDeleteSelected,
@@ -218,6 +224,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: model.busy ? null : callbacks.onExtractPrompt,
                   child: Text(l10n.projectsArtWorkbenchExtractButton),
                 ),

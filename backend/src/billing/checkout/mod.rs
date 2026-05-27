@@ -18,4 +18,9 @@ pub use handlers::{
 };
 
 #[cfg(test)]
+pub(crate) use complete::complete_checkout_session;
+#[cfg(test)]
+pub(crate) use session::{find_by_id as find_checkout_session, mark_paid as mark_checkout_paid};
+
+#[cfg(test)]
 mod tests;

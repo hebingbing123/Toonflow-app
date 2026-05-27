@@ -3,10 +3,10 @@ import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_toolbar_button.dart';
-import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/ix/studio_freshness_banner.dart';
 import '../platform/studio_load_state.dart';
@@ -65,6 +65,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
         )
       else
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: onOpenWorkbench,
           child: Text(l10n.qualityReviewsOpenWorkbench),
         ),
@@ -80,6 +81,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
                 busy: loadingQualityDashboard,
               )
             : FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: loadingQualityDashboard
                     ? null
                     : onLoadQualityDashboard,
@@ -91,6 +93,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
               )),
       if (!studioPresentation && showDashboardControls && showRefreshControls)
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: refreshingQualityDashboardReadModel
               ? null
               : onRefreshQualityDashboardReadModel,
@@ -110,6 +113,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
         )
       else
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
           child: Text(
             loadingQualityReviews
@@ -119,6 +123,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
       if (!studioPresentation)
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,
           child: Text(
             loadingQualityBadCases
@@ -128,6 +133,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
       if (!studioPresentation)
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: loadingQualityStats ? null : onLoadQualityStats,
           child: Text(
             loadingQualityStats
@@ -137,6 +143,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
       if (!studioPresentation)
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed: loadingQualityStagePassRate
               ? null
               : onLoadQualityStagePassRate,
@@ -148,10 +155,8 @@ class QualityReviewsActionsBar extends StatelessWidget {
         ),
     ];
     return StudioFilterRow(
-      wideBreakpoint: studioPresentation ? 560 : 760,
-      wideLayout: studioPresentation
-          ? StudioFilterWideLayout.toolbarRow
-          : StudioFilterWideLayout.wrap,
+      wideBreakpoint: studioPresentation ? 560 : 640,
+      wideLayout: StudioFilterWideLayout.toolbarRow,
       children: actionButtons,
     );
   }
@@ -451,6 +456,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
           runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: creatingQualityReview
                   ? null
                   : onCreateQualityReviewProbe,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 import '../l10n/rust_api_error_format.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -133,17 +135,18 @@ class HarnessSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingHarnessTools ? null : onLoadHarnessTools,
               child: Text(
                 loadingHarnessTools ? '…' : 'GET /api/v1/harness/tools',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingUserWasmValidate
                   ? null
                   : onValidateUserWasmProbe,
@@ -154,18 +157,21 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingUserWasmPersist ? null : onPersistUserWasmProbe,
               child: Text(
                 loadingUserWasmPersist ? '…' : 'POST /api/v1/harness/user-wasm',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingUserWasmList ? null : onLoadUserWasmList,
               child: Text(
                 loadingUserWasmList ? '…' : 'GET /api/v1/harness/user-wasm',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingUserWasmRevoke || userWasmRevokeTargetId == null
                   ? null
                   : onRevokeUserWasmProbe,
@@ -176,6 +182,7 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed:
                   (loadingUserWasmRevoke ||
                       loadingUserWasmList ||
@@ -189,12 +196,14 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillsSummary ? null : onLoadSkillsAggregate,
               child: Text(
                 loadingSkillsSummary ? '…' : 'GET /api/v1/skills/summary',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillList ? null : onLoadSkillList,
               child: Text(loadingSkillList ? '…' : 'GET /api/v1/skills'),
             ),
@@ -264,17 +273,18 @@ class HarnessSection extends StatelessWidget {
           maxLines: 4,
         ),
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillPreview ? null : onPreviewSkillFile,
               child: Text(
                 loadingSkillPreview ? '…' : 'GET /api/v1/skills/content',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillVersions || rollingBackSkillVersion
                   ? null
                   : onShowSkillVersionHistory,
@@ -287,16 +297,19 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillPut ? null : onPutSkillProbe,
               child: Text(loadingSkillPut ? '…' : 'PUT /api/v1/skills/content'),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillPost ? null : onPostSkillProbe,
               child: Text(
                 loadingSkillPost ? '…' : 'POST /api/v1/skills/content',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingSkillDelete ? null : onDeleteSkillProbe,
               child: Text(
                 loadingSkillDelete ? '…' : 'DELETE /api/v1/skills/content',
@@ -312,21 +325,23 @@ class HarnessSection extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 8),
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy ? null : onTestWebSocket,
               child: Text(loadingWs ? '…' : 'WebSocket: attach + LLM stream'),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy ? null : onTestHarnessToolWebSocket,
               child: Text(
                 loadingWsHarness ? '…' : 'WS: harness.tool.invoke (echo)',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy
                   ? null
                   : onTestHarnessIsolatedEchoWebSocket,
@@ -335,18 +350,21 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy ? null : onTestHarnessWasmProbeWebSocket,
               child: Text(
                 loadingWsWasmProbe ? '…' : 'WS: wasm.probe (embedded)',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy ? null : onTestHarnessSkillsReadWebSocket,
               child: Text(
                 loadingWsSkillsRead ? '…' : 'WS: skills.read (path field)',
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: wsProbesBusy ? null : onTestHarnessAgentRunWebSocket,
               child: Text(
                 loadingWsHarnessAgent

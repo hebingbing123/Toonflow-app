@@ -69,6 +69,7 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
               ],
               builder: (context, controller, child) {
                 return FilledButton.tonal(
+                  style: studioFormTonalButtonStyle(context),
                   onPressed: _templateBusy
                       ? null
                       : () {

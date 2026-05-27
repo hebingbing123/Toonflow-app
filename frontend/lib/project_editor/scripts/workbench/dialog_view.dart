@@ -114,6 +114,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       wideBreakpoint: 560,
                       children: <Widget>[
                         FilledButton.tonal(
+                          style: studioFormTonalButtonStyle(context),
                           onPressed:
                               model.localBusy ? null : callbacks.onReadContext,
                           child: Text(
@@ -122,6 +123,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                           ),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: model.localBusy
                               ? null
                               : callbacks.onUsePreviewOrAll,
@@ -134,6 +136,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                           ),
                         ),
                         OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
                           onPressed: model.localBusy
                               ? null
                               : callbacks.onReloadScripts,
@@ -177,6 +180,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                   wideBreakpoint: 520,
                   children: <Widget>[
                     FilledButton(
+                      style: studioFormPrimaryButtonStyle(context),
                       onPressed:
                           model.localBusy ? null : callbacks.onExportSelected,
                       child: Text(
@@ -184,12 +188,14 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                     OutlinedButton(
+                      style: studioFormSecondaryButtonStyle(context),
                       onPressed: model.localBusy ? null : callbacks.onPollSelected,
                       child: Text(
                         l10n.projectEditorScriptsWorkbenchRecommendPollSelected,
                       ),
                     ),
                     OutlinedButton(
+                      style: studioFormSecondaryButtonStyle(context),
                       onPressed:
                           model.localBusy ? null : callbacks.onExtractSelected,
                       child: Text(
@@ -230,6 +236,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: model.localBusy ? null : callbacks.onBatchCreate,
                 child: Text(l10n.projectEditorScriptsWorkbenchDialogBatchCreate),
               ),

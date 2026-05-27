@@ -4,14 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../config.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../l10n/native_bridge_startup_labels.dart';
 import '../native_bridge/native_bridge_bootstrap.dart';
 
-const String kOpenflowDesktopDownloadsUrl =
-    'https://github.com/HBAI-Ltd/Openflow-app/releases/latest';
+export '../config.dart' show kOpenflowDesktopDownloadsUrl;
 
 enum DesktopRuntimeKind { desktopApp, webBrowser, mobileBrowser }
 
@@ -199,6 +200,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
               if (runtime.showDownloadCallToAction) ...[
                 const SizedBox(height: StudioSpacing.sm),
                 FilledButton.icon(
+                  style: studioFormIconLabeledButtonStyle(context),
                   onPressed: () => unawaited(_openDownloads()),
                   icon: const Icon(Icons.download_outlined),
                   label: Text(

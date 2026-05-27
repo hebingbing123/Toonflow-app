@@ -159,6 +159,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed:
                     model.assetsBusy ||
                         model.assetsLoading ||

@@ -5,7 +5,9 @@ import '../../../design_system/components/studio_empty_state.dart';
 import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../design_system/components/studio_text_styles.dart';
 import '../../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
   const ScriptEditImageWorkbenchDialogViewModel({
@@ -96,12 +98,11 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 style: studioHintStyle(context),
               ),
               const SizedBox(height: StudioSpacing.sm),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
                     onPressed: model.loading || model.busy
                         ? null
                         : callbacks.onRefresh,
@@ -133,12 +134,11 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: model.busy
                         ? null
                         : callbacks.onUploadSourceImage,
@@ -194,11 +194,11 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
+              StudioDenseActionRow(
                 spacing: 8,
-                runSpacing: 8,
                 children: [
                   FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
                     onPressed: model.busy
                         ? null
                         : callbacks.onGenerateFlowImage,

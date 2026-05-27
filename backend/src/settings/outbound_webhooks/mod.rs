@@ -19,7 +19,10 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
+use crate::error::helpers::{
+    assert_server_fetchable_url_resolved, bad_request_i18n, forbidden_i18n,
+    validate_server_fetch_url,
+};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -148,26 +151,7 @@ pub struct OutboundWebhookDeliveriesQuery {
 }
 
 fn validate_url(raw: &str) -> Result<String, ApiError> {
-    let trimmed = raw.trim();
-    if trimmed.is_empty() {
-        return Err(bad_request_i18n("url must be non-empty", "url 不能为空"));
-    }
-    let parsed = url::Url::parse(trimmed).map_err(|_| {
-        bad_request_i18n(
-            "url must be a valid absolute URL",
-            "url 必须是有效的绝对 URL",
-        )
-    })?;
-    match parsed.scheme() {
-        "http" | "https" => {}
-        _ => {
-            return Err(bad_request_i18n(
-                "url must start with http:// or https://",
-                "url 必须以 http:// 或 https:// 开头",
-            ));
-        }
-    }
-    Ok(trimmed.to_string())
+    validate_server_fetch_url(raw)
 }
 
 fn generate_secret() -> String {
@@ -307,7 +291,16 @@ async fn require_workspace_member(
     Ok(())
 }
 
-async fn probe_url_reachable(http: &reqwest::Client, url: &str) -> Result<(), ApiError> {
+async fn probe_url_reachable(url: &str) -> Result<(), ApiError> {
+    let http = deliver::outbound_webhook_http_client();
+    let parsed = url::Url::parse(url.trim()).map_err(|_| {
+        bad_request_i18n(
+            "url must be a valid absolute URL",
+            "url 必须是有效的绝对 URL",
+        )
+    })?;
+    assert_server_fetchable_url_resolved(&parsed).await?;
+
     let try_head = http.head(url).timeout(Duration::from_secs(5)).send().await;
     if let Ok(resp) = try_head {
         let s = resp.status();
@@ -365,7 +358,7 @@ pub(crate) async fn post_outbound_webhook_create(
     let pool = state.require_pool()?;
 
     let url = validate_url(&body.url)?;
-    probe_url_reachable(&state.http_client, &url).await?;
+    probe_url_reachable(&url).await?;
 
     let secret = body.secret.unwrap_or_default().trim().to_string();
     let secret = if secret.is_empty() {
@@ -529,7 +522,7 @@ pub(crate) async fn patch_outbound_webhook(
 
     if let Some(u) = body.url.as_ref() {
         url = validate_url(u)?;
-        probe_url_reachable(&state.http_client, &url).await?;
+        probe_url_reachable(&url).await?;
     }
     if let Some(s) = body.secret.as_ref() {
         let t = s.trim();

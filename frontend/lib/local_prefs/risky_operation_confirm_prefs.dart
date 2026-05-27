@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 /// SharedPreferences keys for client-side "don't show again" on destructive flows.
 class RiskyOperationConfirmPreferenceKeys {
@@ -186,6 +187,7 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
             child: Text(dl10n.riskyPrefsResetCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(ctx),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(dl10n.riskyPrefsResetConfirm),
           ),

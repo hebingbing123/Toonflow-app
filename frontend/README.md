@@ -1,5 +1,7 @@
 # OpenFlow `frontend` (Flutter)
 
+> **许可**：OpenFlow 为闭源 SaaS 客户端（见仓库根目录 [LICENSE](../LICENSE)）。产品模式须 **注册并登录**；桌面安装包由商务发放，默认非公开下载页（`OPENFLOW_DESKTOP_DOWNLOADS_URL` 可配置）。
+
 桌面 + Web（**无 iOS/Android** 目标）。通过可配置 **`API_BASE_URL`** 连接 Rust 后端；**Supabase Auth** 通过 `supabase_flutter`（可选，需 dart-define）。
 
 ## 运行

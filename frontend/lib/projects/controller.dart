@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
@@ -38,7 +39,10 @@ class ProjectsController extends ChangeNotifier {
   bool loadingArtStyles = false;
   bool creatingProject = false;
   bool loadingAgentMemory = false;
+  bool skipDemoApi = false;
+  bool skipDemoMutations = false;
   List<ProjectRow>? projects;
+  bool get projectsLoaded => projects != null;
   List<ArtStyleRow>? artStyles;
   String? projectsSummaryLine;
   String? artStylesLine;
@@ -78,6 +82,8 @@ class ProjectsController extends ChangeNotifier {
     projectsSummaryLine = null;
     artStylesLine = null;
     agentMemoryBody = null;
+    skipDemoMutations = false;
+    skipDemoApi = false;
     notifyListeners();
   }
 
@@ -86,6 +92,10 @@ class ProjectsController extends ChangeNotifier {
   }
 
   Future<bool> createProjectWithFields([Map<String, dynamic>? fields]) async {
+    if (skipDemoMutations) {
+      _setError(_l10nResolved.productDemoModeMutationBlocked);
+      return false;
+    }
     final token = _accessToken;
     if (token == null) return false;
     creatingProject = true;
@@ -158,10 +168,17 @@ class ProjectsController extends ChangeNotifier {
   }
 
   Future<void> loadProjects() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
+    if (loadingProjects) return;
     loadingProjects = true;
-    projects = null;
+    // Keep the last list visible while refreshing to avoid empty-state flicker.
+    if (!projectsLoaded) {
+      projects = null;
+    }
     _setError(null);
     notifyListeners();
     try {
@@ -179,6 +196,9 @@ class ProjectsController extends ChangeNotifier {
   }
 
   Future<void> loadProjectsSummary() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingProjectsSummary = true;
@@ -202,6 +222,9 @@ class ProjectsController extends ChangeNotifier {
   }
 
   Future<void> loadArtStyles() async {
+    if (skipDemoApi || ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = _accessToken;
     if (token == null) return;
     loadingArtStyles = true;

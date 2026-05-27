@@ -36,6 +36,17 @@ class AuthController extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool _authInFlight = false;
+
+  /// True while [signIn] or [signUp] is awaiting Supabase.
+  bool get authInFlight => _authInFlight;
+
+  @visibleForTesting
+  void debugSetAuthInFlight(bool value) {
+    _authInFlight = value;
+    notifyListeners();
+  }
+
   StreamSubscription<AuthState>? _authSub;
 
   Session? get session =>
@@ -51,7 +62,12 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signIn() async {
+    if (_authInFlight) {
+      return;
+    }
     onErrorChanged(null);
+    _authInFlight = true;
+    notifyListeners();
     try {
       await Supabase.instance.client.auth.signInWithPassword(
         email: emailController.text.trim(),
@@ -63,11 +79,19 @@ class AuthController extends ChangeNotifier {
       onErrorChanged(
         describeUserVisibleApiError(_l10nResolved, error),
       );
+    } finally {
+      _authInFlight = false;
+      notifyListeners();
     }
   }
 
   Future<void> signUp() async {
+    if (_authInFlight) {
+      return;
+    }
     onErrorChanged(null);
+    _authInFlight = true;
+    notifyListeners();
     try {
       await Supabase.instance.client.auth.signUp(
         email: emailController.text.trim(),
@@ -79,6 +103,9 @@ class AuthController extends ChangeNotifier {
       onErrorChanged(
         describeUserVisibleApiError(_l10nResolved, error),
       );
+    } finally {
+      _authInFlight = false;
+      notifyListeners();
     }
   }
 

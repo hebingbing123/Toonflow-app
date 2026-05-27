@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -1015,16 +1016,17 @@ class _ProjectAssetHubCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
-          Wrap(
+          StudioDenseActionRow(
             spacing: 10,
-            runSpacing: 10,
             children: <Widget>[
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: () => _executePrimaryAction(l10n),
                 child: Text(hub.primaryAction.ctaLabel),
               ),
               if (onOpenAssetEditor != null)
                 OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
                   onPressed: () => onOpenAssetEditor!(
                     const ProjectStudioAssetEditorTarget(
                       kind: ProjectStudioAssetEditorTargetKind.overview,
@@ -1034,6 +1036,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 ),
               if (onOpenTasks != null)
                 OutlinedButton.icon(
+                  style: studioFormOutlinedIconLabeledButtonStyle(context),
                   onPressed: onOpenTasks,
                   icon: Badge(
                     isLabelVisible: runningJobCount > 0,
