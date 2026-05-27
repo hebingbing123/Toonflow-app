@@ -7,6 +7,7 @@ import 'package:openflow_app/design_system/components/studio_entrance_motion.dar
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
@@ -245,6 +246,18 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   Future<void> _remove(String userId) async {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: l10n.projectMembersTooltipRemoveAcl,
+      message:
+          'This will remove the explicit ACL for this member from the project.',
+      confirmLabel: l10n.projectMembersTooltipRemoveAcl,
+      cancelLabel: l10n.globalSearchCancel,
+      destructive: true,
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
     setState(() {
       _removingUsers.add(userId);
     });

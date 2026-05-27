@@ -1132,8 +1132,15 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                       : l10n.opsWhDeliveryLog,
                                 ),
                               ),
-                              OutlinedButton(
-                                style: studioFormSecondaryButtonStyle(context),
+                             OutlinedButton(
+                                style: studioFormSecondaryButtonStyle(context).copyWith(
+                                  foregroundColor: WidgetStatePropertyAll(tokens.danger),
+                                  side: WidgetStatePropertyAll(
+                                    BorderSide(
+                                      color: tokens.danger.withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ),
                                 onPressed: _loadingWebhooks || rowBusy
                                     ? null
                                     : () => _deleteWebhook(wh.id),

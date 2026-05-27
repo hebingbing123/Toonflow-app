@@ -108,7 +108,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               child: ListView.separated(
                                 itemCount: versions.length,
                                 separatorBuilder: (_, _) =>
-                                    const Divider(height: StudioControlSize.dividerThickness),
+                                    const Divider(height: 1),
                                 itemBuilder: (ctx, index) {
                                   final version = versions[index];
                                   final selectedNow =
@@ -334,11 +334,22 @@ extension SkillsHarnessFileController on SkillsHarnessController {
     }
   }
 
-  Future<void> deleteSkillProbe() async {
+  Future<void> deleteSkillProbe(BuildContext context) async {
     final token = _accessToken;
     if (token == null) return;
     final path = skillPathController.text.trim();
     if (path.isEmpty) return;
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: _l10nResolved.skillsHarnessDeleteResult(path),
+      message: 'This will delete the skill content at $path.',
+      confirmLabel: 'Delete',
+      cancelLabel: _l10nResolved.skillsHarnessCancel,
+      destructive: true,
+    );
+    if (confirmed != true) {
+      return;
+    }
     loadingSkillDelete = true;
     _setError(null);
     skillMutationLine = null;

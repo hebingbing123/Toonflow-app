@@ -867,6 +867,18 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required void Function(String infoLine) applyInfoLine,
   }) async {
     final id = int.parse(deleteNovelIdCtrl.text.trim());
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: l10n.projectEditorNovelsWorkbenchDeleteButton,
+      message:
+          'This will delete chapter #$id from the current project and cannot be undone.',
+      confirmLabel: l10n.projectEditorNovelsWorkbenchDeleteButton,
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+    );
+    if (confirmed != true) {
+      return;
+    }
     await deleteProjectNovelByProjectIds(token, project.id, id);
     await refreshWorkbench(setLocalState);
     applyInfoLine(l10n.projectEditorNovelsActionChapterDeleteOk(id));
@@ -976,6 +988,18 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final ids = parseNumericIdList(batchDeleteIdsCtrl.text);
     if (ids.isEmpty) {
       throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
+    }
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteButton,
+      message:
+          'This will delete ${ids.length} chapters from the current project and cannot be undone.',
+      confirmLabel: l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteButton,
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+    );
+    if (confirmed != true) {
+      return;
     }
     await batchDeleteNovelsUnderProject(token, project.id, ids);
     await refreshWorkbench(setLocalState);

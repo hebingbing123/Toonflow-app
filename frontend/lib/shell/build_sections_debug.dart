@@ -96,7 +96,8 @@ extension _HomePageBuildDebugSections on _HomePageState {
           _skillsHarnessController.showSkillVersionHistory(context),
       onPutSkillProbe: _skillsHarnessController.putSkillProbe,
       onPostSkillProbe: _skillsHarnessController.postSkillProbe,
-      onDeleteSkillProbe: _skillsHarnessController.deleteSkillProbe,
+      onDeleteSkillProbe: () =>
+          _skillsHarnessController.deleteSkillProbe(context),
       onTestWebSocket: _skillsHarnessController.testWebSocket,
       onTestHarnessToolWebSocket:
           _skillsHarnessController.testHarnessToolWebSocket,

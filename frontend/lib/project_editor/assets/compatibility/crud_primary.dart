@@ -142,6 +142,17 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                 assetsRef[0]!.items.isEmpty
             ? null
             : () async {
+                final confirmed = await showStudioConfirmDialog(
+                  context: ctx,
+                  title: l10n.projectEditorAssetDeleteDialogTitle,
+                  message: l10n.projectEditorAssetDeleteDialogTargetLabel,
+                  confirmLabel: l10n.projectEditorAssetDeleteDialogConfirm,
+                  cancelLabel: l10n.projectEditorAssetDeleteDialogCancel,
+                  destructive: true,
+                );
+                if (confirmed != true || !ctx.mounted) {
+                  return;
+                }
                 setDialogState(() => assetsBusy[0] = true);
                 final last = assetsRef[0]!.items.last;
                 try {
