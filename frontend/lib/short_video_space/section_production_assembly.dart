@@ -1885,8 +1885,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                       spacing: StudioSpacing.chromeActionGap,
                                       children: [
                                         if (hasAudio)
-                                          IconButton(
-                                            tooltip: l10n
+                                          StudioIconButton(
+                                            icon: Icons.play_circle_outline,
+                                            label: l10n
                                                 .shortVideoSpaceProductionAssemblyPreviewAudio,
                                             onPressed: () {
                                               _showAudioPreviewDialog(
@@ -1894,13 +1895,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                 audioUrl: task.audioUrl!.trim(),
                                               );
                                             },
-                                            icon: const Icon(
-                                              Icons.play_circle_outline,
-                                            ),
                                           ),
                                         if (hasAudio)
-                                          IconButton(
-                                            tooltip: l10n
+                                          StudioIconButton(
+                                            icon: Icons.link,
+                                            label: l10n
                                                 .shortVideoSpaceProductionAssemblyCopyAudioLink,
                                             onPressed: () async {
                                               await Clipboard.setData(
@@ -1914,7 +1913,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                 isSuccess: true,
                                               );
                                             },
-                                            icon: const Icon(Icons.link),
                                           ),
                                         if (canCancel)
                                           TextButton(

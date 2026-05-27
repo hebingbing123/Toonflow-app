@@ -12,6 +12,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -283,10 +284,10 @@ class PanelHeader extends StatelessWidget {
         const SizedBox(width: StudioSpacing.xs),
         PanelFreshnessIndicator(panelName: title, snapshot: snapshot),
         const Spacer(),
-        IconButton(
-          icon: const Icon(Icons.refresh, size: 20),
+        StudioIconButton(
+          icon: Icons.refresh,
+          label: l10n.shortVideoPanelVersionRefreshPanelTooltip,
           onPressed: onRefresh,
-          tooltip: l10n.shortVideoPanelVersionRefreshPanelTooltip,
         ),
       ],
     );

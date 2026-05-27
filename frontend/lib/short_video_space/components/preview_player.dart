@@ -511,7 +511,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onPrimaryContainer,
-                                ),
+                                ).withTabularFigures(),
                           ),
                         ),
                       ],
@@ -573,7 +573,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           const SizedBox(width: StudioSpacing.xs),
                           Text(
                             '${_formatDuration(_playlistProgress)} / ${_formatDuration(_totalPlaylistDuration)}',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
                           ),
                         ],
                       ),
@@ -592,7 +592,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         if (_isPlaylistMode) const SizedBox(width: StudioSpacing.xs),
                         Text(
                           _formatDuration(_currentPosition),
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
                         ),
                         const SizedBox(width: StudioSpacing.xs),
                         Expanded(
@@ -634,7 +634,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         const SizedBox(width: StudioSpacing.xs),
                         Text(
                           _formatDuration(_totalDuration),
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
                         ),
                       ],
                     ),

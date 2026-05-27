@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -375,17 +376,17 @@ class _VersionManagerState extends State<VersionManager> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (!isCurrent)
-                                  IconButton(
-                                    icon: const Icon(Icons.swap_horiz, size: 20),
-                                    tooltip: l10n
+                                  StudioIconButton(
+                                    icon: Icons.swap_horiz,
+                                    label: l10n
                                         .shortVideoVersionManagerTooltipSwitchVersion,
                                     onPressed: _isLoading
                                         ? null
                                         : () => _handleSwitchVersion(version.id),
                                   ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline, size: 20),
-                                  tooltip: l10n
+                                StudioIconButton(
+                                  icon: Icons.delete_outline,
+                                  label: l10n
                                       .shortVideoVersionManagerTooltipDeleteVersion,
                                   onPressed: _isLoading || isCurrent
                                       ? null
@@ -472,16 +473,16 @@ class _VersionManagerState extends State<VersionManager> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.restore, size: 20),
-                            tooltip: l10n.shortVideoVersionManagerTooltipRestoreDraft,
+                          StudioIconButton(
+                            icon: Icons.restore,
+                            label: l10n.shortVideoVersionManagerTooltipRestoreDraft,
                             onPressed: _isLoading
                                 ? null
                                 : () => _handleRestoreDraft(draft),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 20),
-                            tooltip: l10n.shortVideoVersionManagerTooltipDeleteDraft,
+                          StudioIconButton(
+                            icon: Icons.delete_outline,
+                            label: l10n.shortVideoVersionManagerTooltipDeleteDraft,
                             onPressed: _isLoading
                                 ? null
                                 : () => _handleDeleteDraft(draft),
@@ -902,18 +903,18 @@ class _VersionManagerState extends State<VersionManager> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.restore, size: 20),
-                                tooltip:
+                              StudioIconButton(
+                                icon: Icons.restore,
+                                label:
                                     l10n.shortVideoVersionManagerTooltipRestoreDraft,
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   _handleRestoreDraft(draft);
                                 },
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 20),
-                                tooltip:
+                              StudioIconButton(
+                                icon: Icons.delete_outline,
+                                label:
                                     l10n.shortVideoVersionManagerTooltipDeleteDraft,
                                 onPressed: () {
                                   Navigator.of(context).pop();

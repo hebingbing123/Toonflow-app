@@ -6,6 +6,7 @@ import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
 import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../design_system/tokens.dart';
+import 'studio_text_styles.dart';
 class StudioCostEstimateChip extends StatelessWidget {
   const StudioCostEstimateChip({
     super.key,
@@ -51,16 +52,19 @@ class StudioCostEstimateChip extends StatelessWidget {
         else
           StudioChip(
             label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
+            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
           ),
         if (est.quotaImpactJobs > 0)
           StudioChip(
             label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
+            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
           ),
         if (pct != null && est.dailyJobQuota != null)
           StudioChip(
             label: Text(
               l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
             ),
+            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
           ),
       ],
     );

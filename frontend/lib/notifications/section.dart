@@ -1066,9 +1066,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 widget.controller.workspaceSharedAsyncExportInfo!,
                 style: theme.textTheme.bodySmall,
               ),
-              trailing: IconButton(
-                tooltip: l10n.notificationsComplianceCloseTooltip,
-                icon: const Icon(Icons.close),
+              trailing: StudioIconButton(
+                icon: Icons.close,
+                label: l10n.notificationsComplianceCloseTooltip,
                 onPressed:
                     widget.controller.clearWorkspaceSharedAsyncExportInfo,
               ),
@@ -1165,20 +1165,21 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         style: muted,
                       ),
                     ),
-                    IconButton(
-                      tooltip:
-                          l10n.notificationsComplianceReuseExportFiltersTooltip,
+                    StudioIconButton(
+                      icon: Icons.filter_alt_outlined,
+                      label: l10n.notificationsComplianceReuseExportFiltersTooltip,
+                      size: 18,
                       onPressed: widget.controller.loadingWorkspaceSharedAudit
                           ? null
                           : () => _reuseExportRecordFilters(item),
-                      icon: const Icon(Icons.filter_alt_outlined, size: 18),
                     ),
-                    IconButton(
-                      tooltip: _exportRecordDownloadTooltip(l10n, item),
+                    StudioIconButton(
+                      icon: Icons.download_outlined,
+                      label: _exportRecordDownloadTooltip(l10n, item),
+                      size: 18,
                       onPressed: widget.controller.loadingExportHistory
                           ? null
                           : () => _redownloadFromExportRecord(item),
-                      icon: const Icon(Icons.download_outlined, size: 18),
                     ),
                   ],
                 ),

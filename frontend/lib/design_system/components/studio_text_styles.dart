@@ -207,3 +207,15 @@ TextStyle studioFilterActionLabelStyle(BuildContext context) {
     fontSize: typography.bodyLarge,
   );
 }
+
+extension TextStyleTabularFigures on TextStyle {
+  TextStyle withTabularFigures() {
+    return copyWith(
+      fontFeatures: <FontFeature>[
+        ...?fontFeatures,
+        const FontFeature.tabularFigures(),
+      ],
+    );
+  }
+}
+

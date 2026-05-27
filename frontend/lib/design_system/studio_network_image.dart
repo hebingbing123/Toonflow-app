@@ -61,11 +61,14 @@ class StudioNetworkImage extends StatelessWidget {
     int? cacheHeight;
     if (logicalW != null && logicalW.isFinite && logicalW > 0) {
       cacheWidth = (logicalW * dpr).round().clamp(1, 4096);
-    } else if (logicalH != null && logicalH.isFinite && logicalH > 0) {
+    }
+    if (logicalH != null && logicalH.isFinite && logicalH > 0) {
       cacheHeight = (logicalH * dpr).round().clamp(1, 4096);
     }
 
-    final maxEdge = cacheWidth ?? cacheHeight;
+    final maxEdge = (cacheWidth != null && cacheHeight != null)
+        ? (cacheWidth > cacheHeight ? cacheWidth : cacheHeight)
+        : (cacheWidth ?? cacheHeight);
     final resolved = optimizeForDisplay
         ? studioOptimizeImageUrl(url, maxPixelEdge: maxEdge)
         : url;

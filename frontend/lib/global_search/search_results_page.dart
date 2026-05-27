@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
+import '../design_system/components/studio_icon_button.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -857,32 +858,32 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         appBar: AppBar(
           title: Text(l10n.globalSearchTitle(widget.query)),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.bookmark_add_outlined),
+            StudioIconButton(
+              icon: Icons.bookmark_add_outlined,
+              label: l10n.globalSearchTooltipSaveCurrentView,
               onPressed: _saveCurrentView,
-              tooltip: l10n.globalSearchTooltipSaveCurrentView,
             ),
-            IconButton(
-              icon: const Icon(Icons.collections_bookmark_outlined),
+            StudioIconButton(
+              icon: Icons.collections_bookmark_outlined,
+              label: l10n.globalSearchTooltipSavedViews,
               onPressed: _openSavedViews,
-              tooltip: l10n.globalSearchTooltipSavedViews,
             ),
-            IconButton(
-              icon: const Icon(Icons.link),
+            StudioIconButton(
+              icon: Icons.link,
+              label: l10n.globalSearchTooltipCopyDeepLink,
               onPressed: _copySearchLink,
-              tooltip: l10n.globalSearchTooltipCopyDeepLink,
             ),
-            // Filter button
-            IconButton(
-              icon: Badge(
-                isLabelVisible: _filters.hasActiveFilters,
-                label: Text(l10n.l10nBatch_775383c7b6(_filters.activeFilterCount)),
-                child: const Icon(Icons.filter_list),
+            // Filter button with badge
+            Badge(
+              isLabelVisible: _filters.hasActiveFilters,
+              label: Text(l10n.l10nBatch_775383c7b6(_filters.activeFilterCount)),
+              child: StudioIconButton(
+                icon: Icons.filter_list,
+                label: l10n.globalSearchTooltipFilter,
+                onPressed: isMobile
+                    ? _showMobileFilterDrawer
+                    : _toggleFilterPanel,
               ),
-              onPressed: isMobile
-                  ? _showMobileFilterDrawer
-                  : _toggleFilterPanel,
-              tooltip: l10n.globalSearchTooltipFilter,
             ),
             const RiskyOperationConfirmPrefsOverflowMenu(),
           ],

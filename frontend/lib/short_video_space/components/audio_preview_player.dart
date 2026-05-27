@@ -262,7 +262,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                   _formatDuration(_position),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace').withTabularFigures(),
                 ),
                 const SizedBox(width: StudioSpacing.xs),
                 Expanded(
@@ -293,7 +293,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                   _formatDuration(_duration),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace').withTabularFigures(),
                 ),
               ],
             ),
@@ -373,7 +373,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                       (_volume * 100).toInt(),
                     ),
                     textAlign: TextAlign.right,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
                   ),
                 ),
               ],

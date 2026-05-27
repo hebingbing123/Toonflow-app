@@ -661,8 +661,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                 style: Theme.of(ctx).textTheme.labelLarge,
                               ),
                             ),
-                            IconButton(
-                              tooltip: l10n
+                            StudioIconButton(
+                              icon: Icons.delete_outline,
+                              label: l10n
                                   .projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip,
                               onPressed: localBusy
                                   ? null
@@ -678,7 +679,6 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                         ),
                                       );
                                     },
-                              icon: const Icon(Icons.delete_outline),
                             ),
                           ],
                         ),

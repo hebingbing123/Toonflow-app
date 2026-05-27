@@ -36,6 +36,7 @@ Future<bool> showStudioCostConfirmSheet({
                 cny,
                 l10n.studioPlanUsageEstimateDisclaimer,
               ),
+              style: Theme.of(ctx).textTheme.bodyMedium?.withTabularFigures(),
             ),
             const SizedBox(height: StudioSpacing.sm),
             StudioPrimaryButton(

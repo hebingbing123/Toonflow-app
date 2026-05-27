@@ -679,32 +679,18 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   ),
                 ),
                 const SizedBox(width: StudioSpacing.xs),
-                IconButton(
-                  tooltip: l10n.projectMembersTooltipSaveRole,
+                StudioIconButton(
+                  icon: saving ? Icons.hourglass_empty : Icons.save_outlined,
+                  label: l10n.projectMembersTooltipSaveRole,
                   onPressed: saving || removing || pendingRole == row.role
                       ? null
                       : () => _saveRow(row.userId),
-                  icon: saving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined),
                 ),
-                IconButton(
-                  tooltip: l10n.projectMembersTooltipRemoveAcl,
+                StudioIconButton(
+                  icon: removing ? Icons.hourglass_empty : Icons.delete_outline,
+                  label: l10n.projectMembersTooltipRemoveAcl,
                   onPressed: saving || removing ? null : () => _remove(row.userId),
-                  icon: removing
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          Icons.delete_outline,
-                          color: theme.colorScheme.error,
-                        ),
+                  color: removing ? null : theme.colorScheme.error,
                 ),
               ],
             ),

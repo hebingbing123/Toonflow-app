@@ -722,10 +722,10 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                 ),
                               ),
                               if (invite.status == 'pending') ...<Widget>[
-                                IconButton(
-                                  tooltip: l10n
+                                StudioIconButton(
+                                  icon: Icons.refresh,
+                                  label: l10n
                                       .teamWorkspaceRefreshInviteLinkTooltip,
-                                  icon: const Icon(Icons.refresh, size: 18),
                                   onPressed: inviteActionBusyId != null
                                       ? null
                                       : () async {
@@ -762,13 +762,9 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                           }
                                         },
                                 ),
-                                IconButton(
-                                  tooltip:
-                                      l10n.teamWorkspaceRevokeInviteTooltip,
-                                  icon: const Icon(
-                                    Icons.cancel_outlined,
-                                    size: 18,
-                                  ),
+                                StudioIconButton(
+                                  icon: Icons.cancel_outlined,
+                                  label: l10n.teamWorkspaceRevokeInviteTooltip,
                                   onPressed: inviteActionBusyId != null
                                       ? null
                                       : () async {
@@ -812,13 +808,9 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                         },
                                 ),
                               ],
-                              IconButton(
-                                tooltip:
-                                    l10n.teamWorkspaceCopyInviteInfoTooltip,
-                                icon: const Icon(
-                                  Icons.copy_all_outlined,
-                                  size: 18,
-                                ),
+                              StudioIconButton(
+                                icon: Icons.copy_all_outlined,
+                                label: l10n.teamWorkspaceCopyInviteInfoTooltip,
                                 onPressed: () async {
                                   final messenger = ScaffoldMessenger.of(
                                     context,

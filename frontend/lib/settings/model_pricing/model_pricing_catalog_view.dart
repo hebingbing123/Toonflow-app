@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
+import '../../design_system/components/studio_text_styles.dart';
 
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_entrance_motion.dart';
@@ -144,7 +145,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
                           formatCnyFromCents(p.cnyCentsPerUnit),
                           pricingUnitLabel(l10n, p.pricingUnit),
                         ),
-                        style: theme.textTheme.bodyMedium,
+                        style: theme.textTheme.bodyMedium?.withTabularFigures(),
                       ),
                       Text(
                         l10n.studioModelPricingBestFor(p.bestFor),
