@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// Primitive colors that are allowed to appear in theme construction.
+///
+/// UI code should prefer semantic values from [StudioTokens] via:
+/// `Theme.of(context).colorScheme`, `StudioTokens.of(context)`, or `textTheme`.
+abstract final class StudioPrimitives {
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+  static const Color transparent = Color(0x00000000);
+}
+
 /// Semantic studio tokens (LumenX-style CSS variables as ThemeExtension).
 @immutable
 class StudioTokens extends ThemeExtension<StudioTokens> {
@@ -186,6 +196,8 @@ abstract final class StudioSpacing {
   static const double sm = 16;
   static const double md = 24;
   static const double lg = 32;
+  /// Minimum touch target size for tappable controls (Material guidance).
+  static const double touchTarget = 48;
   static const double radiusButton = 10;
   static const double radiusCard = 14;
 
@@ -198,17 +210,26 @@ abstract final class StudioSpacing {
   /// Large sheets / modals (28px).
   static const double radiusSheet = 28;
 
+  /// Fully rounded pill / stadium chip.
+  static const double radiusPill = 999;
+
+  /// Drag handles and 2px micro connectors.
+  static const double radiusHairline = 2;
+
   /// Shared height for dense inputs, text buttons, and labeled actions.
   static const double controlHeight = 36;
 
   /// Minimum square hit target for chrome icon buttons (desktop).
-  static const double iconTouchTarget = controlHeight;
+  static const double iconTouchTarget = touchTarget;
 
   /// Collapsed sidebar nav tile size.
   static const double navItemTouchTarget = 44;
 
   /// Gap between adjacent icon buttons in top-bar chrome groups.
   static const double chromeActionGap = 4;
+
+  /// Vertical inset inside [controlHeight] buttons (pairs with 36px control math).
+  static const double controlPaddingVertical = 6;
 }
 
 /// Page-level semantic spacing (prefer over ad-hoc 10/14/18 values).
@@ -223,18 +244,18 @@ abstract final class StudioLayoutSpacing {
   /// Dense icon-to-label gap; prefer [StudioSpacing.xs] for new toolbar rows.
   static const double microGap = StudioSpacing.xs;
 
-  /// Title to subtitle in compact headers (replaces legacy `4`).
-  static const double titleTight = 4;
+  /// Tight title/subtitle spacing — keep to 8px grid.
+  static const double titleTight = StudioSpacing.xs; // 8
 
-  /// Tight stack gap (replaces legacy `10` in cards and forms).
-  static const double inlineGap = 10;
+  /// Tight stack gap — keep to 8px grid.
+  static const double inlineGap = StudioSpacing.xs; // 8
 
-  /// Between title and body in compact panels (replaces legacy `14`).
-  static const double stackMedium = 14;
+  /// Between title and body in compact panels — keep to 8px grid.
+  static const double stackMedium = StudioSpacing.sm; // 16
 
-  /// Inset padding for dense tool rows (replaces legacy `10`/`12` padding).
-  static const double insetDense = 12;
+  /// Inset padding for dense tool rows — keep to 8px grid.
+  static const double insetDense = StudioSpacing.sm; // 16
 
-  /// Comfortable card / section inset (replaces legacy `18`).
-  static const double insetComfortable = 18;
+  /// Comfortable card / section inset — keep to 8px grid.
+  static const double insetComfortable = StudioSpacing.md; // 24
 }

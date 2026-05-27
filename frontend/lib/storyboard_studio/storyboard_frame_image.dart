@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
+import '../design_system/components/studio_loading_placeholders.dart';
+import '../design_system/studio_network_image.dart';
+import '../design_system/tokens.dart';
 import '../rust_api/production/storyboard/grid_generate.dart';
 
 /// Storyboard frame preview (http(s), data URI, or authenticated local-frame).
@@ -43,6 +46,7 @@ class StoryboardFrameImage extends StatelessWidget {
           height: height,
           width: double.infinity,
           fit: fit,
+          filterQuality: FilterQuality.high,
         );
       } catch (_) {
         return _errorBox(context, raw);
@@ -64,7 +68,7 @@ class StoryboardFrameImage extends StatelessWidget {
           if (snapshot.connectionState != ConnectionState.done) {
             return SizedBox(
               height: height,
-              child: const Center(child: CircularProgressIndicator()),
+              child: const StudioMediaTileSkeleton(),
             );
           }
           final res = snapshot.data;
@@ -76,6 +80,7 @@ class StoryboardFrameImage extends StatelessWidget {
             height: height,
             width: double.infinity,
             fit: fit,
+            filterQuality: FilterQuality.high,
           );
         },
       );
@@ -84,8 +89,8 @@ class StoryboardFrameImage extends StatelessWidget {
     final resolved = raw.startsWith('http')
         ? raw
         : resolveRustApiUrl(raw);
-    return Image.network(
-      resolved,
+    return StudioNetworkImage(
+      url: resolved,
       height: height,
       width: double.infinity,
       fit: fit,
@@ -97,7 +102,7 @@ class StoryboardFrameImage extends StatelessWidget {
     return Container(
       height: height,
       alignment: Alignment.center,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Text(
         label,
         maxLines: 3,

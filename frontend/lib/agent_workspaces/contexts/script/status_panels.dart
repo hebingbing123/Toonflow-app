@@ -35,20 +35,20 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         if (runningTaskLine != null || taskStatusLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(runningTaskLine ?? taskStatusLine!, style: bodySmall),
         ],
         if (resultSummaryLines.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ...resultSummaryLines.map(
             (String line) => Padding(
-              padding: const EdgeInsets.only(bottom: 2),
+              padding: const EdgeInsets.only(bottom: StudioSpacing.radiusHairline),
               child: Text(line, style: bodySmall),
             ),
           ),
         ],
         if (workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.agentWorkspaceScriptLatestAssistantResult,
             style: Theme.of(context).textTheme.labelLarge,
@@ -60,7 +60,7 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
           ),
         ],
         if (scriptWritebackSourceLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.agentWorkspaceScriptWritebackSource(
               scriptWritebackSourceLine!,
@@ -69,11 +69,11 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
           ),
         ],
         if (scriptPlanWritebackLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(scriptPlanWritebackLine!, style: bodySmall),
         ],
         if (workspaceWritebackLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(workspaceWritebackLine!, style: bodySmall),
         ],
       ],

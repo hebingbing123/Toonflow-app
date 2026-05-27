@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
+
 /// Navigates into project studio from a product-shell pane that only hosts a redirect.
 class ProductStudioRouteLauncher extends StatefulWidget {
   const ProductStudioRouteLauncher({super.key, required this.route});
@@ -29,6 +31,10 @@ class _ProductStudioRouteLauncherState extends State<ProductStudioRouteLauncher>
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
+    return const StudioAsyncDataView(
+      loading: true,
+      scrollableLoading: true,
+      child: SizedBox.shrink(),
+    );
   }
 }

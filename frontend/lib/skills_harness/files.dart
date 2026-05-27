@@ -73,10 +73,15 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                 title: Text(l10n.skillsHarnessVersionDialogTitle(path)),
                 content: SizedBox(
                   width: studioConstrainedDialogWidth(context, maxWidth: 980),
-                  height: 720,
+                  height: studioAdaptiveDialogHeight(
+                    context,
+                    fraction: 0.82,
+                    min: 480,
+                    max: 720,
+                  ),
                   child: versions.isEmpty
                       ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          padding: const EdgeInsets.symmetric(vertical: StudioSpacing.md),
                           child: StudioEmptyState.emptyData(
                             title: l10n.skillsHarnessVersionEmpty,
                             icon: Icons.history_outlined,
@@ -92,9 +97,14 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               ),
                               style: Theme.of(ctx).textTheme.bodySmall,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: StudioSpacing.sm),
                             SizedBox(
-                              height: 180,
+                              height: studioAdaptiveDialogHeight(
+                                ctx,
+                                fraction: 0.24,
+                                min: 140,
+                                max: 220,
+                              ),
                               child: ListView.separated(
                                 itemCount: versions.length,
                                 separatorBuilder: (_, _) =>
@@ -112,46 +122,53 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                       _shortHash(version.hashAfter),
                                     ),
                                   ].join(' · ');
-                                  return ListTile(
-                                    dense: true,
-                                    selected: selectedNow,
-                                    contentPadding: EdgeInsets.zero,
-                                    title: Text(
-                                      version.rollbackOf == null
-                                          ? l10n.skillsHarnessVersionTitle(
-                                              index + 1,
-                                            )
-                                          : l10n.skillsHarnessRollbackVersionTitle(
-                                              index + 1,
-                                            ),
+                                  return studioStaggeredItem(
+                                    index,
+                                    entranceKey: versions.length,
+                                    child: StudioListRow(
+                                      dense: true,
+                                      selected: selectedNow,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(
+                                        version.rollbackOf == null
+                                            ? l10n.skillsHarnessVersionTitle(
+                                                index + 1,
+                                              )
+                                            : l10n.skillsHarnessRollbackVersionTitle(
+                                                index + 1,
+                                              ),
+                                      ),
+                                      subtitle: Text(subtitle),
+                                      onTap: () => setState(() {
+                                        selected = version;
+                                      }),
                                     ),
-                                    subtitle: Text(subtitle),
-                                    onTap: () => setState(() {
-                                      selected = version;
-                                    }),
                                   );
                                 },
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: StudioSpacing.sm),
                             Text(
                               l10n.skillsHarnessDiffTitle,
                               style: Theme.of(ctx).textTheme.titleSmall,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             Expanded(
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                     color: studioPanelMutedColor(ctx),
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                                 ),
                                 child: ListView.builder(
                                   itemCount: diffRows.length,
                                   itemBuilder: (ctx, index) {
                                     final row = diffRows[index];
-                                    return Container(
+                                    return studioStaggeredItem(
+                                      index,
+                                      entranceKey: diffRows.length,
+                                      child: Container(
                                       color: row.changed
                                           ? Theme.of(ctx)
                                                 .colorScheme
@@ -174,7 +191,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                               ).textTheme.bodySmall,
                                             ),
                                           ),
-                                          const SizedBox(width: 16),
+                                          const SizedBox(width: StudioSpacing.sm),
                                           Expanded(
                                             child: SelectableText(
                                               row.selectedLine,
@@ -185,6 +202,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                           ),
                                         ],
                                       ),
+                                    ),
                                     );
                                   },
                                 ),

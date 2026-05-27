@@ -34,7 +34,9 @@ InputDecoration agentWorkspaceFieldDecoration(
 }) {
   final tokens = StudioTokens.of(context);
   final theme = Theme.of(context);
-  final labelStyle = TextStyle(color: tokens.textSecondary);
+  final labelStyle = theme.textTheme.bodySmall?.copyWith(
+    color: tokens.textSecondary,
+  );
   final helperStyle =
       theme.inputDecorationTheme.helperStyle ??
       theme.textTheme.bodySmall?.copyWith(color: tokens.textMuted);
@@ -60,7 +62,7 @@ InputDecoration agentWorkspaceFieldDecoration(
         : FloatingLabelBehavior.auto,
     labelStyle: labelStyle,
     hintText: hintText,
-    hintStyle: TextStyle(color: tokens.textMuted),
+    hintStyle: theme.textTheme.bodySmall?.copyWith(color: tokens.textMuted),
   );
 }
 
@@ -186,7 +188,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               rightLabel: l10n.agentWorkspaceScopeScriptIdLabel,
               rightKeyboard: TextInputType.number,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             pair(
               left: projectUuidController,
               leftLabel: l10n.agentWorkspaceScopeProjectUuidLabel,
@@ -195,7 +197,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               rightLabel: l10n.agentWorkspaceScopeScriptUuidLabel,
               rightHint: l10n.agentWorkspaceScopeScriptUuidHint,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             agentWorkspaceLabeledField(
               context,
               label: l10n.agentWorkspaceScopeWorkspaceUuidLabel,
@@ -229,8 +231,8 @@ class AgentWorkspacePaneSelector extends StatelessWidget {
       (AgentWorkspacePane.activity, l10n.agentWorkspacePaneActivity),
     ];
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: tabs
           .map(
             (entry) => StudioChoiceChip(

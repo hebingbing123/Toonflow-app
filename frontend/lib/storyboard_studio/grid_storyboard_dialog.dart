@@ -80,7 +80,7 @@ Future<GridStoryboardDialogResult?> showGridStoryboardDialog({
                     ),
                   ),
                   if (errorText != null) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       errorText!,
                       style: studioAccentBannerBodyStyle(

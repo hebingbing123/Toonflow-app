@@ -112,7 +112,7 @@ class _SettingsHubPageState extends State<SettingsHubPage>
         final contentWidth = constraints.maxWidth;
         Widget tabScrollChild(Widget child) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: const EdgeInsets.only(bottom: StudioSpacing.lg),
             child: SizedBox(width: contentWidth, child: child),
           );
         }
@@ -132,9 +132,9 @@ class _SettingsHubPageState extends State<SettingsHubPage>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   ModelVendorsSection(accessToken: widget.accessToken),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: StudioSpacing.md),
                   ModelPricingCatalogView(accessToken: widget.accessToken),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: StudioSpacing.md),
                   ApiKeysSection(controller: widget.apiKeysController),
                 ],
               ),
@@ -203,18 +203,19 @@ class _SettingsHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final theme = Theme.of(context);
     final compact = maxWidth < 640;
     final scrollableTabs = maxWidth < 760;
     final wideDesktop = maxWidth >= 1240;
     final summary = modules[selectedIndex.clamp(0, modules.length - 1)];
     final subtitleStyle =
         studioSectionIntroStyle(context) ??
-        TextStyle(color: tokens.textSecondary);
+        theme.textTheme.bodyMedium?.copyWith(color: tokens.textSecondary);
     final tabBar = TabBar(
       controller: controller,
       tabAlignment: scrollableTabs ? TabAlignment.start : TabAlignment.fill,
       indicator: const BoxDecoration(),
-      dividerColor: Colors.transparent,
+      dividerColor: StudioPrimitives.transparent,
       overlayColor: WidgetStatePropertyAll<Color>(
         tokens.primary.withValues(alpha: 0.08),
       ),
@@ -317,7 +318,9 @@ class _SettingsHeroCard extends StatelessWidget {
                         color: tokens.bgInset.withValues(alpha: 0.84),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(
+                          StudioSpacing.chromeActionGap,
+                        ),
                         child: tabBar,
                       ),
                     )
@@ -414,7 +417,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                       vertical: StudioLayoutSpacing.microGap,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                       border: Border.all(color: tokens.borderSubtle),
                       color: tokens.bgInset.withValues(alpha: 0.72),
                     ),
@@ -550,7 +553,7 @@ class _SettingsProgressDots extends StatelessWidget {
                 : (compact ? 8 : 10),
             height: compact ? 8 : 10,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
               color: index == selectedIndex ? activeColor : inactiveColor,
             ),
           ),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Advanced filter panel for search results
 ///
@@ -163,8 +165,14 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build desktop layout (sidebar panel)
   Widget _buildDesktopLayout() {
+    final sidebarWidth = studioAdaptiveSidebarWidth(
+      context,
+      fraction: 0.26,
+      min: 260,
+      max: 320,
+    );
     return Container(
-      width: 280,
+      width: sidebarWidth,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -185,7 +193,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Filter content
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(StudioSpacing.sm),
               child: _buildFilterContent(),
             ),
           ),
@@ -213,7 +221,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Filter content
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(StudioSpacing.sm),
               child: _buildFilterContent(),
             ),
           ),
@@ -233,7 +241,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
     final activeCount = _currentFilters.activeFilterCount;
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       child: Row(
         children: [
           Icon(
@@ -241,7 +249,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             size: 20,
             color: Theme.of(context).colorScheme.primary,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Text(
             l10n.globalSearchAdvancedFilterTitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -251,7 +259,10 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           const Spacer(),
           if (activeCount > 0)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.xs,
+                vertical: StudioSpacing.chromeActionGap,
+              ),
               decoration: BoxDecoration(
                 color: StudioTokens.of(context).primarySoft,
                 borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -274,14 +285,14 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
       children: [
         // Result type filter
         _buildSectionTitle(l10n.globalSearchResultTypeSection),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _buildResultTypeFilters(),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: StudioSpacing.md),
         
         // Time range filter
         _buildSectionTitle(l10n.globalSearchCreatedTimeSection),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _buildTimeRangeFilters(),
       ],
     );
@@ -303,13 +314,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       children: [
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: _currentFilters.resultTypes.contains(ResultType.project),
           onChanged: (_) => _toggleResultType(ResultType.project),
           title: Row(
             children: [
               Icon(Icons.folder, size: 18),
-              SizedBox(width: 8),
+              SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeProject),
             ],
           ),
@@ -317,13 +328,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: _currentFilters.resultTypes.contains(ResultType.script),
           onChanged: (_) => _toggleResultType(ResultType.script),
           title: Row(
             children: [
               Icon(Icons.description, size: 18),
-              SizedBox(width: 8),
+              SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeScript),
             ],
           ),
@@ -331,13 +342,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: _currentFilters.resultTypes.contains(ResultType.asset),
           onChanged: (_) => _toggleResultType(ResultType.asset),
           title: Row(
             children: [
               Icon(Icons.image, size: 18),
-              SizedBox(width: 8),
+              SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeAsset),
             ],
           ),
@@ -345,13 +356,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: _currentFilters.resultTypes.contains(ResultType.novel),
           onChanged: (_) => _toggleResultType(ResultType.novel),
           title: Row(
             children: [
               Icon(Icons.menu_book, size: 18),
-              SizedBox(width: 8),
+              SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeNovel),
             ],
           ),
@@ -359,13 +370,13 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: _currentFilters.resultTypes.contains(ResultType.novelEvent),
           onChanged: (_) => _toggleResultType(ResultType.novelEvent),
           title: Row(
             children: [
               Icon(Icons.event_note, size: 18),
-              SizedBox(width: 8),
+              SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeNovelEventOutline),
             ],
           ),
@@ -395,11 +406,14 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           ),
           style: OutlinedButton.styleFrom(
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.radiusComfort,
+              vertical: StudioSpacing.radiusComfort,
+            ),
           ),
         ),
         
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         
         // End date
         OutlinedButton.icon(
@@ -413,13 +427,16 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           ),
           style: OutlinedButton.styleFrom(
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.radiusComfort,
+              vertical: StudioSpacing.radiusComfort,
+            ),
           ),
         ),
         
         // Clear time range button
         if (_currentFilters.timeFrom != null || _currentFilters.timeTo != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           TextButton.icon(
             onPressed: _clearTimeRange,
             icon: const Icon(Icons.clear, size: 18),
@@ -439,7 +456,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
     final hasActiveFilters = _currentFilters.hasActiveFilters;
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -451,7 +468,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             label: Text(l10n.globalSearchApplyFilter),
           ),
           
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           
           // Clear filters button
           OutlinedButton.icon(

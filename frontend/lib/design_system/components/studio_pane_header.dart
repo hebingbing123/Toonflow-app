@@ -5,6 +5,7 @@ import '../../design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../product_shell/studio_shell_scope.dart';
 import '../tokens.dart';
+import 'studio_entrance_motion.dart';
 import 'studio_ellipsis_tooltip_text.dart';
 import 'studio_text_styles.dart';
 
@@ -20,6 +21,7 @@ class StudioPaneToolbar extends StatelessWidget {
     this.showBack = true,
     this.onBack,
     this.titleStyle,
+    this.titleHeroTag,
   });
 
   final String title;
@@ -30,6 +32,7 @@ class StudioPaneToolbar extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
   final TextStyle? titleStyle;
+  final String? titleHeroTag;
 
   Widget? _mergedTrailing() {
     if (actions == null && menu == null) {
@@ -89,6 +92,7 @@ class StudioPaneToolbar extends StatelessWidget {
           showBack: showBack,
           onBack: onBack,
           titleStyle: titleStyle,
+          titleHeroTag: titleHeroTag,
           trailing: _mergedTrailing(),
         ),
         if (secondary != null) ...<Widget>[
@@ -110,6 +114,7 @@ class StudioPaneHeader extends StatelessWidget {
     this.showBack = true,
     this.onBack,
     this.titleStyle,
+    this.titleHeroTag,
   });
 
   final String title;
@@ -118,6 +123,7 @@ class StudioPaneHeader extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
   final TextStyle? titleStyle;
+  final String? titleHeroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +138,7 @@ class StudioPaneHeader extends StatelessWidget {
         return null;
       }
       return IconButton(
-        padding: const EdgeInsets.only(left: 0, right: 8),
+        padding: const EdgeInsets.only(left: 0, right: StudioSpacing.xs),
         constraints: const BoxConstraints(
           minWidth: StudioSpacing.iconTouchTarget + 4,
           minHeight: StudioSpacing.iconTouchTarget + 4,
@@ -165,13 +171,17 @@ class StudioPaneHeader extends StatelessWidget {
       );
     }
 
+    final titleWidget = StudioHero(
+      tag: titleHeroTag,
+      child: Text(title, style: resolvedTitleStyle),
+    );
     final titleBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(title, style: resolvedTitleStyle),
+        titleWidget,
         if (subtitle != null) ...<Widget>[
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           StudioEllipsisTooltipText(
             text: subtitle!,
             style: studioHintStyle(context),
@@ -196,7 +206,7 @@ class StudioPaneHeader extends StatelessWidget {
               ?backButton,
               Expanded(child: titleBlock),
               if (trailing != null) ...<Widget>[
-                const SizedBox(width: 12),
+                const SizedBox(width: StudioSpacing.radiusComfort),
                 Flexible(
                   fit: FlexFit.loose,
                   child: Align(

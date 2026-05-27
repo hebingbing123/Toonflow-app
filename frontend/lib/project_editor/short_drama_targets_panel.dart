@@ -134,7 +134,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +228,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
             ),
           ),
           if (_line != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(_line!, style: theme.textTheme.bodySmall),
           ],
         ],

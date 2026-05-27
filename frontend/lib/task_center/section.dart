@@ -8,11 +8,10 @@ import '../config.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_pane_scaffold.dart';
-import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
-import '../design_system/ix/studio_api_error_callout.dart';
 import '../platform/studio_load_state.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
@@ -129,44 +128,19 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
     );
   }
 
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: DecoratedBox(
-          decoration: studioInsetPanelDecoration(context),
-          child: const Padding(
-            padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                StudioSkeleton(height: 18),
-                SizedBox(height: StudioSpacing.sm),
-                StudioSkeleton(height: 56),
-                SizedBox(height: StudioSpacing.sm),
-                StudioSkeleton(height: 56),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildStudioMainBody(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (widget.taskApiLoadState == StudioLoadState.error) {
-      return const SizedBox.shrink();
-    }
-    if (widget.taskApiLoadState == StudioLoadState.initial ||
-        widget.taskApiLoadState == StudioLoadState.loading ||
-        widget.loadingTaskApi) {
-      return _buildStudioLoadingBody(context);
-    }
     final jobs = widget.taskApiJobs ?? const <JobRow>[];
-    if (jobs.isEmpty) {
-      return Center(
+    return StudioAsyncDataView(
+      loadState: resolveStudioPaneLoadState(
+        reported: widget.taskApiLoadState,
+        busy: widget.loadingTaskApi,
+        hasData: jobs.isNotEmpty,
+      ),
+      error: widget.taskApiLastError,
+      onRetry: widget.onLoadTaskApi,
+      scrollableLoading: true,
+      empty: Center(
         child: SingleChildScrollView(
           child: StudioEmptyState.emptyData(
             title: l10n.taskCenterJobsEmpty,
@@ -176,17 +150,17 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
             onAction: widget.onLoadTaskApi,
           ),
         ),
-      );
-    }
-    return SingleChildScrollView(
-      child: DecoratedBox(
-        decoration: studioInsetPanelDecoration(context),
-        child: Padding(
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
-          child: TaskCenterJobsPreview(
-            jobs: jobs,
-            showCountHeader: false,
-            onSelectTaskJob: widget.onSelectTaskJob,
+      ),
+      child: SingleChildScrollView(
+        child: DecoratedBox(
+          decoration: studioInsetPanelDecoration(context),
+          child: Padding(
+            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+            child: TaskCenterJobsPreview(
+              jobs: jobs,
+              showCountHeader: false,
+              onSelectTaskJob: widget.onSelectTaskJob,
+            ),
           ),
         ),
       ),
@@ -287,17 +261,10 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
         children: <Widget>[
           _buildStudioHeader(context),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
-          if (widget.taskApiLoadState == StudioLoadState.error &&
-              widget.taskApiLastError != null)
-            StudioApiErrorCallout(
-              error: widget.taskApiLastError!,
-              onRetry: widget.onLoadTaskApi,
-            )
-          else
-            StudioPaneScaffold(
-              body: _buildStudioMainBody(context),
-              footer: _buildStudioFooter(context),
-            ),
+          StudioPaneScaffold(
+            body: _buildStudioMainBody(context),
+            footer: _buildStudioFooter(context),
+          ),
         ],
       );
     }
@@ -323,14 +290,8 @@ class _TaskCenterSectionState extends State<TaskCenterSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ...header,
-        const SizedBox(height: 8),
-        if (widget.taskApiLoadState == StudioLoadState.error &&
-            widget.taskApiLastError != null)
-          StudioApiErrorCallout(
-            error: widget.taskApiLastError!,
-            onRetry: widget.onLoadTaskApi,
-          )
-        else if (widget.taskApiLoadState == StudioLoadState.initial &&
+        const SizedBox(height: StudioSpacing.xs),
+        if (widget.taskApiLoadState == StudioLoadState.initial &&
             widget.taskApiJobs == null)
           StudioEmptyState(
             title: l10n.taskCenterTaskListNotLoaded,

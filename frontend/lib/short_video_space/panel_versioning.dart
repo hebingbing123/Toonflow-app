@@ -242,6 +242,7 @@ class PanelConsistencyAlert extends StatelessWidget {
     IconData icon;
 
     final tokens = StudioTokens.of(context);
+    final theme = Theme.of(context);
     switch (severity) {
       case StaleSeverity.info:
         backgroundColor = tokens.signal.withValues(alpha: 0.14);
@@ -288,16 +289,19 @@ class PanelConsistencyAlert extends StatelessWidget {
                   style: studioAccentBannerBodyStyle(context, textColor),
                 ),
                 if (status.stalePanels.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   ...status.stalePanels.map(
                     (p) => Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 2),
+                      padding: const EdgeInsets.only(
+                        left: StudioSpacing.xs,
+                        top: StudioSpacing.radiusHairline,
+                      ),
                       child: Text(
                         l10n.shortVideoPanelVersionStaleRow(
                           shortVideoPanelVersionPanelTitle(l10n, p.panel),
                           PanelVersionManager.formatAge(p.ageSeconds, l10n),
                         ),
-                        style: TextStyle(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: textColor.withValues(alpha: 0.8),
                           fontSize: StudioTypography.of(context).meta,
                         ),
@@ -316,7 +320,7 @@ class PanelConsistencyAlert extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: textColor,
               foregroundColor: backgroundColor,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.radiusComfort, vertical: StudioSpacing.xs),
               textStyle: studioAccentBannerBodyStyle(context, textColor),
             ),
           ),

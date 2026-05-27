@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 
 /// Six-step SOP ring on project cards (0–6 completed segments).
@@ -11,17 +12,26 @@ class StudioStepProgressRing extends StatelessWidget {
     required this.completedSteps,
     this.size = 44,
     this.strokeWidth = 4,
+    this.heroTag,
   });
 
   final int completedSteps;
   final double size;
   final double strokeWidth;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final theme = Theme.of(context);
     final done = completedSteps.clamp(0, 6);
-    return SizedBox(
+    final label = '$done/6';
+    final labelStyle = theme.textTheme.labelLarge?.copyWith(
+      fontSize: size * 0.26,
+      fontWeight: FontWeight.w600,
+      color: tokens.textSecondary,
+    );
+    Widget ring = SizedBox(
       width: size,
       height: size,
       child: CustomPaint(
@@ -34,17 +44,15 @@ class StudioStepProgressRing extends StatelessWidget {
           strokeWidth: strokeWidth,
         ),
         child: Center(
-          child: Text(
-            '$done/6',
-            style: TextStyle(
-              fontSize: size * 0.26,
-              fontWeight: FontWeight.w600,
-              color: tokens.textSecondary,
-            ),
+          child: StudioAnimatedNumber(
+            value: label,
+            style: labelStyle,
           ),
         ),
       ),
     );
+    ring = StudioHero(tag: heroTag, child: ring);
+    return ring;
   }
 }
 

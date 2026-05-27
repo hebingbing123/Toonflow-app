@@ -28,14 +28,22 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
           scopeHint,
           style: studioHintStyle(context),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         SizedBox(
-          height: 280,
+          height: studioAdaptiveDialogHeight(
+            context,
+            fraction: 0.38,
+            min: 200,
+            max: 360,
+          ),
           child: ListView.builder(
             itemCount: scopedAssets.length,
             itemBuilder: (context, index) {
               final asset = scopedAssets[index];
-              return CheckboxListTile(
+              return studioStaggeredItem(
+                index,
+                entranceKey: scopedAssets.length,
+                child: StudioCheckboxListRow(
                 dense: true,
                 value: selectedIds.contains(asset.numericId),
                 onChanged: busy
@@ -53,6 +61,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
+              ),
               );
             },
           ),

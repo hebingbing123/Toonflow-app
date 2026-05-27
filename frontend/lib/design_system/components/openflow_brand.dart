@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../studio_platform_image.dart';
 import '../theme.dart';
 import '../tokens.dart';
 
-const _kOpenFlowGlyphAsset = 'assets/brand/openflow_glyph.png';
+const _kOpenFlowGlyphBaseName = 'openflow_glyph.png';
 
 /// Shared OpenFlow brand mark for app chrome and login surfaces.
 class OpenFlowBrandMark extends StatelessWidget {
@@ -41,8 +42,9 @@ class OpenFlowBrandMark extends StatelessWidget {
         dimension: size,
         child: Padding(
           padding: EdgeInsets.all(size * (1 - iconScale) / 2),
-          child: Image.asset(
-            _kOpenFlowGlyphAsset,
+          child: StudioPlatformImage(
+            baseName: _kOpenFlowGlyphBaseName,
+            fit: BoxFit.contain,
             filterQuality: FilterQuality.high,
           ),
         ),

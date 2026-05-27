@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -32,7 +33,7 @@ class ArtStepReadinessCard extends StatelessWidget {
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(StudioSpacing.radiusCard),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -48,7 +49,9 @@ class ArtStepReadinessCard extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(
+                      StudioSpacing.radiusDense,
+                    ),
                     child: LinearProgressIndicator(
                       value: score / 100,
                       minHeight: 6,
@@ -56,7 +59,7 @@ class ArtStepReadinessCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: StudioSpacing.radiusComfort),
                 Text(
                   '$score%',
                   style: theme.textTheme.labelLarge?.copyWith(
@@ -84,14 +87,17 @@ class ArtStepReadinessCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: StudioSpacing.sm),
-            ...home.onboarding.checklist.map(
-              (item) => _ChecklistRow(
-                item: item,
-                l10n: l10n,
-                onTap: item.done || onChecklistItemTap == null
-                    ? null
-                    : () => onChecklistItemTap!(item.key),
+            ...studioStaggeredChildren(
+              home.onboarding.checklist.map(
+                (item) => _ChecklistRow(
+                  item: item,
+                  l10n: l10n,
+                  onTap: item.done || onChecklistItemTap == null
+                      ? null
+                      : () => onChecklistItemTap!(item.key),
+                ),
               ),
+              entranceKey: home.onboarding.checklist.length,
             ),
           ],
         ),
@@ -119,7 +125,7 @@ class _ChecklistRow extends StatelessWidget {
     final tappable = onTap != null;
 
     final content = Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -130,7 +136,7 @@ class _ChecklistRow extends StatelessWidget {
             size: 20,
             color: item.done ? tokens.success : tokens.textSecondary,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: StudioSpacing.radiusComfort),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,11 +179,11 @@ class _ChecklistRow extends StatelessWidget {
     }
 
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
         key: Key('studio_art_checklist_${item.key}'),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         child: content,
       ),
     );

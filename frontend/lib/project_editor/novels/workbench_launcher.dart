@@ -197,11 +197,11 @@ Future<void> openNovelWorkbenchDialog({
                         local.infoLine,
                         style: Theme.of(dialogCtx).textTheme.bodySmall,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       if (local.previewRows.isNotEmpty)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                           decoration: studioInsetPanelDecoration(dialogCtx),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,10 +210,10 @@ Future<void> openNovelWorkbenchDialog({
                                 l10n.projectEditorNovelsChapterWorkbenchPreviewTitle,
                                 style: Theme.of(dialogCtx).textTheme.labelLarge,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: StudioSpacing.xs),
                               ...local.previewRows.map(
                                 (row) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
+                                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                                   child: Text(
                                     l10n.projectEditorNovelsChapterWorkbenchPreviewRow(
                                       row.numericId,
@@ -260,7 +260,7 @@ Future<void> openNovelWorkbenchDialog({
                           );
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildImportSection(
                         l10n: l10n,
                         ctx: dialogCtx,
@@ -296,7 +296,7 @@ Future<void> openNovelWorkbenchDialog({
                           setLocalState(() => local.crawlAuthOverride = value);
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildCreateSection(
                         l10n: l10n,
                         ctx: dialogCtx,
@@ -315,7 +315,7 @@ Future<void> openNovelWorkbenchDialog({
                         patchBodyCtrl: ctrls.patchBodyCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildEditSection(
                         l10n: l10n,
                         ctx: dialogCtx,
@@ -336,7 +336,7 @@ Future<void> openNovelWorkbenchDialog({
                         patchIntakeNoteCtrl: ctrls.patchIntakeNoteCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildDeleteSection(
                         l10n: l10n,
                         ctx: dialogCtx,
@@ -352,7 +352,7 @@ Future<void> openNovelWorkbenchDialog({
                         generateIdsCtrl: ctrls.generateIdsCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       buildSnapshotSection(
                         l10n: l10n,
                         ctx: dialogCtx,

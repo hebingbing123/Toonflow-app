@@ -19349,6 +19349,15 @@ paths:
         schema:
           format: int32
           type: integer
+      - description: Optional longest edge in pixels when serving locally stored PNG (64–4096). Ignored for HTTP(S) redirects.
+        in: query
+        name: max_edge
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 64
+          maximum: 4096
       responses:
         '200':
           content:

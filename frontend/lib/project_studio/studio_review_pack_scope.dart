@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../demo/studio_demo_data.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/components/studio_toolbar_button.dart';
-import '../design_system/ix/studio_api_error_callout.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../rust_api/project/overview_api.dart';
 import '../rust_api/project/overview_models.dart';
 import '../rust_api/project/overview_models_assembly.dart';
@@ -225,7 +228,9 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     } finally {
       if (mounted) {
@@ -267,75 +272,6 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
         widget.projectName ??
         l10n.projectsUnnamedProject(widget.projectNumericId);
 
-    if (_loading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.studioReviewPackTitle),
-          actions: <Widget>[
-            IconButton(
-              tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-              onPressed: () => _load(isRetry: true),
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
-          leading: IconButton(
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(
-              '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',
-            ),
-          ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                l10n.studioReviewPackLoading,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: StudioTokens.of(context).textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.studioReviewPackTitle),
-          actions: <Widget>[
-            IconButton(
-              tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-              onPressed: () => _load(isRetry: true),
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
-          leading: IconButton(
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go(
-              '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',
-            ),
-          ),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: StudioApiErrorCallout(
-              error: _error!,
-              onRetry: () => _load(isRetry: true),
-              showDiagnostic: false,
-            ),
-          ),
-        ),
-      );
-    }
-
     final readiness = _readiness;
     final rows = readiness?.storyboards ?? const <StoryboardShortVideoReadiness>[];
     final rollup = readiness?.rollup;
@@ -346,6 +282,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(l10n.studioReviewPackTitle),
         actions: <Widget>[
@@ -363,11 +300,17 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
           ),
         ),
       ),
-      body: Column(
+      body: StudioAsyncDataView(
+        loading: _loading,
+        error: _error,
+        onRetry: () => _load(isRetry: true),
+        loadingPlaceholder: StudioLoadingPlaceholder.list,
+        loadingItemCount: 4,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.radiusComfort, StudioSpacing.sm, StudioSpacing.xs),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -385,7 +328,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                   ),
                 ),
                 if (rollup != null || production != null) ...<Widget>[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.studioReviewPackRollupLine(
                       production?.readyStoryboardCount ??
@@ -411,10 +354,10 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
           if (rows.isNotEmpty)
             StudioReviewPackTeamSummary(rollup: feedbackRollup),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm),
             child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: <Widget>[
                 StudioToolbarButton(
                   label: l10n.studioReviewPackOpenAssembly,
@@ -431,12 +374,12 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Expanded(
             child: rows.isEmpty
                 ? Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(StudioSpacing.md),
                       child: StudioEmptyState.emptyData(
                         title: l10n.studioReviewPackEmpty,
                         icon: Icons.movie_filter_outlined,
@@ -444,21 +387,26 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, 0, StudioSpacing.sm, StudioSpacing.md),
                     itemCount: rows.length,
                     separatorBuilder: (_, _) => const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     itemBuilder: (context, index) {
                       final row = rows[index];
-                      return StudioReviewPackStoryboardRow(
-                        row: row,
-                        projectNumericId: widget.projectNumericId,
-                        feedback: _feedbackByStoryboard[row.storyboardNumericId],
-                        onSubmitFeedback: _submitReviewPackFeedback,
+                      return studioStaggeredItem(
+                        index,
+                        entranceKey: rows.length,
+                        child: StudioReviewPackStoryboardRow(
+                          row: row,
+                          projectNumericId: widget.projectNumericId,
+                          feedback: _feedbackByStoryboard[row.storyboardNumericId],
+                          onSubmitFeedback: _submitReviewPackFeedback,
+                        ),
                       );
                     },
                   ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -62,10 +62,10 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.primary.withValues(alpha: 0.45)),
       ),
       child: Column(
@@ -124,8 +124,8 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
           ],
           const SizedBox(height: StudioSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: <Widget>[
               FilledButton.icon(
                 style: studioFormIconLabeledButtonStyle(context),
@@ -172,7 +172,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
         resolveNovelCrawlInAppLoginPlatform() == NovelCrawlInAppLoginPlatform.web;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
       child: Material(
         color: tokens.primarySoft.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -188,7 +188,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
                   size: 18,
                   color: tokens.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
                     l10n.studioNovelCrawlAuthWebGuideCollapsed,

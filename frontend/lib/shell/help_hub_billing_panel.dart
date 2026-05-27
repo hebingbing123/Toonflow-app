@@ -425,7 +425,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
     );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Builder(
         builder: (context) {
           final viewportWidth = MediaQuery.sizeOf(context).width;
@@ -444,7 +444,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                 l10n.billingAuditTitle,
                 style: studioCardTitleStyle(context),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioCollapsibleFilterPanel(
                 subtitle: filterSummary.isEmpty ? null : filterSummary,
                 child: Column(
@@ -538,7 +538,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: _billingEventTypeController,
                       decoration: InputDecoration(
@@ -547,7 +547,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: _billingProviderEventIdController,
                       decoration: InputDecoration(
@@ -556,7 +556,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: _billingRawEventIdController,
                       decoration: InputDecoration(
@@ -565,7 +565,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: _billingProviderEventIdPrefixController,
                       decoration: InputDecoration(
@@ -574,7 +574,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: _billingRawEventIdPrefixController,
                       decoration: InputDecoration(
@@ -583,7 +583,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioFilterRow(
                       wideLayout: StudioFilterWideLayout.wrap,
                       wideBreakpoint: 720,
@@ -635,7 +635,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioFilterRow(
                       wideLayout: StudioFilterWideLayout.wrap,
                       wideBreakpoint: 560,
@@ -739,15 +739,19 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              if (_loadingBillingEvents) Text(l10n.billingAuditLoading),
-              if (_billingEventsError != null)
-                Text(
-                  _billingEventsError == kProductShellSignInErrorPlaceholder
-                      ? l10n.platformConfigPleaseSignIn
-                      : _billingEventsError!,
-                  style: TextStyle(color: StudioTokens.of(context).danger),
-                ),
+              const SizedBox(height: StudioSpacing.xs),
+              StudioAsyncDataView(
+                loading: _loadingBillingEvents,
+                error: _billingEventsError == kProductShellSignInErrorPlaceholder
+                    ? l10n.platformConfigPleaseSignIn
+                    : _billingEventsError,
+                onRetry: _loadBillingEvents,
+                loadingPlaceholder: StudioLoadingPlaceholder.list,
+                loadingItemCount: 2,
+                scrollableLoading: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
               if (_billingEventsPage != null)
                 Text(
                   l10n.billingAuditPageStats(
@@ -762,15 +766,15 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               if (_billingEvents.isNotEmpty) ...<Widget>[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.billingAuditCurrentLoadTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   children: <Widget>[
                     ...(_billingEventCountsByProvider(l10n).entries.toList()
                           ..sort((a, b) => b.value.compareTo(a.value)))
@@ -801,10 +805,10 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   children: <Widget>[
                     ...(_billingEventCountsByType(l10n).entries.toList()
                           ..sort((a, b) => b.value.compareTo(a.value)))
@@ -826,9 +830,9 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
               ],
               ..._billingEvents.map(
                 (item) => Card(
-                  margin: const EdgeInsets.only(top: 8),
+                  margin: const EdgeInsets.only(top: StudioSpacing.xs),
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -844,9 +848,9 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             l10n.billingRowRawEventId(item.rawEventId!),
                           ),
                         SelectableText(l10n.billingRowId('${item.id}')),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioDenseActionRow(
-                          spacing: 8,
+                          spacing: StudioSpacing.xs,
                           children: <Widget>[
                             OutlinedButton(
                               style: studioFormSecondaryButtonStyle(context),
@@ -908,7 +912,7 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                 ),
               ),
               if (_billingEventsPage?.hasMore == true) ...<Widget>[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton(
@@ -924,6 +928,9 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                   ),
                 ),
               ],
+                  ],
+                ),
+              ),
             ],
           );
         },

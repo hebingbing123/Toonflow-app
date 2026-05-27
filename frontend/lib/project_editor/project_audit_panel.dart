@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class ProjectAuditPanel extends StatefulWidget {
   const ProjectAuditPanel({
@@ -129,7 +134,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -158,7 +163,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               wideBreakpoint: 640,
               children: <Widget>[
                 SizedBox(
-                  width: 200,
+                  width: studioAdaptiveFieldWidth(context, max: 280, min: 180),
                   child: StudioDropdownButtonFormField<String>(
                     initialValue: _actionFilter ?? '',
                     decoration: InputDecoration(
@@ -222,38 +227,41 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _error!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ),
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (filtered.isEmpty)
-            StudioEmptyState.emptyData(
+          StudioAsyncDataView(
+            loading: _loading,
+            error: _error,
+            onRetry: _reload,
+            loadingPlaceholder: StudioLoadingPlaceholder.list,
+            loadingItemCount: 3,
+            scrollableLoading: false,
+            isEmpty: filtered.isEmpty,
+            empty: StudioEmptyState.emptyData(
               title: l10n.projectEditorAuditEmpty,
               icon: Icons.fact_check_outlined,
-            )
-          else
-            ...filtered.map(
-              (row) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: Text(projectAuditActionLabel(l10n, row.action)),
-                subtitle: Text(
-                  '${row.createdAt.toLocal().toIso8601String()}\n${buildProjectAuditSummary(row)}',
-                ),
-              ),
             ),
-          const SizedBox(height: 8),
+            child: Column(
+              children: filtered
+                  .map(
+                    (row) => StudioListRow(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onCopy: () async {
+                        final text =
+                            '${projectAuditActionLabel(l10n, row.action)}\n'
+                            '${row.createdAt.toLocal().toIso8601String()}\n'
+                            '${buildProjectAuditSummary(row)}';
+                        await Clipboard.setData(ClipboardData(text: text));
+                      },
+                      title: Text(projectAuditActionLabel(l10n, row.action)),
+                      subtitle: Text(
+                        '${row.createdAt.toLocal().toIso8601String()}\n${buildProjectAuditSummary(row)}',
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ),
+          const SizedBox(height: StudioSpacing.xs),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

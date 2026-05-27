@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import '../../design_system/studio_responsive_layout.dart';
 import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class CornerScapeWorkbenchDialogViewModel {
   const CornerScapeWorkbenchDialogViewModel({
@@ -92,9 +96,9 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     ? null
                     : (_) => callbacks.onRefresh(),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton(
                     style: studioFormPrimaryButtonStyle(context),
@@ -118,7 +122,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               if (model.summaryLine != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   model.summaryLine!,
                   style: Theme.of(context).textTheme.bodySmall,
@@ -138,32 +142,47 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                         icon: Icons.photo_library_outlined,
                       )
               else ...[
-                SizedBox(
-                  height: 180,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final listHeight = studioAspectHeightFromWidth(
+                      constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                          ? constraints.maxWidth
+                          : 360,
+                      min: 140,
+                      max: 240,
+                    );
+                    return SizedBox(
+                  height: listHeight,
                   child: ListView.builder(
                     itemCount: model.assets.length,
                     itemBuilder: (context, index) {
                       final item = model.assets[index];
                       final selectedFlag =
                           item.numericId == model.selectedAssetNumericId;
-                      return ListTile(
-                        dense: true,
-                        selected: selectedFlag,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          '#${item.numericId} ${item.name}',
-                          overflow: TextOverflow.ellipsis,
+                      return studioStaggeredItem(
+                        index,
+                        entranceKey: model.assets.length,
+                        child: StudioListRow(
+                          dense: true,
+                          selected: selectedFlag,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            '#${item.numericId} ${item.name}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            '${item.assetType} · history_images=${item.historyImages.length}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () => callbacks.onAssetSelected(item.numericId),
                         ),
-                        subtitle: Text(
-                          '${item.assetType} · history_images=${item.historyImages.length}',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: () => callbacks.onAssetSelected(item.numericId),
                       );
                     },
                   ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 if (model.selectedAsset != null &&
                     model.selectedAsset!.historyImages.isNotEmpty)
                   StudioDropdownButtonFormField<String>(
@@ -197,7 +216,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                   ),
                   ),
                 if (model.selectedImage != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.projectEditorAssetHistoryCurrentImage(
                       model.selectedImage!.sortIndex,
@@ -206,32 +225,45 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
-                const SizedBox(height: 8),
-                if (model.loadingPreview)
-                  const SizedBox(
-                    height: 140,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (model.selectedPreviewBytes != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-                    child: Image.memory(
-                      model.selectedPreviewBytes!,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      gaplessPlayback: true,
-                    ),
-                  )
-                else
-                  Text(
-                    l10n.projectEditorAssetHistoryNoPreview,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(
-                    color: studioPanelMutedColor(context),
-                  ),
-                  ),
+                const SizedBox(height: StudioSpacing.xs),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final previewHeight = studioPreviewImageHeight(
+                      constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                          ? constraints.maxWidth
+                          : 280,
+                      fraction: 0.55,
+                      min: 120,
+                      max: 220,
+                    );
+                    if (model.loadingPreview) {
+                      return SizedBox(
+                        height: previewHeight,
+                        child: const StudioMediaTileSkeleton(),
+                      );
+                    }
+                    if (model.selectedPreviewBytes == null) {
+                      return Text(
+                        l10n.projectEditorAssetHistoryNoPreview,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: studioPanelMutedColor(context),
+                        ),
+                      );
+                    }
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusDense,
+                      ),
+                      child: Image.memory(
+                        model.selectedPreviewBytes!,
+                        height: previewHeight,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                      ),
+                    );
+                  },
+                ),
               ],
             ],
           ),

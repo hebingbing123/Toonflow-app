@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../demo/studio_demo_data.dart';
-import '../design_system/components/studio_card.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
@@ -317,7 +317,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   ) {
     return Container(
       key: _styleFormKey,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -334,7 +334,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             enabled: !_saving,
             onChanged: (value) => setState(() => _draftArtPack = value),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           StylePackPickerField(
             label: l10n.projectEditorBasicsLabelStoryStylePack,
             options: catalog.storyPacks,
@@ -343,7 +343,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             enabled: !_saving,
             onChanged: (value) => setState(() => _draftStoryPack = value),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             enabled: !_saving,
             controller: _artStyleCtrl,
@@ -353,7 +353,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             ),
             onChanged: (value) => setState(() => _draftArtStyle = value),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.studioArtStepApplyFootnote,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -378,19 +378,8 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
         final wide = constraints.maxWidth >= 900;
         final maxWidth = wide ? 1040.0 : 720.0;
 
-        Widget catalogBody;
-        if (_loadingCatalog) {
-          catalogBody = const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        } else if (_catalogError != null) {
-          catalogBody = _ErrorCard(
-            message: _catalogError!,
-            onRetry: _loadCatalog,
-            retryLabel: l10n.studioScriptStepRetry,
-          );
-        } else if (catalog != null) {
+        final Widget catalogChild;
+        if (catalog != null) {
           final summary = _SelectedPackSummary(
             l10n: l10n,
             artPack: findArtStylePackOption(catalog.artPacks, _draftArtPack),
@@ -401,12 +390,12 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             legacyArtStyle: _draftArtStyle.trim(),
           );
           final form = _buildStyleForm(l10n, theme, tokens, catalog);
-          catalogBody = wide
+          catalogChild = wide
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(flex: 3, child: form),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: StudioSpacing.sm),
                     Expanded(flex: 2, child: summary),
                   ],
                 )
@@ -419,8 +408,14 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                   ],
                 );
         } else {
-          catalogBody = const SizedBox.shrink();
+          catalogChild = const SizedBox.shrink();
         }
+        final catalogBody = StudioAsyncDataView(
+          loading: _loadingCatalog,
+          error: _catalogError,
+          onRetry: _loadCatalog,
+          child: catalogChild,
+        );
 
         return Align(
           alignment: Alignment.topCenter,
@@ -428,7 +423,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: SingleChildScrollView(
               controller: _scrollCtrl,
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.md, StudioSpacing.sm, StudioSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
@@ -464,13 +459,13 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   if (_buildReadinessCard(l10n) case final card?) ...<Widget>[
                     card,
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                   ],
                   catalogBody,
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   StudioDenseActionRow(
                     children: <Widget>[
                       FilledButton.icon(
@@ -523,36 +518,6 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   }
 }
 
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({
-    required this.message,
-    required this.onRetry,
-    required this.retryLabel,
-  });
-
-  final String message;
-  final VoidCallback onRetry;
-  final String retryLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return StudioCard(
-      padding: const EdgeInsets.all(StudioSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(message),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(onPressed: onRetry, child: Text(retryLabel)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SelectedPackSummary extends StatelessWidget {
   const _SelectedPackSummary({
     required this.l10n,
@@ -579,7 +544,7 @@ class _SelectedPackSummary extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -591,7 +556,7 @@ class _SelectedPackSummary extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (!hasAny)
             Text(
               l10n.studioArtStepNoStylePacks,

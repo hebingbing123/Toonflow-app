@@ -13,8 +13,10 @@ import 'support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 part 'workbench_view/review_widgets.dart';
 
@@ -268,8 +270,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   model.filterAutoSourceOnly) ...[
                 const SizedBox(height: StudioSpacing.xs),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   children: [
                     if (model.filterBadCasesOnly)
                       StudioChip(label: Text(l10n.qualityReviewsOnlyBadCases)),
@@ -334,7 +336,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 l10n.qualityReviewsFilterAndReadSection,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -358,7 +360,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioCodeDropdownField(
                 width: null,
                 value: model.targetTypeFilterCtrl.text.trim(),
@@ -370,21 +372,21 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   model.targetTypeFilterCtrl.text = value;
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.targetIdFilterCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.qualityReviewsFilterTargetId,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.jobIdFilterCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.qualityReviewsFilterJobId,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -436,7 +438,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue:
                     model.suggestedActionFilterCtrl.text.trim().isEmpty
@@ -459,7 +461,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
                 children: <Widget>[
                   FilledButton.tonal(
@@ -577,14 +579,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 l10n.qualityReviewsDetailsQuerySection,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.reviewIdCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.qualityReviewsReviewId,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed: model.loadingReviewById || model.creatingReview
@@ -601,7 +603,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 l10n.qualityReviewsCreateReviewSection,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -627,7 +629,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioCodeDropdownField(
                 width: null,
                 value: model.createTargetTypeCtrl.text.trim().isEmpty
@@ -640,14 +642,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   model.createTargetTypeCtrl.text = value;
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createTargetIdCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.qualityReviewsFieldTargetId,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioCodeDropdownField(
                 width: null,
                 value: model.createSourceCtrl.text.trim().isEmpty
@@ -660,7 +662,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   model.createSourceCtrl.text = value;
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createScoreCtrl,
                 keyboardType: TextInputType.number,
@@ -668,12 +670,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.qualityReviewsFieldOverallScore,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               DimensionScoreFormWidget(
                 initialScores: model.createDimensionScores,
                 onChanged: callbacks.onCreateDimensionScoresChanged,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -709,7 +711,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createCommentsCtrl,
                 minLines: 2,
@@ -718,8 +720,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.qualityReviewsFieldComments,
                 ),
               ),
-              const SizedBox(height: 8),
-              SwitchListTile(
+              const SizedBox(height: StudioSpacing.xs),
+              StudioSwitchListRow(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.qualityReviewsFieldPassed),
                 value: model.createPassed,
@@ -727,7 +729,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ? null
                     : callbacks.onCreatePassedChanged,
               ),
-              SwitchListTile(
+              StudioSwitchListRow(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.qualityReviewsFieldIsBadCase),
                 value: model.createBadCase,
@@ -746,7 +748,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   model.createBadCaseCategoryCtrl.text = value;
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed: model.creatingReview
@@ -771,7 +773,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.selectedReview != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 DimensionScoreDisplayWidget(
                   scores: model.selectedReview!.dimensionScores,
                 ),
@@ -863,7 +865,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               ],
               if (model.loadingBadCaseStats ||
                   model.badCaseStatItems.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.qualityReviewsLoadBadCaseDistribution,
                   style: Theme.of(context).textTheme.labelLarge,
@@ -882,26 +884,29 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: StudioSpacing.xs),
-                ...model.stageGradeRows.map(
-                  (row) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      l10n.qualityReviewsStageGradeRow(
-                        _qualityStageLabel(row.stage, l10n),
-                        row.gradeACount,
-                        row.gradeBCount,
-                        row.gradeCCount,
-                        row.gradeDCount,
+                ...studioStaggeredChildren(
+                  model.stageGradeRows.map(
+                    (row) => StudioListRow(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        l10n.qualityReviewsStageGradeRow(
+                          _qualityStageLabel(row.stage, l10n),
+                          row.gradeACount,
+                          row.gradeBCount,
+                          row.gradeCCount,
+                          row.gradeDCount,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      l10n.qualityReviewsTotalAndPassRate(
-                        row.totalCount,
-                        row.passRatePercent.toStringAsFixed(1),
+                      subtitle: Text(
+                        l10n.qualityReviewsTotalAndPassRate(
+                          row.totalCount,
+                          row.passRatePercent.toStringAsFixed(1),
+                        ),
                       ),
                     ),
                   ),
+                  entranceKey: model.stageGradeRows.length,
                 ),
               ],
               if (promptDiagnosticsSummary != null) ...[
@@ -963,143 +968,159 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         ),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                const SizedBox(height: 8),
-                ...model.reviews.take(8).map((review) {
-                  final diagnosticSummary =
-                      summarizeQualityReviewPromptDiagnostics(
-                        review,
-                        l10n: l10n,
-                      );
-                  final writebackSummary =
-                      summarizeQualityReviewMemoryWriteback(review, l10n: l10n);
-                  final repairSuggestions = buildQualityReviewRepairSuggestions(
-                    review,
-                    l10n: l10n,
-                  );
-                  return InkWell(
-                    onTap: () => callbacks.onSelectReview(review),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.qualityReviewsReviewRowTitle(
-                              qualityTargetTypeLabel(review.targetType, l10n),
-                              review.source,
-                              (review.overallScore ??
-                                      l10n.qualityReviewsNotAvailable)
-                                  .toString(),
-                            ),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            [
-                              if ((review.stage ?? '').trim().isNotEmpty)
-                                l10n.qualityReviewsFilterStage(
-                                  _qualityStageLabel(
-                                    review.stage!.trim(),
-                                    l10n,
-                                  ),
-                                ),
-                              if ((review.grade ?? '').trim().isNotEmpty)
-                                l10n.qualityReviewsFilterGrade(review.grade!),
-                            ].join(' · '),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          Text(
-                            formatQualityReviewCoreDetails(review),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          if (diagnosticSummary != null)
+                const SizedBox(height: StudioSpacing.xs),
+                ...studioStaggeredChildren(
+                  model.reviews.take(8).map((review) {
+                    final diagnosticSummary =
+                        summarizeQualityReviewPromptDiagnostics(
+                          review,
+                          l10n: l10n,
+                        );
+                    final writebackSummary = summarizeQualityReviewMemoryWriteback(
+                      review,
+                      l10n: l10n,
+                    );
+                    final repairSuggestions = buildQualityReviewRepairSuggestions(
+                      review,
+                      l10n: l10n,
+                    );
+                    return InkWell(
+                      onTap: () => callbacks.onSelectReview(review),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: StudioSpacing.controlPaddingVertical,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              diagnosticSummary,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(color: muted),
-                            ),
-                          if (writebackSummary != null)
-                            Text(
-                              writebackSummary,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(color: muted),
-                            ),
-                          if (repairSuggestions.isNotEmpty)
-                            Text(
-                              l10n.qualityReviewsSuggestions(
-                                repairSuggestions.join(' / '),
+                              l10n.qualityReviewsReviewRowTitle(
+                                qualityTargetTypeLabel(review.targetType, l10n),
+                                review.source,
+                                (review.overallScore ??
+                                        l10n.qualityReviewsNotAvailable)
+                                    .toString(),
                               ),
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(color: muted),
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
-                          const SizedBox(height: 6),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              if (review.memoryDeliveryPriorityApplied == true)
-                                StudioChip(
-                                  label: Text(l10n.qualityReviewsDeliveryTag),
-                                ),
-                              if (review.source == 'auto')
-                                StudioChip(
-                                  label: Text(l10n.qualityReviewsAutoTag),
-                                ),
-                              if ((review.grade ?? '').trim().isNotEmpty)
-                                StudioChip(
-                                  label: Text(review.grade!.trim()),
-                                  backgroundColor: _qualityGradeColor(
-                                    context,
-                                    review.grade!.trim(),
-                                  ),
-                                ),
-                              if ((review.suggestedAction ?? '').trim().isNotEmpty)
-                                StudioChip(
-                                  label: Text(
-                                    _qualitySuggestedActionLabel(
-                                      review.suggestedAction!.trim(),
+                            const SizedBox(height: StudioSpacing.chromeActionGap),
+                            Text(
+                              [
+                                if ((review.stage ?? '').trim().isNotEmpty)
+                                  l10n.qualityReviewsFilterStage(
+                                    _qualityStageLabel(
+                                      review.stage!.trim(),
                                       l10n,
                                     ),
                                   ),
-                                ),
-                              if (hasDimensionRisk(review.dimensionScores))
-                                StudioChip(
-                                  label: Text(
-                                    l10n.qualityReviewsDimensionRiskBadge,
-                                  ),
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.errorContainer,
-                                ),
-                              if (writebackSummary != null)
-                                StudioChip(
-                                  label: Text(l10n.qualityReviewsMemoryTag),
-                                ),
-                              if ((review.suggestedAction ?? '').trim().isNotEmpty)
-                                IconButton(
-                                  style: studioUtilityIconButtonStyle(context),
-                                  tooltip: l10n
-                                      .qualityReviewsApplySuggestedActionTooltip,
-                                  onPressed: () =>
-                                      callbacks.onApplySuggestedAction(review),
-                                  icon: const Icon(Icons.open_in_new_rounded),
-                                ),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 20,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                if ((review.grade ?? '').trim().isNotEmpty)
+                                  l10n.qualityReviewsFilterGrade(review.grade!),
+                              ].join(' · '),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              formatQualityReviewCoreDetails(review),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (diagnosticSummary != null)
+                              Text(
+                                diagnosticSummary,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: muted),
                               ),
-                            ],
-                          ),
-                        ],
+                            if (writebackSummary != null)
+                              Text(
+                                writebackSummary,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: muted),
+                              ),
+                            if (repairSuggestions.isNotEmpty)
+                              Text(
+                                l10n.qualityReviewsSuggestions(
+                                  repairSuggestions.join(' / '),
+                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: muted),
+                              ),
+                            const SizedBox(height: StudioSpacing.xs),
+                            Wrap(
+                              spacing: StudioSpacing.xs,
+                              runSpacing: StudioSpacing.chromeActionGap,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: studioStaggeredChildren(
+                                [
+                                  if (review.memoryDeliveryPriorityApplied == true)
+                                    StudioChip(
+                                      label: Text(l10n.qualityReviewsDeliveryTag),
+                                    ),
+                                  if (review.source == 'auto')
+                                    StudioChip(
+                                      label: Text(l10n.qualityReviewsAutoTag),
+                                    ),
+                                  if ((review.grade ?? '').trim().isNotEmpty)
+                                    StudioChip(
+                                      label: Text(review.grade!.trim()),
+                                      backgroundColor: _qualityGradeColor(
+                                        context,
+                                        review.grade!.trim(),
+                                      ),
+                                    ),
+                                  if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                                    StudioChip(
+                                      label: Text(
+                                        _qualitySuggestedActionLabel(
+                                          review.suggestedAction!.trim(),
+                                          l10n,
+                                        ),
+                                      ),
+                                    ),
+                                  if (hasDimensionRisk(review.dimensionScores))
+                                    StudioChip(
+                                      label: Text(
+                                        l10n.qualityReviewsDimensionRiskBadge,
+                                      ),
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .errorContainer,
+                                    ),
+                                  if (writebackSummary != null)
+                                    StudioChip(
+                                      label: Text(l10n.qualityReviewsMemoryTag),
+                                    ),
+                                  if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                                    IconButton(
+                                      style: studioUtilityIconButtonStyle(context),
+                                      tooltip: l10n
+                                          .qualityReviewsApplySuggestedActionTooltip,
+                                      onPressed: () =>
+                                          callbacks.onApplySuggestedAction(review),
+                                      icon: const Icon(Icons.open_in_new_rounded),
+                                    ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 20,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                                ],
+                                entranceKey: review.hashCode,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                  entranceKey:
+                      '${model.reviews.length}:${activeFilters.join("|")}',
+                ),
               ] else if (activeFilters.isNotEmpty) ...[
                 const SizedBox(height: StudioLayoutSpacing.listItem),
                 StudioEmptyState.noResults(

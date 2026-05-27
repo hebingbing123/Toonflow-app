@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../tokens.dart';
 import 'studio_text_styles.dart';
 
 /// Collapsible filter / action toolbar for Studio list panes.
@@ -42,7 +43,7 @@ class StudioCollapsibleFilterPanel extends StatelessWidget {
         key: const Key('studio_collapsible_filter_panel'),
         initiallyExpanded: initiallyExpanded,
         tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 8),
+        childrenPadding: const EdgeInsets.only(bottom: StudioSpacing.xs),
         title: Text(panelTitle),
         subtitle: summary != null && summary.isNotEmpty
             ? Text(

@@ -217,11 +217,11 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                 : dl10n.helpHubManageWorkspaceLocked),
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       if (canManageWorkspace)
                         Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                          spacing: StudioSpacing.xs,
+                          runSpacing: StudioSpacing.xs,
                           children: [
                             StudioFilterChip(
                               label: Text(dl10n.helpHubTabPersonal),
@@ -241,7 +241,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             ),
                           ],
                         ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       TextField(
                         controller: _helpHubNewIdController,
                         decoration: InputDecoration(
@@ -250,7 +250,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                         ),
                         enabled: !_savingHelpHubLinks,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: _helpHubNewTitleController,
                         decoration: InputDecoration(
@@ -258,7 +258,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                         ),
                         enabled: !_savingHelpHubLinks,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: _helpHubNewUrlController,
                         decoration: InputDecoration(
@@ -267,9 +267,9 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                         ),
                         enabled: !_savingHelpHubLinks,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioDenseActionRow(
-                        spacing: 8,
+                        spacing: StudioSpacing.xs,
                         children: [
                           FilledButton.tonal(
                             style: studioFormTonalButtonStyle(ctx),
@@ -279,88 +279,103 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                           if (errorText.isNotEmpty)
                             Text(
                               errorText,
-                              style: TextStyle(
+                              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
                                 color: StudioTokens.of(ctx).danger,
                               ),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       if (activeItems.isEmpty)
                         StudioEmptyState.emptyData(
                           title: dl10n.helpHubNoCustomInScope,
                           icon: Icons.link_off_outlined,
                         ),
-                      ...activeItems.asMap().entries.map((entry) {
-                        final idx = entry.key;
-                        final item = entry.value;
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${item.title} (${item.id})',
-                                        style: Theme.of(
-                                          ctx,
-                                        ).textTheme.titleSmall,
-                                      ),
-                                      const SizedBox(height: StudioLayoutSpacing.titleTight),
-                                      SelectableText(item.url),
-                                    ],
+                      ...studioStaggeredChildren(
+                        activeItems.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final item = entry.value;
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                StudioSpacing.radiusComfort,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${item.title} (${item.id})',
+                                          style: Theme.of(ctx)
+                                              .textTheme
+                                              .titleSmall,
+                                        ),
+                                        const SizedBox(
+                                          height:
+                                              StudioLayoutSpacing.titleTight,
+                                        ),
+                                        SelectableText(item.url),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  style: studioUtilityIconButtonStyle(ctx),
-                                  tooltip: dl10n
-                                      .notificationsComplianceTooltipMoveUp,
-                                  onPressed: (_savingHelpHubLinks || idx == 0)
-                                      ? null
-                                      : () => setInner(() {
-                                          final tmp = activeItems[idx - 1];
-                                          activeItems[idx - 1] =
-                                              activeItems[idx];
-                                          activeItems[idx] = tmp;
-                                        }),
-                                  icon: const Icon(Icons.arrow_upward),
-                                ),
-                                IconButton(
-                                  style: studioUtilityIconButtonStyle(ctx),
-                                  tooltip: dl10n
-                                      .notificationsComplianceTooltipMoveDown,
-                                  onPressed:
-                                      (_savingHelpHubLinks ||
-                                          idx >= activeItems.length - 1)
-                                      ? null
-                                      : () => setInner(() {
-                                          final tmp = activeItems[idx + 1];
-                                          activeItems[idx + 1] =
-                                              activeItems[idx];
-                                          activeItems[idx] = tmp;
-                                        }),
-                                  icon: const Icon(Icons.arrow_downward),
-                                ),
-                                IconButton(
-                                  style: studioUtilityIconButtonStyle(ctx),
-                                  tooltip: dl10n.notificationsActionDelete,
-                                  onPressed: _savingHelpHubLinks
-                                      ? null
-                                      : () => setInner(() {
-                                          activeItems.removeAt(idx);
-                                        }),
-                                  icon: const Icon(Icons.delete_outline),
-                                ),
-                              ],
+                                  const SizedBox(width: StudioSpacing.xs),
+                                  IconButton(
+                                    style:
+                                        studioUtilityIconButtonStyle(ctx),
+                                    tooltip: dl10n
+                                        .notificationsComplianceTooltipMoveUp,
+                                    onPressed: (_savingHelpHubLinks ||
+                                            idx == 0)
+                                        ? null
+                                        : () => setInner(() {
+                                              final tmp =
+                                                  activeItems[idx - 1];
+                                              activeItems[idx - 1] =
+                                                  activeItems[idx];
+                                              activeItems[idx] = tmp;
+                                            }),
+                                    icon: const Icon(Icons.arrow_upward),
+                                  ),
+                                  IconButton(
+                                    style:
+                                        studioUtilityIconButtonStyle(ctx),
+                                    tooltip: dl10n
+                                        .notificationsComplianceTooltipMoveDown,
+                                    onPressed: (_savingHelpHubLinks ||
+                                            idx >=
+                                                activeItems.length - 1)
+                                        ? null
+                                        : () => setInner(() {
+                                              final tmp =
+                                                  activeItems[idx + 1];
+                                              activeItems[idx + 1] =
+                                                  activeItems[idx];
+                                              activeItems[idx] = tmp;
+                                            }),
+                                    icon: const Icon(Icons.arrow_downward),
+                                  ),
+                                  IconButton(
+                                    style:
+                                        studioUtilityIconButtonStyle(ctx),
+                                    tooltip:
+                                        dl10n.notificationsActionDelete,
+                                    onPressed: _savingHelpHubLinks
+                                        ? null
+                                        : () => setInner(() {
+                                              activeItems.removeAt(idx);
+                                            }),
+                                    icon: const Icon(Icons.delete_outline),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                        entranceKey: activeItems.length,
+                      ),
                     ],
                   ),
                 ),
@@ -474,7 +489,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
     final filteredHelpHubLinks = _filteredHelpHubLinks();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -492,12 +507,12 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.helpHubLocalRiskLine,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioCollapsibleFilterPanel(
             child: StudioFilterRow(
               wideLayout: StudioFilterWideLayout.toolbarRow,
@@ -518,22 +533,25 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          if (_loading) Text(l10n.helpHubLoading),
-          if (_error != null)
-            Text(
-              _error == kProductShellSignInErrorPlaceholder
-                  ? l10n.platformConfigPleaseSignIn
-                  : _error!,
-              style: TextStyle(color: StudioTokens.of(context).danger),
-            ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
+          StudioAsyncDataView(
+            loading: _loading,
+            error: _error == kProductShellSignInErrorPlaceholder
+                ? l10n.platformConfigPleaseSignIn
+                : _error,
+            onRetry: _load,
+            loadingPlaceholder: StudioLoadingPlaceholder.list,
+            loadingItemCount: 2,
+            scrollableLoading: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
           TextField(
             controller: _helpHubSearchController,
             decoration: InputDecoration(labelText: l10n.helpHubSearchLabel),
             onChanged: _onHelpHubSearchChanged,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (_resp != null)
             Text(_helpHubInventorySummary(l10n, filteredHelpHubLinks)),
           if (_resp != null && _resp!.items.isEmpty)
@@ -545,7 +563,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
               _resp!.items.isNotEmpty &&
               filteredHelpHubLinks.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: StudioSpacing.sm),
               child: StudioEmptyState.noResults(
                 title: l10n.helpHubSearchEmpty,
               ),
@@ -558,9 +576,13 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                 itemCount: filteredHelpHubLinks.length,
                 itemBuilder: (context, index) {
                   final item = filteredHelpHubLinks[index];
-                  return Card(
+                  return studioStaggeredItem(
+                    index,
+                    entranceKey:
+                        '${filteredHelpHubLinks.length}:$_helpHubSearchQuery',
+                    child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -579,10 +601,10 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                           ),
                           const SizedBox(height: StudioLayoutSpacing.titleTight),
                           SelectableText(item.url),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                            spacing: StudioSpacing.xs,
+                            runSpacing: StudioSpacing.xs,
                             children: [
                               IconButton(
                                 style: studioUtilityIconButtonStyle(context),
@@ -625,10 +647,14 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                         ],
                       ),
                     ),
+                  ),
                   );
                 },
               ),
             ),
+              ],
+            ),
+          ),
         ],
       ),
     );

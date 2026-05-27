@@ -146,7 +146,7 @@ extension _StoryboardBatchWorkbenchSections
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.scriptEditorStoryboardBatchQuickGenerateHint,
             style: studioHintStyle(context),
@@ -170,7 +170,10 @@ extension _StoryboardBatchWorkbenchSections
           productionStoryboard: productionRow,
         );
         final checked = _selectedIds.contains(row.numericId);
-        return CheckboxListTile(
+        return studioStaggeredItem(
+          index,
+          entranceKey: widget.boardsList.length,
+          child: StudioCheckboxListRow(
           dense: true,
           contentPadding: EdgeInsets.zero,
           value: checked,
@@ -204,6 +207,7 @@ extension _StoryboardBatchWorkbenchSections
             overflow: TextOverflow.ellipsis,
           ),
           controlAffinity: ListTileControlAffinity.leading,
+        ),
         );
       },
     );
@@ -216,7 +220,7 @@ extension _StoryboardBatchWorkbenchSections
     final l10n = resolveAppLocalizationsForErrors(context);
     final exportEstimate = _currentExportEstimate();
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioRecessedPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,7 +229,7 @@ extension _StoryboardBatchWorkbenchSections
             l10n.scriptEditorStoryboardBatchPreviewExportHeading,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             singleSelectedId == null
                 ? l10n.scriptEditorStoryboardBatchSelectOneForPreview
@@ -233,12 +237,12 @@ extension _StoryboardBatchWorkbenchSections
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (exportEstimate != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateContent(
                 exportEstimate.shotCount,
@@ -275,19 +279,19 @@ extension _StoryboardBatchWorkbenchSections
             ),
           ],
           if (_downloadUrl != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(
               l10n.scriptEditorStoryboardBatchDownloadLinkLine(_downloadUrl!),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
           if (_exportSummary != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.scriptEditorStoryboardBatchLastExportHeading,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.scriptEditorStoryboardBatchExportFileLine(
                 _exportSummary!.filename,
@@ -336,7 +340,7 @@ extension _StoryboardBatchWorkbenchSections
               style: studioHintStyle(context),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Expanded(
             child: _previewUrl == null
                 ? Center(
@@ -346,9 +350,9 @@ extension _StoryboardBatchWorkbenchSections
                     ),
                   )
                 : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      _previewUrl!,
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+                    child: StudioNetworkImage(
+                      url: _previewUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (_, _, _) => Center(

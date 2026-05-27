@@ -12,6 +12,7 @@ import '../design_system/components/studio_primary_button.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/studio_motion.dart';
 import '../design_system/studio_typography.dart';
 import '../demo/product_demo_coach_keys.dart';
@@ -169,6 +170,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
       listenable: widget.authController,
       builder: (context, _) {
         return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: studio.loginBackdrop),
         child: Stack(
@@ -178,14 +180,19 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                 child: AnimatedBuilder(
                   animation: _sceneController,
                   builder: (context, _) {
-                    return CustomPaint(
-                      painter: _BackdropGridPainter(
-                        progress: _sceneController.value,
-                        lineColor: tokens.borderDefault.withValues(alpha: 0.16),
-                        accentColor: tokens.primary.withValues(alpha: 0.18),
-                        accentColorTwo: tokens.accent.withValues(alpha: 0.14),
-                      ),
-                    );
+                            return RepaintBoundary(
+                              child: CustomPaint(
+                                painter: _BackdropGridPainter(
+                                  progress: _sceneController.value,
+                                  lineColor:
+                                      tokens.borderDefault.withValues(alpha: 0.16),
+                                  accentColor:
+                                      tokens.primary.withValues(alpha: 0.18),
+                                  accentColorTwo:
+                                      tokens.accent.withValues(alpha: 0.14),
+                                ),
+                              ),
+                            );
                   },
                 ),
               ),
@@ -207,7 +214,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                         ? StudioSpacing.lg - 4
                         : ultraCompact
                         ? StudioSpacing.sm
-                        : StudioSpacing.sm + 4,
+                        : StudioSpacing.md,
                   );
                   if (wide) {
                     final authPanelWidth = (constraints.maxWidth * 0.34)
@@ -271,7 +278,8 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           Text(
                             l10n.productShellLoginTagline,
                             style: studioSectionIntroStyle(context)?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.78),
+                              color: StudioTokens.of(context).textPrimary
+                                  .withValues(alpha: 0.78),
                             ),
                           )
                         else
@@ -363,7 +371,7 @@ class _HeroStage extends StatelessWidget {
           child: Text(
             l10n.productShellLoginTagline,
             style: studioSectionIntroStyle(context)?.copyWith(
-              color: Colors.white.withValues(alpha: 0.74),
+              color: StudioTokens.of(context).textPrimary.withValues(alpha: 0.74),
               fontSize: typography.bodyLarge,
             ),
           ),
@@ -390,13 +398,25 @@ class _HeroStage extends StatelessWidget {
           ),
         if (!compact) const SizedBox(height: StudioSpacing.md),
         if (compact)
-          SizedBox(
-            height: 176,
-            child: _AiStagePanel(
-              l10n: l10n,
-              compact: compact,
-              progress: progress,
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final panelHeight = studioPreviewImageHeight(
+                constraints.maxHeight.isFinite && constraints.maxHeight > 0
+                    ? constraints.maxHeight
+                    : MediaQuery.sizeOf(context).height * 0.28,
+                fraction: 0.92,
+                min: 140,
+                max: 240,
+              );
+              return SizedBox(
+                height: panelHeight,
+                child: _AiStagePanel(
+                  l10n: l10n,
+                  compact: compact,
+                  progress: progress,
+                ),
+              );
+            },
           )
         else
           Expanded(
@@ -423,6 +443,7 @@ class _BrandBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
 
     return Row(
       children: <Widget>[
@@ -438,7 +459,7 @@ class _BrandBanner extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
+                  color: tokens.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -448,7 +469,7 @@ class _BrandBanner extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.54),
+                  color: tokens.textPrimary.withValues(alpha: 0.54),
                 ),
               ),
             ],
@@ -476,112 +497,116 @@ class _AiStagePanel extends StatelessWidget {
     final typography = StudioTypography.of(context);
     final ringSize = compact ? 96.0 : 120.0;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: tokens.bgInset.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusSheet),
-        border: Border.all(color: tokens.borderSubtle),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _AiStagePainter(
-                progress: progress,
-                lineColor: tokens.borderDefault.withValues(alpha: 0.40),
-                accentColor: tokens.primary.withValues(alpha: 0.85),
-                accentColorTwo: tokens.accent.withValues(alpha: 0.85),
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: tokens.bgInset.withValues(alpha: 0.72),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusSheet),
+          border: Border.all(color: tokens.borderSubtle),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: studioShadowColor(context, alpha: 0.10),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _AiStagePainter(
+                  progress: progress,
+                  lineColor: tokens.borderDefault.withValues(alpha: 0.40),
+                  accentColor: tokens.primary.withValues(alpha: 0.85),
+                  accentColorTwo: tokens.accent.withValues(alpha: 0.85),
+                ),
               ),
             ),
-          ),
-          if (compact)
+            if (compact)
+              Positioned(
+                top: StudioSpacing.sm,
+                left: StudioSpacing.sm,
+                right: StudioSpacing.sm,
+                child: Wrap(
+                  spacing: StudioSpacing.sm,
+                  runSpacing: StudioSpacing.xs,
+                  alignment: WrapAlignment.spaceBetween,
+                  children: <Widget>[
+                    _StageMetric(
+                      icon: Icons.auto_awesome_outlined,
+                      title: l10n.productLoginStageModelOrchestration,
+                      value: l10n.productLoginStageStatusOnline,
+                    ),
+                    _StageMetric(
+                      icon: Icons.memory_outlined,
+                      title: l10n.productLoginStageInferenceLanes,
+                      value: l10n.productLoginStageLowLatency,
+                      alignEnd: true,
+                    ),
+                  ],
+                ),
+              )
+            else ...<Widget>[
+              Positioned(
+                top: StudioSpacing.sm,
+                left: StudioSpacing.sm,
+                child: _StageMetric(
+                  icon: Icons.auto_awesome_outlined,
+                  title: l10n.productLoginStageModelOrchestration,
+                  value: l10n.productLoginStageStatusOnline,
+                ),
+              ),
+              Positioned(
+                top: StudioSpacing.sm,
+                right: StudioSpacing.sm,
+                child: _StageMetric(
+                  icon: Icons.memory_outlined,
+                  title: l10n.productLoginStageInferenceLanes,
+                  value: l10n.productLoginStageLowLatency,
+                  alignEnd: true,
+                ),
+              ),
+            ],
+            Center(
+              child: _StageCoreCluster(progress: progress, ringSize: ringSize),
+            ),
             Positioned(
-              top: 18,
-              left: 18,
-              right: 18,
+              left: StudioSpacing.sm,
+              right: StudioSpacing.sm,
+              bottom: StudioSpacing.sm,
               child: Wrap(
-                spacing: 12,
-                runSpacing: 10,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 alignment: WrapAlignment.spaceBetween,
                 children: <Widget>[
-                  _StageMetric(
-                    icon: Icons.auto_awesome_outlined,
-                    title: l10n.productLoginStageModelOrchestration,
-                    value: l10n.productLoginStageStatusOnline,
+                  _StageLabel(
+                    label: l10n.productLoginStageMultiStepOrchestration,
                   ),
-                  _StageMetric(
-                    icon: Icons.memory_outlined,
-                    title: l10n.productLoginStageInferenceLanes,
-                    value: l10n.productLoginStageLowLatency,
-                    alignEnd: true,
+                  _StageLabel(
+                    label: l10n.productLoginStageShotLevelGeneration,
+                  ),
+                  _StageLabel(
+                    label: l10n.productLoginStageReleaseLoop,
                   ),
                 ],
               ),
-            )
-          else ...<Widget>[
-            Positioned(
-              top: 18,
-              left: 18,
-              child: _StageMetric(
-                icon: Icons.auto_awesome_outlined,
-                title: l10n.productLoginStageModelOrchestration,
-                value: l10n.productLoginStageStatusOnline,
-              ),
             ),
             Positioned(
-              top: 18,
-              right: 18,
-              child: _StageMetric(
-                icon: Icons.memory_outlined,
-                title: l10n.productLoginStageInferenceLanes,
-                value: l10n.productLoginStageLowLatency,
-                alignEnd: true,
+              left: StudioSpacing.sm,
+              bottom: compact
+                  ? StudioSpacing.sm * 4
+                  : (StudioSpacing.sm * 5 + StudioSpacing.xs),
+              child: Text(
+                l10n.productLoginStageFlowTagline,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: tokens.textPrimary.withValues(alpha: 0.64),
+                  fontSize: typography.hint,
+                ),
               ),
             ),
           ],
-          Center(
-            child: _StageCoreCluster(progress: progress, ringSize: ringSize),
-          ),
-          Positioned(
-            left: 18,
-            right: 18,
-            bottom: 18,
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.spaceBetween,
-              children: <Widget>[
-                _StageLabel(
-                  label: l10n.productLoginStageMultiStepOrchestration,
-                ),
-                _StageLabel(
-                  label: l10n.productLoginStageShotLevelGeneration,
-                ),
-                _StageLabel(
-                  label: l10n.productLoginStageReleaseLoop,
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 18,
-            bottom: compact ? 64 : 86,
-            child: Text(
-              l10n.productLoginStageFlowTagline,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.64),
-                fontSize: typography.hint,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -599,12 +624,12 @@ class _SignalChip extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: StudioSpacing.xs + 4,
+          horizontal: StudioSpacing.sm,
           vertical: StudioSpacing.xs,
         ),
         child: Row(
@@ -708,13 +733,13 @@ class _StageCoreCluster extends StatelessWidget {
           Transform.rotate(
             angle: -progress * math.pi * 1.2,
             child: SizedBox.square(
-              dimension: ringSize + 22,
+              dimension: ringSize + StudioSpacing.md,
               child: Stack(
                 children: <Widget>[
                   Align(
                     alignment: const Alignment(0.84, 0),
                     child: _OrbitMarker(
-                      color: Colors.white.withValues(alpha: 0.92),
+                      color: tokens.textPrimary.withValues(alpha: 0.92),
                       glowColor: tokens.primary.withValues(alpha: 0.18),
                       size: 5,
                     ),
@@ -737,7 +762,7 @@ class _StageCoreCluster extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: tokens.textPrimary.withValues(alpha: 0.12),
                 width: 1.2,
               ),
               boxShadow: <BoxShadow>[
@@ -783,7 +808,7 @@ class _StageCoreCluster extends StatelessWidget {
               angle: progress * math.pi * 2,
               child: studioDecorativeIcon(
                 Icons.auto_mode_rounded,
-                color: Colors.white,
+                color: tokens.textPrimary,
                 size: 34,
               ),
             ),
@@ -851,7 +876,7 @@ class _StageMetric extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(icon, size: 15, color: Colors.white.withValues(alpha: 0.68)),
+              Icon(icon, size: 15, color: StudioTokens.of(context).textPrimary.withValues(alpha: 0.68)),
               const SizedBox(width: StudioSpacing.xs),
               Flexible(
                 child: Text(
@@ -860,7 +885,7 @@ class _StageMetric extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: textAlign,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.58),
+                    color: StudioTokens.of(context).textPrimary.withValues(alpha: 0.58),
                   ),
                 ),
               ),
@@ -873,7 +898,7 @@ class _StageMetric extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: textAlign,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Colors.white,
+              color: StudioTokens.of(context).textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -892,9 +917,11 @@ class _StageLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.22),
+        color: StudioTokens.of(context).overlay.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: StudioTokens.of(context).textPrimary.withValues(alpha: 0.08),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -904,7 +931,7 @@ class _StageLabel extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: Colors.white.withValues(alpha: 0.78),
+            color: StudioTokens.of(context).textPrimary.withValues(alpha: 0.78),
           ),
         ),
       ),
@@ -959,17 +986,17 @@ class _AuthPanel extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
-          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
-          compact ? StudioSpacing.sm + 4 : StudioLayoutSpacing.section,
-          compact ? StudioSpacing.sm + 2 : StudioLayoutSpacing.section - 2,
+          compact ? StudioSpacing.md : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.md : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.md : StudioLayoutSpacing.section,
+          compact ? StudioSpacing.md : StudioLayoutSpacing.section,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Wrap(
               alignment: WrapAlignment.spaceBetween,
-              runSpacing: 10,
+              runSpacing: StudioSpacing.xs,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 Text(
@@ -981,7 +1008,7 @@ class _AuthPanel extends StatelessWidget {
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: tokens.bgSurface.withValues(alpha: 0.84),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                     border: Border.all(
                       color: tokens.primary.withValues(alpha: 0.24),
                     ),
@@ -994,7 +1021,7 @@ class _AuthPanel extends StatelessWidget {
                     child: Text(
                       l10n.productLoginAiRuntime,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.78),
+                        color: tokens.textPrimary.withValues(alpha: 0.78),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1087,7 +1114,7 @@ class _AuthPanel extends StatelessWidget {
                         color: theme.colorScheme.error,
                         size: 18,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Text(
                           errorMessage!,
@@ -1157,7 +1184,7 @@ class _AuthModeToggle extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgInset,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Stack(
@@ -1174,7 +1201,7 @@ class _AuthModeToggle extends StatelessWidget {
               child: FractionallySizedBox(
                 widthFactor: 0.5,
                 child: Padding(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(StudioSpacing.chromeActionGap),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -1183,7 +1210,9 @@ class _AuthModeToggle extends StatelessWidget {
                           Color.lerp(tokens.primary, tokens.bgInset, 0.35)!,
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusButton,
+                      ),
                     ),
                   ),
                 ),
@@ -1230,18 +1259,19 @@ class _ToggleSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         child: Center(
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: selected
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.64),
+                  ? tokens.textPrimary
+                  : tokens.textPrimary.withValues(alpha: 0.64),
               fontWeight: FontWeight.w700,
             ),
           ),

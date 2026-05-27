@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
@@ -187,23 +188,26 @@ Future<void> showProjectStudioStepSetupSheet(
             ),
             child: ListView(
               controller: scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-              children: <Widget>[
-                Text(
-                  title,
-                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: tokens.textPrimary,
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.chromeActionGap, StudioSpacing.sm, StudioSpacing.md),
+              children: studioStaggeredChildren(
+                <Widget>[
+                  Text(
+                    title,
+                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: tokens.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: StudioSpacing.xs),
-                Text(
-                  subtitle,
-                  style: studioHintStyle(sheetContext),
-                ),
-                const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                body,
-              ],
+                  const SizedBox(height: StudioSpacing.xs),
+                  Text(
+                    subtitle,
+                    style: studioHintStyle(sheetContext),
+                  ),
+                  const SizedBox(height: StudioLayoutSpacing.stackMedium),
+                  body,
+                ],
+                entranceKey: title,
+              ),
             ),
           );
         },

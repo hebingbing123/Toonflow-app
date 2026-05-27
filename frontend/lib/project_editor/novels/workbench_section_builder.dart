@@ -36,7 +36,7 @@ Widget buildProjectNovelsWorkbenchSection({
 
   return Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
     decoration: showTitle
         ? studioInsetPanelDecoration(ctx)
         : studioRecessedPanelDecoration(ctx),
@@ -76,7 +76,7 @@ Widget buildProjectNovelsWorkbenchSection({
             ),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioCollapsibleFilterPanel(
           child: StudioFilterRow(
             wideLayout: StudioFilterWideLayout.toolbarRow,

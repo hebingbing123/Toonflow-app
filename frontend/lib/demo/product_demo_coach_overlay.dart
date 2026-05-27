@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../l10n/app_localizations.dart';
 import 'product_demo_coach_keys.dart';
 import 'product_demo_coach_theme.dart';
@@ -207,7 +208,7 @@ class _CoachCalloutCard extends StatelessWidget {
       container: true,
       explicitChildNodes: true,
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         child: _CalloutBody(
           tokens: tokens,
           title: title,
@@ -327,7 +328,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: studioShadowColor(context, alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 3),
               ),
@@ -342,7 +343,12 @@ class _CalloutBodyState extends State<_CalloutBody> {
               color: accent,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              padding: const EdgeInsets.fromLTRB(
+                StudioSpacing.radiusComfort,
+                StudioSpacing.radiusComfort,
+                StudioSpacing.radiusComfort,
+                StudioSpacing.radiusComfort,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -354,13 +360,13 @@ class _CalloutBodyState extends State<_CalloutBody> {
                         size: 18,
                         color: accent,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Text(title, style: titleStyle),
                       ),
                       if (counter != null)
                         Padding(
-                          padding: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.only(left: StudioSpacing.xs),
                           child: Semantics(
                             label: 'Demo tour step counter $counter',
                             child: Text(counter, style: counterStyle),
@@ -370,10 +376,10 @@ class _CalloutBodyState extends State<_CalloutBody> {
                   ),
                   if (_detailsExpanded) ...<Widget>[
                     if (badgeLabels.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.chromeActionGap,
                         children: badgeLabels.map((label) {
                           final isOptional =
                               label == l10n.productDemoGuideOptionalTag;
@@ -381,12 +387,14 @@ class _CalloutBodyState extends State<_CalloutBody> {
                               isOptional ? coachTheme.optionalAccent : accent;
                           return Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
+                              horizontal: StudioSpacing.xs,
+                              vertical: StudioSpacing.chromeActionGap,
                             ),
                             decoration: BoxDecoration(
                               color: badgeColor.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(
+                                StudioSpacing.radiusDense,
+                              ),
                               border: Border.all(
                                 color: badgeColor.withValues(alpha: 0.38),
                               ),
@@ -403,7 +411,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
                       ),
                     ],
                     if (tour.isAutoplaying) ...<Widget>[
-                      const SizedBox(height: 6),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         l10n.productDemoAutoplayStepBody(
                           tour.currentStepLabel ?? title,
@@ -414,7 +422,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     ConstrainedBox(
                       constraints: const BoxConstraints(
                         maxHeight: _CoachCalloutCard._cardBodyMaxHeight,
@@ -447,7 +455,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
                           child: Text(l10n.productDemoGuidePrevious),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Semantics(
                           label: ProductDemoCoachKeys.semanticsNext,
@@ -522,7 +530,7 @@ class _CoachSecondaryActionsRow extends StatelessWidget {
         : ProductDemoCoachKeys.semanticsExpandDetails;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
       child: Row(
         children: <Widget>[
           Semantics(
@@ -590,18 +598,21 @@ class _DemoModePill extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       color: tokens.bgElevated.withValues(alpha: 0.94),
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
       elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: studioShadowColor(context, alpha: 0.2),
       child: Semantics(
         label: ProductDemoCoachKeys.semanticsExit,
         button: true,
         child: InkWell(
           key: ProductDemoCoachKeys.tourExit,
           onTap: onExit,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.radiusComfort,
+              vertical: StudioSpacing.xs,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -610,7 +621,7 @@ class _DemoModePill extends StatelessWidget {
                   size: 16,
                   color: tokens.warning,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: StudioSpacing.xs),
                 Text(
                   l10n.productDemoModeBannerTitle,
                   style: theme.textTheme.labelMedium?.copyWith(
@@ -618,12 +629,14 @@ class _DemoModePill extends StatelessWidget {
                     color: tokens.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: StudioSpacing.chromeActionGap),
                 Text(
                   '·',
-                  style: TextStyle(color: tokens.textMuted),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: tokens.textMuted,
+                  ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: StudioSpacing.chromeActionGap),
                 Text(
                   l10n.productDemoModeExit,
                   style: theme.textTheme.labelMedium?.copyWith(

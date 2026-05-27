@@ -53,10 +53,15 @@ Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
 Uri projectAssetImageFileV1UriByProjectId(
   String projectId,
   int assetNumericId,
-  String imageId,
-) {
+  String imageId, {
+  int? maxEdge,
+}) {
   return Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId/file',
+  ).replace(
+    queryParameters: maxEdge != null && maxEdge > 0
+        ? <String, String>{'max_edge': '$maxEdge'}
+        : null,
   );
 }
 

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
@@ -73,7 +75,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return Container(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +108,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             subtitle: model.diagnosis.detail,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               decoration: studioRecessedPanelDecoration(context),
               child: FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
@@ -116,9 +118,12 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: StudioLayoutSpacing.listItem),
-          if (model.loadingContext)
-            const LinearProgressIndicator(minHeight: 2)
-          else ...[
+          StudioAsyncDataView(
+            loading: model.loadingContext,
+            scrollableLoading: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
             Text(
               model.scriptContext == null
                   ? l10n.projectEditorScriptsDiagnosisSingleNoSnapshotSummary
@@ -143,7 +148,9 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
                 ),
               ),
             ],
-          ],
+              ],
+            ),
+          ),
           const SizedBox(height: StudioLayoutSpacing.listItem),
           StudioDenseActionRow(
             spacing: StudioSpacing.xs,
@@ -182,13 +189,11 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
           if (model.extractStateRow != null &&
               (model.extractStateRow!.errorReason ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
-            Text(
-              l10n.projectEditorScriptsSingleWorkbenchRecentExtractError(
+            StudioApiErrorCallout(
+              error: l10n.projectEditorScriptsSingleWorkbenchRecentExtractError(
                 model.extractStateRow!.errorReason!.trim(),
               ),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
             ),
           ],
         ],

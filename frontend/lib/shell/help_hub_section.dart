@@ -37,9 +37,9 @@ class _HelpHubSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(
-              top: StudioLayoutSpacing.cardInner - 4,
-              left: StudioLayoutSpacing.cardInner - 4,
-              right: StudioLayoutSpacing.cardInner - 4,
+              top: StudioSpacing.radiusComfort,
+              left: StudioSpacing.radiusComfort,
+              right: StudioSpacing.radiusComfort,
             ),
             child: DecoratedBox(
               decoration: studioInsetPanelDecoration(context).copyWith(

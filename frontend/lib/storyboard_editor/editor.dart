@@ -49,6 +49,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                         TextField(
                           controller: promptCtrl,
                           maxLines: 4,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: l10n.storyboardEditorPromptLabelClearEmpty,
                             alignLabelWithHint: true,
@@ -57,6 +58,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                         const SizedBox(height: StudioLayoutSpacing.inlineGap),
                         TextField(
                           controller: stateCtrl,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: l10n.storyboardEditorStateLabelClearEmpty,
                           ),
@@ -65,6 +67,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                         TextField(
                           controller: videoCtrl,
                           maxLines: 3,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText:
                                 l10n.storyboardEditorVideoDescLabelClearEmpty,
@@ -78,6 +81,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               child: TextField(
                                 controller: sbIdxCtrl,
                                 keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
                                   labelText:
                                       l10n.storyboardEditorSbIndexLabelClearEmpty,
@@ -89,6 +93,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               child: TextField(
                                 controller: sgiCtrl,
                                 keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
                                 decoration: InputDecoration(
                                   labelText: l10n
                                       .storyboardEditorShouldGenerateImageLabelClearEmpty,

@@ -24,7 +24,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           l10n.projectEditorNovelsWorkbenchDeleteSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: deleteNovelIdCtrl,
           keyboardType: TextInputType.number,
@@ -32,7 +32,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
             labelText: l10n.projectEditorNovelsWorkbenchDeleteNumericIdLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         OutlinedButton(
           onPressed: localBusy
               ? null
@@ -54,7 +54,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 ),
           child: Text(l10n.projectEditorNovelsWorkbenchDeleteButton),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         TextField(
           controller: generateIdsCtrl,
           decoration: InputDecoration(
@@ -62,7 +62,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
             helperText: l10n.projectEditorNovelsWorkbenchDeleteGenerateIdsHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
@@ -114,7 +114,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           l10n.projectEditorNovelsWorkbenchSnapshotSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: numericIdsCtrl,
           decoration: InputDecoration(
@@ -123,9 +123,9 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 l10n.projectEditorNovelsWorkbenchSnapshotEventStateIdsHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             OutlinedButton(
               style: studioFormSecondaryButtonStyle(ctx),
@@ -191,7 +191,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         TextField(
           controller: batchDeleteIdsCtrl,
           decoration: InputDecoration(
@@ -200,7 +200,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteIdsHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy
@@ -223,7 +223,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 ),
           child: Text(l10n.projectEditorNovelsWorkbenchSnapshotBatchDeleteButton),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         TextField(
           controller: batchAdmissionIdsCtrl,
           decoration: InputDecoration(
@@ -233,7 +233,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionIdsHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDropdownButtonFormField<String>(
           initialValue: batchAdmissionStatusCtrl.text.isEmpty
               ? 'pending_review'
@@ -264,7 +264,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
             batchAdmissionStatusCtrl.text = value ?? 'pending_review';
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: batchAdmissionNoteCtrl,
           maxLines: 2,
@@ -275,7 +275,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                 l10n.projectEditorNovelsWorkbenchSnapshotBatchAdmissionNoteHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy

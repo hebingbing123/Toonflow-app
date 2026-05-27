@@ -9,6 +9,7 @@ import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
@@ -94,7 +95,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -179,14 +180,14 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectsArtWorkbenchFieldName,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.labelCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.projectsArtWorkbenchFieldTags,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.fileUrlCtrl,
                 minLines: 2,
@@ -196,7 +197,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectsArtWorkbenchFieldCoverUrlHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.promptCtrl,
                 minLines: 3,
@@ -220,7 +221,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectsArtWorkbenchExtractImagesHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Align(
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonal(
@@ -238,14 +239,29 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                       l10n.projectsArtWorkbenchCoverPreview,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-                      child: Image.memory(
-                        model.coverBytes!,
-                        height: 180,
-                        fit: BoxFit.cover,
-                      ),
+                    const SizedBox(height: StudioSpacing.xs),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final coverHeight = studioAspectHeightFromWidth(
+                          constraints.maxWidth.isFinite &&
+                                  constraints.maxWidth > 0
+                              ? constraints.maxWidth
+                              : 360,
+                          min: 140,
+                          max: 260,
+                        );
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            StudioSpacing.radiusComfort,
+                          ),
+                          child: Image.memory(
+                            model.coverBytes!,
+                            height: coverHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

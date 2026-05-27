@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../design_system/tokens.dart';
 
 /// Structured coach copy for a demo tour stop (zh/en).
 @immutable
@@ -93,17 +94,17 @@ class ProductDemoTourGuideBody extends StatelessWidget {
         return;
       }
       if (children.isNotEmpty) {
-        children.add(const SizedBox(height: 8));
+        children.add(const SizedBox(height: StudioSpacing.xs));
       }
       children.add(Text(text, style: textStyle));
     }
 
     void addLabeledBlock(String label, String body) {
       if (children.isNotEmpty) {
-        children.add(const SizedBox(height: 10));
+        children.add(const SizedBox(height: StudioSpacing.radiusComfort));
       }
       children.add(Text(label, style: labelStyle));
-      children.add(const SizedBox(height: 4));
+      children.add(const SizedBox(height: StudioSpacing.chromeActionGap));
       children.add(Text(body, style: textStyle));
     }
 
@@ -120,14 +121,14 @@ class ProductDemoTourGuideBody extends StatelessWidget {
     final bullets = sections.bulletsForLocale(languageCode);
     if (bullets.isNotEmpty) {
       if (children.isNotEmpty) {
-        children.add(const SizedBox(height: 10));
+        children.add(const SizedBox(height: StudioSpacing.radiusComfort));
       }
       children.add(Text(l10n.productDemoGuideSectionWhere, style: labelStyle));
-      children.add(const SizedBox(height: 4));
+      children.add(const SizedBox(height: StudioSpacing.chromeActionGap));
       for (final bullet in bullets) {
         children.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 3),
+            padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[

@@ -12,7 +12,7 @@ class _AuthSectionContent extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: StudioSpacing.md),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: Column(
@@ -23,7 +23,7 @@ class _AuthSectionContent extends StatelessWidget {
                 l10n.authSupabaseAuthTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (!kSupabaseConfigured)
                 Text(
                   l10n.authSupabaseNotConfigured,
@@ -39,7 +39,7 @@ class _AuthSectionContent extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: model.passwordController,
                   decoration: InputDecoration(
@@ -48,9 +48,9 @@ class _AuthSectionContent extends StatelessWidget {
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 StudioDenseActionRow(
-                  spacing: 8,
+                  spacing: StudioSpacing.xs,
                   children: [
                     FilledButton(
                       style: studioFormPrimaryButtonStyle(context),
@@ -93,9 +93,9 @@ class _AuthSignedInPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(l10n.authSignedInUser(model.session?.user.id ?? '')),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingMe ? null : callbacks.onCallMe,
@@ -104,10 +104,10 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.meBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authMeResponse(model.meBody!)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingDevSwitchProbe
@@ -120,10 +120,10 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.devSwitchProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authDevSwitchResponse(model.devSwitchProbeBody!)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingMemoryConfigProbe
@@ -136,12 +136,12 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.memoryConfigProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.authMemoryConfigResponse(model.memoryConfigProbeBody!),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingAboutProbe
@@ -154,10 +154,10 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.aboutProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authAboutResponse(model.aboutProbeBody!)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingUsageSummary
@@ -170,10 +170,10 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.usageSummaryBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authUsageResponse(model.usageSummaryBody!)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingPromptsProbe
@@ -186,10 +186,10 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.promptsProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authPromptsResponse(model.promptsProbeBody!)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingVisualManualProbe
@@ -202,12 +202,12 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.visualManualProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.authVisualManualResponse(model.visualManualProbeBody!),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingDirectorManualProbe
@@ -220,12 +220,12 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.directorManualProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.authDirectorManualResponse(model.directorManualProbeBody!),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed: model.loadingSkillsBinaryProbe
@@ -238,14 +238,14 @@ class _AuthSignedInPanel extends StatelessWidget {
           ),
         ),
         if (model.skillsBinaryProbeBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.authSkillsBinaryResponse(model.skillsBinaryProbeBody!),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -283,17 +283,17 @@ class _AuthSignedInPanel extends StatelessWidget {
           ],
         ),
         if (model.modelsCatalogBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authModelsResponse(model.modelsCatalogBody!)),
         ],
         if (model.textModelDefaultBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.authTextDefaultResponse(model.textModelDefaultBody!),
           ),
         ],
         if (model.modelDetailBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.authModelDetailResponse(model.modelDetailBody!)),
         ],
       ],

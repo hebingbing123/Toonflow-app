@@ -277,7 +277,7 @@ class _FilterPanelState extends State<FilterPanel> {
     final hasActiveFilters = activeTags.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -367,7 +367,7 @@ class _FilterPanelState extends State<FilterPanel> {
                                 vertical: 2,
                               ),
                               child: Material(
-                                color: Colors.transparent,
+                                color: StudioPrimitives.transparent,
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -447,17 +447,17 @@ class _FilterPanelState extends State<FilterPanel> {
 
           // Search options
           if (_currentFilter.searchKeyword.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Row(
               children: [
                 Text(l10n.shortVideoFilterPanelSearchScopeLabel),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipSubtitle),
                   selected: _currentFilter.searchInSubtitles,
                   onSelected: _onSearchInSubtitlesChanged,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipVoiceover),
                   selected: _currentFilter.searchInVoiceover,
@@ -471,8 +471,8 @@ class _FilterPanelState extends State<FilterPanel> {
           if (hasActiveFilters) ...[
             const SizedBox(height: StudioSpacing.sm),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: [
                 for (final tag in activeTags)
                   StudioInputChip(

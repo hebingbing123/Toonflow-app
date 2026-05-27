@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/layout_breakpoints.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_dense_action_row.dart';
@@ -9,6 +10,7 @@ import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/ix/studio_conflict_banner.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -606,12 +608,12 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
           );
     return Material(
       elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: studioShadowColor(context, alpha: 0.2),
       color: tokens.bgSurface.withValues(alpha: 0.96),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.radiusComfort, StudioSpacing.sm, StudioSpacing.radiusComfort),
           child: hasNext
               ? button
               : Tooltip(
@@ -638,6 +640,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         builder: (context, _) {
           return StudioPaneHeader(
             title: title,
+            titleHeroTag: studioHeroTagProjectTitle(widget.host.projectNumericId),
             subtitle: _studioFocusMode
                 ? _studioFocusSubtitle(l10n)
                 : l10n.studioProjectStudioSubtitle,
@@ -652,7 +655,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       ),
       if (widget.host.conflictMessage != null)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, 0),
           child: StudioConflictBanner(
             message: widget.host.conflictMessage!,
             onRefresh: widget.host.onRefreshAfterConflict ?? () {},
@@ -660,7 +663,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
         ),
       if (widget.host.failedJobCount > 0)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, 0),
           child: Semantics(
             button: true,
             label: '${l10n.studioFailedJobsHint} ${l10n.studioFailedJobsOpenTasks}',
@@ -668,9 +671,9 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
               color: Theme.of(
                 context,
               ).colorScheme.errorContainer.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               child: InkWell(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
                 onTap: () {
                   CreatorJourneyTelemetry.record(
                     CreatorJourneyEvent(
@@ -705,7 +708,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                               l10n.studioFailedJobsHint,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: StudioSpacing.chromeActionGap),
                             Text(
                               l10n.studioFailedJobsOpenTasks,
                               style: Theme.of(context).textTheme.labelMedium
@@ -726,7 +729,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
           ),
         ),
       Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.radiusComfort, StudioSpacing.sm, 0),
         child: _studioFocusMode
             ? CreatorJourneyCompactBar(
                 currentStep: _step,
@@ -762,7 +765,9 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                           buildCreatorWorkspaceMenuEntries(context, l10n),
                       onSelected: _handleWorkspaceMenuSelection,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: StudioSpacing.chromeActionGap,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -771,7 +776,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                               size: 18,
                               color: tokens.textSecondary.withValues(alpha: 0.85),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: StudioSpacing.chromeActionGap),
                             Text(
                               l10n.studioCreatorJourneyMoreSteps,
                               style: Theme.of(context).textTheme.labelSmall
@@ -790,7 +795,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       ),
       if (_step == StudioStep.assets && widget.host.assetsOverview != null)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, 0),
           child: _ProjectAssetHubCard(
             overview: widget.host.assetsOverview!,
             onSelectStep: _selectStep,
@@ -804,7 +809,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
           storyboardReadiness != null &&
           widget.host.onOpenAssetEditor != null)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, 0),
           child: _StoryboardAssetBridgeCard(
             readiness: storyboardReadiness,
             assetsOverview: widget.host.assetsOverview,
@@ -850,7 +855,9 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                       padding: EdgeInsets.only(
                         bottom: _studioFocusMode ? 12 : 72,
                       ),
-                      child: IndexedStack(
+                      child: StudioIndexedPaneFade(
+                        index: _step.sopStackIndex,
+                        child: IndexedStack(
                         index: _step.sopStackIndex,
                         children: StudioStep.sopSteps
                             .map((step) {
@@ -869,6 +876,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                             })
                             .toList(growable: false),
                       ),
+                        ),
                     ),
                   ),
                 ],
@@ -992,10 +1000,10 @@ class _ProjectAssetHubCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -1008,7 +1016,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             hub.subheadline,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -1017,7 +1025,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
           ),
           const SizedBox(height: StudioLayoutSpacing.stackMedium),
           StudioDenseActionRow(
-            spacing: 10,
+            spacing: StudioSpacing.xs,
             children: <Widget>[
               FilledButton(
                 style: studioFormPrimaryButtonStyle(context),
@@ -1058,7 +1066,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
             ],
           ),
           if (hub.metrics.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -1066,7 +1074,9 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 children: hub.metrics
                     .map(
                       (metric) => Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.only(
+                          right: StudioSpacing.radiusComfort,
+                        ),
                         child: _AssetsHubMetricCard(
                           metric: metric,
                           onTap: metric.launchIntent == null
@@ -1081,16 +1091,24 @@ class _ProjectAssetHubCard extends StatelessWidget {
           ],
           if (hub.characterSummaries.isNotEmpty ||
               hub.reusableRoleAssets.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
+            const SizedBox(height: StudioSpacing.sm),
+            LayoutBuilder(
+              builder: (context, hubConstraints) {
+                final hubCardWidth = studioClampedPaneWidth(
+                  hubConstraints.maxWidth,
+                  fraction: 0.46,
+                  min: 280,
+                  max: 420,
+                );
+                return Wrap(
+              spacing: StudioSpacing.radiusComfort,
+              runSpacing: StudioSpacing.radiusComfort,
               crossAxisAlignment: WrapCrossAlignment.start,
               children: <Widget>[
                 if (hub.characterSummaries.isNotEmpty)
                   _AssetHubListCard(
                     title: l10n.projectStudioAssetHubCharactersTitle,
-                    width: 360,
+                    width: hubCardWidth,
                     children: hub.characterSummaries
                         .map(
                           (character) => _AssetHubLine(
@@ -1128,6 +1146,8 @@ class _ProjectAssetHubCard extends StatelessWidget {
                         .toList(growable: false),
                   ),
               ],
+            );
+              },
             ),
           ],
         ],
@@ -1275,10 +1295,10 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -1291,7 +1311,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectStudioStoryboardBlockersSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -1409,7 +1429,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -1429,7 +1449,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: StudioSpacing.chromeActionGap),
                 Text(
                   detail,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -1439,7 +1459,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: StudioSpacing.radiusComfort),
           TextButton(onPressed: onTap, child: Text(ctaLabel)),
         ],
       ),
@@ -1465,7 +1485,7 @@ class _AssetHubListCard extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Container(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: tokens.bgInset,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -1517,14 +1537,14 @@ class _AssetHubLine extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: StudioSpacing.radiusHairline),
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: tokens.textSecondary,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: StudioSpacing.radiusHairline),
           Text(
             meta,
             style: theme.textTheme.labelSmall?.copyWith(
@@ -1564,7 +1584,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
     );
     final card = Container(
       width: _cardWidth,
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgInset,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -1574,9 +1594,9 @@ class _AssetsHubMetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           StudioEllipsisTooltipText(text: metric.label, style: labelStyle),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           StudioEllipsisTooltipText(text: metric.value, style: valueStyle),
-          const SizedBox(height: 6),
+          const SizedBox(height: StudioSpacing.xs),
           StudioEllipsisTooltipText(text: metric.detail, style: detailStyle),
         ],
       ),
@@ -1616,7 +1636,10 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            StudioStepProgressRing(completedSteps: host.completedSteps),
+            StudioStepProgressRing(
+              completedSteps: host.completedSteps,
+              heroTag: studioHeroTagProjectProgress(host.projectNumericId),
+            ),
             if (host.runningJobCount > 0)
               compact
                   ? IconButton(
@@ -1630,7 +1653,9 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                       visualDensity: VisualDensity.standard,
                     )
                   : Padding(
-                      padding: const EdgeInsets.only(left: 4),
+                      padding: const EdgeInsets.only(
+                        left: StudioSpacing.chromeActionGap,
+                      ),
                       child: TextButton.icon(
                         onPressed: host.onOpenTasks,
                         icon: const Icon(Icons.pending_actions_outlined, size: 18),

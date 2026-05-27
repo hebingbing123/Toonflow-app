@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/tokens.dart';
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
 import 'quality_reviews_l10n.dart';
@@ -557,21 +559,17 @@ class BadCaseStatsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: LinearProgressIndicator(minHeight: 2),
-      );
-    }
-    if (items.isEmpty) {
-      return Text(l10n.qualityReviewsNoBadCaseData);
-    }
-    return Column(
+    return StudioAsyncDataView(
+      loading: loading,
+      isEmpty: items.isEmpty,
+      empty: Text(l10n.qualityReviewsNoBadCaseData),
+      scrollableLoading: false,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final e in items)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: StudioSpacing.chromeActionGap),
             child: SelectableText(
               '${l10n.qualityReviewsBadCaseStatsLine(
                 e.badCaseCategory ?? l10n.qualityReviewsUncategorized,
@@ -581,6 +579,7 @@ class BadCaseStatsPanel extends StatelessWidget {
             ),
           ),
       ],
+    ),
     );
   }
 }

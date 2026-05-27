@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -238,7 +239,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 12, 0),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.md, StudioSpacing.radiusComfort, StudioSpacing.radiusComfort, 0),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -255,7 +256,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.md),
               child: Text(
                 l10n.studioArtStepBriefSheetSubtitle,
                 style: studioSectionIntroStyle(context),
@@ -263,9 +264,11 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
             ),
             const SizedBox(height: StudioSpacing.sm),
             Expanded(
-              child: SingleChildScrollView(
+              child: StudioScrollbar(
                 controller: _scrollCtrl,
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: SingleChildScrollView(
+                controller: _scrollCtrl,
+                padding: const EdgeInsets.fromLTRB(StudioSpacing.md, 0, StudioSpacing.md, StudioSpacing.sm),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
@@ -275,7 +278,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                         l10n: l10n,
                         onChecklistItemTap: _onChecklistItemTap,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                     ],
                     KeyedSubtree(
                       key: _pitchSectionKey,
@@ -286,7 +289,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                             l10n.projectEditorBasicsPitchSectionTitle,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _premiseCtrl,
                             focusNode: _premiseFocus,
@@ -296,7 +299,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                               labelText: l10n.projectEditorBasicsFieldPremise,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _audienceCtrl,
                             enabled: !_saving,
@@ -305,7 +308,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                                   l10n.projectEditorBasicsFieldTargetAudience,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _toneCtrl,
                             enabled: !_saving,
@@ -314,7 +317,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                                   l10n.projectEditorBasicsFieldEmotionalTone,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _hookCtrl,
                             enabled: !_saving,
@@ -322,7 +325,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                               labelText: l10n.projectEditorBasicsFieldCoreHook,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _visualCtrl,
                             enabled: !_saving,
@@ -335,7 +338,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     KeyedSubtree(
                       key: _brandSectionKey,
                       child: Column(
@@ -345,7 +348,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                             l10n.projectEditorBasicsBrandSectionTitle,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _brandNameCtrl,
                             enabled: !_saving,
@@ -353,7 +356,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                               labelText: l10n.projectEditorBasicsFieldBrandName,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _brandPromiseCtrl,
                             focusNode: _brandPromiseFocus,
@@ -364,7 +367,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                                   l10n.projectEditorBasicsFieldBrandPromise,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _visualMotifsCtrl,
                             enabled: !_saving,
@@ -374,7 +377,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                                   .projectEditorBasicsFieldVisualMotifsOnePerLine,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           TextField(
                             controller: _forbiddenCtrl,
                             enabled: !_saving,
@@ -390,13 +393,14 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                   ],
                 ),
               ),
+              ),
             ),
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.md, StudioSpacing.xs, StudioSpacing.md, StudioSpacing.sm),
               child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 alignment: WrapAlignment.end,
                 children: <Widget>[
                   TextButton(

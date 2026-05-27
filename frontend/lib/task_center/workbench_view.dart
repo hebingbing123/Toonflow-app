@@ -8,6 +8,7 @@ import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -234,7 +235,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioFilterRow(
                   wideLayout: StudioFilterWideLayout.toolbarRow,
                   wideBreakpoint: 560,
@@ -260,31 +261,31 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: model.taskClassCtrl,
                   decoration: InputDecoration(
                     labelText: l10n.taskCenterFieldTaskClassOptional,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: model.stateCtrl,
                   decoration: InputDecoration(
                     labelText: l10n.taskCenterFieldTaskStatusOptional,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: model.productionPhaseCtrl,
                   decoration: InputDecoration(
                     labelText: l10n.taskCenterFieldProductionPhaseOptional,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   children: <Widget>[
                     for (final item in _shortVideoProductionPhaseFilterItems(
                       l10n,
@@ -302,10 +303,10 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   ],
                 ),
                 if (model.categories.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.xs,
                     children: model.categories
                         .take(6)
                         .map(
@@ -324,14 +325,18 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     l10n.taskCenterJobsCount(model.jobs.length),
                     style: studioControlLabelStyle(context),
                   ),
-                  const SizedBox(height: 8),
-                  ...model.jobs.take(8).map(
-                    (job) => _WorkbenchJobRow(
-                      job: job,
-                      l10n: l10n,
-                      retryingJobId: model.retryingJobId,
-                      cancellingJobId: model.cancellingJobId,
-                      callbacks: callbacks,
+                  const SizedBox(height: StudioSpacing.xs),
+                  ...model.jobs.take(8).toList().asMap().entries.map(
+                    (entry) => studioStaggeredItem(
+                      entry.key,
+                      entranceKey: model.jobs.length,
+                      child: _WorkbenchJobRow(
+                        job: entry.value,
+                        l10n: l10n,
+                        retryingJobId: model.retryingJobId,
+                        cancellingJobId: model.cancellingJobId,
+                        callbacks: callbacks,
+                      ),
                     ),
                   ),
                 ],
@@ -367,19 +372,19 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     if (stacked) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[field, const SizedBox(height: 8), button],
+                        children: <Widget>[field, const SizedBox(height: StudioSpacing.xs), button],
                       );
                     }
                     return Row(
                       children: <Widget>[
                         Expanded(child: field),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         button,
                       ],
                     );
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final stacked = constraints.maxWidth < 520;
@@ -402,13 +407,13 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                     if (stacked) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[field, const SizedBox(height: 8), button],
+                        children: <Widget>[field, const SizedBox(height: StudioSpacing.xs), button],
                       );
                     }
                     return Row(
                       children: <Widget>[
                         Expanded(child: field),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         button,
                       ],
                     );
@@ -449,7 +454,7 @@ class _WorkbenchDialogSection extends StatelessWidget {
           Row(
             children: <Widget>[
               Icon(icon, size: 18, color: tokens.signal),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Text(title, style: studioPaneTitleStyle(context)),
               ),
@@ -522,9 +527,9 @@ class _WorkbenchJobRow extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         child: InkWell(
           onTap: () => callbacks.onPickJob(job),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
@@ -535,7 +540,7 @@ class _WorkbenchJobRow extends StatelessWidget {
               border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, StudioSpacing.radiusComfort, StudioSpacing.xs, StudioSpacing.radiusComfort),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -580,7 +585,7 @@ class _WorkbenchJobRow extends StatelessWidget {
                       job.status == 'queued' ||
                       job.status == 'running')
                     Wrap(
-                      spacing: 4,
+                      spacing: StudioSpacing.chromeActionGap,
                       children: <Widget>[
                         if (job.status == 'failed')
                           TextButton(
@@ -649,7 +654,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
     final domainLink = tryParseTaskCenterDomainDeepLink(job);
     final domainLinkHandler = onNavigateDomainDeepLink;
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -667,7 +672,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
           if (link != null && deepLinkHandler != null) ...[
             const SizedBox(height: StudioLayoutSpacing.titleTight),
             Wrap(
-              spacing: 4,
+              spacing: StudioSpacing.chromeActionGap,
               runSpacing: 0,
               children: [
                 TextButton(
@@ -728,10 +733,10 @@ class _TaskFailedReworkActions extends StatelessWidget {
     final canCompensate = onCompensateWritebackJob != null &&
         taskCenterSupportsWritebackCompensation(job);
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
       child: Wrap(
-        spacing: 6,
-        runSpacing: 2,
+        spacing: StudioSpacing.xs,
+        runSpacing: StudioSpacing.radiusHairline,
         children: [
           TextButton(
             onPressed: () => onRetry(job),

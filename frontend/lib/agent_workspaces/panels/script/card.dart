@@ -196,7 +196,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -205,7 +205,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                 l10n.agentWorkspaceScriptCardTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
             ],
             Text(
               l10n.agentWorkspaceGuidedTasksTitle,
@@ -215,7 +215,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             _buildGuidedTasks(),
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
             _buildPromptTemplates(),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ScriptWorkspaceControlsPanel(
               busy: widget.busy,
               loadingScriptWorkspaceRun: widget.loadingScriptWorkspaceRun,
@@ -250,7 +250,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
               onWriteBackScriptPlanViaUpdateData:
                   _writeBackScriptPlanViaUpdateData,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildArgumentTemplates(l10n),
             ScriptWorkspaceStatusPanel(
               resultSummaryLines: resultSummaryLines,

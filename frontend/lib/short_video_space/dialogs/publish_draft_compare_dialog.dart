@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
@@ -98,7 +99,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
       title: Row(
         children: [
           const Icon(Icons.compare_arrows),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Expanded(
             child: Text(l10n.shortVideoPublishDraftCompareTitle(drafts.length)),
           ),
@@ -117,7 +118,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                   color: studioPanelMutedColor(context),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final useRow = constraints.maxWidth >= 720;
@@ -129,9 +130,15 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                         children: drafts
                             .map(
                               (d) => Padding(
-                                padding: const EdgeInsets.only(right: 12),
+                                padding: const EdgeInsets.only(right: StudioSpacing.radiusComfort),
                                 child: SizedBox(
-                                  width: 220,
+                                  width: studioWrapTileWidth(
+                                    constraints.maxWidth,
+                                    maxColumns: drafts.length.clamp(1, 4),
+                                    minTileWidth: 200,
+                                    maxTileWidth: 280,
+                                    gap: StudioSpacing.radiusComfort,
+                                  ),
                                   child: _DraftCompareCard(draft: d),
                                 ),
                               ),
@@ -145,7 +152,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                     children: drafts
                         .map(
                           (d) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                             child: _DraftCompareCard(draft: d),
                           ),
                         )
@@ -159,10 +166,10 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                   l10n.shortVideoPublishDraftComparePerPlatformHeading,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 ...platformIds.map((pid) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                     child: _PlatformCopyCompareSection(
                       platformId: pid,
                       drafts: drafts,
@@ -196,7 +203,7 @@ class _DraftCompareCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -211,7 +218,7 @@ class _DraftCompareCard extends StatelessWidget {
                 fontFamily: 'monospace',
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _kv(
               context,
               l10n.shortVideoPublishDraftCompareFieldStatus,
@@ -221,14 +228,14 @@ class _DraftCompareCard extends StatelessWidget {
             _kv(context, l10n.shortVideoPublishDraftCompareFieldScript, _emptyAsDash(draft.scriptId)),
             _kv(context, l10n.shortVideoPublishDraftCompareFieldVideoAsset, _emptyAsDash(draft.videoAssetKey)),
             _kv(context, l10n.shortVideoPublishDraftCompareFieldCover, _emptyAsDash(draft.coverAssetKey)),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(l10n.shortVideoPublishDraftCompareFieldSummary, style: theme.textTheme.labelSmall),
             const SizedBox(height: StudioSpacing.xs),
             Text(
               draft.description.trim().isEmpty ? '—' : draft.description,
               style: theme.textTheme.bodySmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(l10n.shortVideoPublishDraftCompareFieldTags, style: theme.textTheme.labelSmall),
             const SizedBox(height: StudioSpacing.xs),
             Text(
@@ -244,7 +251,7 @@ class _DraftCompareCard extends StatelessWidget {
   Widget _kv(BuildContext context, String k, String v) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -280,7 +287,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -288,7 +295,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
               l10n.shortVideoPublishDraftComparePlatformTitle(platformId),
               style: theme.textTheme.labelLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ...drafts.map((d) {
               final block = _copyBlock(d.platformCopy, platformId);
               final title = _emptyAsDash(block?['title'] as String?);

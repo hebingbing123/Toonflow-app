@@ -25,7 +25,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
           ),
         ),
         Wrap(
-          spacing: 4,
+          spacing: StudioSpacing.chromeActionGap,
           runSpacing: 0,
           children: _buildProjectAssetsImagesProbeActions(
             ctx: ctx,

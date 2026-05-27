@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 String _projectAccessModeLabel(AppLocalizations l10n, String mode) {
   switch (mode) {
@@ -67,7 +69,7 @@ class ProjectsActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return StudioDenseActionRow(
-      spacing: 8,
+      spacing: StudioSpacing.xs,
       children: [
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
@@ -189,11 +191,11 @@ class ProjectsSummaryPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (projectsSummaryLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.projectsSummaryLine(projectsSummaryLine!)),
         ],
         if (artStylesLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.projectsArtStylesLine(artStylesLine!)),
         ],
       ],
@@ -272,20 +274,27 @@ class ProjectsArtStylesPreview extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: StudioSpacing.xs),
-        ...artStyles.take(5).map(
-          (style) => ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(style.name),
-            subtitle: Text(
-              '#${style.numericId}'
-              '${(style.label ?? '').isEmpty ? '' : ' · ${style.label}'}',
-            ),
-            trailing: TextButton(
-              onPressed: onManage,
-              child: Text(l10n.projectsArtStylesManage),
+        ...studioStaggeredChildren(
+          artStyles.take(5).map(
+            (style) => StudioListRow(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                style.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                '#${style.numericId}'
+                '${(style.label ?? '').isEmpty ? '' : ' · ${style.label}'}',
+              ),
+              trailing: TextButton(
+                onPressed: onManage,
+                child: Text(l10n.projectsArtStylesManage),
+              ),
             ),
           ),
+          entranceKey: artStyles.length,
         ),
       ],
     );
@@ -316,31 +325,34 @@ class ProjectsListPreview extends StatelessWidget {
           l10n.projectsProjectCount(projects.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        ...projects.map(
-          (project) => ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  project.name ??
-                      l10n.projectsUnnamedProject(project.numericId),
-                ),
-                _ProjectAccessBadge(project: project),
-              ],
+        ...studioStaggeredChildren(
+          projects.map(
+            (project) => StudioListRow(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Wrap(
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    project.name ??
+                        l10n.projectsUnnamedProject(project.numericId),
+                  ),
+                  _ProjectAccessBadge(project: project),
+                ],
+              ),
+              subtitle: Text(
+                '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => onOpenProjectDetail(project),
             ),
-            subtitle: Text(
-              '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => onOpenProjectDetail(project),
           ),
+          entranceKey: projects.length,
         ),
         if (agentMemoryBody != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             '${l10n.projectsAgentMemoryPrefix}$agentMemoryBody',
           ),
@@ -361,12 +373,12 @@ class _ProjectAccessBadge extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final restricted = project.projectAccessMode == 'restricted';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
       decoration: BoxDecoration(
         color: restricted
             ? colorScheme.tertiaryContainer
             : colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Text(
         '${_projectAccessModeLabel(l10n, project.projectAccessMode)} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',

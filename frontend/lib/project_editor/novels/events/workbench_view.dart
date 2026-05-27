@@ -86,11 +86,11 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                 model.infoLine,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (model.previewRows.isNotEmpty)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                  padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                   decoration: studioInsetPanelDecoration(context),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,10 +99,10 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                         l10n.projectEditorNovelsEventsPreviewSectionTitle,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       ...model.previewRows.map(
                         (row) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                           child: Text(
                             l10n.projectEditorNovelsEventsPreviewRow(
                               row.numericId,
@@ -124,9 +124,9 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectEditorNovelsEventsSearchHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -140,16 +140,16 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(l10n.projectEditorNovelsEventsNewEventHeading, style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createNameCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorNovelsEventsFieldEventName,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createDetailCtrl,
                 minLines: 3,
@@ -158,7 +158,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectEditorNovelsEventsFieldEventDescription,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.createChapterIdsCtrl,
                 decoration: InputDecoration(
@@ -166,15 +166,15 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectEditorNovelsEventsFieldChapterIdsHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton(
                 style: studioFormPrimaryButtonStyle(context),
                 onPressed: callbacks.onCreate,
                 child: Text(l10n.projectEditorNovelsEventsCreateButton),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(l10n.projectEditorNovelsEventsUpdateHeading, style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.selectedEventIdCtrl,
                 keyboardType: TextInputType.number,
@@ -182,14 +182,14 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectEditorNovelsEventsFieldNumericId,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.patchNameCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorNovelsEventsFieldUpdatedName,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.patchDetailCtrl,
                 minLines: 3,
@@ -198,7 +198,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectEditorNovelsEventsFieldUpdatedDescription,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.patchChapterIdsCtrl,
                 decoration: InputDecoration(
@@ -206,17 +206,17 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectEditorNovelsEventsFieldUpdatedChapterIdsHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed: callbacks.onSave,
                 child: Text(l10n.projectEditorNovelsEventsSaveButton),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(l10n.projectEditorNovelsEventsDeleteHeading, style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   OutlinedButton(
                     style: studioFormSecondaryButtonStyle(context),
@@ -233,7 +233,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.projectEditorNovelsEventsBatchDeleteIdsHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed: callbacks.onBatchDelete,

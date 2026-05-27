@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
-import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
 import 'package:openflow_app/project_studio/project_studio_scope.dart';
 import 'package:openflow_app/project_studio/studio_step.dart';
@@ -49,6 +49,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(StudioApiErrorCallout), findsOneWidget);
+    expect(find.byType(StudioEmptyState), findsOneWidget);
   });
 }

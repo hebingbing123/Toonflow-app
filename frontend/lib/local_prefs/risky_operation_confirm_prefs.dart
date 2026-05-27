@@ -96,7 +96,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
                 const SizedBox(height: StudioSpacing.sm),
                 ...active.map(
                   (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -105,7 +105,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
                           size: 18,
                           color: Theme.of(ctx).colorScheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Expanded(child: Text(s)),
                       ],
                     ),
@@ -159,10 +159,10 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
                 style: Theme.of(ctx).textTheme.labelMedium,
               ),
               if (active.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 ...active.map(
                   (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -171,7 +171,7 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
                           size: 18,
                           color: Theme.of(ctx).colorScheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Expanded(child: Text(s)),
                       ],
                     ),

@@ -13,7 +13,9 @@ import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -147,7 +149,7 @@ class ProjectsSection extends StatelessWidget {
       builder: (context, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -160,12 +162,12 @@ class ProjectsSection extends StatelessWidget {
               const RiskyOperationConfirmPrefsOverflowMenu(),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectsListSubtitle,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (productPresentation)
             Row(
               children: <Widget>[
@@ -181,7 +183,7 @@ class ProjectsSection extends StatelessWidget {
                         : l10n.projectsCreateFirstEmpty,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 IconButton(
                   tooltip: l10n.projectsLoadProjectList,
                   onPressed: controller.loadingProjects
@@ -214,6 +216,14 @@ class ProjectsSection extends StatelessWidget {
               onCreateEmptyProject: () => _createEmptyProject(context),
             ),
           ],
+          StudioAsyncDataView(
+            loading: controller.loadingProjects && controller.projects == null,
+            loadingPlaceholder: StudioLoadingPlaceholder.grid,
+            loadingItemCount: 4,
+            loadingCrossAxisCount: 2,
+            scrollableLoading: false,
+            child: const SizedBox.shrink(),
+          ),
           if (_showEnterpriseProjectEmptyState) ...[
             const SizedBox(height: StudioLayoutSpacing.listItem),
             StudioEmptyState.firstUse(

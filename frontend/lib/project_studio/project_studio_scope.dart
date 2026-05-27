@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../design_system/ix/studio_api_error_callout.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../demo/product_demo_mode.dart';
 import '../demo/studio_demo_data.dart';
 import '../rust_api.dart';
@@ -131,23 +131,14 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
     final snap = _readiness ?? const StudioReadinessSnapshot(completedSteps: 1);
-    if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: StudioApiErrorCallout(
-            error: _error!,
-            onRetry: _load,
-            showDiagnostic: false,
-          ),
-        ),
-      );
-    }
-    return ProjectStudioPage(host: widget.hostFactory(snap, _load));
+    return StudioAsyncDataView(
+      loading: _loading,
+      error: _error,
+      onRetry: _load,
+      scrollableLoading: true,
+      child: ProjectStudioPage(host: widget.hostFactory(snap, _load)),
+    );
   }
 }
 

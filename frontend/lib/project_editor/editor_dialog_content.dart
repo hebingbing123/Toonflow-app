@@ -59,15 +59,15 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             continuityCtrl: continuityCtrl,
             dialogState: dialogState,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           ProjectMembersPanel(
             accessToken: token,
             projectId: p.id,
             workspaceId: p.workspaceId ?? detail.project.workspaceId,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           ProjectAuditPanel(accessToken: token, projectId: p.id),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _buildProjectEditorNovelsAndEventsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -75,7 +75,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             p: p,
             dialogState: dialogState,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _buildProjectEditorAssetsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -84,7 +84,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
             scriptList: scriptList,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _buildProjectEditorScriptsSection(
             ctx: ctx,
             setDialogState: setDialogState,
@@ -93,7 +93,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
             scriptList: scriptList,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _buildProjectEditorPublishSection(ctx: ctx, token: token, p: p),
         ],
       ),
@@ -108,7 +108,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     final l10n = resolveAppLocalizationsForErrors(ctx);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(ctx),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,16 +117,16 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             l10n.projectEditorPublishSectionTitle,
             style: Theme.of(ctx).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectEditorPublishSectionBody,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: StudioTokens.of(ctx).textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: [
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(ctx),

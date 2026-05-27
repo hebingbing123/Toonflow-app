@@ -122,10 +122,10 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(l10n.shortVideoPanelVersionStaleDialogBody),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 ...status.stalePanels.map(
                   (p) => Padding(
-                    padding: const EdgeInsets.only(left: 8, top: 4),
+                    padding: const EdgeInsets.only(left: StudioSpacing.xs, top: StudioSpacing.chromeActionGap),
                     child: Text(
                       l10n.shortVideoPanelVersionStaleRow(
                         shortVideoPanelVersionPanelTitle(l10n, p.panel),
@@ -280,7 +280,7 @@ class PanelHeader extends StatelessWidget {
           title,
           style: studioPaneTitleStyle(context) ?? studioAccentBannerTitleStyle(context, StudioTokens.of(context).textPrimary),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         PanelFreshnessIndicator(panelName: title, snapshot: snapshot),
         const Spacer(),
         IconButton(

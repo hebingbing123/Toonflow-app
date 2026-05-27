@@ -176,11 +176,14 @@ class _QueueMetricChip extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.radiusComfort,
+          vertical: StudioSpacing.xs,
+        ),
         child: RichText(
           text: TextSpan(
             style: Theme.of(context).textTheme.bodySmall,

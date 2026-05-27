@@ -23,7 +23,7 @@ class _StoryboardCharacterSection extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,7 +48,7 @@ class _StoryboardCharacterSection extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDropdownButtonFormField<String?>(
               key: ValueKey<String?>(
                 _resolvedSelection(selectedCharacterId, characters),
@@ -66,7 +66,11 @@ class _StoryboardCharacterSection extends StatelessWidget {
                 ...characters.map(
                   (character) => DropdownMenuItem<String?>(
                     value: character.id,
-                    child: Text(character.name),
+                    child: Text(
+                      character.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],

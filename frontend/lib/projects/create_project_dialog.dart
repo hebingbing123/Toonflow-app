@@ -47,66 +47,66 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
                     labelText: l10n.projectsDialogFieldIntro,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   l10n.projectsDialogSectionBrief,
                   style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: premiseController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldPremise,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: audienceController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldTargetAudience,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: toneController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldEmotionalTone,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: hookController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldCoreHook,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: visualController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldVisualDirection,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   l10n.projectsDialogSectionBrand,
                   style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: brandNameController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldBrandName,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: brandPromiseController,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldBrandPromise,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: motifsController,
                   decoration: InputDecoration(
@@ -114,7 +114,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
                   ),
                   maxLines: 2,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: forbiddenController,
                   decoration: InputDecoration(
@@ -122,7 +122,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
                   ),
                   maxLines: 2,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: continuityController,
                   decoration: InputDecoration(

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../l10n/native_bridge_startup_labels.dart';
@@ -144,7 +145,7 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
         ];
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(StudioSpacing.sm),
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -186,16 +187,21 @@ class ShortVideoDesktopCapabilityPanel extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: StudioSpacing.sm),
-              ...lines.map(
-                (line) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    line,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: foreground),
+              ...studioStaggeredChildren(
+                lines.map(
+                  (line) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: StudioSpacing.chromeActionGap,
+                    ),
+                    child: Text(
+                      line,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: foreground),
+                    ),
                   ),
                 ),
+                entranceKey: lines.length,
               ),
               if (runtime.showDownloadCallToAction) ...[
                 const SizedBox(height: StudioSpacing.sm),

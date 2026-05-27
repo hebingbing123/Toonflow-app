@@ -85,7 +85,7 @@ class WorkspaceContextView extends StatelessWidget {
       waitDuration: const Duration(milliseconds: 350),
       child: InkWell(
         onTap: onProjectScopeTap,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         hoverColor: tokens.bgInset.withValues(alpha: 0.65),
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
@@ -350,7 +350,7 @@ class WorkspaceContextView extends StatelessWidget {
                   ),
                 ),
                 if (showBilling) ...<Widget>[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   _InlineContextChip(
                     label: billingSummary!,
                     compact: true,
@@ -370,7 +370,7 @@ class WorkspaceContextView extends StatelessWidget {
             size: 16,
             color: tokens.accent,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Expanded(
             child: Text(
               summary,
@@ -384,11 +384,11 @@ class WorkspaceContextView extends StatelessWidget {
           ),
           if (workspaceTypeLabel != null &&
               (embedded || width >= 1520)) ...<Widget>[
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             _InlineContextChip(label: workspaceTypeLabel),
           ],
           if (showBilling && !embedded && width >= 1680) ...<Widget>[
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             _InlineContextChip(label: billingSummary!),
           ],
         ],
@@ -424,7 +424,7 @@ class WorkspaceContextView extends StatelessWidget {
       final useExpandedDesktopLayout = width >= 1500;
       if (useExpandedDesktopLayout) {
         return Padding(
-          padding: const EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface.withValues(alpha: 0.94),
@@ -434,8 +434,8 @@ class WorkspaceContextView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.stackMedium),
               child: Wrap(
-                spacing: 16,
-                runSpacing: 10,
+                spacing: StudioSpacing.sm,
+                runSpacing: StudioSpacing.xs,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                   Row(
@@ -446,7 +446,7 @@ class WorkspaceContextView extends StatelessWidget {
                         size: 18,
                         color: tokens.accent,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 520),
                         child: Text(
@@ -483,20 +483,20 @@ class WorkspaceContextView extends StatelessWidget {
       }
       if (!showBilling) {
         return Padding(
-          padding: const EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
           child: Tooltip(
             message: '$workspaceLine\n$scopeLine',
             waitDuration: const Duration(milliseconds: 350),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: tokens.bgSurface.withValues(alpha: 0.94),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
                 border: Border.all(color: tokens.borderSubtle),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                  horizontal: StudioSpacing.radiusCard,
+                  vertical: StudioSpacing.radiusComfort,
                 ),
                 child: Row(
                   children: <Widget>[
@@ -505,7 +505,7 @@ class WorkspaceContextView extends StatelessWidget {
                       size: 16,
                       color: tokens.accent,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     Expanded(
                       child: Text(
                         '$workspaceLine · $scopeLine',
@@ -517,7 +517,7 @@ class WorkspaceContextView extends StatelessWidget {
                       ),
                     ),
                     if (workspaceTypeLabel != null) ...<Widget>[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       _InlineContextChip(label: workspaceTypeLabel),
                     ],
                   ],
@@ -528,7 +528,7 @@ class WorkspaceContextView extends StatelessWidget {
         );
       }
       return Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: tokens.bgSurface.withValues(alpha: 0.94),
@@ -540,12 +540,17 @@ class WorkspaceContextView extends StatelessWidget {
               horizontal: 14,
               vertical: 2,
             ),
-            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            childrenPadding: const EdgeInsets.fromLTRB(
+              StudioSpacing.radiusCard,
+              0,
+              StudioSpacing.radiusCard,
+              StudioSpacing.radiusCard,
+            ),
             initiallyExpanded: false,
             title: Row(
               children: <Widget>[
                 Icon(Icons.workspaces_outline, size: 18, color: tokens.accent),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
                     '$workspaceLine · $scopeLine',
@@ -556,7 +561,7 @@ class WorkspaceContextView extends StatelessWidget {
                 ),
                 if (workspaceTypeLabel != null)
                   Padding(
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.only(left: StudioSpacing.xs),
                     child: StudioChip(
                       label: Text(workspaceTypeLabel),
                       visualDensity: VisualDensity.standard,
@@ -574,7 +579,7 @@ class WorkspaceContextView extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgSurface.withValues(alpha: 0.94),
@@ -582,7 +587,7 @@ class WorkspaceContextView extends StatelessWidget {
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+          padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -648,7 +653,7 @@ class WorkspaceContextView extends StatelessWidget {
               size: 16,
               color: theme.colorScheme.primary,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             Text(
               l10n.workspaceBillingTitle,
               style: theme.textTheme.labelMedium?.copyWith(
@@ -658,7 +663,7 @@ class WorkspaceContextView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -700,9 +705,9 @@ class WorkspaceContextView extends StatelessWidget {
           ],
         ),
         if (quota != null && quota > 0) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
             child: LinearProgressIndicator(
               value: (today / quota).clamp(0.0, 1.0),
               minHeight: 6,
@@ -730,17 +735,20 @@ class _CompactMetaChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.radiusComfort,
+        vertical: StudioSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(icon, size: 16, color: StudioTokens.of(context).textSecondary),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
@@ -771,7 +779,7 @@ class _InlineContextChip extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: compact ? 0.75 : 0.92),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(
           color: tokens.surfaceHighlight.withValues(alpha: compact ? 0.6 : 0.9),
         ),

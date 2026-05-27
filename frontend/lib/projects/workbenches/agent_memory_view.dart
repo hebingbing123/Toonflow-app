@@ -8,7 +8,11 @@ import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
 
@@ -175,7 +179,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -223,8 +227,15 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
+              StudioAsyncDataView(
+                loading: (model.loadingProjects && model.projects.isEmpty) ||
+                    (model.loadingMemory && model.memoryRows.isEmpty),
+                loadingPlaceholder: StudioLoadingPlaceholder.pane,
+                scrollableLoading: false,
+                child: const SizedBox.shrink(),
+              ),
               if (model.projects.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.agentMemoryProjectsPreviewLine(
                     model.projects.length,
@@ -242,7 +253,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -253,7 +264,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: TextField(
                       controller: model.agentTypeCtrl,
@@ -264,14 +275,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.episodesIdCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.agentMemoryFieldEpisodesIdOptional,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.scopeSignatureCtrl,
                 minLines: 2,
@@ -281,7 +292,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   helperText: l10n.agentMemoryFieldScopeSignatureHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: model.queryType,
                 decoration: InputDecoration(
@@ -302,7 +313,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: model.memoryTier,
                 decoration: InputDecoration(
@@ -323,7 +334,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: model.automationMode,
                 decoration: InputDecoration(
@@ -368,7 +379,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.memorySummary != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   model.memorySummary!,
                   style: Theme.of(
@@ -432,7 +443,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (executionChecklist != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -461,76 +472,96 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
               if (model.memoryRows.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.agentMemoryMemoryRowCount(model.memoryRows.length),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                ...memoryTierGroups.map((group) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.agentMemoryTierGroupHeader(
-                          group.label,
-                          group.rows.length,
-                          group.lastInjectedLabel,
+                ...studioStaggeredChildren(
+                  memoryTierGroups.map((group) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: StudioSpacing.xs),
+                        Text(
+                          l10n.agentMemoryTierGroupHeader(
+                            group.label,
+                            group.rows.length,
+                            group.lastInjectedLabel,
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      ...group.rows.take(6).map((item) {
-                        final preview =
-                            memoryPreviewById[item.id] ??
-                            _buildAgentMemoryPreview(item, l10n);
-                        final titleSegments = <String>[
-                          if (preview.memoryName.isNotEmpty) preview.memoryName,
-                          preview.role,
-                          l10n.agentMemoryCharsAbbr(preview.charCount),
-                          if (preview.classificationLabel.isNotEmpty)
-                            _displayMemoryClass(
-                              l10n,
-                              preview.classificationLabel,
-                            ),
-                          if (preview.actionLabel.isNotEmpty)
-                            _displayMemoryAction(l10n, preview.actionLabel),
-                        ];
-                        final subtitleSegments = <String>[
-                          if (preview.memoryId.isNotEmpty) preview.memoryId,
-                          if (preview.scopeLabel.isNotEmpty) preview.scopeLabel,
-                          if (preview.subjectLabel.isNotEmpty)
-                            l10n.agentMemorySubjectLabel(preview.subjectLabel),
-                          if (preview.signalLabel.isNotEmpty)
-                            l10n.agentMemorySignalsLabel(
-                              _formatSignalLabelDisplay(
-                                l10n,
-                                preview.signalLabel,
-                              ),
-                            ),
-                          preview.shortContent,
-                        ];
-                        return ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(titleSegments.join(' · ')),
-                          subtitle: Text(subtitleSegments.join(' · ')),
-                          trailing: preview.isDuplicated
-                              ? StudioChip(
-                                  label: Text(l10n.agentMemoryDuplicateChip),
-                                )
-                              : null,
-                        );
-                      }),
-                    ],
-                  );
-                }),
+                        ...studioStaggeredChildren(
+                          group.rows.take(6).map((item) {
+                            final preview =
+                                memoryPreviewById[item.id] ??
+                                _buildAgentMemoryPreview(item, l10n);
+                            final titleSegments = <String>[
+                              if (preview.memoryName.isNotEmpty)
+                                preview.memoryName,
+                              preview.role,
+                              l10n.agentMemoryCharsAbbr(preview.charCount),
+                              if (preview.classificationLabel.isNotEmpty)
+                                _displayMemoryClass(
+                                  l10n,
+                                  preview.classificationLabel,
+                                ),
+                              if (preview.actionLabel.isNotEmpty)
+                                _displayMemoryAction(l10n, preview.actionLabel),
+                            ];
+                            final subtitleSegments = <String>[
+                              if (preview.memoryId.isNotEmpty) preview.memoryId,
+                              if (preview.scopeLabel.isNotEmpty)
+                                preview.scopeLabel,
+                              if (preview.subjectLabel.isNotEmpty)
+                                l10n.agentMemorySubjectLabel(
+                                  preview.subjectLabel,
+                                ),
+                              if (preview.signalLabel.isNotEmpty)
+                                l10n.agentMemorySignalsLabel(
+                                  _formatSignalLabelDisplay(
+                                    l10n,
+                                    preview.signalLabel,
+                                  ),
+                                ),
+                              preview.shortContent,
+                            ];
+                            return StudioListRow(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              onCopy: () async {
+                                await Clipboard.setData(
+                                  ClipboardData(
+                                    text: subtitleSegments.join('\n'),
+                                  ),
+                                );
+                              },
+                              copyLabel: l10n.opsWhCopyActivityTooltip,
+                              title: Text(titleSegments.join(' · ')),
+                              subtitle: Text(subtitleSegments.join(' · ')),
+                              trailing: preview.isDuplicated
+                                  ? StudioChip(
+                                      label: Text(
+                                        l10n.agentMemoryDuplicateChip,
+                                      ),
+                                    )
+                                  : null,
+                            );
+                          }),
+                          entranceKey: group.rows.length,
+                        ),
+                      ],
+                    );
+                  }),
+                  entranceKey: memoryTierGroups.length,
+                ),
               ],
               const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.agentMemoryAppendSection,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -557,7 +588,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: StudioDropdownButtonFormField<String>(
                       initialValue: model.appendMemoryTier,
@@ -584,7 +615,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -595,7 +626,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: TextField(
                       controller: model.appendNameCtrl,
@@ -606,7 +637,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -624,7 +655,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.appendContentCtrl,
                 minLines: 3,
@@ -638,7 +669,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 l10n.agentMemoryClearSection,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -665,7 +696,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: FilledButton.tonal(
                       style: studioFormTonalButtonStyle(context),
@@ -682,7 +713,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               if (model.statusLine != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   model.statusLine!,
                   style: Theme.of(

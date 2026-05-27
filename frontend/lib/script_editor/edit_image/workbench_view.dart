@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
+import '../../design_system/studio_responsive_layout.dart';
 import '../../design_system/tokens.dart';
 
 import '../../../design_system/components/studio_empty_state.dart';
@@ -8,6 +10,7 @@ import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
   const ScriptEditImageWorkbenchDialogViewModel({
@@ -99,7 +102,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -133,9 +136,9 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   alignLabelWithHint: true,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton(
                     style: studioFormPrimaryButtonStyle(context),
@@ -151,13 +154,13 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               if (model.uploadedImageUrl != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 SelectableText(
                   model.uploadedImageUrl!,
                   style: theme.textTheme.bodySmall,
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Row(
                 children: [
                   Expanded(
@@ -171,7 +174,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioModelCostControls(
                 accessToken: model.accessToken,
                 projectUuid: model.projectId,
@@ -183,7 +186,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 enabled: !model.busy,
                 onEstimateChanged: model.onEstimateChanged,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.promptCtrl,
                 minLines: 3,
@@ -193,9 +196,9 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   alignLabelWithHint: true,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton(
                     style: studioFormPrimaryButtonStyle(context),
@@ -210,44 +213,53 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.scriptEditorEditImageWorkbenchStepsHeading,
                 style: theme.textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (model.steps.isEmpty)
                 StudioEmptyState.emptyData(
                   title: l10n.scriptEditorEditImageWorkbenchStepsEmpty,
                 )
               else
                 SizedBox(
-                  height: 160,
+                  height: studioAdaptiveDialogHeight(
+                    context,
+                    fraction: 0.22,
+                    min: 140,
+                    max: 280,
+                  ),
                   child: ListView.builder(
                     itemCount: model.steps.length,
                     itemBuilder: (context, index) {
                       final step = model.steps[index];
                       final selected =
                           step.stepId == model.stepIdCtrl.text.trim();
-                      return ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        selected: selected,
-                        title: Text(step.stepName),
-                        subtitle: Text(
-                          l10n.scriptEditorEditImageWorkbenchStepLine(
-                            step.stepId,
-                            step.status,
+                      return studioStaggeredItem(
+                        index,
+                        entranceKey: model.steps.length,
+                        child: StudioListRow(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          selected: selected,
+                          title: Text(step.stepName),
+                          subtitle: Text(
+                            l10n.scriptEditorEditImageWorkbenchStepLine(
+                              step.stepId,
+                              step.status,
+                            ),
                           ),
+                          onTap: model.busy
+                              ? null
+                              : () => callbacks.onSelectStep(step),
                         ),
-                        onTap: model.busy
-                            ? null
-                            : () => callbacks.onSelectStep(step),
                       );
                     },
                   ),
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -273,13 +285,13 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextButton(
                 onPressed: model.busy ? null : callbacks.onUpdateStepStatus,
                 child: Text(l10n.scriptEditorEditImageWorkbenchUpdateStep),
               ),
               if (model.statusLine != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(model.statusLine!, style: theme.textTheme.bodySmall),
               ],
             ],

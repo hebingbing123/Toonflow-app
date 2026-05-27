@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
+import '../../design_system/tokens.dart';
 
 import '../../design_system/components/studio_card.dart';
-import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
+import '../../design_system/components/studio_async_data_view.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
@@ -44,7 +46,7 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -54,21 +56,39 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-
-    if (_loading) {
-      return const StudioSkeleton(height: 80);
-    }
-    if (_error != null) {
-      return Text(_error!);
-    }
     final rows = _summary?.rows ?? const <ModelSpendRow>[];
-    if (rows.isEmpty) {
-      return Text(
+
+    return StudioAsyncDataView(
+      loading: _loading,
+      error: _error,
+      onRetry: _load,
+      isEmpty: rows.isEmpty,
+      empty: Text(
         l10n.studioValueTierSampleLow,
         style: theme.textTheme.bodySmall,
-      );
-    }
+      ),
+      child: _SpendSummaryBody(
+        l10n: l10n,
+        theme: theme,
+        rows: rows,
+      ),
+    );
+  }
+}
 
+class _SpendSummaryBody extends StatelessWidget {
+  const _SpendSummaryBody({
+    required this.l10n,
+    required this.theme,
+    required this.rows,
+  });
+
+  final AppLocalizations l10n;
+  final ThemeData theme;
+  final List<ModelSpendRow> rows;
+
+  @override
+  Widget build(BuildContext context) {
     final tierMinCost = <String, int>{};
     for (final row in rows.where((r) => r.sampleSufficient)) {
       final tier = row.valueTier ?? '';
@@ -84,15 +104,20 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
           l10n.studioModelPricingTitle,
           style: theme.textTheme.titleMedium,
         ),
-        const SizedBox(height: 8),
-        ...rows.map((row) {
+        const SizedBox(height: StudioSpacing.xs),
+        ...rows.toList().asMap().entries.map((entry) {
+          final row = entry.value;
           final tier = row.valueTier;
           final showCheaper = row.sampleSufficient &&
               tier != null &&
               tierMinCost[tier] == row.estimatedCostCents &&
-              rows.where((r) => r.valueTier == tier && r.sampleSufficient).length > 1;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+              rows.where((r) => r.valueTier == tier && r.sampleSufficient).length >
+                  1;
+          return studioStaggeredItem(
+            entry.key,
+            entranceKey: rows.length,
+            child: Padding(
+            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
             child: StudioCard(
               child: Row(
                 children: <Widget>[
@@ -124,7 +149,9 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
                       if (row.tokenEfficiencyRoiBand != null &&
                           (row.tokenEfficiencySampleCount ?? 0) >= 5)
                         Padding(
-                          padding: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.only(
+                            top: StudioSpacing.chromeActionGap,
+                          ),
                           child: StudioChip(
                             label: Text(
                               tokenEfficiencyRoiLabel(
@@ -139,6 +166,7 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
                 ],
               ),
             ),
+          ),
           );
         }),
       ],

@@ -65,7 +65,7 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Material(
-            color: Colors.transparent,
+            color: StudioPrimitives.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
               onTap: () => setState(() => _expanded = !_expanded),

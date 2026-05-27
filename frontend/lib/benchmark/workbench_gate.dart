@@ -4,6 +4,7 @@ import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 import '../design_system/tokens.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Widget for managing benchmark promotion gate decisions
 class BenchmarkGateWorkbench extends StatelessWidget {
@@ -41,7 +42,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -49,16 +50,16 @@ class BenchmarkGateWorkbench extends StatelessWidget {
               l10n.benchmarkGateCardTitle,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: experimentIdController,
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelExperimentId,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [
                 FilledButton.tonal(
                   style: studioFormTonalButtonStyle(context),
@@ -81,7 +82,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                 labelText: l10n.benchmarkLabelGateVariantId,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: gateDecisionController,
               decoration: InputDecoration(
@@ -89,7 +90,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                 hintText: l10n.benchmarkGateDecisionHint,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: gateNoteController,
               decoration: InputDecoration(
@@ -97,8 +98,8 @@ class BenchmarkGateWorkbench extends StatelessWidget {
               ),
               maxLines: 3,
             ),
-            const SizedBox(height: 8),
-            CheckboxListTile(
+            const SizedBox(height: StudioSpacing.xs),
+            StudioCheckboxListRow(
               dense: true,
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.benchmarkGatePromoteBaselineTitle),
@@ -112,7 +113,7 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                       }
                     },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed:

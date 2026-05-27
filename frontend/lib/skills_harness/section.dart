@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/rust_api_error_format.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -119,7 +121,7 @@ class HarnessSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,9 +136,9 @@ class HarnessSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -210,55 +212,55 @@ class HarnessSection extends StatelessWidget {
           ],
         ),
         if (harnessToolsLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessToolsLabel(harnessToolsLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmValidateLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessUserWasmValidateLabel(userWasmValidateLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmPersistLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessUserWasmPersistLabel(userWasmPersistLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmListLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessUserWasmListLabel(userWasmListLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmRevokeLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessUserWasmRevokeLabel(userWasmRevokeLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (skillsAggregateLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.skillsHarnessSummaryLabel(skillsAggregateLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (skillsListSummary != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             skillsListSummary!,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: skillPathController,
           decoration: InputDecoration(
@@ -266,15 +268,15 @@ class HarnessSection extends StatelessWidget {
             helperText: l10n.skillsHarnessPathHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: skillContentController,
           decoration: InputDecoration(labelText: l10n.skillsHarnessBodyLabel),
           maxLines: 4,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -318,15 +320,15 @@ class HarnessSection extends StatelessWidget {
           ],
         ),
         if (skillMutationLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             skillMutationLine!,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -375,19 +377,22 @@ class HarnessSection extends StatelessWidget {
           ],
         ),
         if (wsLog.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.skillsHarnessWsRecent,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          ...wsLog.map(
-            (line) => Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: SelectableText(
-                line,
-                style: Theme.of(context).textTheme.bodySmall,
+          ...studioStaggeredChildren(
+            wsLog.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
+                child: SelectableText(
+                  line,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ),
+            entranceKey: wsLog.length,
           ),
         ],
       ],

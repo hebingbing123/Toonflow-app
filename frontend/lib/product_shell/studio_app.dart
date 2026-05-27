@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/ix/studio_scaffold_messenger.dart';
+import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/studio_adaptive_theme.dart';
 import '../l10n/app_localizations.dart';
@@ -52,6 +53,7 @@ class _StudioProductAppState extends State<StudioProductApp> {
           return StudioScaffoldMessenger(
           key: kRustApiRootScaffoldMessengerKey,
           child: MaterialApp.router(
+            scrollBehavior: const StudioScrollBehavior(),
             debugShowCheckedModeBanner: false,
             onGenerateTitle: (ctx) =>
                 AppLocalizations.of(ctx)?.appTitle ??

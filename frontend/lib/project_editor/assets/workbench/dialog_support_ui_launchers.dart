@@ -22,15 +22,15 @@ class _ProjectAssetsWorkbenchLaunchers extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.projectEditorAssetsSpecializedWorkbenchesTitle, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.projectEditorAssetsSpecializedWorkbenchesSubtitle,
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onOpenImagesWorkbench,

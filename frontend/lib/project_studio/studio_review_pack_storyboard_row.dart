@@ -199,7 +199,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 summary,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

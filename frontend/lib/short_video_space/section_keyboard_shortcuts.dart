@@ -204,7 +204,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
           title: Row(
             children: [
               const Icon(Icons.keyboard),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Text(l10n.shortVideoSpaceKeyboardShortcuts),
             ],
           ),
@@ -217,7 +217,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                 children: [
                   for (final category in groupedShortcuts.keys) ...[
                     Padding(
-                      padding: const EdgeInsets.only(top: 16, bottom: 8),
+                      padding: const EdgeInsets.only(top: StudioSpacing.sm, bottom: StudioSpacing.xs),
                       child: Text(
                         category,
                         style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
@@ -226,9 +226,22 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                             ),
                       ),
                     ),
-                    ...groupedShortcuts[category]!.map(
-                      (shortcut) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                    ...groupedShortcuts[category]!.toList().asMap().entries.map(
+                      (entry) {
+                        final shortcut = entry.value;
+                        final shortcutIndex = groupedShortcuts.keys
+                                .toList()
+                                .indexOf(category) *
+                            100 +
+                            entry.key;
+                        return studioStaggeredItem(
+                          shortcutIndex,
+                          entranceKey: groupedShortcuts.values.fold<int>(
+                            0,
+                            (sum, list) => sum + list.length,
+                          ),
+                          child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: StudioSpacing.chromeActionGap),
                         child: Row(
                           children: [
                             Expanded(
@@ -242,7 +255,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                                   color: Theme.of(ctx)
                                       .colorScheme
                                       .surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                                   border: Border.all(
                                     color: studioPanelMutedColor(ctx),
                                   ),
@@ -256,7 +269,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: StudioSpacing.sm),
                             Expanded(
                               flex: 3,
                               child: Text(
@@ -267,6 +280,8 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
                           ],
                         ),
                       ),
+                    );
+                      },
                     ),
                   ],
                 ],

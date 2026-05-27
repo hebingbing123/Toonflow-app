@@ -6,6 +6,7 @@ import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Widget for managing benchmark experiments
 class BenchmarkExperimentsWorkbench extends StatelessWidget {
@@ -75,16 +76,16 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: experimentIdController,
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelExperimentId,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [
                 FilledButton.tonal(
                   style: studioFormTonalButtonStyle(context),
@@ -123,7 +124,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 labelText: l10n.benchmarkLabelNewExperimentName,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDropdownButtonFormField<String>(
               initialValue: sampleTier,
               decoration: InputDecoration(
@@ -149,7 +150,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 }
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: stageScopeController,
               decoration: InputDecoration(
@@ -157,14 +158,14 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: baselineLabelController,
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelBaselineVariantLabel,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: variantsJsonController,
               maxLines: 14,
@@ -172,7 +173,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 labelText: l10n.benchmarkLabelVariantsJsonArray,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed: busy || experimentNameController.text.trim().isEmpty
@@ -199,9 +200,9 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               ...experiments.take(6).map(
-                    (item) => ListTile(
+                    (item) => StudioListRow(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.l10nBatch_c084376ea9(item.name, item.status)),

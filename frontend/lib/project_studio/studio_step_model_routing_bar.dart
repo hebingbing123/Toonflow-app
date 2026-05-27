@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_model_picker.dart';
+import '../design_system/components/studio_skeleton.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/tokens.dart';
 import '../design_system/studio_motion.dart';
 import '../l10n/app_localizations.dart';
@@ -241,12 +245,10 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
       return _secondaryShell(
         context,
         tokens,
-        child: _loading
-            ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : Column(
+        child: StudioAsyncDataView(
+          loading: _loading,
+          scrollableLoading: false,
+          child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -258,7 +260,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                         size: 16,
                         color: StudioTokens.of(context).textSecondary,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Text(
                           l10n.studioModelRoutingDeliverInherit,
@@ -272,39 +274,17 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   ),
                   if (_error != null) ...<Widget>[
                     const SizedBox(height: StudioSpacing.xs),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            _error!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: _load,
-                          style: TextButton.styleFrom(
-                            minimumSize: Size.zero,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            tapTargetSize: MaterialTapTargetSize.padded,
-                            visualDensity: VisualDensity.standard,
-                          ),
-                          child: Text(l10n.studioScriptStepRetry),
-                        ),
-                      ],
+                    StudioApiErrorCallout(
+                      error: _error!,
+                      onRetry: _load,
+                      emphasis: StudioApiErrorCalloutEmphasis.subtle,
                     ),
                   ],
                   if (inherited.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
+                      spacing: StudioSpacing.xs,
+                      runSpacing: StudioSpacing.xs,
                       children: <Widget>[
                         for (final entry in inherited)
                           StudioChip(
@@ -320,6 +300,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   ],
                 ],
               ),
+        ),
       );
     }
 
@@ -327,20 +308,19 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
         slots.isNotEmpty &&
         slots.every((slot) => _modelsForSlot(slot).isEmpty);
 
-    final expandedBody = _loading
-        ? const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        : Column(
+    final expandedBody = StudioAsyncDataView(
+      loading: _loading,
+      scrollableLoading: false,
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if (_error != null) ...<Widget>[
-                Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                StudioApiErrorCallout(
+                  error: _error!,
+                  onRetry: _load,
+                  emphasis: StudioApiErrorCalloutEmphasis.subtle,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton(
@@ -357,12 +337,18 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                 ),
                 const SizedBox(height: StudioSpacing.sm),
               ],
-              ...slots.map((slot) {
+              ...slots.toList().asMap().entries.map((entry) {
+                final slot = entry.value;
                 final models = _modelsForSlot(slot);
                 final effective = _effectiveEntry(slot);
                 final selected = _draftBySlot[slot];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                return studioStaggeredItem(
+                  entry.key,
+                  entranceKey: slots.length,
+                  child: Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: StudioSpacing.radiusComfort,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -397,12 +383,13 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                       ),
                     ],
                   ),
-                );
+                ),
+              );
               }),
               if (_saving)
                 const Padding(
                   padding: EdgeInsets.only(top: StudioSpacing.xs),
-                  child: LinearProgressIndicator(minHeight: 2),
+                  child: StudioSkeleton(height: 4, borderRadius: 2),
                 ),
               const SizedBox(height: StudioSpacing.xs),
               Text(
@@ -421,7 +408,8 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   ),
                 ),
             ],
-          );
+          ),
+    );
 
     return _primaryShell(
       context,
@@ -456,12 +444,12 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
           InkWell(
             onTap: onToggle,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, StudioSpacing.radiusComfort, StudioSpacing.xs, StudioSpacing.radiusComfort),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Icon(Icons.hub_outlined, color: tokens.primary, size: 20),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -508,7 +496,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, 0, StudioSpacing.radiusComfort, StudioSpacing.radiusComfort),
               child: child,
             ),
             crossFadeState: expanded
@@ -535,7 +523,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
       padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
       decoration: BoxDecoration(
         color: tokens.bgSurface.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: child,
@@ -560,11 +548,11 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -583,7 +571,7 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
               ),
             ),
             if (onOpenSettings != null) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Align(
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonalIcon(

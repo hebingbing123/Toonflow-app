@@ -29,7 +29,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   l10n.shortVideoCandidateAssetConfirmationTitle,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 if (candidateCardUi.loading)
                   Text(
                     candidateCardUi.headline,
@@ -47,8 +47,8 @@ class _CandidateComparePanel extends StatelessWidget {
                   ),
                   const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.xs,
                     children: [
                       _MetricChip(
                         label: l10n.shortVideoCandidateMetricPending,
@@ -69,7 +69,7 @@ class _CandidateComparePanel extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   candidateCardUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
@@ -140,7 +140,7 @@ class _CandidateComparePanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
         ],
         if (candidateComparePanelUi.visible) ...[
           _Panel(
@@ -151,19 +151,19 @@ class _CandidateComparePanel extends StatelessWidget {
                   l10n.shortVideoCandidateCompareSectionTitle,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   candidateComparePanelUi.headline,
                   style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   candidateComparePanelUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                 ),
                 if (!candidateComparePanelUi.loading &&
                     !candidateComparePanelUi.unavailable) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   if (candidateComparePanelUi.items.isEmpty)
                     StudioEmptyState.emptyData(
                       title: candidateComparePanelUi.headline,
@@ -171,12 +171,53 @@ class _CandidateComparePanel extends StatelessWidget {
                       icon: Icons.compare_outlined,
                     )
                   else
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: candidateComparePanelUi.items
-                          .map((item) => _CandidateCompareCard(item: item))
-                          .toList(growable: false),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final crossAxisCount = studioGridCrossAxisCount(
+                          constraints.maxWidth,
+                          handset: 1,
+                          tablet: 2,
+                          desktop: 3,
+                          desktopWide: 4,
+                          desktopWideMin: 1440,
+                        );
+                        if (crossAxisCount <= 1) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: candidateComparePanelUi.items
+                                .map(
+                                  (item) => Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: StudioSpacing.radiusComfort,
+                                    ),
+                                    child: _CandidateCompareCard(item: item),
+                                  ),
+                                )
+                                .toList(growable: false),
+                          );
+                        }
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            mainAxisSpacing: StudioSpacing.radiusComfort,
+                            crossAxisSpacing: StudioSpacing.radiusComfort,
+                            childAspectRatio: 0.72,
+                          ),
+                          itemCount: candidateComparePanelUi.items.length,
+                          itemBuilder: (context, index) {
+                            return studioStaggeredItem(
+                              index,
+                              entranceKey: candidateComparePanelUi.items.length,
+                              child: _CandidateCompareCard(
+                                item: candidateComparePanelUi.items[index],
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                 ],
               ],

@@ -129,10 +129,11 @@ class _StoryboardVideoSection extends StatelessWidget {
           l10n.storyboardVideoWorkbenchTitle,
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: trackIdCtrl,
           keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchTrackIdLabel,
             helperText: knownTrackIds.isEmpty
@@ -142,17 +143,18 @@ class _StoryboardVideoSection extends StatelessWidget {
                   ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: trackNameCtrl,
+          textInputAction: TextInputAction.done,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchNewTrackNameLabel,
             helperText: l10n.storyboardVideoWorkbenchNewTrackNameHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -187,22 +189,22 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.storyboardVideoWorkbenchPrimaryHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.storyboardVideoWorkbenchPatchAttributionHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: 8),
-        CheckboxListTile(
+        const SizedBox(height: StudioSpacing.xs),
+        StudioCheckboxListRow(
           value: autoQualityReviewOnGeneratePrompt,
           onChanged: saving
               ? null
@@ -216,20 +218,21 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: videoDescriptionCtrl,
           minLines: 2,
           maxLines: 4,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchSubtitleLabel,
             helperText: l10n.storyboardVideoWorkbenchSubtitleHelper,
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             TextButton(
               onPressed: saving ? null : onSaveVideoDescription,
@@ -245,29 +248,31 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: liveActionReferenceShotsCtrl,
           minLines: 2,
           maxLines: 4,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchLiveActionRefsLabel,
             helperText: l10n.storyboardVideoWorkbenchLiveActionRefsHelper,
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: liveActionPerformanceNotesCtrl,
           minLines: 2,
           maxLines: 4,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchPerformanceNotesLabel,
             helperText: l10n.storyboardVideoWorkbenchPerformanceNotesHelper,
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
@@ -275,37 +280,38 @@ class _StoryboardVideoSection extends StatelessWidget {
             child: Text(l10n.storyboardVideoWorkbenchSaveLiveAction),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: videoPromptCtrl,
           minLines: 3,
           maxLines: 6,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchVideoPromptLabel,
             alignLabelWithHint: true,
           ),
         ),
         if (promptDiagnostics != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             buildStoryboardVideoPromptDiagnosticsLine(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             buildStoryboardVideoPromptSourceSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             buildStoryboardVideoPromptAnchorSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: studioPanelMutedColor(context),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             buildStoryboardVideoPromptBudgetHint(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -313,7 +319,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ),
           if (repairSuggestions.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.storyboardVideoWorkbenchRepairSuggestionsPrefix(
                 repairSuggestions.join(' / '),
@@ -324,18 +330,19 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: negativeVideoPromptCtrl,
           minLines: 2,
           maxLines: 4,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             labelText: l10n.storyboardVideoWorkbenchNegativePromptLabel,
             helperText: l10n.storyboardVideoWorkbenchNegativePromptHelper,
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -347,7 +354,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: StudioDropdownButtonFormField<String>(
                 initialValue: resolution,
@@ -389,7 +396,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -416,7 +423,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                       },
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: StudioModelCostControls(
                 accessToken: accessToken,
@@ -432,7 +439,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        CheckboxListTile(
+        StudioCheckboxListRow(
           value: audio,
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.storyboardVideoWorkbenchIncludeAudioTitle),
@@ -440,7 +447,7 @@ class _StoryboardVideoSection extends StatelessWidget {
           onChanged: saving ? null : (value) => onAudioChanged(value ?? false),
         ),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton(
               style: studioFormPrimaryButtonStyle(context),
@@ -468,7 +475,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.storyboardVideoWorkbenchSingleTrackHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -476,7 +483,7 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         if (latestExportJob != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.storyboardVideoWorkbenchLatestExportJobLine(
               latestExportJob!.numericTaskId,
@@ -499,15 +506,15 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
         ],
         if (workbenchLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.storyboardVideoWorkbenchSelectedVideoHeading,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           hasSelectedVideo
               ? l10n.storyboardVideoWorkbenchSelectedVideoDetailSelected
@@ -516,15 +523,15 @@ class _StoryboardVideoSection extends StatelessWidget {
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         if (hasSelectedVideo) ...[
           SelectableText(
             selectedVideoUrl,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: [
               OutlinedButton(
                 style: studioFormSecondaryButtonStyle(context),
@@ -546,12 +553,12 @@ class _StoryboardVideoSection extends StatelessWidget {
             l10n.storyboardVideoWorkbenchPickCandidateFirst,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.storyboardVideoWorkbenchCandidatesHeading,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         if (storyboardVideos.isEmpty)
           StudioEmptyState.emptyData(
             title: l10n.storyboardVideoWorkbenchCandidatesEmpty,
@@ -561,7 +568,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             l10n.storyboardVideoWorkbenchCandidatesDetail,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ...storyboardVideos.take(3).map((video) {
           final state = video.state ?? '';
           final duration = video.duration ?? '';
@@ -576,7 +583,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 [
                   if (isCurrent)
@@ -596,9 +603,9 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ].join(' · '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   if (isCurrent)
                     FilledButton.tonal(
@@ -627,9 +634,9 @@ class _StoryboardVideoSection extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               const Divider(height: 1),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
             ],
           );
         }),
@@ -638,7 +645,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             (generateData!.generatingJobs.isNotEmpty ||
                 generateData!.videoWritebackSummary.inFlightGenerationJobCount >
                     0)) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.storyboardVideoWorkbenchInFlightJobsHeading,
             style: Theme.of(context).textTheme.labelLarge,
@@ -663,7 +670,7 @@ class _StoryboardVideoSection extends StatelessWidget {
                       pending.length,
                     );
               return Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                 child: Text(
                   summaryText,
                   style: Theme.of(ctx).textTheme.bodySmall,
@@ -671,11 +678,11 @@ class _StoryboardVideoSection extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ...generateData!.generatingJobs
               .take(3)
               .map(
-                (job) => ListTile(
+                (job) => StudioListRow(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text(job.kind),

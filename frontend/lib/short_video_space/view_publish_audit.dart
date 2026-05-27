@@ -30,14 +30,14 @@ class _PublishAuditPanel extends StatelessWidget {
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         // P11: Delivery mode breakdown
         if (publishPanelUi.jobsByDeliveryMode.isNotEmpty) ...[
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(StudioSpacing.xs),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,16 +48,16 @@ class _PublishAuditPanel extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 6,
+                  spacing: StudioSpacing.radiusComfort,
+                  runSpacing: StudioSpacing.xs,
                   children: publishPanelUi.jobsByDeliveryMode.entries.map((e) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DeliveryModeBadge(deliveryMode: e.key),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoPublishAuditJobCount(e.value),
                           style: theme.textTheme.bodySmall,
@@ -69,11 +69,11 @@ class _PublishAuditPanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         for (final line in publishPanelUi.publishOverviewLines)
           Padding(
-            padding: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
             child: Text(
               line,
               style: theme.textTheme.bodySmall,

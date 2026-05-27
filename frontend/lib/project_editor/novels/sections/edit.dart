@@ -27,7 +27,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
           l10n.projectEditorNovelsWorkbenchEditSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: selectedNovelIdCtrl,
           keyboardType: TextInputType.number,
@@ -35,10 +35,10 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
             labelText: l10n.projectEditorNovelsWorkbenchEditNumericIdLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             OutlinedButton(
               style: studioFormSecondaryButtonStyle(ctx),
@@ -67,14 +67,14 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: patchChapterCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorNovelsWorkbenchEditPatchChapterLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: patchBodyCtrl,
           minLines: 3,
@@ -83,7 +83,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
             labelText: l10n.projectEditorNovelsWorkbenchEditPatchBodyLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: patchIntakeStatusCtrl,
           decoration: InputDecoration(
@@ -91,14 +91,14 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
             helperText: l10n.projectEditorNovelsWorkbenchEditIntakeStatusHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: patchIntakeSourceUrlCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorNovelsWorkbenchEditSourceUrlLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: patchIntakeNoteCtrl,
           maxLines: 2,
@@ -106,7 +106,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
             labelText: l10n.projectEditorNovelsWorkbenchEditIntakeNoteLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(ctx),
           onPressed: localBusy

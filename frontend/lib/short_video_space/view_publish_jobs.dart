@@ -36,7 +36,7 @@ class _PublishJobsPanel extends StatelessWidget {
             // P11: Delivery mode filter chips
             if (publishPanelUi.jobsByDeliveryMode.isNotEmpty)
               Wrap(
-                spacing: 4,
+                spacing: StudioSpacing.chromeActionGap,
                 children: publishPanelUi.jobsByDeliveryMode.entries.map((e) {
                   final isSelected = publishPanelUi.deliveryModeFilter == e.key;
                   return FilterChip(
@@ -44,7 +44,7 @@ class _PublishJobsPanel extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DeliveryModeBadge(deliveryMode: e.key, small: true),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(l10n.l10nBatch_775383c7b6(e.value), style: theme.textTheme.labelSmall),
                       ],
                     ),
@@ -53,19 +53,23 @@ class _PublishJobsPanel extends StatelessWidget {
                         ? null
                         : (_) => publishPanelUi.onDeliveryModeFilterChanged?.call(e.key),
                     showCheckmark: false,
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.chromeActionGap, vertical: 0),
                   );
                 }).toList(),
               ),
           ],
         ),
-        const SizedBox(height: 8),
-        for (final line in publishPanelUi.jobLines)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              line,
-              style: theme.textTheme.bodySmall,
+        const SizedBox(height: StudioSpacing.xs),
+        for (var i = 0; i < publishPanelUi.jobLines.length; i++)
+          studioStaggeredItem(
+            i,
+            entranceKey: publishPanelUi.jobLines.length,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
+              child: Text(
+                publishPanelUi.jobLines[i],
+                style: theme.textTheme.bodySmall,
+              ),
             ),
           ),
       ],

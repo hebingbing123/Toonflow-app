@@ -60,7 +60,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.agentWorkspaceProductionStagesTitle,
           style: Theme.of(context).textTheme.labelLarge,
@@ -72,10 +72,10 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
         const SizedBox(height: StudioSpacing.xs),
         ...stages.map(
           (ProductionWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
-              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -95,10 +95,10 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (stage.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     _buildPromptPreview(context, stage.prompt!.trim()),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDenseActionRow(
                     children: <Widget>[
                       StudioChip(
@@ -208,7 +208,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
               side: BorderSide(color: tokens.borderSubtle),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -222,10 +222,10 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (recipe.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     _buildPromptPreview(context, recipe.prompt!.trim()),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDenseActionRow(
                     children: <Widget>[
                       StudioChip(

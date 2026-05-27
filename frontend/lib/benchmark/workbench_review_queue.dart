@@ -4,6 +4,7 @@ import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Widget for managing benchmark review queue
 class BenchmarkReviewQueueWorkbench extends StatelessWidget {
@@ -55,14 +56,14 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: reviewQueueIdController,
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelReviewQueueId,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: reviewScoreJsonController,
               maxLines: 6,
@@ -70,7 +71,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                 labelText: l10n.benchmarkLabelSubmittedScoreJson,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed: busy || reviewQueueIdController.text.trim().isEmpty
@@ -85,7 +86,7 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                 labelText: l10n.benchmarkLabelSkipReasonOptional,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed: busy || reviewQueueIdController.text.trim().isEmpty
@@ -109,15 +110,19 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                 ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               ...reviewQueue.take(5).map(
-                    (item) => ListTile(
+                    (item) => StudioListRow(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         '${item.reviewType} · ${item.status} · P${item.priority}',
                       ),
-                      subtitle: Text(item.prompt),
+                      subtitle: Text(
+                        item.prompt,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       onTap: () => onReviewSelected(item.id),
                     ),
                   ),

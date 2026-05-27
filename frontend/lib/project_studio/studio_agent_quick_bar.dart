@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
+import '../design_system/tokens.dart';
 
 /// Huobao-style one-click agent actions (Wave 3b).
 class StudioAgentQuickBar extends StatelessWidget {
@@ -71,7 +72,7 @@ class StudioAgentQuickBar extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
-      child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+      child: Wrap(spacing: StudioSpacing.xs, runSpacing: StudioSpacing.xs, children: chips),
     );
   }
 }

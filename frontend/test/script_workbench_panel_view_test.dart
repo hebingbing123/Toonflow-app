@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
 import 'support/studio_workbench_section_test_support.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/support.dart';
@@ -167,7 +168,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byType(StudioSkeleton), findsWidgets);
     expect(
       disabledButtonWithText(_zh.projectEditorScriptsSingleWorkbenchSyncBusy),
       findsOneWidget,

@@ -96,7 +96,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
       (ProductWorkspacePane.helpHub, l10n.productNavHelp, null),
     ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -104,10 +104,10 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
             l10n.productNavSectionTitle,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: paneEntries
                 .map((entry) {
                   final pane = entry.$1;
@@ -157,15 +157,15 @@ class _PlatformPaneDisabledNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             decoration: studioRecessedPanelDecoration(context),
             child: Text(reason, style: theme.textTheme.bodySmall),
           ),

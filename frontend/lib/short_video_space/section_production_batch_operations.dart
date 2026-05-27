@@ -309,7 +309,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     hintText: dlgL10n.shortVideoBatchReplaceFindPatternHint,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 TextField(
                   controller: replacementCtrl,
                   decoration: InputDecoration(
@@ -317,7 +317,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     hintText: dlgL10n.shortVideoBatchReplaceWithHint,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   dlgL10n.shortVideoBatchReplaceUrlDescription,
                   style: Theme.of(ctx).textTheme.bodySmall,
@@ -509,7 +509,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LinearProgressIndicator(value: progress),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     Text(
                       dlgL10n.shortVideoBatchVoiceoverQueueProgress(
                         totalProcessed,
@@ -518,7 +518,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       ),
                       style: Theme.of(ctx).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       dlgL10n.shortVideoBatchVoiceoverQueueStats(
                         totalSuccessful,
@@ -527,22 +527,32 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       style: Theme.of(ctx).textTheme.bodyMedium,
                     ),
                     if (failedItems.isNotEmpty) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       const Divider(),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         dlgL10n.shortVideoBatchVoiceoverQueueFailedHeading,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       SizedBox(
-                        height: 120,
+                        height: studioAdaptiveDialogHeight(
+                          context,
+                          fraction: 0.18,
+                          min: 96,
+                          max: 200,
+                        ),
                         child: ListView.builder(
                           itemCount: failedItems.length,
                           itemBuilder: (ctx, idx) {
                             final item = failedItems[idx];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
+                            return studioStaggeredItem(
+                              idx,
+                              entranceKey: failedItems.length,
+                              child: Padding(
+                              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                               child: Text(
                                 dlgL10n.shortVideoBatchVoiceoverQueueFailedLine(
                                   item.shotId,
@@ -553,6 +563,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                                       color: Theme.of(ctx).colorScheme.error,
                                     ),
                               ),
+                            ),
                             );
                           },
                         ),
@@ -665,9 +676,25 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         return StudioAlertDialog(
           content: Row(
             children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 16),
-              Expanded(child: Text(dlgL10n.shortVideoBatchGeneratingVoiceover)),
+              StudioAsyncDataView(
+                loading: true,
+                loadingPlaceholder: StudioLoadingPlaceholder.list,
+                loadingItemCount: 1,
+                scrollableLoading: false,
+                child: Row(
+                  children: <Widget>[
+                    const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: StudioSpacing.sm),
+                    Expanded(
+                      child: Text(dlgL10n.shortVideoBatchGeneratingVoiceover),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         );

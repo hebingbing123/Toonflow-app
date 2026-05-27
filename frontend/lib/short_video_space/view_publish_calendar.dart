@@ -31,7 +31,7 @@ class _PublishCalendarPanel extends StatelessWidget {
             color: studioPanelMutedColor(context),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         PublishScheduleCalendar(
           drafts: publishPanelUi.publishScheduleCalendarDrafts ?? [],
           busy: publishPanelUi.publishBusy,

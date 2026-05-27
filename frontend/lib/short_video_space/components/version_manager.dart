@@ -10,6 +10,11 @@ import 'version_comparison.dart';
 import 'package:openflow_app/design_system/components/studio_card.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// 成片版本数据模型
 class AssemblyVersion {
@@ -195,9 +200,9 @@ class _VersionManagerState extends State<VersionManager> {
     );
 
     return Card(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(StudioSpacing.xs),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,49 +248,20 @@ class _VersionManagerState extends State<VersionManager> {
                   ),
                 ],
               ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
 
-              // 错误消息
               if (_errorMessage != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: theme.colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(
-                            color: theme.colorScheme.onErrorContainer,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: () {
-                          setState(() {
-                            _errorMessage = null;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                StudioApiErrorCallout(
+                  error: _errorMessage!,
+                  emphasis: StudioApiErrorCalloutEmphasis.subtle,
+                  onDismiss: () => setState(() => _errorMessage = null),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
               ],
 
               // 当前版本信息
               Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               decoration: BoxDecoration(
                 color: StudioTokens.of(context).primarySoft,
                 borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -297,7 +273,7 @@ class _VersionManagerState extends State<VersionManager> {
                     color: theme.colorScheme.primary,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +303,7 @@ class _VersionManagerState extends State<VersionManager> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
 
             // 版本列表
             Text(
@@ -336,7 +312,7 @@ class _VersionManagerState extends State<VersionManager> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
 
             if (widget.versions.isEmpty)
               StudioEmptyState.emptyData(
@@ -354,13 +330,24 @@ class _VersionManagerState extends State<VersionManager> {
                         final isCurrent = version.id == widget.currentVersionId;
 
                         return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
+                          margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
                           color: isCurrent
                               ? StudioTokens.of(context).primarySoft.withValues(
                                   alpha: 0.72,
                                 )
                               : null,
-                          child: ListTile(
+                          child: StudioListRow(
+                            onAlternate: !isCurrent && !_isLoading
+                                ? () => _handleSwitchVersion(version.id)
+                                : null,
+                            alternateLabel: l10n
+                                .shortVideoVersionManagerTooltipSwitchVersion,
+                            alternateIcon: Icons.swap_horiz,
+                            onDelete: !_isLoading && !isCurrent
+                                ? () => _handleDeleteVersion(version)
+                                : null,
+                            deleteLabel: l10n
+                                .shortVideoVersionManagerTooltipDeleteVersion,
                             leading: Icon(
                               isCurrent
                                   ? Icons.radio_button_checked
@@ -371,10 +358,10 @@ class _VersionManagerState extends State<VersionManager> {
                             ),
                             title: Text(
                               version.name,
-                              style: TextStyle(
+                              style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: isCurrent
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                               ),
                             ),
                             subtitle: Text(
@@ -413,7 +400,7 @@ class _VersionManagerState extends State<VersionManager> {
                 ],
               ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: StudioSpacing.md),
 
             // 草稿列表
             Row(
@@ -436,7 +423,7 @@ class _VersionManagerState extends State<VersionManager> {
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
 
             if (widget.drafts.isEmpty)
               StudioEmptyState.emptyData(
@@ -454,15 +441,27 @@ class _VersionManagerState extends State<VersionManager> {
                   final draft = widget.drafts[index];
 
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                     child: StudioCard(
                       padding: EdgeInsets.zero,
-                      child: ListTile(
+                      child: StudioListRow(
+                      onRestore: !_isLoading
+                          ? () => _handleRestoreDraft(draft)
+                          : null,
+                      onDelete: !_isLoading
+                          ? () => _handleDeleteDraft(draft)
+                          : null,
+                      deleteLabel:
+                          l10n.shortVideoVersionManagerTooltipDeleteDraft,
                       leading: Icon(
                         Icons.drafts_outlined,
                         color: theme.colorScheme.secondary,
                       ),
-                      title: Text(draft.name),
+                      title: Text(
+                        draft.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(
                         l10n.shortVideoVersionManagerDraftRowSubtitle(
                           draft.shotCount,
@@ -496,12 +495,13 @@ class _VersionManagerState extends State<VersionManager> {
                 ],
               ),
 
-            // 加载指示器
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              ),
+            StudioAsyncDataView(
+              loading: _isLoading,
+              loadingPlaceholder: StudioLoadingPlaceholder.list,
+              loadingItemCount: 3,
+              scrollableLoading: false,
+              child: const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -525,7 +525,7 @@ class _VersionManagerState extends State<VersionManager> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.shortVideoVersionManagerCreateVersionDialogBody),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   TextField(
                     decoration: InputDecoration(
                       labelText: l10n.shortVideoVersionManagerVersionNameLabel,
@@ -758,7 +758,7 @@ class _VersionManagerState extends State<VersionManager> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.shortVideoVersionManagerSaveDraftDialogBody),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   TextField(
                     decoration: InputDecoration(
                       labelText: l10n.shortVideoVersionManagerDraftNameLabel,
@@ -858,7 +858,7 @@ class _VersionManagerState extends State<VersionManager> {
             width: double.maxFinite,
             child: widget.drafts.isEmpty
                 ? Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(StudioSpacing.md),
                     child: Center(
                       child: Text(l10n.shortVideoVersionManagerNoDraftsInList),
                     ),
@@ -869,11 +869,24 @@ class _VersionManagerState extends State<VersionManager> {
                       final draft = widget.drafts[index];
                       final theme = Theme.of(context);
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                      return studioStaggeredItem(
+                        index,
+                        entranceKey: widget.drafts.length,
+                        child: Padding(
+                        padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                         child: StudioCard(
                           padding: EdgeInsets.zero,
-                          child: ListTile(
+                          child: StudioListRow(
+                          onRestore: () {
+                            Navigator.of(context).pop();
+                            _handleRestoreDraft(draft);
+                          },
+                          onDelete: () {
+                            Navigator.of(context).pop();
+                            _handleDeleteDraft(draft);
+                          },
+                          deleteLabel:
+                              l10n.shortVideoVersionManagerTooltipDeleteDraft,
                           leading: Icon(
                             Icons.drafts_outlined,
                             color: theme.colorScheme.secondary,
@@ -911,6 +924,7 @@ class _VersionManagerState extends State<VersionManager> {
                           ),
                         ),
                       ),
+                    ),
                     );
                     },
                   ),
@@ -1067,7 +1081,7 @@ class _VersionManagerState extends State<VersionManager> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.shortVideoVersionManagerCompareBaseLabel),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioDropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -1097,9 +1111,9 @@ class _VersionManagerState extends State<VersionManager> {
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     Text(l10n.shortVideoVersionManagerCompareTargetLabel),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioDropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),

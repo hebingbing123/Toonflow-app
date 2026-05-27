@@ -275,31 +275,36 @@ class _StoryboardBatchWorkbenchDialogState
               l10n.scriptEditorStoryboardBatchDialogIntro,
               style: studioHintStyle(context),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _buildDiagnosisCard(
               context,
               diagnosis,
               recommendedAction,
               recommendedActionLabel,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _buildBatchWorkbenchTopActions(),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildBatchWorkbenchPromptSection(),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildBatchWorkbenchModelSection(),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _buildBatchWorkbenchMutationActions(
               selected: selected,
               singleSelectedId: singleSelectedId,
             ),
             if (_statusLine != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(_statusLine!, style: Theme.of(context).textTheme.bodySmall),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             SizedBox(
-              height: 280,
+              height: studioAdaptiveDialogHeight(
+                context,
+                fraction: 0.38,
+                min: 200,
+                max: 400,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -307,7 +312,7 @@ class _StoryboardBatchWorkbenchDialogState
                       productionMap: productionMap,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: StudioSpacing.sm),
                   Expanded(
                     child: _buildBatchWorkbenchPreviewPanel(
                       context: context,
@@ -337,7 +342,7 @@ class _StoryboardBatchWorkbenchDialogState
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioRecessedPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,9 +351,9 @@ class _StoryboardBatchWorkbenchDialogState
             diagnosis.summary,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           FilledButton.tonal(
             style: studioFormTonalButtonStyle(context),
             onPressed: recommendedAction,

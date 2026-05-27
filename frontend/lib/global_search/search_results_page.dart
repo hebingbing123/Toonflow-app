@@ -550,7 +550,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 .map(
                   (view) => ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(view.title),
+                    title: Text(
+                      view.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     subtitle: Text(
                       [
                         view.query,
@@ -849,6 +853,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       focusNode: _focusNode,
       onKeyEvent: (node, event) => _handleKeyboardNavigation(event),
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(l10n.globalSearchTitle(widget.query)),
           actions: [

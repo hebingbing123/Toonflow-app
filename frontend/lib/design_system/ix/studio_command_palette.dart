@@ -5,7 +5,9 @@ import '../../l10n/app_localizations.dart';
 import '../components/studio_dialog_shell.dart';
 import '../components/studio_empty_state.dart';
 import '../components/studio_surfaces.dart';
+import '../components/studio_entrance_motion.dart';
 import '../tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Command palette action (⌘K / Ctrl+K).
 class StudioCommandAction {
@@ -113,7 +115,7 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520, maxHeight: 420),
         child: Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           child: DecoratedBox(
             decoration: studioInsetPanelDecoration(context),
             child: ClipRRect(
@@ -157,23 +159,27 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                             itemCount: items.length,
                             itemBuilder: (context, index) {
                               final action = items[index];
-                              return ListTile(
-                                minVerticalPadding: 10,
-                                leading: Icon(
-                                  action.icon ?? Icons.chevron_right,
-                                  color: tokens.textSecondary,
+                              return studioStaggeredItem(
+                                index,
+                                entranceKey: items.length,
+                                child: StudioListRow(
+                                  minVerticalPadding: 10,
+                                  leading: Icon(
+                                    action.icon ?? Icons.chevron_right,
+                                    color: tokens.textSecondary,
+                                  ),
+                                  title: Text(
+                                    action.label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: tokens.textPrimary),
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    action.onInvoke();
+                                  },
                                 ),
-                                title: Text(
-                                  action.label,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(color: tokens.textPrimary),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                  action.onInvoke();
-                                },
                               );
                             },
                           ),

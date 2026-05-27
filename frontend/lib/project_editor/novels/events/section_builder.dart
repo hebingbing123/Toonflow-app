@@ -31,7 +31,7 @@ Widget buildProjectNovelEventsWorkbenchSection({
 
   return Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
     decoration: studioInsetPanelDecoration(ctx),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,9 +53,9 @@ Widget buildProjectNovelEventsWorkbenchSection({
             color: studioPanelMutedColor(ctx),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(ctx),

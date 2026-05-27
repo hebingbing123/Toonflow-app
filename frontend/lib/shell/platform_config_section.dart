@@ -462,25 +462,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     );
   }
 
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return DecoratedBox(
-      decoration: studioInsetPanelDecoration(context),
-      child: const Padding(
-        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            StudioSkeleton(height: 18),
-            SizedBox(height: 16),
-            StudioSkeleton(height: 48),
-            SizedBox(height: 16),
-            StudioSkeleton(height: 48),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildInsetConfigSection(
     BuildContext context, {
     required String title,
@@ -504,7 +485,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
               const SizedBox(height: StudioLayoutSpacing.titleTight),
               Text(stateLine, style: studioSectionIntroStyle(context)),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             child,
           ],
         ),
@@ -519,7 +500,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
   }) {
     return Column(
       children: [
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.helpHubEnabled,
           onChanged: onChanged == null
               ? null
@@ -527,7 +508,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigToggleHelpHubTitle),
           subtitle: Text(l10n.platformConfigToggleHelpHubSubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.qualityDashboardEnabled,
           onChanged: onChanged == null
               ? null
@@ -535,7 +516,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigToggleQualityMainTitle),
           subtitle: Text(l10n.platformConfigToggleQualityMainSubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.qualityRefreshControlsEnabled,
           onChanged: onChanged == null
               ? null
@@ -544,7 +525,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigToggleQualityRefreshTitle),
           subtitle: Text(l10n.platformConfigToggleQualityRefreshSubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.platformStatusEnabled,
           onChanged: onChanged == null
               ? null
@@ -552,7 +533,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigTogglePlatformStatusTitle),
           subtitle: Text(l10n.platformConfigTogglePlatformStatusSubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.workspaceActivityEnabled,
           onChanged: onChanged == null
               ? null
@@ -560,7 +541,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigToggleWorkspaceActivityTitle),
           subtitle: Text(l10n.platformConfigToggleWorkspaceActivitySubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.benchmarkPaneEnabled,
           onChanged: onChanged == null
               ? null
@@ -568,7 +549,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           title: Text(l10n.platformConfigToggleBenchmarkTitle),
           subtitle: Text(l10n.platformConfigToggleBenchmarkSubtitle),
         ),
-        SwitchListTile(
+        StudioSwitchListRow(
           value: draft.jobsPaneEnabled,
           onChanged: onChanged == null
               ? null
@@ -682,18 +663,22 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
               ],
             ),
           ),
-          if (_error != null) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            Text(
-              _error!,
-              style: TextStyle(color: StudioTokens.of(context).danger),
-            ),
-          ],
-          if (_loading && _response == null) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            _buildStudioLoadingBody(context),
-          ],
-          if (_response != null) ...<Widget>[
+          StudioAsyncDataView(
+            loading: _loading && _response == null,
+            error: _response == null && !_loading ? _error : null,
+            onRetry: _load,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (_error != null && _response != null) ...<Widget>[
+                  const SizedBox(height: StudioLayoutSpacing.stackMedium),
+                  StudioApiErrorCallout(
+                    error: _error!,
+                    onRetry: _load,
+                    emphasis: StudioApiErrorCalloutEmphasis.subtle,
+                  ),
+                ],
+                if (_response != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
             DecoratedBox(
               decoration: studioInsetPanelDecoration(context),
@@ -721,8 +706,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                 ),
               ),
             ),
-          ],
-          if (_response != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
             _buildInsetConfigSection(
               context,
@@ -739,7 +722,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                     style: studioSectionIntroStyle(context),
                   ),
                   if (_response!.planOverride != null) ...<Widget>[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     _buildToggleEditor(
                       l10n: l10n,
                       draft: _response!.planOverride!,
@@ -796,7 +779,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                 onChanged: _patchUserDraft,
               ),
             ),
-          ],
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );

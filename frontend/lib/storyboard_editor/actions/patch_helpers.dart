@@ -89,7 +89,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                   scopeCtrl.text = value;
                                 },
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioDropdownButtonFormField<String>(
                           initialValue: modelTierCtrl.text,
                           decoration: InputDecoration(
@@ -111,7 +111,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                   modelTierCtrl.text = value;
                                 },
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextField(
                           controller: idsCtrl,
                           decoration: InputDecoration(
@@ -119,7 +119,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                             helperText: l10n.storyboardPatchTargetIdsHelper,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextField(
                           controller: reasonCtrl,
                           minLines: 3,
@@ -130,7 +130,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                             alignLabelWithHint: true,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           l10n.storyboardPatchScopeHint,
                           style: Theme.of(context).textTheme.bodySmall
@@ -139,14 +139,14 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               ),
                         ),
                         if (submitSummary != null) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: StudioSpacing.sm),
                           Text(
                             submitSummary!,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                         if (attributionSummary != null) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           Text(
                             '${l10n.storyboardPatchAttributionLabel} $attributionSummary',
                             style: Theme.of(context).textTheme.bodySmall
@@ -156,15 +156,15 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                           ),
                         ],
                         if (repairPriority.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           Text(
                             l10n.storyboardPatchRepairPriorityHeading,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           for (final item in repairPriority)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
+                              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                               child: Text(
                                 item,
                                 style: Theme.of(context).textTheme.bodySmall

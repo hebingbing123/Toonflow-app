@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/layout_breakpoints.dart';
+import '../design_system/studio_network_image.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
@@ -16,6 +20,7 @@ import '../rust_api.dart';
 import 'panels/assembly_input_panel.dart';
 import 'publish_copy_editor.dart';
 import 'publish_schedule_calendar.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 // Part files for extracted widget components
 part 'view_project_selector.dart';
@@ -745,10 +750,13 @@ class DeliveryModeBadge extends StatelessWidget {
 
     if (small) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.xs,
+          vertical: StudioSpacing.chromeActionGap,
+        ),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         ),
         child: Text(
           label,
@@ -761,10 +769,13 @@ class DeliveryModeBadge extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.xs,
+        vertical: StudioSpacing.chromeActionGap,
+      ),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
         border: Border.all(color: textColor.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -1034,13 +1045,13 @@ class ShortVideoSpaceView extends StatelessWidget {
                   l10n.shortVideoSpaceSectionCreativeMode,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
                 const SizedBox(height: StudioSpacing.sm),
                 Text(modeTitle, style: theme.textTheme.titleMedium),
                 const SizedBox(height: StudioSpacing.xs),
                 Text(modeSummary, style: studioMutedBodyMedium(context)),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(modeAdvice, style: theme.textTheme.bodySmall),
               ],
             ),
@@ -1191,7 +1202,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                       l10n.shortVideoSpaceSectionModeReadiness,
                       style: theme.textTheme.titleSmall,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     LayoutBuilder(
                       builder: (context, innerConstraints) {
                         final inlineHeader =
@@ -1219,7 +1230,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             intro,
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             readyChip,
                           ],
                         );
@@ -1230,7 +1241,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                       readinessGapSummary,
                       style: studioMutedBodySmall(context),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: StudioSpacing.sm),
                     _ReadinessFlowStrip(items: readinessItems),
                   ],
                 );
@@ -1242,7 +1253,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                       l10n.shortVideoSpaceSectionShotReadinessServer,
                       style: theme.textTheme.titleSmall,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     if (shotReadinessUi.loading)
                       Text(
                         l10n.shortVideoSpaceShotReadinessLoading,
@@ -1264,10 +1275,12 @@ class ShortVideoSpaceView extends StatelessWidget {
                           style: studioMutedBodyMedium(context),
                         ),
                       if (shotReadinessUi.reasonLines.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         for (final line in shotReadinessUi.reasonLines)
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
+                            padding: const EdgeInsets.only(
+                              bottom: StudioSpacing.chromeActionGap,
+                            ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -1288,7 +1301,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                           ),
                       ],
                       if (shotReadinessUi.shotDetailLines.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoSpaceShotReadinessPriorityShots,
                           style: theme.textTheme.labelLarge,
@@ -1296,7 +1309,9 @@ class ShortVideoSpaceView extends StatelessWidget {
                         const SizedBox(height: StudioSpacing.xs),
                         for (final line in shotReadinessUi.shotDetailLines)
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
+                            padding: const EdgeInsets.only(
+                              bottom: StudioSpacing.chromeActionGap,
+                            ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -1374,7 +1389,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                       l10n.shortVideoSpaceSectionSuggestedNext,
                       style: theme.textTheme.titleSmall,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(nextStepTitle, style: theme.textTheme.titleMedium),
                     const SizedBox(height: StudioSpacing.xs),
                     Text(nextStepDetail, style: studioMutedBodyMedium(context)),
@@ -1434,7 +1449,7 @@ class _Panel extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return Container(
       padding: EdgeInsets.all(
-        dense ? StudioLayoutSpacing.cardInner - 4 : StudioLayoutSpacing.cardInner,
+        dense ? StudioSpacing.radiusComfort : StudioLayoutSpacing.cardInner,
       ),
       decoration: BoxDecoration(
         color: tokens.bgSurface.withValues(alpha: 0.96),
@@ -1584,7 +1599,10 @@ class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
                 parent: BouncingScrollPhysics(),
               ),
               clipBehavior: Clip.none,
-              padding: const EdgeInsets.only(bottom: 4, right: 8),
+              padding: const EdgeInsets.only(
+                bottom: StudioSpacing.chromeActionGap,
+                right: StudioSpacing.xs,
+              ),
               child: lane,
             ),
           ),
@@ -1612,7 +1630,6 @@ class _FlowArrowIcon extends StatelessWidget {
 class _StageFlowStrip extends StatelessWidget {
   const _StageFlowStrip({required this.cards});
 
-  static const double _nodeWidth = 208;
   /// Must fit [_FlowNodeShell] vertical padding plus two label lines (see layout).
   static const double _nodeMinHeight = 68;
 
@@ -1623,9 +1640,20 @@ class _StageFlowStrip extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final muted = studioMutedTextColor(context);
-    return _HorizontalFlowLane(
-      nodeWidth: _nodeWidth,
-      nodeMinHeight: _nodeMinHeight,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final laneWidth = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final nodeWidth = studioFlowNodeWidth(
+          laneWidth,
+          cards.length,
+          minNodeWidth: 140,
+          maxNodeWidth: 220,
+        );
+        return _HorizontalFlowLane(
+          nodeWidth: nodeWidth,
+          nodeMinHeight: _nodeMinHeight,
       cells: cards
           .map(
             (card) => _FlowLaneCell(
@@ -1666,6 +1694,8 @@ class _StageFlowStrip extends StatelessWidget {
             ),
           )
           .toList(growable: false),
+        );
+      },
     );
   }
 }
@@ -1713,10 +1743,26 @@ class _CandidateCompareCard extends StatelessWidget {
         : l10n.shortVideoCandidateCompareStoryboardOnly(
             item.storyboardNumericId,
           );
-    return SizedBox(
-      width: 280,
-      child: Container(
-        padding: const EdgeInsets.all(12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : studioWrapTileWidth(
+                MediaQuery.sizeOf(context).width,
+                maxColumns: 1,
+                minTileWidth: 260,
+                maxTileWidth: double.infinity,
+              );
+        final previewHeight = studioPreviewImageHeight(
+          280,
+          fraction: 0.45,
+          min: 120,
+          max: 200,
+        );
+        return SizedBox(
+          width: cardWidth,
+          child: Container(
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: tokens.bgSurface.withValues(alpha: 0.96),
           border: Border.all(color: tokens.borderSubtle),
@@ -1726,7 +1772,7 @@ class _CandidateCompareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(header, style: studioCardTitleStyle(context)),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(item.readinessLine, style: theme.textTheme.bodySmall),
             const SizedBox(height: StudioSpacing.xs),
             Text(
@@ -1740,14 +1786,14 @@ class _CandidateCompareCard extends StatelessWidget {
             if ((item.referenceImageUrl ?? '').trim().isNotEmpty) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.network(
-                  item.referenceImageUrl!,
-                  height: 120,
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                child: StudioNetworkImage(
+                  url: item.referenceImageUrl!,
+                  height: previewHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => Container(
-                    height: 120,
+                    height: previewHeight,
                     color: theme.colorScheme.surfaceContainerHighest,
                     alignment: Alignment.center,
                     child: Text(
@@ -1758,7 +1804,7 @@ class _CandidateCompareCard extends StatelessWidget {
               ),
             ],
             if (item.liveActionReferenceShotUrls.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.shortVideoCandidateLiveRefShotCount(
                   item.liveActionReferenceShotUrls.length,
@@ -1772,7 +1818,7 @@ class _CandidateCompareCard extends StatelessWidget {
               ),
             ],
             if ((item.selectedVideoUrl ?? '').trim().isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.shortVideoCandidateCurrentVideo,
                 style: theme.textTheme.labelMedium,
@@ -1784,7 +1830,7 @@ class _CandidateCompareCard extends StatelessWidget {
               ),
             ],
             if (item.candidateVideoUrls.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.shortVideoCandidateVideoListTitle,
                 style: theme.textTheme.labelMedium,
@@ -1794,7 +1840,7 @@ class _CandidateCompareCard extends StatelessWidget {
                 final isCurrent =
                     url.trim() == (item.selectedVideoUrl ?? '').trim();
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1816,9 +1862,9 @@ class _CandidateCompareCard extends StatelessWidget {
                 );
               }),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [
                 if (item.onSetCurrent != null)
                   FilledButton.tonal(
@@ -1837,6 +1883,8 @@ class _CandidateCompareCard extends StatelessWidget {
           ],
         ),
       ),
+        );
+      },
     );
   }
 }
@@ -1853,8 +1901,8 @@ class _MetricChip extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: StudioSpacing.xs + 2,
-        vertical: StudioSpacing.xs / 2 + 2,
+        horizontal: StudioSpacing.xs,
+        vertical: StudioSpacing.chromeActionGap,
       ),
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.72),
@@ -1875,7 +1923,6 @@ class _MetricChip extends StatelessWidget {
 class _ReadinessFlowStrip extends StatelessWidget {
   const _ReadinessFlowStrip({required this.items});
 
-  static const double _nodeWidth = 132;
   static const double _nodeMinHeight = 40;
 
   final List<ShortVideoReadinessItem> items;
@@ -1884,9 +1931,20 @@ class _ReadinessFlowStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = studioMutedTextColor(context);
-    return _HorizontalFlowLane(
-      nodeWidth: _nodeWidth,
-      nodeMinHeight: _nodeMinHeight,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final laneWidth = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final nodeWidth = studioFlowNodeWidth(
+          laneWidth,
+          items.length,
+          minNodeWidth: 108,
+          maxNodeWidth: 168,
+        );
+        return _HorizontalFlowLane(
+          nodeWidth: nodeWidth,
+          nodeMinHeight: _nodeMinHeight,
       cells: items
           .map(
             (item) => _FlowLaneCell(
@@ -1903,6 +1961,8 @@ class _ReadinessFlowStrip extends StatelessWidget {
             ),
           )
           .toList(growable: false),
+        );
+      },
     );
   }
 }
@@ -1988,10 +2048,13 @@ class _WritebackStatusChip extends StatelessWidget {
         ? theme.colorScheme.onErrorContainer
         : theme.colorScheme.onSecondaryContainer;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.xs,
+        vertical: StudioSpacing.chromeActionGap,
+      ),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

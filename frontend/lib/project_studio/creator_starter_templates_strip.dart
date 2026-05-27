@@ -87,10 +87,10 @@ class _StarterCard extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(

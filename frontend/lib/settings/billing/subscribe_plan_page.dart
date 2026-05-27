@@ -3,9 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../design_system/components/studio_async_data_view.dart';
+import '../../design_system/components/studio_loading_placeholders.dart';
 import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/studio_responsive_layout.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
@@ -72,7 +76,7 @@ class _SubscribePlanPageState extends State<SubscribePlanPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -122,7 +126,9 @@ class _SubscribePlanPageState extends State<SubscribePlanPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     }
   }
@@ -135,7 +141,9 @@ class _SubscribePlanPageState extends State<SubscribePlanPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     }
   }
@@ -144,55 +152,114 @@ class _SubscribePlanPageState extends State<SubscribePlanPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: Text(l10n.billingSubscribeTitle)),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(_error!),
-                  TextButton(onPressed: _load, child: Text(l10n.taskCenterRetry)),
-                ],
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-              children: <Widget>[
-                if (widget.currentPlanTier != null)
-                  Text(
-                    l10n.billingCurrentPlan(
-                      planTierDisplayName(l10n, widget.currentPlanTier!),
-                    ),
-                    style: studioSectionIntroStyle(context),
+      body: StudioAsyncDataView(
+        loading: _loading,
+        error: _error,
+        onRetry: _load,
+        loadingPlaceholder: StudioLoadingPlaceholder.list,
+        loadingItemCount: 3,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = studioGridCrossAxisCount(
+              constraints.maxWidth,
+              handset: 1,
+              tablet: 1,
+              desktop: 2,
+            );
+            final header = <Widget>[
+              if (widget.currentPlanTier != null)
+                Text(
+                  l10n.billingCurrentPlan(
+                    planTierDisplayName(l10n, widget.currentPlanTier!),
                   ),
-                const SizedBox(height: StudioSpacing.md),
-                for (final plan in _plans) ...<Widget>[
-                  _PlanCard(
-                    plan: plan,
-                    highlighted: plan.planTier == widget.currentPlanTier,
-                    onAlipay: plan.providers.contains('alipay')
-                        ? () => _checkout(plan.planTier, 'alipay')
-                        : null,
-                    onStripe: plan.providers.contains('stripe')
-                        ? () => _checkout(plan.planTier, 'stripe')
-                        : null,
-                    onBitpay: plan.providers.contains('bitpay')
-                        ? () => _checkout(plan.planTier, 'bitpay')
-                        : null,
-                  ),
-                  const SizedBox(height: StudioSpacing.md),
-                ],
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: _openPortal,
-                    child: Text(l10n.billingManageSubscription),
-                  ),
+                  style: studioSectionIntroStyle(context),
                 ),
+              const SizedBox(height: StudioSpacing.md),
+            ];
+            final footer = Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: _openPortal,
+                child: Text(l10n.billingManageSubscription),
+              ),
+            );
+            if (crossAxisCount <= 1) {
+              return ListView(
+                padding: const EdgeInsets.all(
+                  StudioLayoutSpacing.insetComfortable,
+                ),
+                children: <Widget>[
+                  ...header,
+                  for (var i = 0; i < _plans.length; i++) ...<Widget>[
+                    studioStaggeredItem(
+                      i,
+                      entranceKey: _plans.length,
+                      child: _PlanCard(
+                        plan: _plans[i],
+                        highlighted: _plans[i].planTier == widget.currentPlanTier,
+                        onAlipay: _plans[i].providers.contains('alipay')
+                            ? () => _checkout(_plans[i].planTier, 'alipay')
+                            : null,
+                        onStripe: _plans[i].providers.contains('stripe')
+                            ? () => _checkout(_plans[i].planTier, 'stripe')
+                            : null,
+                        onBitpay: _plans[i].providers.contains('bitpay')
+                            ? () => _checkout(_plans[i].planTier, 'bitpay')
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: StudioSpacing.md),
+                  ],
+                  footer,
+                ],
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.all(
+                StudioLayoutSpacing.insetComfortable,
+              ),
+              children: <Widget>[
+                ...header,
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: StudioSpacing.md,
+                    crossAxisSpacing: StudioSpacing.md,
+                    childAspectRatio: 0.82,
+                  ),
+                  itemCount: _plans.length,
+                  itemBuilder: (context, index) {
+                    final plan = _plans[index];
+                    return studioStaggeredItem(
+                      index,
+                      entranceKey: _plans.length,
+                      child: _PlanCard(
+                        plan: plan,
+                        highlighted: plan.planTier == widget.currentPlanTier,
+                        onAlipay: plan.providers.contains('alipay')
+                            ? () => _checkout(plan.planTier, 'alipay')
+                            : null,
+                        onStripe: plan.providers.contains('stripe')
+                            ? () => _checkout(plan.planTier, 'stripe')
+                            : null,
+                        onBitpay: plan.providers.contains('bitpay')
+                            ? () => _checkout(plan.planTier, 'bitpay')
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: StudioSpacing.md),
+                footer,
               ],
-            ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -230,7 +297,12 @@ class _PlanCard extends StatelessWidget {
             const SizedBox(height: StudioSpacing.xs),
             Text(plan.priceLabel, style: studioPageTitleStyle(context)),
             const SizedBox(height: StudioSpacing.xs),
-            Text(plan.description, style: studioSectionIntroStyle(context)),
+            Text(
+              plan.description,
+              style: studioSectionIntroStyle(context),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: StudioSpacing.md),
             if (onAlipay != null)
               StudioToolbarButton(

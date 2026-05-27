@@ -197,7 +197,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
   Widget build(BuildContext context) {
     final l10n = _l10n;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -216,7 +216,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 Icons.audiotrack,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Text(
                   l10n.shortVideoAudioPreviewTitle,
@@ -233,42 +233,21 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
 
-          // Error message
           if (_errorMessage != null) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            StudioApiErrorCallout(
+              error: _errorMessage!,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
+              onDismiss: () => setState(() => _errorMessage = null),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
           ],
 
           // Loading indicator
           if (_isLoading) ...[
-            const Center(child: CircularProgressIndicator()),
-            const SizedBox(height: 8),
+            const Center(child: StudioMediaTileSkeleton()),
+            const SizedBox(height: StudioSpacing.xs),
             Center(
               child: Text(
                 l10n.shortVideoAudioPreviewLoading,
@@ -285,7 +264,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                     context,
                   ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
@@ -309,7 +288,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Text(
                   _formatDuration(_duration),
                   style: Theme.of(
@@ -318,7 +297,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
 
             // Playback controls
             Row(
@@ -331,7 +310,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                   tooltip: l10n.shortVideoAudioPreviewTooltipStop,
                   iconSize: 28,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: StudioSpacing.sm),
 
                 // Play/Pause button
                 IconButton(
@@ -349,7 +328,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
 
             // Volume control
             Row(
@@ -362,7 +341,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                       : Icons.volume_up,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
@@ -386,7 +365,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
                   width: 40,
                   child: Text(

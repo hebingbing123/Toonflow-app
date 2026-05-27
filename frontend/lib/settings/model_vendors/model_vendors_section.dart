@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_card.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/studio_typography.dart';
 import '../../design_system/components/studio_empty_state.dart';
-import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_async_data_view.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
@@ -16,6 +17,7 @@ import 'international_vendors_setup_banner.dart';
 import 'vendor_setup_loader.dart';
 import 'vendor_credential_dialog.dart';
 import 'vendor_gateway_ui.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Settings UI: enable catalog vendors, store API credentials, pick models.
 class ModelVendorsSection extends StatefulWidget {
@@ -74,7 +76,7 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -172,8 +174,6 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
     final tokens = StudioTokens.of(context);
     return SingleChildScrollView(
       child: Column(
@@ -229,37 +229,38 @@ class _ModelVendorsSectionState extends State<ModelVendorsSection> {
               onConfigureVendor: _openCredentialDialog,
             ),
         ],
-        if (_loading)
-          const StudioSkeleton(height: 120)
-        else if (_error != null)
-          StudioCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
-                const SizedBox(height: 8),
-                TextButton(onPressed: _load, child: Text(l10n.studioRetry)),
-              ],
-            ),
-          )
-        else if (_vendors.isEmpty)
-          StudioEmptyState.emptyData(
+        StudioAsyncDataView(
+          loading: _loading,
+          error: _error,
+          onRetry: _load,
+          isEmpty: _vendors.isEmpty,
+          empty: StudioEmptyState.emptyData(
             title: l10n.settingsModelVendorsEmpty,
             icon: Icons.hub_outlined,
-          )
-        else
-          ..._vendors.map((vendor) => _VendorCard(
-                vendor: vendor,
-                models: _modelsByVendor[vendor.catalog.id] ?? const <ModelListEntry>[],
-                busy: _busyVendorIds.contains(vendor.vendorId),
-                expandInitially: _expandedCatalogId == vendor.catalog.id,
-                credentialConfigured: _credentialConfigured[vendor.vendorId] ?? false,
-                onToggleEnabled: (v) => _toggleEnabled(vendor, v),
-                onSaveModels: (names) => _saveSelectedModels(vendor, names),
-                onSaveBaseUrl: (url) => _saveBaseUrl(vendor, url),
-                onManageCredential: () => _openCredentialDialog(vendor),
-                onTestModel: (m) => _testModel(vendor, m),
-              )),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: studioStaggeredChildren(
+              _vendors.map(
+                (vendor) => _VendorCard(
+                  vendor: vendor,
+                  models: _modelsByVendor[vendor.catalog.id] ??
+                      const <ModelListEntry>[],
+                  busy: _busyVendorIds.contains(vendor.vendorId),
+                  expandInitially: _expandedCatalogId == vendor.catalog.id,
+                  credentialConfigured:
+                      _credentialConfigured[vendor.vendorId] ?? false,
+                  onToggleEnabled: (v) => _toggleEnabled(vendor, v),
+                  onSaveModels: (names) => _saveSelectedModels(vendor, names),
+                  onSaveBaseUrl: (url) => _saveBaseUrl(vendor, url),
+                  onManageCredential: () => _openCredentialDialog(vendor),
+                  onTestModel: (m) => _testModel(vendor, m),
+                ),
+              ),
+              entranceKey: _vendors.length,
+            ),
+          ),
+        ),
         ],
       ),
     );
@@ -385,7 +386,7 @@ class _VendorCardState extends State<_VendorCard> {
             InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                padding: const EdgeInsets.fromLTRB(StudioSpacing.chromeActionGap, StudioSpacing.chromeActionGap, StudioSpacing.chromeActionGap, 0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
@@ -469,7 +470,7 @@ class _VendorCardState extends State<_VendorCard> {
                   child: Text(l10n.settingsModelVendorsSaveBaseUrl),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: <Widget>[
                   Icon(
@@ -481,7 +482,7 @@ class _VendorCardState extends State<_VendorCard> {
                         ? theme.colorScheme.primary
                         : studioPanelMutedColor(context),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Text(
                       widget.credentialConfigured
@@ -498,32 +499,36 @@ class _VendorCardState extends State<_VendorCard> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.settingsModelVendorsModelsHeading,
                 style: theme.textTheme.labelLarge,
               ),
               const SizedBox(height: StudioLayoutSpacing.titleTight),
-              ...widget.models.map(
-                (m) => CheckboxListTile(
-                  value: _selected.contains(m.value),
-                  onChanged: widget.busy
-                      ? null
-                      : (checked) => _toggleModel(m.value, checked),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: Text(m.label),
-                  subtitle: Text(
-                    '${m.value} · ${studioModelPricingTypeLabel(l10n, m.type)}',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  secondary: IconButton(
-                    tooltip: l10n.settingsModelVendorsTestAction,
-                    onPressed: widget.busy ? null : () => widget.onTestModel(m),
-                    icon: const Icon(Icons.play_circle_outline, size: 20),
+              ...studioStaggeredChildren(
+                widget.models.map(
+                  (m) => StudioCheckboxListRow(
+                    value: _selected.contains(m.value),
+                    onChanged: widget.busy
+                        ? null
+                        : (checked) => _toggleModel(m.value, checked),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text(m.label),
+                    subtitle: Text(
+                      '${m.value} · ${studioModelPricingTypeLabel(l10n, m.type)}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    secondary: IconButton(
+                      tooltip: l10n.settingsModelVendorsTestAction,
+                      onPressed:
+                          widget.busy ? null : () => widget.onTestModel(m),
+                      icon: const Icon(Icons.play_circle_outline, size: 20),
+                    ),
                   ),
                 ),
+                entranceKey: widget.models.length,
               ),
             ],
           ],
@@ -543,12 +548,12 @@ class _VendorProtocolChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
       decoration: BoxDecoration(
         color: emphasized
             ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.55)
             : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       ),
       child: Text(
         label,

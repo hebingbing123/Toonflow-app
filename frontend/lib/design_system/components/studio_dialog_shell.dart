@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../ix/studio_platform_modals.dart';
+import '../ix/studio_scroll_behavior.dart';
 import '../tokens.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
@@ -11,6 +14,13 @@ Future<T?> showStudioDialog<T>({
   bool barrierDismissible = true,
 }) {
   final tokens = StudioTokens.of(context);
+  if (studioPrefersCupertinoModals(context)) {
+    return showCupertinoDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: builder,
+    );
+  }
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
@@ -30,6 +40,34 @@ Future<T?> showStudioBottomSheet<T>({
   bool enableDrag = true,
 }) {
   final tokens = StudioTokens.of(context);
+  Widget sheetChrome(BuildContext ctx, Widget body) {
+    final sheetTokens = StudioTokens.of(ctx);
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(StudioSpacing.radiusCard),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: sheetTokens.bgSurface.withValues(alpha: 0.98),
+          border: Border(
+            top: BorderSide(color: sheetTokens.borderSubtle),
+            left: BorderSide(color: sheetTokens.borderSubtle),
+            right: BorderSide(color: sheetTokens.borderSubtle),
+          ),
+        ),
+        child: body,
+      ),
+    );
+  }
+
+  if (studioPrefersCupertinoModals(context)) {
+    return showCupertinoModalPopup<T>(
+      context: context,
+      barrierDismissible: isDismissible,
+      builder: (ctx) => sheetChrome(ctx, builder(ctx)),
+    );
+  }
+
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
@@ -37,27 +75,9 @@ Future<T?> showStudioBottomSheet<T>({
     useSafeArea: useSafeArea,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
-    backgroundColor: Colors.transparent,
+    backgroundColor: StudioPrimitives.transparent,
     barrierColor: tokens.overlay,
-    builder: (ctx) {
-      final sheetTokens = StudioTokens.of(ctx);
-      return ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(StudioSpacing.radiusCard),
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: sheetTokens.bgSurface.withValues(alpha: 0.98),
-            border: Border(
-              top: BorderSide(color: sheetTokens.borderSubtle),
-              left: BorderSide(color: sheetTokens.borderSubtle),
-              right: BorderSide(color: sheetTokens.borderSubtle),
-            ),
-          ),
-          child: builder(ctx),
-        ),
-      );
-    },
+    builder: (ctx) => sheetChrome(ctx, builder(ctx)),
   );
 }
 
@@ -75,9 +95,28 @@ Future<bool?> showStudioConfirmDialog({
   return showStudioDialog<bool>(
     context: context,
     barrierDismissible: barrierDismissible,
-    builder: (ctx) {
+      builder: (ctx) {
       final resolvedCancel = cancelLabel ?? MaterialLocalizations.of(ctx).cancelButtonLabel;
       final resolvedConfirm = confirmLabel ?? MaterialLocalizations.of(ctx).okButtonLabel;
+      if (studioPrefersCupertinoModals(ctx)) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: content ??
+              (message == null ? null : Text(message, style: studioSectionIntroStyle(ctx))),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(resolvedCancel),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: destructive,
+              isDefaultAction: !destructive,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(resolvedConfirm),
+            ),
+          ],
+        );
+      }
       return StudioAlertDialog(
         title: Text(title),
         content: content ??
@@ -244,7 +283,10 @@ class StudioDialogFrame extends StatelessWidget {
     required this.child,
     this.maxWidth = 900,
     this.maxHeightFactor = 0.92,
-    this.insetPadding = const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+    this.insetPadding = const EdgeInsets.symmetric(
+      horizontal: StudioSpacing.md,
+      vertical: StudioSpacing.md,
+    ),
   });
 
   final Widget child;
@@ -264,24 +306,23 @@ class StudioDialogFrame extends StatelessWidget {
         : 720.0;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: StudioPrimitives.transparent,
       insetPadding: insetPadding,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: width, maxHeight: maxHeight),
         child: Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface.withValues(alpha: 0.98),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
               border: Border.all(color: tokens.borderSubtle),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.24),
-                  blurRadius: 24,
-                  offset: const Offset(0, 14),
-                ),
-              ],
+              boxShadow: studioInsetElevationShadow(
+                context,
+                alpha: 0.24,
+                blurRadius: StudioSpacing.md,
+                offset: const Offset(0, StudioSpacing.sm),
+              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -340,24 +381,26 @@ class StudioDialogShell extends StatelessWidget {
             : Text(title, style: studioDialogTitleStyle(context)));
 
     return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      backgroundColor: StudioPrimitives.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.md,
+        vertical: StudioSpacing.md,
+      ),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: width, maxHeight: maxHeight),
         child: Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface.withValues(alpha: 0.98),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
               border: Border.all(color: tokens.borderSubtle),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.24),
-                  blurRadius: 24,
-                  offset: const Offset(0, 14),
-                ),
-              ],
+              boxShadow: studioInsetElevationShadow(
+                context,
+                alpha: 0.24,
+                blurRadius: StudioSpacing.md,
+                offset: const Offset(0, StudioSpacing.sm),
+              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -381,7 +424,7 @@ class StudioDialogShell extends StatelessWidget {
                         children: <Widget>[
                           if (leading != null) ...<Widget>[
                             leading!,
-                            const SizedBox(width: 12),
+                            const SizedBox(width: StudioSpacing.radiusComfort),
                           ],
                           Expanded(
                             child: Column(
@@ -391,7 +434,9 @@ class StudioDialogShell extends StatelessWidget {
                                 ...?subtitle == null
                                     ? null
                                     : <Widget>[
-                                        const SizedBox(height: 6),
+                                        const SizedBox(
+                                          height: StudioLayoutSpacing.titleTight,
+                                        ),
                                         Text(
                                           subtitle!,
                                           style: studioSectionIntroStyle(context),
@@ -436,9 +481,11 @@ class StudioDialogShell extends StatelessWidget {
                     Divider(height: 1, color: tokens.borderSubtle),
                   Flexible(
                     child: scrollable
-                        ? SingleChildScrollView(
-                            padding: const EdgeInsets.all(StudioSpacing.sm),
-                            child: child,
+                        ? StudioScrollbar(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(StudioSpacing.sm),
+                              child: child,
+                            ),
                           )
                         : Padding(
                             padding: const EdgeInsets.all(StudioSpacing.sm),
@@ -466,8 +513,8 @@ class StudioDialogShell extends StatelessWidget {
                           MainAxisAlignment.spaceEvenly =>
                             WrapAlignment.spaceEvenly,
                         },
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.xs,
                         children: actions!,
                       ),
                     ),

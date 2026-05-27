@@ -61,9 +61,10 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                             selectedScriptNumericId = v;
                           }),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextField(
                           controller: typeCtrl,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText:
                                 l10n.projectEditorAssetFilterAssetTypeOptional,
@@ -71,16 +72,17 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                             isDense: true,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextField(
                           controller: nameCtrl,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText:
                                 l10n.projectEditorAssetFilterNameContainsOptional,
                             isDense: true,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioFilterRow(
                           wideLayout: StudioFilterWideLayout.toolbarRow,
                           wideBreakpoint: 400,
@@ -89,6 +91,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                               child: TextField(
                                 controller: pageCtrl,
                                 keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
                                   labelText: l10n.projectEditorAssetFilterPage,
                                   isDense: true,
@@ -99,6 +102,8 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                               child: TextField(
                                 controller: limitCtrl,
                                 keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => Navigator.of(dialogCtx).pop(true),
                                 decoration: InputDecoration(
                                   labelText: l10n.projectEditorAssetFilterLimit,
                                   isDense: true,

@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 enum ProjectAssetCandidateStatusDialogAction {
   save,
@@ -186,7 +187,7 @@ class _ProjectAssetCandidateStatusDialogState
                   ),
                   const SizedBox(height: StudioSpacing.sm),
                   if (_hasPendingAssets) ...[
-                    SwitchListTile.adaptive(
+                    StudioSwitchListRow(
                       contentPadding: EdgeInsets.zero,
                       value: _pendingOnly,
                       onChanged: (value) {
@@ -201,7 +202,7 @@ class _ProjectAssetCandidateStatusDialogState
                         l10n.projectEditorAssetCandidatePendingOnlyHelper,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                   ],
                   StudioDropdownButtonFormField<int>(
                     initialValue: _selectedAssetNumericId,
@@ -278,7 +279,7 @@ class _ProjectAssetCandidateStatusDialogState
                     l10n.projectEditorAssetCandidateNextStatusLabel,
                     style: Theme.of(context).textTheme.labelMedium,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   SegmentedButton<String>(
                     segments: [
                       ButtonSegment<String>(

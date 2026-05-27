@@ -76,15 +76,27 @@ extension _HomePageProductStudioOverlay on _HomePageState {
           !ProductDemoMode.instance.shouldSkipLiveApi) {
         unawaited(_projectsController.loadProjects());
       }
-      return <Widget>[const Center(child: CircularProgressIndicator())];
+      return <Widget>[
+        const StudioAsyncDataView(
+          loading: true,
+          scrollableLoading: true,
+          child: SizedBox.shrink(),
+        ),
+      ];
     }
     if (needsProjectUuid && token.isEmpty) {
-      return <Widget>[const Center(child: CircularProgressIndicator())];
+      return <Widget>[
+        const StudioAsyncDataView(
+          loading: true,
+          scrollableLoading: true,
+          child: SizedBox.shrink(),
+        ),
+      ];
     }
 
     return buildStudioOverlayChildren(
       resolved: resolved,
-      loadingChild: const Center(child: CircularProgressIndicator()),
+      loadingChild: const StudioDetailSkeleton(),
       storyboardBuilder: (projectNumericId) => StoryboardStudioPage(
         projectNumericId: projectNumericId,
         projectUuid: effectiveProjectUuid,

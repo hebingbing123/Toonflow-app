@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../project_studio/project_studio_model_routing_scope.dart';
 import '../../rust_api.dart';
+import 'studio_async_data_view.dart';
 import 'studio_cost_estimate_chip.dart';
 import 'studio_model_picker.dart';
+import '../../design_system/tokens.dart';
 
 /// Model picker + live cost estimate for inline generation forms.
 class StudioModelCostControls extends StatefulWidget {
@@ -123,7 +125,7 @@ class _StudioModelCostControlsState extends State<StudioModelCostControls> {
       if (!mounted) return;
       setState(() {
         _loadingModels = false;
-        _estimateError = e.toString();
+        _estimateError = describeUserVisibleApiErrorResolved(context, e);
       });
     }
   }
@@ -163,7 +165,7 @@ class _StudioModelCostControlsState extends State<StudioModelCostControls> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _estimateError = e.toString();
+        _estimateError = describeUserVisibleApiErrorResolved(context, e);
         _loadingEstimate = false;
       });
       widget.onEstimateChanged?.call(null);
@@ -178,13 +180,15 @@ class _StudioModelCostControlsState extends State<StudioModelCostControls> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loadingModels) {
-      return const LinearProgressIndicator(minHeight: 2);
-    }
-    if (_models.isEmpty) {
+    if (_models.isEmpty && !_loadingModels) {
       return const SizedBox.shrink();
     }
-    return Column(
+    return StudioAsyncDataView(
+      loading: _loadingModels,
+      isEmpty: _models.isEmpty,
+      empty: const SizedBox.shrink(),
+      scrollableLoading: false,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         StudioModelPicker(
@@ -193,13 +197,14 @@ class _StudioModelCostControlsState extends State<StudioModelCostControls> {
           onChanged: _onModelChanged,
           enabled: widget.enabled,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioCostEstimateChip(
           estimate: _estimate,
           loading: _loadingEstimate,
           error: _estimateError,
         ),
       ],
+    ),
     );
   }
 }

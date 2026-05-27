@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import 'creator_journey_menu.dart';
 import 'creator_journey_strip.dart';
 import 'studio_step.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Compact journey chrome for project-studio focus mode.
 class CreatorJourneyCompactBar extends StatelessWidget {
@@ -34,7 +35,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       foregroundColor: foreground,
       visualDensity: VisualDensity.standard,
       tapTargetSize: MaterialTapTargetSize.padded,
-      minimumSize: const Size(36, 36),
+      minimumSize: const Size(StudioSpacing.touchTarget, StudioSpacing.touchTarget),
       padding: EdgeInsets.zero,
     );
   }
@@ -59,7 +60,12 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         final tokens = StudioTokens.of(sheetContext);
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+            padding: const EdgeInsets.fromLTRB(
+              StudioSpacing.sm,
+              StudioSpacing.xs,
+              StudioSpacing.sm,
+              StudioSpacing.md,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,7 +100,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       builder: (sheetContext) {
         final sheetChildren = <Widget>[
           if (onOpenStepSetup != null)
-            ListTile(
+            StudioListRow(
               leading: const Icon(Icons.playlist_add_check_outlined),
               title: Text(l10n.studioScriptStepSetupOpen),
               onTap: () {
@@ -102,7 +108,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                 onOpenStepSetup!();
               },
             ),
-          ListTile(
+          StudioListRow(
             leading: const Icon(Icons.unfold_more_rounded),
             title: Text(l10n.studioCreatorJourneyCompactExpand),
             onTap: () {
@@ -123,11 +129,18 @@ class CreatorJourneyCompactBar extends StatelessWidget {
           if (!entry.enabled) {
             sheetChildren.add(
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                padding: const EdgeInsets.fromLTRB(
+                  StudioSpacing.sm,
+                  StudioSpacing.radiusComfort,
+                  StudioSpacing.sm,
+                  StudioSpacing.chromeActionGap,
+                ),
                 child: DefaultTextStyle(
                   style:
                       studioChromeTitleStyle(context) ??
-                      const TextStyle(fontWeight: FontWeight.w700),
+                      Theme.of(context).textTheme.labelLarge!.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                   child: entry.child ?? const SizedBox.shrink(),
                 ),
               ),
@@ -139,7 +152,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             continue;
           }
           sheetChildren.add(
-            ListTile(
+            StudioListRow(
               title: entry.child ?? const SizedBox.shrink(),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -148,7 +161,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             ),
           );
         }
-        sheetChildren.add(const SizedBox(height: 8));
+        sheetChildren.add(const SizedBox(height: StudioSpacing.xs));
         return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: sheetChildren));
       },
     );
@@ -177,7 +190,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         label: Text(projectLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
         style: TextButton.styleFrom(
           foregroundColor: tokens.textSecondary,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
           visualDensity: VisualDensity.standard,
         ),
       );
@@ -202,7 +215,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       label: Text(prevLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
       style: TextButton.styleFrom(
         foregroundColor: tokens.textSecondary,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
         visualDensity: VisualDensity.standard,
       ),
     );
@@ -248,7 +261,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       label: Text(label!, overflow: TextOverflow.ellipsis, maxLines: 1),
       style: TextButton.styleFrom(
         foregroundColor: tokens.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
         visualDensity: VisualDensity.standard,
       ),
     );
@@ -264,7 +277,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.primarySoft.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.primary.withValues(alpha: 0.45)),
       ),
       child: Padding(
@@ -331,7 +344,9 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: tokens.textSecondary,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: StudioSpacing.xs,
+                    ),
                     visualDensity: VisualDensity.standard,
                   ),
                 ),

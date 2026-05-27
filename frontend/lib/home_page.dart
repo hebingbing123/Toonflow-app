@@ -90,6 +90,8 @@ import 'shell/navigation_controller.dart';
 import 'design_system/components/studio_chip.dart';
 import 'design_system/components/openflow_brand.dart';
 import 'design_system/layout_breakpoints.dart';
+import 'design_system/studio_responsive_layout.dart';
+import 'design_system/studio_network_image.dart';
 import 'design_system/components/studio_model_cost_controls.dart';
 import 'design_system/ix/studio_cost_confirm_sheet.dart';
 import 'design_system/components/studio_dropdown_field.dart';
@@ -97,7 +99,9 @@ import 'design_system/components/studio_empty_state.dart';
 import 'design_system/components/studio_onboarding_coach.dart';
 import 'design_system/components/studio_pane_header.dart';
 import 'design_system/components/studio_shell_backdrop.dart';
-import 'design_system/components/studio_skeleton.dart';
+import 'design_system/components/studio_async_data_view.dart';
+import 'design_system/components/studio_entrance_motion.dart';
+import 'design_system/components/studio_loading_placeholders.dart';
 import 'design_system/components/studio_dense_action_row.dart';
 import 'design_system/components/studio_surfaces.dart';
 import 'design_system/components/studio_collapsible_filter_panel.dart';
@@ -162,6 +166,7 @@ import 'task_center/support.dart';
 import 'team_workspaces/invite_deep_link.dart';
 import 'rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 part 'project_editor/editor.dart';
 part 'project_editor/editor_dialog_basics.dart';
@@ -1578,6 +1583,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           _appL10n?.appTitle ??
@@ -1586,7 +1592,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           if (accessToken != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.xs),
               child: GlobalSearchBar(
                 accessToken: accessToken,
                 currentWorkspaceName: _sessionMe?.currentWorkspace?.name,

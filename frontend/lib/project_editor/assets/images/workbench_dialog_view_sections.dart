@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -19,6 +22,19 @@ List<Widget> buildAssetImagesWorkbenchSections(
     _buildAssetField(l10n: l10n, model: model, callbacks: callbacks),
     _buildDiagnosisCard(context, l10n: l10n, model: model, callbacks: callbacks),
     _buildToolbar(context, l10n: l10n, model: model, callbacks: callbacks),
+    if (model.loadingList && model.imageItems.isEmpty)
+      StudioAsyncDataView(
+        loading: true,
+        loadingPlaceholder: StudioLoadingPlaceholder.list,
+        loadingItemCount: 2,
+        scrollableLoading: false,
+        child: const SizedBox.shrink(),
+      ),
+    if (model.loadingPreview && model.previewBytes == null)
+      const Padding(
+        padding: EdgeInsets.only(top: StudioSpacing.xs),
+        child: StudioMediaTileSkeleton(),
+      ),
     if (model.statusLine != null)
       Text(model.statusLine!, style: Theme.of(context).textTheme.bodySmall),
     _buildImageField(l10n: l10n, model: model, callbacks: callbacks),
@@ -55,15 +71,26 @@ List<Widget> buildAssetImagesWorkbenchSections(
       ],
     ),
     if (model.previewBytes != null)
-      ClipRRect(
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-        child: Image.memory(
-          model.previewBytes!,
-          height: 160,
-          width: double.infinity,
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
-        ),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final previewHeight = studioAspectHeightFromWidth(
+            constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                ? constraints.maxWidth
+                : 320,
+            min: 120,
+            max: 220,
+          );
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+            child: Image.memory(
+              model.previewBytes!,
+              height: previewHeight,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+            ),
+          );
+        },
       ),
   ];
   return _interleaveVisibleSections(sections);
@@ -100,7 +127,7 @@ Widget _buildDiagnosisCard(
 }) {
   return Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
     decoration: studioInsetPanelDecoration(context),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +141,7 @@ Widget _buildDiagnosisCard(
           model.diagnosis.detail,
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           key: const Key('asset-images-workbench-recommended-action'),
           style: studioFormTonalButtonStyle(context),
@@ -138,7 +165,7 @@ Widget _buildToolbar(
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
   return StudioDenseActionRow(
-    spacing: 8,
+    spacing: StudioSpacing.xs,
     children: [
       FilledButton(
         style: studioFormPrimaryButtonStyle(context),
@@ -200,7 +227,7 @@ Widget _buildMutationForm({
         controller: filePathController,
         decoration: InputDecoration(labelText: filePathLabel),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: StudioSpacing.xs),
       Row(
         children: [
           Expanded(
@@ -209,7 +236,7 @@ Widget _buildMutationForm({
               decoration: InputDecoration(labelText: stateLabel),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Expanded(
             child: TextField(
               controller: sortController,
@@ -222,8 +249,8 @@ Widget _buildMutationForm({
       Align(
         alignment: Alignment.centerLeft,
         child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: actions
               .map(
                 (action) => TextButton(

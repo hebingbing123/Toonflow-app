@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
-import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
@@ -14,6 +17,7 @@ import '../demo/platform_status_demo_data.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class PlatformStatusSection extends StatefulWidget {
   const PlatformStatusSection({
@@ -231,25 +235,6 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
     );
   }
 
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return DecoratedBox(
-      decoration: studioInsetPanelDecoration(context),
-      child: const Padding(
-        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            StudioSkeleton(height: 18),
-            SizedBox(height: StudioSpacing.sm),
-            StudioSkeleton(height: 40),
-            SizedBox(height: StudioSpacing.sm),
-            StudioSkeleton(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -261,7 +246,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         ? 0
         : _degradedEndpointNames(metrics).length;
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -282,7 +267,11 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   children: <Widget>[
                     StudioDropdownButton<int>(
                       value: _windowMinutes,
-                      width: 132,
+                      width: studioAdaptiveFieldWidth(
+                        context,
+                        max: 160,
+                        min: 120,
+                      ),
                       onChanged: _loading
                           ? null
                           : (next) {
@@ -322,7 +311,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Row(
                   children: <Widget>[
                     Expanded(
@@ -350,27 +339,26 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
               ],
             ),
           ),
-          if (_error != null) ...<Widget>[
+          if (_error != null && _health != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-            Text(
-              _error!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: StudioTokens.of(context).danger,
-              ),
+            StudioApiErrorCallout(
+              error: _error!,
+              onRetry: _refresh,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
             ),
           ],
-          if (_loading && _health == null && _error == null) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            _buildStudioLoadingBody(context),
-          ],
           const SizedBox(height: StudioSpacing.sm),
-          DecoratedBox(
+          StudioAsyncDataView(
+            loading: _loading && _health == null && _error == null,
+            error: _health == null ? _error : null,
+            onRetry: _refresh,
+            child: DecoratedBox(
             decoration: studioInsetPanelDecoration(context),
             child: Padding(
               padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
               child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: <Widget>[
               _StatusChip(
                 title: l10n.platformStatusChipHealth,
@@ -411,6 +399,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
               ),
             ),
           ),
+          ),
           if (_version != null) ...<Widget>[
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Text(
@@ -436,9 +425,12 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                       style: studioPaneTitleStyle(context),
                     ),
                     const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-                    ...sliStatus.slis
-                        .take(5)
-                        .map((sli) => _SliTile(snapshot: sli)),
+                    ...studioStaggeredChildren(
+                      sliStatus.slis
+                          .take(5)
+                          .map((sli) => _SliTile(snapshot: sli)),
+                      entranceKey: sliStatus.slis.length,
+                    ),
                   ],
                 ),
               ),
@@ -458,14 +450,20 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                       style: studioPaneTitleStyle(context),
                     ),
                     const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-                    ...metrics.endpoints.values
-                        .toList(growable: false)
-                        .sorted(
-                          (a, b) =>
-                              b.totalRequests.compareTo(a.totalRequests),
-                        )
-                        .take(5)
-                        .map((endpoint) => _EndpointTile(endpoint: endpoint)),
+                    ...studioStaggeredChildren(
+                      metrics.endpoints.values
+                          .toList(growable: false)
+                          .sorted(
+                            (a, b) =>
+                                b.totalRequests.compareTo(a.totalRequests),
+                          )
+                          .take(5)
+                          .map(
+                            (endpoint) =>
+                                _EndpointTile(endpoint: endpoint),
+                          ),
+                      entranceKey: metrics.endpoints.length,
+                    ),
                   ],
                 ),
               ),
@@ -520,17 +518,21 @@ class _SliTile extends StatelessWidget {
           border: Border.all(color: tokens.borderSubtle),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
-        child: ListTile(
+        child: StudioListRow(
           dense: true,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: StudioLayoutSpacing.cardInner - 4,
+            horizontal: StudioSpacing.radiusComfort,
             vertical: StudioSpacing.xs,
           ),
           leading: Icon(
             healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
             color: healthy ? tokens.success : tokens.warning,
           ),
-          title: Text(snapshot.definition.name),
+          title: Text(
+            snapshot.definition.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           subtitle: Text(
             l10n.platformStatusSliTileSubtitle(
               snapshot.path,
@@ -562,10 +564,10 @@ class _EndpointTile extends StatelessWidget {
           border: Border.all(color: tokens.borderSubtle),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
-        child: ListTile(
+        child: StudioListRow(
           dense: true,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: StudioLayoutSpacing.cardInner - 4,
+            horizontal: StudioSpacing.radiusComfort,
             vertical: StudioSpacing.xs,
           ),
           title: Text(endpoint.path),

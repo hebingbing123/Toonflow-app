@@ -59,6 +59,7 @@ class StudioToastOverlay {
     _entry = OverlayEntry(
       builder: (overlayContext) {
         final tokens = StudioTokens.of(overlayContext);
+        final theme = Theme.of(overlayContext);
         final typography = StudioTypography.of(overlayContext);
         final media = MediaQuery.of(overlayContext);
         final maxWidth = (media.size.width - 32).clamp(280.0, 400.0);
@@ -71,9 +72,9 @@ class StudioToastOverlay {
             };
 
         final card = Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           elevation: 12,
-          shadowColor: Colors.black.withValues(alpha: 0.28),
+          shadowColor: studioShadowColor(overlayContext, alpha: 0.28),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -103,7 +104,7 @@ class StudioToastOverlay {
                           Expanded(
                             child: Text(
                               message,
-                              style: TextStyle(
+                              style: theme.textTheme.bodyMedium?.copyWith(
                                 color: tokens.textPrimary,
                                 fontSize: typography.body,
                                 height: 1.4,
@@ -135,7 +136,9 @@ class StudioToastOverlay {
                             },
                             child: Text(
                               actionLabel,
-                              style: TextStyle(color: tokens.accent),
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: tokens.accent,
+                              ),
                             ),
                           ),
                         ),

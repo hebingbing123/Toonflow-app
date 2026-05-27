@@ -2,10 +2,11 @@
 
 use axum::{
     body::Body,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::{header, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect, Response},
 };
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -14,10 +15,18 @@ use crate::state::AppState;
 
 use super::super::crud::{require_asset_project_read_scope, resolve_owned_asset_id_for_project};
 use super::super::models::AssetImageFileSource;
+use super::file_resize::downscale_image_bytes;
+
+#[derive(Debug, Deserialize)]
+pub(in crate::assets) struct AssetImageFileQuery {
+    /// Longest edge in pixels for locally stored raster previews (optional).
+    pub max_edge: Option<u32>,
+}
 
 pub(in crate::assets) async fn get_project_asset_image_file_for_project(
     State(state): State<AppState>,
     Path((project_id, asset_numeric_id, image_id)): Path<(Uuid, i32, Uuid)>,
+    Query(query): Query<AssetImageFileQuery>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -75,13 +84,19 @@ pub(in crate::assets) async fn get_project_asset_image_file_for_project(
         .await
         .map_err(|_| ApiError::NotFound)?;
 
+    let body = if let Some(max_edge) = query.max_edge {
+        downscale_image_bytes(&bytes, max_edge)?
+    } else {
+        bytes
+    };
+
     Ok((
         StatusCode::OK,
         [
             (header::CONTENT_TYPE, "image/png"),
             (header::CACHE_CONTROL, "private, max-age=300"),
         ],
-        Body::from(bytes),
+        Body::from(body),
     )
         .into_response())
 }

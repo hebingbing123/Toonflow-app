@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_model_picker.dart';
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_studio/studio_step.dart';
@@ -117,13 +120,13 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
 
-    if (_loading) {
-      return const LinearProgressIndicator(minHeight: 2);
-    }
-
-    return Container(
+    return StudioAsyncDataView(
+      loading: _loading,
+      loadingPlaceholder: StudioLoadingPlaceholder.pane,
+      scrollableLoading: false,
+      child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusCard, StudioSpacing.radiusComfort, StudioSpacing.radiusCard, StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -164,10 +167,14 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                 ),
               ],
               const SizedBox(height: StudioSpacing.xs),
-              ...slots.map((slot) {
+              ...slots.toList().asMap().entries.map((entry) {
+                final slot = entry.value;
                 final catalog = _catalogForSlot(slot);
                 final selected = _draft[step.slug]?[slot];
-                return Padding(
+                return studioStaggeredItem(
+                  entry.key,
+                  entranceKey: slots.length,
+                  child: Padding(
                   padding: const EdgeInsets.only(left: StudioSpacing.xs, bottom: StudioLayoutSpacing.inlineGap),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,13 +191,15 @@ class _StepModelRoutingSectionState extends State<StepModelRoutingSection> {
                       ),
                     ],
                   ),
-                );
+                ),
+              );
               }),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
             ];
           }),
         ],
       ),
+    ),
     );
   }
 

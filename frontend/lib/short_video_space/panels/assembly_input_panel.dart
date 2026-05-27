@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
 
+import '../../design_system/components/studio_async_data_view.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../view.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Assembly input diagnostic panel (storyboard + assets + assembly per shot).
 class AssemblyInputPanel extends StatelessWidget {
@@ -39,19 +43,19 @@ class AssemblyInputPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = studioPanelMutedColor(context);
 
-    if (ui.loading) {
-      return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: muted));
-    }
     if (ui.unavailable) {
       return Text(ui.headline, style: theme.textTheme.bodyMedium?.copyWith(color: muted));
     }
 
-    return Column(
+    return StudioAsyncDataView(
+      loading: ui.loading,
+      scrollableLoading: false,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(ui.headline, style: theme.textTheme.titleSmall),
         if (ui.gate.blockingShotCount > 0) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Material(
             color: theme.colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -71,7 +75,7 @@ class AssemblyInputPanel extends StatelessWidget {
                   ),
                   for (final line in ui.gate.blockingReasonLines.take(4))
                     Padding(
-                      padding: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                       child: Text(
                         '· $line',
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -104,16 +108,21 @@ class AssemblyInputPanel extends StatelessWidget {
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final row = ui.rows[index];
-                return _ShotRow(
-                  row: row,
-                  l10n: l10n,
-                  onFix: () => _openFix(row),
+                return studioStaggeredItem(
+                  index,
+                  entranceKey: ui.rows.length,
+                  child: _ShotRow(
+                    row: row,
+                    l10n: l10n,
+                    onFix: () => _openFix(row),
+                  ),
                 );
               },
             ),
           ),
         ],
       ],
+    ),
     );
   }
 
@@ -168,16 +177,19 @@ class _ActiveJobBanner extends StatelessWidget {
             ),
             style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
           ),
-          if (job.errorLine != null)
-            Text(
-              job.errorLine!,
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+          if (job.errorLine != null) ...[
+            const SizedBox(height: StudioSpacing.xs),
+            StudioApiErrorCallout(
+              error: job.errorLine!,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
+              onRetry: onRetry,
             ),
+          ],
           if (job.manifestPath != null)
             Text(job.manifestPath!, style: theme.textTheme.bodySmall),
           const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: [
               if (onOpenTaskCenter != null)
                 TextButton(
@@ -222,15 +234,16 @@ class _ShotRow extends StatelessWidget {
         : l10n.shortVideoSpaceAssemblyInputShotBlocking;
     final statusColor = row.ready ? theme.colorScheme.primary : theme.colorScheme.error;
 
-    return ListTile(
+    return StudioListRow(
       dense: true,
       contentPadding: EdgeInsets.zero,
+      onTap: row.ready ? null : onFix,
       title: Text(title, style: theme.textTheme.bodySmall),
       subtitle: row.gapLabels.isEmpty
           ? null
           : Text(row.gapLabels.join(' · '), style: theme.textTheme.bodySmall),
       trailing: Wrap(
-        spacing: 4,
+        spacing: StudioSpacing.chromeActionGap,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           StudioChip(

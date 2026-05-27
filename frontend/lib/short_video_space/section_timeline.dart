@@ -57,7 +57,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -76,7 +76,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             if (_loadingTimeline)
               Text(
                 l10n.shortVideoTimelineLoading,
@@ -331,15 +331,15 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildM4Toolbar(l10n),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(l10n.shortVideoTimelineEffectApplyAll, style: theme.textTheme.labelMedium),
         _buildEffectPresetDropdown(
           l10n,
           value: null,
           onChanged: _applyGlobalEffectPreset,
         ),
-        const SizedBox(height: 8),
-        SwitchListTile(
+        const SizedBox(height: StudioSpacing.xs),
+        StudioSwitchListRow(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.shortVideoTimelineBgmEnabled),
           subtitle: _bgm.bgmStrategy?.trim().isNotEmpty == true
@@ -403,25 +403,29 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
               ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         _buildM2M3TracksPanel(l10n, theme),
-        const SizedBox(height: 16),
-        ...widget.timeline.scripts.map((group) {
-          return _TimelineScriptGroup(
-            group: group,
-            projectId: widget.projectId,
-            accessToken: widget.accessToken,
-            clipByStoryboardId: {
-              for (final c in _tracks.video) c.storyboardNumericId: c,
-            },
-            onTrimChanged: _updateClipTrim,
-            onEffectChanged: _updateClipEffect,
-            onReordered: widget.onReordered,
+        const SizedBox(height: StudioSpacing.sm),
+        ...widget.timeline.scripts.toList().asMap().entries.map((entry) {
+          return studioStaggeredItem(
+            entry.key,
+            entranceKey: widget.timeline.scripts.length,
+            child: _TimelineScriptGroup(
+              group: entry.value,
+              projectId: widget.projectId,
+              accessToken: widget.accessToken,
+              clipByStoryboardId: {
+                for (final c in _tracks.video) c.storyboardNumericId: c,
+              },
+              onTrimChanged: _updateClipTrim,
+              onEffectChanged: _updateClipEffect,
+              onReordered: widget.onReordered,
+            ),
           );
         }),
         if (_tracks.video.isEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: StudioSpacing.xs),
             child: Text(
               l10n.shortVideoTimelineEmpty,
               style: theme.textTheme.bodySmall,
@@ -528,44 +532,68 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
         ? widget.group.scriptName!
         : 'Script ${widget.group.scriptNumericId}';
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 200,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _shots.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final shot = _shots[index];
-                final clip = widget.clipByStoryboardId[shot.storyboardNumericId];
-                return _TimelineShotCard(
-                  shot: shot,
-                  clip: clip,
-                  index: index,
-                  total: _shots.length,
-                  onMoveUp: index > 0 ? () => _move(index, -1) : null,
-                  onMoveDown:
-                      index < _shots.length - 1 ? () => _move(index, 1) : null,
-                  onTrimChanged: (id, {inMs, outMs, fallbackSourceUrl}) =>
-                      widget.onTrimChanged(
-                    id,
-                    inMs: inMs,
-                    outMs: outMs,
-                    fallbackSourceUrl: fallbackSourceUrl ??
-                        shot.sourceUrl ??
-                        shot.selectedVideoUrl,
-                  ),
-                  onEffectChanged: widget.onEffectChanged,
-                );
-              },
-            ),
+          const SizedBox(height: StudioSpacing.xs),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth = studioClampedPaneWidth(
+                constraints.maxWidth,
+                fraction: 0.28,
+                min: 200,
+                max: 300,
+              );
+              final laneHeight = studioPreviewImageHeight(
+                320,
+                fraction: 0.65,
+                min: 180,
+                max: 280,
+              );
+              return SizedBox(
+                height: laneHeight,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _shots.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: StudioSpacing.xs),
+                  itemBuilder: (context, index) {
+                    final shot = _shots[index];
+                    final clip =
+                        widget.clipByStoryboardId[shot.storyboardNumericId];
+                    return studioStaggeredItem(
+                      index,
+                      entranceKey: _shots.length,
+                      child: _TimelineShotCard(
+                        shot: shot,
+                        clip: clip,
+                        index: index,
+                        total: _shots.length,
+                        cardWidth: cardWidth,
+                        onMoveUp: index > 0 ? () => _move(index, -1) : null,
+                        onMoveDown: index < _shots.length - 1
+                            ? () => _move(index, 1)
+                            : null,
+                        onTrimChanged: (id, {inMs, outMs, fallbackSourceUrl}) =>
+                            widget.onTrimChanged(
+                          id,
+                          inMs: inMs,
+                          outMs: outMs,
+                          fallbackSourceUrl: fallbackSourceUrl ??
+                              shot.sourceUrl ??
+                              shot.selectedVideoUrl,
+                        ),
+                        onEffectChanged: widget.onEffectChanged,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.tonal(
@@ -586,6 +614,7 @@ class _TimelineShotCard extends StatelessWidget {
     required this.clip,
     required this.index,
     required this.total,
+    required this.cardWidth,
     this.onMoveUp,
     this.onMoveDown,
     required this.onTrimChanged,
@@ -596,6 +625,7 @@ class _TimelineShotCard extends StatelessWidget {
   final ShortVideoTimelineVideoClipV1? clip;
   final int index;
   final int total;
+  final double cardWidth;
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
   final void Function(
@@ -615,9 +645,9 @@ class _TimelineShotCard extends StatelessWidget {
     final inMs = clip?.inMs ?? shot.inMs;
     final outMs = clip?.outMs ?? shot.outMs;
     return SizedBox(
-      width: 240,
+      width: cardWidth,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(StudioSpacing.xs),
         decoration: BoxDecoration(
           border: Border.all(color: studioPanelBorderColor(context)),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -631,7 +661,7 @@ class _TimelineShotCard extends StatelessWidget {
             ),
             if (preview.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 6),
+                padding: const EdgeInsets.only(top: StudioSpacing.xs),
                 child: Text(
                   preview,
                   maxLines: 2,
@@ -639,7 +669,7 @@ class _TimelineShotCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall,
                 ),
               ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _TrimField(
               label: l10n.shortVideoTimelineTrimInMs,
               value: inMs,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../studio_responsive_layout.dart';
 import '../tokens.dart';
+import 'studio_entrance_motion.dart';
 import 'studio_media_card.dart';
 
 /// Candidate pick grid with keyboard navigation (Wave 4).
@@ -48,36 +50,53 @@ class _StudioPickGridState extends State<StudioPickGrid> {
         }
         return KeyEventResult.ignored;
       },
-      child: GridView.builder(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = studioGridCrossAxisCount(
+            constraints.maxWidth,
+            handset: 1,
+            tablet: 2,
+            desktop: 3,
+            desktopWide: 4,
+          );
+          return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: StudioSpacing.sm,
+          crossAxisSpacing: StudioSpacing.sm,
           childAspectRatio: 16 / 9,
         ),
         itemCount: widget.candidateUrls.length,
         itemBuilder: (context, i) {
           final selected = i == _index;
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-              border: Border.all(
-                color: selected
-                    ? StudioTokens.of(context).primary
-                    : StudioTokens.of(context).borderSubtle,
-                width: selected ? 2 : 1,
+          final url = widget.candidateUrls[i];
+          return StudioStaggeredEntrance(
+            index: i,
+            entranceKey: widget.candidateUrls.length,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+                border: Border.all(
+                  color: selected
+                      ? StudioTokens.of(context).primary
+                      : StudioTokens.of(context).borderSubtle,
+                  width: selected ? 2 : 1,
+                ),
+              ),
+              child: StudioMediaCard(
+                imageUrl: url,
+                heroTag: 'studio.hero.pick_grid.$i.$url',
+                onTap: () {
+                  setState(() => _index = i);
+                  widget.onSelected(i);
+                },
               ),
             ),
-            child: StudioMediaCard(
-              imageUrl: widget.candidateUrls[i],
-              onTap: () {
-                setState(() => _index = i);
-                widget.onSelected(i);
-              },
-            ),
           );
+        },
+      );
         },
       ),
     );

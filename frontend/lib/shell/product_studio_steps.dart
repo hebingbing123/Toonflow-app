@@ -310,8 +310,10 @@ extension _HomePageProductStudioSteps on _HomePageState {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           TabBar(
-            dividerColor: Colors.transparent,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            dividerColor: StudioPrimitives.transparent,
+            labelPadding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.radiusComfort,
+            ),
             indicatorSize: TabBarIndicatorSize.label,
             tabs: <Tab>[
               Tab(height: 40, text: l10n.studioDeliverTabAssembly),

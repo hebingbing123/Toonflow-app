@@ -23,4 +23,17 @@ void main() {
     );
     expect(find.text('Continue'), findsOneWidget);
   });
+
+  test('macOS uses Cupertino page transitions for edge swipe back', () {
+    final theme = buildStudioDarkTheme();
+    final builders = theme.pageTransitionsTheme.builders;
+    expect(
+      builders[TargetPlatform.macOS],
+      isA<CupertinoPageTransitionsBuilder>(),
+    );
+    expect(
+      builders[TargetPlatform.iOS],
+      isA<CupertinoPageTransitionsBuilder>(),
+    );
+  });
 }

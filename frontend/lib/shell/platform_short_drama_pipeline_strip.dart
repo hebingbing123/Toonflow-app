@@ -81,12 +81,12 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
-        horizontal: StudioLayoutSpacing.cardInner - 4,
+        horizontal: StudioSpacing.radiusComfort,
         vertical: 10,
       ),
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: Column(

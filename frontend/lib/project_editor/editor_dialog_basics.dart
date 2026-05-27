@@ -36,7 +36,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         if (home != null) ...[
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             decoration: studioInsetPanelDecoration(ctx),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +45,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   l10n.projectEditorBasicsHomeSectionTitle,
                   style: Theme.of(ctx).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.projectEditorBasicsHomeReadinessLine(
                     home.readinessScore,
@@ -53,7 +53,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   ),
                   style: Theme.of(ctx).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 if (home.onboarding.nextStep != null)
                   Text(
                     l10n.projectEditorBasicsHomeNextStep(
@@ -61,10 +61,10 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                     ),
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 ...home.onboarding.checklist.map(
                   (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                     child: Text(
                       item.done
                           ? l10n.projectEditorBasicsHomeChecklistItemDone(
@@ -80,7 +80,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
         ],
         TextField(
           controller: nameCtrl,
@@ -88,7 +88,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldNameClearLabel,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         TextField(
           controller: introCtrl,
           maxLines: 3,
@@ -96,12 +96,12 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldIntroClearLabel,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.projectEditorBasicsPitchSectionTitle,
           style: Theme.of(ctx).textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: premiseCtrl,
           maxLines: 2,
@@ -109,42 +109,42 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldPremise,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: audienceCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldTargetAudience,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: toneCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldEmotionalTone,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: hookCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldCoreHook,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: visualCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldVisualDirection,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.projectEditorBasicsModelRoutingTitle,
           style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StepModelRoutingSection(
           accessToken: token,
           projectId: p.id,
@@ -155,7 +155,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             dialogState.stepModelsPatchRef[0] = steps;
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         ExpansionTile(
           initiallyExpanded: false,
           tilePadding: EdgeInsets.zero,
@@ -178,7 +178,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               helper: l10n.projectEditorBasicsTextModelHelper,
               suggestions: dialogState.textModelOptionsRef[0],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildProjectModelField(
               l10n: l10n,
               setDialogState: setDialogState,
@@ -187,7 +187,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               helper: l10n.projectEditorBasicsMultimodalModelHelper,
               suggestions: dialogState.textModelOptionsRef[0],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildProjectModelField(
               l10n: l10n,
               setDialogState: setDialogState,
@@ -195,7 +195,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               label: l10n.projectEditorBasicsImageModelLabel,
               suggestions: dialogState.imageModelOptionsRef[0],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildProjectModelField(
               l10n: l10n,
               setDialogState: setDialogState,
@@ -203,7 +203,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               label: l10n.projectEditorBasicsVideoModelLabel,
               suggestions: dialogState.videoModelOptionsRef[0],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             _buildProjectModelField(
               l10n: l10n,
               setDialogState: setDialogState,
@@ -212,7 +212,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               helper: l10n.projectEditorBasicsVoiceModelHelper,
               suggestions: dialogState.textModelOptionsRef[0],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: voiceProfileCtrl,
               maxLines: 2,
@@ -223,19 +223,19 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(
           l10n.projectEditorBasicsBrandSectionTitle,
           style: Theme.of(ctx).textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: brandNameCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldBrandName,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: brandPromiseCtrl,
           maxLines: 2,
@@ -243,7 +243,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldBrandPromise,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: visualMotifsCtrl,
           maxLines: 2,
@@ -251,7 +251,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldVisualMotifsOnePerLine,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: forbiddenCtrl,
           maxLines: 2,
@@ -259,7 +259,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldForbiddenOnePerLine,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: continuityCtrl,
           maxLines: 2,
@@ -267,7 +267,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             labelText: l10n.projectEditorBasicsFieldContinuityRulesOnePerLine,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         StylePackPickerField(
           label: l10n.projectEditorBasicsLabelArtStylePack,
           options: dialogState.artStylePackOptionsRef[0],
@@ -279,7 +279,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         StylePackPickerField(
           label: l10n.projectEditorBasicsLabelStoryStylePack,
           options: dialogState.storyStylePackOptionsRef[0],
@@ -291,7 +291,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         ShortDramaTargetsPanel(
           accessToken: token,
           project: detail.project,
@@ -300,7 +300,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             await _projectsController.loadProjects();
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         if (dialogState.statsRef[0] != null)
           Text(
             l10n.projectEditorBasicsStatsLine(
@@ -344,10 +344,10 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           ),
         ),
         if (chips.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: chips
                 .map((entry) {
                   final modelId = entry.effectiveModelId;

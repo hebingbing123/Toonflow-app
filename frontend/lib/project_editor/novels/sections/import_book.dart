@@ -48,14 +48,14 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           l10n.projectEditorNovelsWorkbenchImportSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.projectEditorNovelsWorkbenchImportStudioHint,
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(ctx).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: importUrlCtrl,
           decoration: InputDecoration(
@@ -63,7 +63,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             helperText: l10n.projectEditorNovelsWorkbenchImportCrawlUrlHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioNovelCrawlAuthSection(
           accessToken: token,
           projectId: project.id,
@@ -73,7 +73,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           },
           onOverrideChanged: setCrawlAuthOverride,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: importBatchUrlsCtrl,
           minLines: 2,
@@ -83,7 +83,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             helperText: l10n.projectEditorNovelsWorkbenchImportBatchUrlsHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -100,7 +100,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: TextField(
                 controller: importScheduleRepeatMinutesCtrl,
@@ -116,10 +116,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             OutlinedButton(
@@ -197,7 +197,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Align(
           alignment: Alignment.centerLeft,
           child: OutlinedButton(
@@ -225,7 +225,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             child: Text(l10n.projectEditorNovelsWorkbenchImportCrawlPreparseButton),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: importRawTextCtrl,
           minLines: 6,
@@ -235,7 +235,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             helperText: l10n.projectEditorNovelsWorkbenchImportRawPasteHelper,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FutureBuilder<WholeBookImportCheckpoint?>(
           future: loadWholeBookImportCheckpoint(
             project.id,
@@ -259,7 +259,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         wholeBookContentHash(paste) ==
                             checkpoint.effectiveContentHash);
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                   child: OutlinedButton.icon(
                     style: studioFormSecondaryButtonStyle(ctx),
                     onPressed: localBusy
@@ -304,8 +304,8 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           },
         ),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             FilledButton.icon(
@@ -370,14 +370,14 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             SizedBox(
-              width: 132,
+              width: studioAdaptiveFieldWidth(ctx, max: 160, min: 112),
               child: TextField(
                 controller: importBatchSizeCtrl,
                 keyboardType: TextInputType.number,
@@ -498,7 +498,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         LayoutBuilder(
           builder: (context, constraints) {
             final stackFields = constraints.maxWidth < 520;
@@ -576,7 +576,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   for (var i = 0; i < fields.length; i++) ...<Widget>[
-                    if (i > 0) const SizedBox(height: 8),
+                    if (i > 0) const SizedBox(height: StudioSpacing.xs),
                     fields[i],
                   ],
                 ],
@@ -586,19 +586,19 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(child: fields[0]),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(child: fields[1]),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(child: fields[2]),
               ],
             );
           },
         ),
         if (importPreviewRows.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             decoration: studioInsetPanelDecoration(ctx),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -636,16 +636,19 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 ...importPreviewRows.asMap().entries.map((entry) {
                   final index = entry.key;
                   final row = entry.value;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
+                  return studioStaggeredItem(
+                    index,
+                    entranceKey: importPreviewRows.length,
+                    child: Container(
+                    margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                     padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
                     decoration: BoxDecoration(
                       border: Border.all(color: studioPanelBorderColor(ctx)),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -679,7 +682,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextFormField(
                           key: ValueKey(
                             'import-preview-title-${row.chapterIndex}-${row.chapter}',
@@ -702,7 +705,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             );
                           },
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextFormField(
                           key: ValueKey(
                             'import-preview-body-${row.chapterIndex}-${row.chapterData.length}',
@@ -729,6 +732,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                         ),
                       ],
                     ),
+                  ),
                   );
                 }),
                 Text(
@@ -736,7 +740,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
                 if (importPreviewRows.length > 12) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.projectEditorNovelsActionImportPreviewLongListHint,
                     style: Theme.of(ctx).textTheme.bodySmall,

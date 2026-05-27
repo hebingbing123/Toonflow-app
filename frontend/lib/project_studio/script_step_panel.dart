@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_empty_state.dart';
-import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -388,7 +388,7 @@ class _ProjectStudioScriptStepPanelState
   Widget _buildNovelTab(BuildContext context, AppLocalizations l10n) {
     final novels = _novelsRef[0]?.items ?? const <NovelRow>[];
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -445,7 +445,7 @@ class _ProjectStudioScriptStepPanelState
 
   Widget _buildExtractTab(BuildContext context, AppLocalizations l10n) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -468,7 +468,7 @@ class _ProjectStudioScriptStepPanelState
   Widget _buildContentTabBar(BuildContext context, AppLocalizations l10n) {
     final tabBar = TabBar(
       isScrollable: true,
-      dividerColor: Colors.transparent,
+      dividerColor: StudioPrimitives.transparent,
       labelPadding: EdgeInsets.symmetric(
         horizontal: StudioLayoutSpacing.insetDense,
         vertical: widget.focusMode ? StudioLayoutSpacing.titleTight / 2 : 0,
@@ -496,9 +496,9 @@ class _ProjectStudioScriptStepPanelState
     final tokens = StudioTokens.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        StudioLayoutSpacing.cardInner - 4,
+        StudioSpacing.radiusComfort,
         StudioLayoutSpacing.stackMedium,
-        StudioLayoutSpacing.cardInner - 4,
+        StudioSpacing.radiusComfort,
         StudioLayoutSpacing.inlineGap,
       ),
       child: Row(
@@ -516,7 +516,10 @@ class _ProjectStudioScriptStepPanelState
               border: Border.all(color: tokens.borderSubtle),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.radiusComfort,
+                vertical: StudioSpacing.chromeActionGap,
+              ),
               child: Text(
                 l10n.studioScriptStepContentCounts(_novelCount, _scriptCount),
                 style: studioHintStyle(context)?.copyWith(
@@ -532,22 +535,12 @@ class _ProjectStudioScriptStepPanelState
 
   Widget _buildContentRail(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_loadError != null) {
-      return Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
-          child: StudioApiErrorCallout(
-            error: _loadError!,
-            onRetry: _reloadContent,
-          ),
-        ),
-      );
-    }
-
-    return DefaultTabController(
+    return StudioAsyncDataView(
+      loading: _loading,
+      error: _loadError,
+      onRetry: _reloadContent,
+      scrollableLoading: true,
+      child: DefaultTabController(
       length: 3,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -560,7 +553,7 @@ class _ProjectStudioScriptStepPanelState
                 _buildNovelTab(context, l10n),
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(
-                    StudioLayoutSpacing.cardInner - 4,
+                    StudioSpacing.radiusComfort,
                   ),
                   child: _buildScriptsSection(context, l10n),
                 ),
@@ -570,6 +563,7 @@ class _ProjectStudioScriptStepPanelState
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -583,9 +577,9 @@ class _ProjectStudioScriptStepPanelState
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            StudioLayoutSpacing.cardInner - 4,
+            StudioSpacing.radiusComfort,
             StudioLayoutSpacing.stackMedium,
-            StudioLayoutSpacing.cardInner - 4,
+            StudioSpacing.radiusComfort,
             StudioLayoutSpacing.inlineGap,
           ),
           child: Row(
@@ -623,12 +617,15 @@ class _ProjectStudioScriptStepPanelState
         onTap: () => setState(() => _agentPaneOpen = true),
         borderRadius: BorderRadius.circular(StudioSpacing.md),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StudioSpacing.radiusCard,
+            vertical: StudioSpacing.radiusComfort,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(Icons.smart_toy_outlined, size: 20, color: tokens.primary),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Text(
                 l10n.studioScriptStepOpenAgent,
                 style: studioControlLabelStyle(context)?.copyWith(
@@ -732,8 +729,10 @@ class _ProjectStudioScriptStepPanelState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           TabBar(
-            dividerColor: Colors.transparent,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            dividerColor: StudioPrimitives.transparent,
+            labelPadding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.radiusComfort,
+            ),
             indicatorSize: TabBarIndicatorSize.label,
             tabs: <Tab>[
               Tab(text: l10n.studioScriptStepTabContent),

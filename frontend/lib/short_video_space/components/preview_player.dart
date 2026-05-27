@@ -6,6 +6,8 @@ import 'package:video_player/video_player.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 AppLocalizations _previewPlayerL10n(BuildContext context) =>
@@ -439,7 +441,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
               // 镜头信息
               if (_currentShotNumber != null || _currentShotTitle != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
@@ -456,7 +458,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           size: 20,
                           color: Theme.of(context).colorScheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoPreviewPlayerShotLabel(
                             _currentShotNumber!,
@@ -466,7 +468,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         ),
                       ],
                       if (_isPlaylistMode) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoPreviewPlayerPlaylistPosition(
                             _currentShotIndex + 1,
@@ -480,7 +482,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                       ],
                       if (_currentShotNumber != null &&
                           _currentShotTitle != null)
-                        const SizedBox(width: 16),
+                        const SizedBox(width: StudioSpacing.sm),
                       if (_currentShotTitle != null)
                         Expanded(
                           child: Text(
@@ -491,7 +493,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                         ),
                       if (_currentDurationText != null) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -499,7 +501,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                           decoration: BoxDecoration(
                             color: StudioTokens.of(context).primarySoft,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                           ),
                           child: Text(
                             _currentDurationText!,
@@ -519,7 +521,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
 
               // 视频播放器
               Container(
-                color: Colors.black,
+                color: StudioTokens.of(context).bgBase,
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
                   child: _buildVideoContent(context),
@@ -528,7 +530,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
 
               // 播放控制
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: const BorderRadius.vertical(
@@ -547,7 +549,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             size: 16,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Text(
                             l10n.shortVideoPreviewPlayerOverallProgress,
                             style: Theme.of(context).textTheme.bodySmall
@@ -555,7 +557,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                                   color: StudioTokens.of(context).textSecondary,
                                 ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Expanded(
                             child: LinearProgressIndicator(
                               value: _totalPlaylistDuration.inMilliseconds > 0
@@ -567,7 +569,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                               ).colorScheme.surfaceContainerHighest,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Text(
                             '${_formatDuration(_playlistProgress)} / ${_formatDuration(_totalPlaylistDuration)}',
                             style: Theme.of(context).textTheme.bodySmall,
@@ -586,12 +588,12 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             size: 16,
                             color: StudioTokens.of(context).textSecondary,
                           ),
-                        if (_isPlaylistMode) const SizedBox(width: 8),
+                        if (_isPlaylistMode) const SizedBox(width: StudioSpacing.xs),
                         Text(
                           _formatDuration(_currentPosition),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Expanded(
                           child: SliderTheme(
                             data: SliderTheme.of(context).copyWith(
@@ -628,14 +630,14 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(
                           _formatDuration(_totalDuration),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
 
                     // 播放控制按钮
                     Row(
@@ -650,7 +652,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             icon: const Icon(Icons.skip_previous),
                             tooltip: l10n.shortVideoPreviewPlayerPreviousShot,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                         ],
 
                         IconButton(
@@ -658,7 +660,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           icon: const Icon(Icons.stop),
                           tooltip: l10n.shortVideoPreviewPlayerStop,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         IconButton(
                           onPressed: _isInitialized ? _togglePlayPause : null,
                           icon: Icon(
@@ -672,7 +674,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
 
                         // 下一个镜头按钮（仅在播放列表模式下显示）
                         if (_isPlaylistMode) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           IconButton(
                             onPressed:
                                 _currentShotIndex < widget.playlist!.length - 1
@@ -698,27 +700,19 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
     final l10n = _previewPlayerL10n(context);
     if (_hasError) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage ?? l10n.shortVideoSpacePreviewVideoLoadFailed,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(StudioSpacing.sm),
+          child: StudioApiErrorCallout(
+            error: _errorMessage ?? l10n.shortVideoSpacePreviewVideoLoadFailed,
+            onRetry: _initializePlayer,
+            emphasis: StudioApiErrorCalloutEmphasis.subtle,
+          ),
         ),
       );
     }
 
     if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: StudioMediaTileSkeleton());
     }
 
     return VideoPlayer(_controller!);
@@ -808,7 +802,7 @@ class PreviewPlayerDialog extends StatelessWidget {
                 },
               ),
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

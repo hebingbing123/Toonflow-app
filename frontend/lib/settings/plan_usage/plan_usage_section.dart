@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../config.dart';
 import '../../design_system/components/studio_primary_button.dart';
-import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_async_data_view.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
@@ -152,7 +152,7 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -161,37 +161,30 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 16),
-        child: StudioSkeleton(height: 120),
-      );
-    }
     if (widget.accessToken == null || widget.accessToken!.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.only(top: StudioSpacing.sm),
         child: Text(l10n.teamWorkspaceLoginRequired),
-      );
-    }
-    if (_error != null) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(_error!),
-            TextButton(onPressed: _load, child: Text(l10n.taskCenterRetry)),
-          ],
-        ),
       );
     }
     final meV2 = _me;
     final meV1 = _meV1;
+    return StudioAsyncDataView(
+      loading: _loading || (meV2 == null && meV1 == null && _error == null),
+      error: _error,
+      onRetry: _load,
+      child: _buildPlanUsageBody(context, l10n, meV2: meV2, meV1: meV1),
+    );
+  }
+
+  Widget _buildPlanUsageBody(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required MeV2Response? meV2,
+    required MeResponse? meV1,
+  }) {
     if (meV2 == null && meV1 == null) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 16),
-        child: StudioSkeleton(height: 120),
-      );
+      return const SizedBox.shrink();
     }
     final usage = _usage;
     final billingScope = meV2?.billingScope ?? 'user';

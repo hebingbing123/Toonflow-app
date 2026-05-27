@@ -105,8 +105,8 @@ TextStyle? studioInsetSectionTitleStyle(BuildContext context) {
 
 TextStyle studioBadgeTextStyle(BuildContext context) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
-    color: Colors.white,
+  return (Theme.of(context).textTheme.labelSmall ?? const TextStyle()).copyWith(
+    color: Theme.of(context).colorScheme.onPrimary,
     fontSize: typography.meta,
     fontWeight: FontWeight.w700,
     height: 1.1,
@@ -137,7 +137,7 @@ TextStyle studioAccentBannerBodyStyle(BuildContext context, Color accentColor) {
 /// Monospace meta copy (reports, technical details).
 TextStyle studioMonospaceMetaStyle(BuildContext context, {Color? color}) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
     fontFamily: 'monospace',
     fontSize: typography.meta,
     color: color,
@@ -147,7 +147,7 @@ TextStyle studioMonospaceMetaStyle(BuildContext context, {Color? color}) {
 /// Large stat value in comparison / summary tiles.
 TextStyle studioStatHeroValueStyle(BuildContext context, Color color) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.displaySmall ?? const TextStyle()).copyWith(
     fontSize: typography.display,
     fontWeight: FontWeight.bold,
     color: color,
@@ -158,7 +158,7 @@ TextStyle studioStatHeroValueStyle(BuildContext context, Color color) {
 /// Wizard step indicator number inside a circle.
 TextStyle studioWizardStepNumberStyle(BuildContext context, Color color) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.labelSmall ?? const TextStyle()).copyWith(
     fontSize: typography.meta,
     fontWeight: FontWeight.w600,
     color: color,
@@ -172,7 +172,7 @@ TextStyle studioWizardStepLabelStyle(
   FontWeight fontWeight = FontWeight.w500,
 }) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.labelMedium ?? const TextStyle()).copyWith(
     fontSize: typography.meta,
     height: 1.25,
     fontWeight: fontWeight,
@@ -183,7 +183,7 @@ TextStyle studioWizardStepLabelStyle(
 /// Popup menu section header.
 TextStyle studioMenuSectionHeaderStyle(BuildContext context) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.labelLarge ?? const TextStyle()).copyWith(
     fontWeight: FontWeight.w700,
     fontSize: typography.meta,
     color: StudioTokens.of(context).textSecondary,
@@ -193,7 +193,7 @@ TextStyle studioMenuSectionHeaderStyle(BuildContext context) {
 /// Filter count pill and compact chips.
 TextStyle studioFilterCountBadgeStyle(BuildContext context) {
   final typography = StudioTypography.of(context);
-  return TextStyle(
+  return (Theme.of(context).textTheme.labelSmall ?? const TextStyle()).copyWith(
     fontSize: typography.meta,
     fontWeight: FontWeight.bold,
     color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -203,5 +203,7 @@ TextStyle studioFilterCountBadgeStyle(BuildContext context) {
 /// Outlined button label in filter panels.
 TextStyle studioFilterActionLabelStyle(BuildContext context) {
   final typography = StudioTypography.of(context);
-  return TextStyle(fontSize: typography.bodyLarge);
+  return (Theme.of(context).textTheme.bodyLarge ?? const TextStyle()).copyWith(
+    fontSize: typography.bodyLarge,
+  );
 }

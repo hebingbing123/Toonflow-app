@@ -45,6 +45,9 @@ const double kStudioLoginAuthPanelMaxWidth = 456;
 /// Handset / narrow Web width gate (aligns with [kProjectsHomePhoneShortestSide]).
 const double kStudioHandsetMaxWidth = 600;
 
+/// Tablet → desktop grid / split-pane gate (multi-column lists, inspector column).
+const double kStudioGridDesktopMinWidth = 960;
+
 /// Projects home: inline title + compact create (desktop / tablet landscape).
 const double kProjectsHomeInlineHeaderMinWidth = kStudioPipelineInlineMinWidth;
 

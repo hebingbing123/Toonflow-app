@@ -95,7 +95,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
         ],
         if (model.scriptList.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
             child: StudioDropdownButton<int?>(
               value: model.filterScriptNumericId,
               isExpanded: true,
@@ -140,10 +140,10 @@ class ProjectAssetsOverviewView extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+          padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
           decoration: studioInsetPanelDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +157,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
                 l10n.projectEditorAssetsOverviewCardIntro,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed:

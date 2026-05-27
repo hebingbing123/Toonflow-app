@@ -101,7 +101,9 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -120,7 +122,9 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -146,7 +150,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             if (_keyHint != null && _keyHint!.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.settingsModelVendorsCredentialHint(_keyHint!),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -162,7 +166,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
                 labelText: l10n.settingsModelVendorsFieldApiKey,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _apiSecretCtrl,
               obscureText: true,
@@ -170,7 +174,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
                 labelText: l10n.settingsModelVendorsFieldApiSecret,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _apiTokenCtrl,
               obscureText: true,

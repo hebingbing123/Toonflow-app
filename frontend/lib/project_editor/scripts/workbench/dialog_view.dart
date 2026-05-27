@@ -108,7 +108,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                         isDense: true,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioFilterRow(
                       wideLayout: StudioFilterWideLayout.toolbarRow,
                       wideBreakpoint: 560,
@@ -150,7 +150,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: model.selectedIdsCtrl,
                 minLines: 2,
@@ -205,12 +205,12 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.projectEditorScriptsBatchAddTitle,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.addCountCtrl,
                 keyboardType: TextInputType.number,
@@ -218,14 +218,14 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectEditorScriptsBatchAddCountLabel,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.addPrefixCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorScriptsBatchAddNamePrefixLabel,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: model.addBodyCtrl,
                 minLines: 3,
@@ -234,18 +234,18 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                   labelText: l10n.projectEditorScriptsBatchAddContentLabel,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(context),
                 onPressed: model.localBusy ? null : callbacks.onBatchCreate,
                 child: Text(l10n.projectEditorScriptsWorkbenchDialogBatchCreate),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.projectEditorScriptsWorkbenchDialogContextPreviewHeading,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (model.previewRows.isEmpty)
                 model.scriptList.isEmpty
                     ? StudioEmptyState.emptyData(
@@ -272,7 +272,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                     .take(6)
                     .map(
                       (row) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                         child: Text(
                           l10n.projectEditorScriptsWorkbenchDialogPreviewRowWithAssets(
                             row.numericId,
@@ -298,7 +298,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(
-                    StudioLayoutSpacing.cardInner - 4,
+                    StudioSpacing.radiusComfort,
                   ),
                   decoration: studioRecessedPanelDecoration(context),
                   child: FilledButton.tonal(

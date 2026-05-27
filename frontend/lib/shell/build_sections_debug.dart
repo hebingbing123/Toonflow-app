@@ -41,13 +41,13 @@ extension _HomePageBuildDebugSections on _HomePageState {
   List<Widget> _buildDebugSections() => [
     if (kInternalOpsToken.isNotEmpty)
       AdminConsoleSection(controller: _adminConsoleController),
-    if (kInternalOpsToken.isNotEmpty) const SizedBox(height: 16),
+    if (kInternalOpsToken.isNotEmpty) const SizedBox(height: StudioSpacing.sm),
     ContentComplianceSection(
       controller: _contentComplianceController,
       onOpenTarget: _openComplianceOpsTarget,
       onOpenOpsTarget: _openComplianceOpsTarget,
     ),
-    const SizedBox(height: 16),
+    const SizedBox(height: StudioSpacing.sm),
     HarnessSection(
       loadingHarnessTools: _skillsHarnessController.loadingHarnessTools,
       loadingUserWasmValidate: _skillsHarnessController.loadingUserWasmValidate,

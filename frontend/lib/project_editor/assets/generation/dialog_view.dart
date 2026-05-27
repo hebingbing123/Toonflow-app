@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import '../../../design_system/studio_responsive_layout.dart';
 import '../../../design_system/components/studio_dropdown_field.dart';
 import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
@@ -12,6 +13,8 @@ import '../asset_type_labels.dart';
 import 'support.dart';
 import 'dialog_view_contract.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 export 'dialog_view_contract.dart';
 
@@ -87,7 +90,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
                 onDeleteDerivatives: callbacks.onDeleteDerivatives,
                 onUpdateImageUrl: callbacks.onUpdateImageUrl,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               _AssetGenerationStatusPanel(
                 busy: model.busyMutation,
                 statusLine: model.statusLine,

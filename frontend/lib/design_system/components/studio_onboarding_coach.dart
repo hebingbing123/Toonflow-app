@@ -97,7 +97,7 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
               borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
               color: StudioTokens.of(context).bgElevated,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 280),
                   child: Column(

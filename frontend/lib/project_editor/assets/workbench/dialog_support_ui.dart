@@ -49,7 +49,7 @@ StudioAlertDialog buildProjectAssetsWorkbenchDialog({
               l10n.projectEditorAssetsMainWorkbenchDialogIntro,
               style: Theme.of(dialogCtx).textTheme.bodySmall,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _ProjectAssetsWorkbenchOverview(
               focusNotice: focusNotice,
               statusLine: statusLine,
@@ -66,7 +66,7 @@ StudioAlertDialog buildProjectAssetsWorkbenchDialog({
               onAssetChanged: onAssetChanged,
               onScriptChanged: onScriptChanged,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _ProjectAssetsWorkbenchActions(
               localBusy: localBusy,
               assetsBusy: assetsBusy,
@@ -84,7 +84,7 @@ StudioAlertDialog buildProjectAssetsWorkbenchDialog({
               onUploadEditImage: onUploadEditImage,
               onUploadClip: onUploadClip,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _ProjectAssetsWorkbenchLaunchers(
               localBusy: localBusy,
               assetsBusy: assetsBusy,

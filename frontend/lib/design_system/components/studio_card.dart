@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../ix/studio_pointer.dart';
 import '../theme.dart';
 import '../tokens.dart';
+import 'studio_surfaces.dart';
 
 class StudioCard extends StatelessWidget {
   const StudioCard({
@@ -35,26 +37,42 @@ class StudioCard extends StatelessWidget {
               : tokens.borderSubtle,
         ),
         boxShadow: emphasized
-            ? <BoxShadow>[
-                BoxShadow(
-                  color: tokens.primary.withValues(alpha: 0.06),
-                  blurRadius: 14,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
+            ? studioInsetElevationShadow(
+                context,
+                alpha: 0.14,
+                blurRadius: StudioSpacing.radiusComfort,
+                spreadRadius: -12,
+              )
             : null,
       ),
       child: child,
     );
     if (onTap == null) return card;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        child: card,
-      ),
+    final radius = BorderRadius.circular(StudioSpacing.radiusCard);
+    return StudioPointerHover(
+      enabled: true,
+      borderRadius: radius,
+      builder: (context, hovered) {
+        return studioWrapClickCursor(
+          enabled: true,
+          child: Material(
+            color: StudioPrimitives.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: radius,
+              hoverColor: studioPointerChromeEnabled(context)
+                  ? tokens.primary.withValues(alpha: 0.08)
+                  : null,
+              child: AnimatedScale(
+                scale: hovered ? 1.008 : 1,
+                duration: const Duration(milliseconds: 140),
+                curve: Curves.easeOutCubic,
+                child: card,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

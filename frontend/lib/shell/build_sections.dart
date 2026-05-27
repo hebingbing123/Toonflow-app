@@ -7,10 +7,10 @@ extension _HomePageBuildSections on _HomePageState {
     final signedIn = session != null;
     final widgets = <Widget>[
       _buildOverviewSection(),
-      const SizedBox(height: 16),
+      const SizedBox(height: StudioSpacing.sm),
       _buildLocaleSection(context),
       if (kInternalOpsToken.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         const JobQueueStatsCard(),
       ],
       _buildAuthSection(session, signedIn),
@@ -38,7 +38,7 @@ extension _HomePageBuildSections on _HomePageState {
     final notifier = AppLocaleNotifier.instance;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -46,7 +46,7 @@ extension _HomePageBuildSections on _HomePageState {
               l10n.localeSectionTitle,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ListenableBuilder(
               listenable: notifier,
               builder: (BuildContext context, _) {
@@ -157,7 +157,7 @@ extension _HomePageBuildSections on _HomePageState {
     };
     final isProduct = _shellNavigationController.isProductMode;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -165,7 +165,7 @@ extension _HomePageBuildSections on _HomePageState {
             l10n.workspaceModeTitle,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SegmentedButton<HomeSectionMode>(
             segments: <ButtonSegment<HomeSectionMode>>[
               ButtonSegment<HomeSectionMode>(
@@ -183,7 +183,7 @@ extension _HomePageBuildSections on _HomePageState {
               _shellNavigationController.selectHomeSectionMode(nextMode);
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             isProduct
                 ? l10n.workspaceModeDescriptionProduct
@@ -251,8 +251,13 @@ extension _HomePageBuildSections on _HomePageState {
     final err = _error!;
     final line = resolveAppLocalizationsForErrors(context).errorLine(err);
     return [
-      const SizedBox(height: 16),
-      Text(line, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      const SizedBox(height: StudioSpacing.sm),
+      Text(
+        line,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.error,
+        ),
+      ),
     ];
   }
 }

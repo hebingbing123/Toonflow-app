@@ -10,8 +10,12 @@ import '../demo/product_demo_mode.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_tap.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -405,7 +409,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           bottom: BorderSide(color: tokens.primary.withValues(alpha: 0.55)),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.fromLTRB(
+        StudioSpacing.radiusComfort,
+        StudioSpacing.xs,
+        StudioSpacing.radiusComfort,
+        StudioSpacing.xs,
+      ),
       child: Row(
         children: <Widget>[
           Icon(
@@ -413,7 +422,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             size: 16,
             color: tokens.textSecondary.withValues(alpha: 0.88),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Expanded(
             child: Text(
               label,
@@ -445,36 +454,36 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       fontSize: typography.meta,
       color: tokens.textMuted.withValues(alpha: 0.85),
     );
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: selected ? tokens.bgInset.withValues(alpha: 0.95) : null,
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+      ),
+      child: StudioTap(
         onTap: onTap,
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          color: selected
-              ? tokens.bgInset.withValues(alpha: 0.95)
-              : Colors.transparent,
-          child: Row(
-            children: <Widget>[
-              if (icon != null) ...<Widget>[
-                Icon(icon, size: 16, color: tokens.textSecondary),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: rowStyle,
-                ),
-              ),
-              if (trailing != null) ...<Widget>[
-                const SizedBox(width: 8),
-                Text(trailing, style: trailingStyle),
-              ],
+        minSize: StudioSpacing.touchTarget,
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            if (icon != null) ...<Widget>[
+              Icon(icon, size: 16, color: tokens.textSecondary),
+              const SizedBox(width: StudioSpacing.xs),
             ],
-          ),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: rowStyle,
+              ),
+            ),
+            if (trailing != null) ...<Widget>[
+              const SizedBox(width: StudioSpacing.xs),
+              Text(trailing, style: trailingStyle),
+            ],
+          ],
         ),
       ),
     );
@@ -497,6 +506,19 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }) {
     var row = 0;
     final items = <Widget>[];
+    final entranceKey = Object.hash(
+      queryLen,
+      showSuggestionsPanel,
+      showPinnedPanel,
+      showRecentViewsPanel,
+      showTemplatePanel,
+      _suggestions.length,
+      _history.length,
+      _pinnedViews.length,
+      _recentViews.length,
+      _loadingSuggestions,
+      _loadingHistory,
+    );
 
     void addRow(
       Widget Function(bool selected) build, {
@@ -505,21 +527,25 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       if (dividerBefore && items.isNotEmpty) {
         items.add(_buildPaletteDivider(tokens));
       }
-      items.add(build(row == _paletteSelectedIndex));
+      final index = row;
+      items.add(
+        studioStaggeredItem(
+          index,
+          entranceKey: entranceKey,
+          child: build(index == _paletteSelectedIndex),
+        ),
+      );
       row++;
     }
 
     if (_loadingSuggestions && queryLen >= _minQueryLength) {
       items.add(
         const Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: StudioSpacing.sm,
+            vertical: StudioSpacing.xs,
           ),
+          child: StudioListSkeleton(itemCount: 3, scrollable: false),
         ),
       );
       return items;
@@ -742,10 +768,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             showWhenUnlinked: false,
             offset: Offset(
               0,
-              fieldSize.height + (widget.titleBarDense ? 4 : 8),
+              fieldSize.height +
+                  (widget.titleBarDense
+                      ? StudioSpacing.chromeActionGap
+                      : StudioSpacing.xs),
             ),
             child: Material(
-              color: Colors.transparent,
+              color: StudioPrimitives.transparent,
               child: Container(
                 constraints: const BoxConstraints(maxHeight: 440),
                 decoration: BoxDecoration(
@@ -754,13 +783,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   border: Border.all(
                     color: tokens.primary.withValues(alpha: 0.38),
                   ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: studioShadowColor(context, alpha: 0.38),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
+                  boxShadow: studioInsetElevationShadow(
+                    context,
+                    alpha: 0.38,
+                    blurRadius: StudioSpacing.md,
+                    offset: const Offset(0, StudioSpacing.radiusComfort),
+                  ),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -771,7 +799,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       _buildPaletteQueryHeader(l10n, theme, tokens),
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: widget.titleBarDense ? 420 : 392,
+                        maxHeight: studioAdaptiveDialogHeight(
+                          context,
+                          fraction: widget.titleBarDense ? 0.48 : 0.44,
+                          min: 280,
+                          max: widget.titleBarDense ? 480 : 440,
+                        ),
                       ),
                       child: ListView(
                         padding: EdgeInsets.fromLTRB(
@@ -1047,7 +1080,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   InputDecoration _titleBarSearchDecoration({
     required String hintText,
     required TextStyle hintStyle,
-    EdgeInsets contentPadding = const EdgeInsets.fromLTRB(0, 5, 0, 10),
+    EdgeInsets contentPadding = const EdgeInsets.fromLTRB(
+      0,
+      StudioSpacing.chromeActionGap,
+      0,
+      StudioSpacing.xs,
+    ),
   }) {
     return InputDecoration(
       hintText: hintText,
@@ -1081,7 +1119,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   ) {
     const barHeight = 30.0;
     final typography = StudioTypography.of(context);
-    const fieldRadius = 8.0;
+    const fieldRadius = StudioSpacing.radiusDense;
     const iconGap = StudioSpacing.xs;
     final textColor = tokens.textPrimary.withValues(alpha: 0.92);
     final iconColor = tokens.textSecondary.withValues(alpha: 0.88);
@@ -1127,61 +1165,56 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
     return MouseRegion(
       cursor: SystemMouseCursors.text,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _requestTitleBarSearchFocus,
-        child: SizedBox(
-          height: barHeight,
-          width: double.infinity,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: tokens.bgInset.withValues(alpha: 0.96),
-              borderRadius: BorderRadius.circular(fieldRadius),
-              border: Border.all(color: fieldBorder),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  const trailingSlotWidth = 15.0;
-                  final glyphColor = _focusNode.hasFocus
-                      ? tokens.accent.withValues(alpha: 0.92)
-                      : iconColor;
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      searchGlyph(color: glyphColor),
-                      const SizedBox(width: iconGap),
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          focusNode: _focusNode,
-                          maxLines: 1,
-                          textAlign: TextAlign.left,
-                          textAlignVertical: TextAlignVertical.center,
-                          style: textStyle,
-                          cursorColor: tokens.accent,
-                          decoration: _titleBarSearchDecoration(
-                            hintText: l10n.globalSearchInputHint,
-                            hintStyle: hintStyle,
-                            contentPadding: fieldContentPadding,
-                          ),
-                          onSubmitted: (_) {
-                            if (_canSearch) {
-                              _performSearch();
-                            }
-                          },
-                        ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: tokens.bgInset.withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(fieldRadius),
+          border: Border.all(color: fieldBorder),
+        ),
+        child: StudioTap(
+          minSize: barHeight,
+          borderRadius: BorderRadius.circular(fieldRadius),
+          onTap: _requestTitleBarSearchFocus,
+          padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const trailingSlotWidth = 15.0;
+              final glyphColor = _focusNode.hasFocus
+                  ? tokens.accent.withValues(alpha: 0.92)
+                  : iconColor;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  searchGlyph(color: glyphColor),
+                  const SizedBox(width: iconGap),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      maxLines: 1,
+                      textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: textStyle,
+                      cursorColor: tokens.accent,
+                      decoration: _titleBarSearchDecoration(
+                        hintText: l10n.globalSearchInputHint,
+                        hintStyle: hintStyle,
+                        contentPadding: fieldContentPadding,
                       ),
-                      SizedBox(
-                        width: trailingSlotWidth,
-                        child: Center(child: trailingSlot()),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                      onSubmitted: (_) {
+                        if (_canSearch) {
+                          _performSearch();
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: trailingSlotWidth,
+                    child: Center(child: trailingSlot()),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -1205,11 +1238,21 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     }
     final compact = widget.compact || titleBarDense;
     final barHeight = titleBarDense ? 30.0 : (compact ? 38.0 : 40.0);
-    final barRadius = titleBarDense ? 8.0 : (compact ? 18.0 : 20.0);
-    final iconSize = titleBarDense ? 16.0 : (compact ? 18.0 : 20.0);
-    final leadingPadding = titleBarDense ? 8.0 : (compact ? 10.0 : 12.0);
-    final iconGap = titleBarDense ? 4.0 : (compact ? 6.0 : 8.0);
-    final textPadding = titleBarDense ? 6.0 : (compact ? 8.0 : 10.0);
+    final barRadius = titleBarDense
+        ? StudioSpacing.radiusDense
+        : (compact ? StudioSpacing.radiusCard : StudioSpacing.sm);
+    final iconSize = titleBarDense
+        ? StudioSpacing.sm
+        : (compact ? StudioSpacing.radiusComfort : StudioSpacing.sm);
+    final leadingPadding = titleBarDense
+        ? StudioSpacing.xs
+        : (compact ? StudioSpacing.xs : StudioSpacing.radiusComfort);
+    final iconGap = titleBarDense
+        ? StudioSpacing.chromeActionGap
+        : StudioSpacing.xs;
+    final textPadding = titleBarDense
+        ? StudioSpacing.xs
+        : (compact ? StudioSpacing.xs : StudioSpacing.radiusComfort);
     final fontSize = titleBarDense ? 12.0 : (compact ? 13.0 : 14.0);
     final mutedFieldColor = tokens.textMuted.withValues(
       alpha: titleBarDense ? 0.52 : 1.0,
@@ -1258,14 +1301,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             ),
             boxShadow: titleBarDense || !_focusNode.hasFocus
                 ? const <BoxShadow>[]
-                : <BoxShadow>[
-                    BoxShadow(
-                      color: tokens.primary.withValues(alpha: 0.14),
-                      blurRadius: 8,
-                      spreadRadius: -2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                : studioInsetElevationShadow(
+                    context,
+                    alpha: 0.14,
+                    blurRadius: StudioSpacing.xs,
+                    spreadRadius: -2,
+                    offset: const Offset(0, StudioSpacing.chromeActionGap),
+                  ),
           ),
           child: Row(
             children: [
@@ -1288,7 +1330,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   focusNode: _focusNode,
                   decoration: InputDecoration(
                     hintText: l10n.globalSearchInputHint,
-                    hintStyle: TextStyle(
+                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: fontSize,
                       color: titleBarDense ? mutedHintColor : tokens.textMuted,
                       fontWeight: titleBarDense ? FontWeight.w400 : null,
@@ -1349,12 +1391,16 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                         ? tokens.primary.withValues(
                             alpha: titleBarDense ? 0.82 : 1.0,
                           )
-                        : Colors.transparent,
+                        : StudioPrimitives.transparent,
                     foregroundColor: _canSearch
                         ? theme.colorScheme.onPrimary
                         : tokens.textMuted,
                   ),
-                  padding: EdgeInsets.all(titleBarDense ? 5 : (compact ? 6 : 8)),
+                  padding: EdgeInsets.all(
+                    titleBarDense
+                        ? StudioSpacing.chromeActionGap
+                        : StudioSpacing.xs,
+                  ),
                   constraints: BoxConstraints(
                     minWidth: titleBarDense ? 26 : 0,
                     minHeight: titleBarDense ? 26 : 0,

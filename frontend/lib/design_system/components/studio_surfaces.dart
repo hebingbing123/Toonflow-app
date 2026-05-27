@@ -19,7 +19,7 @@ Color studioShadowColor(BuildContext context, {double alpha = 0.12}) {
   return StudioTokens.of(context).overlay.withValues(alpha: alpha);
 }
 
-/// Standard inset panel drop shadow (replaces hardcoded `Colors.black`).
+/// Standard inset panel drop shadow (replaces hardcoded overlay blacks).
 List<BoxShadow> studioInsetElevationShadow(
   BuildContext context, {
   double alpha = 0.12,
@@ -66,7 +66,10 @@ ButtonStyle _studioFormButtonDimensions(BuildContext context) {
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     visualDensity: VisualDensity.compact,
     textStyle: WidgetStatePropertyAll<TextStyle>(
-      labelStyle ?? const TextStyle(fontWeight: FontWeight.w600),
+      labelStyle ??
+          (Theme.of(context).textTheme.labelLarge ?? const TextStyle()).copyWith(
+            fontWeight: FontWeight.w600,
+          ),
     ),
   );
 }
@@ -95,7 +98,10 @@ ButtonStyle studioFormTonalButtonStyle(BuildContext context) {
 ButtonStyle studioFormIconLabeledButtonStyle(BuildContext context) {
   return FilledButton.styleFrom(
     iconSize: 18,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(
+      horizontal: StudioSpacing.xs,
+      vertical: StudioSpacing.xs,
+    ),
   ).merge(_studioFormButtonDimensions(context));
 }
 
@@ -103,7 +109,10 @@ ButtonStyle studioFormIconLabeledButtonStyle(BuildContext context) {
 ButtonStyle studioFormOutlinedIconLabeledButtonStyle(BuildContext context) {
   return OutlinedButton.styleFrom(
     iconSize: 18,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(
+      horizontal: StudioSpacing.xs,
+      vertical: StudioSpacing.xs,
+    ),
   ).merge(_studioFormButtonDimensions(context));
 }
 
@@ -111,7 +120,10 @@ ButtonStyle studioFormOutlinedIconLabeledButtonStyle(BuildContext context) {
 ButtonStyle studioFormTextButtonIconStyle(BuildContext context) {
   return TextButton.styleFrom(
     iconSize: 18,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(
+      horizontal: StudioSpacing.xs,
+      vertical: StudioSpacing.xs,
+    ),
   ).merge(_studioFormButtonDimensions(context));
 }
 
@@ -125,7 +137,7 @@ ButtonStyle studioFormInsetTonalChipStyle(BuildContext context) {
       side: WidgetStatePropertyAll(BorderSide(color: tokens.borderDefault)),
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         ),
       ),
     ),
@@ -146,7 +158,10 @@ ButtonStyle studioFormDestructivePrimaryButtonStyle(BuildContext context) {
 ButtonStyle studioFormDestructiveIconLabeledButtonStyle(BuildContext context) {
   return FilledButton.styleFrom(
     iconSize: 18,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(
+      horizontal: StudioSpacing.xs,
+      vertical: StudioSpacing.xs,
+    ),
   ).merge(studioFormDestructivePrimaryButtonStyle(context));
 }
 
@@ -167,7 +182,10 @@ ButtonStyle _studioToolbarButtonDimensions(BuildContext context) {
     tapTargetSize: MaterialTapTargetSize.padded,
     visualDensity: VisualDensity.compact,
     textStyle: WidgetStatePropertyAll<TextStyle>(
-      labelStyle ?? const TextStyle(fontWeight: FontWeight.w600),
+      labelStyle ??
+          (Theme.of(context).textTheme.labelLarge ?? const TextStyle()).copyWith(
+            fontWeight: FontWeight.w600,
+          ),
     ),
   );
 }
@@ -191,7 +209,7 @@ TabBarThemeData studioWorkbenchTabBarTheme(BuildContext context) {
     unselectedLabelStyle: studioHintStyle(context)?.copyWith(
       fontWeight: FontWeight.w500,
     ),
-    dividerColor: Colors.transparent,
+    dividerColor: StudioPrimitives.transparent,
     indicatorSize: TabBarIndicatorSize.label,
   );
 }

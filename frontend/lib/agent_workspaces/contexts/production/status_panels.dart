@@ -31,7 +31,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           runningTaskLine ??
               taskStatusLine ??
@@ -39,7 +39,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
           style: bodySmall,
         ),
         if (workspaceLastToolResultLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.agentWorkspaceProductionLatestToolResult(
               workspaceLastToolResultLine!,
@@ -48,7 +48,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
           ),
         ],
         if (resultSummaryLines.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.agentWorkspaceProductionResultSummary,
             style: Theme.of(context).textTheme.labelLarge,
@@ -59,7 +59,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
           ),
         ],
         if (suggestedFlowKeyLine != null) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Row(
             children: <Widget>[
               Expanded(
@@ -70,7 +70,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
                   style: bodySmall,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               OutlinedButton(
                 onPressed: busy ? null : onApplySuggestedFlowKey,
                 child: Text(l10n.agentWorkspaceProductionUseSuggestedFlowKey),
@@ -78,7 +78,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
             ],
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(l10n.agentWorkspaceProductionWritebackStrategy, style: bodySmall),
       ],
     );

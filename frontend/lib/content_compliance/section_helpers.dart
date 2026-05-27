@@ -1096,7 +1096,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                       children: rows
                           .map(
                             (audit) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
@@ -1113,7 +1113,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                       _auditSummary(l10n, audit),
                                       style: theme.textTheme.titleSmall,
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: StudioSpacing.xs),
                                     Text(
                                       audit.createdAt,
                                       style: theme.textTheme.bodySmall
@@ -1121,7 +1121,7 @@ extension _ContentComplianceSectionHelpers on _ContentComplianceSectionState {
                                             color: tokens.textSecondary,
                                           ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: StudioSpacing.xs),
                                     SelectableText(
                                       _auditDetails(audit),
                                       style: theme.textTheme.bodySmall,

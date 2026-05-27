@@ -59,11 +59,11 @@ class StudioAppBarActions extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.surfaceHighlight),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(StudioSpacing.xs),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -135,7 +135,7 @@ class _UtilityIconButton extends StatelessWidget {
       message: tooltip,
       waitDuration: const Duration(milliseconds: 350),
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         borderRadius: borderRadius,
         child: Ink(
           width: boxSize,
@@ -196,7 +196,7 @@ class _UtilityBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: tokens.accent,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: tokens.bgInset.withValues(alpha: 0.92)),
       ),
       child: Center(

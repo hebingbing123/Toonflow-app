@@ -39,8 +39,8 @@ class ProductionWorkspacePromptTemplatesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: presets
           .map(
             (AgentWorkspacePromptPreset preset) => StudioActionChip(
@@ -311,29 +311,29 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   workflowButton,
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   domainToolDropdown(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   flowKeyDropdown(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   domainArgsField(),
                   if (argumentTemplates != null) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     argumentTemplates!,
                   ],
                   if (actionCandidatePanel != null) ...<Widget>[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     actionCandidatePanel!,
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   probeButton,
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   subAgentDropdown(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   subAgentArgsField(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   subAgentButton,
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   writebackButton,
                 ],
               );
@@ -352,19 +352,19 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                     writebackButton,
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 domainArgsField(),
                 if (argumentTemplates != null) ...<Widget>[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   argumentTemplates!,
                 ],
                 if (actionCandidatePanel != null) ...<Widget>[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   actionCandidatePanel!,
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 subAgentDropdown(),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 subAgentArgsField(),
               ],
             );
@@ -401,8 +401,8 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
         ),
         const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: templates
               .map(
                 (ProductionWorkspaceArgumentTemplateEntry entry) => StudioActionChip(
@@ -459,8 +459,8 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
         ],
         const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: suggestions
               .map(
                 (ProductionWorkspaceArgumentSuggestion suggestion) =>

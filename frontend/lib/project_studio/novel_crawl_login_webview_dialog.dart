@@ -3,6 +3,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -182,7 +183,12 @@ class _NovelCrawlLoginWebViewDialogState
         ),
       ],
       child: SizedBox(
-        height: 520,
+        height: studioAdaptiveDialogHeight(
+          context,
+          fraction: 0.68,
+          min: 400,
+          max: 640,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -199,7 +205,7 @@ class _NovelCrawlLoginWebViewDialogState
                     onSubmitted: (_) => _openUrl(),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 OutlinedButton(
                   onPressed: _capturing || startUri == null ? null : _openUrl,
                   child: Text(l10n.studioNovelCrawlLoginDialogGo),
@@ -219,7 +225,7 @@ class _NovelCrawlLoginWebViewDialogState
               const SizedBox(height: StudioSpacing.xs),
               LinearProgressIndicator(value: _progress, minHeight: 2),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Expanded(
               child: DecoratedBox(
                 decoration: BoxDecoration(

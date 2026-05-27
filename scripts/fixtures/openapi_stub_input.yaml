@@ -5052,6 +5052,16 @@ paths:
   /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file:
     get:
       operationId: getProjectAssetImageFileByProjectIdV1
+      parameters:
+      - description: Optional longest edge in pixels when serving locally stored PNG (64–4096). Ignored for HTTP(S) redirects.
+        in: query
+        name: max_edge
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 64
+          maximum: 4096
       responses:
         '200':
           content:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import '../rust_api.dart';
+import '../design_system/tokens.dart';
 
 /// Provides cached [ProjectModelRoutingResponse] for Studio step panels.
 class ProjectStudioModelRoutingScope extends InheritedWidget {
@@ -49,10 +50,10 @@ class StudioStepModelChip extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 8,
+        spacing: StudioSpacing.xs,
         children: <Widget>[
           StudioChip(
             avatar: const Icon(Icons.smart_toy_outlined, size: 16),

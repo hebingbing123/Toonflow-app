@@ -1,10 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
+import '../ix/studio_pointer.dart';
 import '../studio_typography.dart';
 import '../theme.dart';
 import '../tokens.dart';
+import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
 class StudioPrimaryButton extends StatelessWidget {
@@ -37,7 +37,7 @@ class StudioPrimaryButton extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: enabled
-                  ? Colors.white
+                  ? theme.colorScheme.onPrimary
                   : tokens.textSecondary.withValues(alpha: 0.9),
             ),
           )
@@ -48,8 +48,8 @@ class StudioPrimaryButton extends StatelessWidget {
                 child: Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  runSpacing: 4,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.chromeActionGap,
                   children: <Widget>[
                     if (icon != null) Icon(icon, size: 18),
                     Text(label, textAlign: TextAlign.center),
@@ -60,14 +60,16 @@ class StudioPrimaryButton extends StatelessWidget {
           );
 
     final foregroundColor = enabled
-        ? Colors.white
+        ? theme.colorScheme.onPrimary
         : tokens.textSecondary.withValues(alpha: 0.88);
 
     return Semantics(
       button: true,
       enabled: enabled,
-      child: Material(
-        color: Colors.transparent,
+      child: studioWrapClickCursor(
+        enabled: enabled,
+        child: Material(
+        color: StudioPrimitives.transparent,
         borderRadius: borderRadius,
         child: Ink(
           decoration: BoxDecoration(
@@ -98,7 +100,7 @@ class StudioPrimaryButton extends StatelessWidget {
                   ]
                 : <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
+                      color: studioShadowColor(context, alpha: 0.18),
                       blurRadius: 12,
                       spreadRadius: -10,
                       offset: const Offset(0, 4),
@@ -110,6 +112,9 @@ class StudioPrimaryButton extends StatelessWidget {
             borderRadius: borderRadius,
             splashColor: tokens.accent.withValues(alpha: 0.12),
             highlightColor: tokens.primary.withValues(alpha: 0.10),
+            hoverColor: studioPointerChromeEnabled(context)
+                ? tokens.primary.withValues(alpha: 0.12)
+                : null,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: buttonHeight,
@@ -117,11 +122,8 @@ class StudioPrimaryButton extends StatelessWidget {
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: StudioLayoutSpacing.insetDense + 2,
-                  vertical: math
-                      .max(6, (buttonHeight - 20) / 2)
-                      .clamp(6.0, 8.0)
-                      .toDouble(),
+                  horizontal: StudioLayoutSpacing.insetDense,
+                  vertical: StudioSpacing.xs,
                 ),
                 child: Center(
                   child: IconTheme(
@@ -142,6 +144,7 @@ class StudioPrimaryButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

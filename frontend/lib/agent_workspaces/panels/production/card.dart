@@ -115,7 +115,7 @@ class _AgentWorkspaceProductionCardState
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -123,7 +123,7 @@ class _AgentWorkspaceProductionCardState
               l10n.agentWorkspaceProductionCardTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.agentWorkspaceGuidedTasksTitle,
               style: Theme.of(context).textTheme.labelLarge,
@@ -132,7 +132,7 @@ class _AgentWorkspaceProductionCardState
             _buildGuidedTasks(),
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
             _buildPromptTemplates(),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ProductionWorkspaceControlsPanel(
               busy: widget.busy,
               loadingProductionWorkspaceRun:

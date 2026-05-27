@@ -37,7 +37,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
           ),
         ),
         Wrap(
-          spacing: 4,
+          spacing: StudioSpacing.chromeActionGap,
           runSpacing: 0,
           children: [
             ..._buildProjectNovelsProbeActions(
@@ -54,7 +54,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _buildProjectNovelEventsCompatibilitySection(
           ctx: ctx,
           setDialogState: setDialogState,

@@ -20,7 +20,7 @@ Future<bool> showStudioCostConfirmSheet({
     builder: (ctx) {
       final cny = formatCnyFromCents(estimate.cnyCents);
       return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+        padding: const EdgeInsets.fromLTRB(StudioSpacing.md, StudioSpacing.xs, StudioSpacing.md, StudioSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -42,7 +42,7 @@ Future<bool> showStudioCostConfirmSheet({
               label: l10n.studioCostConfirmProceed,
               onPressed: () => Navigator.of(ctx).pop(true),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
               child: Text(l10n.studioCostConfirmCancel),

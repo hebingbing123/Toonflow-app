@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_empty_state.dart';
-import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -168,7 +169,7 @@ class _AccountSectionState extends State<AccountSection> {
               );
 
         return Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: StudioSpacing.xs),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,8 +206,8 @@ class _AccountSectionState extends State<AccountSection> {
               ),
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 children: <Widget>[
                   StudioChip(
                     label: Text(
@@ -227,7 +228,7 @@ class _AccountSectionState extends State<AccountSection> {
             ],
           );
           final actions = StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             alignment: WrapAlignment.end,
             children: <Widget>[
               OutlinedButton.icon(
@@ -267,14 +268,14 @@ class _AccountSectionState extends State<AccountSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(child: headerDetails),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: StudioSpacing.sm),
                     Flexible(child: actions),
                   ],
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Wrap(
-                spacing: 10,
-                runSpacing: 10,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 children: <Widget>[
                   StudioFilterChip(
                     selected: widget.controller.includeAuditLogs,
@@ -288,27 +289,22 @@ class _AccountSectionState extends State<AccountSection> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              if (widget.controller.loading)
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    StudioSkeleton(height: 18),
-                    SizedBox(height: StudioSpacing.sm),
-                    StudioSkeleton(height: 56),
-                    SizedBox(height: StudioSpacing.sm),
-                    StudioSkeleton(height: 56),
-                  ],
-                )
-              else if (widget.controller.items.isEmpty)
-                StudioEmptyState.emptyData(
+              const SizedBox(height: StudioSpacing.sm),
+              StudioAsyncDataView(
+                loading: widget.controller.loading,
+                isEmpty: widget.controller.items.isEmpty,
+                empty: StudioEmptyState.emptyData(
                   title: l10n.accountExportEmpty,
                   icon: Icons.cloud_download_outlined,
-                )
-              else
-                ...widget.controller.items.map(
-                  (item) => _buildExportRow(context, item),
                 ),
+                child: Column(
+                  children: studioStaggeredChildren(
+                    widget.controller.items
+                        .map((item) => _buildExportRow(context, item)),
+                    entranceKey: widget.controller.items.length,
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -325,7 +321,7 @@ class _AccountSectionState extends State<AccountSection> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(
         context,
         backgroundColor: tokens.bgElevated.withValues(alpha: 0.72),
@@ -344,7 +340,7 @@ class _AccountSectionState extends State<AccountSection> {
                       l10n.accountExportDefaultFileName(item.numericTaskId),
                   style: studioCardTitleStyle(context),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioChip(label: Text(_statusLabel(item.status))),
               ] else
                 Row(
@@ -362,7 +358,7 @@ class _AccountSectionState extends State<AccountSection> {
                     StudioChip(label: Text(_statusLabel(item.status))),
                   ],
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.accountExportTaskLine(
                   item.numericTaskId,
@@ -395,7 +391,7 @@ class _AccountSectionState extends State<AccountSection> {
               ],
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: <Widget>[
                   if (item.downloadReady)
                     FilledButton.tonalIcon(
@@ -465,7 +461,7 @@ class _AccountSectionState extends State<AccountSection> {
                   size: 18,
                   color: theme.colorScheme.error.withValues(alpha: 0.92),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
                     l10n.accountDeleteTitle,
@@ -474,7 +470,7 @@ class _AccountSectionState extends State<AccountSection> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.accountDeleteDescription,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -486,9 +482,9 @@ class _AccountSectionState extends State<AccountSection> {
               const SizedBox(height: StudioLayoutSpacing.stackMedium),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
                   border: Border.all(
                     color: theme.colorScheme.error.withValues(alpha: 0.24),
                   ),
@@ -630,9 +626,9 @@ class _AccountSectionState extends State<AccountSection> {
     }
 
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         onTap: () => setAcknowledged(!_acknowledgeIrreversible),
         child: AnimatedContainer(
           duration: studioAnimationDuration(
@@ -642,7 +638,7 @@ class _AccountSectionState extends State<AccountSection> {
           curve: studioAnimationCurve(context, Curves.easeOutCubic),
           padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
             border: Border.all(
               color: _acknowledgeIrreversible
                   ? theme.colorScheme.error.withValues(alpha: 0.42)
@@ -691,17 +687,17 @@ class _AccountSectionState extends State<AccountSection> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(
           color: theme.colorScheme.error.withValues(alpha: 0.18),
         ),
         color: theme.colorScheme.errorContainer.withValues(alpha: 0.08),
       ),
       child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: StudioSpacing.xs,
+        runSpacing: StudioSpacing.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: <Widget>[
           if (prefix.isNotEmpty)
@@ -718,7 +714,7 @@ class _AccountSectionState extends State<AccountSection> {
               vertical: StudioLayoutSpacing.microGap,
             ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               border: Border.all(
                 color: theme.colorScheme.error.withValues(alpha: 0.24),
               ),

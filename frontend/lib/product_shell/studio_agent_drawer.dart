@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 
@@ -20,7 +21,7 @@ Future<void> showStudioAgentDrawer(
       return Align(
         alignment: Alignment.centerRight,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+          padding: const EdgeInsets.fromLTRB(StudioSpacing.md, StudioSpacing.md, StudioSpacing.md, StudioSpacing.md),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: SafeArea(
@@ -87,13 +88,17 @@ class _StudioAgentDrawerBody extends StatelessWidget {
               padding: const EdgeInsets.all(StudioSpacing.sm),
               itemBuilder: (context, index) {
                 final agent = agents[index];
-                return _StudioAgentActionTile(
-                  icon: agent.$3,
-                  label: agent.$2,
-                  onTap: () async {
-                    Navigator.of(context).pop();
-                    await onRunAgent(agent.$1);
-                  },
+                return studioStaggeredItem(
+                  index,
+                  entranceKey: agents.length,
+                  child: _StudioAgentActionTile(
+                    icon: agent.$3,
+                    label: agent.$2,
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await onRunAgent(agent.$1);
+                    },
+                  ),
                 );
               },
               separatorBuilder: (context, index) =>
@@ -167,7 +172,7 @@ class _StudioAgentActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         onTap: onTap,
@@ -184,7 +189,7 @@ class _StudioAgentActionTile extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Icon(icon, color: tokens.signal, size: 30),
-              const SizedBox(width: 16),
+              const SizedBox(width: StudioSpacing.sm),
               Expanded(
                 child: Text(label, style: studioPaneTitleStyle(context)),
               ),

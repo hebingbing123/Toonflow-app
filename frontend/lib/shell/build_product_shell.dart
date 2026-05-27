@@ -485,15 +485,15 @@ extension _HomePageProductShell on _HomePageState {
       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               color: selected
                   ? tokens.primarySoft.withValues(alpha: 0.72)
                   : tokens.bgSurface.withValues(alpha: 0.42),
@@ -505,7 +505,7 @@ extension _HomePageProductShell on _HomePageState {
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: StudioLayoutSpacing.inlineGap,
-              vertical: StudioLayoutSpacing.inlineGap - 1,
+              vertical: StudioLayoutSpacing.inlineGap,
             ),
             child: Row(
               children: <Widget>[
@@ -619,7 +619,7 @@ extension _HomePageProductShell on _HomePageState {
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
     );
-    const columnGap = 16.0;
+    const columnGap = StudioSpacing.sm;
 
     Widget destinationTile(
       ProductShellDestination dest, {
@@ -671,21 +671,41 @@ extension _HomePageProductShell on _HomePageState {
         children: <Widget>[
           if (sectionLabel != null) ...<Widget>[
             Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
+              padding: const EdgeInsets.fromLTRB(
+                StudioSpacing.chromeActionGap,
+                StudioSpacing.chromeActionGap,
+                StudioSpacing.chromeActionGap,
+                StudioSpacing.xs,
+              ),
               child: Text(sectionLabel, style: sectionLabelStyle),
             ),
           ],
           if (useTwoColumns)
-            Wrap(spacing: columnGap, runSpacing: 0, children: tiles)
+            Wrap(
+              spacing: columnGap,
+              runSpacing: 0,
+              children: studioStaggeredChildren(
+                tiles,
+                entranceKey: destinations.length,
+              ),
+            )
           else
-            ...tiles,
+            ...studioStaggeredChildren(
+              tiles,
+              entranceKey: destinations.length,
+            ),
         ],
       );
     }
 
     Widget sectionDivider() {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(2, 6, 2, 8),
+        padding: const EdgeInsets.fromLTRB(
+          StudioSpacing.chromeActionGap,
+          StudioSpacing.xs,
+          StudioSpacing.chromeActionGap,
+          StudioSpacing.xs,
+        ),
         child: Divider(height: 1, color: tokens.borderSubtle),
       );
     }
@@ -699,23 +719,22 @@ extension _HomePageProductShell on _HomePageState {
     }
 
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: DecoratedBox(
         decoration: studioInsetPanelDecoration(ctx).copyWith(
           border: Border.all(
             color: tokens.primary.withValues(alpha: titleCentered ? 0.42 : 0),
           ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: studioShadowColor(context, alpha: 0.16),
-              blurRadius: 16,
-              spreadRadius: -6,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          boxShadow: studioInsetElevationShadow(
+            context,
+            alpha: 0.16,
+            blurRadius: StudioSpacing.sm,
+            spreadRadius: -6,
+            offset: const Offset(0, StudioSpacing.xs),
+          ),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               StudioLayoutSpacing.insetDense,
@@ -728,7 +747,12 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
+                  padding: const EdgeInsets.fromLTRB(
+                    StudioSpacing.chromeActionGap,
+                    0,
+                    0,
+                    StudioSpacing.xs,
+                  ),
                   child: titleCentered
                       ? Stack(
                           alignment: Alignment.center,
@@ -784,7 +808,12 @@ extension _HomePageProductShell on _HomePageState {
                 if (compactActions) ...<Widget>[
                   sectionDivider(),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+                    padding: const EdgeInsets.fromLTRB(
+                      StudioSpacing.chromeActionGap,
+                      0,
+                      StudioSpacing.chromeActionGap,
+                      StudioSpacing.xs,
+                    ),
                     child: Text(
                       l10n.localeSectionTitle,
                       style: sectionLabelStyle,
@@ -1029,12 +1058,15 @@ extension _HomePageProductShell on _HomePageState {
       onTap: _goToProjectsHome,
       borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        padding: const EdgeInsets.symmetric(
+          vertical: StudioSpacing.chromeActionGap,
+          horizontal: StudioSpacing.chromeActionGap,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const OpenFlowBrandMark(size: 36, borderRadius: 10),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,7 +1166,7 @@ extension _HomePageProductShell on _HomePageState {
           disabledForegroundColor: color,
           hoverColor: enabled
               ? tokens.bgInset.withValues(alpha: 0.75)
-              : Colors.transparent,
+              : StudioPrimitives.transparent,
         ),
         onPressed: enabled ? onPressed : null,
         tooltip: tooltip,
@@ -1174,7 +1206,7 @@ extension _HomePageProductShell on _HomePageState {
               enabled: canBack,
               onPressed: canBack ? _handleProductShellBack : null,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             _buildMacOSNavChevronButton(
               context: context,
               icon: Icons.arrow_forward,
@@ -1235,7 +1267,7 @@ extension _HomePageProductShell on _HomePageState {
       onPointerDown: _handleMacOSTitleBarPointerDown,
       onPointerMove: _handleMacOSTitleBarPointerMove,
       onPointerUp: _handleMacOSTitleBarPointerUp,
-      child: const ColoredBox(color: Color(0x00000000)),
+      child: const ColoredBox(color: StudioPrimitives.transparent),
     );
   }
 
@@ -1271,7 +1303,7 @@ extension _HomePageProductShell on _HomePageState {
                   children: <Widget>[
                     if (showNavChevrons) ...<Widget>[
                       _buildMacOSNavChevrons(context),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                     ],
                     Expanded(child: searchBar),
                   ],
@@ -1287,8 +1319,18 @@ extension _HomePageProductShell on _HomePageState {
   EdgeInsets _macOSTitleBarContentPadding({required bool hasWorkspaceContext}) {
     // Extra top inset: equal top/bottom reads visually high under traffic lights.
     return hasWorkspaceContext
-        ? const EdgeInsets.only(left: 0, right: 10, top: StudioLayoutSpacing.microGap, bottom: 5)
-        : const EdgeInsets.only(left: 0, right: 10, top: 5, bottom: 3);
+        ? const EdgeInsets.only(
+            left: 0,
+            right: StudioSpacing.radiusComfort,
+            top: StudioLayoutSpacing.microGap,
+            bottom: StudioSpacing.chromeActionGap,
+          )
+        : const EdgeInsets.only(
+            left: 0,
+            right: StudioSpacing.radiusComfort,
+            top: StudioSpacing.chromeActionGap,
+            bottom: StudioSpacing.chromeActionGap,
+          );
   }
 
   Widget _buildMacOSTitleBarMoreMenuOverlay({
@@ -1299,7 +1341,7 @@ extension _HomePageProductShell on _HomePageState {
     required bool stackedTopChrome,
   }) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    const horizontalMargin = 16.0;
+    const horizontalMargin = StudioSpacing.sm;
     final panelWidth = productShellMoreMenuPanelWidth(
       screenWidth,
       horizontalMargin: horizontalMargin,
@@ -1323,7 +1365,7 @@ extension _HomePageProductShell on _HomePageState {
       width: panelWidth,
       child: Material(
         elevation: 12,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: panelHeight),
@@ -1375,7 +1417,7 @@ extension _HomePageProductShell on _HomePageState {
       builder: (context, constraints) {
         const trailingChromeMin = _kMacOSTitleBarIconBox + 8;
         const searchClusterMin = 120.0;
-        const interBlockGap = 16.0;
+        const interBlockGap = StudioSpacing.sm;
         var workspaceMaxWidth = _kTitleBarWorkspaceContextMaxWidth;
         if (workspaceContext != null) {
           final reserved = searchClusterMin +
@@ -1422,7 +1464,7 @@ extension _HomePageProductShell on _HomePageState {
               searchCluster,
               Expanded(child: _titleBarFlexibleGap()),
               if (!ultraNarrow) ...<Widget>[
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 const StudioJobTray(),
                 ProductDemoTourAnchor(
                   anchorId: ProductDemoTourAnchorIds.shellAppBar,
@@ -1452,11 +1494,11 @@ extension _HomePageProductShell on _HomePageState {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.surfaceHighlight),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(StudioSpacing.xs),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -1475,7 +1517,7 @@ extension _HomePageProductShell on _HomePageState {
                       onPressed: canBack ? _handleProductShellBack : null,
                       icon: const Icon(Icons.arrow_back_ios_new, size: 22),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     IconButton(
                       style: studioChromeIconButtonStyle(context),
                       tooltip: 'Forward',
@@ -1576,18 +1618,18 @@ extension _HomePageProductShell on _HomePageState {
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
-        ? 14.0
+        ? StudioSpacing.radiusCard
         : desktopWide
-        ? 12.0
-        : 10.0;
+        ? StudioSpacing.radiusComfort
+        : StudioSpacing.radiusComfort;
     final shellSurfacePadding = handsetShellLayout
-        ? 12.0
+        ? StudioSpacing.radiusComfort
         : desktopXWide
-        ? 22.0
+        ? StudioSpacing.md
         : desktopWide
-        ? 18.0
-        : 16.0;
-    final shellPanelRadius = BorderRadius.circular(14);
+        ? StudioSpacing.radiusComfort
+        : StudioSpacing.sm;
+    final shellPanelRadius = BorderRadius.circular(StudioSpacing.radiusCard);
     final globalSearchBar = GlobalSearchBar(
       accessToken: accessToken,
       currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
@@ -1601,11 +1643,11 @@ extension _HomePageProductShell on _HomePageState {
     final moreMenuChrome = DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.surfaceHighlight),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(StudioSpacing.xs),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -1765,11 +1807,11 @@ extension _HomePageProductShell on _HomePageState {
                               showPageTitle: false,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           moreMenuChrome,
                         ],
                       ),
-                      const SizedBox(height: StudioLayoutSpacing.inlineGap - 2),
+                      const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       SizedBox(
                         width: double.infinity,
                         child: Align(
@@ -1794,13 +1836,13 @@ extension _HomePageProductShell on _HomePageState {
                             pageTitle,
                             showPageTitle: false,
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: StudioSpacing.sm),
                           Flexible(child: titleBarWorkspaceContext),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           _buildNavigationButtons(context),
                           const Spacer(),
                           const StudioJobTray(),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           ProductDemoTourAnchor(
                             anchorId: ProductDemoTourAnchorIds.shellAppBar,
                             child: StudioAppBarActions(
@@ -1810,7 +1852,7 @@ extension _HomePageProductShell on _HomePageState {
                               onSelectPane: _selectProductUtilityPane,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           moreMenuChrome,
                         ],
                       ),
@@ -1831,7 +1873,7 @@ extension _HomePageProductShell on _HomePageState {
                         pageTitle,
                         showPageTitle: false,
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: StudioSpacing.sm),
                       Flexible(
                         flex: 2,
                         fit: FlexFit.loose,
@@ -1840,9 +1882,9 @@ extension _HomePageProductShell on _HomePageState {
                           child: titleBarWorkspaceContext,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       _buildNavigationButtons(context),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
@@ -1856,7 +1898,7 @@ extension _HomePageProductShell on _HomePageState {
                         ),
                       ),
                       const StudioJobTray(),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       ProductDemoTourAnchor(
                         anchorId: ProductDemoTourAnchorIds.shellAppBar,
                         child: StudioAppBarActions(
@@ -1866,7 +1908,7 @@ extension _HomePageProductShell on _HomePageState {
                           onSelectPane: _selectProductUtilityPane,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       moreMenuChrome,
                     ],
                   ),
@@ -1931,7 +1973,10 @@ extension _HomePageProductShell on _HomePageState {
                                   ),
                                   const SizedBox(height: StudioLayoutSpacing.inlineGap),
                                 ],
-                                ..._buildActiveProductPaneWidgets(context),
+                                ...studioStaggeredChildren(
+                                  _buildActiveProductPaneWidgets(context),
+                                  entranceKey: currentPane,
+                                ),
                               ],
                             ),
                     ),
@@ -1973,7 +2018,8 @@ extension _HomePageProductShell on _HomePageState {
         : mainColumn;
 
     final shell = Scaffold(
-      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: StudioPrimitives.transparent,
       body: PopScope(
         canPop: !_canProductShellGoBack(),
         onPopInvokedWithResult: (bool didPop, Object? result) {

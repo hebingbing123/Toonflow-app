@@ -409,7 +409,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioDropdownButtonFormField<String>(
                         initialValue: role,
                         decoration: InputDecoration(
@@ -430,7 +430,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             ? null
                             : (v) => setModalState(() => role = v ?? 'member'),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Row(
                         children: <Widget>[
                           FilledButton(
@@ -475,7 +475,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                   : l10n.teamWorkspaceAddMemberAction,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           TextButton(
                             onPressed: loading
                                 ? null
@@ -484,7 +484,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: inviteEmailController,
                         decoration: InputDecoration(
@@ -492,7 +492,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       FilledButton.tonal(
                         style: studioFormTonalButtonStyle(context),
                         onPressed: inviting
@@ -541,14 +541,14 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                       if (showWorkspaceOpsStats &&
                           (currentWorkspaceRole == 'owner' ||
                               currentWorkspaceRole == 'admin')) ...<Widget>[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: StudioSpacing.sm),
                         Row(
                           children: <Widget>[
                             Text(
                               l10n.teamWorkspaceOpsStatsTitle,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: StudioSpacing.xs),
                             TextButton(
                               onPressed: loadingWorkspaceStats
                                   ? null
@@ -563,8 +563,8 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         ),
                         if (workspaceStats != null)
                           Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                            spacing: StudioSpacing.xs,
+                            runSpacing: StudioSpacing.xs,
                             children: <Widget>[
                               StudioChip(
                                 label: Text(
@@ -592,20 +592,20 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         if (workspaceStatsError != null)
                           SelectableText(
                             workspaceStatsError!,
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context).colorScheme.error,
                             ),
                           ),
                       ],
                       if (currentWorkspaceRole == 'owner' ||
                           currentWorkspaceRole == 'admin') ...<Widget>[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Text(
                           l10n.teamWorkspacePlatformInvitesTitle,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        const SizedBox(height: 8),
-                        SwitchListTile(
+                        const SizedBox(height: StudioSpacing.xs),
+                        StudioSwitchListRow(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(l10n.teamWorkspaceIncludeRevokedInvites),
@@ -619,7 +619,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                   await loadMembers(setModalState);
                                 },
                         ),
-                        SwitchListTile(
+                        StudioSwitchListRow(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(l10n.teamWorkspaceShowExpiredInvites),
@@ -658,7 +658,37 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                               : Theme.of(
                                   context,
                                 ).colorScheme.secondaryContainer;
-                          return Row(
+                          return StudioContextMenu(
+                            items: studioBuildListRowContextMenu(
+                              context: context,
+                              onCopy: invite.status == 'pending'
+                                  ? () async {
+                                      await Clipboard.setData(ClipboardData(text: buildInviteCopyText(invite)));
+                                    }
+                                  : null,
+                              onDelete: invite.status == 'pending' && inviteActionBusyId == null
+                                  ? () async {
+                                      setModalState(() => inviteActionBusyId = invite.id);
+                                      try {
+                                        final next = await revokeWorkspaceInviteV1(token, row.workspace.id, invite.id);
+                                        setModalState(() {
+                                          if (includeRevokedInvites) {
+                                            final i = pendingInvites.indexWhere((e) => e.id == invite.id);
+                                            if (i >= 0) pendingInvites[i] = next;
+                                          } else {
+                                            pendingInvites.removeWhere((e) => e.id == invite.id);
+                                          }
+                                        });
+                                        await loadAuditPage(setModalState);
+                                      } catch (e) {
+                                        setModalState(() => error = describeUserVisibleApiErrorResolved(context, e));
+                                      } finally {
+                                        setModalState(() => inviteActionBusyId = null);
+                                      }
+                                    }
+                                  : null,
+                            ),
+                            child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Expanded(
@@ -666,7 +696,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Wrap(
-                                      spacing: 6,
+                                      spacing: StudioSpacing.xs,
                                       crossAxisAlignment:
                                           WrapCrossAlignment.center,
                                       children: <Widget>[
@@ -813,11 +843,12 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                 },
                               ),
                             ],
+                          ),
                           );
                         }),
                         if (inviteHasMore)
                           Padding(
-                            padding: const EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.only(top: StudioSpacing.xs),
                             child: OutlinedButton(
                               onPressed: loading || loadingMoreInvites
                                   ? null
@@ -829,12 +860,12 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                               ),
                             ),
                           ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: StudioSpacing.sm),
                         Text(
                           l10n.teamWorkspaceActivityRecordsTitle,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextField(
                           controller: auditSearchController,
                           decoration: InputDecoration(
@@ -843,7 +874,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                           onChanged: (_) => setModalState(() {}),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         if (auditRows.isEmpty && !loading)
                           StudioEmptyState.emptyData(
                             title: l10n.teamWorkspaceNoActivityRecords,
@@ -865,15 +896,15 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                 ),
                                 audit.actorUserId,
                                 audit.targetUserId ?? '',
-                                '${audit.details['role'] ?? ''}',
-                                '${audit.details['email'] ?? ''}',
-                                '${audit.details['previous_owner_user_id'] ?? ''}',
-                                '${audit.details['new_owner_user_id'] ?? ''}',
+                                "${audit.details['role'] ?? ''}",
+                                "${audit.details['email'] ?? ''}",
+                                "${audit.details['previous_owner_user_id'] ?? ''}",
+                                "${audit.details['new_owner_user_id'] ?? ''}",
                               ].join(' ').toLowerCase();
                               return haystack.contains(needle);
                             })
                             .map((audit) {
-                              return ListTile(
+                              return StudioListRow(
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
@@ -890,7 +921,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             }),
                         if (auditHasMore)
                           Padding(
-                            padding: const EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.only(top: StudioSpacing.xs),
                             child: OutlinedButton(
                               onPressed: loading || loadingMoreAudit
                                   ? null
@@ -907,20 +938,20 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                       ],
                       if (error != null) ...<Widget>[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         SelectableText(
                           error!,
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context).colorScheme.error,
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       SelectableText(
                         l10n.teamWorkspaceCurrentOwnerLine(currentOwnerUserId),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: memberSearchController,
                         decoration: InputDecoration(
@@ -929,13 +960,19 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         ),
                         onChanged: (_) => setModalState(() {}),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       if (members.isEmpty && !loading)
                         StudioEmptyState.emptyData(
                           title: l10n.teamWorkspaceNoMembers,
                           icon: Icons.group_outlined,
                         ),
-                      if (loading) const LinearProgressIndicator(),
+                      StudioAsyncDataView(
+                        loading: loading,
+                        loadingPlaceholder: StudioLoadingPlaceholder.list,
+                        loadingItemCount: 2,
+                        scrollableLoading: false,
+                        child: const SizedBox.shrink(),
+                      ),
                       if (members.isNotEmpty)
                         ...filterWorkspaceMembers(
                           members,
@@ -948,9 +985,87 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                               !isPrimaryOwner;
                           final canEditRole =
                               m.role == 'member' || m.role == 'admin';
-                          return ListTile(
+                          Future<void> removeMember() async {
+                            setModalState(() {
+                              mutatingMemberUserId = m.userId;
+                              error = null;
+                            });
+                            try {
+                              await removeWorkspaceMemberV1(
+                                token,
+                                row.workspace.id,
+                                m.userId,
+                              );
+                              await loadMembers(setModalState);
+                            } catch (e) {
+                              setModalState(
+                                () => error =
+                                    describeUserVisibleApiErrorResolved(
+                                      context,
+                                      e,
+                                    ),
+                              );
+                            } finally {
+                              setModalState(() => mutatingMemberUserId = null);
+                            }
+                          }
+
+                          return StudioListRow(
                             dense: true,
                             contentPadding: EdgeInsets.zero,
+                            trailingContextMenuItems: <StudioContextMenuItem>[
+                              if (canTransferOwner)
+                                StudioContextMenuItem(
+                                  label: l10n.teamWorkspaceTransferOwnerTooltip,
+                                  icon: Icons.swap_horiz_outlined,
+                                  enabled: mutatingMemberUserId == null,
+                                  onSelected: () async {
+                                    final confirmed =
+                                        await confirmOwnerTransfer(m);
+                                    if (!confirmed) return;
+                                    setModalState(() {
+                                      mutatingMemberUserId = m.userId;
+                                      error = null;
+                                    });
+                                    try {
+                                      final workspace =
+                                          await transferWorkspaceOwnerV1(
+                                            token,
+                                            row.workspace.id,
+                                            TransferWorkspaceOwnerBody(
+                                              targetUserId: m.userId,
+                                            ),
+                                          );
+                                      setModalState(() {
+                                        currentOwnerUserId =
+                                            workspace.ownerUserId;
+                                        currentWorkspaceRole = 'admin';
+                                      });
+                                      await loadMembers(setModalState);
+                                      await _load();
+                                    } catch (e) {
+                                      setModalState(
+                                        () => error =
+                                            describeUserVisibleApiErrorResolved(
+                                              context,
+                                              e,
+                                            ),
+                                      );
+                                    } finally {
+                                      setModalState(
+                                        () => mutatingMemberUserId = null,
+                                      );
+                                    }
+                                  },
+                                ),
+                              StudioContextMenuItem(
+                                label: l10n.teamWorkspaceRemoveMemberTooltip,
+                                icon: Icons.person_remove_outlined,
+                                destructive: true,
+                                enabled: mutatingMemberUserId == null,
+                                onSelected: removeMember,
+                              ),
+                            ],
                             title: Text(m.userId),
                             subtitle: Text(
                               isPrimaryOwner
@@ -1067,29 +1182,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                       l10n.teamWorkspaceRemoveMemberTooltip,
                                   onPressed: mutatingMemberUserId != null
                                       ? null
-                                      : () async {
-                                          setModalState(() {
-                                            mutatingMemberUserId = m.userId;
-                                            error = null;
-                                          });
-                                          try {
-                                            await removeWorkspaceMemberV1(
-                                              token,
-                                              row.workspace.id,
-                                              m.userId,
-                                            );
-                                            await loadMembers(setModalState);
-                                          } catch (e) {
-                                            setModalState(
-                                              () => error =
-                                                  describeUserVisibleApiErrorResolved(context, e),
-                                            );
-                                          } finally {
-                                            setModalState(
-                                              () => mutatingMemberUserId = null,
-                                            );
-                                          }
-                                        },
+                                      : removeMember,
                                   icon: const Icon(
                                     Icons.person_remove_outlined,
                                   ),
@@ -1277,7 +1370,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioDropdownButtonFormField<String>(
                         initialValue: role,
                         decoration: InputDecoration(
@@ -1298,7 +1391,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             ? null
                             : (v) => setModalState(() => role = v ?? 'member'),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       StudioFilterRow(
                         wideLayout: StudioFilterWideLayout.toolbarRow,
                         wideBreakpoint: 480,
@@ -1398,7 +1491,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: StudioSpacing.sm),
                       Row(
                         children: <Widget>[
                           Expanded(
@@ -1436,7 +1529,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     },
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Expanded(
                             child: StudioDropdownButtonFormField<int>(
                               initialValue: pageSize,
@@ -1462,8 +1555,8 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      SwitchListTile(
+                      const SizedBox(height: StudioSpacing.xs),
+                      StudioSwitchListRow(
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                         title: Text(l10n.teamWorkspaceShowExpiredInvites),
@@ -1483,15 +1576,21 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         ),
                         onChanged: (_) => setModalState(() => pageIndex = 0),
                       ),
-                      const SizedBox(height: 8),
-                      if (loading) const LinearProgressIndicator(),
+                      const SizedBox(height: StudioSpacing.xs),
+                      StudioAsyncDataView(
+                        loading: loading,
+                        loadingPlaceholder: StudioLoadingPlaceholder.list,
+                        loadingItemCount: 2,
+                        scrollableLoading: false,
+                        child: const SizedBox.shrink(),
+                      ),
                       if (!loading && filteredInvites.isEmpty)
                         StudioEmptyState.noResults(
                           title: l10n.teamWorkspaceNoInvitesForCurrentFilters,
                         ),
                       if (pagedInvites.isNotEmpty) ...<Widget>[
                         StudioDenseActionRow(
-                          spacing: 8,
+                          spacing: StudioSpacing.xs,
                           children: <Widget>[
                             Text(
                               l10n.teamWorkspacePagingLine(
@@ -1516,7 +1615,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         ...pagedInvites.map((invite) {
                           final selected = selectedInviteIds.contains(
                             invite.id,
@@ -1525,7 +1624,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              CheckboxListTile(
+                              StudioCheckboxListRow(
                                 controlAffinity:
                                     ListTileControlAffinity.leading,
                                 value: selected,
@@ -1554,7 +1653,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     bottom: 8,
                                   ),
                                   child: Wrap(
-                                    spacing: 8,
+                                    spacing: StudioSpacing.xs,
                                     children: <Widget>[
                                       TextButton(
                                         onPressed: inviteMgmtBusyId != null
@@ -1652,10 +1751,10 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                         }),
                       ],
                       if (error != null) ...<Widget>[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         SelectableText(
                           error!,
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context).colorScheme.error,
                           ),
                         ),

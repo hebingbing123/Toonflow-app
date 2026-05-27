@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../../l10n/rust_api_error_format.dart';
 import '../tokens.dart';
 import 'studio_surfaces.dart';
 import 'studio_primary_button.dart';
@@ -95,6 +97,39 @@ class StudioEmptyState extends StatelessWidget {
     );
   }
 
+  /// Network or API failure with a prominent retry action.
+  static Widget loadFailed(
+    BuildContext context, {
+    Object? error,
+    required VoidCallback onRetry,
+    String? title,
+    String? subtitle,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final message = error == null
+        ? subtitle
+        : error is String
+        ? compactUserVisibleApiErrorText(l10n, error)
+        : describeUserVisibleApiErrorResolved(context, error);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.md,
+          vertical: StudioSpacing.lg,
+        ),
+        child: StudioEmptyState(
+          title: title ?? l10n.studioLoadFailedTitle,
+          subtitle: subtitle ?? message,
+          icon: Icons.cloud_off_outlined,
+          actionLabel: l10n.studioRetry,
+          onAction: onRetry,
+          variant: StudioEmptyStateVariant.emptyData,
+          weight: StudioEmptyStateWeight.prominent,
+        ),
+      ),
+    );
+  }
+
   /// Data source is healthy but the list has no rows yet.
   factory StudioEmptyState.emptyData({
     Key? key,
@@ -148,7 +183,8 @@ class StudioEmptyState extends StatelessWidget {
                   ).copyWith(
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(
+                        color: studioShadowColor(
+                          context,
                           alpha: _quiet ? 0.16 : 0.22,
                         ),
                         blurRadius: 18,
@@ -226,7 +262,9 @@ class StudioEmptyState extends StatelessWidget {
                                 child: Icon(
                                   icon,
                                   size: _quiet ? 20 : 22,
-                                  color: _quiet ? tokens.primary : Colors.white,
+                                  color: _quiet
+                                      ? tokens.primary
+                                      : Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ),

@@ -83,7 +83,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(model.infoLine, style: theme.textTheme.bodySmall),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (planData != null)
                 Text(
                   l10n.projectScriptPlanWorkbenchPlanMountedLine(
@@ -95,15 +95,15 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                   ),
                   style: studioHintStyle(context),
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(model.eventSummaryLine, style: studioHintStyle(context)),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(model.draftSummaryLine, style: studioHintStyle(context)),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(model.guidanceSummaryLine, style: studioHintStyle(context)),
               const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   OutlinedButton(
                     style: studioFormSecondaryButtonStyle(context),
@@ -163,12 +163,12 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                       l10n.projectScriptPlanWorkbenchAdaptationStrategyHelper,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.projectScriptPlanWorkbenchScriptDraftPreviewTitle,
                 style: theme.textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (model.draftPackets.isEmpty)
                 StudioEmptyState.emptyData(
                   title: l10n.projectScriptPlanWorkbenchNoDraftPacketsHint,
@@ -179,11 +179,11 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     .take(4)
                     .map(
                       (draft) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(
-                            StudioLayoutSpacing.cardInner - 4,
+                            StudioSpacing.radiusComfort,
                           ),
                           decoration: studioRecessedPanelDecoration(context),
                           child: Column(
@@ -210,12 +210,12 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                         ),
                       ),
                     ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.projectScriptPlanWorkbenchStructuredGuidanceTitle,
                 style: theme.textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               if (model.guidanceRows.isEmpty)
                 StudioEmptyState.emptyData(
                   title: l10n.projectScriptPlanWorkbenchNoGuidanceHint,
@@ -226,11 +226,11 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     .take(4)
                     .map(
                       (guidance) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(
-                            StudioLayoutSpacing.cardInner - 4,
+                            StudioSpacing.radiusComfort,
                           ),
                           decoration: studioRecessedPanelDecoration(context),
                           child: Column(

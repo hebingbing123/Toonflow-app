@@ -225,9 +225,11 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
             children: [
               Text(
                 l10n.shortVideoSpaceDialogVoiceoverSettingsProviderLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: _selectedProvider,
                 decoration: const InputDecoration(
@@ -262,12 +264,14 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 key: ValueKey<String>('voiceover-voice-$_selectedProvider'),
                 initialValue: _selectedVoiceId,
@@ -295,12 +299,14 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: _selectedEmotion,
                 decoration: const InputDecoration(
@@ -337,12 +343,14 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Row(
                 children: [
                   Expanded(
@@ -366,20 +374,20 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                         _selectedSpeed.toStringAsFixed(1),
                       ),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedRange,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (widget.onPreviewRequested != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 Row(
                   children: [
                     FilledButton.tonalIcon(
@@ -394,7 +402,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                       label: Text(l10n.shortVideoCharactersPreviewVoice),
                     ),
                     if (_previewStatusLine != null) ...[
-                      const SizedBox(width: 16),
+                      const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: Text(
                           _previewStatusLine!,
@@ -409,9 +417,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   ],
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -423,7 +431,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                       size: 20,
                       color: tokens.textSecondary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     Expanded(
                       child: Text(
                         l10n.shortVideoSpaceDialogVoiceoverSettingsInfoMessage,

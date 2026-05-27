@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 Future<void> openProjectAssetLinkDialog({
   required BuildContext ctx,
@@ -66,7 +67,7 @@ Future<void> openProjectAssetLinkDialog({
                       setState(() => selectedScriptNumericId = value);
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDropdownButtonFormField<int>(
                     initialValue: selectedAssetNumericId,
                     decoration: InputDecoration(

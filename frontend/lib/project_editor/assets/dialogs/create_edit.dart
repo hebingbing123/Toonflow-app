@@ -50,7 +50,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                       labelText: dlgL10n.projectEditorAssetCrudFieldNameLabel,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: typeCtrl,
                     decoration: InputDecoration(
@@ -59,7 +59,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                           dlgL10n.projectEditorAssetCrudFieldTypeHelperCreate,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: descriptionCtrl,
                     minLines: 2,
@@ -200,7 +200,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                           });
                         },
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: nameCtrl,
                         decoration: InputDecoration(
@@ -208,7 +208,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                               dlgL10n.projectEditorAssetCrudFieldNameLabel,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: typeCtrl,
                         decoration: InputDecoration(
@@ -216,7 +216,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                               dlgL10n.projectEditorAssetCrudFieldTypeLabel,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         controller: descriptionCtrl,
                         minLines: 2,

@@ -14,7 +14,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(l10n.projectEditorNovelsAndEventsTitle, style: Theme.of(ctx).textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         buildProjectNovelsWorkbenchSection(
           ctx: ctx,
           l10n: l10n,
@@ -102,7 +102,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
             }
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         buildProjectNovelEventsWorkbenchSection(
           ctx: ctx,
           events:

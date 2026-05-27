@@ -12,14 +12,18 @@ import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
-import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 // Split into multiple files for maintainability
 part 'section_helpers.dart';
@@ -349,25 +353,6 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     );
   }
 
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return DecoratedBox(
-      decoration: studioInsetPanelDecoration(context),
-      child: const Padding(
-        padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            StudioSkeleton(height: 18),
-            SizedBox(height: StudioSpacing.sm),
-            StudioSkeleton(height: 56),
-            SizedBox(height: StudioSpacing.sm),
-            StudioSkeleton(height: 56),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -383,312 +368,409 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     final items = _items;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildStudioHeader(context, l10n),
-          const SizedBox(height: StudioLayoutSpacing.stackMedium),
-        StudioCollapsibleFilterPanel(
-          collapsible: true,
-          title: l10n.teamWorkspaceCreateAction,
-          child: StudioFilterRow(
-            wideLayout: StudioFilterWideLayout.toolbarRow,
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.teamWorkspaceEnterpriseNameLabel,
-                    border: OutlineInputBorder(),
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: _buildStudioHeader(context, l10n)),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: StudioLayoutSpacing.stackMedium),
+          ),
+          SliverToBoxAdapter(
+            child: StudioCollapsibleFilterPanel(
+              collapsible: true,
+              title: l10n.teamWorkspaceCreateAction,
+              child: StudioFilterRow(
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: l10n.teamWorkspaceEnterpriseNameLabel,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
                   ),
-                ),
+                  FilledButton(
+                    style: studioFormPrimaryButtonStyle(context),
+                    onPressed: _creating ? null : _create,
+                    child: Text(
+                      _creating
+                          ? l10n.teamWorkspaceCreating
+                          : l10n.teamWorkspaceCreateAction,
+                    ),
+                  ),
+                ],
               ),
-              FilledButton(
-                style: studioFormPrimaryButtonStyle(context),
-                onPressed: _creating ? null : _create,
+            ),
+          ),
+          if (shouldShowInviteTokenHint(
+            tokenAutoFilledFromUri: _inviteTokenFromUri,
+            tokenText: _acceptInviteTokenController.text,
+          ))
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: StudioSpacing.xs),
                 child: Text(
-                  _creating
-                      ? l10n.teamWorkspaceCreating
-                      : l10n.teamWorkspaceCreateAction,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (shouldShowInviteTokenHint(
-          tokenAutoFilledFromUri: _inviteTokenFromUri,
-          tokenText: _acceptInviteTokenController.text,
-        )) ...<Widget>[
-          const SizedBox(height: StudioSpacing.xs),
-          Text(
-            inviteTokenAutofillHint(l10n),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ],
-        const SizedBox(height: StudioSpacing.sm),
-        StudioCollapsibleFilterPanel(
-          collapsible: true,
-          title: l10n.teamWorkspaceAcceptInviteAction,
-          subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
-              ? l10n.teamWorkspaceInviteTokenInputLabel
-              : null,
-          child: StudioFilterRow(
-            wideLayout: StudioFilterWideLayout.toolbarRow,
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: _acceptInviteTokenController,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.teamWorkspaceInviteTokenInputLabel,
-                    border: OutlineInputBorder(),
+                  inviteTokenAutofillHint(l10n),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
-              FilledButton.tonal(
-                style: studioFormTonalButtonStyle(context),
-                onPressed: _acceptingInvite ? null : _acceptInvite,
-                child: Text(
-                  _acceptingInvite
-                      ? l10n.teamWorkspaceJoining
-                      : l10n.teamWorkspaceAcceptInviteAction,
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: StudioSpacing.sm)),
+          SliverToBoxAdapter(
+            child: StudioCollapsibleFilterPanel(
+              collapsible: true,
+              title: l10n.teamWorkspaceAcceptInviteAction,
+              subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
+                  ? l10n.teamWorkspaceInviteTokenInputLabel
+                  : null,
+              child: StudioFilterRow(
+                wideLayout: StudioFilterWideLayout.toolbarRow,
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _acceptInviteTokenController,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.teamWorkspaceInviteTokenInputLabel,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    style: studioFormTonalButtonStyle(context),
+                    onPressed: _acceptingInvite ? null : _acceptInvite,
+                    child: Text(
+                      _acceptingInvite
+                          ? l10n.teamWorkspaceJoining
+                          : l10n.teamWorkspaceAcceptInviteAction,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: StudioSpacing.sm)),
+          SliverToBoxAdapter(
+            child: StudioSwitchListRow(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.teamWorkspaceShowArchivedToggle),
+              value: _includeArchived,
+              onChanged: _loading
+                  ? null
+                  : (bool v) {
+                      setState(() => _includeArchived = v);
+                      _load();
+                    },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _loading ? null : _load,
+                icon: _loading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+                label: Text(
+                  _loading
+                      ? l10n.teamWorkspaceLoading
+                      : l10n.teamWorkspaceRefreshList,
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: StudioSpacing.sm),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.teamWorkspaceShowArchivedToggle),
-          value: _includeArchived,
-          onChanged: _loading
-              ? null
-              : (bool v) {
-                  setState(() => _includeArchived = v);
-                  _load();
-                },
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: _loading ? null : _load,
-            icon: _loading
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.refresh),
-            label: Text(
-              _loading
-                  ? l10n.teamWorkspaceLoading
-                  : l10n.teamWorkspaceRefreshList,
             ),
           ),
-        ),
-        if (_error != null) ...<Widget>[
-          const SizedBox(height: 8),
-          SelectableText(
-            _error!,
-            style: TextStyle(color: theme.colorScheme.error),
-          ),
-        ],
-        const SizedBox(height: 8),
-        if (_loading && items == null) _buildStudioLoadingBody(context),
-        if (items == null && !_loading)
-          StudioEmptyState.emptyData(
-            title: l10n.teamWorkspaceNoListDataHint,
-            icon: Icons.groups_outlined,
-            actionLabel: l10n.teamWorkspaceRefreshList,
-            onAction: _load,
-          ),
-        if (items != null && items.isEmpty)
-          StudioEmptyState.emptyData(
-            title: l10n.teamWorkspaceNoWorkspacesHint,
-            icon: Icons.groups_outlined,
-            actionLabel: l10n.teamWorkspaceRefreshList,
-            onAction: _load,
-          ),
-        if (items != null &&
-            items.isNotEmpty &&
-            !hasActiveEnterpriseWorkspace(items)) ...<Widget>[
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-              border: Border.all(color: studioPanelBorderColor(context)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  onlyPersonalWorkspaceTitle(l10n),
-                  style: theme.textTheme.titleSmall,
+          const SliverToBoxAdapter(child: SizedBox(height: StudioSpacing.xs)),
+          if (_loading && items == null)
+            const SliverToBoxAdapter(
+              child: StudioListSkeleton(
+                itemCount: 6,
+                scrollable: false,
+                padding: EdgeInsets.symmetric(
+                  horizontal: StudioSpacing.sm,
+                  vertical: StudioSpacing.xs,
                 ),
-                const SizedBox(height: StudioSpacing.xs),
-                Text(
-                  onlyPersonalWorkspaceBody(l10n),
-                  style: theme.textTheme.bodySmall,
+              ),
+            )
+          else if (items == null && !_loading)
+            SliverToBoxAdapter(
+              child: StudioEmptyState.loadFailed(
+                context,
+                error: _error,
+                title: l10n.teamWorkspaceNoListDataHint,
+                onRetry: _load,
+              ),
+            )
+          else if (items != null && items.isEmpty)
+            SliverToBoxAdapter(
+              child: StudioEmptyState.emptyData(
+                title: l10n.teamWorkspaceNoWorkspacesHint,
+                icon: Icons.groups_outlined,
+                actionLabel: l10n.teamWorkspaceRefreshList,
+                onAction: _load,
+              ),
+            )
+          else ...<Widget>[
+            if (_error != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                  child: StudioApiErrorCallout(error: _error!, onRetry: _load),
                 ),
-              ],
-            ),
-          ),
-        ],
-        if (items != null && items.isNotEmpty)
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var index = 0; index < items.length; index++) ...[
-                if (index > 0) const Divider(height: 1),
-                Builder(builder: (context) {
-              final row = items[index];
-              final tokens = StudioTokens.of(context);
-              final w = row.workspace;
-              final busy = _patchingWorkspaceId == w.id;
-              final switching = _switchingWorkspaceId == w.id;
-              final canManage = _canArchiveOrRestore(row);
-              final isCurrent = isCurrentWorkspaceRow(
-                row,
-                widget.currentWorkspaceId,
-              );
-              return Semantics(
-                selected: isCurrent,
-                label: buildWorkspaceRowSemanticsLabel(
-                  l10n,
-                  row,
-                  isCurrent: isCurrent,
-                ),
-                child: ListTile(
-                  dense: true,
-                  selected: isCurrent,
-                  selectedTileColor: tokens.primarySoft.withValues(alpha: 0.35),
-                  title: Text(w.name),
-                  subtitle: Text(
-                    '${w.workspaceType} · ${row.role}'
-                    '${w.archivedAt != null ? ' · ${l10n.teamWorkspaceArchivedBadge}' : ''}',
+              ),
+            if (items != null &&
+                items.isNotEmpty &&
+                !hasActiveEnterpriseWorkspace(items))
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                  child: Container(
+                    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusDense,
+                      ),
+                      border: Border.all(
+                        color: studioPanelBorderColor(context),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          onlyPersonalWorkspaceTitle(l10n),
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: StudioSpacing.xs),
+                        Text(
+                          onlyPersonalWorkspaceBody(l10n),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
-                  trailing: Row(
+                ),
+              ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final row = items![index];
+                  final tokens = StudioTokens.of(context);
+                  final w = row.workspace;
+                  final busy = _patchingWorkspaceId == w.id;
+                  final switching = _switchingWorkspaceId == w.id;
+                  final canManage = _canArchiveOrRestore(row);
+                  final isCurrent = isCurrentWorkspaceRow(
+                    row,
+                    widget.currentWorkspaceId,
+                  );
+
+                  final tile = studioStaggeredItem(
+                    index,
+                    entranceKey: items.length,
+                    child: StudioListRow(
+                      dense: true,
+                      selected: isCurrent,
+                        selectedTileColor:
+                            tokens.primarySoft.withValues(alpha: 0.35),
+                        onTap: (_loading || busy || switching || isCurrent)
+                            ? null
+                            : () => _switchCurrentWorkspace(row),
+                        trailingContextMenuItems: <StudioContextMenuItem>[
+                          if (!isCurrent)
+                            StudioContextMenuItem(
+                              label: l10n.teamWorkspaceSwitchHereAction,
+                              icon: Icons.swap_horiz,
+                              enabled: !_loading && !busy && !switching,
+                              onSelected: () => _switchCurrentWorkspace(row),
+                            ),
+                          if (canManage)
+                            StudioContextMenuItem(
+                              label: l10n.teamWorkspaceMembersShortAction,
+                              icon: Icons.group_outlined,
+                              enabled: !_loading && !busy,
+                              onSelected: () => _openMembersDialog(row),
+                            ),
+                          if (canManage)
+                            StudioContextMenuItem(
+                              label: l10n.teamWorkspaceInvitesShortAction,
+                              icon: Icons.mail_outline,
+                              enabled: !_loading && !busy,
+                              onSelected: () => _openInvitesDialog(row),
+                            ),
+                          if (canManage && w.archivedAt == null)
+                            StudioContextMenuItem(
+                              label: l10n.teamWorkspaceArchiveAction,
+                              icon: Icons.archive_outlined,
+                              enabled: !_loading && !busy,
+                              onSelected: () => _confirmArchive(row),
+                            ),
+                          if (canManage && w.archivedAt != null)
+                            StudioContextMenuItem(
+                              label: l10n.teamWorkspaceRestoreAction,
+                              icon: Icons.unarchive_outlined,
+                              enabled: !_loading && !busy,
+                              onSelected: () => _setArchive(row, false),
+                            ),
+                        ],
+                        title: Text(
+                          w.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          '${w.workspaceType} · ${row.role}'
+                          '${w.archivedAt != null ? ' · ${l10n.teamWorkspaceArchivedBadge}' : ''}',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            if (isCurrent)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: StudioSpacing.xs,
+                                ),
+                                child: StudioChip(
+                                  label: Text(l10n.teamWorkspaceCurrentBadge),
+                                  backgroundColor: tokens.primarySoft,
+                                ),
+                              ),
+                            if (canManage)
+                              Tooltip(
+                                message: buildWorkspaceActionTooltip(
+                                  l10n: l10n,
+                                  actionLabel:
+                                      l10n.teamWorkspaceManageMembersAction,
+                                  workspaceName: w.name,
+                                ),
+                                child: TextButton(
+                                  onPressed: (_loading || busy)
+                                      ? null
+                                      : () => _openMembersDialog(row),
+                                  child: Text(
+                                    l10n.teamWorkspaceMembersShortAction,
+                                  ),
+                                ),
+                              ),
+                            if (canManage)
+                              Tooltip(
+                                message: buildWorkspaceActionTooltip(
+                                  l10n: l10n,
+                                  actionLabel:
+                                      l10n.teamWorkspaceManageInvitesAction,
+                                  workspaceName: w.name,
+                                ),
+                                child: TextButton(
+                                  onPressed: (_loading || busy)
+                                      ? null
+                                      : () => _openInvitesDialog(row),
+                                  child: Text(
+                                    l10n.teamWorkspaceInvitesShortAction,
+                                  ),
+                                ),
+                              ),
+                            Tooltip(
+                              message: buildWorkspaceActionTooltip(
+                                l10n: l10n,
+                                actionLabel:
+                                    l10n.teamWorkspaceSwitchActionLabel,
+                                workspaceName: w.name,
+                              ),
+                              child: TextButton(
+                                onPressed:
+                                    (_loading ||
+                                            busy ||
+                                            switching ||
+                                            isCurrent)
+                                        ? null
+                                        : () => _switchCurrentWorkspace(row),
+                                child: switching
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(l10n.teamWorkspaceSwitchHereAction),
+                              ),
+                            ),
+                            if (canManage && w.archivedAt == null)
+                              Tooltip(
+                                message: buildWorkspaceActionTooltip(
+                                  l10n: l10n,
+                                  actionLabel:
+                                      l10n.teamWorkspaceArchiveActionLabel,
+                                  workspaceName: w.name,
+                                ),
+                                child: TextButton(
+                                  onPressed: (_loading || busy)
+                                      ? null
+                                      : () => _confirmArchive(row),
+                                  child: busy
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(l10n.teamWorkspaceArchiveAction),
+                                ),
+                              ),
+                            if (canManage && w.archivedAt != null)
+                              Tooltip(
+                                message: buildWorkspaceActionTooltip(
+                                  l10n: l10n,
+                                  actionLabel:
+                                      l10n.teamWorkspaceRestoreActionLabel,
+                                  workspaceName: w.name,
+                                ),
+                                child: TextButton(
+                                  onPressed: (_loading || busy)
+                                      ? null
+                                      : () => _setArchive(row, false),
+                                  child: busy
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(l10n.teamWorkspaceRestoreAction),
+                                ),
+                              ),
+                          ],
+                        ),
+                    ),
+                  );
+
+                  if (index == 0) {
+                    return tile;
+                  }
+                  return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      if (isCurrent)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: StudioChip(
-                            label: Text(l10n.teamWorkspaceCurrentBadge),
-                            backgroundColor: tokens.primarySoft,
-                          ),
-                        ),
-                      if (canManage)
-                        Tooltip(
-                          message: buildWorkspaceActionTooltip(
-                            l10n: l10n,
-                            actionLabel: l10n.teamWorkspaceManageMembersAction,
-                            workspaceName: w.name,
-                          ),
-                          child: TextButton(
-                            onPressed: (_loading || busy)
-                                ? null
-                                : () => _openMembersDialog(row),
-                            child: Text(l10n.teamWorkspaceMembersShortAction),
-                          ),
-                        ),
-                      if (canManage)
-                        Tooltip(
-                          message: buildWorkspaceActionTooltip(
-                            l10n: l10n,
-                            actionLabel: l10n.teamWorkspaceManageInvitesAction,
-                            workspaceName: w.name,
-                          ),
-                          child: TextButton(
-                            onPressed: (_loading || busy)
-                                ? null
-                                : () => _openInvitesDialog(row),
-                            child: Text(l10n.teamWorkspaceInvitesShortAction),
-                          ),
-                        ),
-                      Tooltip(
-                        message: buildWorkspaceActionTooltip(
-                          l10n: l10n,
-                          actionLabel: l10n.teamWorkspaceSwitchActionLabel,
-                          workspaceName: w.name,
-                        ),
-                        child: TextButton(
-                          onPressed:
-                              (_loading || busy || switching || isCurrent)
-                              ? null
-                              : () => _switchCurrentWorkspace(row),
-                          child: switching
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(l10n.teamWorkspaceSwitchHereAction),
-                        ),
-                      ),
-                      if (canManage && w.archivedAt == null)
-                        Tooltip(
-                          message: buildWorkspaceActionTooltip(
-                            l10n: l10n,
-                            actionLabel: l10n.teamWorkspaceArchiveActionLabel,
-                            workspaceName: w.name,
-                          ),
-                          child: TextButton(
-                            onPressed: (_loading || busy)
-                                ? null
-                                : () => _confirmArchive(row),
-                            child: busy
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(l10n.teamWorkspaceArchiveAction),
-                          ),
-                        ),
-                      if (canManage && w.archivedAt != null)
-                        Tooltip(
-                          message: buildWorkspaceActionTooltip(
-                            l10n: l10n,
-                            actionLabel: l10n.teamWorkspaceRestoreActionLabel,
-                            workspaceName: w.name,
-                          ),
-                          child: TextButton(
-                            onPressed: (_loading || busy)
-                                ? null
-                                : () => _setArchive(row, false),
-                            child: busy
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(l10n.teamWorkspaceRestoreAction),
-                          ),
-                        ),
+                      const Divider(height: 1),
+                      tile,
                     ],
-                  ),
-                ),
-              );
-                }),
-              ],
-            ],
-          ),
+                  );
+                },
+                childCount: items?.length ?? 0,
+              ),
+            ),
           ],
-        ),
+          const SliverToBoxAdapter(child: SizedBox(height: StudioSpacing.md)),
+        ],
       ),
     );
   }

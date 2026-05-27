@@ -116,7 +116,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -135,7 +135,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (_loadingCharacters)
             Text(
               l10n.shortVideoCharactersLoading,
@@ -147,7 +147,8 @@ extension _ShortVideoSpaceSectionCharactersExtension
               icon: Icons.people_outline,
             )
           else
-            ..._projectCharacters.map((character) {
+            ..._projectCharacters.toList().asMap().entries.map((entry) {
+              final character = entry.value;
               final voice = character.voiceConfig;
               final provider = (voice['provider'] as String? ?? '').trim();
               final voiceId =
@@ -156,15 +157,23 @@ extension _ShortVideoSpaceSectionCharactersExtension
               final emotion =
                   (voice['emotion'] as String? ?? voice['style'] as String? ?? '')
                       .trim();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+              return studioStaggeredItem(
+                entry.key,
+                entranceKey: _projectCharacters.length,
+                child: Padding(
+                padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                 child: StudioCard(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(character.name, style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 8),
+                      Text(
+                        character.name,
+                        style: theme.textTheme.titleSmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.shortVideoCharactersVoiceSummary(
                           provider.isEmpty ? '—' : provider,
@@ -173,10 +182,10 @@ extension _ShortVideoSpaceSectionCharactersExtension
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.chromeActionGap,
                         children: [
                           OutlinedButton.icon(
                             onPressed: () =>
@@ -201,10 +210,11 @@ extension _ShortVideoSpaceSectionCharactersExtension
                     ],
                   ),
                 ),
-              );
+              ),
+            );
             }),
           if ((_charactersStatusLine ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _charactersStatusLine!,
               style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
@@ -311,7 +321,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
                 labelText: l10n.shortVideoCharactersCloneSampleUrl,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             OutlinedButton(
               onPressed: () {
                 urlCtrl.text = 'mock-sample';

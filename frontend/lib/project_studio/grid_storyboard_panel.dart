@@ -50,8 +50,8 @@ class GridStoryboardPanel extends StatelessWidget {
               Wrap(
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
+                spacing: StudioSpacing.radiusComfort,
+                runSpacing: StudioSpacing.radiusComfort,
                 children: actionChildren,
               ),
             ],

@@ -8,6 +8,8 @@ import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
 import '../../controls.dart';
 import '../../prompt_preset.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 class ScriptWorkspaceArgumentTemplateEntry {
   const ScriptWorkspaceArgumentTemplateEntry({
@@ -86,8 +88,8 @@ class ScriptWorkspacePromptTemplatesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: presets
           .map(
             (AgentWorkspacePromptPreset preset) => StudioActionChip(
@@ -170,8 +172,22 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
             helperText: l10n.agentWorkspaceScriptPromptHelper,
           ),
         ),
-        const SizedBox(height: 8),
-        StudioDenseActionRow(
+        const SizedBox(height: StudioSpacing.xs),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final toolWidth = studioWrapTileWidth(
+              constraints.maxWidth,
+              maxColumns: 2,
+              minTileWidth: 200,
+              maxTileWidth: 280,
+            );
+            final argsWidth = studioWrapTileWidth(
+              constraints.maxWidth,
+              maxColumns: 1,
+              minTileWidth: 260,
+              maxTileWidth: 420,
+            );
+            return StudioDenseActionRow(
           children: <Widget>[
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -183,7 +199,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 220,
+              width: toolWidth,
               child: StudioDropdownButtonFormField<String>(
                 key: ValueKey<String?>(
                   'script-domain-tool-${selectedScriptDomainTool ?? ''}',
@@ -223,7 +239,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 320,
+              width: argsWidth,
               child: TextField(
                 controller: scriptDomainArgsController,
                 maxLines: 2,
@@ -236,7 +252,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 300,
+              width: toolWidth,
               child: StudioDropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: selectedScriptSubAgentTool,
@@ -306,6 +322,8 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               ),
             ),
           ],
+            );
+          },
         ),
       ],
     );
@@ -328,8 +346,8 @@ class ScriptWorkspaceArgumentTemplatesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: templates
           .map(
             (ScriptWorkspaceArgumentTemplateEntry entry) => StudioActionChip(

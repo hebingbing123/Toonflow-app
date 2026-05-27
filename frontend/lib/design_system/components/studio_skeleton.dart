@@ -9,11 +9,13 @@ class StudioSkeleton extends StatefulWidget {
     this.width,
     this.height = 16,
     this.borderRadius = 8,
+    this.shimmer = true,
   });
 
   final double? width;
   final double height;
   final double borderRadius;
+  final bool shimmer;
 
   @override
   State<StudioSkeleton> createState() => _StudioSkeletonState();
@@ -21,7 +23,7 @@ class StudioSkeleton extends StatefulWidget {
 
 class _StudioSkeletonState extends State<StudioSkeleton>
     with SingleTickerProviderStateMixin {
-  static const _pulseDuration = Duration(milliseconds: 1200);
+  static const _pulseDuration = Duration(milliseconds: 1400);
 
   late final AnimationController _controller;
 
@@ -29,7 +31,7 @@ class _StudioSkeletonState extends State<StudioSkeleton>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: _pulseDuration)
-      ..repeat(reverse: true);
+      ..repeat();
   }
 
   @override
@@ -42,7 +44,7 @@ class _StudioSkeletonState extends State<StudioSkeleton>
         _controller.stop();
         _controller.value = 0;
       } else if (!_controller.isAnimating) {
-        _controller.repeat(reverse: true);
+        _controller.repeat();
       }
     }
   }
@@ -59,18 +61,47 @@ class _StudioSkeletonState extends State<StudioSkeleton>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Container(
+        final base = Color.lerp(
+          tokens.bgInset,
+          tokens.borderDefault,
+          0.35 + 0.25 * (0.5 - (0.5 - _controller.value).abs() * 2),
+        )!;
+        final highlight = Color.lerp(
+          tokens.borderDefault,
+          tokens.surfaceHighlight,
+          widget.shimmer ? _controller.value : 0,
+        )!;
+
+        Widget box = Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.borderRadius),
-            color: Color.lerp(
-              tokens.bgInset,
-              tokens.borderDefault,
-              _controller.value,
-            ),
+            color: base,
           ),
         );
+
+        if (widget.shimmer) {
+          box = ShaderMask(
+            blendMode: BlendMode.srcATop,
+            shaderCallback: (bounds) {
+              final slide = -1.2 + 2.4 * _controller.value;
+              return LinearGradient(
+                begin: Alignment(slide - 0.6, 0),
+                end: Alignment(slide + 0.6, 0),
+                colors: <Color>[
+                  base,
+                  highlight.withValues(alpha: 0.85),
+                  base,
+                ],
+                stops: const <double>[0.25, 0.5, 0.75],
+              ).createShader(bounds);
+            },
+            child: box,
+          );
+        }
+
+        return box;
       },
     );
   }

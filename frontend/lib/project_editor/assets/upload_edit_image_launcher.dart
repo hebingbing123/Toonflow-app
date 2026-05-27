@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
 
 Future<void> openProjectAssetEditImageUploadDialog({
   required BuildContext ctx,
@@ -59,7 +60,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
                         setState(() => selectedScriptNumericId = value);
                       },
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     TextField(
                       controller: base64Ctrl,
                       minLines: 4,

@@ -3,8 +3,11 @@ import '../../design_system/components/studio_chip.dart';
 import 'package:flutter/services.dart';
 
 import '../../design_system/components/studio_card.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/layout_breakpoints.dart';
+import '../../design_system/studio_responsive_layout.dart';
 import '../../design_system/tokens.dart';
 import '../../design_system/studio_typography.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,6 +15,7 @@ import '../../rust_api.dart';
 import 'version_manager.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
   if (value == null) return l10n.shortVideoVersionComparisonValueEmpty;
@@ -541,9 +545,18 @@ class _VersionComparisonState extends State<VersionComparison> {
 
     return StudioDialogFrame(
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.9,
-        padding: const EdgeInsets.all(24),
+        width: studioConstrainedDialogWidth(
+          context,
+          maxWidth: 960,
+          horizontalMargin: 48,
+        ),
+        height: studioAdaptiveDialogHeight(
+          context,
+          fraction: 0.88,
+          min: 420,
+          max: 720,
+        ),
+        padding: const EdgeInsets.all(StudioSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -581,7 +594,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: StudioSpacing.md),
 
             // 统计信息卡片
             Card(
@@ -635,7 +648,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
 
             // 工具栏
             Row(
@@ -662,8 +675,8 @@ class _VersionComparisonState extends State<VersionComparison> {
                 ),
                 const SizedBox(width: StudioSpacing.sm),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     StudioFilterChip(
@@ -698,7 +711,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
 
             // 差异列表
             Expanded(
@@ -721,7 +734,11 @@ class _VersionComparisonState extends State<VersionComparison> {
                         itemCount: filteredDiffs.length,
                         itemBuilder: (context, index) {
                           final diff = filteredDiffs[index];
-                          return _DifferenceListItem(difference: diff);
+                          return studioStaggeredItem(
+                            index,
+                            entranceKey: filteredDiffs.length,
+                            child: _DifferenceListItem(difference: diff),
+                          );
                         },
                       ),
                     ),
@@ -752,7 +769,7 @@ class _StatisticItem extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           value,
           style: studioStatHeroValueStyle(context, color),
@@ -810,17 +827,19 @@ class _DifferenceListItem extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final typeColor = _getTypeColor(context);
 
-    return ListTile(
+    return StudioListRow(
       leading: Icon(_getTypeIcon(), color: typeColor),
       title: Row(
         children: [
           Text(
             l10n.shortVideoVersionComparisonShotTitle(difference.shotId),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.radiusHairline),
             decoration: BoxDecoration(
               color: typeColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -839,7 +858,7 @@ class _DifferenceListItem extends StatelessWidget {
           difference.type == DifferenceType.modified &&
               difference.fieldName != null
           ? Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: StudioSpacing.xs),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -852,17 +871,17 @@ class _DifferenceListItem extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: tokens.danger.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeOld,
-                          style: TextStyle(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             fontSize: StudioTypography.of(context).meta,
                             color: tokens.danger,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Text(
                           _formatVersionComparisonValue(
@@ -889,17 +908,17 @@ class _DifferenceListItem extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: tokens.success.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeNew,
-                          style: TextStyle(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             fontSize: StudioTypography.of(context).meta,
                             color: tokens.success,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: Text(
                           _formatVersionComparisonValue(

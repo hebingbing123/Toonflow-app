@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
@@ -136,8 +137,11 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                     ? l10n.shortVideoPublishCalendarDraftCountOverflow
                     : '$c');
 
-            return Material(
-              color: Colors.transparent,
+            return studioStaggeredItem(
+              index,
+              entranceKey: cells.length,
+              child: Material(
+              color: StudioPrimitives.transparent,
               child: InkWell(
                 onTap: widget.busy
                     ? null
@@ -152,7 +156,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(StudioSpacing.chromeActionGap),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final compact = constraints.maxHeight < 40;
@@ -175,7 +179,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                               l10n.l10nBatch_775383c7b6(day.day),
                               style: labelStyle,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: StudioSpacing.radiusHairline),
                             Text(
                               countLabel,
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -192,6 +196,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                   ),
                 ),
               ),
+            ),
             );
           },
         ),

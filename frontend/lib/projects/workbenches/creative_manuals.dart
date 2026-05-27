@@ -7,6 +7,7 @@ import '../../design_system/layout_breakpoints.dart';
 import '../../design_system/components/studio_dense_action_row.dart';
 import '../../design_system/components/studio_dropdown_field.dart';
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/tokens.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';

@@ -38,23 +38,23 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+          padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
           decoration: studioInsetPanelDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(statusLine, style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 scriptScopedLine,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (selectedAsset != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.projectEditorAssetsWorkbenchFocusAssetSummary(
                     selectedAsset!.numericId,
@@ -67,7 +67,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         StudioDropdownButtonFormField<int?>(
           initialValue: selectedAssetNumericId,
           decoration: InputDecoration(
@@ -93,7 +93,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
           ],
           onChanged: onAssetChanged,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDropdownButtonFormField<int?>(
           initialValue: selectedScriptNumericId,
           decoration: InputDecoration(

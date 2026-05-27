@@ -8,6 +8,7 @@ mod list;
 mod mutate;
 
 pub(super) use file::get_project_asset_image_file_for_project;
+mod file_resize;
 pub(super) use list::{get_project_asset_image_for_project, list_project_asset_images_for_project};
 pub(super) use mutate::{
     create_project_asset_image_for_project, delete_project_asset_image_for_project,

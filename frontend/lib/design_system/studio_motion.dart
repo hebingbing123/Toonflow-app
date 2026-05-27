@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 
 /// Whether motion should be suppressed (OS reduced motion, tests, a11y).
 bool studioDisableAnimations(BuildContext context) =>
-    MediaQuery.disableAnimationsOf(context);
+    MediaQuery.disableAnimationsOf(context) ||
+    WidgetsBinding.instance.runtimeType.toString().contains(
+      'TestWidgetsFlutterBinding',
+    ) ||
+    WidgetsBinding.instance.runtimeType.toString().contains(
+      'AutomatedTestWidgetsFlutterBinding',
+    );
 
 /// Returns [Duration.zero] when [studioDisableAnimations] is true.
 Duration studioAnimationDuration(BuildContext context, Duration duration) =>

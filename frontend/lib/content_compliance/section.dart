@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_code_dropdown_field.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
@@ -219,7 +221,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       StudioCodeDropdownField(
                         value: _targetType,
                         labelText: l10n.contentComplianceFieldTargetType,
-                        width: 280,
+                        width: null,
                         codes: _reportTargetTypeCodes,
                         labelForValue: (code) => _targetTypeLabel(l10n, code),
                         onChanged: (value) {
@@ -231,7 +233,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       StudioCodeDropdownField(
                         value: _category,
                         labelText: l10n.contentComplianceFieldCategory,
-                        width: 280,
+                        width: null,
                         codes: _categoryCodes,
                         labelForValue: (code) => _categoryLabel(l10n, code),
                         onChanged: (value) {
@@ -243,7 +245,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       StudioCodeDropdownField(
                         value: _severity,
                         labelText: l10n.contentComplianceFieldSeverity,
-                        width: 280,
+                        width: null,
                         codes: _severityCodes,
                         labelForValue: (code) => _severityLabel(l10n, code),
                         onChanged: (value) {
@@ -1058,13 +1060,22 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     style: theme.textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final tileWidth = studioWrapTileWidth(
+                        constraints.maxWidth,
+                        maxColumns: 4,
+                        minTileWidth: 200,
+                        maxTileWidth: 320,
+                        gap: 8,
+                      );
+                      return Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: queue.ownerSummaries
                         .map(
                           (owner) => SizedBox(
-                            width: 220,
+                            width: tileWidth,
                             child: OutlinedButton(
                               onPressed: widget.controller.loadingQueue
                                   ? null
@@ -1121,6 +1132,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           ),
                         )
                         .toList(growable: false),
+                  );
+                    },
                   ),
                 ],
                 if (queue.escalationSummaries.isNotEmpty) ...[
@@ -1158,13 +1171,22 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     style: theme.textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final tileWidth = studioWrapTileWidth(
+                        constraints.maxWidth,
+                        maxColumns: 3,
+                        minTileWidth: 220,
+                        maxTileWidth: 360,
+                        gap: 8,
+                      );
+                      return Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: queue.workspaceSummaries
                         .map(
                           (workspace) => SizedBox(
-                            width: 230,
+                            width: tileWidth,
                             child: OutlinedButton(
                               onPressed: widget.controller.loadingQueue
                                   ? null
@@ -1209,6 +1231,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           ),
                         )
                         .toList(growable: false),
+                  );
+                    },
                   ),
                 ],
                     ],
@@ -1226,8 +1250,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                   )
                 else
-                  ...queue.items.map(
-                    (item) => Padding(
+                  ...queue.items.toList().asMap().entries.map(
+                    (entry) {
+                      final item = entry.value;
+                      return studioStaggeredItem(
+                        entry.key,
+                        entranceKey: queue.items.length,
+                        child: Padding(
                       padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
                       child: Container(
                         width: double.infinity,
@@ -1453,6 +1482,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         ),
                       ),
                     ),
+              );
+                    },
                   ),
                 if (queue.items.isNotEmpty) ...[
                   const SizedBox(height: 8),

@@ -64,7 +64,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
     final check = exportCheck;
     if (check == null) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, 0, StudioSpacing.sm, StudioSpacing.xs),
         child: Text(
           l10n.studioReviewPackExportCheckUnavailable,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -86,10 +86,10 @@ class StudioReviewPackExportBridge extends StatelessWidget {
           );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, 0, StudioSpacing.sm, StudioSpacing.radiusComfort),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: ready
               ? tokens.primary.withValues(alpha: 0.12)
@@ -112,7 +112,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
                   size: 20,
                   color: ready ? tokens.primary : theme.colorScheme.error,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +139,9 @@ class StudioReviewPackExportBridge extends StatelessWidget {
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               ...blocking.map(
                 (issue) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(
+                    bottom: StudioSpacing.chromeActionGap,
+                  ),
                   child: Text(
                     '• ${issue.detail.trim().isEmpty ? issue.code : issue.detail}',
                     style: theme.textTheme.bodySmall,
@@ -149,8 +151,8 @@ class StudioReviewPackExportBridge extends StatelessWidget {
             ],
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: <Widget>[
                 StudioToolbarButton(
                   icon: ready ? Icons.upload_outlined : Icons.build_outlined,

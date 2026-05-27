@@ -87,8 +87,8 @@ class _ProjectSelectorPanel extends StatelessWidget {
       border: const OutlineInputBorder(),
       filled: true,
       fillColor: tokens.bgInset,
-      labelStyle: TextStyle(color: tokens.textSecondary),
-      hintStyle: TextStyle(color: tokens.textMuted),
+      labelStyle: theme.textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(color: tokens.textMuted),
     );
 
     return _Panel(
@@ -96,12 +96,12 @@ class _ProjectSelectorPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.shortVideoSpaceTargetConfiguration, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.shortVideoSpaceConfigurationDescription,
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Row(
             children: [
               Expanded(
@@ -125,7 +125,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                   onChanged: loadingProjects ? null : onProjectChanged,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: StudioSpacing.sm),
               OutlinedButton.icon(
                 onPressed: loadingProjects ? null : onRefreshProjects,
                 icon: const Icon(Icons.refresh_outlined),
@@ -138,7 +138,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ],
           ),
           if (onResetConfirmationDontShowAgain != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
@@ -151,9 +151,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           SegmentedButton<String>(
             segments: [
               ButtonSegment(
@@ -177,12 +177,12 @@ class _ProjectSelectorPanel extends StatelessWidget {
               onVideoRatioChanged(selection.first);
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.shortVideoSpacePublishMarketPlatformTitle,
             style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDropdownButtonFormField<String>(
             key: ValueKey<String>('tm-$selectedProjectId'),
             initialValue: targetMarket,
@@ -221,15 +221,15 @@ class _ProjectSelectorPanel extends StatelessWidget {
                     }
                   },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.shortVideoSpaceTargetPlatformsHint,
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: kShortVideoPublishPlatformIdsInDisplayOrder
                 .map(
                   (id) => FilterChip(
@@ -245,12 +245,12 @@ class _ProjectSelectorPanel extends StatelessWidget {
                 )
                 .toList(growable: false),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.shortVideoSpaceDurationStrategyTitle,
             style: theme.textTheme.labelLarge,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SegmentedButton<String>(
             segments: [
               ButtonSegment(
@@ -274,12 +274,12 @@ class _ProjectSelectorPanel extends StatelessWidget {
               onDurationStrategyChanged(selection.first);
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           Text(
             l10n.shortVideoSpaceVoiceSubtitleBgmTitle,
             style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           TextFormField(
             key: ValueKey<String>('vp-$selectedProjectId'),
             initialValue: voiceProfile,
@@ -310,9 +310,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ),
             onChanged: onBgmStrategyChanged,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: [
               FilledButton.tonalIcon(
                 style: studioFormIconLabeledButtonStyle(context),
@@ -345,7 +345,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
           if (projectConfigLine != null) ...[
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               decoration: BoxDecoration(
                 color: operationFeedbackIsSuccess == true
                     ? StudioTokens.of(context).primarySoft
@@ -377,7 +377,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                             ? theme.colorScheme.error
                             : StudioTokens.of(context).textSecondary,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Text(
                       projectConfigLine!,
@@ -403,10 +403,10 @@ class _ProjectSelectorPanel extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           if (visualLabel != null || directionLabel != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: [
                 if (visualLabel != null)
                   _MetricChip(
@@ -422,10 +422,10 @@ class _ProjectSelectorPanel extends StatelessWidget {
             ),
           ],
           if (projectMetrics.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: projectMetrics
                   .map(
                     (item) =>

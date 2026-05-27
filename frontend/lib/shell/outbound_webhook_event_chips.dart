@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design_system/tokens.dart';
 import '../design_system/components/studio_chip.dart';
 
 import '../rust_api.dart';
@@ -33,8 +34,8 @@ class OutboundWebhookEventChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: [
         for (final slug in kOutboundWebhookPlatformEventTypes)
           StudioFilterChip(

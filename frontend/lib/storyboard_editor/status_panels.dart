@@ -38,7 +38,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
       _ => narrationSource,
     };
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,41 +47,58 @@ class _StoryboardPreviewCard extends StatelessWidget {
             l10n.scriptEditorStoryboardsCurrentFrame,
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             metaLine,
             style: studioHintStyle(context),
           ),
-          const SizedBox(height: 16),
-          if (loadingProduction)
-            const Center(child: CircularProgressIndicator())
-          else if (imageUrl == null || imageUrl.isEmpty)
-            Text(
-              l10n.scriptEditorStoryboardsNoSelectedFrame,
-              style: studioHintStyle(context),
-            )
-          else
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                imageUrl,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  height: 180,
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  alignment: Alignment.center,
-                  child: Text(
-                    l10n.scriptEditorStoryboardsPreviewLoadFailed(imageUrl),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+          const SizedBox(height: StudioSpacing.sm),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final previewHeight = studioAspectHeightFromWidth(
+                constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                    ? constraints.maxWidth
+                    : MediaQuery.sizeOf(context).width,
+                min: 140,
+                max: 240,
+              );
+              if (loadingProduction) {
+                return SizedBox(
+                  height: previewHeight,
+                  child: const StudioMediaTileSkeleton(),
+                );
+              }
+              if (imageUrl == null || imageUrl.isEmpty) {
+                return Text(
+                  l10n.scriptEditorStoryboardsNoSelectedFrame,
+                  style: studioHintStyle(context),
+                );
+              }
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+                child: StudioNetworkImage(
+                  url: imageUrl,
+                  height: previewHeight,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    height: previewHeight,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    alignment: Alignment.center,
+                    child: Text(
+                      l10n.scriptEditorStoryboardsPreviewLoadFailed(imageUrl),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+          ),
           if ((productionRow?.prompt ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               productionRow!.prompt!.trim(),
               maxLines: 3,
@@ -90,7 +107,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
             ),
           ],
           if ((productionRow?.videoDesc ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.scriptEditorStoryboardsSubtitleNarration(
                 productionRow!.videoDesc!.trim(),
@@ -100,7 +117,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
               style: studioHintStyle(context),
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.scriptEditorStoryboardsAudioDelivery(audioDeliveryLine),
             maxLines: 2,
@@ -155,7 +172,7 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: studioInsetPanelDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,8 +196,8 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Wrap(
-            spacing: 10,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               for (final step in steps)
                 _ReadinessStepPill(
@@ -223,7 +240,7 @@ class _ReadinessStepPill extends StatelessWidget {
           size: 17,
           color: ok ? scheme.primary : muted,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(

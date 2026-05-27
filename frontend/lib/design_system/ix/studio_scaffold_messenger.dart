@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'studio_toast.dart';
 import 'studio_toast_overlay.dart';
+import '../tokens.dart';
 
 /// Root [ScaffoldMessenger] that routes all [SnackBar]s to [StudioToastOverlay].
 class StudioScaffoldMessenger extends ScaffoldMessenger {
@@ -41,7 +42,7 @@ class StudioScaffoldMessengerState extends ScaffoldMessengerState {
         width: 1,
         margin: const EdgeInsets.only(left: 100000, bottom: 100000),
         padding: EdgeInsets.zero,
-        backgroundColor: Colors.transparent,
+        backgroundColor: StudioPrimitives.transparent,
         elevation: 0,
         clipBehavior: Clip.none,
       ),

@@ -87,7 +87,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/brand/
+    - assets/brand/mobile/
+    - assets/brand/tablet/
+    - assets/brand/desktop/
+    - assets/brand/web/
 
   fonts:
     - family: Inter

@@ -17,7 +17,7 @@ class ProductDemoCoachTheme {
   }) {
     return ProductDemoCoachTheme._(
       accent: tokens.primary,
-      onAccent: Colors.white,
+      onAccent: StudioPrimitives.white,
       optionalAccent: isOptionalUtility ? tokens.warning : tokens.primary,
     );
   }
@@ -43,7 +43,7 @@ class ProductDemoCoachTheme {
       disabledBackgroundColor: tokens.primary.withValues(alpha: 0.35),
       disabledForegroundColor: tokens.textMuted,
       minimumSize: const Size(96, StudioSpacing.iconTouchTarget),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.radiusComfort),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
       ),
@@ -55,7 +55,7 @@ class ProductDemoCoachTheme {
     return TextButton.styleFrom(
       foregroundColor: tokens.textSecondary,
       minimumSize: const Size(64, StudioSpacing.iconTouchTarget),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.radiusComfort, vertical: StudioSpacing.xs),
       textStyle: theme.textTheme.labelLarge,
     );
   }
@@ -64,7 +64,7 @@ class ProductDemoCoachTheme {
     return TextButton.styleFrom(
       foregroundColor: tokens.textMuted,
       minimumSize: const Size(64, StudioSpacing.iconTouchTarget),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.xs),
       textStyle: theme.textTheme.labelMedium,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../demo/product_demo_tour_anchors.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_getting_started_steps.dart';
 import '../design_system/components/studio_primary_button.dart';
@@ -246,7 +247,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             ],
           ),
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.insetDense + 2),
+        padding: const EdgeInsets.all(StudioLayoutSpacing.insetDense + StudioSpacing.radiusHairline),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -382,14 +383,17 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             SizedBox(
               width: recentCardWidth,
               height: compact ? 112 : 132,
-              child: _RecentProjectChip(
-                project: recent[i],
-                completedSteps: _progressByProjectId[recent[i].id] ?? 0,
-                compact: compact,
-                selected: widget.currentProjectNumericId == recent[i].numericId,
-                onTap: widget.onSelectProjectScope == null
-                    ? () => widget.onOpenProjectStudio(recent[i])
-                    : () => widget.onSelectProjectScope!(recent[i]),
+              child: StudioStaggeredEntrance(
+                index: i,
+                child: _RecentProjectChip(
+                  project: recent[i],
+                  completedSteps: _progressByProjectId[recent[i].id] ?? 0,
+                  compact: compact,
+                  selected: widget.currentProjectNumericId == recent[i].numericId,
+                  onTap: widget.onSelectProjectScope == null
+                      ? () => widget.onOpenProjectStudio(recent[i])
+                      : () => widget.onSelectProjectScope!(recent[i]),
+                ),
               ),
             ),
             if (i != recent.length - 1)
@@ -414,14 +418,17 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               final project = recent[index];
               return SizedBox(
                 width: recentCardWidth,
-                child: _RecentProjectChip(
-                  project: project,
-                  completedSteps: _progressByProjectId[project.id] ?? 0,
-                  compact: compact,
-                  selected: widget.currentProjectNumericId == project.numericId,
-                  onTap: widget.onSelectProjectScope == null
-                      ? () => widget.onOpenProjectStudio(project)
-                      : () => widget.onSelectProjectScope!(project),
+                child: StudioStaggeredEntrance(
+                  index: index,
+                  child: _RecentProjectChip(
+                    project: project,
+                    completedSteps: _progressByProjectId[project.id] ?? 0,
+                    compact: compact,
+                    selected: widget.currentProjectNumericId == project.numericId,
+                    onTap: widget.onSelectProjectScope == null
+                        ? () => widget.onOpenProjectStudio(project)
+                        : () => widget.onSelectProjectScope!(project),
+                  ),
                 ),
               );
             },
@@ -454,6 +461,9 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             final showRecentRail = recent.isNotEmpty && projects.length > 2;
             final projectsEmpty =
                 projectsLoaded && !showProjectsLoading && projects.isEmpty;
+            final gridEntranceKey = projects.isEmpty
+                ? null
+                : '${projects.length}:${projects.first.id}';
             final useSplitOverview =
                 layout.useSplitOverview && showRecentRail && projects.isNotEmpty;
             final contentMaxWidth = projectsHomeContentMaxWidth(
@@ -518,13 +528,14 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                             recentCardWidth: recentCardWidth + 24,
                           ),
                         ),
-                        const SizedBox(width: 24),
+                        const SizedBox(width: StudioSpacing.md),
                         Expanded(
                           child: ProductDemoTourAnchor(
                             anchorId: ProductDemoTourAnchorIds.projectsGrid,
                             child: ProjectsGridView(
                               projects: projects,
                               loading: widget.controller.loadingProjects,
+                              listEntranceKey: gridEntranceKey,
                               currentProjectNumericId:
                                   widget.currentProjectNumericId,
                               progressForProject: (p) =>
@@ -571,6 +582,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                         child: ProjectsGridView(
                           projects: projects,
                           loading: widget.controller.loadingProjects,
+                          listEntranceKey: gridEntranceKey,
                           currentProjectNumericId: widget.currentProjectNumericId,
                           progressForProject: (p) =>
                               _progressByProjectId[p.id] ?? 0,
@@ -614,7 +626,7 @@ class _RecentProjectChip extends StatelessWidget {
         project.name ?? l10n.projectsUnnamedProject(project.numericId);
 
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
       child: InkWell(
         onTap: onTap,
@@ -653,9 +665,11 @@ class _RecentProjectChip extends StatelessWidget {
                   const Spacer(),
                   if (selected)
                     Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
-                        Icons.check_circle,
+                      padding: const EdgeInsets.only(
+                        right: StudioSpacing.chromeActionGap,
+                      ),
+                      child: StudioIconSwap(
+                        icon: Icons.check_circle,
                         size: compact ? 16 : 18,
                         color: tokens.primary,
                       ),
@@ -663,15 +677,19 @@ class _RecentProjectChip extends StatelessWidget {
                   StudioStepProgressRing(
                     completedSteps: completedSteps,
                     size: compact ? 28 : 32,
+                    heroTag: studioHeroTagProjectProgress(project.numericId),
                   ),
                 ],
               ),
               const Spacer(),
-              Text(
-                title,
-                maxLines: compact ? 1 : 2,
-                overflow: TextOverflow.ellipsis,
-                style: studioCardTitleStyle(context),
+              StudioHero(
+                tag: studioHeroTagProjectTitle(project.numericId),
+                child: Text(
+                  title,
+                  maxLines: compact ? 1 : 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: studioCardTitleStyle(context),
+                ),
               ),
             ],
             ),

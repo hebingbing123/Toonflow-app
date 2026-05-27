@@ -6,6 +6,7 @@ import 'package:openflow_app/design_system/components/studio_dense_action_row.da
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../demo/benchmark_demo_data.dart';
@@ -14,12 +15,14 @@ import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../rust_api.dart';
 import 'support.dart';
 import 'workbench_cases.dart';
 import 'workbench_experiments.dart';
 import 'workbench_gate.dart';
 import 'workbench_review_queue.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class BenchmarkSection extends StatefulWidget {
   const BenchmarkSection({
@@ -114,6 +117,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
 
   bool _busy = false;
   String? _statusLine;
+  Object? _lastActionError;
   String _sampleTier = 'smoke';
   String _promoteCaseType = 'bad_case';
   bool _promoteToBaseline = false;
@@ -199,17 +203,20 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     }
     setState(() {
       _busy = true;
+      _lastActionError = null;
       _statusLine = l10n.benchmarkStatusRunning(label);
     });
     try {
       await action(token);
       if (!mounted) return;
       setState(() {
+        _lastActionError = null;
         _statusLine = l10n.benchmarkStatusCompleted(label);
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
+        _lastActionError = error;
         _statusLine = l10n.benchmarkStatusFailed(
           label,
           describeUserVisibleApiErrorResolved(context, error),
@@ -266,7 +273,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           DecoratedBox(
             decoration:
                 studioInsetPanelDecoration(
@@ -328,7 +335,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                     isDense: true,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioFilterRow(
                   wideLayout: StudioFilterWideLayout.wrap,
                   wideBreakpoint: 720,
@@ -409,8 +416,16 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               ],
             ),
           ),
+          if (_lastActionError != null) ...[
+            const SizedBox(height: StudioSpacing.xs),
+            StudioApiErrorCallout(
+              error: _lastActionError!,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
+              onDismiss: () => setState(() => _lastActionError = null),
+            ),
+          ],
           if (_statusLine != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(_statusLine!),
           ],
           const SizedBox(height: StudioSpacing.sm),
@@ -429,11 +444,11 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_cases.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ..._cases
                 .take(6)
                 .map(
-                  (item) => ListTile(
+                  (item) => StudioListRow(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
@@ -455,11 +470,11 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_experiments.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ..._experiments
                 .take(6)
                 .map(
-                  (item) => ListTile(
+                  (item) => StudioListRow(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
@@ -493,17 +508,21 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_reviewQueue.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ..._reviewQueue
                 .take(5)
                 .map(
-                  (item) => ListTile(
+                  (item) => StudioListRow(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       '${studioBenchmarkReviewTypeLabel(l10n, item.reviewType)} · ${studioBenchmarkReviewStatusLabel(l10n, item.status)} · P${item.priority}',
                     ),
-                    subtitle: Text(item.prompt),
+                    subtitle: Text(
+                      item.prompt,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     onTap: () {
                       _reviewQueueIdCtrl.text = item.id;
                       setState(() {});
@@ -895,7 +914,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   Widget _buildABCompareCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -903,14 +922,14 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               l10n.benchmarkAbCardTitle,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _abCompareNameCtrl,
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelAbSaveNameOptional,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _abCompareCasesCtrl,
               maxLines: 5,
@@ -918,13 +937,22 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 labelText: l10n.benchmarkLabelAbCaseLines,
               ),
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            const SizedBox(height: StudioSpacing.xs),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final fieldWidth = studioWrapTileWidth(
+                  constraints.maxWidth,
+                  maxColumns: 4,
+                  minTileWidth: 160,
+                  maxTileWidth: 220,
+                  gap: StudioSpacing.xs,
+                );
+                return Wrap(
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: [
                 SizedBox(
-                  width: 180,
+                  width: fieldWidth,
                   child: TextField(
                     controller: _abMinTokenReductionCtrl,
                     decoration: InputDecoration(
@@ -934,7 +962,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
                 SizedBox(
-                  width: 180,
+                  width: fieldWidth,
                   child: TextField(
                     controller: _abMaxQualityDropCtrl,
                     decoration: InputDecoration(
@@ -944,7 +972,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
                 SizedBox(
-                  width: 180,
+                  width: fieldWidth,
                   child: TextField(
                     controller: _abMinQualityScoreCtrl,
                     decoration: InputDecoration(
@@ -954,7 +982,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
                 SizedBox(
-                  width: 180,
+                  width: fieldWidth,
                   child: TextField(
                     controller: _abSignificanceCtrl,
                     decoration: InputDecoration(
@@ -964,8 +992,10 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   ),
                 ),
               ],
+            );
+              },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed: _busy
@@ -981,7 +1011,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                     }),
               child: Text(l10n.benchmarkButtonRunAbCompare),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
               onPressed: _busy
@@ -1000,9 +1030,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                     }),
               child: Text(l10n.benchmarkButtonSaveAndRun),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [
                 FilledButton.tonal(
                   style: studioFormTonalButtonStyle(context),

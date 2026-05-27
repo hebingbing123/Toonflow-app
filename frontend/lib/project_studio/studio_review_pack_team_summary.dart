@@ -19,13 +19,13 @@ class StudioReviewPackTeamSummary extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, 0, StudioSpacing.sm, StudioSpacing.xs),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
           color: tokens.bgInset,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Text(

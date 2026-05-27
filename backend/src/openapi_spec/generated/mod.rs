@@ -5,6 +5,7 @@ mod art_styles;
 mod assets;
 mod novel_events;
 mod novels;
+mod production;
 mod projects;
 mod scripts;
 mod skills;
@@ -16,6 +17,7 @@ pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(assets::ApiDocAssets::openapi());
     doc.merge(novel_events::ApiDocNovelEvents::openapi());
     doc.merge(novels::ApiDocNovels::openapi());
+    doc.merge(production::ApiDocProduction::openapi());
     doc.merge(projects::ApiDocProjects::openapi());
     doc.merge(scripts::ApiDocScripts::openapi());
     doc.merge(skills::ApiDocSkills::openapi());

@@ -74,8 +74,8 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
 
   Widget _buildM4Toolbar(AppLocalizations l10n) {
     return Wrap(
-      spacing: 4,
-      runSpacing: 4,
+      spacing: StudioSpacing.chromeActionGap,
+      runSpacing: StudioSpacing.chromeActionGap,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         IconButton(
@@ -113,7 +113,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
         builder: (ctx) {
           if (revisions.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(StudioSpacing.md),
               child: StudioEmptyState.emptyData(
                 title: l10n.shortVideoTimelineRevisionEmpty,
                 icon: Icons.history_outlined,
@@ -122,7 +122,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
           }
           return SafeArea(
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
               itemCount: revisions.length,
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
@@ -131,16 +131,20 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
                   if (item.summary?.trim().isNotEmpty == true) item.summary!,
                   item.createdAt,
                 ].join(' · ');
-                return ListTile(
-                  title: Text(
-                    l10n.shortVideoTimelineRevisionLabel(item.revision),
+                return studioStaggeredItem(
+                  index,
+                  entranceKey: revisions.length,
+                  child: StudioListRow(
+                    title: Text(
+                      l10n.shortVideoTimelineRevisionLabel(item.revision),
+                    ),
+                    subtitle: Text(subtitle),
+                    trailing: const Icon(Icons.restore, size: 20),
+                    onTap: () async {
+                      Navigator.of(ctx).pop();
+                      await _restoreRevision(item.revision);
+                    },
                   ),
-                  subtitle: Text(subtitle),
-                  trailing: const Icon(Icons.restore, size: 20),
-                  onTap: () async {
-                    Navigator.of(ctx).pop();
-                    await _restoreRevision(item.revision);
-                  },
                 );
               },
             ),

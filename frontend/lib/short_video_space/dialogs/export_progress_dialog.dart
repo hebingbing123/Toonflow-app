@@ -382,7 +382,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       title: Row(
         children: [
           const Icon(Icons.video_file_outlined),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Text(l10n.shortVideoSpaceDialogExportProgressTitle),
           const Spacer(),
           if (progress != null && !progress.status.isTerminal)
@@ -401,32 +401,24 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (progress == null) ...[
-              if (_errorMessage != null) ...[
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: theme.colorScheme.error,
+            if (progress == null)
+              StudioAsyncDataView(
+                loading: _errorMessage == null,
+                error: _errorMessage,
+                onRetry: _pollProgress,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const SizedBox(height: StudioSpacing.sm),
+                    Center(
+                      child: Text(
+                        l10n.shortVideoSpaceDialogExportProgressLoadingStatus,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  _errorMessage!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-              ] else ...[
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                Center(
-                  child: Text(l10n.shortVideoSpaceDialogExportProgressLoadingStatus),
-                ),
-              ],
-            ] else ...[
+              )
+            else ...[
               // Progress bar
               LinearProgressIndicator(
                 value: progress.progress,
@@ -440,7 +432,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                           : theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
 
               // Progress percentage
               Row(
@@ -469,11 +461,11 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
 
               // Status message
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -485,7 +477,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                       size: 20,
                       color: tokens.textSecondary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     Expanded(
                       child: Text(
                         _getStatusMessage(progress, l10n),
@@ -498,38 +490,17 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 ),
               ),
 
-              // Error message
               if (_errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 20,
-                        color: theme.colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onErrorContainer,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: StudioSpacing.sm),
+                StudioApiErrorCallout(
+                  error: _errorMessage!,
+                  emphasis: StudioApiErrorCalloutEmphasis.subtle,
+                  onDismiss: () => setState(() => _errorMessage = null),
                 ),
               ],
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             SelectableText(
               l10n.shortVideoSpaceDialogExportProgressTaskId(
                 widget.taskId,
@@ -539,12 +510,15 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 fontFamily: 'monospace',
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Material(
               type: MaterialType.transparency,
               child: ExpansionTile(
                 tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(top: 4, bottom: 8),
+                childrenPadding: const EdgeInsets.only(
+                  top: StudioSpacing.chromeActionGap,
+                  bottom: StudioSpacing.xs,
+                ),
                 initiallyExpanded: false,
                 title: Text(
                   l10n.qualityReviewsFreshnessShowDetails,

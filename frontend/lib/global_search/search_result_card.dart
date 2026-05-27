@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
@@ -99,7 +100,7 @@ class SearchResultCard extends StatelessWidget {
       // Add highlighted text
       parts.add(TextSpan(
         text: match.group(1),
-        style: TextStyle(
+        style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
           backgroundColor: StudioTokens.of(context).primarySoft,
           color: StudioTokens.of(context).textPrimary,
           fontWeight: FontWeight.w600,
@@ -134,7 +135,7 @@ class SearchResultCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
       elevation: isSelected ? 4 : 1,
       color: isSelected 
           ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.3)
@@ -153,19 +154,29 @@ class SearchResultCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(StudioSpacing.sm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title and type badge
                 Row(
                   children: [
-                    Icon(
-                      _getTypeIcon(result.resultType),
-                      size: 20,
-                      color: theme.colorScheme.primary,
+                    StudioHero(
+                      tag: studioHeroTagSearchResultLeading(
+                        result.resultType,
+                        result.id,
+                      ),
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: StudioTokens.of(context).primarySoft,
+                        child: Icon(
+                          _getTypeIcon(result.resultType),
+                          size: 20,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     Expanded(
                       child: Text(
                         result.title,
@@ -183,7 +194,9 @@ class SearchResultCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: StudioTokens.of(context).primarySoft,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(
+                          StudioSpacing.radiusDense,
+                        ),
                       ),
                       child: Text(
                         _getTypeDisplayName(l10n, result.resultType),

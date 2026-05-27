@@ -27,14 +27,14 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
           l10n.projectEditorNovelsWorkbenchCreateSectionTitle,
           style: Theme.of(ctx).textTheme.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: createChapterCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorNovelsWorkbenchCreateChapterTitleLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: createBodyCtrl,
           minLines: 3,
@@ -43,7 +43,7 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
             labelText: l10n.projectEditorNovelsWorkbenchCreateChapterBodyLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton(
           style: studioFormPrimaryButtonStyle(ctx),
           onPressed: localBusy

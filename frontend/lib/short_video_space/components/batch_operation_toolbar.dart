@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_tap.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:flutter/services.dart';
 
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Batch operation toolbar component for short video assembly
 /// 
@@ -116,7 +119,10 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
     final isAllSelected = widget.selectedIds.length == widget.totalCount && widget.totalCount > 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.sm,
+        vertical: StudioSpacing.radiusComfort,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
@@ -142,7 +148,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     }
                   },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           
           // Select all / Deselect all button
           TextButton.icon(
@@ -161,7 +167,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
             ),
           ),
           
-          const SizedBox(width: 16),
+          const SizedBox(width: StudioSpacing.sm),
           
           // Selected count indicator
           Container(
@@ -189,12 +195,12 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
             ),
           ),
           
-          const SizedBox(width: 16),
+          const SizedBox(width: StudioSpacing.sm),
           
           // Batch operation buttons (only show when items are selected)
           if (hasSelection) ...[
             const VerticalDivider(),
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             
             Expanded(
               child: StudioDenseActionRow(
@@ -255,7 +261,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
           
           // Show loading indicator when operation is in progress
           if (widget.isOperationInProgress) ...[
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             const SizedBox(
               width: 20,
               height: 20,
@@ -332,28 +338,21 @@ class _ShotSelectionCheckboxState extends State<ShotSelectionCheckbox> {
         }
         return KeyEventResult.ignored;
       },
-      child: GestureDetector(
-        onTap: widget.isEnabled
-            ? () {
-                // Check if Shift key is pressed
-                final isShiftPressed =
-                    _isShiftPressed || HardwareKeyboard.instance.isShiftPressed;
-                if (isShiftPressed) {
-                  widget.onRangeSelection(widget.shotId, true);
-                } else {
-                  widget.onSelectionChanged(!widget.isSelected);
-                }
-              }
-            : null,
-        child: Checkbox(
-          value: widget.isSelected,
-          onChanged: widget.isEnabled
-              ? (value) {
-                  if (value != null) {
-                    widget.onSelectionChanged(value);
-                  }
-                }
-              : null,
+      child: StudioTap(
+        enabled: widget.isEnabled,
+        onTap: () {
+          final isShiftPressed =
+              _isShiftPressed || HardwareKeyboard.instance.isShiftPressed;
+          if (isShiftPressed) {
+            widget.onRangeSelection(widget.shotId, true);
+          } else {
+            widget.onSelectionChanged(!widget.isSelected);
+          }
+        },
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+        child: IgnorePointer(
+          // Tap behavior is handled by [StudioTap] to provide feedback and a larger target.
+          child: Checkbox(value: widget.isSelected, onChanged: null),
         ),
       ),
     );
@@ -423,14 +422,14 @@ class BatchOperationProgressDialog extends StatelessWidget {
               value: progress,
               minHeight: 8,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             
             // Statistics
             Text(
               l10n.shortVideoBatchProgressCompletedTotal(completed, total),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Row(
               children: [
                 Icon(
@@ -438,45 +437,54 @@ class BatchOperationProgressDialog extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Text(l10n.shortVideoBatchProgressSucceededLabel(successful)),
-                const SizedBox(width: 24),
+                const SizedBox(width: StudioSpacing.md),
                 Icon(
                   Icons.error,
                   color: Theme.of(context).colorScheme.error,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Text(l10n.shortVideoBatchProgressFailedLabel(failed)),
               ],
             ),
             
             // Failed items list
             if (hasFailures) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.shortVideoBatchProgressFailedHeading,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Flexible(
                 child: ListView.builder(
                   itemCount: failedItems.length,
                   itemBuilder: (context, index) {
                     final item = failedItems[index];
-                    return ListTile(
-                      dense: true,
-                      leading: Icon(
-                        Icons.error_outline,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
-                      ),
-                      title: Text(l10n.shortVideoBatchProgressStoryboardLine(item.shotId)),
-                      subtitle: Text(
-                        item.errorMessage,
-                        style: Theme.of(context).textTheme.bodySmall,
+                    return studioStaggeredItem(
+                      index,
+                      entranceKey: failedItems.length,
+                      child: StudioListRow(
+                        dense: true,
+                        onCopy: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: item.errorMessage),
+                          );
+                        },
+                        leading: Icon(
+                          Icons.error_outline,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        title: Text(l10n.shortVideoBatchProgressStoryboardLine(item.shotId)),
+                        subtitle: Text(
+                          item.errorMessage,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
                     );
                   },

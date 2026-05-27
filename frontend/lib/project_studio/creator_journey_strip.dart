@@ -300,10 +300,13 @@ class CreatorJourneyStrip extends StatelessWidget {
           };
 
           final tile = InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
             onTap: onTapMilestone,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.xs,
+                vertical: StudioSpacing.chromeActionGap,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
@@ -351,7 +354,7 @@ class CreatorJourneyStrip extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: connectorColor,
-                  borderRadius: BorderRadius.circular(1),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusHairline),
                 ),
               ),
             ),

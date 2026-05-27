@@ -66,7 +66,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 l10n.projectsCreativeManualIntro,
                 style: studioHintStyle(context),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               SegmentedButton<_CreativeManualKind>(
                 segments: <ButtonSegment<_CreativeManualKind>>[
                   ButtonSegment<_CreativeManualKind>(
@@ -88,9 +88,9 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                         }
                       },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -118,7 +118,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               if (activeRows.isNotEmpty)
                 StudioDropdownButtonFormField<String>(
                   initialValue: selected?.path,
@@ -147,19 +147,19 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                   l10n.projectsCreativeManualEmptyKind,
                   style: studioHintStyle(context),
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               TextField(
                 controller: nameCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.projectsCreativeManualFieldName,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: pathCtrl,
                 decoration: InputDecoration(labelText: pathLabel),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: imagesCtrl,
                 minLines: 2,
@@ -169,7 +169,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                   helperText: l10n.projectsCreativeManualFieldImagesHelper,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextField(
                 controller: slotsCtrl,
                 minLines: 5,
@@ -180,12 +180,12 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 ),
               ),
               if (selected != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 Text(
                   l10n.projectsCreativeManualSummaryTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 SelectableText(
                   l10n.projectsCreativeManualSummaryLine(
                     selected!.name,
@@ -196,7 +196,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 ),
               ],
               if (statusLine != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 SelectableText(statusLine!),
               ],
             ],

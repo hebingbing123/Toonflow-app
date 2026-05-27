@@ -525,7 +525,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
             onPressed: canUndo ? () => _performUndo() : null,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         Tooltip(
           message: canRedo
               ? l10n.shortVideoRedoTooltipWithDescription(redoDescription!)
@@ -535,7 +535,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
             onPressed: canRedo ? () => _performRedo() : null,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         Tooltip(
           message: l10n.shortVideoOperationHistoryToolbarTooltip,
           child: IconButton(
@@ -568,7 +568,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
               children: [
                 // Summary section
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                   decoration: BoxDecoration(
                     color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -582,7 +582,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Row(
                         children: [
                           Icon(
@@ -590,19 +590,19 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             size: 16,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Text(
                             l10n.shortVideoOperationHistoryUndoStack(
                               summary['undoCount'] as int,
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: StudioSpacing.sm),
                           Icon(
                             Icons.redo,
                             size: 16,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Text(
                             l10n.shortVideoOperationHistoryRedoStack(
                               summary['redoCount'] as int,
@@ -610,7 +610,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.shortVideoOperationHistoryLimitLine(
                           summary['maxHistorySize'] as int,
@@ -620,12 +620,12 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: StudioSpacing.sm),
                 // History list section
                 if (historyList.isEmpty)
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(StudioSpacing.md),
                       child: StudioEmptyState.emptyData(
                         title: l10n.shortVideoOperationHistoryEmpty,
                         icon: Icons.history_outlined,
@@ -643,7 +643,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Flexible(
                           child: ListView.builder(
                             itemCount: historyList.length,
@@ -653,13 +653,16 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                   historyList[historyList.length - 1 - idx];
                               final isLatest = idx == 0;
 
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 8),
+                              return studioStaggeredItem(
+                                idx,
+                                entranceKey: historyList.length,
+                                child: Card(
+                                margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
                                 elevation: isLatest ? 2 : 0,
                                 color: isLatest
                                     ? StudioTokens.of(ctx).primarySoft
                                     : null,
-                                child: ListTile(
+                                child: StudioListRow(
                                   leading: CircleAvatar(
                                     backgroundColor: isLatest
                                         ? StudioTokens.of(ctx).primary
@@ -676,9 +679,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                   ),
                                   title: Text(
                                     operation.localizedDescription(l10n),
-                                    style: TextStyle(
+                                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
                                       fontWeight: isLatest
-                                          ? FontWeight.bold
+                                          ? FontWeight.w700
                                           : null,
                                     ),
                                   ),
@@ -696,7 +699,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                           backgroundColor: Theme.of(
                                             ctx,
                                           ).colorScheme.primary,
-                                          labelStyle: TextStyle(
+                                          labelStyle: Theme.of(ctx).textTheme.labelSmall?.copyWith(
                                             color: Theme.of(
                                               ctx,
                                             ).colorScheme.onPrimary,
@@ -707,6 +710,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                         )
                                       : null,
                                 ),
+                              ),
                               );
                             },
                           ),

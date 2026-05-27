@@ -12,7 +12,8 @@ import 'package:openflow_app/design_system/components/studio_collapsible_filter_
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
-import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -172,10 +173,10 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                       l10n.apiKeysExpiryPolicy,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                      spacing: StudioSpacing.xs,
+                      runSpacing: StudioSpacing.xs,
                       children: [
                         _choiceChip(
                           label: l10n.apiKeysExpiryKeepCurrent,
@@ -237,7 +238,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     if (customDate != null &&
                         customDate !=
                             DateTime.fromMillisecondsSinceEpoch(0)) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.apiKeysExpiresAtUtc(_fmtDate(customDate!)),
                         style: Theme.of(context).textTheme.bodySmall,
@@ -394,7 +395,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
         final compact = constraints.maxWidth < 420;
 
         return Padding(
-          padding: EdgeInsets.only(top: compact ? 12 : 16),
+          padding: EdgeInsets.only(top: compact ? StudioSpacing.radiusComfort : StudioSpacing.sm),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,7 +468,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Align(alignment: Alignment.centerRight, child: refreshButton),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
           TextField(
             controller: _displayNameController,
             maxLength: 80,
@@ -477,12 +478,12 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               hintText: l10n.apiKeysDisplayNameHint,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(l10n.apiKeysPermissionTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               _choiceChip(
                 label: l10n.apiKeysScopeReadOnly,
@@ -506,10 +507,10 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ),
           const SizedBox(height: StudioSpacing.sm),
           Text(l10n.apiKeysExpiryPolicy, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               _choiceChip(
                 label: l10n.apiKeysExpiryNever,
@@ -563,7 +564,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           if (_expiryPreset == _ExpiryPreset.custom &&
               _customExpiryDate != null)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: StudioSpacing.xs),
               child: Text(
                 l10n.apiKeysExpiresAtUtc(_fmtDate(_customExpiryDate!)),
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -580,7 +581,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               decoration: BoxDecoration(
                 color: StudioTokens.of(context).accentSoft.withValues(
                   alpha: 0.45,
@@ -601,7 +602,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   ),
                   const SizedBox(height: StudioLayoutSpacing.inlineGap),
                   SelectableText(widget.controller.latestPlaintextToken!),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   if (compact)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -614,7 +615,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                           icon: const Icon(Icons.copy_outlined, size: 18),
                           label: Text(l10n.apiKeysCopyPlaintext),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         TextButton(
                           onPressed:
                               widget.controller.clearLatestPlaintextToken,
@@ -624,7 +625,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     )
                   else
                     StudioDenseActionRow(
-                      spacing: 8,
+                      spacing: StudioSpacing.xs,
                       children: [
                         OutlinedButton.icon(
                           style: studioFormOutlinedIconLabeledButtonStyle(context),
@@ -672,10 +673,10 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               l10n.apiKeysExistingKeysTitle,
               style: theme.textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: <Widget>[
                 StudioChip(
                   label: Text(
@@ -695,26 +696,26 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ],
             ),
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
-            if (widget.controller.loading)
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  StudioSkeleton(height: 18),
-                  SizedBox(height: StudioSpacing.sm),
-                  StudioSkeleton(height: 56),
-                  SizedBox(height: StudioSpacing.sm),
-                  StudioSkeleton(height: 56),
-                ],
-              )
-            else if (widget.controller.items.isEmpty)
-              StudioEmptyState.emptyData(
+            StudioAsyncDataView(
+              loading: widget.controller.loading,
+              isEmpty: widget.controller.items.isEmpty,
+              empty: StudioEmptyState.emptyData(
                 title: l10n.apiKeysEmptyList,
                 icon: Icons.vpn_key_outlined,
-              )
-            else
-              ...widget.controller.items.map(
-                (item) => _buildKeyCard(context, l10n, item, compact: compact),
               ),
+              child: Column(
+                children: widget.controller.items
+                    .map(
+                      (item) => _buildKeyCard(
+                        context,
+                        l10n,
+                        item,
+                        compact: compact,
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ),
           ],
         ),
       ),
@@ -810,8 +811,8 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                     Text(item.displayName, style: theme.textTheme.titleSmall),
                     const SizedBox(height: StudioLayoutSpacing.titleTight),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                      spacing: StudioSpacing.xs,
+                      runSpacing: StudioSpacing.xs,
                       children: [
                         StudioChip(
                           label: Text(
@@ -915,21 +916,21 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 color: StudioTokens.of(context).textSecondary,
               ),
             ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (compact)
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 primaryAction,
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 stateAction,
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 deleteAction,
               ],
             )
           else
             StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [primaryAction, stateAction, deleteAction],
             ),
         ],
@@ -953,51 +954,59 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(l10n.apiKeysAuditTitle, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (widget.controller.auditItems.isEmpty)
             StudioEmptyState.emptyData(
               title: l10n.apiKeysAuditEmpty,
               icon: Icons.history_outlined,
             )
           else
-            ...widget.controller.auditItems.map(
-              (item) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: EdgeInsets.all(compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
-                decoration: BoxDecoration(
-                  border: Border.all(color: studioPanelBorderColor(context)),
-                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.eventSummary, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: StudioLayoutSpacing.titleTight),
-                    Text(
-                      '${item.eventType} · ${_fmt(item.createdAt)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: StudioTokens.of(context).textSecondary,
+            ...studioStaggeredChildren(
+              widget.controller.auditItems.map(
+                (item) => Container(
+                  margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                  padding: EdgeInsets.all(
+                    compact
+                        ? StudioLayoutSpacing.inlineGap
+                        : StudioLayoutSpacing.insetDense,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: studioPanelBorderColor(context)),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.eventSummary, style: theme.textTheme.titleSmall),
+                      const SizedBox(height: StudioLayoutSpacing.titleTight),
+                      Text(
+                        '${item.eventType} · ${_fmt(item.createdAt)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: StudioTokens.of(context).textSecondary,
+                        ),
                       ),
-                    ),
-                    if (item.metadata.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: item.metadata.entries
-                            .map(
+                      if (item.metadata.isNotEmpty) ...[
+                        const SizedBox(height: StudioSpacing.xs),
+                        Wrap(
+                          spacing: StudioSpacing.xs,
+                          runSpacing: StudioSpacing.xs,
+                          children: studioStaggeredChildren(
+                            item.metadata.entries.map(
                               (entry) => StudioChip(
                                 label: Text(
                                   '${entry.key}: ${_metadataValue(entry.value)}',
                                 ),
                               ),
-                            )
-                            .toList(growable: false),
-                      ),
+                            ),
+                            entranceKey: item.metadata.length,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
+              entranceKey: widget.controller.auditItems.length,
             ),
           ],
         ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
 
 import '../../design_system/components/studio_card.dart';
-import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
+import '../../design_system/components/studio_async_data_view.dart';
+import '../../design_system/components/studio_loading_placeholders.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
@@ -58,7 +60,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiErrorResolved(context, e);
         _loading = false;
       });
     }
@@ -82,7 +84,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
         ),
         const SizedBox(height: StudioSpacing.sm),
         Wrap(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: <String>['all', 'text', 'image', 'video'].map((value) {
             final selected = _typeFilter == value;
             final label = studioModelPricingTypeLabel(l10n, value);
@@ -97,13 +99,24 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
           }).toList(),
         ),
         const SizedBox(height: StudioSpacing.sm),
-        if (_loading) const StudioSkeleton(height: 160),
-        if (_error != null) Text(_error!),
-        if (!_loading && _error == null)
-          ..._models.map((entry) {
-            final p = entry.pricing;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+        StudioAsyncDataView(
+          loading: _loading,
+          error: _error,
+          onRetry: _load,
+          loadingPlaceholder: StudioLoadingPlaceholder.list,
+          loadingItemCount: 3,
+          scrollableLoading: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _models.toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final modelEntry = entry.value;
+            final p = modelEntry.pricing;
+            return studioStaggeredItem(
+              index,
+              entranceKey: _models.length,
+              child: Padding(
+              padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
               child: StudioCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +125,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            '${entry.label} · ${entry.name}',
+                            '${modelEntry.label} · ${modelEntry.name}',
                             style: theme.textTheme.titleSmall,
                           ),
                         ),
@@ -141,8 +154,11 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
                   ],
                 ),
               ),
+            ),
             );
-          }),
+          }).toList(growable: false),
+          ),
+        ),
       ],
     );
   }

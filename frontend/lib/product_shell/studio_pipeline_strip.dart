@@ -281,7 +281,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
@@ -303,13 +303,13 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: StudioSpacing.xs + 1,
-          vertical: StudioSpacing.xs / 2,
+          vertical: StudioSpacing.chromeActionGap,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

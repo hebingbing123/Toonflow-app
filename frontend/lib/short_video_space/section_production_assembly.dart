@@ -1001,10 +1001,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       matchIndex,
                       matchIndex + lowerKeyword.length,
                     ),
-                    style: (style ?? const TextStyle()).copyWith(
+                    style: (style ?? Theme.of(ctx).textTheme.bodyMedium ?? const TextStyle()).copyWith(
                       backgroundColor: StudioTokens.of(ctx).primarySoft,
                       color: StudioTokens.of(ctx).textPrimary,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 );
@@ -1168,20 +1168,22 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     Text(
                       l10n.shortVideoSpaceProductionAssemblyBasicOpsDescription,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       l10n.shortVideoSpaceProductionAssemblyBasicOpsNote,
                       style: Theme.of(ctx).textTheme.bodySmall,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     // 显示成片总时长
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(StudioSpacing.xs),
                       decoration: BoxDecoration(
                         color: Theme.of(
                           ctx,
                         ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(
+                          StudioSpacing.radiusDense,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -1190,7 +1192,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             size: 20,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Text(
                             l10n.shortVideoSpaceProductionAssemblyTotalDuration(
                               currentTotalDuration,
@@ -1203,7 +1205,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     FilterPanel(
                       initialFilter: filterState,
                       onFilterChanged: (nextFilter) {
@@ -1221,7 +1223,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         _setSearchFocusNode(focusNode);
                       },
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     // Batch operation toolbar
                     if (visibleEntries.isNotEmpty)
                       BatchOperationToolbar(
@@ -1335,7 +1337,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         },
                         isOperationInProgress: operationInProgress,
                       ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: StudioDenseActionRow(
@@ -1549,7 +1551,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 ),
                 content: SizedBox(
                   width: studioConstrainedDialogWidth(context, maxWidth: 760),
-                  height: 420,
+                  height: studioAdaptiveDialogHeight(
+                    context,
+                    fraction: 0.52,
+                    min: 300,
+                    max: 520,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1620,7 +1627,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     unawaited(loadTasks());
                                   },
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           OutlinedButton.icon(
                             onPressed: (loading || requestBusy)
                                 ? null
@@ -1630,7 +1637,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                               l10n.shortVideoSpaceProductionAssemblyRefresh,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           FilterChip(
                             selected: groupedByShot,
                             label: Text(
@@ -1646,7 +1653,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     });
                                   },
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           OutlinedButton.icon(
                             onPressed:
                                 (loading ||
@@ -1707,7 +1714,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       TextField(
                         enabled: !requestBusy,
                         decoration: InputDecoration(
@@ -1724,15 +1731,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           });
                         },
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       if (errorMessage != null)
                         Text(
                           errorMessage!,
-                          style: TextStyle(
+                          style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(ctx).colorScheme.error,
                           ),
                         ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       if (!loading && tasks.isNotEmpty)
                         Text(
                           l10n.shortVideoSpaceProductionAssemblyTaskSummary(
@@ -1748,17 +1755,21 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
                       if (!loading && tasks.isNotEmpty)
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                       Expanded(
-                        child: loading
-                            ? const Center(child: CircularProgressIndicator())
-                            : tasks.isEmpty
-                            ? Center(
-                                child: Text(
-                                  l10n.shortVideoSpaceProductionAssemblyNoVoiceoverTasks,
-                                ),
-                              )
-                            : ListView.separated(
+                        child: StudioAsyncDataView(
+                          loading: loading,
+                          loadingPlaceholder: StudioLoadingPlaceholder.list,
+                          loadingItemCount: 4,
+                          isEmpty: tasks.isEmpty,
+                          empty: Center(
+                            child: StudioEmptyState.emptyData(
+                              title: l10n
+                                  .shortVideoSpaceProductionAssemblyNoVoiceoverTasks,
+                              icon: Icons.record_voice_over_outlined,
+                            ),
+                          ),
+                          child: ListView.separated(
                                 itemCount: groupedByShot
                                     ? filteredTasks.length
                                     : filteredTasks.length,
@@ -1791,7 +1802,64 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                           task.error!,
                                         )
                                       : '';
-                                  return ListTile(
+                                  return studioStaggeredItem(
+                                    index,
+                                    entranceKey: filteredTasks.length,
+                                    child: StudioListRow(
+                                    onCopy: hasAudio
+                                        ? () async {
+                                            await Clipboard.setData(
+                                              ClipboardData(
+                                                text: task.audioUrl!.trim(),
+                                              ),
+                                            );
+                                            if (!mounted) return;
+                                            _showOperationFeedback(
+                                              l10n.shortVideoSpaceProductionAssemblyAudioLinkCopied,
+                                              isSuccess: true,
+                                            );
+                                          }
+                                        : null,
+                                    copyLabel: l10n
+                                        .shortVideoSpaceProductionAssemblyCopyAudioLink,
+                                    onCancel: canCancel && !requestBusy
+                                        ? () async {
+                                            setState(() {
+                                              requestBusy = true;
+                                            });
+                                            try {
+                                              await postTtsCancelV1(
+                                                token,
+                                                task.taskId,
+                                              );
+                                              if (!mounted) return;
+                                              _showOperationFeedback(
+                                                l10n.shortVideoSpaceProductionAssemblyTaskCancelled(
+                                                  task.taskId.substring(0, 8),
+                                                ),
+                                                isSuccess: true,
+                                              );
+                                              await loadTasks();
+                                            } catch (e) {
+                                              if (!mounted) return;
+                                              _showOperationFeedback(
+                                                l10n.shortVideoSpaceProductionAssemblyCancelFailed(
+                                                  describeUserVisibleApiError(
+                                                    l10n,
+                                                    e,
+                                                  ),
+                                                ),
+                                                isSuccess: false,
+                                              );
+                                            } finally {
+                                              setState(() {
+                                                requestBusy = false;
+                                              });
+                                            }
+                                          }
+                                        : null,
+                                    cancelLabel: l10n
+                                        .shortVideoSpaceProductionAssemblyCancelTask,
                                     dense: true,
                                     title: Text(
                                       l10n.shortVideoSpaceProductionAssemblyTaskEntry(
@@ -1814,7 +1882,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                       ),
                                     ),
                                     trailing: Wrap(
-                                      spacing: 4,
+                                      spacing: StudioSpacing.chromeActionGap,
                                       children: [
                                         if (hasAudio)
                                           IconButton(
@@ -1965,9 +2033,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                           ),
                                       ],
                                     ),
+                                  ),
                                   );
                                 },
                               ),
+                          ),
                       ),
                     ],
                   ),
@@ -2025,22 +2095,26 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         delegate: FlutterListViewDelegate(
           (context, idx) {
             final item = visibleEntries[idx];
-            return _buildShotCard(
-              item: item,
-              ordered: ordered,
-              pausedStoryboardIds: pausedStoryboardIds,
-              selectedStoryboardIds: selectedStoryboardIds,
-              operationInProgress: operationInProgress,
-              filterState: filterState,
-              ctx: ctx,
-              l10n: l10n,
-              setLocalState: setLocalState,
-              runDisable: runDisable,
-              runEnableOrReplace: runEnableOrReplace,
-              runAlignDuration: runAlignDuration,
-              parseDurationSeconds: parseDurationSeconds,
-              subtitleMismatchLine: subtitleMismatchLine,
-              buildHighlightedText: buildHighlightedText,
+            return studioStaggeredItem(
+              idx,
+              entranceKey: visibleEntries.length,
+              child: _buildShotCard(
+                item: item,
+                ordered: ordered,
+                pausedStoryboardIds: pausedStoryboardIds,
+                selectedStoryboardIds: selectedStoryboardIds,
+                operationInProgress: operationInProgress,
+                filterState: filterState,
+                ctx: ctx,
+                l10n: l10n,
+                setLocalState: setLocalState,
+                runDisable: runDisable,
+                runEnableOrReplace: runEnableOrReplace,
+                runAlignDuration: runAlignDuration,
+                parseDurationSeconds: parseDurationSeconds,
+                subtitleMismatchLine: subtitleMismatchLine,
+                buildHighlightedText: buildHighlightedText,
+              ),
             );
           },
           childCount: visibleEntries.length,
@@ -2056,22 +2130,26 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         itemCount: visibleEntries.length,
         itemBuilder: (context, idx) {
           final item = visibleEntries[idx];
-          return _buildShotCard(
-            item: item,
-            ordered: ordered,
-            pausedStoryboardIds: pausedStoryboardIds,
-            selectedStoryboardIds: selectedStoryboardIds,
-            operationInProgress: operationInProgress,
-            filterState: filterState,
-            ctx: ctx,
-            l10n: l10n,
-            setLocalState: setLocalState,
-            runDisable: runDisable,
-            runEnableOrReplace: runEnableOrReplace,
-            runAlignDuration: runAlignDuration,
-            parseDurationSeconds: parseDurationSeconds,
-            subtitleMismatchLine: subtitleMismatchLine,
-            buildHighlightedText: buildHighlightedText,
+          return studioStaggeredItem(
+            idx,
+            entranceKey: visibleEntries.length,
+            child: _buildShotCard(
+              item: item,
+              ordered: ordered,
+              pausedStoryboardIds: pausedStoryboardIds,
+              selectedStoryboardIds: selectedStoryboardIds,
+              operationInProgress: operationInProgress,
+              filterState: filterState,
+              ctx: ctx,
+              l10n: l10n,
+              setLocalState: setLocalState,
+              runDisable: runDisable,
+              runEnableOrReplace: runEnableOrReplace,
+              runAlignDuration: runAlignDuration,
+              parseDurationSeconds: parseDurationSeconds,
+              subtitleMismatchLine: subtitleMismatchLine,
+              buildHighlightedText: buildHighlightedText,
+            ),
           );
         },
       );
@@ -2108,9 +2186,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     final canMoveDown = actualIndex < ordered.length - 1;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(StudioSpacing.xs),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -2131,7 +2209,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       });
                     },
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2143,7 +2221,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       actualIndex + 1,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     paused
                         ? l10n.shortVideoSpaceProductionAssemblyStatusPaused
@@ -2151,7 +2229,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             item.selectedMediaKind,
                           ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Row(
                     children: [
                       Text(l10n.shortVideoSpaceProductionAssemblyDurationLabel),
@@ -2174,14 +2252,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   // 配音状态展示
                   Text(
                     '${item.voiceoverScriptReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady} · '
                     '${item.voiceoverAssetReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady}',
                   ),
                   if (item.voiceoverState.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Row(
                       children: [
                         Text(
@@ -2197,7 +2275,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     ),
                   ],
                   if (item.voiceoverAudioUrl.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Row(
                       children: [
                         Text(
@@ -2217,7 +2295,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   ],
                   if (item.voiceoverState == 'failed' &&
                       item.voiceoverError.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Row(
                       children: [
                         Text(
@@ -2237,11 +2315,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ],
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     '${l10n.shortVideoSpaceProductionAssemblyMismatchCheckLabel}${subtitleMismatchLine(item)}',
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDenseActionRow(
                     children: [
                       OutlinedButton(
@@ -2453,7 +2531,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           .shortVideoSpaceProductionAssemblySubtitleStyleHint,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   TextField(
                     controller: bgmCtrl,
                     decoration: InputDecoration(
@@ -2463,7 +2541,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           l10n.shortVideoSpaceProductionAssemblyBgmStrategyHint,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.shortVideoSpaceProductionAssemblyStyleNote,
                     style: Theme.of(ctx).textTheme.bodySmall,

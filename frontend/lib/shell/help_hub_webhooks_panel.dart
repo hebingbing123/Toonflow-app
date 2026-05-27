@@ -640,7 +640,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
           );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -648,7 +648,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
             l10n.opsWhSectionTitle,
             style: studioCardTitleStyle(context),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioCollapsibleFilterPanel(
             collapsible: true,
             title: l10n.opsWhCreate,
@@ -663,7 +663,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     isDense: true,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: _webhookSecretController,
                   decoration: InputDecoration(
@@ -671,7 +671,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     isDense: true,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: _webhookWorkspaceIdController,
                   decoration: InputDecoration(
@@ -680,7 +680,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     isDense: true,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -700,7 +700,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     });
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: _webhookTestEventTypeController,
                   decoration: InputDecoration(
@@ -709,7 +709,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     isDense: true,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: FilledButton.tonal(
@@ -724,12 +724,12 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
             ),
           ),
           if (_latestCreatedWebhook != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Container(
               width: double.infinity,
               decoration: studioInsetPanelDecoration(context),
               child: Padding(
-                padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -762,9 +762,9 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     SelectableText(
                       l10n.opsWhFieldSecret(_latestCreatedWebhook!.secret),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     StudioDenseActionRow(
-                      spacing: 8,
+                      spacing: StudioSpacing.xs,
                       children: [
                         OutlinedButton(
                           style: studioFormSecondaryButtonStyle(context),
@@ -794,7 +794,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
               ),
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioCollapsibleFilterPanel(
             subtitle: _webhookSearchQuery.trim().isEmpty
                 ? null
@@ -821,30 +821,45 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          if (_loadingWebhooks) Text(l10n.opsWhLoading),
-          if (_webhooksError != null)
-            Text(
-              _webhooksError == kProductShellSignInErrorPlaceholder
-                  ? l10n.platformConfigPleaseSignIn
-                  : _webhooksError!,
-              style: TextStyle(color: StudioTokens.of(context).danger),
-            ),
+          const SizedBox(height: StudioSpacing.xs),
+          StudioAsyncDataView(
+            loading: _loadingWebhooks,
+            error: _webhooksError == kProductShellSignInErrorPlaceholder
+                ? l10n.platformConfigPleaseSignIn
+                : _webhooksError,
+            onRetry: _loadWebhooks,
+            loadingPlaceholder: StudioLoadingPlaceholder.list,
+            loadingItemCount: 2,
+            scrollableLoading: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
           if (_webhooks != null)
             Text(_webhookInventorySummary(l10n, filteredWebhooks)),
           if (_webhookActivity.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.opsWhRecentActivity,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             ..._webhookActivity
                 .take(6)
                 .map(
-                  (entry) => ListTile(
+                  (entry) => StudioListRow(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
+                    onCopy: () async {
+                      final text = '${webhookActivityActionLabel(l10n, entry.action)}\n'
+                          '${entry.webhookId}\n'
+                          '${entry.summary}';
+                      await Clipboard.setData(ClipboardData(text: text));
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.opsWhActivityRecordSuffix.trim())),
+                      );
+                    },
+                    copyLabel: l10n.opsWhCopyActivityTooltip,
                     title: Text(
                       l10n.opsWhActivityEntryTitle(
                         webhookActivityActionLabel(l10n, entry.action),
@@ -889,14 +904,17 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   final rowBusy = _webhookMutatingId == wh.id;
                   final tokens = StudioTokens.of(context);
                   final highlightLatest = _latestCreatedWebhook?.id == wh.id;
-                  return Card(
+                  return studioStaggeredItem(
+                    index,
+                    entranceKey: filteredWebhooks.length,
+                    child: Card(
                     color: highlightLatest
                         ? tokens.primarySoft.withValues(alpha: 0.92)
                         : null,
                     elevation: highlightLatest ? 0 : null,
                     child: Padding(
                       padding: const EdgeInsets.all(
-                        StudioLayoutSpacing.cardInner - 4,
+                        StudioSpacing.radiusComfort,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -908,7 +926,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           const SizedBox(height: StudioLayoutSpacing.titleTight),
                           if (_latestCreatedWebhook?.id == wh.id)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
+                              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                               child: StudioChip(
                                 label: Text(l10n.opsWhChipLatestCreated),
                               ),
@@ -922,7 +940,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           ),
                           if (!wh.enabled)
                             Padding(
-                              padding: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                               child: StudioChip(
                                 label: Text(l10n.opsWhChipDisabled),
                               ),
@@ -952,7 +970,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                 ),
                                 if (wh.eventTypes.isNotEmpty)
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 4),
+                                    padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                                     child: Text(
                                       l10n.opsWhApiEventTypes(
                                         wh.eventTypes.join(', '),
@@ -966,7 +984,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.only(top: StudioSpacing.xs),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -986,9 +1004,9 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                   ),
                                   enabled: !_loadingWebhooks && !rowBusy,
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: StudioSpacing.xs),
                                 StudioDenseActionRow(
-                                  spacing: 8,
+                                  spacing: StudioSpacing.xs,
                                   children: [
                                     OutlinedButton(
                                       style: studioFormSecondaryButtonStyle(
@@ -1021,7 +1039,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             ),
                           ),
                           if (_webhookDeliveries[wh.id] != null) ...[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             Text(
                               l10n.opsWhRecentDeliveries,
                               style: Theme.of(context).textTheme.labelLarge,
@@ -1029,9 +1047,24 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             ..._webhookDeliveries[wh.id]!.items
                                 .take(6)
                                 .map(
-                                  (d) => ListTile(
+                                  (d) => StudioListRow(
                                     dense: true,
                                     contentPadding: EdgeInsets.zero,
+                                    onCopy: () async {
+                                      final text =
+                                          '${d.eventType} · ${d.status} · HTTP ${d.httpStatus ?? '-'}\n'
+                                          '${d.createdAt}\n${d.error ?? ''}';
+                                      await Clipboard.setData(
+                                        ClipboardData(text: text),
+                                      );
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(l10n.opsWhActivityRecordSuffix.trim()),
+                                        ),
+                                      );
+                                    },
+                                    copyLabel: l10n.opsWhCopyActivityTooltip,
                                     title: Text(
                                       '${d.eventType} · ${d.status} · HTTP ${d.httpStatus ?? '-'}',
                                     ),
@@ -1046,7 +1079,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           ],
                           if (_webhookLastTestResultById[wh.id] != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                               child: Text(
                                 _formatWebhookTestResult(
                                   l10n,
@@ -1055,9 +1088,9 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: StudioSpacing.xs),
                           StudioDenseActionRow(
-                            spacing: 8,
+                            spacing: StudioSpacing.xs,
                             children: [
                               IconButton(
                                 style: studioUtilityIconButtonStyle(context),
@@ -1116,10 +1149,14 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                         ],
                       ),
                     ),
+                  ),
                   );
                 },
               ),
             ),
+              ],
+            ),
+          ),
         ],
       ),
     );

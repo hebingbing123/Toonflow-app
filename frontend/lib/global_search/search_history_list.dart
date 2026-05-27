@@ -4,8 +4,12 @@ import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search history dropdown: shows recent queries on focus, tap to fill and search, clear button.
@@ -132,54 +136,18 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (_loading) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (_error != null) {
-      final tokens = StudioTokens.of(context);
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(StudioSpacing.sm),
-          child: Row(
-            children: [
-              Icon(Icons.error_outline, color: tokens.danger, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.globalSearchLoadHistoryFailed,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              TextButton(
-                onPressed: _loadHistory,
-                child: Text(l10n.globalSearchRetry),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_history.isEmpty) {
-      return StudioEmptyState.emptyData(
+    return StudioAsyncDataView(
+      loading: _loading,
+      error: _error,
+      onRetry: _loadHistory,
+      isEmpty: _history.isEmpty,
+      empty: StudioEmptyState.emptyData(
         title: l10n.globalSearchNoSearchHistory,
         icon: Icons.history,
-      );
-    }
-
-    return Card(
+      ),
+      loadingPlaceholder: StudioLoadingPlaceholder.list,
+      loadingItemCount: 3,
+      child: Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -189,7 +157,10 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               for (var i = 0; i < _history.length; i++) ...<Widget>[
-                ListTile(
+                studioStaggeredItem(
+                  i,
+                  entranceKey: _history.length,
+                  child: StudioListRow(
                   dense: true,
                   leading: const Icon(Icons.history, size: 20),
                   title: Text(
@@ -209,6 +180,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
                   ),
                   onTap: () => widget.onHistorySelected(_history[i].query),
                 ),
+                ),
                 if (i < _history.length - 1) const Divider(height: 1),
               ],
             ],
@@ -218,7 +190,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: StudioSpacing.xs,
-              vertical: StudioSpacing.xs / 2,
+              vertical: StudioSpacing.chromeActionGap,
             ),
             child: TextButton.icon(
               onPressed: _handleClearHistory,
@@ -233,6 +205,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
           ),
         ],
       ),
+    ),
     );
   }
 

@@ -22,12 +22,12 @@ class StudioMergeDeliverBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
         decoration: BoxDecoration(
           color: tokens.bgSurface,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Column(

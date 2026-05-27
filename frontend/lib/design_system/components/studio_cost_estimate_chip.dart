@@ -4,7 +4,8 @@ import '../../design_system/components/studio_chip.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
-
+import '../../design_system/ix/studio_api_error_callout.dart';
+import '../../design_system/tokens.dart';
 class StudioCostEstimateChip extends StatelessWidget {
   const StudioCostEstimateChip({
     super.key,
@@ -28,9 +29,9 @@ class StudioCostEstimateChip extends StatelessWidget {
       );
     }
     if (error != null) {
-      return StudioChip(
-        label: Text(error!, maxLines: 2),
-        backgroundColor: theme.colorScheme.errorContainer,
+      return StudioApiErrorCallout(
+        error: error!,
+        emphasis: StudioApiErrorCalloutEmphasis.subtle,
       );
     }
     final est = estimate;
@@ -39,8 +40,8 @@ class StudioCostEstimateChip extends StatelessWidget {
     final cny = formatCnyFromCents(est.cnyCents);
     final pct = est.quotaUsagePercentAfter;
     return Wrap(
-      spacing: 8,
-      runSpacing: 4,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.chromeActionGap,
       children: <Widget>[
         if (est.platformBillingExempt)
           StudioChip(

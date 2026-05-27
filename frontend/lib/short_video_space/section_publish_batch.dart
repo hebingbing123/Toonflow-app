@@ -83,15 +83,22 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                 children: [
                   Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
                   Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
-                  ...validation.blockedDrafts.take(5).map((d) => Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 4),
+                  ...validation.blockedDrafts.take(5).toList().asMap().entries.map((entry) {
+                    final d = entry.value;
+                    return studioStaggeredItem(
+                      entry.key,
+                      entranceKey: validation.blockedDrafts.length,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: StudioSpacing.xs, top: StudioSpacing.chromeActionGap),
                         child: Text(
                           '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
-                      )),
+                      ),
+                    );
+                  }),
                 ],
               ),
               actions: [
@@ -203,15 +210,22 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
                 children: [
                   Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
                   Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                   Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
-                  ...validation.blockedDrafts.take(5).map((d) => Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 4),
+                  ...validation.blockedDrafts.take(5).toList().asMap().entries.map((entry) {
+                    final d = entry.value;
+                    return studioStaggeredItem(
+                      entry.key,
+                      entranceKey: validation.blockedDrafts.length,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: StudioSpacing.xs, top: StudioSpacing.chromeActionGap),
                         child: Text(
                           '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
-                      )),
+                      ),
+                    );
+                  }),
                 ],
               ),
               actions: [

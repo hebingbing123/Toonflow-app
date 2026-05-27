@@ -35,7 +35,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
               isDense: true,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioFilterRow(
             wideLayout: StudioFilterWideLayout.toolbarRow,
             wideBreakpoint: 560,
@@ -132,7 +132,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioFilterRow(
             wideLayout: StudioFilterWideLayout.toolbarRow,
             wideBreakpoint: 520,

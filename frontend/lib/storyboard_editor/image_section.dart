@@ -30,20 +30,21 @@ class _StoryboardImageSection extends StatelessWidget {
           l10n.projectEditorStoryboardImageWorkbenchTitle,
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: imageUrlCtrl,
           minLines: 2,
           maxLines: 4,
+          textInputAction: TextInputAction.done,
           decoration: InputDecoration(
             labelText: l10n.projectEditorStoryboardImageUrlLabel,
             helperText: l10n.projectEditorStoryboardImageUrlHelper,
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),

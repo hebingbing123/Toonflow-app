@@ -600,7 +600,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       title: Row(
         children: [
           const Icon(Icons.history),
-          const SizedBox(width: 8),
+          const SizedBox(width: StudioSpacing.xs),
           Text(l10n.shortVideoSpaceDialogExportHistoryTitle),
           const Spacer(),
           IconButton(
@@ -625,7 +625,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               children: [
                 if (_focusedTaskId != null && _focusedTaskId!.isNotEmpty) ...[
                   _buildCurrentTaskBanner(theme),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                 ],
                 if (_errorMessage == null && !_loading) ...<Widget>[
                   Row(
@@ -663,7 +663,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                               },
                             ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: StudioSpacing.sm),
                       // Time filter
                       Expanded(
                         child:
@@ -699,7 +699,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: StudioSpacing.sm),
                 ],
 
                 // History list
@@ -727,54 +727,26 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final tokens = StudioTokens.of(context);
 
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: theme.colorScheme.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                style: studioFormIconLabeledButtonStyle(context),
-                onPressed: _loadHistory,
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_historyItems.isEmpty) {
-      return Center(
+    return StudioAsyncDataView(
+      loading: _loading,
+      error: _errorMessage,
+      onRetry: _loadHistory,
+      loadingPlaceholder: StudioLoadingPlaceholder.list,
+      loadingItemCount: 4,
+      isEmpty: _historyItems.isEmpty,
+      empty: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.inbox_outlined, size: 64, color: tokens.textSecondary),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryNoRecords,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: tokens.textSecondary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryNoRecordsHint,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -783,16 +755,19 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             ),
           ],
         ),
-      );
-    }
-
-    return ListView.separated(
-      itemCount: _historyItems.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final item = _historyItems[index];
-        return _buildHistoryItem(item, theme);
-      },
+      ),
+      child: ListView.separated(
+        itemCount: _historyItems.length,
+        separatorBuilder: (context, index) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final item = _historyItems[index];
+          return studioStaggeredItem(
+            index,
+            entranceKey: _historyItems.length,
+            child: _buildHistoryItem(item, theme),
+          );
+        },
+      ),
     );
   }
 
@@ -807,7 +782,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     }
     if (focused == null) {
       return Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: StudioTokens.of(context).accentSoft,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -821,7 +796,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       );
     }
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: StudioTokens.of(context).accentSoft,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -854,7 +829,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   'Task ID: ${focused.taskId}',
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -899,25 +874,41 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             ? Border(left: BorderSide(color: tokens.primary, width: 3))
             : null,
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: StudioListRow(
+        onTap: () => setState(() => _focusedTaskId = item.taskId),
+        onDownload: item.status == ExportTaskStatus.completed &&
+                item.outputUrl != null &&
+                !isDownloading
+            ? () => _downloadExport(item)
+            : null,
+        onRetry: (item.status == ExportTaskStatus.failed ||
+                item.status == ExportTaskStatus.cancelled) &&
+            !_loading
+            ? () => _retryExport(item)
+            : null,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: StudioSpacing.sm,
+          vertical: StudioSpacing.xs,
+        ),
         leading: _buildStatusIcon(item.status, theme),
         title: Row(
           children: [
             Expanded(
               child: Text(
                 '${getFormatDisplayName(l10n, item.format.toLowerCase())} · ${getResolutionDisplayName(l10n, item.resolution)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (isFocused) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.radiusHairline),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                 ),
                 child: Text(
                   l10n.teamWorkspaceCurrentBadge,
@@ -928,15 +919,15 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 ),
               ),
             ],
-            const SizedBox(width: 8),
+            const SizedBox(width: StudioSpacing.xs),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.radiusHairline),
               decoration: BoxDecoration(
                 color: _getStatusColor(
                   item.status,
                   theme,
                 ).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
               ),
               child: Text(
                 item.status.displayName(l10n),
@@ -951,7 +942,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.shortVideoSpaceDialogExportHistoryCreatedAt(
                 _formatDateTime(item.createdAt),
@@ -980,51 +971,16 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 style: theme.textTheme.bodySmall,
               ),
             if (structuredFailureLine != null || rawErrorLine != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 16,
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (structuredFailureLine != null)
-                            Text(
-                              structuredFailureLine,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onErrorContainer,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          if (rawErrorLine != null) ...[
-                            if (structuredFailureLine != null)
-                              const SizedBox(height: 8),
-                            Text(
-                              rawErrorLine,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onErrorContainer,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              const SizedBox(height: StudioSpacing.xs),
+              StudioApiErrorCallout(
+                error: [
+                  ?structuredFailureLine,
+                  ?rawErrorLine,
+                ].whereType<String>().join('\n'),
+                emphasis: StudioApiErrorCalloutEmphasis.subtle,
               ),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.shortVideoSpaceDialogExportHistorySettings(
                 getBitrateDisplayName(l10n, item.bitrate),
@@ -1105,8 +1061,8 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         );
       }
       return Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: StudioSpacing.xs,
+        runSpacing: StudioSpacing.xs,
         children: [
           retryButton,
           if (widget.onOpenProductionWorkspace != null) openProductionButton,
@@ -1139,7 +1095,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(StudioSpacing.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,

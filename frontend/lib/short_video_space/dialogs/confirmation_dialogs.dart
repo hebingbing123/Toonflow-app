@@ -6,6 +6,8 @@ import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Confirmation dialog utilities for short video editing operations
 ///
@@ -33,7 +35,7 @@ Widget studioDialogCheckboxListTile({
 }) {
   return Material(
     type: MaterialType.transparency,
-    child: CheckboxListTile(
+    child: StudioCheckboxListRow(
       value: value,
       onChanged: onChanged,
       title: title,
@@ -317,7 +319,7 @@ class _DeleteVersionConfirmationDialogState
             l10n.shortVideoSpaceDialogConfirmDeleteVersionMessage(widget.versionName),
           ),
           if (widget.showDontShowAgain) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
@@ -380,7 +382,7 @@ class _BatchDisableConfirmationDialogState
             l10n.shortVideoSpaceDialogConfirmBatchDisableMessage(widget.shotCount),
           ),
           if (widget.showDontShowAgain) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
@@ -443,7 +445,7 @@ class _RestoreDraftConfirmationDialogState
             l10n.shortVideoSpaceDialogConfirmRestoreDraftMessage(widget.draftName),
           ),
           if (widget.showDontShowAgain) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
@@ -500,7 +502,7 @@ class _CancelExportConfirmationDialogState
         children: [
           Text(l10n.shortVideoSpaceDialogConfirmCancelExportMessage),
           if (widget.showDontShowAgain) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {
@@ -561,7 +563,7 @@ class _BatchArchivePublishConfirmationDialogState
         children: [
           Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveMessage(widget.draftCount)),
           if (widget.showDontShowAgain) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             studioDialogCheckboxListTile(
               value: _dontShowAgain,
               onChanged: (value) {

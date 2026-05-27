@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 
+import 'studio_entrance_motion.dart';
+import '../ix/studio_pointer.dart';
+import '../studio_network_image.dart';
 import '../studio_typography.dart';
 import '../tokens.dart';
 import 'studio_decorative_icon.dart';
+import 'studio_loading_placeholders.dart';
 import 'studio_text_styles.dart';
 
 /// 16:9 media preview card (Wave 4).
@@ -17,6 +21,7 @@ class StudioMediaCard extends StatelessWidget {
     this.error,
     this.onRetry,
     this.onTap,
+    this.heroTag,
   });
 
   final String? imageUrl;
@@ -25,31 +30,48 @@ class StudioMediaCard extends StatelessWidget {
   final String? error;
   final VoidCallback? onRetry;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     Widget child;
     if (loading) {
-      child = const Center(child: CircularProgressIndicator());
+      child = const StudioMediaTileSkeleton();
     } else if (error != null) {
       child = Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            studioDecorativeIcon(Icons.error_outline, color: tokens.danger),
-            const SizedBox(height: 8),
-            Text(error!, style: Theme.of(context).textTheme.bodySmall),
-            if (onRetry != null)
-              TextButton(
-                onPressed: onRetry,
-                child: Text(AppLocalizations.of(context)!.studioRetry),
+        child: Padding(
+          padding: const EdgeInsets.all(StudioSpacing.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              studioDecorativeIcon(Icons.cloud_off_outlined, color: tokens.danger),
+              const SizedBox(height: StudioSpacing.xs),
+              Text(
+                error!,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
-          ],
+              if (onRetry != null) ...<Widget>[
+                const SizedBox(height: StudioSpacing.xs),
+                TextButton(
+                  onPressed: onRetry,
+                  child: Text(AppLocalizations.of(context)!.studioRetry),
+                ),
+              ],
+            ],
+          ),
         ),
       );
     } else if (imageUrl != null && imageUrl!.isNotEmpty) {
-      child = Image.network(imageUrl!, fit: BoxFit.cover);
+      child = StudioNetworkImage(
+        url: imageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
     } else {
       child = studioDecorativeIcon(
         Icons.movie_outlined,
@@ -58,46 +80,69 @@ class StudioMediaCard extends StatelessWidget {
       );
     }
 
-    return AspectRatio(
+    final radius = BorderRadius.circular(StudioSpacing.radiusCard);
+    final interactive = onTap != null;
+
+    final card = AspectRatio(
       aspectRatio: 16 / 9,
-      child: Material(
-        color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              child,
-              if (label != null)
-                Positioned(
-                  left: 8,
-                  bottom: 8,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: tokens.overlay,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        label!,
-                        style: studioControlLabelStyle(context)?.copyWith(
-                          color: Colors.white,
-                          fontSize: StudioTypography.of(context).meta,
+      child: StudioPointerHover(
+        enabled: interactive,
+        borderRadius: radius,
+        builder: (context, hovered) {
+          return studioWrapClickCursor(
+            enabled: interactive,
+            child: Material(
+              color: tokens.bgInset,
+              borderRadius: radius,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                hoverColor: studioPointerChromeEnabled(context)
+                    ? tokens.primary.withValues(alpha: 0.08)
+                    : null,
+                child: AnimatedScale(
+                  scale: hovered ? 1.01 : 1,
+                  duration: const Duration(milliseconds: 140),
+                  curve: Curves.easeOutCubic,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      child,
+                      if (label != null)
+                        Positioned(
+                          left: 8,
+                          bottom: 8,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: tokens.overlay,
+                              borderRadius: BorderRadius.circular(
+                                StudioSpacing.radiusDense,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              child: Text(
+                                label!,
+                                style: studioControlLabelStyle(context)?.copyWith(
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: StudioTypography.of(context).meta,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
+    return StudioHero(tag: heroTag, child: card);
   }
 }

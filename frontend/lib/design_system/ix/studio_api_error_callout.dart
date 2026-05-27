@@ -122,7 +122,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                   width: subtle ? 1.5 : 2,
                   decoration: BoxDecoration(
                     color: errorColor.withValues(alpha: subtle ? 0.76 : 0.88),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                   ),
                 ),
               ),
@@ -144,7 +144,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                   children: <Widget>[
                     subtle
                         ? Padding(
-                            padding: const EdgeInsets.only(top: 1),
+                            padding: const EdgeInsets.only(top: StudioSpacing.radiusHairline),
                             child: Icon(
                               Icons.error_outline,
                               size: 16,
@@ -220,7 +220,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                                     ),
                           ),
                           if (showDiagnostic) ...<Widget>[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             SelectableText(
                               error.toString(),
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -232,7 +232,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                             ),
                           ],
                           if (compact && canRetry) ...<Widget>[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             retryButton,
                           ],
                         ],

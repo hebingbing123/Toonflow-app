@@ -4,7 +4,9 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../studio/job_center.dart';
 import '../components/studio_dialog_shell.dart';
+import '../components/studio_entrance_motion.dart';
 import '../tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Compact job indicator for the studio top bar (Wave 1.5).
 class StudioJobTray extends StatelessWidget {
@@ -52,24 +54,28 @@ class StudioJobTray extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, StudioSpacing.chromeActionGap),
                 child: Text(
                   sheetL10n.studioJobTraySheetTitle,
                   style: Theme.of(ctx).textTheme.titleMedium,
                 ),
               ),
-              ...jobs.map(
-                (j) => ListTile(
-                  title: Text(j.label ?? j.jobId),
-                  subtitle: Text(
-                    studioJobStatusLabel(
-                      AppLocalizations.of(ctx)!,
-                      j.status,
+              ...jobs.indexed.map(
+                (entry) => studioStaggeredItem(
+                  entry.$1,
+                  entranceKey: jobs.length,
+                  child: StudioListRow(
+                    title: Text(entry.$2.label ?? entry.$2.jobId),
+                    subtitle: Text(
+                      studioJobStatusLabel(
+                        AppLocalizations.of(ctx)!,
+                        entry.$2.status,
+                      ),
                     ),
+                    trailing: entry.$2.progress != null
+                        ? Text('${(entry.$2.progress! * 100).round()}%')
+                        : null,
                   ),
-                  trailing: j.progress != null
-                      ? Text('${(j.progress! * 100).round()}%')
-                      : null,
                 ),
               ),
             ],

@@ -4,6 +4,7 @@ import '../studio_typography.dart';
 import '../studio_motion.dart';
 import '../tokens.dart';
 import 'studio_decorative_icon.dart';
+import 'studio_surfaces.dart';
 
 /// One selectable row in a [StudioDropdownField] menu.
 @immutable
@@ -435,9 +436,12 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
 
     return Padding(
       key: ValueKey<String>('studio_multi_select_$label'),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.xs,
+        vertical: StudioSpacing.chromeActionGap,
+      ),
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           onTap: enabled ? onPressed : null,
@@ -445,7 +449,7 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected
                   ? tokens.primarySoft.withValues(alpha: 0.55)
-                  : Colors.transparent,
+                  : StudioPrimitives.transparent,
               borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
             ),
             child: Padding(
@@ -481,7 +485,10 @@ class StudioMenuDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.symmetric(
+        vertical: StudioSpacing.chromeActionGap,
+        horizontal: StudioSpacing.xs,
+      ),
       child: Divider(height: 1, thickness: 1, color: tokens.borderSubtle),
     );
   }
@@ -498,10 +505,10 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
     ),
     elevation: const WidgetStatePropertyAll<double>(16),
     shadowColor: WidgetStatePropertyAll<Color>(
-      Colors.black.withValues(alpha: 0.42),
+      studioShadowColor(context, alpha: 0.42),
     ),
     backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
-    surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+    surfaceTintColor: const WidgetStatePropertyAll<Color>(StudioPrimitives.transparent),
     shape: WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -531,7 +538,7 @@ ButtonStyle studioMenuItemButtonStyle(
     foregroundColor: WidgetStatePropertyAll<Color>(resolvedForeground),
     backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
       if (!enabled) {
-        return Colors.transparent;
+        return StudioPrimitives.transparent;
       }
       if (states.contains(WidgetState.hovered) ||
           states.contains(WidgetState.focused)) {
@@ -540,7 +547,7 @@ ButtonStyle studioMenuItemButtonStyle(
       if (selected) {
         return tokens.primarySoft.withValues(alpha: 0.55);
       }
-      return Colors.transparent;
+      return StudioPrimitives.transparent;
     }),
     overlayColor: WidgetStatePropertyAll<Color>(
       tokens.primary.withValues(alpha: 0.08),
@@ -551,7 +558,7 @@ ButtonStyle studioMenuItemButtonStyle(
       ),
     ),
     textStyle: WidgetStatePropertyAll<TextStyle>(
-      TextStyle(
+      (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
         fontSize: typography?.body ?? StudioTypography.regular.body,
         fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         height: 1.35,
@@ -714,12 +721,15 @@ class StudioSelectFieldTrigger extends StatelessWidget {
         enabled: enabled,
         label: valueLabel,
         child: Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.chromeActionGap,
+                vertical: StudioSpacing.xs,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -750,7 +760,7 @@ class StudioSelectFieldTrigger extends StatelessWidget {
       enabled: enabled,
       label: hasLabel ? '$labelText: $valueLabel' : valueLabel,
       child: Material(
-        color: Colors.transparent,
+        color: StudioPrimitives.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),

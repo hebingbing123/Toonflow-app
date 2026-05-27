@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -210,7 +211,7 @@ class _CompactCockpitBar extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: LayoutBuilder(
@@ -255,8 +256,8 @@ class _CompactCockpitBar extends StatelessWidget {
                 const SizedBox(height: StudioSpacing.xs),
                 Wrap(
                   alignment: WrapAlignment.end,
-                  spacing: 6,
-                  runSpacing: 6,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
                   children: <Widget>[
                     expandButton,
                     if (showPrimaryAction) primaryButton,
@@ -316,7 +317,7 @@ class _ExpandedCockpitCard extends StatelessWidget {
       padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -373,20 +374,26 @@ class _ExpandedCockpitCard extends StatelessWidget {
                   spacing: spacing,
                   runSpacing: spacing,
                   children: <Widget>[
-                    ...filtered.metrics.map(
-                      (metric) => _CockpitMetricTile(
-                        width: itemWidth,
-                        metric: metric,
-                        action: metricActionBuilder(metric),
-                        onExecuteAction: onExecuteAction,
+                    ...studioStaggeredChildren(
+                      filtered.metrics.map(
+                        (metric) => _CockpitMetricTile(
+                          width: itemWidth,
+                          metric: metric,
+                          action: metricActionBuilder(metric),
+                          onExecuteAction: onExecuteAction,
+                        ),
                       ),
+                      entranceKey: filtered.metrics.length,
                     ),
-                    ...filtered.starters.map(
-                      (starter) => _CockpitStarterTile(
-                        width: itemWidth,
-                        starter: starter,
-                        onExecuteStarter: onExecuteStarter,
+                    ...studioStaggeredChildren(
+                      filtered.starters.map(
+                        (starter) => _CockpitStarterTile(
+                          width: itemWidth,
+                          starter: starter,
+                          onExecuteStarter: onExecuteStarter,
+                        ),
                       ),
+                      entranceKey: filtered.starters.length,
                     ),
                   ],
                 );
@@ -413,8 +420,8 @@ class _CockpitActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: <Widget>[
         FilledButton(
           style: studioFormPrimaryButtonStyle(context),
@@ -453,10 +460,10 @@ class _CockpitMetricTile extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final card = Container(
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 6),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgInset,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: Column(
@@ -494,7 +501,7 @@ class _CockpitMetricTile extends StatelessWidget {
       child: action == null || onExecuteAction == null
           ? card
           : InkWell(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               onTap: () => onExecuteAction!(action!),
               child: card,
             ),
@@ -520,10 +527,10 @@ class _CockpitStarterTile extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Container(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 6),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: tokens.bgInset,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           border: Border.all(color: tokens.borderSubtle),
         ),
         child: Column(

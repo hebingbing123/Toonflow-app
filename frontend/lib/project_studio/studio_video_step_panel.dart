@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../design_system/tokens.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../l10n/app_localizations.dart';
 
@@ -64,18 +65,16 @@ class _StudioVideoStepPanelState extends State<StudioVideoStepPanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (!_loaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Column(
+    return StudioAsyncDataView(
+      loading: !_loaded,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
           l10n.studioVideoFrameModeTitle,
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         SegmentedButton<StudioVideoFrameMode>(
           segments: <ButtonSegment<StudioVideoFrameMode>>[
             ButtonSegment(
@@ -99,10 +98,11 @@ class _StudioVideoStepPanelState extends State<StudioVideoStepPanel> {
           label: l10n.studioStepOpenProduction,
           onPressed: widget.onOpenProduction,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         if (widget.embeddedChild != null)
           Expanded(child: widget.embeddedChild!),
       ],
+    ),
     );
   }
 }

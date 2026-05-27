@@ -204,8 +204,8 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
         ),
         const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 6,
-          runSpacing: 6,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             for (final id in ids)
               StudioChoiceChip(
@@ -242,7 +242,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           widget.domesticPlatformIds,
           muted,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _chipRow(
           l10n.shortVideoSpaceTargetMarketOverseas,
           widget.overseasPlatformIds,
@@ -259,7 +259,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           enabled: !widget.busy,
           maxLines: 1,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _descriptionController,
           decoration: InputDecoration(
@@ -271,7 +271,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           minLines: 2,
           maxLines: 5,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _tagsController,
           decoration: InputDecoration(

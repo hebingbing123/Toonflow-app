@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -359,7 +360,7 @@ class _StudioScriptNovelInlineImportState
     final tokens = StudioTokens.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -377,7 +378,7 @@ class _StudioScriptNovelInlineImportState
                 color: tokens.primary,
                 size: 20,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Text(
                   l10n.studioScriptNovelInlineImportTitle,
@@ -387,7 +388,9 @@ class _StudioScriptNovelInlineImportState
               TextButton(
                 style: TextButton.styleFrom(
                   minimumSize: const Size(0, StudioSpacing.iconTouchTarget),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: StudioSpacing.radiusComfort,
+                  ),
                 ),
                 onPressed: _busy ? null : widget.onOpenFullWorkbench,
                 child: Text(l10n.studioScriptNovelInlineOpenFullWorkbench),
@@ -453,9 +456,9 @@ class _StudioScriptNovelInlineImportState
               isDense: true,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: <Widget>[
               if (_resumeCheckpoint != null)
                 FutureBuilder<bool>(
@@ -556,7 +559,7 @@ class _StudioScriptNovelInlineImportState
               isDense: true,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: OutlinedButton(
@@ -576,10 +579,11 @@ class _StudioScriptNovelInlineImportState
             ),
             ),
           ],
-          if (_busy) ...<Widget>[
-            const SizedBox(height: StudioLayoutSpacing.inlineGap),
-            const LinearProgressIndicator(minHeight: 2),
-          ],
+          StudioAsyncDataView(
+            loading: _busy,
+            scrollableLoading: false,
+            child: const SizedBox.shrink(),
+          ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -207,7 +208,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _singleDurationCtrl,
           enabled: !_busy,
@@ -245,7 +246,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
             alignLabelWithHint: true,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _batchDurationCtrl,
           enabled: !_busy,
@@ -295,7 +296,7 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
                     mode: _StoryboardIntakeMode.single,
                     icon: Icons.add_outlined,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   _modeChip(
                     label: l10n.scriptEditorStoryboardBatchAddDialogTitle,
                     mode: _StoryboardIntakeMode.batch,
@@ -305,8 +306,8 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
               )
             else
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 children: <Widget>[
                   _modeChip(
                     label: l10n.scriptEditorStoryboardAddDialogTitle,
@@ -328,10 +329,11 @@ class _StoryboardShotIntakePanelState extends State<StoryboardShotIntakePanel> {
               const SizedBox(height: StudioSpacing.sm),
               _buildBatchForm(l10n),
             ],
-            if (_busy) ...<Widget>[
-              const SizedBox(height: StudioSpacing.sm),
-              const LinearProgressIndicator(minHeight: 2),
-            ],
+            StudioAsyncDataView(
+              loading: _busy,
+              scrollableLoading: false,
+              child: const SizedBox.shrink(),
+            ),
           ],
         ),
       ),

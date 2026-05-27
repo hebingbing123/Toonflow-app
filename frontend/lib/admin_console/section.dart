@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
-import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -13,6 +16,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class AdminConsoleSection extends StatefulWidget {
   const AdminConsoleSection({super.key, required this.controller});
@@ -273,62 +277,96 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ),
             ),
             const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            if (result != null) ...<Widget>[
-              _buildSearchGroup(
-              context,
-              title: l10n.adminConsoleGroupUsers,
-              emptyText: l10n.adminConsoleEmptyUsers,
-              children: result.users
-                  .map((item) => _userHitTile(context, item))
-                  .toList(growable: false),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.insetDense),
-            _buildSearchGroup(
-              context,
-              title: l10n.adminConsoleGroupWorkspaces,
-              emptyText: l10n.adminConsoleEmptyWorkspaces,
-              children: result.workspaces
-                  .map((item) => _workspaceHitTile(context, item))
-                  .toList(growable: false),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.insetDense),
-            _buildSearchGroup(
-              context,
-              title: l10n.adminConsoleGroupProjects,
-              emptyText: l10n.adminConsoleEmptyProjects,
-              children: result.projects
-                  .map((item) => _projectHitTile(context, item))
-                  .toList(growable: false),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.insetDense),
-            _buildSearchGroup(
-              context,
-              title: l10n.adminConsoleGroupJobs,
-              emptyText: l10n.adminConsoleEmptyJobs,
-              children: result.jobs
-                  .map((item) => _jobTile(context, item))
-                  .toList(growable: false),
-            ),
-            const SizedBox(height: StudioLayoutSpacing.stackMedium),
-            ],
-            if (widget.controller.loadingDetail)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: StudioLayoutSpacing.stackMedium),
-                child: Column(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final split = studioUseThreePaneLayout(constraints.maxWidth);
+                final searchColumn = result == null
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          _buildSearchGroup(
+                            context,
+                            title: l10n.adminConsoleGroupUsers,
+                            emptyText: l10n.adminConsoleEmptyUsers,
+                            children: result.users
+                                .map((item) => _userHitTile(context, item))
+                                .toList(growable: false),
+                          ),
+                          const SizedBox(height: StudioLayoutSpacing.insetDense),
+                          _buildSearchGroup(
+                            context,
+                            title: l10n.adminConsoleGroupWorkspaces,
+                            emptyText: l10n.adminConsoleEmptyWorkspaces,
+                            children: result.workspaces
+                                .map((item) => _workspaceHitTile(context, item))
+                                .toList(growable: false),
+                          ),
+                          const SizedBox(height: StudioLayoutSpacing.insetDense),
+                          _buildSearchGroup(
+                            context,
+                            title: l10n.adminConsoleGroupProjects,
+                            emptyText: l10n.adminConsoleEmptyProjects,
+                            children: result.projects
+                                .map((item) => _projectHitTile(context, item))
+                                .toList(growable: false),
+                          ),
+                          const SizedBox(height: StudioLayoutSpacing.insetDense),
+                          _buildSearchGroup(
+                            context,
+                            title: l10n.adminConsoleGroupJobs,
+                            emptyText: l10n.adminConsoleEmptyJobs,
+                            children: result.jobs
+                                .map((item) => _jobTile(context, item))
+                                .toList(growable: false),
+                          ),
+                        ],
+                      );
+                final detailPanel = StudioAsyncDataView(
+                  loading: widget.controller.loadingDetail,
+                  loadingPlaceholder: StudioLoadingPlaceholder.pane,
+                  scrollableLoading: false,
+                  child: widget.controller.userDetail != null
+                      ? _buildUserDetail(
+                          context,
+                          widget.controller.userDetail!,
+                        )
+                      : widget.controller.workspaceDetail != null
+                      ? _buildWorkspaceDetail(
+                          context,
+                          widget.controller.workspaceDetail!,
+                        )
+                      : widget.controller.projectDetail != null
+                      ? _buildProjectDetail(
+                          context,
+                          widget.controller.projectDetail!,
+                        )
+                      : const SizedBox.shrink(),
+                );
+                if (split && searchColumn != null) {
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(flex: 2, child: searchColumn),
+                        const SizedBox(width: StudioLayoutSpacing.section),
+                        Expanded(flex: 3, child: detailPanel),
+                      ],
+                    ),
+                  );
+                }
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    StudioSkeleton(height: 18),
-                    SizedBox(height: StudioSpacing.sm),
-                    StudioSkeleton(height: 120),
+                    if (searchColumn != null) ...<Widget>[
+                      searchColumn,
+                      const SizedBox(height: StudioLayoutSpacing.stackMedium),
+                    ],
+                    detailPanel,
                   ],
-                ),
-              )
-            else if (widget.controller.userDetail != null)
-              _buildUserDetail(context, widget.controller.userDetail!)
-            else if (widget.controller.workspaceDetail != null)
-              _buildWorkspaceDetail(context, widget.controller.workspaceDetail!)
-            else if (widget.controller.projectDetail != null)
-              _buildProjectDetail(context, widget.controller.projectDetail!),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -356,7 +394,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 icon: Icons.manage_search_outlined,
               )
             else
-              ...children,
+              ...studioStaggeredChildren(
+                children,
+                entranceKey: children.length,
+              ),
           ],
         ),
       ),
@@ -366,7 +407,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   Widget _userHitTile(BuildContext context, AdminUserSearchHitV1 item) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    return ListTile(
+    return StudioListRow(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(item.email ?? item.userId),
@@ -391,10 +432,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   ) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    return ListTile(
+    return StudioListRow(
       dense: true,
       contentPadding: EdgeInsets.zero,
-      title: Text(item.name),
+      title: Text(
+        item.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text(
         l10n.adminConsoleWorkspaceHitSummary(
           item.workspaceType,
@@ -413,7 +458,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   Widget _projectHitTile(BuildContext context, AdminProjectSearchHitV1 item) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    return ListTile(
+    return StudioListRow(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(
@@ -438,7 +483,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   Widget _jobTile(BuildContext context, AdminJobSummaryV1 item) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    return ListTile(
+    return StudioListRow(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(studioJobListTitle(l10n, item.kind, item.status)),
@@ -540,10 +585,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleGovernanceActionsTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleStatusActive),
@@ -567,7 +612,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _opsReasonController,
           enabled: _statusRequiresReason,
@@ -579,7 +624,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 : l10n.adminConsoleSuspendReasonDisabledHint,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _opsNoteController,
           maxLines: 3,
@@ -593,7 +638,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleDailyQuotaOverrideTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           detail.dailyJobQuotaOverride == null
               ? l10n.adminConsoleDailyQuotaNotOverridden
@@ -604,10 +649,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleQuotaActionPreserve),
@@ -638,9 +683,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         SizedBox(
-          width: 220,
+          width: studioAdaptiveFieldWidth(context, max: 280),
           child: TextField(
             controller: _dailyQuotaController,
             enabled: _quotaRequiresValue,
@@ -716,16 +761,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleWorkspaceContextRepairTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleWorkspaceContextRepairIntro,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             OutlinedButton.icon(
               style: studioFormOutlinedIconLabeledButtonStyle(context),
@@ -742,26 +787,33 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     : l10n.adminConsoleWorkspaceContextSwitchPersonal,
               ),
             ),
-            ...switchTargets.map(
-              (item) => OutlinedButton(
-                style: studioFormSecondaryButtonStyle(context),
-                onPressed: widget.controller.savingWorkspaceContext
-                    ? null
-                    : () => widget.controller.updateUserWorkspaceContext(
-                        userId: detail.userId,
-                        action:
-                            AdminUserWorkspaceContextActionV1.setToWorkspace,
-                        workspaceId: item.workspaceId,
-                      ),
-                child: Text(
-                  l10n.adminConsoleWorkspaceContextSwitchTo(item.workspaceName),
+            ...studioStaggeredChildren(
+              switchTargets.map(
+                (item) => OutlinedButton(
+                  style: studioFormSecondaryButtonStyle(context),
+                  onPressed:
+                      widget.controller.savingWorkspaceContext
+                          ? null
+                          : () =>
+                              widget.controller.updateUserWorkspaceContext(
+                                userId: detail.userId,
+                                action:
+                                    AdminUserWorkspaceContextActionV1.setToWorkspace,
+                                workspaceId: item.workspaceId,
+                              ),
+                  child: Text(
+                    l10n.adminConsoleWorkspaceContextSwitchTo(
+                      item.workspaceName,
+                    ),
+                  ),
                 ),
               ),
+              entranceKey: switchTargets.length,
             ),
           ],
         ),
         if (widget.controller.savingWorkspaceContext) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -770,7 +822,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                 height: 14,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               Text(
                 l10n.adminConsoleWorkspaceContextRepairing,
                 style: theme.textTheme.bodySmall,
@@ -799,7 +851,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleWorkspaceGovernanceTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         if (isPersonal)
           Text(
             l10n.adminConsoleWorkspaceGovernancePersonalHint,
@@ -814,11 +866,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               color: StudioTokens.of(context).textSecondary,
             ),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         if (!isPersonal) ...[
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               StudioChoiceChip(
                 label: Text(l10n.adminConsoleLifecyclePreserve),
@@ -858,16 +910,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         Text(
           l10n.adminConsoleInternalNoteLabel,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionPreserve),
@@ -904,7 +956,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _workspaceOpsNoteController,
           enabled: _workspaceOpsNoteRequiresValue,
@@ -959,19 +1011,19 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleWorkspaceMemberRemediationTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleWorkspaceMemberRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             SizedBox(
-              width: 260,
+              width: studioAdaptiveFieldWidth(context),
               child: TextField(
                 controller: _workspaceMemberUserIdController,
                 decoration: InputDecoration(
@@ -1020,12 +1072,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ],
         ),
         const SizedBox(height: StudioSpacing.sm),
-        ...detail.members.map((member) {
+        ...detail.members.toList().asMap().entries.map((entry) {
+          final member = entry.value;
           final isOwner = member.role == 'owner';
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+          return studioStaggeredItem(
+            entry.key,
+            entranceKey: detail.members.length,
+            child: Padding(
+            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
             child: StudioDenseActionRow(
-              spacing: 8,
+              spacing: StudioSpacing.xs,
               children: [
                 Text(
                   '${member.email ?? member.userId} · ${member.role}',
@@ -1082,6 +1138,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                   ),
               ],
             ),
+          ),
           );
         }),
       ],
@@ -1102,7 +1159,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleWorkspaceOwnerRemediationTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           isPersonal
               ? l10n.adminConsoleWorkspaceOwnerRemediationPersonalHint
@@ -1112,12 +1169,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
         ),
         if (!isPersonal) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: [
               SizedBox(
-                width: 260,
+                width: studioAdaptiveFieldWidth(context),
                 child: TextField(
                   controller: _workspaceOwnerUserIdController,
                   decoration: InputDecoration(
@@ -1148,9 +1205,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               .where((member) => member.role != 'owner')
               .map(
                 (member) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                   child: StudioDenseActionRow(
-                    spacing: 8,
+                    spacing: StudioSpacing.xs,
                     children: [
                       Text(
                         '${member.email ?? member.userId} · ${member.role}',
@@ -1189,10 +1246,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleAclSummaryTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChip(
               label: Text(
@@ -1211,7 +1268,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         if (detail.projectAclSummaries.isEmpty)
           StudioEmptyState.emptyData(
             title: l10n.adminConsoleNoProjectAclSummary,
@@ -1220,10 +1277,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         else
           ...detail.projectAclSummaries.map(
             (project) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
               child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Checkbox(
@@ -1296,17 +1353,17 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleBatchProjectGovernanceTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleBatchProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchLifecyclePreserve),
@@ -1346,10 +1403,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleBatchNotePreserve),
@@ -1389,7 +1446,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _workspaceBatchOpsNoteController,
           enabled: _workspaceBatchOpsNoteRequiresValue,
@@ -1549,21 +1606,21 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleProjectOwnerRemediationTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleProjectOwnerRemediationHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             SizedBox(
-              width: 260,
+              width: studioAdaptiveFieldWidth(context),
               child: TextField(
                 controller: _projectOwnerUserIdController,
                 decoration: InputDecoration(
@@ -1606,17 +1663,17 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           l10n.adminConsoleProjectGovernanceTitle,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleProjectGovernanceHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: StudioTokens.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleLifecyclePreserve),
@@ -1650,15 +1707,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.adminConsoleInternalNoteLabel,
           style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioChoiceChip(
               label: Text(l10n.adminConsoleNoteActionPreserve),
@@ -1694,7 +1751,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: _projectOpsNoteController,
           enabled: _projectOpsNoteRequiresValue,
@@ -1851,10 +1908,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: chips
                 .map((item) => StudioChip(label: Text(item)))
                 .toList(growable: false),
@@ -1872,8 +1929,8 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   Widget _kvWrap(BuildContext context, Map<String, String> rows) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: StudioSpacing.xs,
+      runSpacing: StudioSpacing.xs,
       children: rows.entries
           .map(
             (entry) => StudioChip(
@@ -1902,11 +1959,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             icon: Icons.inbox_outlined,
           )
         else
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(item, style: theme.textTheme.bodySmall),
+          ...studioStaggeredChildren(
+            items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(
+                  bottom: StudioSpacing.chromeActionGap,
+                ),
+                child: Text(item, style: theme.textTheme.bodySmall),
+              ),
             ),
+            entranceKey: items.length,
           ),
       ],
     );

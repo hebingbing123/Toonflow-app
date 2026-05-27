@@ -82,12 +82,12 @@ extension _HomePageProductPanesBuilder on _HomePageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioPaneHeader(
           title: title,
           showBack: false,
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: StudioSpacing.lg),
         Center(
           child: StudioEmptyState(
             title: l10n.studioProductHarnessRedirectTitle,

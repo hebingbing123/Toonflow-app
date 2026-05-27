@@ -6,6 +6,8 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 
 /// **Validates: Requirement 14**
 final _zh = AppLocalizationsZh();
@@ -353,8 +355,8 @@ void main() {
     testWidgets('renders with filters and empty state', (tester) async {
       await tester.pumpWidget(buildTestApp(buildHistoryDialog()));
 
-      // Should show loading initially
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      // Should show list skeleton while history loads
+      expect(find.byType(StudioListSkeleton), findsOneWidget);
 
       // Wait for mock data to load
       await tester.pumpAndSettle();
@@ -494,8 +496,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Should show error messages for failed items
-      expect(find.byIcon(Icons.error_outline), findsWidgets);
+      expect(find.byType(StudioApiErrorCallout), findsWidgets);
     });
 
     testWidgets('shows status icons correctly', (tester) async {

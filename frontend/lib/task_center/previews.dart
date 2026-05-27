@@ -103,7 +103,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
       ),
       children: [
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -145,7 +145,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: taskDetailJobIdController,
           onChanged: onTaskDetailJobIdChanged,
@@ -153,7 +153,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
             labelText: l10n.taskCenterFieldTaskUuidTapToFill,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         FilledButton.tonal(
           style: studioFormTonalButtonStyle(context),
           onPressed:
@@ -229,14 +229,14 @@ class TaskCenterJobsPreview extends StatelessWidget {
         final tokens = StudioTokens.of(context);
         tiles.add(
           Material(
-            color: Colors.transparent,
+            color: StudioPrimitives.transparent,
             child: InkWell(
               onTap: () => onSelectTaskJob(job),
               borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
               child: Container(
                 margin: const EdgeInsets.only(top: StudioSpacing.xs),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: StudioLayoutSpacing.cardInner - 4,
+                  horizontal: StudioSpacing.radiusComfort,
                   vertical: StudioSpacing.sm,
                 ),
                 decoration: BoxDecoration(
@@ -260,7 +260,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
                             style: studioCardTitleStyle(context),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -304,7 +304,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showCountHeader) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.taskCenterJobsCount(jobs.length),
             style: Theme.of(context).textTheme.labelLarge,
@@ -373,13 +373,13 @@ class TaskCenterDetailsPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (taskDetailNumericIdLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(
             l10n.taskCenterNumericIdDetailsLine(taskDetailNumericIdLine!),
           ),
         ],
         if (taskDetailUuidLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           SelectableText(l10n.taskCenterUuidDetailsLine(taskDetailUuidLine!)),
         ],
       ],

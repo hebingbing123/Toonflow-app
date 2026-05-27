@@ -59,7 +59,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -69,7 +69,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                   l10n.agentWorkspaceActivityTitle,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 if (eventType != null)
                   StudioChip(
                     label: Text(
@@ -81,7 +81,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
               ],
             ),
             if (workspaceLastToolResultLine != null) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.agentWorkspaceActivityLatestToolResult(
                   workspaceLastToolResultLine!,
@@ -90,14 +90,14 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
               ),
             ],
             if (workspaceWritebackLine != null) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 workspaceWritebackLine!,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
             if (workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               Text(
                 l10n.agentWorkspaceActivityLatestAssistantText,
                 style: Theme.of(context).textTheme.labelLarge,
@@ -108,7 +108,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             if (lines.isEmpty)
               StudioEmptyState.emptyData(
                 title: l10n.agentWorkspaceActivityNoWsEvents,
@@ -119,7 +119,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
                 children: lines
                     .map(
                       (String line) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                         child: SelectableText(
                           line,
                           style: Theme.of(context).textTheme.bodySmall,

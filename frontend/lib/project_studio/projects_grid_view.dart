@@ -2,10 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -20,6 +22,7 @@ class ProjectsGridView extends StatelessWidget {
     this.onSelectProject,
     this.loading = false,
     this.progressForProject,
+    this.listEntranceKey,
   });
 
   final List<ProjectRow> projects;
@@ -28,6 +31,7 @@ class ProjectsGridView extends StatelessWidget {
   final Future<void> Function(ProjectRow project)? onSelectProject;
   final bool loading;
   final int Function(ProjectRow project)? progressForProject;
+  final Object? listEntranceKey;
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +48,20 @@ class ProjectsGridView extends StatelessWidget {
         );
         if (projects.length == 1) {
           final project = projects.first;
-          final card = _ProjectGridCard(
-            project: project,
-            completedSteps: progressForProject?.call(project) ?? 0,
-            selected: currentProjectNumericId == project.numericId,
-            onSelect: onSelectProject == null
-                ? null
-                : () => onSelectProject!(project),
-            onTap: () => onOpenProject(project),
-            dense: layout.useDenseSingleCard,
-            standalone: layout.useStandaloneSingleCard,
+          final card = _wrapGridEntrance(
+            context,
+            index: 0,
+            child: _ProjectGridCard(
+              project: project,
+              completedSteps: progressForProject?.call(project) ?? 0,
+              selected: currentProjectNumericId == project.numericId,
+              onSelect: onSelectProject == null
+                  ? null
+                  : () => onSelectProject!(project),
+              onTap: () => onOpenProject(project),
+              dense: layout.useDenseSingleCard,
+              standalone: layout.useStandaloneSingleCard,
+            ),
           );
           if (layout.useDenseSingleCard) {
             return Align(
@@ -114,18 +122,34 @@ class ProjectsGridView extends StatelessWidget {
           itemBuilder: (context, index) {
             final project = projects[index];
             final steps = progressForProject?.call(project) ?? 0;
-            return _ProjectGridCard(
-              project: project,
-              completedSteps: steps,
-              selected: currentProjectNumericId == project.numericId,
-              onSelect: onSelectProject == null
-                  ? null
-                  : () => onSelectProject!(project),
-              onTap: () => onOpenProject(project),
+            return _wrapGridEntrance(
+              context,
+              index: index,
+              child: _ProjectGridCard(
+                project: project,
+                completedSteps: steps,
+                selected: currentProjectNumericId == project.numericId,
+                onSelect: onSelectProject == null
+                    ? null
+                    : () => onSelectProject!(project),
+                onTap: () => onOpenProject(project),
+              ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _wrapGridEntrance(
+    BuildContext context, {
+    required int index,
+    required Widget child,
+  }) {
+    return StudioStaggeredEntrance(
+      index: index,
+      entranceKey: listEntranceKey,
+      child: child,
     );
   }
 }
@@ -149,7 +173,17 @@ class _LoadingGrid extends StatelessWidget {
           childAspectRatio: childAspectRatio,
           children: List<Widget>.generate(
             crossAxisCount == 1 ? 2 : 4,
-            (_) => const StudioSkeleton(height: 220, borderRadius: 14),
+            (_) => LayoutBuilder(
+              builder: (context, constraints) {
+                final tileHeight = studioPreviewImageHeight(
+                  constraints.maxWidth,
+                  fraction: 1.05,
+                  min: 160,
+                  max: 260,
+                );
+                return StudioSkeleton(height: tileHeight, borderRadius: 14);
+              },
+            ),
           ),
         );
       },
@@ -217,7 +251,7 @@ class _ProjectGridCard extends StatelessWidget {
     );
 
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       borderRadius: cardRadius,
       child: Container(
         decoration: BoxDecoration(
@@ -232,7 +266,7 @@ class _ProjectGridCard extends StatelessWidget {
         ),
         padding: EdgeInsets.all(
           standalone
-              ? StudioLayoutSpacing.insetDense + 2
+              ? StudioLayoutSpacing.insetDense + StudioSpacing.radiusHairline
               : StudioLayoutSpacing.section - 4,
         ),
         child: Column(
@@ -271,7 +305,7 @@ class _ProjectGridCard extends StatelessWidget {
     required int summaryMaxLines,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
         key: Key('project_select_scope_${project.numericId}'),
         onTap: onSelect ?? onTap,
@@ -286,23 +320,29 @@ class _ProjectGridCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      title,
-                      maxLines: titleMaxLines,
-                      overflow: TextOverflow.ellipsis,
-                      style: studioCardTitleStyle(context),
+                    child: StudioHero(
+                      tag: studioHeroTagProjectTitle(project.numericId),
+                      child: Text(
+                        title,
+                        maxLines: titleMaxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: studioCardTitleStyle(context),
+                      ),
                     ),
                   ),
                   if (selected) ...<Widget>[
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.check_circle,
+                    const SizedBox(width: StudioSpacing.xs),
+                    StudioIconSwap(
+                      icon: Icons.check_circle,
                       size: 18,
                       color: tokens.primary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                   ],
-                  StudioStepProgressRing(completedSteps: completedSteps),
+                  StudioStepProgressRing(
+                    completedSteps: completedSteps,
+                    heroTag: studioHeroTagProjectProgress(project.numericId),
+                  ),
                 ],
               ),
               const SizedBox(height: StudioSpacing.sm),
@@ -364,7 +404,7 @@ class _ProjectGridCard extends StatelessWidget {
     required BorderRadius cardRadius,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       borderRadius: cardRadius,
       child: Container(
         decoration: BoxDecoration(
@@ -379,14 +419,14 @@ class _ProjectGridCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: StudioLayoutSpacing.stackMedium,
-          vertical: StudioLayoutSpacing.cardInner + 2,
+          vertical: StudioLayoutSpacing.cardInner,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
               child: Material(
-                color: Colors.transparent,
+                color: StudioPrimitives.transparent,
                 child: InkWell(
                   key: Key('project_select_scope_${project.numericId}'),
                   onTap: onSelect ?? onTap,
@@ -394,7 +434,7 @@ class _ProjectGridCard extends StatelessWidget {
                     StudioSpacing.radiusButton,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    padding: EdgeInsets.zero,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -403,17 +443,20 @@ class _ProjectGridCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Expanded(
-                              child: Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: studioCardTitleStyle(context),
+                              child: StudioHero(
+                                tag: studioHeroTagProjectTitle(project.numericId),
+                                child: Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: studioCardTitleStyle(context),
+                                ),
                               ),
                             ),
                             if (selected) ...<Widget>[
                               const SizedBox(width: StudioSpacing.xs),
-                              Icon(
-                                Icons.check_circle,
+                              StudioIconSwap(
+                                icon: Icons.check_circle,
                                 size: 16,
                                 color: tokens.primary,
                               ),
@@ -471,7 +514,10 @@ class _ProjectGridCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: StudioSpacing.sm),
-            StudioStepProgressRing(completedSteps: completedSteps),
+            StudioStepProgressRing(
+              completedSteps: completedSteps,
+              heroTag: studioHeroTagProjectProgress(project.numericId),
+            ),
             const SizedBox(width: StudioSpacing.sm),
             FilledButton.icon(
               key: Key('project_enter_studio_${project.numericId}'),
@@ -540,7 +586,7 @@ class _ProjectMetaChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: backgroundColor ?? tokens.bgInset.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(
           color: borderColor ?? tokens.surfaceHighlight.withValues(alpha: 0.9),
         ),

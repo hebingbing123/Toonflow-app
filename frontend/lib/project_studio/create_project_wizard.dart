@@ -14,7 +14,7 @@ Future<Map<String, dynamic>?> showCreateProjectWizard(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Colors.transparent,
+    backgroundColor: StudioPrimitives.transparent,
     barrierColor: tokens.overlay,
     builder: (ctx) => const _CreateProjectWizardSheet(),
   );
@@ -89,17 +89,22 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Container(
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
                     color: tokens.borderDefault,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusHairline),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+                  padding: const EdgeInsets.fromLTRB(
+                    StudioSpacing.md,
+                    StudioSpacing.sm,
+                    StudioSpacing.radiusComfort,
+                    StudioSpacing.xs,
+                  ),
                   child: Row(
                     children: <Widget>[
                       Text(
@@ -135,7 +140,7 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(StudioSpacing.md),
                   child: Row(
                     children: <Widget>[
                       if (_step > 0)
@@ -185,7 +190,7 @@ class _WizardStepIndicator extends StatelessWidget {
       l10n.studioWizardStepReview,
     ];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.xs, StudioSpacing.sm, StudioSpacing.chromeActionGap),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: List<Widget>.generate(labels.length * 2 - 1, (index) {
@@ -193,7 +198,7 @@ class _WizardStepIndicator extends StatelessWidget {
             final leftStep = index ~/ 2;
             return Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(top: 13),
+                padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort),
                 child: Container(
                   height: 2,
                   color: leftStep < current
@@ -272,7 +277,7 @@ class _StepBasics extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(StudioSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -289,7 +294,7 @@ class _StepBasics extends StatelessWidget {
             ),
             onChanged: (_) => onChanged(),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             controller: intro,
             maxLines: 3,
@@ -312,7 +317,7 @@ class _StepNovelPaste extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(StudioSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -357,7 +362,7 @@ class _StepReview extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(StudioSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

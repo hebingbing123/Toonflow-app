@@ -335,10 +335,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
       if (normalized.isEmpty) return;
       sections.add(
         Card(
-          margin: const EdgeInsets.only(top: 8),
+          margin: const EdgeInsets.only(top: StudioSpacing.xs),
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Padding(
-            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -455,7 +455,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.agentWorkspaceProductionContextSnapshotTitle,
           style: theme.labelLarge,

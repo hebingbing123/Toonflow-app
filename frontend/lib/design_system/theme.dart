@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'ix/studio_pointer.dart';
 import 'studio_bundled_text_theme.dart';
 import 'studio_typography.dart';
 import 'tokens.dart';
@@ -21,10 +22,10 @@ ThemeData buildStudioDarkTheme({
         brightness: Brightness.dark,
       ).copyWith(
         primary: tokens.primary,
-        onPrimary: Colors.white,
+        onPrimary: StudioPrimitives.white,
         primaryContainer: tokens.primarySoft,
         secondary: tokens.accent,
-        onSecondary: Colors.black,
+        onSecondary: StudioPrimitives.black,
         secondaryContainer: tokens.accentSoft,
         surface: tokens.bgSurface,
         onSurface: tokens.textPrimary,
@@ -35,7 +36,7 @@ ThemeData buildStudioDarkTheme({
         outline: tokens.borderDefault,
         outlineVariant: tokens.borderSubtle,
         error: tokens.danger,
-        onError: Colors.white,
+        onError: StudioPrimitives.white,
       );
 
   final fallbackTextTheme = ThemeData(brightness: Brightness.dark).textTheme;
@@ -101,19 +102,30 @@ ThemeData buildStudioDarkTheme({
     colorScheme: base,
     scaffoldBackgroundColor: tokens.bgBase,
     textTheme: textTheme,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        // iOS keeps native-style horizontal swipe transitions.
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+      },
+    ),
     appBarTheme: AppBarTheme(
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
       backgroundColor: tokens.bgSurface,
       foregroundColor: tokens.textPrimary,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: StudioPrimitives.transparent,
       titleTextStyle: textTheme.titleLarge,
     ),
     cardTheme: CardThemeData(
       elevation: 0,
       color: tokens.bgSurface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: StudioPrimitives.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         side: BorderSide(color: tokens.surfaceHighlight),
@@ -121,75 +133,91 @@ ThemeData buildStudioDarkTheme({
       margin: EdgeInsets.zero,
     ),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        backgroundColor: tokens.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shadowColor: Colors.transparent,
-        padding: typography.buttonPadding,
-        minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-          side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
-        ),
-        textStyle: studioBundledTextStyle(
-          TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: typography.label,
-            height: 1.2,
+      style: studioInteractiveButtonMouseCursor(
+        FilledButton.styleFrom(
+          backgroundColor: tokens.primary,
+          foregroundColor: StudioPrimitives.white,
+          elevation: 0,
+          shadowColor: StudioPrimitives.transparent,
+          padding: typography.buttonPadding,
+          minimumSize: Size(0, typography.buttonHeight),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+            side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
           ),
-        ),
+          textStyle: studioBundledTextStyle(
+            TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: typography.label,
+              height: 1.2,
+            ),
+          ),
+        ).copyWith(overlayColor: studioButtonHoverOverlay(tokens)),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        minimumSize: const Size(
-          StudioSpacing.iconTouchTarget,
-          StudioSpacing.iconTouchTarget,
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        iconSize: 20,
+      style: studioInteractiveButtonMouseCursor(
+        IconButton.styleFrom(
+          minimumSize: const Size(
+            StudioSpacing.iconTouchTarget,
+            StudioSpacing.iconTouchTarget,
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          iconSize: 20,
+        ).copyWith(overlayColor: studioButtonHoverOverlay(tokens)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: tokens.textPrimary,
-        backgroundColor: tokens.bgSurface.withValues(alpha: 0.74),
-        side: BorderSide(color: tokens.surfaceHighlight),
-        padding: typography.buttonPadding,
-        minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-        ),
-        textStyle: studioBundledTextStyle(
-          TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: typography.label,
-            height: 1.2,
+      style: studioInteractiveButtonMouseCursor(
+        OutlinedButton.styleFrom(
+          foregroundColor: tokens.textPrimary,
+          backgroundColor: tokens.bgSurface.withValues(alpha: 0.74),
+          side: BorderSide(color: tokens.surfaceHighlight),
+          padding: typography.buttonPadding,
+          minimumSize: Size(0, typography.buttonHeight),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           ),
-        ),
+          textStyle: studioBundledTextStyle(
+            TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: typography.label,
+              height: 1.2,
+            ),
+          ),
+        ).copyWith(overlayColor: studioButtonHoverOverlay(tokens)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: tokens.accent,
-        padding: typography.textButtonPadding,
-        minimumSize: Size(0, typography.buttonHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        textStyle: studioBundledTextStyle(
-          TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: typography.label,
-            height: 1.2,
+      style: studioInteractiveButtonMouseCursor(
+        TextButton.styleFrom(
+          foregroundColor: tokens.accent,
+          padding: typography.textButtonPadding,
+          minimumSize: Size(0, typography.buttonHeight),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          textStyle: studioBundledTextStyle(
+            TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: typography.label,
+              height: 1.2,
+            ),
           ),
-        ),
+        ).copyWith(overlayColor: studioButtonHoverOverlay(tokens)),
       ),
+    ),
+    listTileTheme: ListTileThemeData(
+      mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return SystemMouseCursors.click;
+      }),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -233,10 +261,10 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
         elevation: const WidgetStatePropertyAll<double>(16),
         shadowColor: WidgetStatePropertyAll<Color>(
-          Colors.black.withValues(alpha: 0.42),
+          StudioPrimitives.black.withValues(alpha: 0.42),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
-          Colors.transparent,
+          StudioPrimitives.transparent,
         ),
         shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(
@@ -251,9 +279,9 @@ ThemeData buildStudioDarkTheme({
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: tokens.bgElevated,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: StudioPrimitives.transparent,
       elevation: 16,
-      shadowColor: Colors.black.withValues(alpha: 0.42),
+      shadowColor: StudioPrimitives.black.withValues(alpha: 0.42),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         side: BorderSide(color: tokens.surfaceHighlight),
@@ -295,10 +323,10 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
         elevation: const WidgetStatePropertyAll<double>(16),
         shadowColor: WidgetStatePropertyAll<Color>(
-          Colors.black.withValues(alpha: 0.42),
+          StudioPrimitives.black.withValues(alpha: 0.42),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
-          Colors.transparent,
+          StudioPrimitives.transparent,
         ),
         shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(
@@ -340,7 +368,7 @@ ThemeData buildStudioDarkTheme({
         height: 1.2,
       ),
       side: BorderSide(color: tokens.surfaceHighlight),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(StudioSpacing.radiusPill)),
     ),
     extensions: <ThemeExtension<dynamic>>[
       StudioTokens.dark,

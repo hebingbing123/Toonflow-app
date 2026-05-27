@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../l10n/billing_l10n_helpers.dart';
@@ -14,12 +15,14 @@ import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_filter_row.dart';
-import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class NotificationsSection extends StatefulWidget {
   const NotificationsSection({
@@ -125,28 +128,6 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: DecoratedBox(
-        decoration: studioInsetPanelDecoration(context),
-        child: const Padding(
-          padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              StudioSkeleton(height: 18),
-              SizedBox(height: StudioSpacing.sm),
-              StudioSkeleton(height: 72),
-              SizedBox(height: StudioSpacing.sm),
-              StudioSkeleton(height: 72),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildStudioHeader(
@@ -261,7 +242,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         .toList(growable: false);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -318,7 +299,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: ExpansionTile(
                 initiallyExpanded: false,
                 tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: 8),
+                childrenPadding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                 title: Text(l10n.studioNotificationsAdvanced),
                 children: [
                 Align(
@@ -327,7 +308,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     tooltip: l10n.notificationsRiskyPrefsTooltip,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 _buildComplianceAdminPanel(context, theme, l10n),
                 ],
               ),
@@ -337,26 +318,25 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           _buildNotificationListFilters(l10n),
           const SizedBox(height: StudioSpacing.sm),
-          if (widget.controller.loading)
-            widget.studioPresentation
-                ? _buildStudioLoadingBody(context)
-                : const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-          else if (filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
+          StudioAsyncDataView(
+            loading: widget.controller.loading,
+            isEmpty: filtered.isEmpty,
+            empty: Padding(
+              padding: const EdgeInsets.symmetric(vertical: StudioSpacing.md),
               child: StudioEmptyState.noResults(
                 title: l10n.notificationsEmptyFiltered,
               ),
-            )
-          else
-            ...filtered.map(
-              (item) => _buildNotificationTile(context, l10n, item),
             ),
+            scrollableLoading: true,
+            child: Column(
+              children: studioStaggeredChildren(
+                filtered.map((item) => _buildNotificationTile(context, l10n, item)),
+                entranceKey: '$_typeFilter:$_unreadOnly:$needle:${filtered.length}',
+              ),
+            ),
+          ),
           if (widget.controller.hasMore) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
@@ -510,7 +490,20 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         ),
       ),
       typeField,
-      if (toolbar) Expanded(child: searchField) else SizedBox(width: 280, child: searchField),
+      if (toolbar)
+        Expanded(child: searchField)
+      else
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final w = studioClampedPaneWidth(
+              constraints.maxWidth,
+              fraction: 0.42,
+              min: 200,
+              max: 360,
+            );
+            return SizedBox(width: w, child: searchField);
+          },
+        ),
       refreshButton,
     ];
   }
@@ -561,7 +554,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final muted = _complianceMutedStyle(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -583,7 +576,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 style: theme.textTheme.bodyMedium,
               ),
               SizedBox(
-                width: 140,
+                width: studioAdaptiveFieldWidth(
+                  context,
+                  max: 160,
+                  min: 120,
+                ),
                 child: TextField(
                   controller: _clearedThrottleController,
                   focusNode: _clearedThrottleFocus,
@@ -643,9 +640,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(l10n.notificationsComplianceClearedHelpShort, style: muted),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Align(
             alignment: Alignment.centerLeft,
             child: StudioFilterChip(
@@ -658,10 +655,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               ...widget.controller.complianceClearedTemplates
@@ -670,7 +667,33 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         !_customTemplatesOnly || template.kind == 'custom',
                   )
                   .map(
-                    (template) => Tooltip(
+                    (template) => StudioContextMenu(
+                      items: <StudioContextMenuItem>[
+                        StudioContextMenuItem(
+                          label: l10n.notificationsComplianceTemplateChip(
+                            template.label,
+                          ),
+                          icon: Icons.tune,
+                          enabled: !widget.controller.savingPreferences,
+                          onSelected: () => _applyThrottleTemplate(template.id),
+                        ),
+                        if (template.canEdit)
+                          StudioContextMenuItem(
+                            label: l10n.notificationsComplianceTooltipEditTemplate,
+                            icon: Icons.edit_outlined,
+                            enabled: !widget.controller.savingPreferences,
+                            onSelected: () => _editTemplate(template),
+                          ),
+                        if (template.canDelete)
+                          StudioContextMenuItem(
+                            label: l10n.notificationsComplianceTooltipDeleteTemplate,
+                            icon: Icons.delete_outline,
+                            destructive: true,
+                            enabled: !widget.controller.savingPreferences,
+                            onSelected: () => _deleteTemplate(template),
+                          ),
+                      ],
+                      child: Tooltip(
                       message: template.description,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -724,6 +747,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         ],
                       ),
                     ),
+                    ),
                   ),
             ],
           ),
@@ -731,19 +755,49 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               .controller
               .workspaceSharedComplianceTemplates
               .isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.notificationsComplianceWorkspaceSharedHeader,
               style: muted,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: widget.controller.workspaceSharedComplianceTemplates
                   .map(
-                    (template) => Tooltip(
+                    (template) => StudioContextMenu(
+                      items: <StudioContextMenuItem>[
+                        StudioContextMenuItem(
+                          label: l10n.notificationsComplianceSharedChip(
+                            template.label,
+                          ),
+                          icon: Icons.tune,
+                          enabled: !widget.controller.savingPreferences,
+                          onSelected: () => _applyThrottleTemplate(template.id),
+                        ),
+                        if (widget.controller.canManageWorkspaceSharedTemplates)
+                          StudioContextMenuItem(
+                            label: l10n
+                                .notificationsComplianceTooltipEditSharedTemplate,
+                            icon: Icons.edit_outlined,
+                            enabled: !widget.controller.savingPreferences,
+                            onSelected: () =>
+                                _editWorkspaceSharedTemplate(template),
+                          ),
+                        if (widget.controller.canManageWorkspaceSharedTemplates)
+                          StudioContextMenuItem(
+                            label: l10n
+                                .notificationsComplianceTooltipDeleteSharedTemplate,
+                            icon: Icons.delete_outline,
+                            destructive: true,
+                            enabled: !widget.controller.savingPreferences,
+                            onSelected: () =>
+                                _deleteWorkspaceSharedTemplate(template),
+                          ),
+                      ],
+                      child: Tooltip(
                       message: template.description,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -786,6 +840,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         ],
                       ),
                     ),
+                    ),
                   )
                   .toList(),
             ),
@@ -805,8 +860,17 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   wideLayout: StudioFilterWideLayout.wrap,
                   children: _complianceStages
                       .map(
-                        (stage) => SizedBox(
-                          width: 200,
+                        (stage) => LayoutBuilder(
+                          builder: (context, constraints) {
+                            final fieldWidth = studioWrapTileWidth(
+                              constraints.maxWidth,
+                              maxColumns: 3,
+                              minTileWidth: 180,
+                              maxTileWidth: 260,
+                              gap: StudioSpacing.sm,
+                            );
+                            return SizedBox(
+                          width: fieldWidth,
                           child: _complianceLabeledField(
                             context,
                             label:
@@ -816,7 +880,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                 stage,
                               ),
                             ),
-                            width: 200,
+                            width: fieldWidth,
                             child: TextField(
                               controller: _stageThrottleControllers[stage],
                               focusNode: _stageThrottleFocusNodes[stage],
@@ -828,11 +892,13 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                               ),
                             ),
                           ),
+                            );
+                          },
                         ),
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Text(
                   _buildPreferencesAuditText(
                     l10n,
@@ -922,7 +988,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioFilterRow(
                 wideBreakpoint: 480,
                 wideLayout: StudioFilterWideLayout.toolbarRow,
@@ -982,11 +1048,14 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         if ((widget.controller.workspaceSharedAsyncExportInfo ?? '')
             .trim()
             .isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioCard(
             padding: EdgeInsets.zero,
-            child: ListTile(
+            child: StudioListRow(
               dense: true,
+              alternateLabel: l10n.notificationsComplianceCloseTooltip,
+              alternateIcon: Icons.close,
+              onAlternate: widget.controller.clearWorkspaceSharedAsyncExportInfo,
               leading: Icon(
                 Icons.info_outline,
                 color: theme.colorScheme.primary,
@@ -1004,7 +1073,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         StudioCollapsibleFilterPanel(
           collapsible: true,
           title: l10n.notificationsComplianceExportHistoryTitle,
@@ -1015,7 +1084,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               _complianceLabeledField(
                 context,
                 label: l10n.notificationsComplianceExportFormatFilter,
-              width: 180,
+              width: studioAdaptiveFieldWidth(context, max: 220, min: 160),
               child: StudioDropdownButtonFormField<String>(
                 // Controlled by _exportHistoryFormat via setState.
                 // ignore: deprecated_member_use
@@ -1077,41 +1146,44 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        ...widget.controller.workspaceSharedAuditExports.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Tooltip(
-              message: _formatWorkspaceAuditExportItem(l10n, item),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      _formatWorkspaceAuditExportItem(l10n, item),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: muted,
+        const SizedBox(height: StudioSpacing.xs),
+        ...studioStaggeredChildren(
+          widget.controller.workspaceSharedAuditExports.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
+              child: Tooltip(
+                message: _formatWorkspaceAuditExportItem(l10n, item),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        _formatWorkspaceAuditExportItem(l10n, item),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: muted,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip:
-                        l10n.notificationsComplianceReuseExportFiltersTooltip,
-                    onPressed: widget.controller.loadingWorkspaceSharedAudit
-                        ? null
-                        : () => _reuseExportRecordFilters(item),
-                    icon: const Icon(Icons.filter_alt_outlined, size: 18),
-                  ),
-                  IconButton(
-                    tooltip: _exportRecordDownloadTooltip(l10n, item),
-                    onPressed: widget.controller.loadingExportHistory
-                        ? null
-                        : () => _redownloadFromExportRecord(item),
-                    icon: const Icon(Icons.download_outlined, size: 18),
-                  ),
-                ],
+                    IconButton(
+                      tooltip:
+                          l10n.notificationsComplianceReuseExportFiltersTooltip,
+                      onPressed: widget.controller.loadingWorkspaceSharedAudit
+                          ? null
+                          : () => _reuseExportRecordFilters(item),
+                      icon: const Icon(Icons.filter_alt_outlined, size: 18),
+                    ),
+                    IconButton(
+                      tooltip: _exportRecordDownloadTooltip(l10n, item),
+                      onPressed: widget.controller.loadingExportHistory
+                          ? null
+                          : () => _redownloadFromExportRecord(item),
+                      icon: const Icon(Icons.download_outlined, size: 18),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          entranceKey: widget.controller.workspaceSharedAuditExports.length,
         ),
         if (widget.controller.workspaceSharedExportHistoryHasMore)
           Align(
@@ -1131,17 +1203,22 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
         const SizedBox(height: StudioSpacing.sm),
-        ...widget.controller.workspaceSharedComplianceAudit
-            .take(6)
-            .map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  _formatWorkspaceAuditItem(l10n, item),
-                  style: muted,
+        ...studioStaggeredChildren(
+          widget.controller.workspaceSharedComplianceAudit
+              .take(6)
+              .map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: StudioSpacing.chromeActionGap,
+                  ),
+                  child: Text(
+                    _formatWorkspaceAuditItem(l10n, item),
+                    style: muted,
+                  ),
                 ),
               ),
-            ),
+          entranceKey: widget.controller.workspaceSharedComplianceAudit.length,
+        ),
         if (widget.controller.workspaceSharedAuditHasMore)
           Align(
             alignment: Alignment.centerLeft,
@@ -1182,17 +1259,32 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.18)
             : null,
       ),
-      child: ListTile(
+      child: StudioListRow(
+        onTap: () {
+          if (item.isUnread) {
+            widget.controller.markRead(item);
+          }
+          widget.onOpenNotification(item);
+        },
+        onMarkRead: item.isUnread
+            ? () => widget.controller.markRead(item)
+            : null,
         leading: Icon(_iconForType(item.notificationType)),
         title: Row(
           children: [
-            Expanded(child: Text(item.title)),
+            Expanded(
+              child: Text(
+                item.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (item.isUnread)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
                 decoration: BoxDecoration(
                   color: StudioTokens.of(context).primarySoft,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                 ),
                 child: Text(
                   l10n.notificationsUnreadBadge,
@@ -1220,7 +1312,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ),
         ),
         trailing: Wrap(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             if (item.isUnread)
@@ -1920,7 +2012,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       });
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: jsonController,
                     maxLines: 14,

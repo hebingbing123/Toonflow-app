@@ -53,25 +53,26 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           if (publishPanelUi.exportGateHint.trim().isNotEmpty) ...[
             Text(
               publishPanelUi.exportGateHint,
               style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
           ],
-          if (publishPanelUi.loading)
+          if (publishPanelUi.unavailable)
             Text(
               publishPanelUi.headline,
               style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             )
-          else if (publishPanelUi.unavailable)
-            Text(
-              publishPanelUi.headline,
-              style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
-            )
-          else ...[
+          else
+            StudioAsyncDataView(
+              loading: publishPanelUi.loading,
+              scrollableLoading: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
             Text(
               publishPanelUi.headline,
               style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
@@ -82,10 +83,10 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelMatrixDomesticLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.matrixDomesticLines)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
@@ -95,10 +96,10 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelMatrixOverseasLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.matrixOverseasLines)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
@@ -108,10 +109,10 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelPrepareChecks,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               for (final line in publishPanelUi.prepareLines)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
@@ -145,11 +146,11 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               // P8: Multi-select toolbar
               if (publishPanelUi.multiSelectMode) ...[
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(StudioSpacing.xs),
                   decoration: BoxDecoration(
                     color: StudioTokens.of(context).primarySoft.withValues(
                       alpha: 0.3,
@@ -190,9 +191,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                         ],
                       ),
                       if (publishPanelUi.selectedDraftIds.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioDenseActionRow(
-                          spacing: 8,
+                          spacing: StudioSpacing.xs,
                           children: [
                             if (publishPanelUi.onBatchScheduleDrafts != null)
                               FilledButton.tonalIcon(
@@ -244,12 +245,12 @@ class _PublishDraftsPanel extends StatelessWidget {
                       ],
                       // P8: Batch validation summary
                       if (publishPanelUi.batchValidation != null) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(StudioSpacing.xs),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +261,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 l10n.shortVideoPublishPanelBatchValidationSummary(
                                   publishPanelUi.batchValidation!.readyCount,
@@ -272,12 +273,23 @@ class _PublishDraftsPanel extends StatelessWidget {
                                   .batchValidation!
                                   .blockedDrafts
                                   .isNotEmpty) ...[
-                                const SizedBox(height: 8),
+                                const SizedBox(height: StudioSpacing.xs),
                                 ...publishPanelUi.batchValidation!.blockedDrafts
                                     .take(3)
+                                    .toList()
+                                    .asMap()
+                                    .entries
                                     .map(
-                                      (d) => Padding(
-                                        padding: const EdgeInsets.only(top: 2),
+                                      (entry) {
+                                        final d = entry.value;
+                                        return studioStaggeredItem(
+                                          entry.key,
+                                          entranceKey: publishPanelUi
+                                              .batchValidation!
+                                              .blockedDrafts
+                                              .length,
+                                          child: Padding(
+                                        padding: const EdgeInsets.only(top: StudioSpacing.radiusHairline),
                                         child: Text(
                                           l10n.shortVideoPublishPanelBlockedDraftLine(
                                             d.title.isEmpty
@@ -295,7 +307,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                                               ),
                                         ),
                                       ),
-                                    ),
+                                  );
+                                },
+                              ),
                               ],
                             ],
                           ),
@@ -304,7 +318,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
               ],
               // P8: Draft list with checkboxes
               for (
@@ -313,9 +327,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                 i++
               )
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: publishPanelUi.multiSelectMode
-                      ? CheckboxListTile(
+                      ? StudioCheckboxListRow(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                           value: publishPanelUi.selectedDraftIds.contains(
@@ -346,7 +360,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 l10n.shortVideoPublishPanelCurrentDraftLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 key: ValueKey<String>(
                   'publish_op_draft_${publishPanelUi.selectedPublishDraftId ?? "__none__"}',
@@ -397,7 +411,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 publishPanelUi.publishPrimaryDraftId.isNotEmpty &&
                 (publishPanelUi.publishDomesticTargetIds.isNotEmpty ||
                     publishPanelUi.publishOverseasTargetIds.isNotEmpty)) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               PublishPlatformCopyEditor(
                 key: ValueKey(
                   '${publishPanelUi.publishPrimaryDraftId}_${publishPanelUi.publishCopyEditorRevision}',
@@ -413,7 +427,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             ],
             if (publishPanelUi.awaitingSemiAutoJobId != null &&
                 publishPanelUi.onConfirmSemiAuto != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               FilledButton.tonalIcon(
                 onPressed: publishPanelUi.publishBusy
                     ? null
@@ -430,27 +444,27 @@ class _PublishDraftsPanel extends StatelessWidget {
             ],
             if (publishPanelUi.publishAutomationModesByPlatform.isNotEmpty &&
                 publishPanelUi.onChangePublishAutomationMode != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoPublishPanelAutomationByPlatform,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               for (final entry
                   in publishPanelUi.publishAutomationModesByPlatform.entries)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 150,
+                      Flexible(
+                        flex: 2,
                         child: Text(
                           publishPanelUi.publishPlatformLabels[entry.key] ??
                               entry.key,
                           style: theme.textTheme.bodySmall,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Expanded(
                         child: StudioDropdownButtonFormField<String>(
                           initialValue: entry.value,
@@ -512,9 +526,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                 publishPanelUi.onScheduleFirstDraft != null ||
                 publishPanelUi.onScheduleAllDraftsSameTime != null ||
                 publishPanelUi.onOpenPublishTroubleshooting != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   if (publishPanelUi.onRefreshPublish != null)
                     OutlinedButton.icon(
@@ -641,12 +655,12 @@ class _PublishDraftsPanel extends StatelessWidget {
               ),
             ],
             if (publishPanelUi.publishBatchResultLines.isNotEmpty) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoPublishPanelBatchResultSummary,
                 style: theme.textTheme.labelSmall?.copyWith(color: studioPanelMutedColor(context)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               ...publishPanelUi.publishBatchResultLines
                   .take(8)
                   .map(
@@ -656,8 +670,10 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   ),
             ],
-          ],
-          const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             publishPanelUi.detail,
             style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),

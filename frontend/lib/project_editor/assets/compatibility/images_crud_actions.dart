@@ -61,7 +61,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                               width: 56,
                               height: 56,
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                                 child: Image.memory(
                                   cornerThumb,
                                   fit: BoxFit.cover,

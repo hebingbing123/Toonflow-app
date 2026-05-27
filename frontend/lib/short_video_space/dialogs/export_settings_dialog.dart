@@ -180,9 +180,11 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
             children: [
               Text(
                 l10n.shortVideoExportSettingsFormatLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: _selectedFormat,
                 decoration: const InputDecoration(
@@ -209,12 +211,14 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoExportSettingsResolutionLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: _selectedResolution,
                 decoration: const InputDecoration(
@@ -241,12 +245,14 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoExportSettingsBitrateLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<String>(
                 initialValue: _selectedBitrate,
                 decoration: const InputDecoration(
@@ -273,12 +279,14 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoExportSettingsFramerateLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDropdownButtonFormField<int>(
                 initialValue: _selectedFramerate,
                 decoration: const InputDecoration(
@@ -305,9 +313,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   });
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: StudioSpacing.md),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(StudioSpacing.sm),
                 decoration: BoxDecoration(
                   color: StudioTokens.of(context).primarySoft,
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -322,17 +330,17 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                           size: 20,
                           color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: StudioSpacing.xs),
                         Text(
                           l10n.shortVideoExportSettingsEstimatedSize,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: StudioSpacing.xs),
                     Text(
                       _formatFileSize(l10n, estimatedSize),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -341,7 +349,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                           ),
                     ),
                     if (widget.estimatedDurationSeconds != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.shortVideoExportSettingsBasedOnDuration(
                           widget.estimatedDurationSeconds!,
@@ -354,9 +362,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
@@ -368,7 +376,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                       size: 20,
                       color: tokens.textSecondary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: StudioSpacing.xs),
                     Expanded(
                       child: Text(
                         l10n.shortVideoExportSettingsExportTimeHint,

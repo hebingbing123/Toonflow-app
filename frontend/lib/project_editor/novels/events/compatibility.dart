@@ -27,7 +27,7 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
           ),
         ),
         Wrap(
-          spacing: 4,
+          spacing: StudioSpacing.chromeActionGap,
           runSpacing: 0,
           children: [
             ..._buildProjectNovelEventsCompatibilityActions(

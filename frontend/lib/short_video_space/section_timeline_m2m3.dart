@@ -45,8 +45,8 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             StudioMenuAnchor(
               menuChildren: [
@@ -85,27 +85,27 @@ extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(l10n.shortVideoTimelineSubtitlesTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _SubtitleCueList(
           cues: _tracks.subtitles,
           onChanged: (next) => setState(() {
             _tracks = _tracks.copyWith(subtitles: next);
           }),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(l10n.shortVideoTimelineTransitionsTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _TransitionList(
           transitions: _tracks.transitions,
           onChanged: (next) => setState(() {
             _tracks = _tracks.copyWith(transitions: next);
           }),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         Text(l10n.shortVideoTimelineVoiceoverTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         _VoiceoverTrackPanel(
           clips: _tracks.voiceover,
           peaks: widget.timeline.voiceoverWaveformPeaks,
@@ -142,8 +142,11 @@ class _SubtitleCueList extends StatelessWidget {
         ...cues.asMap().entries.map((entry) {
           final idx = entry.key;
           final cue = entry.value;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+          return studioStaggeredItem(
+            idx,
+            entranceKey: cues.length,
+            child: Padding(
+            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -163,9 +166,13 @@ class _SubtitleCueList extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
-                  width: 88,
+                  width: studioAdaptiveFieldWidth(
+                    context,
+                    max: 104,
+                    min: 72,
+                  ),
                   child: TextField(
                     decoration: InputDecoration(
                       isDense: true,
@@ -182,9 +189,13 @@ class _SubtitleCueList extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
-                  width: 88,
+                  width: studioAdaptiveFieldWidth(
+                    context,
+                    max: 104,
+                    min: 72,
+                  ),
                   child: TextField(
                     decoration: InputDecoration(
                       isDense: true,
@@ -203,6 +214,7 @@ class _SubtitleCueList extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           );
         }),
         Align(
@@ -249,15 +261,18 @@ class _TransitionList extends StatelessWidget {
       children: transitions.asMap().entries.map((entry) {
         final idx = entry.key;
         final tr = entry.value;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+        return studioStaggeredItem(
+          idx,
+          entranceKey: transitions.length,
+          child: Padding(
+          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
           child: Row(
             children: [
               Text(
                 l10n.shortVideoTimelineTransitionBetweenShots(idx + 1, idx + 2),
                 style: Theme.of(context).textTheme.labelMedium,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: StudioSpacing.sm),
               StudioDropdownButton<String>(
                 value: tr.type,
                 items: [
@@ -285,9 +300,13 @@ class _TransitionList extends StatelessWidget {
                 },
               ),
               if (tr.type != 'cut') ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
-                  width: 100,
+                  width: studioAdaptiveFieldWidth(
+                    context,
+                    max: 112,
+                    min: 80,
+                  ),
                   child: TextField(
                     decoration: InputDecoration(
                       isDense: true,
@@ -310,6 +329,7 @@ class _TransitionList extends StatelessWidget {
               ],
             ],
           ),
+        ),
         );
       }).toList(growable: false),
     );
@@ -350,9 +370,13 @@ class _VoiceoverTrackPanel extends StatelessWidget {
               child: const SizedBox.expand(),
             ),
           ),
-        ...clips.map((clip) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+        ...clips.toList().asMap().entries.map((entry) {
+          final clip = entry.value;
+          return studioStaggeredItem(
+            entry.key,
+            entranceKey: clips.length,
+            child: Padding(
+            padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
             child: Row(
               children: [
                 Expanded(
@@ -363,8 +387,7 @@ class _VoiceoverTrackPanel extends StatelessWidget {
                   ),
                 ),
                 Text(l10n.shortVideoTimelineVoiceoverVolume),
-                SizedBox(
-                  width: 120,
+                Expanded(
                   child: Slider(
                     value: clip.volume.clamp(0.0, 2.0),
                     min: 0,
@@ -375,7 +398,8 @@ class _VoiceoverTrackPanel extends StatelessWidget {
                 ),
               ],
             ),
-          );
+          ),
+        );
         }),
       ],
     );

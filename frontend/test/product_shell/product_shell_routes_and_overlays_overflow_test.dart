@@ -53,6 +53,13 @@ const _auditStudioRoutes = <({String id, String location})>[
   (id: 'platform_config_models', location: '/settings/models'),
 ];
 
+void _testWidgetsNoSemantics(
+  String description,
+  WidgetTesterCallback callback,
+) {
+  testWidgets(description, callback, semanticsEnabled: false);
+}
+
 GoRouter _createPreviewRouter() {
   return createProductShellDebugRouter(
     debugPreviewData: buildProductShellOverflowPreviewData(),
@@ -92,7 +99,7 @@ Widget _loginTestApp(Size size) {
 void main() {
   group('login page — no layout overflow', () {
     for (final width in _auditWidths) {
-      testWidgets('@ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('@ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         await tester.binding.setSurfaceSize(Size(width, 900));
         await tester.pumpWidget(_loginTestApp(Size(width, 900)));
@@ -106,7 +113,7 @@ void main() {
   group('utility panes — no layout overflow (mock preview)', () {
     for (final pane in _auditUtilityPanes) {
       for (final width in _auditWidths) {
-        testWidgets('${pane.name} @ ${width.round()}px', (tester) async {
+        _testWidgetsNoSemantics('${pane.name} @ ${width.round()}px', (tester) async {
           addTearDown(() => tester.binding.setSurfaceSize(null));
           final router = _createPreviewRouter();
           addTearDown(router.dispose);
@@ -124,7 +131,7 @@ void main() {
   group('project studio steps — no layout overflow (mock preview)', () {
     for (final route in _auditProjectStudioSteps) {
       for (final width in _auditWidths) {
-        testWidgets('${route.id} @ ${width.round()}px', (tester) async {
+        _testWidgetsNoSemantics('${route.id} @ ${width.round()}px', (tester) async {
           addTearDown(() => tester.binding.setSurfaceSize(null));
           final router = _createPreviewRouter();
           addTearDown(router.dispose);
@@ -142,7 +149,7 @@ void main() {
   group('studio overlay routes — no layout overflow (mock preview)', () {
     for (final route in _auditStudioRoutes) {
       for (final width in _auditWidths) {
-        testWidgets('${route.id} @ ${width.round()}px', (tester) async {
+        _testWidgetsNoSemantics('${route.id} @ ${width.round()}px', (tester) async {
           addTearDown(() => tester.binding.setSurfaceSize(null));
           final router = _createPreviewRouter();
           addTearDown(router.dispose);
@@ -159,7 +166,7 @@ void main() {
 
   group('overlays & dialogs — no layout overflow (mock preview)', () {
     for (final width in _auditWidths) {
-      testWidgets('more menu @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('more menu @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -170,7 +177,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('create project wizard @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('create project wizard @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -181,7 +188,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('settings plan tab @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('settings plan tab @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -191,7 +198,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('settings api tab @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('settings api tab @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -201,7 +208,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('settings workspaces tab @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('settings workspaces tab @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -211,7 +218,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('api keys create dialog @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('api keys create dialog @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -229,7 +236,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('help hub add webhook @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('help hub add webhook @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -247,7 +254,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('platform config vendor dialog @ ${width.round()}px', (
+      _testWidgetsNoSemantics('platform config vendor dialog @ ${width.round()}px', (
         tester,
       ) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -267,7 +274,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('task center filter panel @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('task center filter panel @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -280,7 +287,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('short video filter @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('short video filter @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -294,7 +301,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('notifications filter @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('notifications filter @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -308,7 +315,7 @@ void main() {
         expectNoLayoutOverflow(tester);
       });
 
-      testWidgets('task workbench @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('task workbench @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -322,7 +329,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('quality workbench @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('quality workbench @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);
@@ -336,7 +343,7 @@ void main() {
         await harness.dismissToProjectsHome();
       });
 
-      testWidgets('script setup sheet @ ${width.round()}px', (tester) async {
+      _testWidgetsNoSemantics('script setup sheet @ ${width.round()}px', (tester) async {
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final router = _createPreviewRouter();
         addTearDown(router.dispose);

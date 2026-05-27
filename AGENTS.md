@@ -19,6 +19,17 @@
 - **单文件体量**：`backend/`、`frontend/` 中 **避免单文件过长**（建议 **≤800 行**；明显膨胀时 **拆模块/组件**），与路线图「竖切、可维护」一致。
 - 对照 `master` 或 parity 时，若发现 **明确 bug、性能问题、明显不合理设计**，可在 **同一竖切/同一 PR 节奏内** 一并修复（避免无关大重构）。
 
+## Flutter 异步三态（加载 / 空 / 错）
+
+凡在 `frontend/lib/` 新增或改动 **列表、面板、设置块、对话框内的数据拉取** UI，须遵循 [`frontend/lib/design_system/ASYNC_LOADING.md`](frontend/lib/design_system/ASYNC_LOADING.md)：
+
+- 加载：**骨架屏**（`StudioPaneLoadingSkeleton` / `StudioListSkeleton` 等），禁止整页 `CircularProgressIndicator()`。
+- 整页失败：`StudioEmptyState.loadFailed` + 重试；区块/行内失败：`StudioApiErrorCallout`。
+- 已有 `StudioLoadState` 的 Studio 主面板：优先 `StudioAsyncDataView` + `resolveStudioPaneLoadState`（见 `frontend/lib/platform/studio_load_state.dart`）。
+- 错误文案：`describeUserVisibleApiErrorResolved`，禁止 `e.toString()` 直接展示。
+
+回归测试见 `frontend/test/ui/studio_async_sections_test.dart`、`frontend/test/platform/studio_load_state_test.dart`、`frontend/test/design_system/studio_loading_placeholders_test.dart`。
+
 ## 计划文档与全栈交付
 
 - `docs/plans/` 中 **竖切任务清单**（`tasks-*.md`）、**路线图分册**（`roadmap-*.md`）及 **Workspace 全量计划** 默认要求：用户/运营可见的能力 **须 `backend/` + `frontend/`（含 `rust_api`）+ 契约** 同里程碑交付；例外须在计划中标 **`(ops-only)`**。约定见 [`docs/plans/full-stack-delivery-covenant.md`](docs/plans/full-stack-delivery-covenant.md)；平台级补漏清单见 [`docs/plans/platform-capabilities-backlog.md`](docs/plans/platform-capabilities-backlog.md)。

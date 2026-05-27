@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/components/studio_skeleton.dart';
+import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
@@ -282,7 +288,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
         border: Border.all(color: studioPanelBorderColor(context)),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -313,8 +319,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               ),
               const SizedBox(width: StudioSpacing.sm),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: StudioSpacing.xs,
+                runSpacing: StudioSpacing.xs,
                 alignment: WrapAlignment.end,
                 children: [
                   _buildSummaryChip(
@@ -340,29 +346,25 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             ],
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _error!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ),
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_projectMembersForbidden)
-            _buildForbiddenNotice(theme, l10n)
-          else ...[
-            _buildAddSection(theme, l10n, assignableCandidates),
-            const SizedBox(height: StudioSpacing.sm),
-            _buildExplicitMembersSection(theme, l10n),
-          ],
-          const SizedBox(height: 8),
+          StudioAsyncDataView(
+            loading: _loading,
+            error: _error,
+            onRetry: _reload,
+            loadingPlaceholder: StudioLoadingPlaceholder.list,
+            loadingItemCount: 2,
+            scrollableLoading: false,
+            child: _projectMembersForbidden
+                ? _buildForbiddenNotice(theme, l10n)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _buildAddSection(theme, l10n, assignableCandidates),
+                      const SizedBox(height: StudioSpacing.sm),
+                      _buildExplicitMembersSection(theme, l10n),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: StudioSpacing.xs),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
@@ -379,9 +381,9 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Widget _buildForbiddenNotice(ThemeData theme, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         color: theme.colorScheme.surface,
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
@@ -408,9 +410,9 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         color: theme.colorScheme.surface,
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
@@ -453,23 +455,15 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           if (_loadingWorkspaceMembers)
-            Row(
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 8),
-                Text(l10n.projectMembersLoadingWorkspaceMembers, style: theme.textTheme.bodySmall),
-              ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+              child: StudioSkeleton(height: 40),
             )
           else if (_workspaceMembersError != null)
-            Text(
-              _workspaceMembersError!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+            StudioApiErrorCallout(
+              error: _workspaceMembersError!,
+              onRetry: _loadWorkspaceMembers,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
             )
           else if (_workspaceMembersForbidden)
             Text(
@@ -520,7 +514,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                             },
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: StudioSpacing.xs),
                   FilledButton.tonalIcon(
                     style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _adding ? null : _addWorkspaceCandidate,
@@ -543,7 +537,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: StudioSpacing.xs),
               FilledButton(
                 style: studioFormPrimaryButtonStyle(context),
                 onPressed: _adding ? null : _addManual,
@@ -559,9 +553,9 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Widget _buildExplicitMembersSection(ThemeData theme, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         color: theme.colorScheme.surface,
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
@@ -585,7 +579,13 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               icon: Icons.group_outlined,
             )
           else
-            ..._projectRows.map((row) => _buildExplicitMemberRow(theme, l10n, row)),
+            ..._projectRows.toList().asMap().entries.map(
+              (entry) => studioStaggeredItem(
+                entry.key,
+                entranceKey: _projectRows.length,
+                child: _buildExplicitMemberRow(theme, l10n, entry.value),
+              ),
+            ),
         ],
       ),
     );
@@ -601,7 +601,13 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     final saving = _savingUsers.contains(row.userId);
     final removing = _removingUsers.contains(row.userId);
 
-    return Padding(
+    return StudioContextMenu(
+      items: studioBuildListRowContextMenu(
+        context: context,
+        onCopy: () => _copyUserId(row.userId),
+        onDelete: saving || removing ? null : () => _remove(row.userId),
+      ),
+      child: Padding(
       padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
       child: Container(
         width: double.infinity,
@@ -631,8 +637,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             ),
             const SizedBox(height: StudioSpacing.xs),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
               children: [
                 _buildTag(theme, l10n.projectMembersTagExplicitRole, row.role),
                 if (workspaceRole != null)
@@ -670,7 +676,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                           },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 IconButton(
                   tooltip: l10n.projectMembersTooltipSaveRole,
                   onPressed: saving || removing || pendingRole == row.role
@@ -703,6 +709,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -717,7 +724,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         vertical: StudioLayoutSpacing.microGap,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         border: Border.all(color: studioPanelBorderColor(context)),
       ),
       child: RichText(
@@ -742,9 +749,9 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   Widget _buildTag(ThemeData theme, String label, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
         color: theme.colorScheme.surfaceContainerHighest,
       ),
       child: Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_card.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -85,7 +86,7 @@ class _InternationalVendorsSetupBannerState
     final tokens = StudioTokens.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.sm),
       child: StudioCard(
         emphasized: true,
         child: Column(
@@ -115,7 +116,7 @@ class _InternationalVendorsSetupBannerState
                           tokens.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         l10n.settingsInternationalVendorsSetupProgress(
                           primaryReady,
@@ -131,18 +132,21 @@ class _InternationalVendorsSetupBannerState
               ],
             ),
             const SizedBox(height: StudioSpacing.sm),
-            ...primary.map(
-              (vendor) => _IntlVendorSetupRow(
-                vendor: vendor,
-                ready: isDomesticVendorCredentialReady(
-                  vendor,
-                  widget.credentialConfigured[vendor.vendorId] ?? false,
+            ...studioStaggeredChildren(
+              primary.map(
+                (vendor) => _IntlVendorSetupRow(
+                  vendor: vendor,
+                  ready: isDomesticVendorCredentialReady(
+                    vendor,
+                    widget.credentialConfigured[vendor.vendorId] ?? false,
+                  ),
+                  onConfigure: () => widget.onConfigureVendor(vendor),
                 ),
-                onConfigure: () => widget.onConfigureVendor(vendor),
               ),
+              entranceKey: primary.length,
             ),
             if (extended.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               TextButton(
                 onPressed: () => setState(() => _showExtended = !_showExtended),
                 child: Text(
@@ -152,18 +156,21 @@ class _InternationalVendorsSetupBannerState
                 ),
               ),
               if (_showExtended)
-                ...extended.map(
-                  (vendor) => _IntlVendorSetupRow(
-                    vendor: vendor,
-                    ready: isDomesticVendorCredentialReady(
-                      vendor,
-                      widget.credentialConfigured[vendor.vendorId] ?? false,
+                ...studioStaggeredChildren(
+                  extended.map(
+                    (vendor) => _IntlVendorSetupRow(
+                      vendor: vendor,
+                      ready: isDomesticVendorCredentialReady(
+                        vendor,
+                        widget.credentialConfigured[vendor.vendorId] ?? false,
+                      ),
+                      onConfigure: () => widget.onConfigureVendor(vendor),
                     ),
-                    onConfigure: () => widget.onConfigureVendor(vendor),
                   ),
+                  entranceKey: extended.length,
                 ),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -200,7 +207,7 @@ class _IntlVendorSetupRow extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgInset.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           border: Border.all(
             color: ready
                 ? tokens.primary.withValues(alpha: 0.35)
@@ -208,7 +215,7 @@ class _IntlVendorSetupRow extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.radiusComfort, vertical: StudioSpacing.xs),
           child: Row(
             children: <Widget>[
               Icon(

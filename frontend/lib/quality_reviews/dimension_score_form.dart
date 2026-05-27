@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 
 // ---------------------------------------------------------------------------
 // Compile-time constant: rubric version from docs/plans/quality-rubric.md
@@ -167,7 +168,7 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
       children: [
         // Rubric version header
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
           child: Text(
             l10n.qualityReviewsRubricVersionLine(kRubricVersion),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -176,19 +177,22 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
           ),
         ),
         // Dimension rows
-        ...kDimensionKeys.map(
-          (key) => _DimensionRow(
-            dimensionKey: key,
-            label: studioQualityDimensionLabel(l10n, key),
-            score: _scores[key]!,
-            skipped: _skipped[key]!,
-            controller: _controllers[key]!,
-            errorText: _errors[key],
-            skipLabel: l10n.qualityReviewsDimensionScoreSkip,
-            onSliderChanged: (v) => _onSliderChanged(key, v),
-            onTextChanged: (v) => _onTextChanged(key, v, l10n),
-            onSkipChanged: (v) => _onSkipChanged(key, v),
+        ...studioStaggeredChildren(
+          kDimensionKeys.map(
+            (key) => _DimensionRow(
+              dimensionKey: key,
+              label: studioQualityDimensionLabel(l10n, key),
+              score: _scores[key]!,
+              skipped: _skipped[key]!,
+              controller: _controllers[key]!,
+              errorText: _errors[key],
+              skipLabel: l10n.qualityReviewsDimensionScoreSkip,
+              onSliderChanged: (v) => _onSliderChanged(key, v),
+              onTextChanged: (v) => _onTextChanged(key, v, l10n),
+              onSkipChanged: (v) => _onSkipChanged(key, v),
+            ),
           ),
+          entranceKey: kDimensionKeys.length,
         ),
       ],
     );
@@ -227,7 +231,7 @@ class _DimensionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -274,7 +278,7 @@ class _DimensionRow extends StatelessWidget {
                     onChanged: onSliderChanged,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
                   width: 56,
                   child: Semantics(
@@ -372,7 +376,7 @@ class _ScoreRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRisk = score <= 3;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: StudioSpacing.radiusHairline),
       child: Row(
         children: [
           Expanded(

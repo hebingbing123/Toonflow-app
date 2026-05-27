@@ -40,26 +40,26 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (statusLine != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(statusLine!, style: bodySmall),
         ],
         if (productionData != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             summarizeProductionAssetData(productionData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
         ],
         if (pollingData != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             summarizeAssetPollingStatuses(pollingData!.statuses, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: pollingSelections.entries
                 .map(
                   (entry) => ActionChip(
@@ -78,15 +78,15 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (materialData != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             summarizeWorkbenchAssetMaterialData(materialData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               ActionChip(
                 label: Text(
@@ -100,15 +100,15 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (batchData != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             summarizeWorkbenchBatchGenerationData(batchData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               ActionChip(
                 label: Text(
@@ -122,15 +122,15 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
           ),
         ],
         if (promptPollingData != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             summarizeWorkbenchPromptPolling(promptPollingData!, l10n),
             style: bodySmall?.copyWith(color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: promptSelections.entries
                 .map(
                   (entry) => ActionChip(

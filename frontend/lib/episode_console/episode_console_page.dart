@@ -27,6 +27,7 @@ class EpisodeConsolePage extends StatelessWidget {
     final tokens = StudioTokens.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: tokens.bgBase,
       appBar: AppBar(
         leading: IconButton(
@@ -46,7 +47,7 @@ class EpisodeConsolePage extends StatelessWidget {
         ),
         actions: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: StudioSpacing.xs),
             child: StudioChip(
               label: Text(l10n.studioEpisodeConsoleBetaLabel),
             ),
@@ -63,7 +64,7 @@ class EpisodeConsolePage extends StatelessWidget {
           Material(
             color: tokens.bgSurface,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.radiusComfort, StudioSpacing.sm, StudioSpacing.radiusComfort),
               child: Text(
                 l10n.studioEpisodeConsoleBetaBody,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

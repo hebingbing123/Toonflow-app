@@ -5,17 +5,18 @@ import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_pane_header.dart';
 import '../../design_system/components/studio_pane_scaffold.dart';
-import '../../design_system/components/studio_skeleton.dart';
+import '../../design_system/components/studio_async_data_view.dart';
 import '../../design_system/components/studio_dense_action_row.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
-import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../platform/studio_load_state.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class JobsSectionViewModel {
   const JobsSectionViewModel({
@@ -112,31 +113,6 @@ class JobsSectionView extends StatelessWidget {
         .toList(growable: false);
   }
 
-  Widget _buildStudioLoadingBody(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: DecoratedBox(
-          decoration: studioInsetPanelDecoration(context),
-          child: const Padding(
-            padding: EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                StudioSkeleton(height: 18),
-                SizedBox(height: StudioSpacing.sm),
-                StudioSkeleton(height: 56),
-                SizedBox(height: StudioSpacing.sm),
-                StudioSkeleton(height: 56),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildStudioJobTile(
     BuildContext context, {
     required JobRow job,
@@ -173,14 +149,14 @@ class JobsSectionView extends StatelessWidget {
         ),
     ];
     return Material(
-      color: Colors.transparent,
+      color: StudioPrimitives.transparent,
       child: InkWell(
         onTap: () => callbacks.onSelectJob(job),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         child: Container(
           margin: const EdgeInsets.only(top: StudioSpacing.xs),
           padding: const EdgeInsets.symmetric(
-            horizontal: StudioLayoutSpacing.cardInner - 4,
+            horizontal: StudioSpacing.radiusComfort,
             vertical: StudioSpacing.sm,
           ),
           decoration: BoxDecoration(
@@ -204,7 +180,7 @@ class JobsSectionView extends StatelessWidget {
                   ),
                   if (!compact && actionButtons.isNotEmpty)
                     StudioDenseActionRow(
-                      spacing: 4,
+                      spacing: StudioSpacing.chromeActionGap,
                       expandToMaxWidth: false,
                       children: actionButtons,
                     ),
@@ -215,7 +191,7 @@ class JobsSectionView extends StatelessWidget {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -232,9 +208,9 @@ class JobsSectionView extends StatelessWidget {
                 ),
               ),
               if (compact && actionButtons.isNotEmpty) ...<Widget>[
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioDenseActionRow(
-                  spacing: 8,
+                  spacing: StudioSpacing.xs,
                   expandToMaxWidth: false,
                   children: actionButtons,
                 ),
@@ -267,16 +243,19 @@ class JobsSectionView extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ...visibleJobs.take(8).map((job) {
+        ...visibleJobs.take(8).toList().asMap().entries.map((entry) {
+          final index = entry.key;
+          final job = entry.value;
+          final Widget tile;
           if (studioCards) {
-            return _buildStudioJobTile(
+            tile = _buildStudioJobTile(
               context,
               job: job,
               l10n: l10n,
               compact: compact,
               detailStyle: detailStyle,
             );
-          }
+          } else {
           final detailLines = <String>[
             job.id,
             if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
@@ -304,47 +283,60 @@ class JobsSectionView extends StatelessWidget {
                 ),
               ),
           ];
-          return ListTile(
-            dense: !compact,
-            contentPadding: EdgeInsets.zero,
-            minVerticalPadding: compact ? 10 : 6,
-            title: Text(
-              studioJobListTitle(l10n, job.kind, job.status),
-              maxLines: compact ? 2 : 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                    if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
-                    Text(
-                      detailLines[i],
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: detailStyle,
-                    ),
+            tile = StudioListRow(
+              dense: !compact,
+              contentPadding: EdgeInsets.zero,
+              minVerticalPadding: compact ? 10 : 6,
+              title: Text(
+                studioJobListTitle(l10n, job.kind, job.status),
+                maxLines: compact ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    for (var i = 0; i < detailLines.length; i++) ...<Widget>[
+                      if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
+                      Text(
+                        detailLines[i],
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: detailStyle,
+                      ),
+                    ],
+                    if (compact && actionButtons.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: StudioSpacing.xs),
+                      StudioDenseActionRow(
+                        spacing: StudioSpacing.xs,
+                        children: actionButtons,
+                      ),
+                    ],
                   ],
-                  if (compact && actionButtons.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 8),
-                    StudioDenseActionRow(
-                      spacing: 8,
+                ),
+              ),
+              onTap: () => callbacks.onSelectJob(job),
+              onRetry: job.status == 'failed'
+                  ? () => callbacks.onRetryFailedJob(job)
+                  : null,
+              retryLabel: l10n.jobsRetry,
+              onCancel: job.status == 'queued' || job.status == 'running'
+                  ? () => callbacks.onCancelQueuedJob(job)
+                  : null,
+              trailing: compact || actionButtons.isEmpty
+                  ? null
+                  : StudioDenseActionRow(
+                      spacing: StudioSpacing.chromeActionGap,
+                      expandToMaxWidth: false,
                       children: actionButtons,
                     ),
-                  ],
-                ],
-              ),
-            ),
-            onTap: () => callbacks.onSelectJob(job),
-            trailing: compact || actionButtons.isEmpty
-                ? null
-                : StudioDenseActionRow(
-                    spacing: 4,
-                    expandToMaxWidth: false,
-                    children: actionButtons,
-                  ),
+            );
+          }
+          return studioStaggeredItem(
+            index,
+            entranceKey: visibleJobs.length,
+            child: tile,
           );
         }),
       ],
@@ -408,17 +400,17 @@ class JobsSectionView extends StatelessWidget {
 
   Widget _buildStudioMainBody(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (model.jobsLoadState == StudioLoadState.error) {
-      return const SizedBox.shrink();
-    }
-    if (model.jobsLoadState == StudioLoadState.initial ||
-        model.jobsLoadState == StudioLoadState.loading ||
-        model.loadingJobs) {
-      return _buildStudioLoadingBody(context);
-    }
     final visibleJobs = _visibleJobs();
-    if (visibleJobs.isEmpty) {
-      return Center(
+    return StudioAsyncDataView(
+      loadState: resolveStudioPaneLoadState(
+        reported: model.jobsLoadState,
+        busy: model.loadingJobs,
+        hasData: visibleJobs.isNotEmpty,
+      ),
+      error: model.jobsLastError,
+      onRetry: callbacks.onLoadJobs,
+      scrollableLoading: true,
+      empty: Center(
         child: StudioEmptyState.emptyData(
           title: l10n.jobsEmptyValue,
           subtitle: l10n.jobsSubtitle,
@@ -426,18 +418,18 @@ class JobsSectionView extends StatelessWidget {
           actionLabel: l10n.jobsLoadList,
           onAction: callbacks.onLoadJobs,
         ),
-      );
-    }
-    return SingleChildScrollView(
-      child: DecoratedBox(
-        decoration: studioInsetPanelDecoration(context),
-        child: Padding(
-          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
-          child: _buildJobList(
-            context,
-            visibleJobs: visibleJobs,
-            showCountHeader: false,
-            studioCards: true,
+      ),
+      child: SingleChildScrollView(
+        child: DecoratedBox(
+          decoration: studioInsetPanelDecoration(context),
+          child: Padding(
+            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+            child: _buildJobList(
+              context,
+              visibleJobs: visibleJobs,
+              showCountHeader: false,
+              studioCards: true,
+            ),
           ),
         ),
       ),
@@ -452,7 +444,7 @@ class JobsSectionView extends StatelessWidget {
     }
     final l10n = resolveAppLocalizationsForErrors(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort, bottom: StudioSpacing.xs),
       child: Center(
         child: Text(
           l10n.jobsCountLabel(_visibleJobs().length),
@@ -471,7 +463,7 @@ class JobsSectionView extends StatelessWidget {
     final muted = studioMutedTextColor(context);
 
     final header = <Widget>[
-      const SizedBox(height: 16),
+      const SizedBox(height: StudioSpacing.sm),
       if (studioPresentation)
         StudioPaneToolbar(
           title: l10n.jobsTitle,
@@ -541,20 +533,13 @@ class JobsSectionView extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          const SizedBox(height: 16),
+          const SizedBox(height: StudioSpacing.sm),
           _buildStudioHeader(context, l10n),
           const SizedBox(height: StudioSpacing.sm),
-          if (model.jobsLoadState == StudioLoadState.error &&
-              model.jobsLastError != null)
-            StudioApiErrorCallout(
-              error: model.jobsLastError!,
-              onRetry: callbacks.onLoadJobs,
-            )
-          else
-            StudioPaneScaffold(
-              body: _buildStudioMainBody(context),
-              footer: _buildStudioFooter(context),
-            ),
+          StudioPaneScaffold(
+            body: _buildStudioMainBody(context),
+            footer: _buildStudioFooter(context),
+          ),
         ],
       );
     }
@@ -564,7 +549,7 @@ class JobsSectionView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...header,
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
             childrenPadding: EdgeInsets.zero,
@@ -586,9 +571,9 @@ class JobsSectionView extends StatelessWidget {
                   ).textTheme.labelSmall?.copyWith(color: muted),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: StudioSpacing.xs),
               StudioDenseActionRow(
-                spacing: 8,
+                spacing: StudioSpacing.xs,
                 children: [
                   FilledButton.tonal(
                     style: studioFormTonalButtonStyle(context),
@@ -654,7 +639,7 @@ class JobsSectionView extends StatelessWidget {
             onChanged: callbacks.onJobIdChanged,
             decoration: InputDecoration(labelText: l10n.jobsJobIdLabel),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           FilledButton.tonal(
             style: studioFormTonalButtonStyle(context),
             onPressed:
@@ -665,24 +650,24 @@ class JobsSectionView extends StatelessWidget {
             child: Text(model.loadingJobById ? '…' : l10n.jobsFetchDetail),
           ),
           if (model.jobByIdLine != null) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(
               l10n.jobsDetailLabel(model.jobByIdLine!),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
           if (model.jobKindsLine != null) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(l10n.jobsKindsLabel(model.jobKindsLine!)),
           ],
           if (model.jobKindSummaryLine != null) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(
               l10n.jobsKindSummaryLabel(model.jobKindSummaryLine!),
             ),
           ],
           if (model.jobStatusSummaryLine != null) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             SelectableText(
               l10n.jobsStatusSummaryLabel(model.jobStatusSummaryLine!),
             ),

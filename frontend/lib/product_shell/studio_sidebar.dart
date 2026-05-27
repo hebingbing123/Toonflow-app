@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/openflow_brand.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../shell/navigation_controller.dart';
@@ -64,13 +65,16 @@ class StudioSidebar extends StatelessWidget {
                 final badge = isNotifications && unreadNotifications > 0
                     ? unreadNotifications
                     : null;
-                return _SidebarTile(
-                  extended: extended,
-                  selected: selected,
-                  icon: selected ? dest.selectedIcon : dest.icon,
-                  label: dest.label(AppLocalizations.of(context)!),
-                  badge: badge,
-                  onTap: () => onSelect(index),
+                return studioStaggeredItem(
+                  index,
+                  child: _SidebarTile(
+                    extended: extended,
+                    selected: selected,
+                    icon: selected ? dest.selectedIcon : dest.icon,
+                    label: dest.label(AppLocalizations.of(context)!),
+                    badge: badge,
+                    onTap: () => onSelect(index),
+                  ),
                 );
               },
             ),
@@ -153,7 +157,7 @@ class _SidebarTileState extends State<_SidebarTile> {
         ? tokens.primarySoft.withValues(alpha: 0.72)
         : (_hovered
               ? tokens.primary.withValues(alpha: 0.08)
-              : Colors.transparent);
+              : StudioPrimitives.transparent);
     final border = widget.selected
         ? Border(
             left: BorderSide(color: tokens.primary, width: 3),
@@ -166,7 +170,7 @@ class _SidebarTileState extends State<_SidebarTile> {
               : null);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: StudioSpacing.xs / 2),
+      padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
       child: Material(
         color: bg,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
@@ -238,10 +242,10 @@ class _SidebarBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
       decoration: BoxDecoration(
         color: tokens.danger,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
       ),
       child: Text(
         count > 99 ? '99+' : '$count',

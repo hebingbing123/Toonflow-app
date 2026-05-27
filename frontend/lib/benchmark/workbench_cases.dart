@@ -4,6 +4,7 @@ import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Widget for managing benchmark cases (sample pool)
 class BenchmarkCasesWorkbench extends StatelessWidget {
@@ -54,7 +55,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: projectIdController,
           keyboardType: TextInputType.number,
@@ -65,7 +66,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
         const SizedBox(height: StudioSpacing.sm),
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -73,14 +74,14 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
                   l10n.benchmarkPromoteCardTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: qualityReviewIdController,
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkLabelQualityReviewId,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioDropdownButtonFormField<String>(
                   initialValue: promoteCaseType,
                   decoration: InputDecoration(
@@ -106,21 +107,21 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
                     }
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: promoteSummaryController,
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkLabelSampleSummary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: promoteTagsController,
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkLabelTagsCommaSeparated,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 FilledButton.tonal(
                   style: studioFormTonalButtonStyle(context),
                   onPressed: busy ||
@@ -146,9 +147,9 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
             ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           ...cases.take(6).map(
-                (item) => ListTile(
+                (item) => StudioListRow(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text(

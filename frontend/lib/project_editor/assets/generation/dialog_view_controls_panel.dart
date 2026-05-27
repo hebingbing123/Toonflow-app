@@ -73,7 +73,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                       },
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: StudioDropdownButtonFormField<String>(
                 initialValue: selectedType,
@@ -98,7 +98,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioModelCostControls(
           accessToken: accessToken,
           projectUuid: projectUuid,
@@ -111,14 +111,14 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
           enabled: !busy,
           onEstimateChanged: onBatchEstimateChanged,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: resolutionCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorAssetGenWorkbenchResolutionOptionalLabel,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -129,9 +129,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: StudioSpacing.sm),
             SizedBox(
-              width: 140,
+              width: studioAdaptiveFieldWidth(context, max: 160, min: 112),
               child: TextField(
                 controller: batchLimitCtrl,
                 keyboardType: TextInputType.number,
@@ -142,7 +142,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         TextField(
           controller: imageUrlCtrl,
           onChanged: onImageUrlChanged,

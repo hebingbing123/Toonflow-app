@@ -104,7 +104,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
         if (suggested != null) ...[
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -120,7 +120,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
                         suggested.title,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: StudioSpacing.xs),
                       Text(
                         suggested.detail,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -128,7 +128,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: StudioSpacing.sm),
                 FilledButton(
                   style: studioFormPrimaryButtonStyle(context),
                   onPressed: suggested.enabled ? suggested.onPressed : null,
@@ -137,10 +137,10 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -164,9 +164,9 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(
-          spacing: 8,
+          spacing: StudioSpacing.xs,
           children: [
             OutlinedButton(
               style: studioFormSecondaryButtonStyle(context),

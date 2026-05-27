@@ -4,7 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bootstrap/global_error_handling.dart';
 import 'config.dart';
 import 'design_system/ix/studio_scaffold_messenger.dart';
+import 'design_system/ix/studio_scroll_behavior.dart';
 import 'design_system/ix/studio_toast_overlay.dart';
+import 'design_system/studio_adaptive_theme.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'home_page.dart';
 import 'l10n/app_localizations.dart';
@@ -48,6 +50,7 @@ class OpenFlowHarnessApp extends StatelessWidget {
         return StudioScaffoldMessenger(
           key: kRustApiRootScaffoldMessengerKey,
           child: MaterialApp(
+            scrollBehavior: const StudioScrollBehavior(),
             debugShowCheckedModeBanner: false,
             onGenerateTitle: (ctx) =>
                 AppLocalizations.of(ctx)?.appTitle ??
@@ -66,10 +69,7 @@ class OpenFlowHarnessApp extends StatelessWidget {
               }
               return supportedLocales.first;
             },
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-              useMaterial3: true,
-            ),
+            theme: studioAdaptiveDesktopTheme(context),
             builder: (context, child) =>
                 StudioToastHost(child: child ?? const SizedBox.shrink()),
             home: home,

@@ -71,7 +71,7 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
           border: Border.all(
             color: widget.selected
                 ? (tokens?.primary.withValues(alpha: 0.55) ?? borderColor)
@@ -80,7 +80,7 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
           ),
         ),
         child: Material(
-          color: Colors.transparent,
+          color: StudioPrimitives.transparent,
           child: InkWell(
             onTap: widget.enabled && widget.onSelected != null
                 ? () => widget.onSelected!(true)
@@ -90,7 +90,7 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
                 setState(() => _hovered = value);
               }
             },
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: widget.compact
@@ -117,7 +117,7 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
                                 : theme.colorScheme.surface.withValues(
                                     alpha: 0.78,
                                   )),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
                       border: Border.all(
                         color: widget.selected
                             ? (tokens?.primary.withValues(alpha: 0.28) ??

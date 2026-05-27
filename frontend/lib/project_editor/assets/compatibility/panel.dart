@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_text_styles.dart';
 import '../../../rust_api.dart';
+import '../../../design_system/tokens.dart';
 
 /// Renders collapsed asset probe actions for project editor diagnostics.
 class ProjectAssetsCompatibilityPanel extends StatelessWidget {
@@ -54,9 +55,9 @@ class ProjectAssetsCompatibilityPanel extends StatelessWidget {
       ),
       children: [
         buildImagesSection(),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 4,
+          spacing: StudioSpacing.chromeActionGap,
           runSpacing: 0,
           children: [
             ...buildPrimaryActions(),

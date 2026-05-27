@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
+import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_toolbar_button.dart';
-import '../design_system/components/studio_skeleton.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_surfaces.dart';
-import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/ix/studio_freshness_banner.dart';
 import '../platform/studio_load_state.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_entrance_motion.dart';
 import 'enum_labels.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Groups the section-level review actions above the detailed workbench flow.
 class QualityReviewsActionsBar extends StatelessWidget {
@@ -201,14 +202,6 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (dashboardLoadState == StudioLoadState.error &&
-        dashboardLoadError != null) {
-      return StudioApiErrorCallout(
-        error: dashboardLoadError!,
-        onRetry: onRefreshDashboard,
-      );
-    }
-
     final hasAnything =
         dashboardSummary != null ||
         refreshSummary != null ||
@@ -218,40 +211,36 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
         (scopeInsightRows?.isNotEmpty ?? false) ||
         (tokenEfficiencyRows?.isNotEmpty ?? false) ||
         (badCaseStats?.isNotEmpty ?? false);
-    if (!hasAnything) {
-      if (dashboardLoadState == StudioLoadState.loading || loadingDashboard) {
-        if (studioPresentation) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                StudioSkeleton(height: 16),
-                SizedBox(height: StudioSpacing.sm),
-                StudioSkeleton(height: 48),
-              ],
+    final loading = !hasAnything &&
+        (dashboardLoadState == StudioLoadState.loading || loadingDashboard);
+    final isEmpty = !hasAnything && !loading;
+
+    return StudioAsyncDataView(
+      loading: loading,
+      error: dashboardLoadState == StudioLoadState.error
+          ? dashboardLoadError
+          : null,
+      onRetry: onRefreshDashboard,
+      isEmpty: isEmpty,
+      empty: studioPresentation &&
+              dashboardLoadState == StudioLoadState.success
+          ? const SizedBox.shrink()
+          : StudioEmptyState(
+              title: l10n.qualityReviewsOpsDashboardTitle,
+              subtitle: refreshControlsEnabled
+                  ? l10n.qualityReviewsDashboardNotLoadedRefreshEnabled
+                  : l10n.qualityReviewsDashboardNotLoadedRefreshDisabled,
+              icon: Icons.analytics_outlined,
+              actionLabel: onRefreshDashboard != null
+                  ? l10n.qualityReviewsFreshnessRefresh
+                  : null,
+              onAction: onRefreshDashboard,
             ),
-          );
-        }
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (studioPresentation &&
-          dashboardLoadState == StudioLoadState.success) {
-        return const SizedBox.shrink();
-      }
-      return StudioEmptyState(
-        title: l10n.qualityReviewsOpsDashboardTitle,
-        subtitle: refreshControlsEnabled
-            ? l10n.qualityReviewsDashboardNotLoadedRefreshEnabled
-            : l10n.qualityReviewsDashboardNotLoadedRefreshDisabled,
-        icon: Icons.analytics_outlined,
-        actionLabel: onRefreshDashboard != null
-            ? l10n.qualityReviewsFreshnessRefresh
-            : null,
-        onAction: onRefreshDashboard,
-      );
-    }
-    return Column(
+      scrollableLoading: !studioPresentation,
+      loadingPadding: studioPresentation
+          ? const EdgeInsets.symmetric(vertical: StudioSpacing.xs)
+          : null,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (refreshSummary != null) ...[
@@ -261,7 +250,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
               context,
             ).textTheme.bodySmall?.copyWith(color: mutedColor),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (freshnessMeta != null)
           StudioFreshnessBanner(
@@ -274,7 +263,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             dashboardSummary!,
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (qualityStatsRows?.isNotEmpty == true) ...[
           Text(
@@ -283,8 +272,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           ),
           const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: qualityStatsRows!
                 .take(4)
                 .map(
@@ -300,7 +289,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 )
                 .toList(growable: false),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (stageGradeRows?.isNotEmpty == true) ...[
           Text(
@@ -309,8 +298,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           ),
           const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: stageGradeRows!
                 .take(4)
                 .map(
@@ -322,7 +311,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 )
                 .toList(growable: false),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (badCaseStats?.isNotEmpty == true) ...[
           Text(
@@ -331,8 +320,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           ),
           const SizedBox(height: StudioSpacing.xs),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: badCaseStats!
                 .take(4)
                 .map(
@@ -347,7 +336,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
                 )
                 .toList(growable: false),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (scopeInsightRows?.isNotEmpty == true) ...[
           Text(
@@ -359,14 +348,14 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
               .take(3)
               .map(
                 (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: Text(
                     '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
               ),
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
         ],
         if (tokenEfficiencyRows?.isNotEmpty == true) ...[
           Text(
@@ -378,7 +367,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
               .take(3)
               .map(
                 (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
                   child: Text(
                     '${qualityTargetTypeLabel(row.targetType, l10n)} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
                     style: Theme.of(context).textTheme.bodySmall,
@@ -387,6 +376,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
               ),
         ],
       ],
+    ),
     );
   }
 }
@@ -450,10 +440,10 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
             ).textTheme.labelSmall?.copyWith(color: mutedColor),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: StudioSpacing.xs,
+          runSpacing: StudioSpacing.xs,
           children: [
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
@@ -498,13 +488,14 @@ class QualityReviewsListPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showCountHeader) ...<Widget>[
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.qualityReviewsCount(reviews.length),
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ...reviews.take(8).map((review) {
+        ...studioStaggeredChildren(
+          reviews.take(8).map((review) {
           final detailLines = <String>[
             review.id,
             if (review.targetId != null && review.targetId!.isNotEmpty)
@@ -513,7 +504,7 @@ class QualityReviewsListPreview extends StatelessWidget {
               l10n.qualityReviewsPreviewDetailPassed(review.passed!.toString()),
             if (review.isBadCase) l10n.qualityReviewsPreviewDetailBadCase,
           ];
-          return ListTile(
+          return StudioListRow(
             dense: !compact,
             contentPadding: EdgeInsets.zero,
             minVerticalPadding: compact ? 10 : 6,
@@ -528,7 +519,7 @@ class QualityReviewsListPreview extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -547,7 +538,9 @@ class QualityReviewsListPreview extends StatelessWidget {
             trailing: compact ? null : const Icon(Icons.chevron_right),
             onTap: () => onSelectQualityReview(review),
           );
-        }),
+          }),
+          entranceKey: reviews.length,
+        ),
       ],
     );
   }

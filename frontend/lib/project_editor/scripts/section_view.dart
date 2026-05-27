@@ -8,6 +8,7 @@ import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import '../../script_editor/support.dart';
+import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 class ProjectScriptsSectionViewModel {
   const ProjectScriptsSectionViewModel({
@@ -128,7 +129,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
         ),
         const SizedBox(height: StudioSpacing.xs),
         Wrap(
-          spacing: 4,
+          spacing: StudioSpacing.chromeActionGap,
           runSpacing: 0,
           children: [
             TextButton(
@@ -205,13 +206,19 @@ class ProjectScriptsSectionView extends StatelessWidget {
                   : openEditor != null
                   ? () => openEditor(script)
                   : null;
-              return ListTile(
+              return StudioListRow(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   '#${script.numericId} ${script.name ?? ""}',
                   style: theme.textTheme.bodySmall,
                 ),
+                onEdit: openStoryboard != null &&
+                        openEditor != null &&
+                        !model.saving
+                    ? () => openEditor(script)
+                    : null,
+                editLabel: l10n.projectEditorScriptsSectionEditScript,
                 trailing: openStoryboard != null && openEditor != null
                     ? IconButton(
                         tooltip: l10n.projectEditorScriptsSectionEditScript,

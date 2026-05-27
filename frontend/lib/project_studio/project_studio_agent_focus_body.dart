@@ -56,7 +56,7 @@ class _ProjectStudioAgentFocusBodyState extends State<ProjectStudioAgentFocusBod
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Icon(Icons.smart_toy_outlined, size: 20, color: tokens.primary),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: StudioSpacing.xs),
                       Text(
                         widget.openLabel,
                         style: studioControlLabelStyle(context)?.copyWith(

@@ -29,7 +29,7 @@ class ProductDemoModeBanner extends StatelessWidget {
     return Material(
       color: tokens.warning.withValues(alpha: 0.14),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+        padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.radiusComfort, StudioSpacing.sm, StudioSpacing.radiusComfort),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -43,7 +43,7 @@ class ProductDemoModeBanner extends StatelessWidget {
                   color: tokens.warning,
                   size: 22,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: StudioSpacing.radiusComfort),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,14 +70,14 @@ class ProductDemoModeBanner extends StatelessWidget {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: StudioSpacing.chromeActionGap),
                       Text(
                         title,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: StudioSpacing.radiusHairline),
                       Text(
                         body,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -95,9 +95,9 @@ class ProductDemoModeBanner extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
-              spacing: 4,
+              spacing: StudioSpacing.chromeActionGap,
               children: <Widget>[
                 TextButton(
                   onPressed: tour.stepCount > 0

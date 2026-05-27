@@ -36,12 +36,12 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
                       helperText: l10n.projectEditorScriptsBatchAddCountHelper,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: namePrefixCtrl,
                     decoration: InputDecoration(labelText: l10n.projectEditorScriptsBatchAddNamePrefixLabel),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: scriptDataCtrl,
                     minLines: 3,

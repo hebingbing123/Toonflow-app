@@ -536,7 +536,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         widget.sectionDescription ?? l10n.agentWorkspaceSectionDescription;
     final header = <Widget>[
       if (!widget.suppressSectionHeader) ...<Widget>[
-        const SizedBox(height: StudioLayoutSpacing.cardInner - 4),
+        const SizedBox(height: StudioSpacing.radiusComfort),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -566,7 +566,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         workspaceUuidController: _effectiveWorkspaceUuidController,
       ),
       if (widget.showPaneSelector) ...<Widget>[
-        const SizedBox(height: 16),
+        const SizedBox(height: StudioSpacing.sm),
         AgentWorkspacePaneSelector(
           selectedPane: _pane,
           onSelected: (AgentWorkspacePane nextPane) {
@@ -577,9 +577,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           },
         ),
       ],
-      const SizedBox(height: 16),
+      const SizedBox(height: StudioSpacing.sm),
       _buildPaneBody(context),
-      const SizedBox(height: 24),
+      const SizedBox(height: StudioSpacing.md),
     ];
 
     return LayoutBuilder(

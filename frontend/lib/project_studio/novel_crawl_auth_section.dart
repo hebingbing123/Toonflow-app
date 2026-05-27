@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -242,7 +243,9 @@ class _StudioNovelCrawlAuthSectionState
           onTap: _loading ? null : () => setState(() => _expanded = !_expanded),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(
+              vertical: StudioSpacing.chromeActionGap,
+            ),
             child: Row(
               children: <Widget>[
                 Icon(
@@ -286,7 +289,7 @@ class _StudioNovelCrawlAuthSectionState
               ),
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           DropdownButtonFormField<String>(
             initialValue: _authMode,
             decoration: InputDecoration(
@@ -310,7 +313,7 @@ class _StudioNovelCrawlAuthSectionState
                   },
           ),
           if (supportsNovelCrawlInAppLogin(context)) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: FilledButton.icon(
@@ -321,11 +324,11 @@ class _StudioNovelCrawlAuthSectionState
               ),
             ),
           ] else ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             const NovelCrawlDesktopDownloadHintPanel(),
           ],
           if (_showCookieField) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _cookieCtrl,
               enabled: !_loading && !_saving,
@@ -342,7 +345,7 @@ class _StudioNovelCrawlAuthSectionState
             ),
           ],
           if (_showPasswordFields) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             TextField(
               controller: _usernameCtrl,
               enabled: !_loading && !_saving,
@@ -387,7 +390,7 @@ class _StudioNovelCrawlAuthSectionState
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: TextField(
                     controller: _loginPassFieldCtrl,
@@ -401,9 +404,9 @@ class _StudioNovelCrawlAuthSectionState
               ],
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: StudioSpacing.xs),
           StudioDenseActionRow(
-            spacing: 8,
+            spacing: StudioSpacing.xs,
             children: <Widget>[
               OutlinedButton(
                 style: studioFormSecondaryButtonStyle(context),
@@ -428,8 +431,8 @@ class _StudioNovelCrawlAuthSectionState
           ],
           if (_loading || _saving)
             const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: LinearProgressIndicator(minHeight: 2),
+              padding: EdgeInsets.only(top: StudioSpacing.xs),
+              child: StudioSkeleton(height: 4, borderRadius: 2),
             ),
         ],
       ],

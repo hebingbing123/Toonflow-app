@@ -36,7 +36,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8),
+        const SizedBox(height: StudioSpacing.xs),
         Text(
           l10n.agentWorkspaceScriptStagesTitle,
           style: Theme.of(context).textTheme.labelLarge,
@@ -44,10 +44,10 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
         const SizedBox(height: StudioSpacing.xs),
         ...stages.map(
           (ScriptWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
-              padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner - 4),
+              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -66,7 +66,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
                     stage.detail,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDenseActionRow(
                     children: <Widget>[
                       OutlinedButton(
@@ -145,7 +145,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(
-                      StudioLayoutSpacing.cardInner - 4,
+                      StudioSpacing.radiusComfort,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +159,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                           recipe.detail,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioDenseActionRow(
                           children: <Widget>[
                             if (recipe.domainTool != null)
