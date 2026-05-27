@@ -17,6 +17,18 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
         onPressed: scriptProbeBusy[0] || saving[0]
             ? null
             : () async {
+                final confirmed = await showStudioConfirmDialog(
+                  context: ctx,
+                  title: 'Run batch add probe?',
+                  message:
+                      'This probe creates temporary scripts and deletes them immediately after the probe completes. The write/delete flow cannot be undone.',
+                  confirmLabel: 'Run probe',
+                  cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
+                  destructive: true,
+                );
+                if (confirmed != true || !ctx.mounted) {
+                  return;
+                }
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
                   final stamp = DateTime.now().millisecondsSinceEpoch;

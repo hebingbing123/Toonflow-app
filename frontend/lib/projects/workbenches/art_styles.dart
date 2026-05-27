@@ -222,6 +222,18 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() => _statusLine = l10n.projectsArtWorkbenchStatusDeleteNeedSelect);
       return;
     }
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: 'Delete art style?',
+      message:
+          'This will delete the selected art style and cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
     setState(() {
       _busy = true;
       _statusLine = l10n.projectsArtWorkbenchStatusDeleting;

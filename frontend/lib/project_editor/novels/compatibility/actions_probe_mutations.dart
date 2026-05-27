@@ -81,6 +81,18 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
             ? null
             : () async {
                 final l10n = resolveAppLocalizationsForErrors(ctx);
+                final confirmed = await showStudioConfirmDialog(
+                  context: ctx,
+                  title: 'Batch delete probe?',
+                  message:
+                      'This will submit the batch-delete probe and cannot be undone.',
+                  confirmLabel: 'Delete',
+                  cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
+                  destructive: true,
+                );
+                if (confirmed != true || !ctx.mounted) {
+                  return;
+                }
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await batchDeleteNovelsUnderProject(token, p.id, const []);
@@ -118,6 +130,18 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
             ? null
             : () async {
                 final l10n = resolveAppLocalizationsForErrors(ctx);
+                final confirmed = await showStudioConfirmDialog(
+                  context: ctx,
+                  title: 'Delete probe novel?',
+                  message:
+                      'This will submit the numeric-id delete probe and cannot be undone.',
+                  confirmLabel: 'Delete',
+                  cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
+                  destructive: true,
+                );
+                if (confirmed != true || !ctx.mounted) {
+                  return;
+                }
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await deleteNovelByProjectUuid(token, p.id, 0);

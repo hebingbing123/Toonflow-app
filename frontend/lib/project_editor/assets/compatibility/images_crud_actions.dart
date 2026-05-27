@@ -101,8 +101,20 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                 assetsRef[0]!.items.isEmpty
             ? null
             : () async {
-                setDialogState(() => assetsBusy[0] = true);
                 final first = assetsRef[0]!.items.first;
+                final confirmed = await showStudioConfirmDialog(
+                  context: ctx,
+                  title: 'Delete probe image?',
+                  message:
+                      'This will delete the temporary probe image created for the selected asset and cannot be undone.',
+                  confirmLabel: 'Delete',
+                  cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
+                  destructive: true,
+                );
+                if (confirmed != true || !ctx.mounted) {
+                  return;
+                }
+                setDialogState(() => assetsBusy[0] = true);
                 try {
                   final ts = DateTime.now().millisecondsSinceEpoch;
                   final row = await createProjectAssetImageForProject(

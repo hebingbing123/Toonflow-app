@@ -111,6 +111,18 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
   }
 
   Future<void> _delete() async {
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: 'Delete vendor credential?',
+      message:
+          'This will remove the saved credential for this vendor and cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
     setState(() => _busy = true);
     try {
       await deleteSettingsVendorCredentialV1(
@@ -202,7 +214,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(l10n.projectEditorAssetCrudSave),
         ),

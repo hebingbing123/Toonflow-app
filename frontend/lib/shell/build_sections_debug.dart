@@ -85,9 +85,36 @@ extension _HomePageBuildDebugSections on _HomePageState {
       onValidateUserWasmProbe: _skillsHarnessController.validateUserWasmProbe,
       onPersistUserWasmProbe: _skillsHarnessController.persistUserWasmProbe,
       onLoadUserWasmList: _skillsHarnessController.loadUserWasmList,
-      onRevokeUserWasmProbe: _skillsHarnessController.revokeUserWasmProbe,
-      onRevokeUserWasmProbeAndReloadList:
-          _skillsHarnessController.revokeUserWasmProbeAndReloadList,
+      onRevokeUserWasmProbe: () async {
+        final confirmed = await showStudioConfirmDialog(
+          context: context,
+          title: 'Revoke user WASM?',
+          message:
+              'This will revoke the selected user WASM entry and cannot be undone.',
+          confirmLabel: 'Revoke',
+          cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+          destructive: true,
+        );
+        if (confirmed != true || !mounted) {
+          return;
+        }
+        await _skillsHarnessController.revokeUserWasmProbe();
+      },
+      onRevokeUserWasmProbeAndReloadList: () async {
+        final confirmed = await showStudioConfirmDialog(
+          context: context,
+          title: 'Revoke user WASM?',
+          message:
+              'This will revoke the selected user WASM entry, reload the list, and cannot be undone.',
+          confirmLabel: 'Revoke',
+          cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+          destructive: true,
+        );
+        if (confirmed != true || !mounted) {
+          return;
+        }
+        await _skillsHarnessController.revokeUserWasmProbeAndReloadList();
+      },
       onLoadSkillsAggregate: _skillsHarnessController.loadSkillsAggregate,
       onLoadSkillList: _skillsHarnessController.loadSkillList,
       onPreviewSkillFile: () =>
