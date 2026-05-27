@@ -741,15 +741,14 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
-                        IconButton(
-                          style: studioUtilityIconButtonStyle(context),
-                          tooltip: l10n.helpHubDialogClose,
+                        StudioUtilityIconButton(
+                          icon: Icons.close,
+                          label: l10n.helpHubDialogClose,
                           onPressed: () {
                             setState(() {
                               _latestCreatedWebhook = null;
                             });
                           },
-                          icon: const Icon(Icons.close, size: 18),
                         ),
                       ],
                     ),
@@ -870,9 +869,9 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                       '${entry.at.toLocal().toIso8601String()}\n${entry.summary}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    trailing: IconButton(
-                      style: studioUtilityIconButtonStyle(context),
-                      tooltip: l10n.opsWhCopyActivityTooltip,
+                    trailing: StudioUtilityIconButton(
+                      icon: Icons.copy_outlined,
+                      label: l10n.opsWhCopyActivityTooltip,
                       onPressed: () async {
                         final text = '${webhookActivityActionLabel(l10n, entry.action)}\n'
                             '${entry.webhookId}\n'
@@ -883,7 +882,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           SnackBar(content: Text(l10n.opsWhActivityRecordSuffix.trim())),
                         );
                       },
-                      icon: const Icon(Icons.copy_outlined),
                     ),
                   ),
                 ),
@@ -1092,9 +1090,9 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                           StudioDenseActionRow(
                             spacing: StudioSpacing.xs,
                             children: [
-                              IconButton(
-                                style: studioUtilityIconButtonStyle(context),
-                                tooltip: l10n.opsWhTooltipCopyUrl,
+                              StudioUtilityIconButton(
+                                icon: Icons.copy_outlined,
+                                label: l10n.opsWhTooltipCopyUrl,
                                 onPressed: () async {
                                   await Clipboard.setData(
                                     ClipboardData(text: wh.url),
@@ -1108,7 +1106,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.copy_outlined),
                               ),
                               OutlinedButton(
                                 style: studioFormSecondaryButtonStyle(context),

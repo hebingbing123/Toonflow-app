@@ -322,52 +322,55 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                     ),
                                   ),
                                   const SizedBox(width: StudioSpacing.xs),
-                                  IconButton(
-                                    style:
-                                        studioUtilityIconButtonStyle(ctx),
-                                    tooltip: dl10n
+                                  StudioIconButton(
+                                    style: studioUtilityIconButtonStyle(ctx),
+                                    icon: Icons.arrow_upward,
+                                    label: dl10n
                                         .notificationsComplianceTooltipMoveUp,
                                     onPressed: (_savingHelpHubLinks ||
                                             idx == 0)
                                         ? null
-                                        : () => setInner(() {
+                                        : () {
+                                            setInner(() {
                                               final tmp =
                                                   activeItems[idx - 1];
                                               activeItems[idx - 1] =
                                                   activeItems[idx];
                                               activeItems[idx] = tmp;
-                                            }),
-                                    icon: const Icon(Icons.arrow_upward),
+                                            });
+                                          },
                                   ),
-                                  IconButton(
-                                    style:
-                                        studioUtilityIconButtonStyle(ctx),
-                                    tooltip: dl10n
+                                  StudioIconButton(
+                                    style: studioUtilityIconButtonStyle(ctx),
+                                    icon: Icons.arrow_downward,
+                                    label: dl10n
                                         .notificationsComplianceTooltipMoveDown,
                                     onPressed: (_savingHelpHubLinks ||
                                             idx >=
                                                 activeItems.length - 1)
                                         ? null
-                                        : () => setInner(() {
+                                        : () {
+                                            setInner(() {
                                               final tmp =
                                                   activeItems[idx + 1];
                                               activeItems[idx + 1] =
                                                   activeItems[idx];
                                               activeItems[idx] = tmp;
-                                            }),
-                                    icon: const Icon(Icons.arrow_downward),
+                                            });
+                                          },
                                   ),
-                                  IconButton(
-                                    style:
-                                        studioUtilityIconButtonStyle(ctx),
-                                    tooltip:
+                                  StudioIconButton(
+                                    style: studioUtilityIconButtonStyle(ctx),
+                                    icon: Icons.delete_outline,
+                                    label:
                                         dl10n.notificationsActionDelete,
                                     onPressed: _savingHelpHubLinks
                                         ? null
-                                        : () => setInner(() {
+                                        : () {
+                                            setInner(() {
                                               activeItems.removeAt(idx);
-                                            }),
-                                    icon: const Icon(Icons.delete_outline),
+                                            });
+                                          },
                                   ),
                                 ],
                               ),
@@ -606,9 +609,9 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                             spacing: StudioSpacing.xs,
                             runSpacing: StudioSpacing.xs,
                             children: [
-                              IconButton(
-                                style: studioUtilityIconButtonStyle(context),
-                                tooltip: l10n.helpHubCopyLinkTooltip,
+                              StudioUtilityIconButton(
+                                icon: Icons.copy,
+                                label: l10n.helpHubCopyLinkTooltip,
                                 onPressed: () async {
                                   await Clipboard.setData(
                                     ClipboardData(text: item.url),
@@ -620,11 +623,10 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                     SnackBar(content: Text(l10n.helpHubCopied)),
                                   );
                                 },
-                                icon: const Icon(Icons.copy),
                               ),
-                              IconButton(
-                                style: studioUtilityIconButtonStyle(context),
-                                tooltip: l10n.helpHubCopyTitleUrlTooltip,
+                              StudioUtilityIconButton(
+                                icon: Icons.copy_all_outlined,
+                                label: l10n.helpHubCopyTitleUrlTooltip,
                                 onPressed: () async {
                                   await Clipboard.setData(
                                     ClipboardData(
@@ -640,7 +642,6 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.copy_all_outlined),
                               ),
                             ],
                           ),

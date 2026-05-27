@@ -764,11 +764,10 @@ extension _HomePageProductShell on _HomePageState {
                             ),
                             Align(
                               alignment: Alignment.centerRight,
-                              child: IconButton(
-                                tooltip: l10n.studioDismiss,
+                              child: StudioUtilityIconButton(
+                                icon: Icons.close_rounded,
+                                label: l10n.studioDismiss,
                                 onPressed: dismissPanel,
-                                style: studioUtilityIconButtonStyle(ctx),
-                                icon: const Icon(Icons.close_rounded, size: 16),
                               ),
                             ),
                           ],
@@ -781,11 +780,10 @@ extension _HomePageProductShell on _HomePageState {
                                 style: studioPaneTitleStyle(ctx),
                               ),
                             ),
-                            IconButton(
-                              tooltip: l10n.studioDismiss,
+                            StudioUtilityIconButton(
+                              icon: Icons.close_rounded,
+                              label: l10n.studioDismiss,
                               onPressed: dismissPanel,
-                              style: studioUtilityIconButtonStyle(ctx),
-                              icon: const Icon(Icons.close_rounded, size: 18),
                             ),
                           ],
                         ),
@@ -1511,19 +1509,19 @@ extension _HomePageProductShell on _HomePageState {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    IconButton(
+                    StudioIconButton(
                       style: studioChromeIconButtonStyle(context),
-                      tooltip: 'Back',
+                      icon: Icons.arrow_back_ios_new,
+                      label: 'Back',
                       onPressed: canBack ? _handleProductShellBack : null,
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 22),
                     ),
                     const SizedBox(width: StudioSpacing.xs),
-                    IconButton(
+                    StudioIconButton(
                       style: studioChromeIconButtonStyle(context),
-                      tooltip: 'Forward',
+                      icon: Icons.arrow_forward_ios,
+                      label: 'Forward',
                       onPressed:
                           canForward ? _handleProductShellForward : null,
-                      icon: const Icon(Icons.arrow_forward_ios, size: 22),
                     ),
                   ],
                 );
@@ -1653,18 +1651,19 @@ extension _HomePageProductShell on _HomePageState {
           children: <Widget>[
             Builder(
               builder: (buttonContext) {
-                return IconButton(
-                  style: studioChromeIconButtonStyle(context),
-                  tooltip: l10n.productShellMoreMenu,
-                  onPressed: () => _openProductShellMoreMenu(buttonContext),
-                  icon:
-                      compactTopChrome &&
+                return Badge.count(
+                  count: compactTopChrome &&
                           _notificationsController.unreadCount > 0
-                      ? Badge.count(
-                          count: _notificationsController.unreadCount,
-                          child: const Icon(Icons.apps_outlined),
-                        )
-                      : const Icon(Icons.apps_outlined),
+                      ? _notificationsController.unreadCount
+                      : 0,
+                  isLabelVisible: compactTopChrome &&
+                      _notificationsController.unreadCount > 0,
+                  child: StudioIconButton(
+                    style: studioChromeIconButtonStyle(context),
+                    icon: Icons.apps_outlined,
+                    label: l10n.productShellMoreMenu,
+                    onPressed: () => _openProductShellMoreMenu(buttonContext),
+                  ),
                 );
               },
             ),
@@ -1691,11 +1690,11 @@ extension _HomePageProductShell on _HomePageState {
                 onSelected: AppLocaleNotifier.instance.setLocaleCode,
               ),
               const SizedBox(width: StudioSpacing.xs),
-              IconButton(
+              StudioIconButton(
                 style: studioChromeIconButtonStyle(context),
-                tooltip: l10n.authSignOut,
+                icon: Icons.logout_outlined,
+                label: l10n.authSignOut,
                 onPressed: _authController.signOut,
-                icon: const Icon(Icons.logout_outlined),
               ),
             ],
           ],
