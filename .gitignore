@@ -90,6 +90,17 @@ frontend/.l10n_batch/
 # Cursor IDE (local)
 .cursor/
 
+# --- Local audit/demo artifacts (avoid accidental commits) ---
+.codex/
+.ecc-design/
+scratch/
+autotour_*.png
+full_autotour_step.png
+screenshot_target_*.png
+
+# Experimental scratch images under website (keep real design assets tracked)
+website/assets/source/ChatGP*.png
+
 # Kiro: local per-workspace tooling config (keep specs markdown in Git if desired)
 .kiro/**/.config.kiro
 
