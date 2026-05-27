@@ -6,12 +6,7 @@ import 'package:flutter/material.dart';
 /// Each [StudioPlatformImageSurface] maps to its own asset path under
 /// `assets/brand/<surface>/`. Do not share one sprite or mobile-only crop
 /// across surfaces — add a dedicated file per surface when art is ready.
-enum StudioPlatformImageSurface {
-  mobile,
-  tablet,
-  desktop,
-  web,
-}
+enum StudioPlatformImageSurface { mobile, tablet, desktop, web }
 
 /// Resolves a platform-specific asset path with fallback to [mobile].
 String studioPlatformImageAsset(

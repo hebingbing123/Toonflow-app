@@ -87,22 +87,12 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    # Brand assets are split by surface; Flutter resolves the 1.5x/2.0x/3.0x
+    # variants automatically under each base directory.
     - assets/brand/mobile/
-    - assets/brand/mobile/1.5x/
-    - assets/brand/mobile/2.0x/
-    - assets/brand/mobile/3.0x/
     - assets/brand/tablet/
-    - assets/brand/tablet/1.5x/
-    - assets/brand/tablet/2.0x/
-    - assets/brand/tablet/3.0x/
     - assets/brand/desktop/
-    - assets/brand/desktop/1.5x/
-    - assets/brand/desktop/2.0x/
-    - assets/brand/desktop/3.0x/
     - assets/brand/web/
-    - assets/brand/web/1.5x/
-    - assets/brand/web/2.0x/
-    - assets/brand/web/3.0x/
 
   fonts:
     - family: Inter
