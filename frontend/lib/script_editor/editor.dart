@@ -71,6 +71,8 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
   late final TextEditingController _contentCtrl;
   late final TextEditingController _stateCtrl;
   var _saving = false;
+  bool _allowPopOnce = false;
+  bool _handlingPop = false;
 
   @override
   void initState() {
@@ -98,6 +100,55 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
       projectNumericId: widget.projectNumericId,
       scriptNumericId: widget.script.numericId,
     );
+  }
+
+  bool get _dirty {
+    final script = widget.script;
+    return _nameCtrl.text != (script.name ?? '') ||
+        _contentCtrl.text != (script.content ?? '') ||
+        _stateCtrl.text != (script.extractState?.toString() ?? '');
+  }
+
+  bool get _canPop => _allowPopOnce || _saving || !_dirty;
+
+  Future<void> _handlePopInvoked(bool didPop) async {
+    if (didPop || _handlingPop || _saving) {
+      return;
+    }
+    if (!_dirty) {
+      if (!mounted) return;
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(widget.dialogContext).maybePop();
+      });
+      return;
+    }
+
+    _handlingPop = true;
+    try {
+      final discard = await showStudioConfirmDialog(
+        context: widget.dialogContext,
+        title: 'Discard changes?',
+        message: 'You have unsaved script changes. Leave anyway?',
+        confirmLabel: 'Discard',
+        cancelLabel: MaterialLocalizations.of(
+          widget.dialogContext,
+        ).cancelButtonLabel,
+        destructive: true,
+        barrierDismissible: false,
+      );
+      if (discard != true || !mounted) {
+        return;
+      }
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(widget.dialogContext).maybePop();
+      });
+    } finally {
+      _handlingPop = false;
+    }
   }
 
   Future<void> _deleteScript(AppLocalizations l10n) async {
@@ -140,8 +191,9 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
       ScaffoldMessenger.of(widget.hostContext).showSnackBar(
         SnackBar(
           content: Text(
-            resolveAppLocalizationsForErrors(widget.hostContext)
-                .scriptEditorDeletedSnackBar,
+            resolveAppLocalizationsForErrors(
+              widget.hostContext,
+            ).scriptEditorDeletedSnackBar,
           ),
         ),
       );
@@ -168,9 +220,7 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
         if (mounted) {
           setState(() => _saving = false);
           ScaffoldMessenger.of(widget.dialogContext).showSnackBar(
-            SnackBar(
-              content: Text(l10n.scriptEditorExtractStateMustBeInteger),
-            ),
+            SnackBar(content: Text(l10n.scriptEditorExtractStateMustBeInteger)),
           );
         }
         return;
@@ -210,84 +260,92 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
         ? viewportWidth.clamp(320.0, 720.0)
         : 720.0;
 
-    return StudioAlertDialog(
-      title: Text(l10n.scriptEditorDialogTitle(widget.script.numericId)),
-      content: SizedBox(
-        width: dialogWidth,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _nameCtrl,
-                enabled: !_saving,
-                decoration: InputDecoration(
-                  labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
+    return PopScope(
+      canPop: _canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        unawaited(_handlePopInvoked(didPop));
+      },
+      child: StudioAlertDialog(
+        title: Text(l10n.scriptEditorDialogTitle(widget.script.numericId)),
+        content: SizedBox(
+          width: dialogWidth,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _nameCtrl,
+                  enabled: !_saving,
+                  decoration: InputDecoration(
+                    labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
+                  ),
                 ),
-              ),
-              const SizedBox(height: StudioLayoutSpacing.listItem),
-              TextField(
-                controller: _contentCtrl,
-                enabled: !_saving,
-                minLines: 4,
-                maxLines: 12,
-                decoration: InputDecoration(
-                  labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
-                  alignLabelWithHint: true,
+                const SizedBox(height: StudioLayoutSpacing.listItem),
+                TextField(
+                  controller: _contentCtrl,
+                  enabled: !_saving,
+                  minLines: 4,
+                  maxLines: 12,
+                  decoration: InputDecoration(
+                    labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
+                    alignLabelWithHint: true,
+                  ),
                 ),
-              ),
-              const SizedBox(height: StudioLayoutSpacing.listItem),
-              TextField(
-                controller: _stateCtrl,
-                enabled: !_saving,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText:
-                      l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
+                const SizedBox(height: StudioLayoutSpacing.listItem),
+                TextField(
+                  controller: _stateCtrl,
+                  enabled: !_saving,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
+                  ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: _saving ? null : _openStoryboardStep,
-                  child: Text(l10n.scriptEditorOpenStoryboards),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: _saving ? null : _openStoryboardStep,
+                    child: Text(l10n.scriptEditorOpenStoryboards),
+                  ),
                 ),
-              ),
-              const SizedBox(height: StudioLayoutSpacing.insetComfortable),
-              _ScriptWorkbenchPanel(
-                token: widget.token,
-                projectId: widget.projectId,
-                scriptNumericId: widget.script.numericId,
-                onExtractStateSynced: (extractState) {
-                  if (!mounted) return;
-                  _stateCtrl.text = extractState?.toString() ?? '';
-                },
-                onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
-              ),
-            ],
+                const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+                _ScriptWorkbenchPanel(
+                  token: widget.token,
+                  projectId: widget.projectId,
+                  scriptNumericId: widget.script.numericId,
+                  onExtractStateSynced: (extractState) {
+                    if (!mounted) return;
+                    _stateCtrl.text = extractState?.toString() ?? '';
+                  },
+                  onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
+                ),
+              ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: _saving
+                ? null
+                : () => Navigator.of(widget.dialogContext).pop(),
+            child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
+          ),
+          TextButton(
+            onPressed: _saving ? null : () => _deleteScript(l10n),
+            child: Text(l10n.scriptEditorDeleteScriptButton),
+          ),
+          FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
+            onPressed: _saving ? null : () => _saveChanges(l10n),
+            child: Text(
+              _saving
+                  ? l10n.scriptEditorSaveSaving
+                  : l10n.scriptEditorSaveChanges,
+            ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _saving
-              ? null
-              : () => Navigator.of(widget.dialogContext).pop(),
-          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
-        ),
-        TextButton(
-          onPressed: _saving ? null : () => _deleteScript(l10n),
-          child: Text(l10n.scriptEditorDeleteScriptButton),
-        ),
-        FilledButton(
-          style: studioFormPrimaryButtonStyle(context),
-          onPressed: _saving ? null : () => _saveChanges(l10n),
-          child: Text(
-            _saving ? l10n.scriptEditorSaveSaving : l10n.scriptEditorSaveChanges,
-          ),
-        ),
-      ],
     );
   }
 }

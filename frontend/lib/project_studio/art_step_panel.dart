@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../demo/studio_demo_data.dart';
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
@@ -83,6 +84,8 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   late String? _savedArtStyle;
 
   bool _saving = false;
+  bool _allowPopOnce = false;
+  bool _handlingPop = false;
   late final TextEditingController _artStyleCtrl;
   final ScrollController _scrollCtrl = ScrollController();
   final GlobalKey _styleFormKey = GlobalKey();
@@ -136,8 +139,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       accessToken: widget.accessToken,
       project: widget.project,
       home: widget.projectHome,
-      onOpenFullProjectSettings:
-          widget.onOpenFullProjectSettings ?? () {},
+      onOpenFullProjectSettings: widget.onOpenFullProjectSettings ?? () {},
       onNavigateToScriptStep: widget.onNavigateToScriptStep,
       onFocusStylePacks: _scrollToStyleForm,
       initialChecklistFocusKey: focusKey,
@@ -210,8 +212,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
         });
         return;
       }
-      final loadCatalog =
-          widget.catalogLoader ?? loadProjectStylePackCatalog;
+      final loadCatalog = widget.catalogLoader ?? loadProjectStylePackCatalog;
       final catalog = await loadCatalog(widget.accessToken, l10n);
       if (!mounted) return;
       setState(() {
@@ -281,9 +282,9 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
       kStudioSnapshotBus.invalidate(
         StudioSnapshotInvalidation.projectOnboarding,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.studioArtStepSaveSuccess)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.studioArtStepSaveSuccess)));
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -297,6 +298,46 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
 
   void _resetDraft() {
     setState(() => _seedFromProject(widget.project));
+  }
+
+  bool get _canPop => _allowPopOnce || _saving || !_dirty;
+
+  Future<void> _handlePopInvoked(bool didPop) async {
+    if (didPop || _handlingPop || _saving) {
+      return;
+    }
+    if (!_dirty) {
+      if (!mounted) return;
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).maybePop();
+      });
+      return;
+    }
+
+    _handlingPop = true;
+    try {
+      final discard = await showStudioConfirmDialog(
+        context: context,
+        title: 'Discard changes?',
+        message: 'You have unsaved art direction changes. Leave anyway?',
+        confirmLabel: 'Discard',
+        cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+        destructive: true,
+        barrierDismissible: false,
+      );
+      if (discard != true || !mounted) {
+        return;
+      }
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).maybePop();
+      });
+    } finally {
+      _handlingPop = false;
+    }
   }
 
   Widget? _buildReadinessCard(AppLocalizations l10n) {
@@ -372,148 +413,165 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     final tokens = StudioTokens.of(context);
     final catalog = _catalog;
 
-    return LayoutBuilder(
-      key: const Key('studio_art_step_panel'),
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 900;
-        final maxWidth = wide ? 1040.0 : 720.0;
+    return PopScope(
+      canPop: _canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        unawaited(_handlePopInvoked(didPop));
+      },
+      child: LayoutBuilder(
+        key: const Key('studio_art_step_panel'),
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 900;
+          final maxWidth = wide ? 1040.0 : 720.0;
 
-        final Widget catalogChild;
-        if (catalog != null) {
-          final summary = _SelectedPackSummary(
-            l10n: l10n,
-            artPack: findArtStylePackOption(catalog.artPacks, _draftArtPack),
-            storyPack: findStoryStylePackOption(
-              catalog.storyPacks,
-              _draftStoryPack,
-            ),
-            legacyArtStyle: _draftArtStyle.trim(),
-          );
-          final form = _buildStyleForm(l10n, theme, tokens, catalog);
-          catalogChild = wide
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(flex: 3, child: form),
-                    const SizedBox(width: StudioSpacing.sm),
-                    Expanded(flex: 2, child: summary),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    form,
-                    const SizedBox(height: StudioSpacing.sm),
-                    summary,
-                  ],
-                );
-        } else {
-          catalogChild = const SizedBox.shrink();
-        }
-        final catalogBody = StudioAsyncDataView(
-          loading: _loadingCatalog,
-          error: _catalogError,
-          onRetry: _loadCatalog,
-          child: catalogChild,
-        );
-
-        return Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: SingleChildScrollView(
-              controller: _scrollCtrl,
-              padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.md, StudioSpacing.sm, StudioSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Row(
+          final Widget catalogChild;
+          if (catalog != null) {
+            final summary = _SelectedPackSummary(
+              l10n: l10n,
+              artPack: findArtStylePackOption(catalog.artPacks, _draftArtPack),
+              storyPack: findStoryStylePackOption(
+                catalog.storyPacks,
+                _draftStoryPack,
+              ),
+              legacyArtStyle: _draftArtStyle.trim(),
+            );
+            final form = _buildStyleForm(l10n, theme, tokens, catalog);
+            catalogChild = wide
+                ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Icon(
-                        Icons.palette_outlined,
-                        size: 36,
-                        color: tokens.primary,
-                      ),
+                      Expanded(flex: 3, child: form),
                       const SizedBox(width: StudioSpacing.sm),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              l10n.studioStepArtTitle,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: tokens.textPrimary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: StudioSpacing.xs),
-                            Text(
-                              l10n.studioArtStepEditSubtitle,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: tokens.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      Expanded(flex: 2, child: summary),
                     ],
-                  ),
-                  const SizedBox(height: StudioSpacing.sm),
-                  if (_buildReadinessCard(l10n) case final card?) ...<Widget>[
-                    card,
-                    const SizedBox(height: StudioSpacing.sm),
-                  ],
-                  catalogBody,
-                  const SizedBox(height: StudioSpacing.sm),
-                  StudioDenseActionRow(
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      FilledButton.icon(
-                        key: const Key('studio_art_step_save'),
-                        style: studioFormIconLabeledButtonStyle(context),
-                        onPressed: _saving || !_dirty || _loadingCatalog
-                            ? null
-                            : _save,
-                        icon: _saving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: StudioControlSize.progressStroke,
-                                ),
-                              )
-                            : const Icon(Icons.save_outlined, size: StudioIconSize.sm),
-                        label: Text(
-                          _saving
-                              ? l10n.projectEditorSavingEllipsis
-                              : l10n.studioArtStepSaveButton,
-                        ),
-                      ),
-                      OutlinedButton(
-                        style: studioFormSecondaryButtonStyle(context),
-                        onPressed: _saving || !_dirty ? null : _resetDraft,
-                        child: Text(l10n.studioArtStepResetButton),
-                      ),
-                      TextButton.icon(
-                        style: studioFormTextButtonIconStyle(context),
-                        onPressed: _openBriefContext,
-                        icon: const Icon(Icons.article_outlined, size: StudioIconSize.sm),
-                        label: Text(l10n.studioArtStepOpenSettings),
-                      ),
-                      if (widget.onOpenFullProjectSettings != null)
-                        TextButton(
-                          style: studioFormButtonStyle(context),
-                          onPressed: widget.onOpenFullProjectSettings,
-                          child: Text(l10n.studioArtStepOpenFullSettings),
-                        ),
+                      form,
+                      const SizedBox(height: StudioSpacing.sm),
+                      summary,
                     ],
-                  ),
-                ],
+                  );
+          } else {
+            catalogChild = const SizedBox.shrink();
+          }
+          final catalogBody = StudioAsyncDataView(
+            loading: _loadingCatalog,
+            error: _catalogError,
+            onRetry: _loadCatalog,
+            child: catalogChild,
+          );
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: SingleChildScrollView(
+                controller: _scrollCtrl,
+                padding: const EdgeInsets.fromLTRB(
+                  StudioSpacing.sm,
+                  StudioSpacing.md,
+                  StudioSpacing.sm,
+                  StudioSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Icon(
+                          Icons.palette_outlined,
+                          size: 36,
+                          color: tokens.primary,
+                        ),
+                        const SizedBox(width: StudioSpacing.sm),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                l10n.studioStepArtTitle,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: tokens.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: StudioSpacing.xs),
+                              Text(
+                                l10n.studioArtStepEditSubtitle,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: tokens.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: StudioSpacing.sm),
+                    if (_buildReadinessCard(l10n) case final card?) ...<Widget>[
+                      card,
+                      const SizedBox(height: StudioSpacing.sm),
+                    ],
+                    catalogBody,
+                    const SizedBox(height: StudioSpacing.sm),
+                    StudioDenseActionRow(
+                      children: <Widget>[
+                        FilledButton.icon(
+                          key: const Key('studio_art_step_save'),
+                          style: studioFormIconLabeledButtonStyle(context),
+                          onPressed: _saving || !_dirty || _loadingCatalog
+                              ? null
+                              : _save,
+                          icon: _saving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.save_outlined,
+                                  size: StudioIconSize.sm,
+                                ),
+                          label: Text(
+                            _saving
+                                ? l10n.projectEditorSavingEllipsis
+                                : l10n.studioArtStepSaveButton,
+                          ),
+                        ),
+                        OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
+                          onPressed: _saving || !_dirty ? null : _resetDraft,
+                          child: Text(l10n.studioArtStepResetButton),
+                        ),
+                        TextButton.icon(
+                          style: studioFormTextButtonIconStyle(context),
+                          onPressed: _openBriefContext,
+                          icon: const Icon(
+                            Icons.article_outlined,
+                            size: StudioIconSize.sm,
+                          ),
+                          label: Text(l10n.studioArtStepOpenSettings),
+                        ),
+                        if (widget.onOpenFullProjectSettings != null)
+                          TextButton(
+                            style: studioFormButtonStyle(context),
+                            onPressed: widget.onOpenFullProjectSettings,
+                            child: Text(l10n.studioArtStepOpenFullSettings),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -536,9 +594,7 @@ class _SelectedPackSummary extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final hasAny =
-        artPack != null ||
-        storyPack != null ||
-        legacyArtStyle.isNotEmpty;
+        artPack != null || storyPack != null || legacyArtStyle.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
@@ -590,11 +646,7 @@ class _SelectedPackSummary extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-    this.detail,
-  });
+  const _SummaryRow({required this.label, required this.value, this.detail});
 
   final String label;
   final String value;

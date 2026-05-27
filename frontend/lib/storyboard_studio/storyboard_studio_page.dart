@@ -11,6 +11,7 @@ import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/studio_responsive_layout.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
@@ -105,7 +106,8 @@ class StoryboardStudioPage extends StatefulWidget {
   final Future<void> Function({
     required String projectUuid,
     required int scriptNumericId,
-  })? onOpenBatchImageWorkbench;
+  })?
+  onOpenBatchImageWorkbench;
   final int? initialScriptNumericId;
 
   /// When true, renders inside [ProjectStudioPage] without its own [Scaffold].
@@ -409,7 +411,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     } finally {
       if (mounted) setState(() => _savingPrompt = false);
@@ -439,7 +443,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     }
   }
@@ -451,7 +457,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(describeUserVisibleApiErrorResolved(context, e))),
+        SnackBar(
+          content: Text(describeUserVisibleApiErrorResolved(context, e)),
+        ),
       );
     }
   }
@@ -493,7 +501,12 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       return null;
     }
     return Padding(
-      padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, StudioSpacing.xs, StudioSpacing.radiusComfort, StudioSpacing.chromeActionGap),
+      padding: const EdgeInsets.fromLTRB(
+        StudioSpacing.radiusComfort,
+        StudioSpacing.xs,
+        StudioSpacing.radiusComfort,
+        StudioSpacing.chromeActionGap,
+      ),
       child: Align(
         alignment: Alignment.centerLeft,
         child: StudioDropdownButton<int>(
@@ -591,7 +604,8 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
               StudioSpacing.radiusComfort,
               0,
             ),
-            child: _buildShotIntake(l10n, compact: true) ??
+            child:
+                _buildShotIntake(l10n, compact: true) ??
                 const SizedBox.shrink(),
           ),
         ),
@@ -638,7 +652,10 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                 overflow: TextOverflow.ellipsis,
               ),
               onTap: () => _selectShot(shot),
-              onLongPress: _openShotEditor,
+              onLongPress: () {
+                unawaited(studioMediumImpact());
+                _openShotEditor();
+              },
             ),
           );
         },
@@ -756,7 +773,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(child: detail),
-        const Divider(height: StudioControlSize.dividerThickness),
+        const Divider(height: 1),
         SizedBox(
           height: studioClampedPaneWidth(
             frameHeight,
@@ -792,144 +809,157 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
     final topAction = noShots ? _openScriptStep : _openProductionWorkspace;
 
     final workspaceBody = StudioAsyncDataView(
-          loading: _loadingScripts,
-          error: _loadError != null && _shots.isEmpty ? _loadError : null,
-          onRetry: _loadScripts,
-          loadingPlaceholder: StudioLoadingPlaceholder.detail,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final contentWidth = constraints.maxWidth;
-              final contentHeight = constraints.maxHeight;
-              final tier = studioWidthTier(contentWidth);
-              final threePane = studioUseThreePaneLayout(contentWidth);
-              final listPaneWidth = studioClampedPaneWidth(
-                contentWidth,
-                fraction: 0.24,
-                min: 200,
-                max: StudioLayoutSize.fieldStandard,
-              );
-              final propertiesPaneWidth = studioClampedPaneWidth(
-                contentWidth,
-                fraction: 0.28,
-                min: 260,
-                max: 320,
-              );
-              final frameHeight = studioPreviewImageHeight(contentHeight);
+      loading: _loadingScripts,
+      error: _loadError != null && _shots.isEmpty ? _loadError : null,
+      onRetry: _loadScripts,
+      loadingPlaceholder: StudioLoadingPlaceholder.detail,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final contentWidth = constraints.maxWidth;
+          final contentHeight = constraints.maxHeight;
+          final tier = studioWidthTier(contentWidth);
+          final threePane = studioUseThreePaneLayout(contentWidth);
+          final listPaneWidth = studioClampedPaneWidth(
+            contentWidth,
+            fraction: 0.24,
+            min: 200,
+            max: 280,
+          );
+          final propertiesPaneWidth = studioClampedPaneWidth(
+            contentWidth,
+            fraction: 0.28,
+            min: 260,
+            max: 320,
+          );
+          final frameHeight = studioPreviewImageHeight(contentHeight);
 
-              if (!noShots && tier == StudioWidthTier.handset) {
-                if (selected != null) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: () =>
-                              setState(() => _selectedShotId = null),
-                          icon: const Icon(Icons.arrow_back),
-                          label: Text(l10n.studioStoryboardShotList),
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildStoryboardDetailPane(
-                          l10n: l10n,
-                          tokens: tokens,
-                          selected: selected,
-                          projectUuid: projectUuid,
-                          frameHeight: frameHeight,
-                          propertiesBelow: true,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-                return ColoredBox(
-                  color: tokens.bgInset,
-                  child: _buildStoryboardHandsetShotList(
-                    l10n: l10n,
-                    tokens: tokens,
-                    projectUuid: projectUuid,
+          if (!noShots && tier == StudioWidthTier.handset) {
+            if (selected != null) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () => setState(() => _selectedShotId = null),
+                      icon: const Icon(Icons.arrow_back),
+                      label: Text(l10n.studioStoryboardShotList),
+                    ),
                   ),
-                );
-              }
+                  Expanded(
+                    child: _buildStoryboardDetailPane(
+                      l10n: l10n,
+                      tokens: tokens,
+                      selected: selected,
+                      projectUuid: projectUuid,
+                      frameHeight: frameHeight,
+                      propertiesBelow: true,
+                    ),
+                  ),
+                ],
+              );
+            }
+            return ColoredBox(
+              color: tokens.bgInset,
+              child: _buildStoryboardHandsetShotList(
+                l10n: l10n,
+                tokens: tokens,
+                projectUuid: projectUuid,
+              ),
+            );
+          }
 
-              return Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                if (!noShots)
-                  SizedBox(
-                    width: tier == StudioWidthTier.handset
-                        ? contentWidth
-                        : listPaneWidth,
-                    child: ColoredBox(
-                      color: tokens.bgInset,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, StudioSpacing.radiusComfort, StudioSpacing.radiusComfort, 0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                Text(
-                                  l10n.studioStoryboardShotList,
-                                  style: studioPaneTitleStyle(context),
-                                ),
-                                if (widget.onOpenBatchImageWorkbench != null)
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.padded,
-                                        minimumSize: const Size(
-                                          StudioSpacing.iconTouchTarget,
-                                          StudioSpacing.iconTouchTarget,
-                                        ),
-                                      ),
-                                      onPressed: _loadingShots ||
-                                              _gridBusy ||
-                                              _savingPrompt
-                                          ? null
-                                          : () async {
-                                              final scriptId = _scriptNumericId;
-                                              if (scriptId == null) return;
-                                              final projectUuid =
-                                                  await _ensureProjectUuid();
-                                              await widget
-                                                  .onOpenBatchImageWorkbench!(
-                                                projectUuid: projectUuid,
-                                                scriptNumericId: scriptId,
-                                              );
-                                              if (mounted) {
-                                                await _onShotsMutated();
-                                              }
-                                            },
-                                      child: Text(
-                                        l10n.scriptEditorStoryboardsOpenImageWorkbench,
-                                        style: studioHintStyle(context),
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (!noShots)
+                SizedBox(
+                  width: tier == StudioWidthTier.handset
+                      ? contentWidth
+                      : listPaneWidth,
+                  child: ColoredBox(
+                    color: tokens.bgInset,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            StudioSpacing.radiusComfort,
+                            StudioSpacing.radiusComfort,
+                            StudioSpacing.radiusComfort,
+                            0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Text(
+                                l10n.studioStoryboardShotList,
+                                style: studioPaneTitleStyle(context),
+                              ),
+                              if (widget.onOpenBatchImageWorkbench != null)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: TextButton(
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.padded,
+                                      minimumSize: const Size(
+                                        StudioSpacing.iconTouchTarget,
+                                        StudioSpacing.iconTouchTarget,
                                       ),
                                     ),
+                                    onPressed:
+                                        _loadingShots ||
+                                            _gridBusy ||
+                                            _savingPrompt
+                                        ? null
+                                        : () async {
+                                            final scriptId = _scriptNumericId;
+                                            if (scriptId == null) return;
+                                            final projectUuid =
+                                                await _ensureProjectUuid();
+                                            await widget
+                                                .onOpenBatchImageWorkbench!(
+                                              projectUuid: projectUuid,
+                                              scriptNumericId: scriptId,
+                                            );
+                                            if (mounted) {
+                                              await _onShotsMutated();
+                                            }
+                                          },
+                                    child: Text(
+                                      l10n.scriptEditorStoryboardsOpenImageWorkbench,
+                                      style: studioHintStyle(context),
+                                    ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
-                          Flexible(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.fromLTRB(StudioSpacing.radiusComfort, StudioSpacing.xs, StudioSpacing.radiusComfort, 0),
-                              child: _buildShotIntake(l10n, compact: true) ??
-                                  const SizedBox.shrink(),
+                        ),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(
+                              StudioSpacing.radiusComfort,
+                              StudioSpacing.xs,
+                              StudioSpacing.radiusComfort,
+                              0,
                             ),
+                            child:
+                                _buildShotIntake(l10n, compact: true) ??
+                                const SizedBox.shrink(),
                           ),
-                          Expanded(
-                            child: StudioAsyncDataView(
-                              loading: _loadingShots,
-                              loadingPlaceholder: StudioLoadingPlaceholder.list,
-                              loadingItemCount: 3,
-                              scrollableLoading: false,
-                              child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+                        ),
+                        Expanded(
+                          child: StudioAsyncDataView(
+                            loading: _loadingShots,
+                            loadingPlaceholder: StudioLoadingPlaceholder.list,
+                            loadingItemCount: 3,
+                            scrollableLoading: false,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: StudioSpacing.xs,
+                              ),
                               itemCount: _shots.length,
                               itemBuilder: (context, index) {
                                 final shot = _shots[index];
@@ -953,7 +983,9 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                           : tokens.textMuted,
                                     ),
                                     title: Text(
-                                      l10n.studioStoryboardShotLabel(labelIndex),
+                                      l10n.studioStoryboardShotLabel(
+                                        labelIndex,
+                                      ),
                                     ),
                                     subtitle: Text(
                                       shot.state?.trim().isNotEmpty == true
@@ -963,101 +995,104 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     onTap: () => _selectShot(shot),
-                                    onLongPress: _openShotEditor,
+                                    onLongPress: () {
+                                      unawaited(studioMediumImpact());
+                                      _openShotEditor();
+                                    },
                                   ),
                                 );
                               },
                             ),
                           ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                Expanded(
-                  child: Column(
-                    children: <Widget>[
-                      Expanded(
-                        child: noShots
-                            ? Center(
-                                child: SingleChildScrollView(
-                                  padding: const EdgeInsets.all(StudioSpacing.lg),
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 520,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: <Widget>[
-                                        StudioEmptyState.firstUse(
-                                          title: l10n
-                                              .studioStoryboardStudioNoShotsTitle,
-                                          subtitle: l10n
-                                              .studioStoryboardStudioNoShotsSubtitle,
-                                          icon: Icons.view_comfy_alt_outlined,
-                                          actionLabel: l10n.projectStudioOpenStep(
-                                            l10n.studioStepScriptShort,
-                                          ),
-                                          onAction: _openScriptStep,
-                                        ),
-                                        const SizedBox(height: StudioSpacing.md),
-                                        _buildShotIntake(l10n, compact: false) ??
-                                            const SizedBox.shrink(),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : selected == null
-                            ? Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(StudioSpacing.md),
-                                  child: StudioEmptyState(
-                                    title: l10n.studioStoryboardStudioSelectShot,
-                                    icon: Icons.touch_app_outlined,
-                                    variant: StudioEmptyStateVariant.emptyData,
-                                    weight: StudioEmptyStateWeight.quiet,
-                                  ),
-                                ),
-                              )
-                            : _buildStoryboardDetailPane(
-                                l10n: l10n,
-                                tokens: tokens,
-                                selected: selected,
-                                projectUuid: projectUuid,
-                                frameHeight: frameHeight,
-                                propertiesBelow: !threePane,
-                              ),
-                      ),
-                      if (!noShots) ...<Widget>[
-                        const Divider(height: StudioControlSize.dividerThickness),
-                        Padding(
-                          padding: const EdgeInsets.all(StudioSpacing.sm),
-                          child: GridStoryboardPanel(
-                            busy: _gridBusy,
-                            onGenerateGrid: _runGridGenerate,
-                          ),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-                if (!noShots && threePane)
-                  SizedBox(
-                    width: propertiesPaneWidth,
-                    child: ColoredBox(
-                      color: tokens.bgSurface,
-                      child: _buildStoryboardPropertiesPane(
-                        l10n: l10n,
-                        selected: selected,
-                      ),
                     ),
                   ),
-              ],
-            );
-            },
-          ),
+                ),
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: noShots
+                          ? Center(
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(StudioSpacing.lg),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 520,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: <Widget>[
+                                      StudioEmptyState.firstUse(
+                                        title: l10n
+                                            .studioStoryboardStudioNoShotsTitle,
+                                        subtitle: l10n
+                                            .studioStoryboardStudioNoShotsSubtitle,
+                                        icon: Icons.view_comfy_alt_outlined,
+                                        actionLabel: l10n.projectStudioOpenStep(
+                                          l10n.studioStepScriptShort,
+                                        ),
+                                        onAction: _openScriptStep,
+                                      ),
+                                      const SizedBox(height: StudioSpacing.md),
+                                      _buildShotIntake(l10n, compact: false) ??
+                                          const SizedBox.shrink(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          : selected == null
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(StudioSpacing.md),
+                                child: StudioEmptyState(
+                                  title: l10n.studioStoryboardStudioSelectShot,
+                                  icon: Icons.touch_app_outlined,
+                                  variant: StudioEmptyStateVariant.emptyData,
+                                  weight: StudioEmptyStateWeight.quiet,
+                                ),
+                              ),
+                            )
+                          : _buildStoryboardDetailPane(
+                              l10n: l10n,
+                              tokens: tokens,
+                              selected: selected,
+                              projectUuid: projectUuid,
+                              frameHeight: frameHeight,
+                              propertiesBelow: !threePane,
+                            ),
+                    ),
+                    if (!noShots) ...<Widget>[
+                      const Divider(height: 1),
+                      Padding(
+                        padding: const EdgeInsets.all(StudioSpacing.sm),
+                        child: GridStoryboardPanel(
+                          busy: _gridBusy,
+                          onGenerateGrid: _runGridGenerate,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (!noShots && threePane)
+                SizedBox(
+                  width: propertiesPaneWidth,
+                  child: ColoredBox(
+                    color: tokens.bgSurface,
+                    child: _buildStoryboardPropertiesPane(
+                      l10n: l10n,
+                      selected: selected,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
 
     if (widget.embeddedInProjectStudio) {

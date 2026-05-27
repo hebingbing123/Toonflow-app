@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import 'studio_mobile_affordances.dart';
 import 'studio_pointer.dart';
 
 /// One action in a desktop-style context menu.
@@ -106,9 +109,7 @@ List<StudioContextMenuItem> studioBuildListRowContextMenu({
   List<StudioContextMenuItem>? trailingItems,
 }) {
   final l10n = AppLocalizations.of(context);
-  final items = <StudioContextMenuItem>[
-    ...?leadingItems,
-  ];
+  final items = <StudioContextMenuItem>[...?leadingItems];
 
   void add(
     VoidCallback? action,
@@ -159,7 +160,9 @@ List<StudioContextMenuItem> studioBuildListRowContextMenu({
   );
   add(
     onRestore,
-    restoreLabel ?? l10n?.shortVideoVersionManagerTooltipRestoreDraft ?? 'Restore',
+    restoreLabel ??
+        l10n?.shortVideoVersionManagerTooltipRestoreDraft ??
+        'Restore',
     icon: Icons.restore,
   );
   add(
@@ -169,7 +172,9 @@ List<StudioContextMenuItem> studioBuildListRowContextMenu({
   );
   add(
     onDownload,
-    downloadLabel ?? l10n?.shortVideoSpaceDialogExportHistoryDownload ?? 'Download',
+    downloadLabel ??
+        l10n?.shortVideoSpaceDialogExportHistoryDownload ??
+        'Download',
     icon: Icons.download_outlined,
   );
   add(
@@ -393,7 +398,12 @@ class StudioListRow extends StatelessWidget {
       minVerticalPadding: minVerticalPadding,
       enabled: enabled,
       onTap: enabled ? onTap : null,
-      onLongPress: enabled ? onLongPress : null,
+      onLongPress: enabled && onLongPress != null
+          ? () {
+              unawaited(studioMediumImpact());
+              onLongPress!();
+            }
+          : null,
       selected: selected,
       focusColor: focusColor,
       hoverColor: hoverColor,
@@ -403,19 +413,12 @@ class StudioListRow extends StatelessWidget {
     );
 
     final interactive = enabled && (onTap != null || onLongPress != null);
-    final wrapped = studioWrapClickCursor(
-      enabled: interactive,
-      child: tile,
-    );
+    final wrapped = studioWrapClickCursor(enabled: interactive, child: tile);
 
     final menu = _resolvedMenu(context);
     if (menu.isEmpty) return wrapped;
 
-    return StudioContextMenu(
-      items: menu,
-      enabled: enabled,
-      child: wrapped,
-    );
+    return StudioContextMenu(items: menu, enabled: enabled, child: wrapped);
   }
 }
 
@@ -469,7 +472,12 @@ class StudioCheckboxListRow extends StatelessWidget {
       enabled: interactive,
       child: CheckboxListTile(
         value: value,
-        onChanged: enabled ? onChanged : null,
+        onChanged: enabled && onChanged != null
+            ? (next) {
+                unawaited(studioLightImpact());
+                onChanged!(next);
+              }
+            : null,
         title: title,
         subtitle: subtitle,
         secondary: secondary,
@@ -538,7 +546,12 @@ class StudioSwitchListRow extends StatelessWidget {
       enabled: interactive,
       child: SwitchListTile(
         value: value,
-        onChanged: enabled ? onChanged : null,
+        onChanged: enabled && onChanged != null
+            ? (next) {
+                unawaited(studioLightImpact());
+                onChanged!(next);
+              }
+            : null,
         title: title,
         subtitle: subtitle,
         secondary: secondary,

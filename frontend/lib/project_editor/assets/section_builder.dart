@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_text_styles.dart';
+import '../../design_system/ix/studio_mobile_affordances.dart';
 import '../../rust_api.dart';
 import 'overview.dart';
 
@@ -56,6 +59,7 @@ Widget buildProjectAssetsSection({
               }
             },
             onRefresh: () async {
+              unawaited(studioLightImpact());
               setDialogState(() => assetsLoading[0] = true);
               try {
                 await reloadAssetsAndStats();

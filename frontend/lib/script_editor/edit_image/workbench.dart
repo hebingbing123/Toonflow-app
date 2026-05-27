@@ -64,10 +64,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
         });
       } catch (e) {
         setState(
-          () =>
-              statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
-                describeUserVisibleApiErrorResolved(context, e),
-              ),
+          () => statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
+            describeUserVisibleApiErrorResolved(context, e),
+          ),
         );
       } finally {
         setState(() => loading = false);
@@ -82,7 +81,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
       try {
         await action();
       } catch (e) {
-        setState(() => statusLine = describeUserVisibleApiErrorResolved(context, e));
+        setState(
+          () => statusLine = describeUserVisibleApiErrorResolved(context, e),
+        );
       } finally {
         setState(() => busy = false);
       }
@@ -117,7 +118,10 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                   stepStatusCtrl: stepStatusCtrl,
                 ),
                 callbacks: ScriptEditImageWorkbenchDialogViewCallbacks(
-                  onRefresh: () => refresh(setState),
+                  onRefresh: () {
+                    unawaited(studioLightImpact());
+                    return refresh(setState);
+                  },
                   onUploadSourceImage: () => runMutation(setState, () async {
                     final base64Data = uploadCtrl.text.trim();
                     if (base64Data.isEmpty) {
@@ -165,8 +169,8 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                               : modelCtrl.text.trim(),
                         );
                     setState(() {
-                      statusLine =
-                          l10n.scriptEditorEditImageWorkbenchJobEnqueued(
+                      statusLine = l10n
+                          .scriptEditorEditImageWorkbenchJobEnqueued(
                             response.jobId,
                             response.status,
                           );
@@ -230,8 +234,8 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                         .toList(growable: false);
                     setState(() {
                       steps = nextSteps;
-                      statusLine =
-                          l10n.scriptEditorEditImageWorkbenchStepUpdated(
+                      statusLine = l10n
+                          .scriptEditorEditImageWorkbenchStepUpdated(
                             response.stepId,
                           );
                     });

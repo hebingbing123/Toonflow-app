@@ -2,7 +2,8 @@
 
 part of 'section.dart';
 
-extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionState {
+extension _ShortVideoSpaceSectionTimelineExtension
+    on _ShortVideoSpaceSectionState {
   Future<void> _loadShortVideoTimeline() async {
     if (ProductDemoMode.instance.shouldSkipLiveApi) {
       final snap = widget.debugOverviewSnapshot;
@@ -80,7 +81,9 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
             if (_loadingTimeline)
               Text(
                 l10n.shortVideoTimelineLoading,
-                style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: studioPanelMutedColor(context),
+                ),
               )
             else if (timeline == null || timeline.scripts.isEmpty)
               StudioEmptyState.emptyData(
@@ -172,10 +175,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
         token,
         project.id,
       );
-      final url = await pollTimelinePreviewJobFileUrl(
-        token,
-        enqueued.jobId,
-      );
+      final url = await pollTimelinePreviewJobFileUrl(token, enqueued.jobId);
       if (!mounted) return;
       setState(() {
         _timelinePreviewUrl = url;
@@ -241,11 +241,9 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
   void initState() {
     super.initState();
     _tracks = widget.timeline.tracks;
-    _bgm = widget.timeline.tracks.bgm ??
-        const ShortVideoTimelineBgmTrackV1(
-          enabled: false,
-          volume: 0.35,
-        );
+    _bgm =
+        widget.timeline.tracks.bgm ??
+        const ShortVideoTimelineBgmTrackV1(enabled: false, volume: 0.35);
   }
 
   @override
@@ -254,7 +252,8 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
     if (oldWidget.timeline.timelineVersion != widget.timeline.timelineVersion ||
         oldWidget.timeline.revision != widget.timeline.revision) {
       _tracks = widget.timeline.tracks;
-      _bgm = widget.timeline.tracks.bgm ??
+      _bgm =
+          widget.timeline.tracks.bgm ??
           const ShortVideoTimelineBgmTrackV1(enabled: false, volume: 0.35);
       _undoStack.clear();
     }
@@ -332,7 +331,10 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
       children: [
         _buildM4Toolbar(l10n),
         const SizedBox(height: StudioSpacing.xs),
-        Text(l10n.shortVideoTimelineEffectApplyAll, style: theme.textTheme.labelMedium),
+        Text(
+          l10n.shortVideoTimelineEffectApplyAll,
+          style: theme.textTheme.labelMedium,
+        ),
         _buildEffectPresetDropdown(
           l10n,
           value: null,
@@ -378,7 +380,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(l10n.shortVideoTimelineSave),
             ),
@@ -458,7 +460,8 @@ class _TimelineScriptGroup extends StatefulWidget {
     String? fallbackSourceUrl,
   })
   onTrimChanged;
-  final void Function(int storyboardNumericId, String? presetId) onEffectChanged;
+  final void Function(int storyboardNumericId, String? presetId)
+  onEffectChanged;
   final Future<void> Function() onReordered;
 
   @override
@@ -484,6 +487,7 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
       final item = _shots.removeAt(index);
       _shots.insert(next, item);
     });
+    unawaited(studioLightImpact());
   }
 
   Future<void> _persist() async {
@@ -496,14 +500,16 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
         widget.accessToken,
         widget.projectId,
         scriptNumericId: widget.group.scriptNumericId,
-        orderedStoryboardIds:
-            _shots.map((s) => s.storyboardNumericId).toList(growable: false),
+        orderedStoryboardIds: _shots
+            .map((s) => s.storyboardNumericId)
+            .toList(growable: false),
       );
       if (!mounted) return;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoTimelineReorderDone)),
       );
       await widget.onReordered();
+      unawaited(studioMediumImpact());
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
@@ -550,7 +556,7 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
                 320,
                 fraction: 0.65,
                 min: 180,
-                max: StudioLayoutSize.fieldStandard,
+                max: 280,
               );
               return SizedBox(
                 height: laneHeight,
@@ -578,13 +584,14 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
                             : null,
                         onTrimChanged: (id, {inMs, outMs, fallbackSourceUrl}) =>
                             widget.onTrimChanged(
-                          id,
-                          inMs: inMs,
-                          outMs: outMs,
-                          fallbackSourceUrl: fallbackSourceUrl ??
-                              shot.sourceUrl ??
-                              shot.selectedVideoUrl,
-                        ),
+                              id,
+                              inMs: inMs,
+                              outMs: outMs,
+                              fallbackSourceUrl:
+                                  fallbackSourceUrl ??
+                                  shot.sourceUrl ??
+                                  shot.selectedVideoUrl,
+                            ),
                         onEffectChanged: widget.onEffectChanged,
                       ),
                     );
@@ -635,7 +642,8 @@ class _TimelineShotCard extends StatelessWidget {
     String? fallbackSourceUrl,
   })
   onTrimChanged;
-  final void Function(int storyboardNumericId, String? presetId) onEffectChanged;
+  final void Function(int storyboardNumericId, String? presetId)
+  onEffectChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -676,8 +684,7 @@ class _TimelineShotCard extends StatelessWidget {
               onSubmitted: (v) => onTrimChanged(
                 shot.storyboardNumericId,
                 inMs: v,
-                fallbackSourceUrl:
-                    shot.sourceUrl ?? shot.selectedVideoUrl,
+                fallbackSourceUrl: shot.sourceUrl ?? shot.selectedVideoUrl,
               ),
             ),
             _TrimField(
@@ -686,14 +693,13 @@ class _TimelineShotCard extends StatelessWidget {
               onSubmitted: (v) => onTrimChanged(
                 shot.storyboardNumericId,
                 outMs: v,
-                fallbackSourceUrl:
-                    shot.sourceUrl ?? shot.selectedVideoUrl,
+                fallbackSourceUrl: shot.sourceUrl ?? shot.selectedVideoUrl,
               ),
             ),
             Builder(
               builder: (ctx) {
-                final editor =
-                    ctx.findAncestorStateOfType<_TimelineNleEditorState>();
+                final editor = ctx
+                    .findAncestorStateOfType<_TimelineNleEditorState>();
                 if (editor == null) {
                   return const SizedBox.shrink();
                 }
@@ -758,8 +764,7 @@ class _TrimFieldState extends State<_TrimField> {
   @override
   void didUpdateWidget(covariant _TrimField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value &&
-        _ctrl.text != '${widget.value}') {
+    if (oldWidget.value != widget.value && _ctrl.text != '${widget.value}') {
       _ctrl.text = '${widget.value}';
     }
   }
@@ -775,10 +780,7 @@ class _TrimFieldState extends State<_TrimField> {
     return TextField(
       controller: _ctrl,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        isDense: true,
-        labelText: widget.label,
-      ),
+      decoration: InputDecoration(isDense: true, labelText: widget.label),
       onSubmitted: (text) {
         final parsed = int.tryParse(text.trim());
         if (parsed != null) {
