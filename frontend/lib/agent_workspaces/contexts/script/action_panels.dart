@@ -179,7 +179,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               constraints.maxWidth,
               maxColumns: 2,
               minTileWidth: 200,
-              maxTileWidth: 280,
+              maxTileWidth: StudioLayoutSize.fieldStandard,
             );
             final argsWidth = studioWrapTileWidth(
               constraints.maxWidth,

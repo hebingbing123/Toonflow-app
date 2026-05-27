@@ -48,7 +48,7 @@ Future<void> _showStudioContextMenu({
               if (enabled[i].icon != null) ...<Widget>[
                 Icon(
                   enabled[i].icon,
-                  size: 18,
+                  size: StudioIconSize.sm,
                   color: enabled[i].destructive
                       ? tokens.danger
                       : tokens.textSecondary,

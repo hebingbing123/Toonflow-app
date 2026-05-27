@@ -75,6 +75,9 @@ const double kProjectsHomeContentMaxWidth2200 = 1980;
 /// Shortest-side gate for phone / handset layout (iOS, Android, narrow Web).
 const double kProjectsHomePhoneShortestSide = kStudioHandsetMaxWidth;
 
+/// Minimum width for dialogs, sheets, and constrained panels.
+const double kStudioMinPanelWidth = 280;
+
 /// «更多» menu: bottom sheet at handset / compact shell widths.
 bool productShellMoreMenuUsesBottomSheet(double viewportWidth) {
   return viewportWidth <= kStudioShellCompactTopChromeMaxWidth;
@@ -86,7 +89,7 @@ double productShellMoreMenuPanelWidth(
   double horizontalMargin = 16,
 }) {
   if (productShellMoreMenuUsesBottomSheet(viewportWidth)) {
-    return math.max(280, viewportWidth - (horizontalMargin * 2));
+    return math.max(kStudioMinPanelWidth, viewportWidth - (horizontalMargin * 2));
   }
   if (viewportWidth >= 1440) {
     return 360;
@@ -97,7 +100,7 @@ double productShellMoreMenuPanelWidth(
   if (viewportWidth >= 720) {
     return 320;
   }
-  return math.max(280, viewportWidth - (horizontalMargin * 2));
+  return math.max(kStudioMinPanelWidth, viewportWidth - (horizontalMargin * 2));
 }
 
 /// Dialog / sheet content width capped to viewport minus [horizontalMargin].
@@ -107,7 +110,7 @@ double studioConstrainedDialogWidth(
   double horizontalMargin = 48,
 }) {
   final viewport = MediaQuery.sizeOf(context).width;
-  return math.min(maxWidth, math.max(280, viewport - horizontalMargin));
+  return math.min(maxWidth, math.max(kStudioMinPanelWidth, viewport - horizontalMargin));
 }
 
 /// Resolves projects-home content max width from pane [contentWidth].

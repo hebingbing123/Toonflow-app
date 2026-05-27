@@ -162,7 +162,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
                   entranceKey: _history.length,
                   child: StudioListRow(
                   dense: true,
-                  leading: const Icon(Icons.history, size: 20),
+                  leading: const Icon(Icons.history, size: StudioIconSize.md),
                   title: Text(
                     _history[i].query,
                     maxLines: 1,
@@ -181,11 +181,11 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
                   onTap: () => widget.onHistorySelected(_history[i].query),
                 ),
                 ),
-                if (i < _history.length - 1) const Divider(height: 1),
+                if (i < _history.length - 1) const Divider(height: StudioControlSize.dividerThickness),
               ],
             ],
           ),
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           // Clear history
           Padding(
             padding: const EdgeInsets.symmetric(

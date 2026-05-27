@@ -1608,7 +1608,8 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                           ],
                         ),
                         const SizedBox(height: StudioSpacing.xs),
-                        ...pagedInvites.map((invite) {
+                        ...studioStaggeredChildren(
+                          pagedInvites.map((invite) {
                           final selected = selectedInviteIds.contains(
                             invite.id,
                           );
@@ -1741,6 +1742,8 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                             ],
                           );
                         }),
+                          entranceKey: '${safePageIndex}_${pagedInvites.length}',
+                        ),
                       ],
                       if (error != null) ...<Widget>[
                         const SizedBox(height: StudioSpacing.xs),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
@@ -554,10 +555,13 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               ),
             ),
             const SizedBox(height: StudioSpacing.xs),
-            ..._experimentDetail!.variants.map(
-              (variant) => Text(
-                '${variant.label} · baseline=${variant.isBaseline} · budget=${variant.memoryBudgetSnapshot['budgetTier'] ?? '-'} · model=${variant.modelRouteSnapshot['modelName'] ?? '-'}',
+            ...studioStaggeredChildren(
+              _experimentDetail!.variants.map(
+                (variant) => Text(
+                  '${variant.label} · baseline=${variant.isBaseline} · budget=${variant.memoryBudgetSnapshot['budgetTier'] ?? '-'} · model=${variant.modelRouteSnapshot['modelName'] ?? '-'}',
+                ),
               ),
+              entranceKey: _experimentDetail!.variants.length,
             ),
           ],
           if (_roiSummary != null) ...[
@@ -569,45 +573,54 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               ),
             ),
             const SizedBox(height: StudioSpacing.xs),
-            ..._roiSummary!.variantComparisons.map(
-              (item) => Text(
-                l10n.benchmarkRoiVariantLine(
-                  item.variantLabel,
-                  item.qualityScoreDelta.toStringAsFixed(2),
-                  item.tokenDeltaPercent.toStringAsFixed(1),
+            ...studioStaggeredChildren(
+              _roiSummary!.variantComparisons.map(
+                (item) => Text(
+                  l10n.benchmarkRoiVariantLine(
+                    item.variantLabel,
+                    item.qualityScoreDelta.toStringAsFixed(2),
+                    item.tokenDeltaPercent.toStringAsFixed(1),
+                  ),
                 ),
               ),
+              entranceKey: _roiSummary!.variantComparisons.length,
             ),
           ],
           if (_gateSummary != null) ...[
             const SizedBox(height: StudioSpacing.sm),
             Text(summarizeBenchmarkGate(l10n, _gateSummary)),
             const SizedBox(height: StudioSpacing.xs),
-            ..._gateSummary!.assessments.map(
-              (item) => Text(
-                l10n.benchmarkGateAssessmentRow(
-                  item.variantLabel,
-                  studioBenchmarkGateDecisionLabel(l10n, item.autoDecision),
-                  item.qualityScoreDelta.toStringAsFixed(2),
-                  '${item.severeGuardFailures}',
+            ...studioStaggeredChildren(
+              _gateSummary!.assessments.map(
+                (item) => Text(
+                  l10n.benchmarkGateAssessmentRow(
+                    item.variantLabel,
+                    studioBenchmarkGateDecisionLabel(l10n, item.autoDecision),
+                    item.qualityScoreDelta.toStringAsFixed(2),
+                    '${item.severeGuardFailures}',
+                  ),
                 ),
               ),
+              entranceKey: _gateSummary!.assessments.length,
             ),
           ],
           if (_trends != null) ...[
             const SizedBox(height: StudioSpacing.sm),
             Text(summarizeBenchmarkTrends(l10n, _trends)),
             const SizedBox(height: StudioSpacing.xs),
-            ..._trends!.weeks.map(
-              (item) => Text(
-                l10n.benchmarkTrendWeekRow(
-                  item.weekStart,
-                  item.avgQualityScore.toStringAsFixed(1),
-                  '${item.totalTokens}',
-                  '${item.approvedCount}',
-                  '${item.blockedCount}',
+            ...studioStaggeredChildren(
+              _trends!.weeks.map(
+                (item) => Text(
+                  l10n.benchmarkTrendWeekRow(
+                    item.weekStart,
+                    item.avgQualityScore.toStringAsFixed(1),
+                    '${item.totalTokens}',
+                    '${item.approvedCount}',
+                    '${item.blockedCount}',
+                  ),
                 ),
               ),
+              entranceKey: _trends!.weeks.length,
             ),
           ],
           if (_abCompare != null) ...[
@@ -624,13 +637,16 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               ),
             ),
             const SizedBox(height: StudioSpacing.xs),
-            ..._abCompare!.comparisons.take(12).map(
-              (item) => Text(
-                '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, item.passed ? 'PASS' : 'FAIL')} · '
-                'tokenΔ ${item.tokenReductionPct.toStringAsFixed(1)}% · '
-                'qualityΔ ${(item.qualityScoreDiff ?? 0).toStringAsFixed(2)}'
-                '${item.failureReasons.isEmpty ? '' : ' · ${item.failureReasons.join(" | ")}'}',
+            ...studioStaggeredChildren(
+              _abCompare!.comparisons.take(12).map(
+                (item) => Text(
+                  '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, item.passed ? 'PASS' : 'FAIL')} · '
+                  'tokenΔ ${item.tokenReductionPct.toStringAsFixed(1)}% · '
+                  'qualityΔ ${(item.qualityScoreDiff ?? 0).toStringAsFixed(2)}'
+                  '${item.failureReasons.isEmpty ? '' : ' · ${item.failureReasons.join(" | ")}'}',
+                ),
               ),
+              entranceKey: _abCompare!.comparisons.length,
             ),
           ],
           if (_abRunDetail != null) ...[
@@ -644,21 +660,24 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               ),
             ),
             const SizedBox(height: StudioSpacing.xs),
-            ..._abRunDetail!.cases.take(12).map((item) {
-              final cmp = item.comparison;
-              final passed = cmp['passed'] == true;
-              final tokenDelta = (cmp['tokenReductionPct'] as num?)?.toDouble();
-              final qualityDelta = (cmp['qualityScoreDiff'] as num?)?.toDouble();
-              final reasons = (cmp['failureReasons'] is List)
-                  ? (cmp['failureReasons'] as List).map((e) => e.toString()).toList()
-                  : const <String>[];
-              return Text(
-                '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, passed ? 'PASS' : 'FAIL')} · '
-                'tokenΔ ${(tokenDelta ?? 0).toStringAsFixed(1)}% · '
-                'qualityΔ ${(qualityDelta ?? 0).toStringAsFixed(2)}'
-                '${reasons.isEmpty ? "" : " · ${reasons.join(" | ")}"}',
-              );
-            }),
+            ...studioStaggeredChildren(
+              _abRunDetail!.cases.take(12).map((item) {
+                final cmp = item.comparison;
+                final passed = cmp['passed'] == true;
+                final tokenDelta = (cmp['tokenReductionPct'] as num?)?.toDouble();
+                final qualityDelta = (cmp['qualityScoreDiff'] as num?)?.toDouble();
+                final reasons = (cmp['failureReasons'] is List)
+                    ? (cmp['failureReasons'] as List).map((e) => e.toString()).toList()
+                    : const <String>[];
+                return Text(
+                  '${item.testCaseId} · ${studioBenchmarkGateDecisionLabel(l10n, passed ? 'PASS' : 'FAIL')} · '
+                  'tokenΔ ${(tokenDelta ?? 0).toStringAsFixed(1)}% · '
+                  'qualityΔ ${(qualityDelta ?? 0).toStringAsFixed(2)}'
+                  '${reasons.isEmpty ? "" : " · ${reasons.join(" | ")}"}',
+                );
+              }),
+              entranceKey: _abRunDetail!.cases.length,
+            ),
           ],
         ],
       ),

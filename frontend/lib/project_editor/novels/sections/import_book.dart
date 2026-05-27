@@ -287,7 +287,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                     project: project,
                                   ),
                             ),
-                    icon: const Icon(Icons.play_arrow_outlined, size: 18),
+                    icon: const Icon(Icons.play_arrow_outlined, size: StudioIconSize.sm),
                     label: Text(
                       inPlace
                           ? l10n
@@ -335,7 +335,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           project: project,
                         ),
                       ),
-              icon: const Icon(Icons.upload_file_outlined, size: 18),
+              icon: const Icon(Icons.upload_file_outlined, size: StudioIconSize.sm),
               label: Text(l10n.projectEditorNovelsWholeBookPickFileAndImportButton),
             ),
             OutlinedButton.icon(
@@ -365,7 +365,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                           project: project,
                         ),
                       ),
-              icon: const Icon(Icons.folder_open_outlined, size: 18),
+              icon: const Icon(Icons.folder_open_outlined, size: StudioIconSize.sm),
               label: Text(l10n.projectEditorNovelsWholeBookPickFileButton),
             ),
           ],

@@ -66,7 +66,7 @@ class StudioGettingStartedSteps extends StatelessWidget {
                                 Container(
                                   constraints: const BoxConstraints(
                                     minWidth: 28,
-                                    minHeight: 28,
+                                    minHeight: StudioLayoutSize.wizardStepBadge,
                                   ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(

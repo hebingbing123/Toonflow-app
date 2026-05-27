@@ -466,7 +466,7 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
                     ),
                   ),
                   if (selected)
-                    Icon(Icons.check_rounded, size: 18, color: tokens.accent),
+                    Icon(Icons.check_rounded, size: StudioIconSize.sm, color: tokens.accent),
                 ],
               ),
             ),
@@ -489,7 +489,7 @@ class StudioMenuDivider extends StatelessWidget {
         vertical: StudioSpacing.chromeActionGap,
         horizontal: StudioSpacing.xs,
       ),
-      child: Divider(height: 1, thickness: 1, color: tokens.borderSubtle),
+      child: Divider(height: StudioControlSize.dividerThickness, thickness: 1, color: tokens.borderSubtle),
     );
   }
 }
@@ -645,7 +645,7 @@ class StudioSelectMenuItem extends StatelessWidget {
         foregroundColor: foregroundColor,
       ),
       trailingIcon: _showsCheckmark && selected
-          ? Icon(Icons.check_rounded, size: 18, color: tokens.accent)
+          ? Icon(Icons.check_rounded, size: StudioIconSize.sm, color: tokens.accent)
           : null,
       child: content,
     );

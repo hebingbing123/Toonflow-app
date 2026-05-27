@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
 import '../../../design_system/components/studio_dense_action_row.dart';
 import '../../../design_system/components/studio_surfaces.dart';
-
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -70,73 +70,76 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
           Text(blockerSummary, style: Theme.of(context).textTheme.bodySmall),
         ],
         const SizedBox(height: StudioSpacing.xs),
-        ...stages.map(
-          (ProductionWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          stage.title,
-                          style: Theme.of(context).textTheme.labelLarge,
+        ...studioStaggeredChildren(
+          stages.map(
+            (ProductionWorkspaceStage stage) => Card(
+              margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            stage.title,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                      StudioChip(label: Text(stage.status.localizedLabel(l10n))),
+                        StudioChip(label: Text(stage.status.localizedLabel(l10n))),
+                      ],
+                    ),
+                    Text(
+                      stage.detail,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    if (stage.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
+                      const SizedBox(height: StudioSpacing.xs),
+                      _buildPromptPreview(context, stage.prompt!.trim()),
                     ],
-                  ),
-                  Text(
-                    stage.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  if (stage.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
                     const SizedBox(height: StudioSpacing.xs),
-                    _buildPromptPreview(context, stage.prompt!.trim()),
+                    StudioDenseActionRow(
+                      children: <Widget>[
+                        StudioChip(
+                          label: Text(
+                            agentWorkspaceFlowKeyLabel(l10n, stage.flowKey),
+                          ),
+                        ),
+                        OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
+                          onPressed: busy ? null : () => onApplyStage(stage),
+                          child: Text(l10n.agentWorkspaceProductionApplyStage),
+                        ),
+                        if (stage.domainTool != null)
+                          FilledButton.tonal(
+                            style: studioFormTonalButtonStyle(context),
+                            onPressed: busy
+                                ? null
+                                : () => onRunStageDomainTool(stage),
+                            child: Text(
+                              productionStageDomainButtonLabel(stage, l10n),
+                            ),
+                          ),
+                        if (stage.subAgentTool != null)
+                          FilledButton(
+                            style: studioFormPrimaryButtonStyle(context),
+                            onPressed: busy
+                                ? null
+                                : () => onRunStageSubAgent(stage),
+                            child: Text(
+                              productionStageSubAgentButtonLabel(stage, l10n),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
-                  const SizedBox(height: StudioSpacing.xs),
-                  StudioDenseActionRow(
-                    children: <Widget>[
-                      StudioChip(
-                        label: Text(
-                          agentWorkspaceFlowKeyLabel(l10n, stage.flowKey),
-                        ),
-                      ),
-                      OutlinedButton(
-                        style: studioFormSecondaryButtonStyle(context),
-                        onPressed: busy ? null : () => onApplyStage(stage),
-                        child: Text(l10n.agentWorkspaceProductionApplyStage),
-                      ),
-                      if (stage.domainTool != null)
-                        FilledButton.tonal(
-                          style: studioFormTonalButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunStageDomainTool(stage),
-                          child: Text(
-                            productionStageDomainButtonLabel(stage, l10n),
-                          ),
-                        ),
-                      if (stage.subAgentTool != null)
-                        FilledButton(
-                          style: studioFormPrimaryButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunStageSubAgent(stage),
-                          child: Text(
-                            productionStageSubAgentButtonLabel(stage, l10n),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
+          entranceKey: stages.length,
         ),
       ],
     );
@@ -199,92 +202,95 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
         subtitle: diagnosisHeadline.isEmpty ? null : diagnosisHeadline,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: recipes.map(
-          (ProductionWorkspaceRecipe recipe) => Card(
-            margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.listItem),
-            color: tokens.bgInset,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-              side: BorderSide(color: tokens.borderSubtle),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    recipe.title,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: StudioSpacing.xs),
-                  Text(
-                    recipe.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  if (recipe.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
-                    const SizedBox(height: StudioSpacing.xs),
-                    _buildPromptPreview(context, recipe.prompt!.trim()),
-                  ],
-                  const SizedBox(height: StudioSpacing.xs),
-                  StudioDenseActionRow(
+          children: studioStaggeredChildren(
+            recipes.map(
+              (ProductionWorkspaceRecipe recipe) => Card(
+                margin: const EdgeInsets.only(bottom: StudioLayoutSpacing.listItem),
+                color: tokens.bgInset,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+                  side: BorderSide(color: tokens.borderSubtle),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      StudioChip(
-                        label: Text(
-                          agentWorkspaceFlowKeyLabel(l10n, recipe.flowKey),
-                        ),
+                      Text(
+                        recipe.title,
+                        style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      if (recipe.domainTool != null)
-                        StudioChip(
-                          label: Text(
-                            agentWorkspaceProductionDomainToolLabel(
-                              l10n,
-                              recipe.domainTool!,
+                      const SizedBox(height: StudioSpacing.xs),
+                      Text(
+                        recipe.detail,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      if (recipe.prompt?.trim().isNotEmpty ?? false) ...<Widget>[
+                        const SizedBox(height: StudioSpacing.xs),
+                        _buildPromptPreview(context, recipe.prompt!.trim()),
+                      ],
+                      const SizedBox(height: StudioSpacing.xs),
+                      StudioDenseActionRow(
+                        children: <Widget>[
+                          StudioChip(
+                            label: Text(
+                              agentWorkspaceFlowKeyLabel(l10n, recipe.flowKey),
                             ),
                           ),
-                        ),
-                      if (recipe.subAgentTool != null)
-                        StudioChip(
-                          label: Text(
-                            agentWorkspaceProductionSubAgentLabel(
-                              l10n,
-                              recipe.subAgentTool!,
+                          if (recipe.domainTool != null)
+                            StudioChip(
+                              label: Text(
+                                agentWorkspaceProductionDomainToolLabel(
+                                  l10n,
+                                  recipe.domainTool!,
+                                ),
+                              ),
+                            ),
+                          if (recipe.subAgentTool != null)
+                            StudioChip(
+                              label: Text(
+                                agentWorkspaceProductionSubAgentLabel(
+                                  l10n,
+                                  recipe.subAgentTool!,
+                                ),
+                              ),
+                            ),
+                          OutlinedButton(
+                            style: studioFormSecondaryButtonStyle(context),
+                            onPressed: busy ? null : () => onApplyRecipe(recipe),
+                            child: Text(
+                              l10n.agentWorkspaceProductionApplySuggestion,
                             ),
                           ),
-                        ),
-                      OutlinedButton(
-                        style: studioFormSecondaryButtonStyle(context),
-                        onPressed: busy ? null : () => onApplyRecipe(recipe),
-                        child: Text(
-                          l10n.agentWorkspaceProductionApplySuggestion,
-                        ),
+                          if (recipe.domainTool != null)
+                            FilledButton.tonal(
+                              style: studioFormTonalButtonStyle(context),
+                              onPressed: busy
+                                  ? null
+                                  : () => onRunRecipeDomainTool(recipe),
+                              child: Text(
+                                productionRecipeDomainButtonLabel(recipe, l10n),
+                              ),
+                            ),
+                          if (recipe.subAgentTool != null)
+                            FilledButton(
+                              style: studioFormPrimaryButtonStyle(context),
+                              onPressed: busy
+                                  ? null
+                                  : () => onRunRecipeSubAgent(recipe),
+                              child: Text(
+                                productionRecipeSubAgentButtonLabel(recipe, l10n),
+                              ),
+                            ),
+                        ],
                       ),
-                      if (recipe.domainTool != null)
-                        FilledButton.tonal(
-                          style: studioFormTonalButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunRecipeDomainTool(recipe),
-                          child: Text(
-                            productionRecipeDomainButtonLabel(recipe, l10n),
-                          ),
-                        ),
-                      if (recipe.subAgentTool != null)
-                        FilledButton(
-                          style: studioFormPrimaryButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunRecipeSubAgent(recipe),
-                          child: Text(
-                            productionRecipeSubAgentButtonLabel(recipe, l10n),
-                          ),
-                        ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
+            entranceKey: recipes.length,
           ),
-        ).toList(growable: false),
         ),
       ),
     );

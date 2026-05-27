@@ -42,7 +42,7 @@ class TaskCenterActionsBar extends StatelessWidget {
             ),
           ),
           onPressed: loadingTaskApi ? null : onLoadTaskApi,
-          icon: const Icon(Icons.refresh, size: 16),
+          icon: const Icon(Icons.refresh, size: StudioIconSize.xs),
           label: Text(
             loadingTaskApi
                 ? l10n.projectsBusyProcessing
@@ -285,7 +285,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
                       const SizedBox(width: StudioSpacing.xs),
                       Icon(
                         Icons.chevron_right,
-                        size: 20,
+                        size: StudioIconSize.md,
                         color: tokens.textMuted,
                       ),
                     ],

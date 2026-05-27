@@ -257,7 +257,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                     children: <Widget>[
                       Icon(
                         Icons.alt_route_outlined,
-                        size: 16,
+                        size: StudioIconSize.xs,
                         color: StudioTokens.of(context).textSecondary,
                       ),
                       const SizedBox(width: StudioSpacing.xs),
@@ -403,7 +403,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
                     onPressed: widget.onOpenProjectSettings,
-                    icon: const Icon(Icons.tune_outlined, size: 18),
+                    icon: const Icon(Icons.tune_outlined, size: StudioIconSize.sm),
                     label: Text(l10n.studioModelRoutingOpenAdvancedSettings),
                   ),
                 ),
@@ -448,7 +448,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Icon(Icons.hub_outlined, color: tokens.primary, size: 20),
+                  Icon(Icons.hub_outlined, color: tokens.primary, size: StudioIconSize.md),
                   const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Column(
@@ -576,7 +576,7 @@ class _ModelCatalogEmptyCallout extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonalIcon(
                   onPressed: onOpenSettings,
-                  icon: const Icon(Icons.settings_outlined, size: 18),
+                  icon: const Icon(Icons.settings_outlined, size: StudioIconSize.sm),
                   label: Text(l10n.studioModelRoutingOpenVendorSettings),
                 ),
               ),

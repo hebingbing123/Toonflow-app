@@ -686,7 +686,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     const SizedBox(
                       width: 28,
                       height: 28,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     ),
                     const SizedBox(width: StudioSpacing.sm),
                     Expanded(

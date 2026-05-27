@@ -193,7 +193,7 @@ class ProjectsSection extends StatelessWidget {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                         )
                       : const Icon(Icons.refresh),
                 ),

@@ -18,6 +18,7 @@ import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
+import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search results page displaying grouped search results by type.
@@ -545,11 +546,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           );
         }
         return SafeArea(
-          child: ListView(
+          child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            children: views
-                .map(
-                  (view) => ListTile(
+            itemCount: views.length,
+            itemBuilder: (context, index) {
+              final view = views[index];
+              return ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       view.title,
@@ -683,9 +685,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         ),
                       );
                     },
-                  ),
-                )
-                .toList(growable: false),
+                  );
+            },
           ),
         );
       },
@@ -911,10 +912,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         children: [
                           Icon(
                             Icons.search,
-                            size: 20,
+                            size: StudioIconSize.md,
                             color: StudioTokens.of(context).textSecondary,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: StudioSpacing.xs),
                           Expanded(
                             child: Text(
                               l10n.globalSearchFoundResults(_response!.total),
@@ -978,7 +979,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             ResultType.novelEvent,
                           ])
                             StudioFilterChip(
-                              avatar: Icon(_getTypeIcon(type), size: 16),
+                              avatar: Icon(_getTypeIcon(type), size: StudioIconSize.xs),
                               label: Text(
                                 l10n.globalSearchTypeCountChipLabel(
                                   _getTypeDisplayName(type),
@@ -1145,12 +1146,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               size: 64,
               color: Theme.of(context).colorScheme.error,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Text(
               l10n.globalSearchErrorTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               _error ?? l10n.globalSearchUnknownError,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1158,7 +1159,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: StudioSpacing.md),
             FilledButton.icon(
               style: studioFormIconLabeledButtonStyle(context),
               onPressed: _performSearch,
@@ -1183,7 +1184,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   /// Build results list grouped by type
   Widget _buildResultsList() {
     final grouped = _groupResultsByType();
-    int currentIndex = 0;
     const typeOrder = <ResultType>[
       ResultType.project,
       ResultType.script,
@@ -1192,21 +1192,80 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       ResultType.novelEvent,
     ];
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        for (final t in typeOrder) ...[
-          if (grouped[t] != null && grouped[t]!.isNotEmpty) ...[
-            _buildTypeHeader(t, grouped[t]!.length),
-            const SizedBox(height: 8),
-            ...grouped[t]!.map((result) {
-              final index = currentIndex++;
-              return _buildResultCard(result, index);
-            }),
-            const SizedBox(height: 24),
+    final sections = <_SearchResultSection>[];
+    var startIndex = 0;
+    for (final type in typeOrder) {
+      final items = grouped[type];
+      if (items == null || items.isEmpty) {
+        continue;
+      }
+      sections.add(
+        _SearchResultSection(
+          type: type,
+          results: items,
+          startIndex: startIndex,
+        ),
+      );
+      startIndex += items.length;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = studioGridCrossAxisCount(
+          constraints.maxWidth,
+          handset: 1,
+          tablet: 2,
+          desktop: 3,
+        );
+
+        return CustomScrollView(
+          slivers: <Widget>[
+            for (final section in sections) ...<Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                sliver: SliverToBoxAdapter(
+                  child: _buildTypeHeader(section.type, section.results.length),
+                ),
+              ),
+              if (crossAxisCount <= 1)
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                        final result = section.results[i];
+                        final index = section.startIndex + i;
+                        return _buildResultCard(result, index);
+                      },
+                      childCount: section.results.length,
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 2.8,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                        final result = section.results[i];
+                        final index = section.startIndex + i;
+                        return _buildResultCard(result, index);
+                      },
+                      childCount: section.results.length,
+                    ),
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ],
-        ],
-      ],
+        );
+      },
     );
   }
 
@@ -1217,10 +1276,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       children: [
         Icon(
           _getTypeIcon(type),
-          size: 20,
+          size: StudioIconSize.md,
           color: Theme.of(context).colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: StudioSpacing.xs),
         Text(
           l10n.globalSearchTypeSectionHeader(
             _getTypeDisplayName(type),
@@ -1270,7 +1329,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             tooltip: l10n.globalSearchPrevPage,
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: StudioSpacing.sm),
 
           // Page indicator
           Text(
@@ -1278,7 +1337,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             style: theme.textTheme.bodyMedium,
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: StudioSpacing.sm),
 
           // Next button
           IconButton.outlined(
@@ -1432,4 +1491,16 @@ class _SearchViewTemplate {
   final String id;
   final Set<ResultType> resultTypes;
   final int? daysBack;
+}
+
+class _SearchResultSection {
+  const _SearchResultSection({
+    required this.type,
+    required this.results,
+    required this.startIndex,
+  });
+
+  final ResultType type;
+  final List<SearchResult> results;
+  final int startIndex;
 }

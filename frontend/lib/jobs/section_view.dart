@@ -186,7 +186,7 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   if (!compact) ...<Widget>[
                     const SizedBox(width: StudioSpacing.xs),
-                    Icon(Icons.chevron_right, size: 20, color: tokens.textMuted),
+                    Icon(Icons.chevron_right, size: StudioIconSize.md, color: tokens.textMuted),
                   ],
                 ],
               ),
@@ -222,6 +222,110 @@ class JobsSectionView extends StatelessWidget {
     );
   }
 
+  Widget _buildJobTile(
+    BuildContext context, {
+    required JobRow job,
+    required int index,
+    required int entranceKey,
+    required AppLocalizations l10n,
+    required bool compact,
+    required TextStyle? detailStyle,
+    required bool studioCards,
+  }) {
+    final Widget tile;
+    if (studioCards) {
+      tile = _buildStudioJobTile(
+        context,
+        job: job,
+        l10n: l10n,
+        compact: compact,
+        detailStyle: detailStyle,
+      );
+    } else {
+      final detailLines = <String>[
+        job.id,
+        if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
+          l10n.jobsFailedReason(job.errorMessage!),
+        if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
+          l10n.jobsClaimedBy(job.claimedBy!),
+      ];
+      final actionButtons = <Widget>[
+        if (job.status == 'failed')
+          TextButton(
+            onPressed: model.retryingJobId == job.id
+                ? null
+                : () => callbacks.onRetryFailedJob(job),
+            child: Text(
+              model.retryingJobId == job.id ? '…' : l10n.jobsRetry,
+            ),
+          ),
+        if (job.status == 'queued' || job.status == 'running')
+          TextButton(
+            onPressed: model.cancellingJobId == job.id
+                ? null
+                : () => callbacks.onCancelQueuedJob(job),
+            child: Text(
+              model.cancellingJobId == job.id ? '…' : l10n.jobsCancel,
+            ),
+          ),
+      ];
+      tile = StudioListRow(
+        dense: !compact,
+        contentPadding: EdgeInsets.zero,
+        minVerticalPadding: compact ? 10 : 6,
+        title: Text(
+          studioJobListTitle(l10n, job.kind, job.status),
+          maxLines: compact ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              for (var i = 0; i < detailLines.length; i++) ...<Widget>[
+                if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
+                Text(
+                  detailLines[i],
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: detailStyle,
+                ),
+              ],
+              if (compact && actionButtons.isNotEmpty) ...<Widget>[
+                const SizedBox(height: StudioSpacing.xs),
+                StudioDenseActionRow(
+                  spacing: StudioSpacing.xs,
+                  children: actionButtons,
+                ),
+              ],
+            ],
+          ),
+        ),
+        onTap: () => callbacks.onSelectJob(job),
+        onRetry: job.status == 'failed'
+            ? () => callbacks.onRetryFailedJob(job)
+            : null,
+        retryLabel: l10n.jobsRetry,
+        onCancel: job.status == 'queued' || job.status == 'running'
+            ? () => callbacks.onCancelQueuedJob(job)
+            : null,
+        trailing: compact || actionButtons.isEmpty
+            ? null
+            : StudioDenseActionRow(
+                spacing: StudioSpacing.chromeActionGap,
+                expandToMaxWidth: false,
+                children: actionButtons,
+              ),
+      );
+    }
+    return studioStaggeredItem(
+      index,
+      entranceKey: entranceKey,
+      child: tile,
+    );
+  }
+
   Widget _buildJobList(
     BuildContext context, {
     required List<JobRow> visibleJobs,
@@ -234,6 +338,7 @@ class JobsSectionView extends StatelessWidget {
       color: StudioTokens.of(context).textSecondary,
       height: 1.35,
     );
+    final jobs = visibleJobs.take(8).toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -243,102 +348,23 @@ class JobsSectionView extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ...visibleJobs.take(8).toList().asMap().entries.map((entry) {
-          final index = entry.key;
-          final job = entry.value;
-          final Widget tile;
-          if (studioCards) {
-            tile = _buildStudioJobTile(
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: jobs.length,
+          itemBuilder: (context, index) {
+            return _buildJobTile(
               context,
-              job: job,
+              job: jobs[index],
+              index: index,
+              entranceKey: visibleJobs.length,
               l10n: l10n,
               compact: compact,
               detailStyle: detailStyle,
+              studioCards: studioCards,
             );
-          } else {
-          final detailLines = <String>[
-            job.id,
-            if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
-              l10n.jobsFailedReason(job.errorMessage!),
-            if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
-              l10n.jobsClaimedBy(job.claimedBy!),
-          ];
-          final actionButtons = <Widget>[
-            if (job.status == 'failed')
-              TextButton(
-                onPressed: model.retryingJobId == job.id
-                    ? null
-                    : () => callbacks.onRetryFailedJob(job),
-                child: Text(
-                  model.retryingJobId == job.id ? '…' : l10n.jobsRetry,
-                ),
-              ),
-            if (job.status == 'queued' || job.status == 'running')
-              TextButton(
-                onPressed: model.cancellingJobId == job.id
-                    ? null
-                    : () => callbacks.onCancelQueuedJob(job),
-                child: Text(
-                  model.cancellingJobId == job.id ? '…' : l10n.jobsCancel,
-                ),
-              ),
-          ];
-            tile = StudioListRow(
-              dense: !compact,
-              contentPadding: EdgeInsets.zero,
-              minVerticalPadding: compact ? 10 : 6,
-              title: Text(
-                studioJobListTitle(l10n, job.kind, job.status),
-                maxLines: compact ? 2 : 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                      if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
-                      Text(
-                        detailLines[i],
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: detailStyle,
-                      ),
-                    ],
-                    if (compact && actionButtons.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: StudioSpacing.xs),
-                      StudioDenseActionRow(
-                        spacing: StudioSpacing.xs,
-                        children: actionButtons,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              onTap: () => callbacks.onSelectJob(job),
-              onRetry: job.status == 'failed'
-                  ? () => callbacks.onRetryFailedJob(job)
-                  : null,
-              retryLabel: l10n.jobsRetry,
-              onCancel: job.status == 'queued' || job.status == 'running'
-                  ? () => callbacks.onCancelQueuedJob(job)
-                  : null,
-              trailing: compact || actionButtons.isEmpty
-                  ? null
-                  : StudioDenseActionRow(
-                      spacing: StudioSpacing.chromeActionGap,
-                      expandToMaxWidth: false,
-                      children: actionButtons,
-                    ),
-            );
-          }
-          return studioStaggeredItem(
-            index,
-            entranceKey: visibleJobs.length,
-            child: tile,
-          );
-        }),
+          },
+        ),
       ],
     );
   }
@@ -419,18 +445,29 @@ class JobsSectionView extends StatelessWidget {
           onAction: callbacks.onLoadJobs,
         ),
       ),
-      child: SingleChildScrollView(
-        child: DecoratedBox(
-          decoration: studioInsetPanelDecoration(context),
-          child: Padding(
-            padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
-            child: _buildJobList(
+      child: DecoratedBox(
+        decoration: studioInsetPanelDecoration(context),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(StudioLayoutSpacing.cardInner),
+          itemCount: visibleJobs.length,
+          itemBuilder: (context, index) {
+            final l10n = resolveAppLocalizationsForErrors(context);
+            final compact = MediaQuery.sizeOf(context).width < 520;
+            final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: StudioTokens.of(context).textSecondary,
+              height: 1.35,
+            );
+            return _buildJobTile(
               context,
-              visibleJobs: visibleJobs,
-              showCountHeader: false,
+              job: visibleJobs[index],
+              index: index,
+              entranceKey: visibleJobs.length,
+              l10n: l10n,
+              compact: compact,
+              detailStyle: detailStyle,
               studioCards: true,
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

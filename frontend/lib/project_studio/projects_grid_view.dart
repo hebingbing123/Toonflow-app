@@ -334,7 +334,7 @@ class _ProjectGridCard extends StatelessWidget {
                     const SizedBox(width: StudioSpacing.xs),
                     StudioIconSwap(
                       icon: Icons.check_circle,
-                      size: 18,
+                      size: StudioIconSize.sm,
                       color: tokens.primary,
                     ),
                     const SizedBox(width: StudioSpacing.xs),
@@ -457,7 +457,7 @@ class _ProjectGridCard extends StatelessWidget {
                               const SizedBox(width: StudioSpacing.xs),
                               StudioIconSwap(
                                 icon: Icons.check_circle,
-                                size: 16,
+                                size: StudioIconSize.xs,
                                 color: tokens.primary,
                               ),
                             ],
@@ -529,7 +529,7 @@ class _ProjectGridCard extends StatelessWidget {
                   vertical: 10,
                 ),
               ),
-              icon: const Icon(Icons.arrow_outward, size: 16),
+              icon: const Icon(Icons.arrow_outward, size: StudioIconSize.xs),
               label: Text(l10n.studioEnterStudio),
             ),
           ],

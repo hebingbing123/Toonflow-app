@@ -143,7 +143,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: () => onResetConfirmationDontShowAgain!.call(context),
-                icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                icon: const Icon(Icons.notifications_active_outlined, size: StudioIconSize.sm),
                 label: Text(l10n.shortVideoSpaceRestoreRiskyConfirmation),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.primary,
@@ -370,7 +370,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
                         : operationFeedbackIsSuccess == false
                             ? Icons.error_outline
                             : Icons.info_outline,
-                    size: 20,
+                    size: StudioIconSize.md,
                     color: operationFeedbackIsSuccess == true
                         ? theme.colorScheme.primary
                         : operationFeedbackIsSuccess == false

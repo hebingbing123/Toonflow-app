@@ -369,7 +369,7 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _copyLink(context),
-                  icon: const Icon(Icons.link, size: 18),
+                  icon: const Icon(Icons.link, size: StudioIconSize.sm),
                   label: Text(l10n.studioReviewPackCopyLink),
                 ),
               ],

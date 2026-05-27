@@ -316,9 +316,9 @@ extension _HomePageProductStudioSteps on _HomePageState {
             ),
             indicatorSize: TabBarIndicatorSize.label,
             tabs: <Tab>[
-              Tab(height: 40, text: l10n.studioDeliverTabAssembly),
-              Tab(height: 40, text: l10n.studioDeliverTabPublish),
-              Tab(height: 40, text: l10n.studioDeliverTabQuality),
+              Tab(height: StudioLayoutSize.skeletonAvatar, text: l10n.studioDeliverTabAssembly),
+              Tab(height: StudioLayoutSize.skeletonAvatar, text: l10n.studioDeliverTabPublish),
+              Tab(height: StudioLayoutSize.skeletonAvatar, text: l10n.studioDeliverTabQuality),
             ],
           ),
           Expanded(

@@ -158,7 +158,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              StudioSkeleton(height: 18),
+              StudioSkeleton(height: StudioLayoutSize.skeletonLineTall),
               SizedBox(height: StudioSpacing.sm),
               StudioSkeleton(height: 72),
               SizedBox(height: StudioSpacing.sm),
@@ -256,7 +256,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: _targetIdController,
                     decoration: InputDecoration(
@@ -265,7 +265,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       isDense: true,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: _detailController,
                     maxLines: 3,
@@ -293,7 +293,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.report_outlined),
                       label: Text(
@@ -307,7 +307,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               ),
             ),
             if (widget.controller.queueEnabled) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: StudioSpacing.sm),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final stackQueueActions =
@@ -353,7 +353,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           l10n.contentComplianceQueueTitle,
                           style: studioPaneTitleStyle(context),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: StudioSpacing.xs),
                         StudioDenseActionRow(
                           spacing: 8,
                           children: [
@@ -423,7 +423,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               ),
                               style: theme.textTheme.bodySmall,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             StudioDenseActionRow(
                               spacing: 8,
                               children: [
@@ -493,7 +493,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Builder(
                     builder: (context) {
                       final sortedAlerts = [...queue.alerts]
@@ -535,7 +535,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                               color: tokens.textSecondary,
                                             ),
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: StudioSpacing.xs),
                                       StudioDenseActionRow(
                                         spacing: 8,
                                         children: [
@@ -730,7 +730,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     },
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioCollapsibleFilterPanel(
                   subtitle: _queueFilterSummary(l10n, queue),
                   child: Column(
@@ -924,7 +924,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -1054,12 +1054,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ],
                 ),
                 if (queue.ownerSummaries.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.contentComplianceReviewerOwnerLoad,
                     style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final tileWidth = studioWrapTileWidth(
@@ -1137,12 +1137,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 ],
                 if (queue.escalationSummaries.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.contentComplianceEscalationRhythm,
                     style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -1165,12 +1165,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   ),
                 ],
                 if (queue.workspaceSummaries.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   Text(
                     l10n.contentComplianceWorkspaceHotspots,
                     style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final tileWidth = studioWrapTileWidth(
@@ -1238,7 +1238,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 if (queue.items.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
@@ -1328,7 +1328,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: StudioSpacing.xs),
                             SelectableText(
                               l10n.contentComplianceReportInfo(
                                 item.id,
@@ -1345,14 +1345,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               ),
                             ),
                             if ((item.detail ?? '').isNotEmpty) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 item.detail!,
                                 style: theme.textTheme.bodySmall,
                               ),
                             ],
                             if ((item.resolutionNote ?? '').isNotEmpty) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 l10n.contentComplianceResolutionLine(
                                   item.resolutionNote!,
@@ -1486,7 +1486,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     },
                   ),
                 if (queue.items.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: _reassignReviewerController,
                     decoration: InputDecoration(
@@ -1495,7 +1495,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       hintText: l10n.contentComplianceBulkReassignReviewerHint,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: StudioSpacing.xs),
                   StudioDenseActionRow(
                     children: [
                       StudioFilterChip(
@@ -1594,7 +1594,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ],
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 StudioCodeDropdownField(
                   value: _disposition,
                   labelText: l10n.contentComplianceFieldDisposition,
@@ -1606,7 +1606,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     });
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: StudioSpacing.xs),
                 TextField(
                   controller: _resolutionNoteController,
                   maxLines: 2,

@@ -40,7 +40,7 @@ class _StoryboardCharacterSection extends StatelessWidget {
                       ? Icons.hourglass_empty
                       : Icons.refresh,
                   label: l10n.storyboardWorkbenchCharacterReload,
-                  size: 20,
+                  size: StudioIconSize.md,
                   onPressed: loadingCharacters || saving ? null : onReloadCharacters,
                 ),
               ],

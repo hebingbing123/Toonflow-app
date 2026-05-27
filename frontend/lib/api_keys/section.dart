@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
+import '../design_system/components/studio_icon_button.dart';
 import 'package:flutter/services.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
@@ -423,18 +424,18 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final theme = Theme.of(context);
     final panelPadding = compact ? 14.0 : 16.0;
     final refreshButton = compact
-        ? IconButton(
-            tooltip: l10n.apiKeysRefresh,
+        ? StudioIconButton(
+            icon: Icons.refresh,
+            label: l10n.apiKeysRefresh,
             onPressed: widget.controller.loading
                 ? null
                 : widget.controller.refresh,
-            icon: const Icon(Icons.refresh, size: 20),
           )
         : TextButton.icon(
             onPressed: widget.controller.loading
                 ? null
                 : widget.controller.refresh,
-            icon: const Icon(Icons.refresh, size: 18),
+            icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
             label: Text(l10n.apiKeysRefresh),
           );
     final createButton = FilledButton.tonalIcon(
@@ -444,7 +445,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
             )
           : const Icon(Icons.key_outlined),
       label: Text(
@@ -612,7 +613,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                             widget.controller.latestPlaintextToken!,
                             l10n.apiKeysCopiedPlaintextSnack,
                           ),
-                          icon: const Icon(Icons.copy_outlined, size: 18),
+                          icon: const Icon(Icons.copy_outlined, size: StudioIconSize.sm),
                           label: Text(l10n.apiKeysCopyPlaintext),
                         ),
                         const SizedBox(height: StudioSpacing.xs),
@@ -633,7 +634,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                             widget.controller.latestPlaintextToken!,
                             l10n.apiKeysCopiedPlaintextSnack,
                           ),
-                          icon: const Icon(Icons.copy_outlined, size: 18),
+                          icon: const Icon(Icons.copy_outlined, size: StudioIconSize.sm),
                           label: Text(l10n.apiKeysCopyPlaintext),
                         ),
                         TextButton(
@@ -737,7 +738,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
             )
           : const Icon(Icons.refresh_outlined),
       label: Text(l10n.apiKeysActionRotate),
@@ -844,12 +845,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                   ],
                 ),
               ),
-              IconButton(
-                style: studioUtilityIconButtonStyle(context),
-                tooltip: l10n.apiKeysCopyPublicIdTooltip,
+              StudioUtilityIconButton(
+                icon: Icons.tag_outlined,
+                label: l10n.apiKeysCopyPublicIdTooltip,
                 onPressed: () =>
                     _copyText(item.publicId, l10n.apiKeysCopiedPublicIdSnack),
-                icon: const Icon(Icons.tag_outlined),
               ),
             ],
           ),

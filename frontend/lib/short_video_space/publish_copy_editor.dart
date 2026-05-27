@@ -291,7 +291,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                   )
                 : const Icon(Icons.save_outlined),
             label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),

@@ -479,10 +479,10 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                  strokeWidth: StudioControlSize.progressStroke,
                                 ),
                               )
-                            : const Icon(Icons.save_outlined, size: 18),
+                            : const Icon(Icons.save_outlined, size: StudioIconSize.sm),
                         label: Text(
                           _saving
                               ? l10n.projectEditorSavingEllipsis
@@ -497,7 +497,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                       TextButton.icon(
                         style: studioFormTextButtonIconStyle(context),
                         onPressed: _openBriefContext,
-                        icon: const Icon(Icons.article_outlined, size: 18),
+                        icon: const Icon(Icons.article_outlined, size: StudioIconSize.sm),
                         label: Text(l10n.studioArtStepOpenSettings),
                       ),
                       if (widget.onOpenFullProjectSettings != null)

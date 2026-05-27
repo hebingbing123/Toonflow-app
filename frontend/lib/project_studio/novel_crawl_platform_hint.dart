@@ -130,7 +130,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
               FilledButton.icon(
                 style: studioFormIconLabeledButtonStyle(context),
                 onPressed: () => unawaited(_openDownloads(downloadUrl)),
-                icon: const Icon(Icons.download_outlined, size: 18),
+                icon: const Icon(Icons.download_outlined, size: StudioIconSize.sm),
                 label: Text(l10n.shortVideoDownloadDesktopApp),
               ),
               if (isWeb)
@@ -138,7 +138,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
                   onPressed: () => unawaited(
                     _openDownloads('$downloadUrl#novel-crawl-auth'),
                   ),
-                  icon: const Icon(Icons.menu_book_outlined, size: 18),
+                  icon: const Icon(Icons.menu_book_outlined, size: StudioIconSize.sm),
                   label: Text(l10n.studioNovelCrawlAuthWebGuideLearnMore),
                 ),
             ],
@@ -185,7 +185,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
               children: <Widget>[
                 Icon(
                   isWeb ? Icons.laptop_outlined : Icons.info_outline,
-                  size: 18,
+                  size: StudioIconSize.sm,
                   color: tokens.primary,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
@@ -200,7 +200,7 @@ class NovelCrawlDesktopDownloadHintTeaser extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  size: 20,
+                  size: StudioIconSize.md,
                   color: theme.colorScheme.onSecondaryContainer,
                 ),
               ],

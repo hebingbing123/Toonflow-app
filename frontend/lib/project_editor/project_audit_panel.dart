@@ -163,7 +163,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               wideBreakpoint: 640,
               children: <Widget>[
                 SizedBox(
-                  width: studioAdaptiveFieldWidth(context, max: 280, min: 180),
+                  width: studioAdaptiveFieldWidth(context, max: StudioLayoutSize.fieldStandard, min: 180),
                   child: StudioDropdownButtonFormField<String>(
                     initialValue: _actionFilter ?? '',
                     decoration: InputDecoration(
@@ -272,14 +272,14 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                         )
-                      : const Icon(Icons.expand_more, size: 18),
+                      : const Icon(Icons.expand_more, size: StudioIconSize.sm),
                   label: Text(l10n.projectEditorAuditLoadMore),
                 ),
               TextButton.icon(
                 onPressed: _loading || _loadingMore ? null : _reload,
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                 label: Text(l10n.projectEditorAuditRefresh),
               ),
             ],

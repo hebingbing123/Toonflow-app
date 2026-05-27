@@ -250,7 +250,7 @@ class _StudioNovelCrawlAuthSectionState
               children: <Widget>[
                 Icon(
                   _expanded ? Icons.expand_less : Icons.expand_more,
-                  size: 20,
+                  size: StudioIconSize.md,
                   color: outline,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
@@ -319,7 +319,7 @@ class _StudioNovelCrawlAuthSectionState
               child: FilledButton.icon(
                 style: studioFormPrimaryButtonStyle(context),
                 onPressed: _loading || _saving ? null : _captureCookieInApp,
-                icon: const Icon(Icons.login, size: 18),
+                icon: const Icon(Icons.login, size: StudioIconSize.sm),
                 label: Text(l10n.studioNovelCrawlAuthCaptureCookieButton),
               ),
             ),

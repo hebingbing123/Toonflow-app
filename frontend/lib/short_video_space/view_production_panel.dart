@@ -378,7 +378,7 @@ class _ProductionPanel extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.category_outlined,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: theme.colorScheme.primary,
                             ),
                             const SizedBox(width: StudioSpacing.xs),
@@ -502,7 +502,7 @@ class _ProductionPanel extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.fact_check_outlined,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: theme.colorScheme.tertiary,
                             ),
                             const SizedBox(width: StudioSpacing.xs),
@@ -526,7 +526,7 @@ class _ProductionPanel extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.movie_filter_outlined,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: theme.colorScheme.primary,
                             ),
                             const SizedBox(width: StudioSpacing.xs),
@@ -557,7 +557,7 @@ class _ProductionPanel extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.alt_route_outlined,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: theme.colorScheme.secondary,
                             ),
                             const SizedBox(width: StudioSpacing.xs),
@@ -656,7 +656,7 @@ class _ProductionPanel extends StatelessWidget {
                     const SizedBox(height: StudioSpacing.xs),
                     OutlinedButton.icon(
                       onPressed: onRefreshExportCheck,
-                      icon: const Icon(Icons.refresh, size: 18),
+                      icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                       label: Text(l10n.shortVideoSpaceExportCheckRefreshButton),
                     ),
                   ],
@@ -879,7 +879,7 @@ class _ProductionPanel extends StatelessWidget {
                               latestExportUi.isWarning
                                   ? Icons.warning_amber_rounded
                                   : Icons.task_alt,
-                              size: 18,
+                              size: StudioIconSize.sm,
                               color: latestExportCardTextColor,
                             ),
                             const SizedBox(width: StudioSpacing.xs),
@@ -935,7 +935,7 @@ class _ProductionPanel extends StatelessWidget {
                                       height: 14,
                                       child: latestExportUi.activeTaskRunning
                                           ? CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                              strokeWidth: StudioControlSize.progressStroke,
                                               color: latestExportCardTextColor,
                                             )
                                           : Icon(
@@ -1027,7 +1027,7 @@ class _ProductionPanel extends StatelessWidget {
                                         width: 16,
                                         height: 16,
                                         child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                          strokeWidth: StudioControlSize.progressStroke,
                                         ),
                                       )
                                     : const Icon(Icons.refresh),
@@ -1157,7 +1157,7 @@ class _ProductionPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.file_upload_outlined),
                       label: Text(
@@ -1182,7 +1182,7 @@ class _ProductionPanel extends StatelessWidget {
                                 width: 14,
                                 height: 14,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                  strokeWidth: StudioControlSize.progressStroke,
                                 ),
                               )
                             : const Icon(Icons.playlist_play_outlined),

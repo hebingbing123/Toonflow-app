@@ -376,7 +376,7 @@ class _StudioScriptNovelInlineImportState
               Icon(
                 Icons.cloud_download_outlined,
                 color: tokens.primary,
-                size: 20,
+                size: StudioIconSize.md,
               ),
               const SizedBox(width: StudioSpacing.xs),
               Expanded(
@@ -434,7 +434,7 @@ class _StudioScriptNovelInlineImportState
             child: FilledButton.icon(
               style: studioFormPrimaryButtonStyle(context),
               onPressed: _busy ? null : () => _runAction(_importFromUrl),
-              icon: const Icon(Icons.link, size: 18),
+              icon: const Icon(Icons.link, size: StudioIconSize.sm),
               label: Text(l10n.studioScriptNovelInlineImportFromUrl),
             ),
           ),
@@ -494,7 +494,7 @@ class _StudioScriptNovelInlineImportState
                 onPressed: _busy
                     ? null
                     : () => _pickWholeBookFile(importAfterParse: true),
-                icon: const Icon(Icons.upload_file_outlined, size: 18),
+                icon: const Icon(Icons.upload_file_outlined, size: StudioIconSize.sm),
                 label: Text(l10n.studioScriptNovelInlinePickFileAndImport),
               ),
               OutlinedButton.icon(
@@ -502,7 +502,7 @@ class _StudioScriptNovelInlineImportState
                 onPressed: _busy
                     ? null
                     : () => _pickWholeBookFile(importAfterParse: false),
-                icon: const Icon(Icons.folder_open_outlined, size: 18),
+                icon: const Icon(Icons.folder_open_outlined, size: StudioIconSize.sm),
                 label: Text(l10n.projectEditorNovelsWholeBookPickFileButton),
               ),
               OutlinedButton(

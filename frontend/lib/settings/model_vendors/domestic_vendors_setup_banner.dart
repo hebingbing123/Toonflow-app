@@ -219,7 +219,7 @@ class _DomesticVendorSetupRow extends StatelessWidget {
             children: <Widget>[
               Icon(
                 ready ? Icons.check_circle : Icons.radio_button_unchecked,
-                size: 20,
+                size: StudioIconSize.md,
                 color: ready ? tokens.primary : tokens.textMuted,
               ),
               const SizedBox(width: StudioLayoutSpacing.inlineGap),

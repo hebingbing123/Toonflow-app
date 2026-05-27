@@ -83,7 +83,7 @@ class _StudioAgentDrawerBody extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _StudioAgentDrawerHeader(title: l10n.studioAgentDrawerTitle),
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           Flexible(
             child: ListView.separated(
               padding: const EdgeInsets.all(StudioSpacing.sm),
@@ -136,7 +136,7 @@ class _StudioAgentDrawerHeader extends StatelessWidget {
           StudioIconButton(
             icon: Icons.close,
             label: MaterialLocalizations.of(context).closeButtonTooltip,
-            size: 20,
+            size: StudioIconSize.md,
             onPressed: () => Navigator.of(context).pop(),
             style: IconButton.styleFrom(
               backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),

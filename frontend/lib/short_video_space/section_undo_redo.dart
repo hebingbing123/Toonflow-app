@@ -581,7 +581,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                         children: [
                           Icon(
                             Icons.undo,
-                            size: 16,
+                            size: StudioIconSize.xs,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: StudioSpacing.xs),
@@ -593,7 +593,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           const SizedBox(width: StudioSpacing.sm),
                           Icon(
                             Icons.redo,
-                            size: 16,
+                            size: StudioIconSize.xs,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: StudioSpacing.xs),

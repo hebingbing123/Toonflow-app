@@ -28,13 +28,13 @@ class StudioToolbarButton extends StatelessWidget {
         ? const SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
           )
         : (icon != null
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Icon(icon, size: 16),
+                    Icon(icon, size: StudioIconSize.xs),
                     const SizedBox(width: StudioSpacing.xs),
                     Text(label),
                   ],

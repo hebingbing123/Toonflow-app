@@ -236,7 +236,7 @@ class _AccountSectionState extends State<AccountSection> {
                 onPressed: widget.controller.loading
                     ? null
                     : widget.controller.refresh,
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                 label: Text(l10n.notificationsRefresh),
               ),
               FilledButton.tonalIcon(
@@ -248,7 +248,7 @@ class _AccountSectionState extends State<AccountSection> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : const Icon(Icons.archive_outlined),
                 label: Text(l10n.accountExportCreate),
@@ -416,7 +416,7 @@ class _AccountSectionState extends State<AccountSection> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.download_outlined),
                       label: Text(l10n.accountExportDownload),
@@ -427,7 +427,7 @@ class _AccountSectionState extends State<AccountSection> {
                       onPressed: () => Clipboard.setData(
                         ClipboardData(text: item.fileName!),
                       ),
-                      icon: const Icon(Icons.copy_all_outlined, size: 18),
+                      icon: const Icon(Icons.copy_all_outlined, size: StudioIconSize.sm),
                       label: Text(l10n.accountExportCopyFileName),
                     ),
                 ],
@@ -458,7 +458,7 @@ class _AccountSectionState extends State<AccountSection> {
               children: <Widget>[
                 Icon(
                   Icons.warning_amber_rounded,
-                  size: 18,
+                  size: StudioIconSize.sm,
                   color: theme.colorScheme.error.withValues(alpha: 0.92),
                 ),
                 const SizedBox(width: StudioSpacing.xs),
@@ -548,7 +548,7 @@ class _AccountSectionState extends State<AccountSection> {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                         )
                       : const Icon(Icons.delete_forever_outlined),
                   label: Text(l10n.accountDeleteButton),

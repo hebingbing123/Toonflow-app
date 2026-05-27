@@ -624,7 +624,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                 hasFrame
                     ? Icons.image_outlined
                     : Icons.image_not_supported_outlined,
-                size: 18,
+                size: StudioIconSize.sm,
                 color: hasFrame
                     ? StudioTokens.of(context).accent
                     : StudioTokens.of(context).textMuted,
@@ -756,7 +756,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(child: detail),
-        const Divider(height: 1),
+        const Divider(height: StudioControlSize.dividerThickness),
         SizedBox(
           height: studioClampedPaneWidth(
             frameHeight,
@@ -806,7 +806,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                 contentWidth,
                 fraction: 0.24,
                 min: 200,
-                max: 280,
+                max: StudioLayoutSize.fieldStandard,
               );
               final propertiesPaneWidth = studioClampedPaneWidth(
                 contentWidth,
@@ -947,7 +947,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                                       hasFrame
                                           ? Icons.image_outlined
                                           : Icons.image_not_supported_outlined,
-                                      size: 18,
+                                      size: StudioIconSize.sm,
                                       color: hasFrame
                                           ? tokens.accent
                                           : tokens.textMuted,
@@ -1031,7 +1031,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                               ),
                       ),
                       if (!noShots) ...<Widget>[
-                        const Divider(height: 1),
+                        const Divider(height: StudioControlSize.dividerThickness),
                         Padding(
                           padding: const EdgeInsets.all(StudioSpacing.sm),
                           child: GridStoryboardPanel(

@@ -31,22 +31,24 @@ class StudioStepProgressRing extends StatelessWidget {
       fontWeight: FontWeight.w600,
       color: tokens.textSecondary,
     );
-    Widget ring = SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _RingPainter(
-          completed: done,
-          total: 6,
-          activeColor: tokens.primary,
-          accentColor: tokens.accent,
-          trackColor: tokens.borderSubtle,
-          strokeWidth: strokeWidth,
-        ),
-        child: Center(
-          child: StudioAnimatedNumber(
-            value: label,
-            style: labelStyle,
+    Widget ring = RepaintBoundary(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _RingPainter(
+            completed: done,
+            total: 6,
+            activeColor: tokens.primary,
+            accentColor: tokens.accent,
+            trackColor: tokens.borderSubtle,
+            strokeWidth: strokeWidth,
+          ),
+          child: Center(
+            child: StudioAnimatedNumber(
+              value: label,
+              style: labelStyle,
+            ),
           ),
         ),
       ),

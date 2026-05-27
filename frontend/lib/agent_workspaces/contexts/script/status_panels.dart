@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/tokens.dart';
 
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../rust_api.dart';
 
 /// Groups status, result summary, and writeback snapshots for the script workspace.
@@ -40,11 +41,14 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
         ],
         if (resultSummaryLines.isNotEmpty) ...<Widget>[
           const SizedBox(height: StudioSpacing.xs),
-          ...resultSummaryLines.map(
-            (String line) => Padding(
-              padding: const EdgeInsets.only(bottom: StudioSpacing.radiusHairline),
-              child: Text(line, style: bodySmall),
+          ...studioStaggeredChildren(
+            resultSummaryLines.map(
+              (String line) => Padding(
+                padding: const EdgeInsets.only(bottom: StudioSpacing.radiusHairline),
+                child: Text(line, style: bodySmall),
+              ),
             ),
+            entranceKey: resultSummaryLines.length,
           ),
         ],
         if (workspaceAssistantText.trim().isNotEmpty) ...<Widget>[

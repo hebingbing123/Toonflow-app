@@ -367,7 +367,7 @@ class WorkspaceContextView extends StatelessWidget {
         children: <Widget>[
           Icon(
             Icons.workspaces_outline,
-            size: 16,
+            size: StudioIconSize.xs,
             color: tokens.accent,
           ),
           const SizedBox(width: StudioSpacing.xs),
@@ -443,7 +443,7 @@ class WorkspaceContextView extends StatelessWidget {
                     children: <Widget>[
                       Icon(
                         Icons.workspaces_outline,
-                        size: 18,
+                        size: StudioIconSize.sm,
                         color: tokens.accent,
                       ),
                       const SizedBox(width: StudioSpacing.xs),
@@ -502,7 +502,7 @@ class WorkspaceContextView extends StatelessWidget {
                   children: <Widget>[
                     Icon(
                       Icons.workspaces_outline,
-                      size: 16,
+                      size: StudioIconSize.xs,
                       color: tokens.accent,
                     ),
                     const SizedBox(width: StudioSpacing.xs),
@@ -549,7 +549,7 @@ class WorkspaceContextView extends StatelessWidget {
             initiallyExpanded: false,
             title: Row(
               children: <Widget>[
-                Icon(Icons.workspaces_outline, size: 18, color: tokens.accent),
+                Icon(Icons.workspaces_outline, size: StudioIconSize.sm, color: tokens.accent),
                 const SizedBox(width: StudioSpacing.xs),
                 Expanded(
                   child: Text(
@@ -593,7 +593,7 @@ class WorkspaceContextView extends StatelessWidget {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  const Icon(Icons.workspaces_outline, size: 18),
+                  const Icon(Icons.workspaces_outline, size: StudioIconSize.sm),
                   const SizedBox(width: StudioLayoutSpacing.inlineGap),
                   Expanded(
                     child: Column(
@@ -620,7 +620,7 @@ class WorkspaceContextView extends StatelessWidget {
               // Display workspace billing when billing_scope = workspace (Task 6.2)
               if (billingScope == 'workspace' && workspacePlanTier != null) ...[
                 const SizedBox(height: StudioSpacing.sm),
-                const Divider(height: 1),
+                const Divider(height: StudioControlSize.dividerThickness),
                 const SizedBox(height: StudioSpacing.sm),
                 _buildWorkspaceBillingInfo(context, l10n),
               ],
@@ -650,7 +650,7 @@ class WorkspaceContextView extends StatelessWidget {
           children: [
             Icon(
               Icons.account_balance_wallet_outlined,
-              size: 16,
+              size: StudioIconSize.xs,
               color: theme.colorScheme.primary,
             ),
             const SizedBox(width: StudioSpacing.xs),
@@ -747,7 +747,7 @@ class _CompactMetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 16, color: StudioTokens.of(context).textSecondary),
+          Icon(icon, size: StudioIconSize.xs, color: StudioTokens.of(context).textSecondary),
           const SizedBox(width: StudioSpacing.xs),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),

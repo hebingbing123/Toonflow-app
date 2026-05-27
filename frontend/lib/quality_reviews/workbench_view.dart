@@ -1104,7 +1104,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                     ),
                                   Icon(
                                     Icons.chevron_right,
-                                    size: 20,
+                                    size: StudioIconSize.md,
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,

@@ -102,10 +102,10 @@ class AssemblyInputPanel extends StatelessWidget {
         if (ui.rows.isNotEmpty) ...[
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 280),
+            constraints: const BoxConstraints(maxHeight: StudioLayoutSize.paneMinHeight),
             child: ListView.separated(
               itemCount: ui.rows.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
+              separatorBuilder: (context, index) => const Divider(height: StudioControlSize.dividerThickness),
               itemBuilder: (context, index) {
                 final row = ui.rows[index];
                 return studioStaggeredItem(

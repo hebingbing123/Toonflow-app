@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
@@ -271,7 +272,7 @@ class PanelConsistencyAlert extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: textColor, size: 24),
+          Icon(icon, color: textColor, size: StudioIconSize.lg),
           const SizedBox(width: StudioSpacing.sm),
           Expanded(
             child: Column(
@@ -290,23 +291,26 @@ class PanelConsistencyAlert extends StatelessWidget {
                 ),
                 if (status.stalePanels.isNotEmpty) ...[
                   const SizedBox(height: StudioSpacing.xs),
-                  ...status.stalePanels.map(
-                    (p) => Padding(
-                      padding: const EdgeInsets.only(
-                        left: StudioSpacing.xs,
-                        top: StudioSpacing.radiusHairline,
-                      ),
-                      child: Text(
-                        l10n.shortVideoPanelVersionStaleRow(
-                          shortVideoPanelVersionPanelTitle(l10n, p.panel),
-                          PanelVersionManager.formatAge(p.ageSeconds, l10n),
+                  ...studioStaggeredChildren(
+                    status.stalePanels.map(
+                      (p) => Padding(
+                        padding: const EdgeInsets.only(
+                          left: StudioSpacing.xs,
+                          top: StudioSpacing.radiusHairline,
                         ),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: textColor.withValues(alpha: 0.8),
-                          fontSize: StudioTypography.of(context).meta,
+                        child: Text(
+                          l10n.shortVideoPanelVersionStaleRow(
+                            shortVideoPanelVersionPanelTitle(l10n, p.panel),
+                            PanelVersionManager.formatAge(p.ageSeconds, l10n),
+                          ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: textColor.withValues(alpha: 0.8),
+                            fontSize: StudioTypography.of(context).meta,
+                          ),
                         ),
                       ),
                     ),
+                    entranceKey: status.stalePanels.length,
                   ),
                 ],
               ],
@@ -315,7 +319,7 @@ class PanelConsistencyAlert extends StatelessWidget {
           const SizedBox(width: StudioSpacing.sm),
           ElevatedButton.icon(
             onPressed: onRefresh,
-            icon: const Icon(Icons.refresh, size: 16),
+            icon: const Icon(Icons.refresh, size: StudioIconSize.xs),
             label: Text(l10n.shortVideoPanelVersionRefresh),
             style: ElevatedButton.styleFrom(
               backgroundColor: textColor,

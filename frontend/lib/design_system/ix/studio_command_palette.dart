@@ -144,7 +144,7 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                       },
                     ),
                   ),
-                  Divider(height: 1, color: tokens.borderSubtle),
+                  Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
                   Flexible(
                     child: items.isEmpty
                         ? Padding(

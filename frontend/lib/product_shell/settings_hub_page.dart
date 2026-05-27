@@ -392,7 +392,7 @@ class _SettingsSummaryTile extends StatelessWidget {
                     color: tokens.bgInset.withValues(alpha: 0.84),
                     border: Border.all(color: tokens.borderSubtle),
                   ),
-                  child: Icon(module.icon, size: 18, color: tokens.textSecondary),
+                  child: Icon(module.icon, size: StudioIconSize.sm, color: tokens.textSecondary),
                 ),
                 const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(

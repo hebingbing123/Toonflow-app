@@ -625,7 +625,7 @@ class _ProjectStudioScriptStepPanelState
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(Icons.smart_toy_outlined, size: 20, color: tokens.primary),
+              Icon(Icons.smart_toy_outlined, size: StudioIconSize.md, color: tokens.primary),
               const SizedBox(width: StudioSpacing.xs),
               Text(
                 l10n.studioScriptStepOpenAgent,

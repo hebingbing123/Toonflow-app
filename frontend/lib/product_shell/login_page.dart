@@ -1048,7 +1048,7 @@ class _AuthPanel extends StatelessWidget {
                   hintText: kDebugMode ? kDevAdminEmail : null,
                   prefixIcon: const Icon(
                     Icons.alternate_email_rounded,
-                    size: 18,
+                    size: StudioIconSize.sm,
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -1062,7 +1062,7 @@ class _AuthPanel extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: l10n.authPasswordFieldLabel,
                   hintText: kDebugMode ? kDevAdminPassword : null,
-                  prefixIcon: const Icon(Icons.lock_outline_rounded, size: 18),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded, size: StudioIconSize.sm),
                 ),
                 obscureText: true,
                 autofillHints: const <String>[AutofillHints.password],
@@ -1084,7 +1084,7 @@ class _AuthPanel extends StatelessWidget {
                     labelText: l10n.productLoginConfirmPasswordLabel,
                     prefixIcon: const Icon(
                       Icons.verified_user_outlined,
-                      size: 18,
+                      size: StudioIconSize.sm,
                     ),
                   ),
                   obscureText: true,
@@ -1112,7 +1112,7 @@ class _AuthPanel extends StatelessWidget {
                       Icon(
                         Icons.error_outline_rounded,
                         color: theme.colorScheme.error,
-                        size: 18,
+                        size: StudioIconSize.sm,
                       ),
                       const SizedBox(width: StudioSpacing.xs),
                       Expanded(

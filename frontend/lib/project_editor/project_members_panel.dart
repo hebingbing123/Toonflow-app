@@ -370,7 +370,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: _loading || _loadingWorkspaceMembers ? null : _reload,
-              icon: const Icon(Icons.refresh, size: 18),
+              icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
               label: Text(l10n.projectMembersButtonRefresh),
             ),
           ),
@@ -458,7 +458,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           if (_loadingWorkspaceMembers)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: StudioSpacing.xs),
-              child: StudioSkeleton(height: 40),
+              child: StudioSkeleton(height: StudioLayoutSize.skeletonAvatar),
             )
           else if (_workspaceMembersError != null)
             StudioApiErrorCallout(
@@ -632,7 +632,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 StudioIconButton(
                   icon: Icons.copy_all_outlined,
                   label: l10n.projectMembersTooltipCopyUserId,
-                  size: 18,
+                  size: StudioIconSize.sm,
                   onPressed: () => _copyUserId(row.userId),
                 ),
               ],

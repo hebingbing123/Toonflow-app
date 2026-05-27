@@ -781,7 +781,7 @@ class DeliveryModeBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: textColor),
+          Icon(icon, size: StudioIconSize.xs, color: textColor),
           const SizedBox(width: StudioSpacing.xs),
           Text(
             label,
@@ -1286,7 +1286,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                               children: <Widget>[
                                 Icon(
                                   Icons.warning_amber_rounded,
-                                  size: 16,
+                                  size: StudioIconSize.xs,
                                   color: theme.colorScheme.tertiary,
                                 ),
                                 const SizedBox(width: StudioSpacing.xs),
@@ -1317,7 +1317,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                               children: <Widget>[
                                 Icon(
                                   Icons.movie_filter_outlined,
-                                  size: 16,
+                                  size: StudioIconSize.xs,
                                   color: theme.colorScheme.primary,
                                 ),
                                 const SizedBox(width: StudioSpacing.xs),
@@ -1620,7 +1620,7 @@ class _FlowArrowIcon extends StatelessWidget {
     final muted = studioMutedTextColor(context);
     return studioDecorativeIcon(
       Icons.arrow_forward_rounded,
-      size: 18,
+      size: StudioIconSize.sm,
       color: muted.withValues(alpha: 0.78),
     );
   }
@@ -1836,31 +1836,34 @@ class _CandidateCompareCard extends StatelessWidget {
                 style: theme.textTheme.labelMedium,
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...item.candidateVideoUrls.map((url) {
-                final isCurrent =
-                    url.trim() == (item.selectedVideoUrl ?? '').trim();
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: SelectableText(
-                          url,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: isCurrent ? theme.colorScheme.primary : null,
+              ...studioStaggeredChildren(
+                item.candidateVideoUrls.map((url) {
+                  final isCurrent =
+                      url.trim() == (item.selectedVideoUrl ?? '').trim();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: SelectableText(
+                            url,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isCurrent ? theme.colorScheme.primary : null,
+                            ),
                           ),
                         ),
-                      ),
-                      if (item.onSelectCandidateVideo != null && !isCurrent)
-                        TextButton(
-                          onPressed: () => item.onSelectCandidateVideo!(url),
-                          child: Text(l10n.shortVideoCandidateSelectVideo),
-                        ),
-                    ],
-                  ),
-                );
-              }),
+                        if (item.onSelectCandidateVideo != null && !isCurrent)
+                          TextButton(
+                            onPressed: () => item.onSelectCandidateVideo!(url),
+                            child: Text(l10n.shortVideoCandidateSelectVideo),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+                entranceKey: item.candidateVideoUrls.length,
+              ),
             ],
             const SizedBox(height: StudioSpacing.xs),
             StudioDenseActionRow(
@@ -2004,7 +2007,7 @@ class _ReadinessFlowNode extends StatelessWidget {
                   item.ready
                       ? Icons.check_circle_outline
                       : Icons.radio_button_unchecked,
-                  size: 16,
+                  size: StudioIconSize.xs,
                   color: accent,
                 ),
                 const SizedBox(width: StudioSpacing.xs),

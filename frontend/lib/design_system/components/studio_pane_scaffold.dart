@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../design_system/tokens.dart';
 
 /// Fills studio pane height inside scroll parents and pins [footer] bottom-center.
 class StudioPaneScaffold extends StatelessWidget {
@@ -9,7 +10,7 @@ class StudioPaneScaffold extends StatelessWidget {
     required this.body,
     this.footer,
     this.chromeReserve = 300,
-    this.minBodyHeight = 280,
+    this.minBodyHeight = StudioLayoutSize.paneMinHeight,
     this.footerHeight = 40,
   });
 

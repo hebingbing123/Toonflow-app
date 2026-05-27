@@ -211,7 +211,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchEnable),
-                    icon: const Icon(Icons.play_arrow, size: 18),
+                    icon: const Icon(Icons.play_arrow, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoBatchOpEnable),
                   ),
                   
@@ -221,7 +221,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchDisable),
-                    icon: const Icon(Icons.pause, size: 18),
+                    icon: const Icon(Icons.pause, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoBatchOpDisable),
                   ),
                   
@@ -231,7 +231,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchUpdateDuration),
-                    icon: const Icon(Icons.timer, size: 18),
+                    icon: const Icon(Icons.timer, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoBatchOpDurationAlign),
                   ),
                   
@@ -241,7 +241,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchReplace),
-                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    icon: const Icon(Icons.swap_horiz, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoBatchOpReplace),
                   ),
                   
@@ -251,7 +251,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     onPressed: widget.isOperationInProgress 
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchGenerateVoiceover),
-                    icon: const Icon(Icons.record_voice_over, size: 18),
+                    icon: const Icon(Icons.record_voice_over, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoBatchOpVoiceover),
                   ),
                 ],
@@ -265,7 +265,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
             const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
             ),
           ],
         ],
@@ -435,7 +435,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                 Icon(
                   Icons.check_circle,
                   color: Theme.of(context).colorScheme.primary,
-                  size: 20,
+                  size: StudioIconSize.md,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
                 Text(l10n.shortVideoBatchProgressSucceededLabel(successful)),
@@ -443,7 +443,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                 Icon(
                   Icons.error,
                   color: Theme.of(context).colorScheme.error,
-                  size: 20,
+                  size: StudioIconSize.md,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
                 Text(l10n.shortVideoBatchProgressFailedLabel(failed)),
@@ -478,7 +478,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                         leading: Icon(
                           Icons.error_outline,
                           color: Theme.of(context).colorScheme.error,
-                          size: 20,
+                          size: StudioIconSize.md,
                         ),
                         title: Text(l10n.shortVideoBatchProgressStoryboardLine(item.shotId)),
                         subtitle: Text(

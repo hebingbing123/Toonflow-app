@@ -511,7 +511,7 @@ extension _HomePageProductShell on _HomePageState {
               children: <Widget>[
                 Icon(
                   icon,
-                  size: 18,
+                  size: StudioIconSize.sm,
                   color: selected ? tokens.accent : tokens.textSecondary,
                 ),
                 const SizedBox(width: StudioLayoutSpacing.inlineGap),
@@ -524,7 +524,7 @@ extension _HomePageProductShell on _HomePageState {
                   ),
                 ),
                 if (selected && showCheckWhenSelected)
-                  Icon(Icons.check_rounded, size: 16, color: tokens.accent),
+                  Icon(Icons.check_rounded, size: StudioIconSize.xs, color: tokens.accent),
               ],
             ),
           ),
@@ -706,7 +706,7 @@ extension _HomePageProductShell on _HomePageState {
           StudioSpacing.chromeActionGap,
           StudioSpacing.xs,
         ),
-        child: Divider(height: 1, color: tokens.borderSubtle),
+        child: Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
       );
     }
 

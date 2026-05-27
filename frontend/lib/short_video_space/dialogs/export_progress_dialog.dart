@@ -418,87 +418,90 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   ],
                 ),
               )
-            else ...[
-              // Progress bar
-              LinearProgressIndicator(
-                value: progress.progress,
-                minHeight: 8,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  progress.status == ExportTaskStatus.failed
-                      ? theme.colorScheme.error
-                      : progress.status == ExportTaskStatus.completed
-                          ? StudioTokens.of(context).success
-                          : theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: StudioSpacing.sm),
-
-              // Progress percentage
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (progress.stage != null)
-                    Text(
-                      progress.stage!.displayName(l10n),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  else
-                    Text(
-                      progress.status.displayName(l10n),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            else
+              RepaintBoundary(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    LinearProgressIndicator(
+                      value: progress.progress,
+                      minHeight: 8,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        progress.status == ExportTaskStatus.failed
+                            ? theme.colorScheme.error
+                            : progress.status == ExportTaskStatus.completed
+                                ? StudioTokens.of(context).success
+                                : theme.colorScheme.primary,
                       ),
                     ),
-                  Text(
-                    '${progress.progressPercentage}%',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: StudioSpacing.sm),
-
-              // Status message
-              Container(
-                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _getStatusIcon(progress.status),
-                      size: 20,
-                      color: tokens.textSecondary,
-                    ),
-                    const SizedBox(width: StudioSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        _getStatusMessage(progress, l10n),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: tokens.textSecondary,
+                    const SizedBox(height: StudioSpacing.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (progress.stage != null)
+                          Text(
+                            progress.stage!.displayName(l10n),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        else
+                          Text(
+                            progress.status.displayName(l10n),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        Text(
+                          '${progress.progressPercentage}%',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: StudioSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(StudioSpacing.radiusDense),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _getStatusIcon(progress.status),
+                            size: StudioIconSize.md,
+                            color: tokens.textSecondary,
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              _getStatusMessage(progress, l10n),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: tokens.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: StudioSpacing.sm),
+                      StudioApiErrorCallout(
+                        error: _errorMessage!,
+                        emphasis: StudioApiErrorCalloutEmphasis.subtle,
+                        onDismiss: () => setState(() => _errorMessage = null),
+                      ),
+                    ],
                   ],
                 ),
               ),
-
-              if (_errorMessage != null) ...[
-                const SizedBox(height: StudioSpacing.sm),
-                StudioApiErrorCallout(
-                  error: _errorMessage!,
-                  emphasis: StudioApiErrorCalloutEmphasis.subtle,
-                  onDismiss: () => setState(() => _errorMessage = null),
-                ),
-              ],
-            ],
 
             const SizedBox(height: StudioSpacing.sm),
             SelectableText(
@@ -558,7 +561,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                   )
                 : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
           ),

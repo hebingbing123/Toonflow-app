@@ -200,7 +200,7 @@ class _SidebarTileState extends State<_SidebarTile> {
             child: widget.extended
                 ? Row(
                     children: <Widget>[
-                      Icon(widget.icon, color: fg, size: 20),
+                      Icon(widget.icon, color: fg, size: StudioIconSize.md),
                       const SizedBox(width: StudioSpacing.sm),
                       Expanded(
                         child: Text(

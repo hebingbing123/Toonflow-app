@@ -35,7 +35,7 @@ class StudioPrimaryButton extends StatelessWidget {
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
+              strokeWidth: StudioControlSize.progressStroke,
               color: enabled
                   ? theme.colorScheme.onPrimary
                   : tokens.textSecondary.withValues(alpha: 0.9),
@@ -51,7 +51,7 @@ class StudioPrimaryButton extends StatelessWidget {
                   spacing: StudioSpacing.xs,
                   runSpacing: StudioSpacing.chromeActionGap,
                   children: <Widget>[
-                    if (icon != null) Icon(icon, size: 18),
+                    if (icon != null) Icon(icon, size: StudioIconSize.sm),
                     Text(label, textAlign: TextAlign.center),
                   ],
                 ),
@@ -127,7 +127,7 @@ class StudioPrimaryButton extends StatelessWidget {
                 ),
                 child: Center(
                   child: IconTheme(
-                    data: IconThemeData(size: 18, color: foregroundColor),
+                    data: IconThemeData(size: StudioIconSize.sm, color: foregroundColor),
                     child: DefaultTextStyle(
                       style: (studioControlLabelStyle(context) ??
                               theme.textTheme.labelLarge ??

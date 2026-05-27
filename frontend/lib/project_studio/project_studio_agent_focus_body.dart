@@ -55,7 +55,7 @@ class _ProjectStudioAgentFocusBodyState extends State<ProjectStudioAgentFocusBod
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Icon(Icons.smart_toy_outlined, size: 20, color: tokens.primary),
+                      Icon(Icons.smart_toy_outlined, size: StudioIconSize.md, color: tokens.primary),
                       const SizedBox(width: StudioSpacing.xs),
                       Text(
                         widget.openLabel,
@@ -81,7 +81,7 @@ class _ProjectStudioAgentFocusBodyState extends State<ProjectStudioAgentFocusBod
           alignment: Alignment.centerRight,
           child: TextButton.icon(
             onPressed: () => setState(() => _agentOpen = false),
-            icon: const Icon(Icons.close_rounded, size: 18),
+            icon: const Icon(Icons.close_rounded, size: StudioIconSize.sm),
             label: Text(widget.closeLabel ?? l10n.studioScriptStepCloseAgent),
           ),
         ),

@@ -419,7 +419,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         children: <Widget>[
           Icon(
             Icons.search_rounded,
-            size: 16,
+            size: StudioIconSize.xs,
             color: tokens.textSecondary.withValues(alpha: 0.88),
           ),
           const SizedBox(width: StudioSpacing.xs),
@@ -468,7 +468,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             if (icon != null) ...<Widget>[
-              Icon(icon, size: 16, color: tokens.textSecondary),
+              Icon(icon, size: StudioIconSize.xs, color: tokens.textSecondary),
               const SizedBox(width: StudioSpacing.xs),
             ],
             Expanded(
@@ -490,7 +490,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   Widget _buildPaletteDivider(StudioTokens tokens) {
-    return Divider(height: 1, thickness: 1, color: tokens.surfaceHighlight);
+    return Divider(height: StudioControlSize.dividerThickness, thickness: 1, color: tokens.surfaceHighlight);
   }
 
   List<Widget> _buildPaletteOverlayList({
@@ -667,7 +667,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             child: SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
             ),
           ),
         ),
@@ -802,11 +802,11 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                         maxHeight: studioAdaptiveDialogHeight(
                           context,
                           fraction: widget.titleBarDense ? 0.48 : 0.44,
-                          min: 280,
+                          min: StudioLayoutSize.fieldStandard,
                           max: widget.titleBarDense ? 480 : 440,
                         ),
                       ),
-                      child: ListView(
+                      child: ListView.builder(
                         padding: EdgeInsets.fromLTRB(
                           StudioLayoutSpacing.titleTight,
                           widget.titleBarDense
@@ -816,7 +816,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                           StudioLayoutSpacing.titleTight,
                         ),
                         shrinkWrap: true,
-                        children: listChildren,
+                        itemCount: listChildren.length,
+                        itemBuilder: (context, index) => listChildren[index],
                       ),
                     ),
                   ],
@@ -1144,7 +1145,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     Widget searchGlyph({required Color color}) {
       return studioDecorativeIcon(
         Icons.search_rounded,
-        size: 16,
+        size: StudioIconSize.xs,
         color: color,
       );
     }
@@ -1155,7 +1156,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           width: 15,
           height: 15,
           child: CircularProgressIndicator(
-            strokeWidth: 2,
+            strokeWidth: StudioControlSize.progressStroke,
             color: tokens.accent,
           ),
         );
@@ -1368,7 +1369,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     width: iconSize,
                     height: iconSize,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: StudioControlSize.progressStroke,
                       color: tokens.accent,
                     ),
                   ),

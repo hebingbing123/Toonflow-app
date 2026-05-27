@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -111,21 +112,24 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...reviewQueue.take(5).map(
-                    (item) => StudioListRow(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        '${item.reviewType} · ${item.status} · P${item.priority}',
+              ...studioStaggeredChildren(
+                reviewQueue.take(5).map(
+                      (item) => StudioListRow(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          '${item.reviewType} · ${item.status} · P${item.priority}',
+                        ),
+                        subtitle: Text(
+                          item.prompt,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => onReviewSelected(item.id),
                       ),
-                      subtitle: Text(
-                        item.prompt,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () => onReviewSelected(item.id),
                     ),
-                  ),
+                entranceKey: reviewQueue.length,
+              ),
             ],
           ],
         ),

@@ -41,7 +41,7 @@ class ProjectStudioGenericStepSetupPanel extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: onOpenModelRoutingSettings,
-              icon: const Icon(Icons.hub_outlined, size: 18),
+              icon: const Icon(Icons.hub_outlined, size: StudioIconSize.sm),
               label: Text(l10n.studioScriptStepModelRoutingSettingsLink),
             ),
           ),

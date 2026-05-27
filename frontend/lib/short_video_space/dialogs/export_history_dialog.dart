@@ -613,7 +613,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       content: LayoutBuilder(
         builder: (context, constraints) {
           final fallbackHeight = (MediaQuery.sizeOf(context).height * 0.45)
-              .clamp(280.0, 480.0);
+              .clamp(StudioLayoutSize.fieldStandard, 480.0);
           final height = constraints.maxHeight.isFinite
               ? constraints.maxHeight
               : fallbackHeight;
@@ -758,7 +758,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       ),
       child: ListView.separated(
         itemCount: _historyItems.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        separatorBuilder: (context, index) => const Divider(height: StudioControlSize.dividerThickness),
         itemBuilder: (context, index) {
           final item = _historyItems[index];
           return studioStaggeredItem(
@@ -844,7 +844,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
             ),
         ],
       ),
@@ -1014,7 +1014,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             ? const SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
               )
             : const Icon(Icons.download),
         label: Text(
@@ -1100,7 +1100,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
-      child: studioDecorativeIcon(icon, color: color, size: 24),
+      child: studioDecorativeIcon(icon, color: color, size: StudioIconSize.lg),
     );
   }
 

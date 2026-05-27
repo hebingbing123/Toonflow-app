@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -109,7 +110,7 @@ class StudioReviewPackExportBridge extends StatelessWidget {
               children: <Widget>[
                 Icon(
                   ready ? Icons.check_circle_outline : Icons.info_outline,
-                  size: 20,
+                  size: StudioIconSize.md,
                   color: ready ? tokens.primary : theme.colorScheme.error,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
@@ -137,16 +138,19 @@ class StudioReviewPackExportBridge extends StatelessWidget {
             ),
             if (!ready && blocking.isNotEmpty) ...<Widget>[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
-              ...blocking.map(
-                (issue) => Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: StudioSpacing.chromeActionGap,
-                  ),
-                  child: Text(
-                    '• ${issue.detail.trim().isEmpty ? issue.code : issue.detail}',
-                    style: theme.textTheme.bodySmall,
+              ...studioStaggeredChildren(
+                blocking.map(
+                  (issue) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: StudioSpacing.chromeActionGap,
+                    ),
+                    child: Text(
+                      '• ${issue.detail.trim().isEmpty ? issue.code : issue.detail}',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                 ),
+                entranceKey: blocking.length,
               ),
             ],
             const SizedBox(height: StudioLayoutSpacing.inlineGap),

@@ -6,6 +6,7 @@ import '../../../design_system/components/studio_chip.dart';
 
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../design_system/components/studio_workbench_section.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -42,60 +43,63 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: StudioSpacing.xs),
-        ...stages.map(
-          (ScriptWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          stage.title,
-                          style: Theme.of(context).textTheme.labelLarge,
+        ...studioStaggeredChildren(
+          stages.map(
+            (ScriptWorkspaceStage stage) => Card(
+              margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            stage.title,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                      StudioChip(label: Text(stage.statusLabel)),
-                    ],
-                  ),
-                  Text(
-                    stage.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: StudioSpacing.xs),
-                  StudioDenseActionRow(
-                    children: <Widget>[
-                      OutlinedButton(
-                        style: studioFormSecondaryButtonStyle(context),
-                        onPressed: busy ? null : () => onApplyStage(stage),
-                        child: Text(l10n.agentWorkspaceScriptApplyStage),
-                      ),
-                      if (stage.domainTool != null)
-                        FilledButton.tonal(
-                          style: studioFormTonalButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunStageDomainTool(stage),
-                          child: Text(l10n.agentWorkspaceScriptReadContext),
+                        StudioChip(label: Text(stage.statusLabel)),
+                      ],
+                    ),
+                    Text(
+                      stage.detail,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: StudioSpacing.xs),
+                    StudioDenseActionRow(
+                      children: <Widget>[
+                        OutlinedButton(
+                          style: studioFormSecondaryButtonStyle(context),
+                          onPressed: busy ? null : () => onApplyStage(stage),
+                          child: Text(l10n.agentWorkspaceScriptApplyStage),
                         ),
-                      if (stage.subAgentTool != null)
-                        FilledButton(
-                          style: studioFormPrimaryButtonStyle(context),
-                          onPressed: busy
-                              ? null
-                              : () => onRunStageSubAgent(stage),
-                          child: Text(l10n.agentWorkspaceScriptAdvanceStage),
-                        ),
-                    ],
-                  ),
-                ],
+                        if (stage.domainTool != null)
+                          FilledButton.tonal(
+                            style: studioFormTonalButtonStyle(context),
+                            onPressed: busy
+                                ? null
+                                : () => onRunStageDomainTool(stage),
+                            child: Text(l10n.agentWorkspaceScriptReadContext),
+                          ),
+                        if (stage.subAgentTool != null)
+                          FilledButton(
+                            style: studioFormPrimaryButtonStyle(context),
+                            onPressed: busy
+                                ? null
+                                : () => onRunStageSubAgent(stage),
+                            child: Text(l10n.agentWorkspaceScriptAdvanceStage),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          entranceKey: stages.length,
         ),
       ],
     );
@@ -130,93 +134,94 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
         title: l10n.agentWorkspaceScriptDiagnosisTitle,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: recipes
-              .map(
-                (ScriptWorkspaceRecipe recipe) => Card(
-                  margin: const EdgeInsets.only(
-                    bottom: StudioLayoutSpacing.listItem,
+          children: studioStaggeredChildren(
+            recipes.map(
+              (ScriptWorkspaceRecipe recipe) => Card(
+                margin: const EdgeInsets.only(
+                  bottom: StudioLayoutSpacing.listItem,
+                ),
+                color: tokens.bgInset,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    StudioSpacing.radiusButton,
                   ),
-                  color: tokens.bgInset,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      StudioSpacing.radiusButton,
-                    ),
-                    side: BorderSide(color: tokens.borderSubtle),
+                  side: BorderSide(color: tokens.borderSubtle),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                    StudioSpacing.radiusComfort,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(
-                      StudioSpacing.radiusComfort,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          recipe.title,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: StudioSpacing.xs),
-                        Text(
-                          recipe.detail,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: StudioSpacing.xs),
-                        StudioDenseActionRow(
-                          children: <Widget>[
-                            if (recipe.domainTool != null)
-                              StudioChip(
-                                label: Text(
-                                  agentWorkspaceScriptDomainToolLabel(
-                                    l10n,
-                                    recipe.domainTool!,
-                                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        recipe.title,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: StudioSpacing.xs),
+                      Text(
+                        recipe.detail,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: StudioSpacing.xs),
+                      StudioDenseActionRow(
+                        children: <Widget>[
+                          if (recipe.domainTool != null)
+                            StudioChip(
+                              label: Text(
+                                agentWorkspaceScriptDomainToolLabel(
+                                  l10n,
+                                  recipe.domainTool!,
                                 ),
-                              ),
-                            if (recipe.subAgentTool != null)
-                              StudioChip(
-                                label: Text(
-                                  agentWorkspaceScriptSubAgentLabel(
-                                    l10n,
-                                    recipe.subAgentTool!,
-                                  ),
-                                ),
-                              ),
-                            OutlinedButton(
-                              style: studioFormSecondaryButtonStyle(context),
-                              onPressed: busy
-                                  ? null
-                                  : () => onApplyRecipe(recipe),
-                              child: Text(
-                                l10n.agentWorkspaceScriptApplySuggestion,
                               ),
                             ),
-                            if (recipe.domainTool != null)
-                              FilledButton.tonal(
-                                style: studioFormTonalButtonStyle(context),
-                                onPressed: busy
-                                    ? null
-                                    : () => onRunRecipeDomainTool(recipe),
-                                child: Text(
-                                  l10n.agentWorkspaceScriptReadContext,
+                          if (recipe.subAgentTool != null)
+                            StudioChip(
+                              label: Text(
+                                agentWorkspaceScriptSubAgentLabel(
+                                  l10n,
+                                  recipe.subAgentTool!,
                                 ),
                               ),
-                            if (recipe.subAgentTool != null)
-                              FilledButton(
-                                style: studioFormPrimaryButtonStyle(context),
-                                onPressed: busy
-                                    ? null
-                                    : () => onRunRecipeSubAgent(recipe),
-                                child: Text(
-                                  l10n.agentWorkspaceScriptRunSubAgent,
-                                ),
+                            ),
+                          OutlinedButton(
+                            style: studioFormSecondaryButtonStyle(context),
+                            onPressed: busy
+                                ? null
+                                : () => onApplyRecipe(recipe),
+                            child: Text(
+                              l10n.agentWorkspaceScriptApplySuggestion,
+                            ),
+                          ),
+                          if (recipe.domainTool != null)
+                            FilledButton.tonal(
+                              style: studioFormTonalButtonStyle(context),
+                              onPressed: busy
+                                  ? null
+                                  : () => onRunRecipeDomainTool(recipe),
+                              child: Text(
+                                l10n.agentWorkspaceScriptReadContext,
                               ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ),
+                          if (recipe.subAgentTool != null)
+                            FilledButton(
+                              style: studioFormPrimaryButtonStyle(context),
+                              onPressed: busy
+                                  ? null
+                                  : () => onRunRecipeSubAgent(recipe),
+                              child: Text(
+                                l10n.agentWorkspaceScriptRunSubAgent,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              )
-              .toList(growable: false),
+              ),
+            ),
+            entranceKey: recipes.length,
+          ),
         ),
       ),
     );

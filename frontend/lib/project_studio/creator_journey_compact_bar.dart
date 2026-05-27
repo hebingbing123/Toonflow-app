@@ -117,11 +117,11 @@ class CreatorJourneyCompactBar extends StatelessWidget {
               _showFullWorkflow(context);
             },
           ),
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
         ];
         for (final entry in buildCreatorWorkspaceMenuEntries(context, l10n)) {
           if (entry is PopupMenuDivider) {
-            sheetChildren.add(const Divider(height: 1));
+            sheetChildren.add(const Divider(height: StudioControlSize.dividerThickness));
             continue;
           }
           if (entry is! PopupMenuItem<CreatorWorkspaceMenuTarget>) {
@@ -187,7 +187,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       }
       return TextButton.icon(
         onPressed: onBackToProjects,
-        icon: const Icon(Icons.chevron_left_rounded, size: 20),
+        icon: const Icon(Icons.chevron_left_rounded, size: StudioIconSize.md),
         label: Text(projectLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
         style: TextButton.styleFrom(
           foregroundColor: tokens.textSecondary,
@@ -212,7 +212,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     }
     return TextButton.icon(
       onPressed: onPressed,
-      icon: const Icon(Icons.chevron_left_rounded, size: 20),
+      icon: const Icon(Icons.chevron_left_rounded, size: StudioIconSize.md),
       label: Text(prevLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
       style: TextButton.styleFrom(
         foregroundColor: tokens.textSecondary,
@@ -258,7 +258,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     }
     return TextButton.icon(
       onPressed: onPressed,
-      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+      icon: const Icon(Icons.arrow_forward_rounded, size: StudioIconSize.sm),
       label: Text(label!, overflow: TextOverflow.ellipsis, maxLines: 1),
       style: TextButton.styleFrom(
         foregroundColor: tokens.primary,
@@ -289,7 +289,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.menu_book_outlined, size: 16, color: tokens.primary),
+            Icon(Icons.menu_book_outlined, size: StudioIconSize.xs, color: tokens.primary),
             const SizedBox(width: StudioSpacing.xs),
             Flexible(
               child: Text(
@@ -338,7 +338,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                 )
               : TextButton.icon(
                   onPressed: onOpenStepSetup,
-                  icon: const Icon(Icons.playlist_add_check_outlined, size: 18),
+                  icon: const Icon(Icons.playlist_add_check_outlined, size: StudioIconSize.sm),
                   label: Text(
                     l10n.studioScriptStepSetupOpen,
                     overflow: TextOverflow.ellipsis,

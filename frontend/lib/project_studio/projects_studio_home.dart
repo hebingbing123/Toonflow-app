@@ -781,7 +781,7 @@ class _SelectProjectHintBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(Icons.touch_app_outlined, size: 18, color: tokens.primary),
+            Icon(Icons.touch_app_outlined, size: StudioIconSize.sm, color: tokens.primary),
             const SizedBox(width: StudioSpacing.sm - 6),
             Expanded(
               child: Text(

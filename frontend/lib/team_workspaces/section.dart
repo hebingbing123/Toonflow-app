@@ -477,7 +477,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : const Icon(Icons.refresh),
                 label: Text(
@@ -698,7 +698,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                         width: 16,
                                         height: 16,
                                         child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                          strokeWidth: StudioControlSize.progressStroke,
                                         ),
                                       )
                                     : Text(l10n.teamWorkspaceSwitchHereAction),
@@ -721,7 +721,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                           width: 16,
                                           height: 16,
                                           child: CircularProgressIndicator(
-                                            strokeWidth: 2,
+                                            strokeWidth: StudioControlSize.progressStroke,
                                           ),
                                         )
                                       : Text(l10n.teamWorkspaceArchiveAction),
@@ -744,7 +744,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                           width: 16,
                                           height: 16,
                                           child: CircularProgressIndicator(
-                                            strokeWidth: 2,
+                                            strokeWidth: StudioControlSize.progressStroke,
                                           ),
                                         )
                                       : Text(l10n.teamWorkspaceRestoreAction),
@@ -761,7 +761,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      const Divider(height: 1),
+                      const Divider(height: StudioControlSize.dividerThickness),
                       tile,
                     ],
                   );

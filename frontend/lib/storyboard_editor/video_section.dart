@@ -569,7 +569,8 @@ class _StoryboardVideoSection extends StatelessWidget {
             style: studioHintStyle(context),
           ),
           const SizedBox(height: StudioSpacing.xs),
-          ...storyboardVideos.take(3).map((video) {
+          ...studioStaggeredChildren(
+            storyboardVideos.take(3).map((video) {
           final state = video.state ?? '';
           final duration = video.duration ?? '';
           final videoUrl = video.videoUrl?.trim() ?? '';
@@ -635,11 +636,13 @@ class _StoryboardVideoSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: StudioSpacing.xs),
-              const Divider(height: 1),
+              const Divider(height: StudioControlSize.dividerThickness),
               const SizedBox(height: StudioSpacing.xs),
             ],
           );
         }),
+            entranceKey: storyboardVideos.length,
+          ),
         ],
         if (generateData != null &&
             (generateData!.generatingJobs.isNotEmpty ||

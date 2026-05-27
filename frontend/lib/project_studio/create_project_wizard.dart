@@ -92,7 +92,7 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
               children: <Widget>[
                 const SizedBox(height: StudioSpacing.xs),
                 Container(
-                  width: 40,
+                  width: StudioLayoutSize.skeletonAvatar,
                   height: 4,
                   decoration: BoxDecoration(
                     color: tokens.borderDefault,

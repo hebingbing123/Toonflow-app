@@ -368,7 +368,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                     ),
                   ),
                   SizedBox(
-                    width: 60,
+                    width: StudioLayoutSize.sliderCompact,
                     child: Text(
                       resolveAppLocalizationsForErrors(context).shortVideoVoiceoverSpeedMultiplier(
                         _selectedSpeed.toStringAsFixed(1),
@@ -396,7 +396,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.play_arrow),
                       label: Text(l10n.shortVideoCharactersPreviewVoice),
@@ -428,7 +428,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      size: 20,
+                      size: StudioIconSize.md,
                       color: tokens.textSecondary,
                     ),
                     const SizedBox(width: StudioSpacing.xs),

@@ -828,8 +828,9 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                   ],
                 ),
               ],
-              ..._billingEvents.map(
-                (item) => Card(
+              ...studioStaggeredChildren(
+                _billingEvents.map(
+                  (item) => Card(
                   margin: const EdgeInsets.only(top: StudioSpacing.xs),
                   child: Padding(
                     padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
@@ -910,6 +911,8 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                     ),
                   ),
                 ),
+                ),
+                entranceKey: _billingEvents.length,
               ),
               if (_billingEventsPage?.hasMore == true) ...<Widget>[
                 const SizedBox(height: StudioSpacing.xs),

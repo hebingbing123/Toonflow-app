@@ -171,7 +171,7 @@ class SearchResultCard extends StatelessWidget {
                         backgroundColor: StudioTokens.of(context).primarySoft,
                         child: Icon(
                           _getTypeIcon(result.resultType),
-                          size: 20,
+                          size: StudioIconSize.md,
                           color: theme.colorScheme.primary,
                         ),
                       ),

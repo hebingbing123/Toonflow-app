@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../design_system/components/studio_icon_button.dart';
+import '../../design_system/components/studio_text_styles.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -456,7 +457,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                       if (_currentShotNumber != null) ...[
                         Icon(
                           Icons.movie_outlined,
-                          size: 20,
+                          size: StudioIconSize.md,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: StudioSpacing.xs),
@@ -547,7 +548,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         children: [
                           Icon(
                             Icons.playlist_play,
-                            size: 16,
+                            size: StudioIconSize.xs,
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(width: StudioSpacing.xs),
@@ -586,7 +587,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         if (_isPlaylistMode)
                           Icon(
                             Icons.movie,
-                            size: 16,
+                            size: StudioIconSize.xs,
                             color: StudioTokens.of(context).textSecondary,
                           ),
                         if (_isPlaylistMode) const SizedBox(width: StudioSpacing.xs),

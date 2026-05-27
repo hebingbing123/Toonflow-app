@@ -260,7 +260,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                           )
                         : const Icon(Icons.travel_explore_outlined),
                     label: Text(l10n.adminConsoleSearchAction),
@@ -685,7 +685,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         ),
         const SizedBox(height: StudioSpacing.xs),
         SizedBox(
-          width: studioAdaptiveFieldWidth(context, max: 280),
+          width: studioAdaptiveFieldWidth(context, max: StudioLayoutSize.fieldStandard),
           child: TextField(
             controller: _dailyQuotaController,
             enabled: _quotaRequiresValue,
@@ -723,7 +723,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
               : const Icon(Icons.admin_panel_settings_outlined),
           label: Text(
@@ -820,7 +820,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               const SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
               ),
               const SizedBox(width: StudioSpacing.xs),
               Text(
@@ -985,7 +985,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
               : const Icon(Icons.domain_verification_outlined),
           label: Text(
@@ -1275,66 +1275,69 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             icon: Icons.shield_outlined,
           )
         else
-          ...detail.projectAclSummaries.map(
-            (project) => Padding(
-              padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-              child: Wrap(
-                spacing: StudioSpacing.xs,
-                runSpacing: StudioSpacing.xs,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Checkbox(
-                    value: _selectedWorkspaceProjectIds.contains(
-                      project.projectId,
+          ...studioStaggeredChildren(
+            detail.projectAclSummaries.map(
+              (project) => Padding(
+                padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                child: Wrap(
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: _selectedWorkspaceProjectIds.contains(
+                        project.projectId,
+                      ),
+                      onChanged: widget.controller.savingBatchGovernance
+                          ? null
+                          : (checked) {
+                              setState(() {
+                                if (checked == true) {
+                                  _selectedWorkspaceProjectIds.add(
+                                    project.projectId,
+                                  );
+                                } else {
+                                  _selectedWorkspaceProjectIds.remove(
+                                    project.projectId,
+                                  );
+                                }
+                              });
+                            },
                     ),
-                    onChanged: widget.controller.savingBatchGovernance
-                        ? null
-                        : (checked) {
-                            setState(() {
-                              if (checked == true) {
-                                _selectedWorkspaceProjectIds.add(
-                                  project.projectId,
-                                );
-                              } else {
-                                _selectedWorkspaceProjectIds.remove(
-                                  project.projectId,
-                                );
-                              }
-                            });
-                          },
-                  ),
-                  Text(
-                    '#${project.numericId} ${project.name ?? ''}',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  StudioChip(label: Text(studioAdminAclModeLabel(l10n, project.aclMode))),
-                  StudioChip(
-                    label: Text(
-                      l10n.adminConsoleExplicitAclCount(
-                        project.explicitAclCount,
+                    Text(
+                      '#${project.numericId} ${project.name ?? ''}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    StudioChip(label: Text(studioAdminAclModeLabel(l10n, project.aclMode))),
+                    StudioChip(
+                      label: Text(
+                        l10n.adminConsoleExplicitAclCount(
+                          project.explicitAclCount,
+                        ),
                       ),
                     ),
-                  ),
-                  StudioChip(
-                    label: Text(
-                      l10n.adminConsoleEditorCount(project.editorCount),
+                    StudioChip(
+                      label: Text(
+                        l10n.adminConsoleEditorCount(project.editorCount),
+                      ),
                     ),
-                  ),
-                  StudioChip(
-                    label: Text(
-                      l10n.adminConsoleViewerCount(project.viewerCount),
+                    StudioChip(
+                      label: Text(
+                        l10n.adminConsoleViewerCount(project.viewerCount),
+                      ),
                     ),
-                  ),
-                  if (project.archivedAt != null)
-                    StudioChip(label: Text(l10n.teamWorkspaceArchivedBadge)),
-                  TextButton(
-                    onPressed: () =>
-                        widget.controller.loadProject(project.projectId),
-                    child: Text(l10n.adminConsoleViewAction),
-                  ),
-                ],
+                    if (project.archivedAt != null)
+                      StudioChip(label: Text(l10n.teamWorkspaceArchivedBadge)),
+                    TextButton(
+                      onPressed: () =>
+                          widget.controller.loadProject(project.projectId),
+                      child: Text(l10n.adminConsoleViewAction),
+                    ),
+                  ],
+                ),
               ),
             ),
+            entranceKey: detail.projectAclSummaries.length,
           ),
       ],
     );
@@ -1484,7 +1487,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
               : const Icon(Icons.playlist_add_check_circle_outlined),
           label: Text(
@@ -1778,7 +1781,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
               : const Icon(Icons.folder_special_outlined),
           label: Text(

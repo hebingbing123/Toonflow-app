@@ -31,7 +31,7 @@ class StudioJobTray extends StatelessWidget {
               width: 18,
               height: 18,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: StudioControlSize.progressStroke,
                 color: tokens.accent,
               ),
             ),

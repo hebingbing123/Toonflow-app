@@ -595,7 +595,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Icon(Icons.arrow_forward_rounded, size: 16),
+                  const Icon(Icons.arrow_forward_rounded, size: StudioIconSize.xs),
                   SizedBox(width: StudioLayoutSpacing.microGap),
                   Text(l10n.studioCreatorJourneyNext),
                 ],
@@ -774,7 +774,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                           children: <Widget>[
                             Icon(
                               Icons.tune_rounded,
-                              size: 18,
+                              size: StudioIconSize.sm,
                               color: tokens.textSecondary.withValues(alpha: 0.85),
                             ),
                             const SizedBox(width: StudioSpacing.chromeActionGap),
@@ -1098,7 +1098,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 final hubCardWidth = studioClampedPaneWidth(
                   hubConstraints.maxWidth,
                   fraction: 0.46,
-                  min: 280,
+                  min: StudioLayoutSize.fieldStandard,
                   max: 420,
                 );
                 return Wrap(
@@ -1658,7 +1658,7 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                       ),
                       child: TextButton.icon(
                         onPressed: host.onOpenTasks,
-                        icon: const Icon(Icons.pending_actions_outlined, size: 18),
+                        icon: const Icon(Icons.pending_actions_outlined, size: StudioIconSize.sm),
                         label: Text('${host.runningJobCount}'),
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.standard,

@@ -229,7 +229,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     context,
                     fraction: 0.22,
                     min: 140,
-                    max: 280,
+                    max: StudioLayoutSize.fieldStandard,
                   ),
                   child: ListView.builder(
                     itemCount: model.steps.length,

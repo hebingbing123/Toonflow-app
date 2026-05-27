@@ -81,18 +81,18 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
         StudioIconButton(
           icon: Icons.undo,
           label: l10n.shortVideoTimelineUndo,
-          size: 20,
+          size: StudioIconSize.md,
           onPressed: _undoStack.canUndo ? _undoLocal : null,
         ),
         StudioIconButton(
           icon: Icons.redo,
           label: l10n.shortVideoTimelineRedo,
-          size: 20,
+          size: StudioIconSize.md,
           onPressed: _undoStack.canRedo ? _redoLocal : null,
         ),
         TextButton.icon(
           onPressed: _showRevisionHistorySheet,
-          icon: const Icon(Icons.history, size: 18),
+          icon: const Icon(Icons.history, size: StudioIconSize.sm),
           label: Text(l10n.shortVideoTimelineRevisionHistory),
         ),
       ],
@@ -126,7 +126,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
               itemCount: revisions.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: StudioControlSize.dividerThickness),
               itemBuilder: (context, index) {
                 final item = revisions[index];
                 final subtitle = [
@@ -141,7 +141,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
                       l10n.shortVideoTimelineRevisionLabel(item.revision),
                     ),
                     subtitle: Text(subtitle),
-                    trailing: const Icon(Icons.restore, size: 20),
+                    trailing: const Icon(Icons.restore, size: StudioIconSize.md),
                     onTap: () async {
                       Navigator.of(ctx).pop();
                       await _restoreRevision(item.revision);

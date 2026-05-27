@@ -108,7 +108,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               child: ListView.separated(
                                 itemCount: versions.length,
                                 separatorBuilder: (_, _) =>
-                                    const Divider(height: 1),
+                                    const Divider(height: StudioControlSize.dividerThickness),
                                 itemBuilder: (ctx, index) {
                                   final version = versions[index];
                                   final selectedNow =

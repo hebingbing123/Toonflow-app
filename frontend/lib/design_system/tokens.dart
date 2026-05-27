@@ -232,6 +232,44 @@ abstract final class StudioSpacing {
   static const double controlPaddingVertical = 6;
 }
 
+/// Icon glyph sizes in chrome, lists, and toolbars.
+abstract final class StudioIconSize {
+  static const double xs = 16;
+  static const double sm = 18;
+  static const double md = 20;
+  static const double lg = 24;
+}
+
+/// Hairline chrome and inline progress affordances.
+abstract final class StudioControlSize {
+  static const double progressIndicator = 18;
+  static const double progressStroke = 2;
+  static const double dividerThickness = 1;
+  static const double linearProgressHeight = 2;
+}
+
+/// Named layout widths and heights (fields, rails, previews).
+abstract final class StudioLayoutSize {
+  static const double fieldMin = 180;
+  static const double fieldNarrow = 240;
+  static const double fieldStandard = 280;
+  static const double searchField = 280;
+  static const double paneMinHeight = 280;
+  static const double timelineLane = 88;
+  static const double timelineControl = 120;
+  static const double labelColumn = 100;
+  static const double sliderCompact = 60;
+  static const double previewPanelHeight = 200;
+  static const double previewThumbnail = 120;
+  static const double wizardStepBadge = 28;
+  static const double skeletonLineShort = 12;
+  static const double skeletonLineMedium = 16;
+  static const double skeletonLineTall = 18;
+  static const double skeletonLineWide = 56;
+  static const double skeletonAvatar = 40;
+  static const double dialogBatchHeight = 280;
+}
+
 /// Page-level semantic spacing (prefer over ad-hoc 10/14/18 values).
 abstract final class StudioLayoutSpacing {
   static const double pageTop = StudioSpacing.md;

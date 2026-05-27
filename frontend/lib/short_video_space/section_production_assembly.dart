@@ -1189,7 +1189,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         children: [
                           Icon(
                             Icons.timer_outlined,
-                            size: 20,
+                            size: StudioIconSize.md,
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: StudioSpacing.xs),
@@ -1774,7 +1774,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     ? filteredTasks.length
                                     : filteredTasks.length,
                                 separatorBuilder: (context, _) =>
-                                    const Divider(height: 1),
+                                    const Divider(height: StudioControlSize.dividerThickness),
                                 itemBuilder: (_, index) {
                                   final task = filteredTasks[index];
                                   final shotNumeric = task.shotId == null

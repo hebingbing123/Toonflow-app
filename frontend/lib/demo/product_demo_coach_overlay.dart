@@ -357,7 +357,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
                     children: <Widget>[
                       Icon(
                         Icons.route_outlined,
-                        size: 18,
+                        size: StudioIconSize.sm,
                         color: accent,
                       ),
                       const SizedBox(width: StudioSpacing.xs),
@@ -545,7 +545,7 @@ class _CoachSecondaryActionsRow extends StatelessWidget {
                 detailsExpanded
                     ? Icons.unfold_less_rounded
                     : Icons.unfold_more_rounded,
-                size: 18,
+                size: StudioIconSize.sm,
               ),
               label: Text(expandLabel),
             ),
@@ -618,7 +618,7 @@ class _DemoModePill extends StatelessWidget {
               children: <Widget>[
                 Icon(
                   Icons.play_lesson_outlined,
-                  size: 16,
+                  size: StudioIconSize.xs,
                   color: tokens.warning,
                 ),
                 const SizedBox(width: StudioSpacing.xs),

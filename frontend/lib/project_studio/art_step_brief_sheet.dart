@@ -397,7 +397,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
               ),
               ),
             ),
-            const Divider(height: 1),
+            const Divider(height: StudioControlSize.dividerThickness),
             Padding(
               padding: const EdgeInsets.fromLTRB(StudioSpacing.md, StudioSpacing.xs, StudioSpacing.md, StudioSpacing.sm),
               child: Wrap(

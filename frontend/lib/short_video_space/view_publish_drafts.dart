@@ -135,7 +135,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                         publishPanelUi.multiSelectMode
                             ? Icons.check_box
                             : Icons.check_box_outline_blank,
-                        size: 18,
+                        size: StudioIconSize.sm,
                       ),
                       label: Text(
                         publishPanelUi.multiSelectMode
@@ -202,7 +202,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : () => publishPanelUi.onBatchScheduleDrafts
                                           ?.call(context),
-                                icon: const Icon(Icons.schedule, size: 18),
+                                icon: const Icon(Icons.schedule, size: StudioIconSize.sm),
                                 label: Text(
                                   l10n.shortVideoPublishPanelBatchSchedule,
                                 ),
@@ -213,7 +213,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onBatchPublishDrafts,
-                                icon: const Icon(Icons.publish, size: 18),
+                                icon: const Icon(Icons.publish, size: StudioIconSize.sm),
                                 label: Text(
                                   l10n.shortVideoPublishPanelBatchPublish,
                                 ),
@@ -224,7 +224,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onBatchArchiveDrafts,
-                                icon: const Icon(Icons.archive, size: 18),
+                                icon: const Icon(Icons.archive, size: StudioIconSize.sm),
                                 label: Text(
                                   l10n.shortVideoPublishPanelBatchArchive,
                                 ),
@@ -235,7 +235,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
                                     : publishPanelUi.onCompareDrafts,
-                                icon: const Icon(Icons.compare, size: 18),
+                                icon: const Icon(Icons.compare, size: StudioIconSize.sm),
                                 label: Text(
                                   l10n.shortVideoPublishPanelCompareDrafts,
                                 ),
@@ -436,7 +436,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : const Icon(Icons.verified_outlined),
                 label: Text(l10n.shortVideoPublishPanelConfirmSemiAuto),
@@ -549,7 +549,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.note_add_outlined),
                       label: Text(l10n.shortVideoPublishPanelBootstrapDraft),
@@ -566,7 +566,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.cloud_upload_outlined),
                       label: Text(

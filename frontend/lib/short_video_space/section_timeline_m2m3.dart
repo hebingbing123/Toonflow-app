@@ -230,7 +230,7 @@ class _SubtitleCueList extends StatelessWidget {
                 ),
               ]);
             },
-            icon: const Icon(Icons.add, size: 18),
+            icon: const Icon(Icons.add, size: StudioIconSize.sm),
             label: Text(l10n.shortVideoTimelineAddSubtitle),
           ),
         ),
@@ -361,7 +361,7 @@ class _VoiceoverTrackPanel extends StatelessWidget {
       children: [
         if (peaks != null && peaks!.isNotEmpty)
           SizedBox(
-            height: 48,
+            height: StudioSpacing.touchTarget,
             child: CustomPaint(
               painter: _WaveformBarsPainter(
                 peaks!,

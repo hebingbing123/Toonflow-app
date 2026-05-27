@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../design_system/components/studio_entrance_motion.dart';
 import '../../../design_system/tokens.dart';
 
 import '../../../rust_api.dart';
@@ -54,8 +55,11 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: StudioSpacing.xs),
-          ...resultSummaryLines.map(
-            (String line) => Text(line, style: bodySmall),
+          ...studioStaggeredChildren(
+            resultSummaryLines.map(
+              (String line) => Text(line, style: bodySmall),
+            ),
+            entranceKey: resultSummaryLines.length,
           ),
         ],
         if (suggestedFlowKeyLine != null) ...<Widget>[

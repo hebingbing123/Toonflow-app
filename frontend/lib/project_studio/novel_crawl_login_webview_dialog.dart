@@ -176,9 +176,9 @@ class _NovelCrawlLoginWebViewDialogState
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
-              : const Icon(Icons.cookie_outlined, size: 18),
+              : const Icon(Icons.cookie_outlined, size: StudioIconSize.sm),
           label: Text(l10n.studioNovelCrawlLoginDialogConfirm),
         ),
       ],
@@ -223,7 +223,7 @@ class _NovelCrawlLoginWebViewDialogState
             ],
             if (_progress > 0 && _progress < 1) ...<Widget>[
               const SizedBox(height: StudioSpacing.xs),
-              LinearProgressIndicator(value: _progress, minHeight: 2),
+              LinearProgressIndicator(value: _progress, minHeight: StudioControlSize.linearProgressHeight),
             ],
             const SizedBox(height: StudioSpacing.xs),
             Expanded(

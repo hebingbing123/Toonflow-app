@@ -183,9 +183,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     )
-                  : const Icon(Icons.done_all_outlined, size: 18),
+                  : const Icon(Icons.done_all_outlined, size: StudioIconSize.sm),
               label: Text(l10n.notificationsMarkAllRead),
             ),
           ],
@@ -282,7 +282,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                         )
                       : const Icon(Icons.done_all_outlined),
                   label: Text(l10n.notificationsMarkAllRead),
@@ -349,7 +349,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : const Icon(Icons.expand_more),
                 label: Text(l10n.notificationsLoadMore),
@@ -474,7 +474,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       onPressed: widget.controller.loading
           ? null
           : widget.controller.refresh,
-      icon: const Icon(Icons.refresh, size: 18),
+      icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
       label: Text(l10n.notificationsRefresh),
     );
 
@@ -601,7 +601,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     ? const SizedBox(
                         width: 14,
                         height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : Text(l10n.notificationsComplianceSavePolicy),
               ),
@@ -712,7 +712,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.arrow_upward,
                             label: l10n.notificationsComplianceTooltipMoveUp,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed: widget.controller.savingPreferences
                                 ? null
                                 : () => _reorderTemplate(template.id, up: true),
@@ -720,7 +720,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.arrow_downward,
                             label: l10n.notificationsComplianceTooltipMoveDown,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed: widget.controller.savingPreferences
                                 ? null
                                 : () =>
@@ -729,7 +729,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.edit_outlined,
                             label: l10n.notificationsComplianceTooltipEditTemplate,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !template.canEdit
@@ -739,7 +739,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.delete_outline,
                             label: l10n.notificationsComplianceTooltipDeleteTemplate,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !template.canDelete
@@ -817,7 +817,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.edit_outlined,
                             label: l10n.notificationsComplianceTooltipEditSharedTemplate,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !widget
@@ -829,7 +829,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                           StudioIconButton(
                             icon: Icons.delete_outline,
                             label: l10n.notificationsComplianceTooltipDeleteSharedTemplate,
-                            size: 18,
+                            size: StudioIconSize.sm,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !widget
@@ -1140,7 +1140,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     ? const SizedBox(
                         width: 14,
                         height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     : Text(l10n.notificationsComplianceFilterExports),
               ),
@@ -1168,7 +1168,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     StudioIconButton(
                       icon: Icons.filter_alt_outlined,
                       label: l10n.notificationsComplianceReuseExportFiltersTooltip,
-                      size: 18,
+                      size: StudioIconSize.sm,
                       onPressed: widget.controller.loadingWorkspaceSharedAudit
                           ? null
                           : () => _reuseExportRecordFilters(item),
@@ -1176,7 +1176,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     StudioIconButton(
                       icon: Icons.download_outlined,
                       label: _exportRecordDownloadTooltip(l10n, item),
-                      size: 18,
+                      size: StudioIconSize.sm,
                       onPressed: widget.controller.loadingExportHistory
                           ? null
                           : () => _redownloadFromExportRecord(item),
@@ -1199,9 +1199,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     )
-                  : const Icon(Icons.expand_more, size: 18),
+                  : const Icon(Icons.expand_more, size: StudioIconSize.sm),
               label: Text(l10n.notificationsComplianceMoreExportRecords),
             ),
           ),
@@ -1233,9 +1233,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     )
-                  : const Icon(Icons.expand_more, size: 18),
+                  : const Icon(Icons.expand_more, size: StudioIconSize.sm),
               label: Text(l10n.notificationsComplianceLoadMoreAudit),
             ),
           ),

@@ -433,7 +433,7 @@ class _VendorCardState extends State<_VendorCard> {
                       const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                       )
                     else
                       Switch(
@@ -449,7 +449,7 @@ class _VendorCardState extends State<_VendorCard> {
               ),
             ),
             if (_expanded) ...<Widget>[
-              const Divider(height: 16),
+              const Divider(height: StudioSpacing.sm),
               TextField(
                 controller: _baseUrlCtrl,
                 onChanged: (_) => setState(() {}),
@@ -477,7 +477,7 @@ class _VendorCardState extends State<_VendorCard> {
                     widget.credentialConfigured
                         ? Icons.vpn_key
                         : Icons.vpn_key_off_outlined,
-                    size: 18,
+                    size: StudioIconSize.sm,
                     color: widget.credentialConfigured
                         ? theme.colorScheme.primary
                         : studioPanelMutedColor(context),
@@ -524,7 +524,7 @@ class _VendorCardState extends State<_VendorCard> {
                       tooltip: l10n.settingsModelVendorsTestAction,
                       onPressed:
                           widget.busy ? null : () => widget.onTestModel(m),
-                      icon: const Icon(Icons.play_circle_outline, size: 20),
+                      icon: const Icon(Icons.play_circle_outline, size: StudioIconSize.md),
                     ),
                   ),
                 ),

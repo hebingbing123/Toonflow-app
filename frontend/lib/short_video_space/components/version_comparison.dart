@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
+import '../../design_system/components/studio_icon_button.dart';
 import 'package:flutter/services.dart';
 
 import '../../design_system/components/studio_card.dart';
@@ -565,7 +566,7 @@ class _VersionComparisonState extends State<VersionComparison> {
               children: [
                 Icon(
                   Icons.compare_arrows,
-                  size: 24,
+                  size: StudioIconSize.lg,
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: StudioSpacing.sm),
@@ -587,10 +588,10 @@ class _VersionComparisonState extends State<VersionComparison> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
+                StudioIconButton(
+                  icon: Icons.close,
+                  label: l10n.shortVideoSpaceProductionAssemblyClose,
                   onPressed: widget.onClose,
-                  tooltip: l10n.shortVideoSpaceProductionAssemblyClose,
                 ),
               ],
             ),
@@ -658,7 +659,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: l10n.shortVideoVersionComparisonSearchHint,
-                      prefixIcon: const Icon(Icons.search, size: 20),
+                      prefixIcon: const Icon(Icons.search, size: StudioIconSize.md),
                       border: const OutlineInputBorder(),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -693,7 +694,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                         _showOnlyChanges
                             ? Icons.filter_alt
                             : Icons.filter_alt_outlined,
-                        size: 18,
+                        size: StudioIconSize.sm,
                       ),
                     ),
                     FilledButton.tonalIcon(
@@ -702,9 +703,9 @@ class _VersionComparisonState extends State<VersionComparison> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
-                          : const Icon(Icons.download, size: 18),
+                          : const Icon(Icons.download, size: StudioIconSize.sm),
                       label: Text(l10n.shortVideoVersionComparisonExportReport),
                     ),
                   ],

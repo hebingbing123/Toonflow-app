@@ -327,7 +327,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                       children: [
                         Icon(
                           Icons.storage_outlined,
-                          size: 20,
+                          size: StudioIconSize.md,
                           color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                         const SizedBox(width: StudioSpacing.xs),
@@ -373,7 +373,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      size: 20,
+                      size: StudioIconSize.md,
                       color: tokens.textSecondary,
                     ),
                     const SizedBox(width: StudioSpacing.xs),

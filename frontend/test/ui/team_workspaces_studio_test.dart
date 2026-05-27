@@ -5,6 +5,7 @@ import '../support/ignore_layout_overflow.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/team_workspaces/section.dart';
 
 /// Team workspaces section studio smoke (no network when logged out).
@@ -53,13 +54,16 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         theme: buildStudioDarkTheme(useBundledFonts: true),
         home: const Scaffold(
-          body: SingleChildScrollView(
-            child: TeamWorkspacesSection(accessToken: 'token'),
+          body: TeamWorkspacesSection(
+            accessToken: 'token',
+            // Avoid network + nested scrollables (section owns CustomScrollView).
+            debugInitialItems: <WorkspaceListItem>[],
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text(zh.teamWorkspaceTitle), findsOneWidget);
     expect(find.text(zh.teamWorkspaceRefreshList), findsWidgets);

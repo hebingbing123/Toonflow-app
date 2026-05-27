@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_empty_state.dart';
 import '../../design_system/components/studio_icon_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
@@ -196,43 +197,46 @@ class ProjectScriptsSectionView extends StatelessWidget {
             ),
           )
         else
-          ...model.scriptList.map(
-            (script) {
-              final openStoryboard = callbacks.onOpenStoryboardStep;
-              final openEditor = callbacks.onOpenScriptEditor;
-              final onTap = model.saving
-                  ? null
-                  : openStoryboard != null
-                  ? () => openStoryboard(script)
-                  : openEditor != null
-                  ? () => openEditor(script)
-                  : null;
-              return StudioListRow(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  '#${script.numericId} ${script.name ?? ""}',
-                  style: theme.textTheme.bodySmall,
-                ),
-                onEdit: openStoryboard != null &&
-                        openEditor != null &&
-                        !model.saving
+          ...studioStaggeredChildren(
+            model.scriptList.map(
+              (script) {
+                final openStoryboard = callbacks.onOpenStoryboardStep;
+                final openEditor = callbacks.onOpenScriptEditor;
+                final onTap = model.saving
+                    ? null
+                    : openStoryboard != null
+                    ? () => openStoryboard(script)
+                    : openEditor != null
                     ? () => openEditor(script)
-                    : null,
-                editLabel: l10n.projectEditorScriptsSectionEditScript,
-                trailing: openStoryboard != null && openEditor != null
-                    ? StudioIconButton(
-                        icon: Icons.edit_outlined,
-                        label: l10n.projectEditorScriptsSectionEditScript,
-                        size: 18,
-                        onPressed: model.saving
-                            ? null
-                            : () => openEditor(script),
-                      )
-                    : const Icon(Icons.chevron_right, size: 18),
-                onTap: onTap,
-              );
-            },
+                    : null;
+                return StudioListRow(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    '#${script.numericId} ${script.name ?? ""}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  onEdit: openStoryboard != null &&
+                          openEditor != null &&
+                          !model.saving
+                      ? () => openEditor(script)
+                      : null,
+                  editLabel: l10n.projectEditorScriptsSectionEditScript,
+                  trailing: openStoryboard != null && openEditor != null
+                      ? StudioIconButton(
+                          icon: Icons.edit_outlined,
+                          label: l10n.projectEditorScriptsSectionEditScript,
+                          size: StudioIconSize.sm,
+                          onPressed: model.saving
+                              ? null
+                              : () => openEditor(script),
+                        )
+                      : const Icon(Icons.chevron_right, size: StudioIconSize.sm),
+                  onTap: onTap,
+                );
+              },
+            ),
+            entranceKey: model.scriptList.length,
           ),
       ],
     );

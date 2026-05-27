@@ -133,7 +133,7 @@ class _ChecklistRow extends StatelessWidget {
             item.done
                 ? Icons.check_circle_rounded
                 : Icons.radio_button_unchecked_rounded,
-            size: 20,
+            size: StudioIconSize.md,
             color: item.done ? tokens.success : tokens.textSecondary,
           ),
           const SizedBox(width: StudioSpacing.radiusComfort),
@@ -167,7 +167,7 @@ class _ChecklistRow extends StatelessWidget {
           if (tappable)
             Icon(
               Icons.chevron_right_rounded,
-              size: 20,
+              size: StudioIconSize.md,
               color: tokens.textSecondary,
             ),
         ],

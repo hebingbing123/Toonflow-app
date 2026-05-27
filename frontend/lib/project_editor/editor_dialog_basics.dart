@@ -353,7 +353,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   final modelId = entry.effectiveModelId;
                   return ActionChip(
                     avatar: normalized == modelId
-                        ? const Icon(Icons.check, size: 16)
+                        ? const Icon(Icons.check, size: StudioIconSize.xs)
                         : null,
                     label: Text(entry.label),
                     onPressed: () {

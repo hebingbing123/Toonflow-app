@@ -226,10 +226,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
               ),
               if (widget.onClose != null)
-                IconButton(
-                  icon: const Icon(Icons.close),
+                StudioIconButton(
+                  icon: Icons.close,
+                  label: l10n.shortVideoAudioPreviewCloseTooltip,
                   onPressed: widget.onClose,
-                  tooltip: l10n.shortVideoAudioPreviewCloseTooltip,
                 ),
             ],
           ),
@@ -255,8 +255,8 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
               ),
             ),
           ] else ...[
-            // Progress bar with time display
-            Row(
+            RepaintBoundary(
+              child: Row(
               children: [
                 Text(
                   _formatDuration(_position),
@@ -297,6 +297,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
               ],
             ),
+            ),
             const SizedBox(height: StudioSpacing.sm),
 
             // Playback controls
@@ -304,26 +305,24 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Stop button
-                IconButton(
-                  icon: const Icon(Icons.stop),
+                StudioIconButton(
+                  icon: Icons.stop,
+                  label: l10n.shortVideoAudioPreviewTooltipStop,
                   onPressed: _playerState != PlayerState.stopped ? _stop : null,
-                  tooltip: l10n.shortVideoAudioPreviewTooltipStop,
-                  iconSize: 28,
+                  size: 28,
                 ),
                 const SizedBox(width: StudioSpacing.sm),
 
                 // Play/Pause button
-                IconButton(
-                  icon: Icon(
-                    _playerState == PlayerState.playing
-                        ? Icons.pause_circle_filled
-                        : Icons.play_circle_filled,
-                  ),
-                  onPressed: _togglePlayPause,
-                  tooltip: _playerState == PlayerState.playing
+                StudioIconButton(
+                  icon: _playerState == PlayerState.playing
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  label: _playerState == PlayerState.playing
                       ? l10n.shortVideoAudioPreviewTooltipPause
                       : l10n.shortVideoAudioPreviewTooltipPlay,
-                  iconSize: 48,
+                  onPressed: _togglePlayPause,
+                  size: 48,
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ],
@@ -339,7 +338,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                       : _volume < 0.5
                       ? Icons.volume_down
                       : Icons.volume_up,
-                  size: 20,
+                  size: StudioIconSize.md,
                 ),
                 const SizedBox(width: StudioSpacing.xs),
                 Expanded(
@@ -367,7 +366,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 ),
                 const SizedBox(width: StudioSpacing.xs),
                 SizedBox(
-                  width: 40,
+                  width: StudioLayoutSize.skeletonAvatar,
                   child: Text(
                     l10n.shortVideoAudioVolumePercent(
                       (_volume * 100).toInt(),

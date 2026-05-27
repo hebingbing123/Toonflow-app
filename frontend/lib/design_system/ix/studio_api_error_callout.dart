@@ -53,7 +53,7 @@ class StudioApiErrorCallout extends StatelessWidget {
         final subtle = emphasis == StudioApiErrorCalloutEmphasis.subtle;
         final dismissButton = IconButton(
           onPressed: onDismiss,
-          icon: const Icon(Icons.close, size: 18),
+          icon: const Icon(Icons.close, size: StudioIconSize.sm),
           color: tokens.textSecondary,
           tooltip: l10n.studioDismiss,
           visualDensity: VisualDensity.standard,
@@ -147,7 +147,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                             padding: const EdgeInsets.only(top: StudioSpacing.radiusHairline),
                             child: Icon(
                               Icons.error_outline,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: errorColor.withValues(alpha: 0.9),
                             ),
                           )
@@ -163,7 +163,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                             ),
                             child: Icon(
                               Icons.error_outline,
-                              size: 16,
+                              size: StudioIconSize.xs,
                               color: errorColor,
                             ),
                           ),

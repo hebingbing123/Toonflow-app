@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
@@ -132,31 +133,37 @@ class BenchmarkGateWorkbench extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...gateSummary!.assessments.map(
-                (item) => Text(
-                  l10n.benchmarkGateAssessmentRow(
-                    item.variantLabel,
-                    item.autoDecision,
-                    item.qualityScoreDelta.toStringAsFixed(2),
-                    '${item.severeGuardFailures}',
+              ...studioStaggeredChildren(
+                gateSummary!.assessments.map(
+                  (item) => Text(
+                    l10n.benchmarkGateAssessmentRow(
+                      item.variantLabel,
+                      item.autoDecision,
+                      item.qualityScoreDelta.toStringAsFixed(2),
+                      '${item.severeGuardFailures}',
+                    ),
                   ),
                 ),
+                entranceKey: gateSummary!.assessments.length,
               ),
             ],
             if (trends != null) ...[
               const SizedBox(height: StudioSpacing.sm),
               Text(l10n.benchmarkTrendsDataSummary(trends!.weeks.length)),
               const SizedBox(height: StudioSpacing.xs),
-              ...trends!.weeks.map(
-                (item) => Text(
-                  l10n.benchmarkTrendWeekRow(
-                    item.weekStart,
-                    item.avgQualityScore.toStringAsFixed(1),
-                    '${item.totalTokens}',
-                    '${item.approvedCount}',
-                    '${item.blockedCount}',
+              ...studioStaggeredChildren(
+                trends!.weeks.map(
+                  (item) => Text(
+                    l10n.benchmarkTrendWeekRow(
+                      item.weekStart,
+                      item.avgQualityScore.toStringAsFixed(1),
+                      '${item.totalTokens}',
+                      '${item.approvedCount}',
+                      '${item.blockedCount}',
+                    ),
                   ),
                 ),
+                entranceKey: trends!.weeks.length,
               ),
             ],
           ],

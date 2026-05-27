@@ -130,7 +130,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
               ),
               TextButton.icon(
                 onPressed: _loadingCharacters ? null : _loadProjectCharacters,
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                 label: Text(l10n.shortVideoCharactersRefresh),
               ),
             ],
@@ -190,7 +190,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
                           OutlinedButton.icon(
                             onPressed: () =>
                                 unawaited(_previewProjectCharacterVoice(character)),
-                            icon: const Icon(Icons.volume_up_outlined, size: 18),
+                            icon: const Icon(Icons.volume_up_outlined, size: StudioIconSize.sm),
                             label: Text(l10n.shortVideoCharactersPreviewVoice),
                           ),
                           OutlinedButton(

@@ -55,7 +55,7 @@ class StudioFreshnessBanner extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: textColor, size: 24),
+              Icon(icon, color: textColor, size: StudioIconSize.lg),
               const SizedBox(width: StudioSpacing.sm),
               Expanded(
                 child: Column(

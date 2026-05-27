@@ -217,9 +217,9 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     )
-                  : const Icon(Icons.save_outlined, size: 18),
+                  : const Icon(Icons.save_outlined, size: StudioIconSize.sm),
               label: Text(
                 _busy
                     ? l10n.projectEditorShortDramaTargetsSaveBusy

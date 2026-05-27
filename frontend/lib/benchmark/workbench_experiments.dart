@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
@@ -201,21 +202,24 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...experiments.take(6).map(
-                    (item) => StudioListRow(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.l10nBatch_c084376ea9(item.name, item.status)),
-                      subtitle: Text(
-                        l10n.benchmarkExperimentRowSubtitle(
-                          item.sampleTier,
-                          item.stageScope.join(', '),
-                          item.id,
+              ...studioStaggeredChildren(
+                experiments.take(6).map(
+                      (item) => StudioListRow(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.l10nBatch_c084376ea9(item.name, item.status)),
+                        subtitle: Text(
+                          l10n.benchmarkExperimentRowSubtitle(
+                            item.sampleTier,
+                            item.stageScope.join(', '),
+                            item.id,
+                          ),
                         ),
+                        onTap: () => onExperimentSelected(item.id),
                       ),
-                      onTap: () => onExperimentSelected(item.id),
                     ),
-                  ),
+                entranceKey: experiments.length,
+              ),
             ],
             if (experimentDetail != null) ...[
               const SizedBox(height: StudioSpacing.sm),
@@ -228,12 +232,15 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...experimentDetail!.variants.map(
-                (variant) => Text(
-                  '${variant.label} · baseline=${variant.isBaseline} · '
-                  'budget=${variant.memoryBudgetSnapshot['budgetTier'] ?? '-'} · '
-                  'model=${variant.modelRouteSnapshot['modelName'] ?? '-'}',
+              ...studioStaggeredChildren(
+                experimentDetail!.variants.map(
+                  (variant) => Text(
+                    '${variant.label} · baseline=${variant.isBaseline} · '
+                    'budget=${variant.memoryBudgetSnapshot['budgetTier'] ?? '-'} · '
+                    'model=${variant.modelRouteSnapshot['modelName'] ?? '-'}',
+                  ),
                 ),
+                entranceKey: experimentDetail!.variants.length,
               ),
             ],
             if (roiSummary != null) ...[
@@ -245,14 +252,17 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: StudioSpacing.xs),
-              ...roiSummary!.variantComparisons.map(
-                (item) => Text(
-                  l10n.benchmarkRoiVariantLine(
-                    item.variantLabel,
-                    item.qualityScoreDelta.toStringAsFixed(2),
-                    item.tokenDeltaPercent.toStringAsFixed(1),
+              ...studioStaggeredChildren(
+                roiSummary!.variantComparisons.map(
+                  (item) => Text(
+                    l10n.benchmarkRoiVariantLine(
+                      item.variantLabel,
+                      item.qualityScoreDelta.toStringAsFixed(2),
+                      item.tokenDeltaPercent.toStringAsFixed(1),
+                    ),
                   ),
                 ),
+                entranceKey: roiSummary!.variantComparisons.length,
               ),
             ],
           ],

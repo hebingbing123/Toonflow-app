@@ -62,7 +62,7 @@ class StudioToastOverlay {
         final theme = Theme.of(overlayContext);
         final typography = StudioTypography.of(overlayContext);
         final media = MediaQuery.of(overlayContext);
-        final maxWidth = (media.size.width - 32).clamp(280.0, 400.0);
+        final maxWidth = (media.size.width - 32).clamp(StudioLayoutSize.fieldStandard, 400.0);
         final accent = iconColor ??
             switch (tone) {
               StudioToastTone.error => tokens.danger,
@@ -119,7 +119,7 @@ class StudioToastOverlay {
                             },
                             icon: Icon(
                               Icons.close_rounded,
-                              size: 20,
+                              size: StudioIconSize.md,
                               color: tokens.textMuted,
                             ),
                           ),

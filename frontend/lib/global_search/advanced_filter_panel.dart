@@ -188,7 +188,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Header
           _buildHeader(),
           
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           
           // Filter content
           Expanded(
@@ -198,7 +198,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             ),
           ),
           
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           
           // Action buttons
           _buildActionButtons(),
@@ -216,7 +216,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Header
           _buildHeader(),
           
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           
           // Filter content
           Expanded(
@@ -226,7 +226,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             ),
           ),
           
-          const Divider(height: 1),
+          const Divider(height: StudioControlSize.dividerThickness),
           
           // Action buttons
           _buildActionButtons(),
@@ -246,7 +246,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         children: [
           Icon(
             Icons.filter_list,
-            size: 20,
+            size: StudioIconSize.md,
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: StudioSpacing.xs),
@@ -319,7 +319,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           onChanged: (_) => _toggleResultType(ResultType.project),
           title: Row(
             children: [
-              Icon(Icons.folder, size: 18),
+              Icon(Icons.folder, size: StudioIconSize.sm),
               SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeProject),
             ],
@@ -333,7 +333,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           onChanged: (_) => _toggleResultType(ResultType.script),
           title: Row(
             children: [
-              Icon(Icons.description, size: 18),
+              Icon(Icons.description, size: StudioIconSize.sm),
               SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeScript),
             ],
@@ -347,7 +347,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           onChanged: (_) => _toggleResultType(ResultType.asset),
           title: Row(
             children: [
-              Icon(Icons.image, size: 18),
+              Icon(Icons.image, size: StudioIconSize.sm),
               SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeAsset),
             ],
@@ -361,7 +361,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           onChanged: (_) => _toggleResultType(ResultType.novel),
           title: Row(
             children: [
-              Icon(Icons.menu_book, size: 18),
+              Icon(Icons.menu_book, size: StudioIconSize.sm),
               SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeNovel),
             ],
@@ -375,7 +375,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           onChanged: (_) => _toggleResultType(ResultType.novelEvent),
           title: Row(
             children: [
-              Icon(Icons.event_note, size: 18),
+              Icon(Icons.event_note, size: StudioIconSize.sm),
               SizedBox(width: StudioSpacing.xs),
               Text(l10n.globalSearchTypeNovelEventOutline),
             ],
@@ -397,7 +397,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         // Start date
         OutlinedButton.icon(
           onPressed: _selectStartDate,
-          icon: const Icon(Icons.calendar_today, size: 18),
+          icon: const Icon(Icons.calendar_today, size: StudioIconSize.sm),
           label: Text(
             _currentFilters.timeFrom != null
                 ? l10n.globalSearchStartDateLabel(_formatDate(_currentFilters.timeFrom!))
@@ -418,7 +418,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
         // End date
         OutlinedButton.icon(
           onPressed: _selectEndDate,
-          icon: const Icon(Icons.calendar_today, size: 18),
+          icon: const Icon(Icons.calendar_today, size: StudioIconSize.sm),
           label: Text(
             _currentFilters.timeTo != null
                 ? l10n.globalSearchEndDateLabel(_formatDate(_currentFilters.timeTo!))
@@ -439,7 +439,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           const SizedBox(height: StudioSpacing.xs),
           TextButton.icon(
             onPressed: _clearTimeRange,
-            icon: const Icon(Icons.clear, size: 18),
+            icon: const Icon(Icons.clear, size: StudioIconSize.sm),
             label: Text(l10n.globalSearchClearTimeRange),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
@@ -464,7 +464,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           FilledButton.icon(
             style: studioFormIconLabeledButtonStyle(context),
             onPressed: _applyFilters,
-            icon: const Icon(Icons.check, size: 18),
+            icon: const Icon(Icons.check, size: StudioIconSize.sm),
             label: Text(l10n.globalSearchApplyFilter),
           ),
           
@@ -474,7 +474,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           OutlinedButton.icon(
             style: studioFormOutlinedIconLabeledButtonStyle(context),
             onPressed: hasActiveFilters ? _clearAllFilters : null,
-            icon: const Icon(Icons.clear_all, size: 18),
+            icon: const Icon(Icons.clear_all, size: StudioIconSize.sm),
             label: Text(l10n.globalSearchClearFilters),
           ),
         ],

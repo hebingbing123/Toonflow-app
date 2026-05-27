@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../design_system/tokens.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_dropdown_field.dart';
 import '../design_system/components/studio_decorative_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,22 +95,25 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
               ),
               if (active.isNotEmpty) ...[
                 const SizedBox(height: StudioSpacing.sm),
-                ...active.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          size: 18,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        ),
-                        const SizedBox(width: StudioSpacing.xs),
-                        Expanded(child: Text(s)),
-                      ],
+                ...studioStaggeredChildren(
+                  active.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: StudioIconSize.sm,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          Expanded(child: Text(s)),
+                        ],
+                      ),
                     ),
                   ),
+                  entranceKey: active.length,
                 ),
               ],
             ],
@@ -160,22 +164,25 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
               ),
               if (active.isNotEmpty) ...[
                 const SizedBox(height: StudioSpacing.xs),
-                ...active.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.notifications_active_outlined,
-                          size: 18,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        ),
-                        const SizedBox(width: StudioSpacing.xs),
-                        Expanded(child: Text(s)),
-                      ],
+                ...studioStaggeredChildren(
+                  active.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.notifications_active_outlined,
+                            size: StudioIconSize.sm,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          Expanded(child: Text(s)),
+                        ],
+                      ),
                     ),
                   ),
+                  entranceKey: active.length,
                 ),
               ],
             ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
+import '../../design_system/components/studio_icon_button.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
@@ -307,8 +308,9 @@ class _FilterPanelState extends State<FilterPanel> {
                       hintText: l10n.shortVideoFilterPanelSearchHint,
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
+                          ? StudioIconButton(
+                              icon: Icons.clear,
+                              label: MaterialLocalizations.of(context).clearButtonTooltip,
                               onPressed: () {
                                 _searchController.clear();
                                 _onSearchChanged('');
@@ -341,14 +343,14 @@ class _FilterPanelState extends State<FilterPanel> {
                   OutlinedButton.icon(
                     style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: _clearAllFilters,
-                    icon: const Icon(Icons.clear_all, size: 18),
+                    icon: const Icon(Icons.clear_all, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoFilterPanelClearButton),
                   ),
                 if (hasActiveFilters)
                   OutlinedButton.icon(
                     style: studioFormOutlinedIconLabeledButtonStyle(context),
                     onPressed: _savePreset,
-                    icon: const Icon(Icons.bookmark_add, size: 18),
+                    icon: const Icon(Icons.bookmark_add, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoFilterPanelSavePresetButton),
                   ),
                 if (widget.presets.isNotEmpty)
@@ -412,14 +414,14 @@ class _FilterPanelState extends State<FilterPanel> {
                                         ),
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, size: 18),
+                                    StudioIconButton(
+                                      icon: Icons.delete,
+                                      label: l10n
+                                          .shortVideoFilterPanelDeletePresetTooltip,
                                       onPressed: () {
                                         menuController?.close();
                                         _deletePreset(preset);
                                       },
-                                      tooltip: l10n
-                                          .shortVideoFilterPanelDeletePresetTooltip,
                                     ),
                                   ],
                                 ),
@@ -429,9 +431,9 @@ class _FilterPanelState extends State<FilterPanel> {
                         ),
                     ],
                     builder: (context, controller, child) {
-                      return IconButton(
-                        tooltip: l10n.shortVideoFilterPanelApplyPresetTooltip,
-                        icon: const Icon(Icons.bookmarks),
+                      return StudioIconButton(
+                        icon: Icons.bookmarks,
+                        label: l10n.shortVideoFilterPanelApplyPresetTooltip,
                         onPressed: () {
                           if (controller.isOpen) {
                             controller.close();
@@ -478,7 +480,7 @@ class _FilterPanelState extends State<FilterPanel> {
                   StudioInputChip(
                     label: Text(tag.label),
                     onDeleted: () => _removeFilter(tag),
-                    deleteIcon: const Icon(Icons.close, size: 18),
+                    deleteIcon: const Icon(Icons.close, size: StudioIconSize.sm),
                   ),
               ],
             ),

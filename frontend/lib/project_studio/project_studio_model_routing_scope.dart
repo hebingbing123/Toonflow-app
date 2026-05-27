@@ -56,7 +56,7 @@ class StudioStepModelChip extends StatelessWidget {
         spacing: StudioSpacing.xs,
         children: <Widget>[
           StudioChip(
-            avatar: const Icon(Icons.smart_toy_outlined, size: 16),
+            avatar: const Icon(Icons.smart_toy_outlined, size: StudioIconSize.xs),
             label: Text(modelId, overflow: TextOverflow.ellipsis),
           ),
           if (onEdit != null)

@@ -99,7 +99,7 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
               child: Padding(
                 padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 280),
+                  constraints: const BoxConstraints(maxWidth: StudioLayoutSize.fieldStandard),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,

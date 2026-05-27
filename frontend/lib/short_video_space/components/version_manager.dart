@@ -213,7 +213,7 @@ class _VersionManagerState extends State<VersionManager> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 20, color: theme.colorScheme.primary),
+                  Icon(Icons.history, size: StudioIconSize.md, color: theme.colorScheme.primary),
                   const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Text(
@@ -232,19 +232,19 @@ class _VersionManagerState extends State<VersionManager> {
                     FilledButton.tonalIcon(
                       style: studioFormIconLabeledButtonStyle(context),
                       onPressed: _isLoading ? null : _showCompareVersionsDialog,
-                      icon: const Icon(Icons.compare_arrows, size: 18),
+                      icon: const Icon(Icons.compare_arrows, size: StudioIconSize.sm),
                       label: Text(l10n.shortVideoVersionManagerCompareVersions),
                     ),
                   FilledButton.tonalIcon(
                     style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _isLoading ? null : _showCreateVersionDialog,
-                    icon: const Icon(Icons.add, size: 18),
+                    icon: const Icon(Icons.add, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoVersionManagerCreateNewVersion),
                   ),
                   FilledButton.tonalIcon(
                     style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _isLoading ? null : _showSaveDraftDialog,
-                    icon: const Icon(Icons.save_outlined, size: 18),
+                    icon: const Icon(Icons.save_outlined, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoVersionManagerSaveDraft),
                   ),
                 ],
@@ -272,7 +272,7 @@ class _VersionManagerState extends State<VersionManager> {
                   Icon(
                     Icons.check_circle,
                     color: theme.colorScheme.primary,
-                    size: 20,
+                    size: StudioIconSize.md,
                   ),
                   const SizedBox(width: StudioSpacing.xs),
                   Expanded(
@@ -419,7 +419,7 @@ class _VersionManagerState extends State<VersionManager> {
                 if (widget.drafts.isNotEmpty)
                   TextButton.icon(
                     onPressed: _isLoading ? null : _showDraftsDialog,
-                    icon: const Icon(Icons.list, size: 18),
+                    icon: const Icon(Icons.list, size: StudioIconSize.sm),
                     label: Text(l10n.shortVideoVersionManagerViewAllDrafts),
                   ),
               ],
@@ -438,61 +438,65 @@ class _VersionManagerState extends State<VersionManager> {
                   for (var index = 0;
                       index < (widget.drafts.length > 3 ? 3 : widget.drafts.length);
                       index++)
-                    Builder(builder: (context) {
-                  final draft = widget.drafts[index];
+                    Builder(
+                      builder: (context) {
+                        final draft = widget.drafts[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                    child: StudioCard(
-                      padding: EdgeInsets.zero,
-                      child: StudioListRow(
-                      onRestore: !_isLoading
-                          ? () => _handleRestoreDraft(draft)
-                          : null,
-                      onDelete: !_isLoading
-                          ? () => _handleDeleteDraft(draft)
-                          : null,
-                      deleteLabel:
-                          l10n.shortVideoVersionManagerTooltipDeleteDraft,
-                      leading: Icon(
-                        Icons.drafts_outlined,
-                        color: theme.colorScheme.secondary,
-                      ),
-                      title: Text(
-                        draft.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        l10n.shortVideoVersionManagerDraftRowSubtitle(
-                          draft.shotCount,
-                          _formatDateTime(draft.savedAt),
-                        ),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          StudioIconButton(
-                            icon: Icons.restore,
-                            label: l10n.shortVideoVersionManagerTooltipRestoreDraft,
-                            onPressed: _isLoading
-                                ? null
-                                : () => _handleRestoreDraft(draft),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                          child: StudioCard(
+                            padding: EdgeInsets.zero,
+                            child: StudioListRow(
+                              onRestore: !_isLoading
+                                  ? () => _handleRestoreDraft(draft)
+                                  : null,
+                              onDelete: !_isLoading
+                                  ? () => _handleDeleteDraft(draft)
+                                  : null,
+                              deleteLabel: l10n
+                                  .shortVideoVersionManagerTooltipDeleteDraft,
+                              leading: Icon(
+                                Icons.drafts_outlined,
+                                color: theme.colorScheme.secondary,
+                              ),
+                              title: Text(
+                                draft.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text(
+                                l10n.shortVideoVersionManagerDraftRowSubtitle(
+                                  draft.shotCount,
+                                  _formatDateTime(draft.savedAt),
+                                ),
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StudioIconButton(
+                                    icon: Icons.restore,
+                                    label: l10n
+                                        .shortVideoVersionManagerTooltipRestoreDraft,
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () => _handleRestoreDraft(draft),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.delete_outline,
+                                    label: l10n
+                                        .shortVideoVersionManagerTooltipDeleteDraft,
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () => _handleDeleteDraft(draft),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          StudioIconButton(
-                            icon: Icons.delete_outline,
-                            label: l10n.shortVideoVersionManagerTooltipDeleteDraft,
-                            onPressed: _isLoading
-                                ? null
-                                : () => _handleDeleteDraft(draft),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                );
-                    }),
                 ],
               ),
 

@@ -71,7 +71,7 @@ extension _ShortVideoSpaceSectionTimelineExtension on _ShortVideoSpaceSectionSta
                 ),
                 TextButton.icon(
                   onPressed: _loadingTimeline ? null : _loadShortVideoTimeline,
-                  icon: const Icon(Icons.refresh, size: 18),
+                  icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                   label: Text(l10n.shortVideoCharactersRefresh),
                 ),
               ],
@@ -378,7 +378,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                     )
                   : Text(l10n.shortVideoTimelineSave),
             ),
@@ -398,7 +398,7 @@ class _TimelineNleEditorState extends State<_TimelineNleEditor> {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
-                icon: const Icon(Icons.play_arrow, size: 18),
+                icon: const Icon(Icons.play_arrow, size: StudioIconSize.sm),
                 label: Text(l10n.shortVideoTimelinePlayPreview),
               ),
           ],
@@ -550,7 +550,7 @@ class _TimelineScriptGroupState extends State<_TimelineScriptGroup> {
                 320,
                 fraction: 0.65,
                 min: 180,
-                max: 280,
+                max: StudioLayoutSize.fieldStandard,
               );
               return SizedBox(
                 height: laneHeight,

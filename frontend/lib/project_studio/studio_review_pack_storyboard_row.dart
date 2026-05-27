@@ -165,14 +165,14 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                             child: Text(l10n.studioReviewPackFeedbackSetFlagged),
                           ),
                         ],
-                    icon: const Icon(Icons.rate_review_outlined, size: 20),
+                    icon: const Icon(Icons.rate_review_outlined, size: StudioIconSize.md),
                   ),
                   const SizedBox(width: StudioSpacing.xs),
                   Icon(
                     row.readyForGeneration
                         ? Icons.check_circle_outline
                         : Icons.hourglass_empty_rounded,
-                    size: 20,
+                    size: StudioIconSize.md,
                     color: row.readyForGeneration
                         ? tokens.primary
                         : tokens.textSecondary,

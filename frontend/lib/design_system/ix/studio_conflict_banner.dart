@@ -29,7 +29,7 @@ class StudioConflictBanner extends StatelessWidget {
         ),
         child: Row(
           children: <Widget>[
-            Icon(Icons.warning_amber_rounded, color: tokens.danger, size: 20),
+            Icon(Icons.warning_amber_rounded, color: tokens.danger, size: StudioIconSize.md),
             const SizedBox(width: StudioSpacing.sm),
             Expanded(
               child: Text(
@@ -45,7 +45,7 @@ class StudioConflictBanner extends StatelessWidget {
             ),
             if (onDismiss != null)
               IconButton(
-                icon: const Icon(Icons.close, size: 18),
+                icon: const Icon(Icons.close, size: StudioIconSize.sm),
                 onPressed: onDismiss,
                 tooltip: l10n.studioDismiss,
               ),

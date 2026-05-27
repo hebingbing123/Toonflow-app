@@ -469,7 +469,7 @@ class StudioDialogShell extends StatelessWidget {
                                 ),
                               ),
                               onPressed: onClose,
-                              icon: const Icon(Icons.close, size: 20),
+                              icon: const Icon(Icons.close, size: StudioIconSize.md),
                             ),
                         ],
                       ),
@@ -478,7 +478,7 @@ class StudioDialogShell extends StatelessWidget {
                       subtitle != null ||
                       leading != null ||
                       onClose != null)
-                    Divider(height: 1, color: tokens.borderSubtle),
+                    Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
                   Flexible(
                     child: scrollable
                         ? StudioScrollbar(
@@ -493,7 +493,7 @@ class StudioDialogShell extends StatelessWidget {
                           ),
                   ),
                   if (actions != null && actions!.isNotEmpty) ...<Widget>[
-                    Divider(height: 1, color: tokens.borderSubtle),
+                    Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         StudioSpacing.sm,

@@ -202,7 +202,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                 )
               : Text(l10n.projectEditorAssetCrudSave),
         ),

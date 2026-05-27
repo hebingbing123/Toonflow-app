@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import 'package:openflow_app/design_system/studio_responsive_layout.dart';
+import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
@@ -127,36 +128,38 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: drafts
-                            .map(
-                              (d) => Padding(
-                                padding: const EdgeInsets.only(right: StudioSpacing.radiusComfort),
-                                child: SizedBox(
-                                  width: studioWrapTileWidth(
-                                    constraints.maxWidth,
-                                    maxColumns: drafts.length.clamp(1, 4),
-                                    minTileWidth: 200,
-                                    maxTileWidth: 280,
-                                    gap: StudioSpacing.radiusComfort,
-                                  ),
-                                  child: _DraftCompareCard(draft: d),
+                        children: studioStaggeredChildren(
+                          drafts.map(
+                            (d) => Padding(
+                              padding: const EdgeInsets.only(right: StudioSpacing.radiusComfort),
+                              child: SizedBox(
+                                width: studioWrapTileWidth(
+                                  constraints.maxWidth,
+                                  maxColumns: drafts.length.clamp(1, 4),
+                                  minTileWidth: 200,
+                                  maxTileWidth: StudioLayoutSize.fieldStandard,
+                                  gap: StudioSpacing.radiusComfort,
                                 ),
+                                child: _DraftCompareCard(draft: d),
                               ),
-                            )
-                            .toList(growable: false),
+                            ),
+                          ),
+                          entranceKey: drafts.length,
+                        ),
                       ),
                     );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: drafts
-                        .map(
-                          (d) => Padding(
-                            padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
-                            child: _DraftCompareCard(draft: d),
-                          ),
-                        )
-                        .toList(growable: false),
+                    children: studioStaggeredChildren(
+                      drafts.map(
+                        (d) => Padding(
+                          padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
+                          child: _DraftCompareCard(draft: d),
+                        ),
+                      ),
+                      entranceKey: drafts.length,
+                    ),
                   );
                 },
               ),
@@ -167,15 +170,18 @@ class _PublishDraftCompareDialog extends StatelessWidget {
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: StudioSpacing.xs),
-                ...platformIds.map((pid) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
-                    child: _PlatformCopyCompareSection(
-                      platformId: pid,
-                      drafts: drafts,
-                    ),
-                  );
-                }),
+                ...studioStaggeredChildren(
+                  platformIds.map((pid) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
+                      child: _PlatformCopyCompareSection(
+                        platformId: pid,
+                        drafts: drafts,
+                      ),
+                    );
+                  }),
+                  entranceKey: platformIds.length,
+                ),
               ],
             ],
           ),
@@ -296,46 +302,49 @@ class _PlatformCopyCompareSection extends StatelessWidget {
               style: theme.textTheme.labelLarge,
             ),
             const SizedBox(height: StudioSpacing.xs),
-            ...drafts.map((d) {
-              final block = _copyBlock(d.platformCopy, platformId);
-              final title = _emptyAsDash(block?['title'] as String?);
-              final desc = _emptyAsDash(block?['description'] as String?);
-              final tagsRaw = block?['tags'];
-              var tags = '—';
-              if (tagsRaw is List) {
-                tags = tagsRaw.map((e) => '$e').join(', ');
-                if (tags.isEmpty) {
-                  tags = '—';
+            ...studioStaggeredChildren(
+              drafts.map((d) {
+                final block = _copyBlock(d.platformCopy, platformId);
+                final title = _emptyAsDash(block?['title'] as String?);
+                final desc = _emptyAsDash(block?['description'] as String?);
+                final tagsRaw = block?['tags'];
+                var tags = '—';
+                if (tagsRaw is List) {
+                  tags = tagsRaw.map((e) => '$e').join(', ');
+                  if (tags.isEmpty) {
+                    tags = '—';
+                  }
                 }
-              }
-              return Padding(
-                padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _shortId(d.id),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontFamily: 'monospace',
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _shortId(d.id),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontFamily: 'monospace',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: StudioSpacing.xs),
-                    Text(
-                      l10n.shortVideoPublishDraftCompareCopyLineTitle(title),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    Text(
-                      l10n.shortVideoPublishDraftCompareCopyLineDescription(desc),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    Text(
-                      l10n.shortVideoPublishDraftCompareCopyLineTags(tags),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              );
-            }),
+                      const SizedBox(height: StudioSpacing.xs),
+                      Text(
+                        l10n.shortVideoPublishDraftCompareCopyLineTitle(title),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      Text(
+                        l10n.shortVideoPublishDraftCompareCopyLineDescription(desc),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      Text(
+                        l10n.shortVideoPublishDraftCompareCopyLineTags(tags),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              entranceKey: '${platformId}_${drafts.length}',
+            ),
           ],
         ),
       ),

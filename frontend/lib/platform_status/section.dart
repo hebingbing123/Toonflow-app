@@ -304,7 +304,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                           ? const SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
                             )
                           : const Icon(Icons.refresh),
                       label: Text(l10n.platformStatusRefreshAction),

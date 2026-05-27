@@ -453,7 +453,7 @@ class _WorkbenchDialogSection extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Icon(icon, size: 18, color: tokens.signal),
+              Icon(icon, size: StudioIconSize.sm, color: tokens.signal),
               const SizedBox(width: StudioSpacing.xs),
               Expanded(
                 child: Text(title, style: studioPaneTitleStyle(context)),
@@ -487,13 +487,13 @@ class _WorkbenchToolbarButton extends StatelessWidget {
       return FilledButton.icon(
         style: studioFormIconLabeledButtonStyle(context),
         onPressed: onPressed,
-        icon: Icon(icon, size: 16),
+        icon: Icon(icon, size: StudioIconSize.xs),
         label: Text(label),
       );
     }
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 16),
+      icon: Icon(icon, size: StudioIconSize.xs),
       label: Text(label),
     );
   }
@@ -615,7 +615,7 @@ class _WorkbenchJobRow extends StatelessWidget {
                     Icon(
                       Icons.chevron_right,
                       color: tokens.textMuted,
-                      size: 20,
+                      size: StudioIconSize.md,
                     ),
                 ],
               ),
