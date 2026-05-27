@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../ix/studio_mobile_affordances.dart';
 import '../tokens.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
@@ -28,18 +31,22 @@ class StudioToolbarButton extends StatelessWidget {
         ? const SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+            child: CircularProgressIndicator(
+              strokeWidth: StudioControlSize.progressStroke,
+            ),
           )
         : (icon != null
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
+              ? Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.chromeActionGap,
                   children: <Widget>[
                     Icon(icon, size: StudioIconSize.xs),
-                    const SizedBox(width: StudioSpacing.xs),
-                    Text(label),
+                    Text(label, softWrap: true),
                   ],
                 )
-              : Text(label));
+              : Text(label, softWrap: true));
 
     final style = primary
         ? studioToolbarPrimaryButtonStyle(context)
@@ -48,13 +55,23 @@ class StudioToolbarButton extends StatelessWidget {
     if (primary) {
       return FilledButton(
         style: style,
-        onPressed: enabled ? onPressed : null,
+        onPressed: enabled
+            ? () {
+                unawaited(studioLightImpact());
+                onPressed!();
+              }
+            : null,
         child: child,
       );
     }
     return FilledButton.tonal(
       style: style,
-      onPressed: enabled ? onPressed : null,
+      onPressed: enabled
+          ? () {
+              unawaited(studioLightImpact());
+              onPressed!();
+            }
+          : null,
       child: DefaultTextStyle(
         style: studioControlLabelStyle(context) ?? const TextStyle(),
         child: child,

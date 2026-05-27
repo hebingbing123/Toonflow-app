@@ -168,6 +168,7 @@ import 'team_workspaces/invite_deep_link.dart';
 import 'rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_mobile_affordances.dart';
 
 part 'project_editor/editor.dart';
 part 'project_editor/editor_dialog_basics.dart';
@@ -1593,7 +1594,10 @@ class _HomePageState extends State<HomePage> {
         actions: [
           if (accessToken != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.xs),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.sm,
+                vertical: StudioSpacing.xs,
+              ),
               child: GlobalSearchBar(
                 accessToken: accessToken,
                 currentWorkspaceName: _sessionMe?.currentWorkspace?.name,

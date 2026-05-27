@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../ix/studio_pointer.dart';
+import '../ix/studio_mobile_affordances.dart';
 import '../tokens.dart';
 
 /// Accessible icon button with built-in Semantics and Tooltip.
@@ -65,13 +68,13 @@ class StudioIconButton extends StatelessWidget {
         waitDuration: const Duration(milliseconds: 350),
         child: IconButton(
           style: style,
-          icon: Icon(
-            icon,
-            size: size,
-            color: color,
-            semanticLabel: label,
-          ),
-          onPressed: onPressed,
+          icon: Icon(icon, size: size, color: color, semanticLabel: label),
+          onPressed: onPressed == null
+              ? null
+              : () {
+                  unawaited(studioLightImpact());
+                  onPressed!();
+                },
         ),
       ),
     );
@@ -158,7 +161,10 @@ class StudioUtilityIconButton extends StatelessWidget {
                           : null,
                     ),
               child: InkWell(
-                onTap: onPressed,
+                onTap: () {
+                  unawaited(studioLightImpact());
+                  onPressed();
+                },
                 borderRadius: borderRadius,
                 hoverColor: dense
                     ? tokens.bgInset.withValues(alpha: 0.65)
@@ -206,10 +212,7 @@ class _Badge extends StatelessWidget {
         decoration: BoxDecoration(
           color: tokens.signal,
           borderRadius: BorderRadius.circular(size / 2),
-          border: Border.all(
-            color: tokens.bgSurface,
-            width: dense ? 1 : 1.5,
-          ),
+          border: Border.all(color: tokens.bgSurface, width: dense ? 1 : 1.5),
         ),
         child: Text(
           value > 99 ? '99+' : value.toString(),

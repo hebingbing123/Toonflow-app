@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import '../ix/studio_mobile_affordances.dart';
 
 /// Status / metadata chip — uses [ThemeData.chipTheme] from [buildStudioDarkTheme].
 class StudioChip extends StatelessWidget {
@@ -66,7 +70,12 @@ class StudioActionChip extends StatelessWidget {
     return ActionChip(
       label: label,
       avatar: avatar,
-      onPressed: onPressed,
+      onPressed: onPressed == null
+          ? null
+          : () {
+              unawaited(studioLightImpact());
+              onPressed!();
+            },
       backgroundColor: backgroundColor,
       side: side,
       padding: padding,
@@ -106,7 +115,12 @@ class StudioChoiceChip extends StatelessWidget {
     return ChoiceChip(
       label: label,
       selected: selected,
-      onSelected: onSelected,
+      onSelected: onSelected == null
+          ? null
+          : (value) {
+              unawaited(studioLightImpact());
+              onSelected!(value);
+            },
       avatar: avatar,
       selectedColor: selectedColor,
       backgroundColor: backgroundColor,
@@ -146,9 +160,19 @@ class StudioInputChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InputChip(
       label: label,
-      onDeleted: onDeleted,
+      onDeleted: onDeleted == null
+          ? null
+          : () {
+              unawaited(studioMediumImpact());
+              onDeleted!();
+            },
       deleteIcon: deleteIcon,
-      onSelected: onSelected,
+      onSelected: onSelected == null
+          ? null
+          : (value) {
+              unawaited(studioLightImpact());
+              onSelected!(value);
+            },
       selected: selected,
       avatar: avatar,
       backgroundColor: backgroundColor,
