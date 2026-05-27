@@ -19,6 +19,7 @@ import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_card.dart';
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_empty_state.dart';

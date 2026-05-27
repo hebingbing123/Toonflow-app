@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
@@ -628,10 +629,11 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
-                IconButton(
-                  tooltip: l10n.projectMembersTooltipCopyUserId,
+                StudioIconButton(
+                  icon: Icons.copy_all_outlined,
+                  label: l10n.projectMembersTooltipCopyUserId,
+                  size: 18,
                   onPressed: () => _copyUserId(row.userId),
-                  icon: const Icon(Icons.copy_all_outlined, size: 18),
                 ),
               ],
             ),

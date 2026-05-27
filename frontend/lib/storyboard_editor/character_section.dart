@@ -35,16 +35,13 @@ class _StoryboardCharacterSection extends StatelessWidget {
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
-                IconButton(
-                  tooltip: l10n.storyboardWorkbenchCharacterReload,
-                  onPressed: loadingCharacters || saving ? null : onReloadCharacters,
+                StudioIconButton(
                   icon: loadingCharacters
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.refresh, size: 20),
+                      ? Icons.hourglass_empty
+                      : Icons.refresh,
+                  label: l10n.storyboardWorkbenchCharacterReload,
+                  size: 20,
+                  onPressed: loadingCharacters || saving ? null : onReloadCharacters,
                 ),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../design_system/components/studio_empty_state.dart';
+import '../../design_system/components/studio_icon_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/components/studio_filter_row.dart';
 import '../../design_system/components/studio_workbench_section.dart';
@@ -220,9 +221,10 @@ class ProjectScriptsSectionView extends StatelessWidget {
                     : null,
                 editLabel: l10n.projectEditorScriptsSectionEditScript,
                 trailing: openStoryboard != null && openEditor != null
-                    ? IconButton(
-                        tooltip: l10n.projectEditorScriptsSectionEditScript,
-                        icon: const Icon(Icons.edit_outlined, size: 18),
+                    ? StudioIconButton(
+                        icon: Icons.edit_outlined,
+                        label: l10n.projectEditorScriptsSectionEditScript,
+                        size: 18,
                         onPressed: model.saving
                             ? null
                             : () => openEditor(script),

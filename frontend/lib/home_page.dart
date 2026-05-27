@@ -88,6 +88,7 @@ import 'shell/help_hub_support.dart';
 import 'shell/home_shell_mode.dart';
 import 'shell/navigation_controller.dart';
 import 'design_system/components/studio_chip.dart';
+import 'design_system/components/studio_icon_button.dart';
 import 'design_system/components/openflow_brand.dart';
 import 'design_system/layout_breakpoints.dart';
 import 'design_system/studio_responsive_layout.dart';

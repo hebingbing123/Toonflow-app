@@ -710,17 +710,17 @@ class _TimelineShotCard extends StatelessWidget {
             const Spacer(),
             Row(
               children: [
-                IconButton(
+                StudioIconButton(
+                  icon: Icons.arrow_upward,
+                  label: l10n.shortVideoTimelineMoveUp,
                   style: studioUtilityIconButtonStyle(context),
                   onPressed: onMoveUp,
-                  icon: const Icon(Icons.arrow_upward, size: 18),
-                  tooltip: l10n.shortVideoTimelineMoveUp,
                 ),
-                IconButton(
+                StudioIconButton(
+                  icon: Icons.arrow_downward,
+                  label: l10n.shortVideoTimelineMoveDown,
                   style: studioUtilityIconButtonStyle(context),
                   onPressed: onMoveDown,
-                  icon: const Icon(Icons.arrow_downward, size: 18),
-                  tooltip: l10n.shortVideoTimelineMoveDown,
                 ),
               ],
             ),
