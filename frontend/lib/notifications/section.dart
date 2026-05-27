@@ -191,6 +191,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ),
             ),
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed:
                   widget.controller.markingAllRead ||
                       widget.controller.unreadCount == 0
@@ -289,6 +290,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ),
                 ),
                 FilledButton.tonalIcon(
+                  style: studioFormIconLabeledButtonStyle(context),
                   onPressed:
                       widget.controller.markingAllRead ||
                           widget.controller.unreadCount == 0
@@ -358,6 +360,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
+                style: studioFormTextButtonIconStyle(context),
                 onPressed: widget.controller.loadingMore
                     ? null
                     : widget.controller.loadMore,
@@ -486,6 +489,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
 
     final refreshButton = TextButton.icon(
+      style: studioFormButtonStyle(context),
       onPressed: widget.controller.loading
           ? null
           : widget.controller.refresh,
@@ -591,6 +595,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 ),
               ),
               FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
                 onPressed: widget.controller.savingPreferences
                     ? null
                     : _saveClearedThrottlePolicy,
@@ -603,6 +608,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     : Text(l10n.notificationsComplianceSavePolicy),
               ),
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: widget.controller.savingPreferences
                     ? null
                     : _createTemplateFromCurrentPolicy,
@@ -610,6 +616,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 label: Text(l10n.notificationsComplianceSaveAsTemplate),
               ),
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed:
                     widget.controller.savingPreferences ||
                         !widget.controller.canManageWorkspaceSharedTemplates
@@ -619,6 +626,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 label: Text(l10n.notificationsComplianceSaveToWorkspaceShared),
               ),
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: widget.controller.savingPreferences
                     ? null
                     : _exportTemplatesToClipboard,
@@ -626,6 +634,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 label: Text(l10n.notificationsComplianceExportTemplatesJson),
               ),
               OutlinedButton.icon(
+                style: studioFormOutlinedIconLabeledButtonStyle(context),
                 onPressed: widget.controller.savingPreferences
                     ? null
                     : _openImportTemplatesDialog,
@@ -919,12 +928,14 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 wideLayout: StudioFilterWideLayout.toolbarRow,
                 children: <Widget>[
                   OutlinedButton(
+                    style: studioFormSecondaryButtonStyle(context),
                     onPressed: widget.controller.loadingWorkspaceSharedAudit
                         ? null
                         : _reloadWorkspaceAuditWithFilters,
                     child: Text(l10n.notificationsComplianceApplyFilters),
                   ),
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed: widget.controller.loadingWorkspaceSharedAudit
                   ? null
                   : _exportWorkspaceAuditJsonToClipboard,
@@ -932,6 +943,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               label: Text(l10n.notificationsComplianceDownloadAuditJson),
             ),
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed: widget.controller.loadingWorkspaceSharedAudit
                   ? null
                   : _exportWorkspaceAuditCsvToClipboard,
@@ -939,6 +951,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               label: Text(l10n.notificationsComplianceDownloadAuditCsv),
             ),
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed:
                   widget.controller.loadingWorkspaceSharedAudit ||
                       widget
@@ -950,6 +963,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               label: Text(l10n.notificationsComplianceAsyncJson),
             ),
             OutlinedButton.icon(
+              style: studioFormOutlinedIconLabeledButtonStyle(context),
               onPressed:
                   widget.controller.loadingWorkspaceSharedAudit ||
                       widget
@@ -1215,6 +1229,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 child: Text(l10n.notificationsMarkRead),
               ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: () {
                 if (item.isUnread) {
                   widget.controller.markRead(item);
@@ -1388,6 +1403,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionSave),
             ),
@@ -1482,6 +1498,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionSave),
             ),
@@ -1568,6 +1585,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionSave),
             ),
@@ -1611,6 +1629,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionDelete),
             ),
@@ -1642,6 +1661,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionDelete),
             ),
@@ -1695,6 +1715,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: Text(dl10n.notificationsActionCancel),
             ),
             FilledButton(
+              style: studioFormPrimaryButtonStyle(dialogContext),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(dl10n.notificationsActionSave),
             ),
@@ -1917,6 +1938,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 child: Text(dl10n.notificationsActionCancel),
               ),
               FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
                 onPressed: () => Navigator.of(stateContext).pop(true),
                 child: Text(dl10n.notificationsActionImport),
               ),

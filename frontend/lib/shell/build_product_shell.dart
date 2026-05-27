@@ -33,6 +33,9 @@ extension _HomePageProductShell on _HomePageState {
     if (widget.shellMode != HomeShellMode.product) {
       return;
     }
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     void load() {
       if (!mounted) {
         return;
@@ -108,6 +111,9 @@ extension _HomePageProductShell on _HomePageState {
 
   Future<void> _maybeNudgeDomesticVendorOnProjectsHome() async {
     if (!mounted || widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    if (ProductDemoMode.instance.shouldSkipLiveApi) {
       return;
     }
     if (widget.studioOverlay != StudioOverlayMode.none) {
@@ -460,6 +466,9 @@ extension _HomePageProductShell on _HomePageState {
   void _handleStudioRouteChanged() {
     if (!mounted) return;
     _syncStudioPaneFromRoute();
+    if (_isDemoModeActive) {
+      _syncDemoTourFromShell();
+    }
   }
 
   Widget _buildProductShellMoreMenuRow(
@@ -852,6 +861,38 @@ extension _HomePageProductShell on _HomePageState {
   Future<void> _openProductShellMoreMenu(BuildContext anchorContext) async {
     final l10n = AppLocalizations.of(anchorContext)!;
     final width = MediaQuery.sizeOf(anchorContext).width;
+    final grouping = _productShellMoreMenuGrouping(l10n, width);
+    final compactActions = width < 720;
+
+    if (productShellMoreMenuUsesBottomSheet(width)) {
+      final selected = await showStudioBottomSheet<ProductWorkspacePane>(
+        context: anchorContext,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (ctx) {
+          final panelWidth = productShellMoreMenuPanelWidth(
+            MediaQuery.sizeOf(ctx).width,
+            horizontalMargin: 12,
+          );
+          return SafeArea(
+            top: false,
+            child: _buildProductShellMoreMenuContent(
+              ctx,
+              l10n: l10n,
+              grouping: grouping,
+              compactActions: compactActions,
+              panelWidth: panelWidth,
+            ),
+          );
+        },
+      );
+      if (selected == null || !mounted) {
+        return;
+      }
+      _applyProductShellMoreMenuSelection(selected);
+      return;
+    }
+
     final overlayBox =
         Overlay.of(anchorContext).context.findRenderObject() as RenderBox;
     final anchorBox = anchorContext.findRenderObject() as RenderBox;
@@ -860,8 +901,6 @@ extension _HomePageProductShell on _HomePageState {
       ancestor: overlayBox,
     );
     final anchorRect = anchorOffset & anchorBox.size;
-    final grouping = _productShellMoreMenuGrouping(l10n, width);
-    final compactActions = width < 720;
     final selected = await showGeneralDialog<ProductWorkspacePane>(
       context: anchorContext,
       barrierDismissible: true,
@@ -871,19 +910,12 @@ extension _HomePageProductShell on _HomePageState {
       pageBuilder: (ctx, animation1, animation2) {
         final mediaQuery = MediaQuery.of(ctx);
         final screenSize = mediaQuery.size;
-        final horizontalMargin = width < 720 ? 12.0 : 16.0;
+        final horizontalMargin = 16.0;
         final safeTop = mediaQuery.padding.top + 10;
         final safeBottom = mediaQuery.padding.bottom + 12;
-        final desiredWidth = width >= 1440
-            ? 360.0
-            : width >= 1100
-            ? 340.0
-            : width >= 720
-            ? 320.0
-            : screenSize.width - (horizontalMargin * 2);
-        final panelWidth = math.min(
-          desiredWidth,
-          screenSize.width - (horizontalMargin * 2),
+        final panelWidth = productShellMoreMenuPanelWidth(
+          width,
+          horizontalMargin: horizontalMargin,
         );
         final estimatedHeight = _estimateMoreMenuPanelHeight(
           panelWidth: panelWidth,
@@ -1214,22 +1246,38 @@ extension _HomePageProductShell on _HomePageState {
     required bool moreMenuOpen,
     required double slotHeight,
   }) {
+    final viewportWideEnoughForNavChevrons =
+        MediaQuery.sizeOf(context).width >= 480 && slotHeight >= 32;
+    const navChevronClusterWidth = _kMacOSNavChevronBox * 2 + 8;
+    const searchFieldMinWidth = 120.0;
     return IgnorePointer(
       ignoring: moreMenuOpen,
       child: Opacity(
         opacity: moreMenuOpen ? 0 : 1,
         child: SizedBox(
           height: slotHeight,
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                _buildMacOSNavChevrons(context),
-                const SizedBox(width: 8),
-                Expanded(child: searchBar),
-              ],
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < searchFieldMinWidth) {
+                return const SizedBox.shrink();
+              }
+              final showNavChevrons = viewportWideEnoughForNavChevrons &&
+                  constraints.maxWidth >=
+                      navChevronClusterWidth + searchFieldMinWidth;
+              return Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    if (showNavChevrons) ...<Widget>[
+                      _buildMacOSNavChevrons(context),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(child: searchBar),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -1251,14 +1299,18 @@ extension _HomePageProductShell on _HomePageState {
     required bool stackedTopChrome,
   }) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final slotWidth = screenWidth / 3;
-    final left = (screenWidth - slotWidth) / 2;
+    const horizontalMargin = 16.0;
+    final panelWidth = productShellMoreMenuPanelWidth(
+      screenWidth,
+      horizontalMargin: horizontalMargin,
+    );
+    final left = screenWidth - panelWidth - horizontalMargin;
     final top = stackedTopChrome
         ? titleBarHeight - 32
         : 4.0;
     final panelHeight = math.min(
       _estimateMoreMenuPanelHeight(
-        panelWidth: slotWidth,
+        panelWidth: panelWidth,
         grouping: grouping,
         compactActions: true,
       ),
@@ -1268,7 +1320,7 @@ extension _HomePageProductShell on _HomePageState {
     return Positioned(
       top: top,
       left: left,
-      width: slotWidth,
+      width: panelWidth,
       child: Material(
         elevation: 12,
         borderRadius: BorderRadius.circular(14),
@@ -1280,7 +1332,7 @@ extension _HomePageProductShell on _HomePageState {
             l10n: l10n,
             grouping: grouping,
             compactActions: true,
-            panelWidth: slotWidth,
+            panelWidth: panelWidth,
             titleCentered: true,
             onDismiss: _closeMacOSTitleBarMoreMenu,
             onDestinationSelected: (pane) {
@@ -1319,55 +1371,78 @@ extension _HomePageProductShell on _HomePageState {
     Widget? workspaceContext,
     required double innerHeight,
   }) {
-    final searchCluster = Flexible(
-      fit: FlexFit.loose,
-      child: _buildMacOSTitleBarSearchCluster(
-        context: context,
-        searchBar: searchBar,
-        moreMenuOpen: moreMenuOpen,
-        slotHeight: innerHeight,
-      ),
-    );
-    return SizedBox(
-      height: innerHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          if (workspaceContext != null) ...<Widget>[
-            SizedBox(
-              height: innerHeight,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: _kTitleBarWorkspaceContextMaxWidth,
-                  ),
-                  child: workspaceContext,
-                ),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const trailingChromeMin = _kMacOSTitleBarIconBox + 8;
+        const searchClusterMin = 120.0;
+        const interBlockGap = 16.0;
+        var workspaceMaxWidth = _kTitleBarWorkspaceContextMaxWidth;
+        if (workspaceContext != null) {
+          final reserved = searchClusterMin +
+              trailingChromeMin +
+              interBlockGap +
+              (ultraNarrow ? 0 : 160);
+          workspaceMaxWidth = math.max(
+            88,
+            math.min(
+              _kTitleBarWorkspaceContextMaxWidth,
+              constraints.maxWidth - reserved,
             ),
-            const SizedBox(width: 16),
-          ],
-          Expanded(child: _titleBarFlexibleGap()),
-          searchCluster,
-          Expanded(child: _titleBarFlexibleGap()),
-          if (!ultraNarrow) ...<Widget>[
-            const SizedBox(width: 8),
-            const StudioJobTray(),
-            StudioAppBarActions(
-              dense: true,
-              selectedPane: currentPane,
-              unreadNotifications: _notificationsController.unreadCount,
-              onSelectPane: _selectProductUtilityPane,
-            ),
-          ],
-          _buildMacOSTitleBarMoreButton(
-            context,
-            l10n: l10n,
+          );
+        }
+        final searchCluster = Flexible(
+          fit: FlexFit.loose,
+          child: _buildMacOSTitleBarSearchCluster(
+            context: context,
+            searchBar: searchBar,
             moreMenuOpen: moreMenuOpen,
+            slotHeight: innerHeight,
           ),
-        ],
-      ),
+        );
+        return SizedBox(
+          height: innerHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              if (workspaceContext != null &&
+                  workspaceMaxWidth >= 88) ...<Widget>[
+                SizedBox(
+                  height: innerHeight,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: workspaceMaxWidth),
+                      child: workspaceContext,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: interBlockGap),
+              ],
+              Expanded(child: _titleBarFlexibleGap()),
+              searchCluster,
+              Expanded(child: _titleBarFlexibleGap()),
+              if (!ultraNarrow) ...<Widget>[
+                const SizedBox(width: 8),
+                const StudioJobTray(),
+                ProductDemoTourAnchor(
+                  anchorId: ProductDemoTourAnchorIds.shellAppBar,
+                  child: StudioAppBarActions(
+                    dense: true,
+                    selectedPane: currentPane,
+                    unreadNotifications: _notificationsController.unreadCount,
+                    onSelectPane: _selectProductUtilityPane,
+                  ),
+                ),
+              ],
+              _buildMacOSTitleBarMoreButton(
+                context,
+                l10n: l10n,
+                moreMenuOpen: moreMenuOpen,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1454,6 +1529,7 @@ extension _HomePageProductShell on _HomePageState {
         errorMessage: _error,
         onSignIn: _authController.signIn,
         onSignUp: _authController.signUp,
+        onExploreDemo: () => unawaited(_enterProductDemoMode(guest: true)),
       );
     }
 
@@ -1471,29 +1547,31 @@ extension _HomePageProductShell on _HomePageState {
     );
     final width = MediaQuery.sizeOf(context).width;
     final isMacOS = _isMacOSNativeShell;
-    final useMacOSIntegratedTitleBar = _useIntegratedStudioTitleBar(width);
+    final handsetShellLayout = width < kStudioHandsetMaxWidth;
+    final useMacOSIntegratedTitleBar =
+        !handsetShellLayout && _useIntegratedStudioTitleBar(width);
     // Legacy multi-row chrome only when the viewport is too narrow for integrated.
-    final compactTopChrome = !useMacOSIntegratedTitleBar && width < 860;
-    final stackedTopChrome =
-        !useMacOSIntegratedTitleBar && width >= 860 && width < 1240;
-    final macOSUltraNarrowTitleBar =
-        useMacOSIntegratedTitleBar && width < 1080;
-    final mergeWorkspaceIntoTitleBar = showPipeline;
-    final titleBarWorkspaceContext = mergeWorkspaceIntoTitleBar
-        ? _buildWorkspaceContextSection(
-            context,
-            inline: true,
-            titleBarChrome: true,
-            titleBarDense:
-                compactTopChrome ||
-                (useMacOSIntegratedTitleBar && macOSUltraNarrowTitleBar),
-          )
-        : null;
+    final compactTopChrome = handsetShellLayout ||
+        (!useMacOSIntegratedTitleBar &&
+            width < kStudioShellCompactTopChromeMaxWidth);
+    final stackedTopChrome = !useMacOSIntegratedTitleBar &&
+        width >= kStudioShellCompactTopChromeMaxWidth &&
+        width < kStudioShellStackedTopChromeMaxWidth;
+    final macOSUltraNarrowTitleBar = useMacOSIntegratedTitleBar &&
+        width < kStudioShellMacOSUltraNarrowMaxWidth;
+    // Scope summary stays in the title bar on every signed-in product pane.
+    // [showPipeline] only controls the production step strip — not workspace context.
+    final titleBarWorkspaceContext = _buildWorkspaceContextSection(
+      context,
+      inline: true,
+      titleBarChrome: true,
+      titleBarDense:
+          handsetShellLayout ||
+          compactTopChrome ||
+          (useMacOSIntegratedTitleBar && macOSUltraNarrowTitleBar),
+    );
     final titleBarLeftInset = isMacOS
-        ? _kMacOSTrafficLightInset +
-            (titleBarWorkspaceContext != null
-                ? _kMacOSTitleBarGapAfterTrafficLights
-                : 0)
+        ? _kMacOSTrafficLightInset + _kMacOSTitleBarGapAfterTrafficLights
         : 16.0;
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
@@ -1502,7 +1580,9 @@ extension _HomePageProductShell on _HomePageState {
         : desktopWide
         ? 12.0
         : 10.0;
-    final shellSurfacePadding = desktopXWide
+    final shellSurfacePadding = handsetShellLayout
+        ? 12.0
+        : desktopXWide
         ? 22.0
         : desktopWide
         ? 18.0
@@ -1513,8 +1593,8 @@ extension _HomePageProductShell on _HomePageState {
       currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
       currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
       onNavigateToResults: _openGlobalSearchResults,
-      compact: compactTopChrome,
-      titleBarDense: useMacOSIntegratedTitleBar,
+      compact: compactTopChrome || handsetShellLayout,
+      titleBarDense: useMacOSIntegratedTitleBar || handsetShellLayout,
       showLocalPrefsMenu:
           !compactTopChrome && !useMacOSIntegratedTitleBar,
     );
@@ -1584,16 +1664,13 @@ extension _HomePageProductShell on _HomePageState {
     final macOSMoreGrouping = useMacOSIntegratedTitleBar
         ? _productShellMoreMenuGrouping(l10n, width)
         : null;
-    final macOSTitleBarUsesContext = useMacOSIntegratedTitleBar &&
-        titleBarWorkspaceContext != null;
+    final macOSTitleBarUsesContext = useMacOSIntegratedTitleBar;
     final titleBarHeight = useMacOSIntegratedTitleBar
         ? (macOSTitleBarUsesContext
               ? _kMacOSTitleBarHeightWithContext
               : _kMacOSTitleBarHeight)
         : compactTopChrome
-        ? (titleBarWorkspaceContext != null
-              ? (width < 560 ? 132.0 : 138.0)
-              : (width < 560 ? 112.0 : 118.0))
+        ? (width < 560 ? 132.0 : 138.0)
         : stackedTopChrome
         ? 112.0
         : desktopXWide
@@ -1629,7 +1706,7 @@ extension _HomePageProductShell on _HomePageState {
                         ),
                       Padding(
                         padding: _macOSTitleBarContentPadding(
-                          hasWorkspaceContext: titleBarWorkspaceContext != null,
+                          hasWorkspaceContext: true,
                         ).copyWith(left: titleBarLeftInset),
                         child: _buildMacOSIntegratedTitleBar(
                           context: context,
@@ -1685,20 +1762,21 @@ extension _HomePageProductShell on _HomePageState {
                               context,
                               appTitle,
                               pageTitle,
-                              showPageTitle: titleBarWorkspaceContext == null,
+                              showPageTitle: false,
                             ),
                           ),
                           const SizedBox(width: 8),
                           moreMenuChrome,
                         ],
                       ),
-                      if (titleBarWorkspaceContext != null) ...<Widget>[
-                        const SizedBox(height: StudioLayoutSpacing.inlineGap - 2),
-                        Align(
+                      const SizedBox(height: StudioLayoutSpacing.inlineGap - 2),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Align(
                           alignment: Alignment.centerLeft,
                           child: titleBarWorkspaceContext,
                         ),
-                      ],
+                      ),
                       const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       Row(children: <Widget>[Expanded(child: globalSearchBar)]),
                     ],
@@ -1714,22 +1792,23 @@ extension _HomePageProductShell on _HomePageState {
                             context,
                             appTitle,
                             pageTitle,
-                            showPageTitle: titleBarWorkspaceContext == null,
+                            showPageTitle: false,
                           ),
-                          if (titleBarWorkspaceContext != null) ...<Widget>[
-                            const SizedBox(width: 16),
-                            Flexible(child: titleBarWorkspaceContext),
-                          ],
+                          const SizedBox(width: 16),
+                          Flexible(child: titleBarWorkspaceContext),
                           const SizedBox(width: 8),
                           _buildNavigationButtons(context),
                           const Spacer(),
                           const StudioJobTray(),
                           const SizedBox(width: 8),
-                          StudioAppBarActions(
-                            selectedPane: currentPane,
-                            unreadNotifications:
-                                _notificationsController.unreadCount,
-                            onSelectPane: _selectProductUtilityPane,
+                          ProductDemoTourAnchor(
+                            anchorId: ProductDemoTourAnchorIds.shellAppBar,
+                            child: StudioAppBarActions(
+                              selectedPane: currentPane,
+                              unreadNotifications:
+                                  _notificationsController.unreadCount,
+                              onSelectPane: _selectProductUtilityPane,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           moreMenuChrome,
@@ -1750,19 +1829,17 @@ extension _HomePageProductShell on _HomePageState {
                         context,
                         appTitle,
                         pageTitle,
-                        showPageTitle: titleBarWorkspaceContext == null,
+                        showPageTitle: false,
                       ),
-                      if (titleBarWorkspaceContext != null) ...<Widget>[
-                        const SizedBox(width: 16),
-                        Flexible(
-                          flex: 2,
-                          fit: FlexFit.loose,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: titleBarWorkspaceContext,
-                          ),
+                      const SizedBox(width: 16),
+                      Flexible(
+                        flex: 2,
+                        fit: FlexFit.loose,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: titleBarWorkspaceContext,
                         ),
-                      ],
+                      ),
                       const SizedBox(width: 8),
                       _buildNavigationButtons(context),
                       const SizedBox(width: 16),
@@ -1780,11 +1857,14 @@ extension _HomePageProductShell on _HomePageState {
                       ),
                       const StudioJobTray(),
                       const SizedBox(width: 8),
-                      StudioAppBarActions(
-                        selectedPane: currentPane,
-                        unreadNotifications:
-                            _notificationsController.unreadCount,
-                        onSelectPane: _selectProductUtilityPane,
+                      ProductDemoTourAnchor(
+                        anchorId: ProductDemoTourAnchorIds.shellAppBar,
+                        child: StudioAppBarActions(
+                          selectedPane: currentPane,
+                          unreadNotifications:
+                              _notificationsController.unreadCount,
+                          onSelectPane: _selectProductUtilityPane,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       moreMenuChrome,
@@ -1807,17 +1887,22 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (showPipeline) ...<Widget>[
-                  StudioPipelineStrip(
-                    selectedPane: currentPane,
-                    jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
-                    qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
-                    compact: useCompactStudio,
-                    onSelectPane: _handleProductPipelinePaneSelect,
+                  ProductDemoTourAnchor(
+                    anchorId: ProductDemoTourAnchorIds.shellPipeline,
+                    child: StudioPipelineStrip(
+                      selectedPane: currentPane,
+                      jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
+                      qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
+                      compact: useCompactStudio || handsetShellLayout,
+                      onSelectPane: _handleProductPipelinePaneSelect,
+                    ),
                   ),
                   SizedBox(height: useCompactStudio ? 10 : 12),
                 ],
                 Expanded(
-                  child: DecoratedBox(
+                  child: ProductDemoTourAnchor(
+                    anchorId: ProductDemoTourAnchorIds.shellContent,
+                    child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: tokens.bgSurface.withValues(alpha: 0.96),
                       borderRadius: shellPanelRadius,
@@ -1850,6 +1935,7 @@ extension _HomePageProductShell on _HomePageState {
                               ],
                             ),
                     ),
+                  ),
                   ),
                 ),
               ],
@@ -1900,7 +1986,7 @@ extension _HomePageProductShell on _HomePageState {
       ),
     );
 
-    return StudioShellScope(
+    Widget tree = StudioShellScope(
       onPopProductPane: _popProductWorkspacePane,
       onBackToProjectsHome: _goToProjectsHome,
       child: StudioJobScope(
@@ -1909,6 +1995,7 @@ extension _HomePageProductShell on _HomePageState {
           actions: _studioCommandActions(l10n),
           child: StudioOnboardingCoach(
             enabled:
+                !_isDemoModeActive &&
                 currentPane == ProductWorkspacePane.projects &&
                 widget.studioOverlay == StudioOverlayMode.none,
             child: shell,
@@ -1916,5 +2003,7 @@ extension _HomePageProductShell on _HomePageState {
         ),
       ),
     );
+
+    return tree;
   }
 }

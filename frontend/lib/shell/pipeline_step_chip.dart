@@ -13,6 +13,7 @@ class PipelineStepChip extends StatefulWidget {
     this.enabled = true,
     this.useStudioTokens = false,
     this.compact = false,
+    this.iconOnly = false,
   });
 
   final String label;
@@ -22,6 +23,9 @@ class PipelineStepChip extends StatefulWidget {
   final bool enabled;
   final bool useStudioTokens;
   final bool compact;
+
+  /// Handset / narrow pane: icon + tooltip only (saves horizontal space in pipeline rail).
+  final bool iconOnly;
 
   @override
   State<PipelineStepChip> createState() => _PipelineStepChipState();
@@ -62,7 +66,7 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
                   alpha: 0.40,
                 ));
 
-    return Opacity(
+    final chip = Opacity(
       opacity: widget.enabled ? 1 : 0.52,
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -138,22 +142,24 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: widget.compact
-                        ? StudioSpacing.xs - 3
-                        : StudioSpacing.xs,
-                  ),
-                  Text(
-                    widget.label,
-                    style: widget.compact
-                        ? theme.textTheme.labelSmall?.copyWith(
-                            color: labelStyle?.color,
-                            fontWeight: labelStyle?.fontWeight,
-                          )
-                        : labelStyle,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
+                  if (!widget.iconOnly) ...<Widget>[
+                    SizedBox(
+                      width: widget.compact
+                          ? StudioSpacing.xs - 3
+                          : StudioSpacing.xs,
+                    ),
+                    Text(
+                      widget.label,
+                      style: widget.compact
+                          ? theme.textTheme.labelSmall?.copyWith(
+                              color: labelStyle?.color,
+                              fontWeight: labelStyle?.fontWeight,
+                            )
+                          : labelStyle,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -161,5 +167,9 @@ class _PipelineStepChipState extends State<PipelineStepChip> {
         ),
       ),
     );
+    if (!widget.iconOnly) {
+      return chip;
+    }
+    return Tooltip(message: widget.label, child: chip);
   }
 }

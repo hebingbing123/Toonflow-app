@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
+import '../demo/product_demo_tour_anchors.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_getting_started_steps.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../projects/controller.dart';
@@ -31,6 +34,7 @@ class ProjectsStudioHome extends StatefulWidget {
     this.currentWorkspaceType,
     this.onOpenTeamWorkspaces,
     this.onOpenModelVendorSettings,
+    this.onExploreDemo,
   });
 
   final ProjectsController controller;
@@ -43,6 +47,7 @@ class ProjectsStudioHome extends StatefulWidget {
   final String? currentWorkspaceType;
   final VoidCallback? onOpenTeamWorkspaces;
   final VoidCallback? onOpenModelVendorSettings;
+  final VoidCallback? onExploreDemo;
 
   @override
   State<ProjectsStudioHome> createState() => _ProjectsStudioHomeState();
@@ -61,7 +66,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   void initState() {
     super.initState();
     _loadRecent();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _autoLoadProjects());
+    _autoLoadProjects();
   }
 
   Future<void> _loadRecent() async {
@@ -71,6 +76,10 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   }
 
   void _autoLoadProjects() {
+    if (widget.controller.skipDemoApi ||
+        ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     if (widget.controller.projects == null &&
         !widget.controller.loadingProjects) {
       widget.controller.loadProjects().then((_) => _loadReadinessForProjects());
@@ -80,6 +89,10 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   }
 
   Future<void> _loadReadinessForProjects() async {
+    if (widget.controller.skipDemoApi ||
+        ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
     final token = widget.accessToken;
     final projects = widget.controller.projects;
     if (token == null ||
@@ -144,8 +157,9 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   Widget _buildHeader(
     BuildContext context,
     AppLocalizations l10n,
-    ProjectsStudioHomeLayout layout,
-  ) {
+    ProjectsStudioHomeLayout layout, {
+    required bool includeCreateAction,
+  }) {
     final stacked = layout.stackedHeader;
     final tokens = StudioTokens.of(context);
     final creating = widget.controller.creatingProject;
@@ -180,6 +194,13 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
       loading: creating,
       onPressed: creating ? null : _createProject,
     );
+
+    if (!includeCreateAction) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
+        child: titleBlock,
+      );
+    }
 
     if (!stacked) {
       return Padding(
@@ -238,12 +259,43 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     );
   }
 
-  Widget _buildEmptyProjectsOverview(
+  Widget _buildGettingStartedBlock(
     BuildContext context,
     AppLocalizations l10n,
     double width, {
     bool isPhone = false,
   }) {
+    return StudioGettingStartedSteps(
+      title: l10n.studioGettingStartedTitle,
+      steps: <String>[
+        l10n.studioProjectsEmptyStep1,
+        l10n.studioProjectsEmptyStep2,
+        l10n.studioProjectsEmptyStep3,
+      ],
+      maxWidth: isPhone
+          ? double.infinity
+          : width >= kProjectsHomeEmptySplitMinWidth
+          ? 420
+          : 560,
+    );
+  }
+
+  Widget _buildEmptyProjectsOverview(
+    BuildContext context,
+    AppLocalizations l10n,
+    double width, {
+    bool isPhone = false,
+    bool enterpriseGuided = false,
+  }) {
+    final gettingStarted = _buildGettingStartedBlock(
+      context,
+      l10n,
+      width,
+      isPhone: isPhone,
+    );
+    if (enterpriseGuided) {
+      return gettingStarted;
+    }
     final showSecondaryAction = widget.onOpenModelVendorSettings != null;
     final emptyState = StudioEmptyState.firstUse(
       title: l10n.studioProjectsEmptyTitle,
@@ -258,21 +310,31 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
           ? widget.onOpenModelVendorSettings
           : null,
     );
-    final gettingStarted = StudioGettingStartedSteps(
-      title: l10n.studioGettingStartedTitle,
-      steps: <String>[
-        l10n.studioProjectsEmptyStep1,
-        l10n.studioProjectsEmptyStep2,
-        l10n.studioProjectsEmptyStep3,
-      ],
-      maxWidth: width >= 1080 ? 420 : 560,
-    );
 
-    if (!isPhone && width >= 1080) {
+    if (!isPhone && width >= kProjectsHomeEmptySplitMinWidth) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(flex: 6, child: emptyState),
+          Expanded(
+            flex: 6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                emptyState,
+                if (widget.onExploreDemo != null) ...<Widget>[
+                  const SizedBox(height: StudioSpacing.sm),
+                  Align(
+                    alignment: Alignment.center,
+                    child: TextButton(
+                      key: const Key('projects-home-explore-demo-wide'),
+                      onPressed: widget.onExploreDemo,
+                      child: Text(l10n.productDemoModeExploreLoggedIn),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
           const SizedBox(width: StudioSpacing.md),
           Expanded(flex: 5, child: gettingStarted),
         ],
@@ -282,6 +344,17 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         emptyState,
+        if (widget.onExploreDemo != null) ...<Widget>[
+          const SizedBox(height: StudioSpacing.sm),
+          Align(
+            alignment: Alignment.center,
+            child: TextButton(
+              key: const Key('projects-home-explore-demo'),
+              onPressed: widget.onExploreDemo,
+              child: Text(l10n.productDemoModeExploreLoggedIn),
+            ),
+          ),
+        ],
         const SizedBox(height: StudioLayoutSpacing.section + 4),
         gettingStarted,
       ],
@@ -372,31 +445,25 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               contentWidth: constraints.maxWidth,
             );
             final contentWidth = layout.contentWidth;
+            final projectsLoaded = widget.controller.projectsLoaded;
             final projects = widget.controller.projects ?? const <ProjectRow>[];
+            final showProjectsLoading =
+                !projectsLoaded ||
+                (widget.controller.loadingProjects && projects.isEmpty);
             final recent = _resolveRecent(projects);
             final showRecentRail = recent.isNotEmpty && projects.length > 2;
+            final projectsEmpty =
+                projectsLoaded && !showProjectsLoading && projects.isEmpty;
             final useSplitOverview =
                 layout.useSplitOverview && showRecentRail && projects.isNotEmpty;
-            final contentMaxWidth = layout.isPhone
-                ? double.infinity
-                : contentWidth >= 2200
-                ? 1980.0
-                : contentWidth >= 1800
-                ? 1720.0
-                : contentWidth >= 1440
-                ? 1480.0
-                : contentWidth >= 1280
-                ? 1320.0
-                : double.infinity;
-            final recentCardWidth = layout.isPhone
-                ? 220.0
-                : contentWidth >= 1800
-                ? 320.0
-                : contentWidth >= 1440
-                ? 288.0
-                : contentWidth >= 1080
-                ? 272.0
-                : 260.0;
+            final contentMaxWidth = projectsHomeContentMaxWidth(
+              contentWidth,
+              isPhone: layout.isPhone,
+            );
+            final recentCardWidth = projectsHomeRecentCardWidth(
+              contentWidth,
+              isPhone: layout.isPhone,
+            );
             final scrollPadding = EdgeInsets.fromLTRB(
               layout.isPhone ? StudioSpacing.sm : 0,
               0,
@@ -413,7 +480,13 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      _buildHeader(context, l10n, layout),
+                      _buildHeader(
+                        context,
+                        l10n,
+                        layout,
+                        includeCreateAction:
+                            !projectsEmpty || _enterpriseEmpty,
+                      ),
                   if (_enterpriseEmpty) ...<Widget>[
                     const SizedBox(height: StudioLayoutSpacing.section - 4),
                     _EnterpriseEmptyBanner(
@@ -447,15 +520,18 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                         ),
                         const SizedBox(width: 24),
                         Expanded(
-                          child: ProjectsGridView(
-                            projects: projects,
-                            loading: widget.controller.loadingProjects,
-                            currentProjectNumericId:
-                                widget.currentProjectNumericId,
-                            progressForProject: (p) =>
-                                _progressByProjectId[p.id] ?? 0,
-                            onSelectProject: widget.onSelectProjectScope,
-                            onOpenProject: widget.onOpenProjectStudio,
+                          child: ProductDemoTourAnchor(
+                            anchorId: ProductDemoTourAnchorIds.projectsGrid,
+                            child: ProjectsGridView(
+                              projects: projects,
+                              loading: widget.controller.loadingProjects,
+                              currentProjectNumericId:
+                                  widget.currentProjectNumericId,
+                              progressForProject: (p) =>
+                                  _progressByProjectId[p.id] ?? 0,
+                              onSelectProject: widget.onSelectProjectScope,
+                              onOpenProject: widget.onOpenProjectStudio,
+                            ),
                           ),
                         ),
                       ],
@@ -473,22 +549,34 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                       ),
                     ],
                     const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                    if (projects.isEmpty && !widget.controller.loadingProjects)
+                    if (showProjectsLoading)
+                      ProjectsGridView(
+                        projects: const <ProjectRow>[],
+                        loading: true,
+                        currentProjectNumericId: widget.currentProjectNumericId,
+                        onSelectProject: widget.onSelectProjectScope,
+                        onOpenProject: widget.onOpenProjectStudio,
+                      )
+                    else if (projects.isEmpty)
                       _buildEmptyProjectsOverview(
                         context,
                         l10n,
                         contentWidth,
                         isPhone: layout.isPhone,
+                        enterpriseGuided: _enterpriseEmpty,
                       )
                     else
-                      ProjectsGridView(
-                        projects: projects,
-                        loading: widget.controller.loadingProjects,
-                        currentProjectNumericId: widget.currentProjectNumericId,
-                        progressForProject: (p) =>
-                            _progressByProjectId[p.id] ?? 0,
-                        onSelectProject: widget.onSelectProjectScope,
-                        onOpenProject: widget.onOpenProjectStudio,
+                      ProductDemoTourAnchor(
+                        anchorId: ProductDemoTourAnchorIds.projectsGrid,
+                        child: ProjectsGridView(
+                          projects: projects,
+                          loading: widget.controller.loadingProjects,
+                          currentProjectNumericId: widget.currentProjectNumericId,
+                          progressForProject: (p) =>
+                              _progressByProjectId[p.id] ?? 0,
+                          onSelectProject: widget.onSelectProjectScope,
+                          onOpenProject: widget.onOpenProjectStudio,
+                        ),
                       ),
                   ],
                 ],

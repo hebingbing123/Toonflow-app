@@ -41,14 +41,40 @@ class StudioPaneToolbar extends StatelessWidget {
     if (menu == null) {
       return actions;
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        actions!,
-        const SizedBox(width: StudioSpacing.sm),
-        menu!,
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final handset = MediaQuery.sizeOf(context).shortestSide <
+            kProjectsHomePhoneShortestSide;
+        final stackActions =
+            handset ||
+            (maxWidth.isFinite && maxWidth < kStudioCompactHeaderMinWidth);
+        if (stackActions) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              actions!,
+              const SizedBox(height: StudioSpacing.sm),
+              Align(alignment: Alignment.centerRight, child: menu!),
+            ],
+          );
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          physics: const ClampingScrollPhysics(),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              actions!,
+              const SizedBox(width: StudioSpacing.sm),
+              menu!,
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -157,9 +183,11 @@ class StudioPaneHeader extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final handset = MediaQuery.sizeOf(context).shortestSide <
+            kProjectsHomePhoneShortestSide;
         final stackTrailing =
             trailing != null &&
-            constraints.maxWidth < kStudioCompactHeaderMinWidth;
+            (handset || constraints.maxWidth < kStudioCompactHeaderMinWidth);
         final backButton = buildBackButton();
         if (!stackTrailing) {
           return Row(
@@ -196,7 +224,13 @@ class StudioPaneHeader extends StatelessWidget {
               ],
             ),
             const SizedBox(height: StudioLayoutSpacing.inlineGap),
-            Align(alignment: Alignment.centerRight, child: trailing),
+            SizedBox(
+              width: constraints.maxWidth,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: trailing,
+              ),
+            ),
           ],
         );
       },

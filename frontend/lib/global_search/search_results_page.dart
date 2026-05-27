@@ -16,6 +16,7 @@ import 'advanced_filter_panel.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search results page displaying grouped search results by type.
@@ -466,6 +467,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             child: Text(l10n.globalSearchCancel),
           ),
           FilledButton(
+            style: studioFormPrimaryButtonStyle(dialogContext),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.globalSearchSave),
           ),
@@ -840,7 +842,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final isMobile =
+        MediaQuery.of(context).size.width < kStudioHandsetMaxWidth;
 
     return Focus(
       focusNode: _focusNode,
@@ -917,14 +920,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           if (_filters.hasActiveFilters)
                             TextButton.icon(
                               onPressed: _clearFilters,
-                              icon: const Icon(Icons.clear, size: 16),
+                              icon: const Icon(Icons.clear_outlined),
                               label: Text(l10n.globalSearchClearFilters),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
+                              style: studioFormTextButtonIconStyle(context),
                             ),
                         ],
                       ),
@@ -1156,6 +1154,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
+              style: studioFormIconLabeledButtonStyle(context),
               onPressed: _performSearch,
               icon: const Icon(Icons.refresh),
               label: Text(l10n.globalSearchRetry),

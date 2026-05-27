@@ -62,6 +62,7 @@ for vp in desktop mobile; do
     --dart-define=SUPABASE_URL="$SUPABASE_URL" \
     --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
     --dart-define=OPENFLOW_UI_UX_AUDIT_OUTPUT="$BUILD_OUT" \
+    --dart-define=OPENFLOW_SCREENSHOT_MODE=true \
     2>&1 | tee -a "$LOG_DIR/flutter-integration.log"
   vp_rc=${PIPESTATUS[0]}
   if [[ "$vp_rc" -ne 0 ]]; then
@@ -123,5 +124,7 @@ if [[ "$FLUTTER_RC" -ne 0 ]]; then
   tail -n 40 "$LOG_DIR/flutter-integration.log" >&2 || true
   exit "$FLUTTER_RC"
 fi
+
+log "Optional: bash scripts/analyze-ui-ux-audit-screenshots.sh \"$AUDIT_OUT/e2e\""
 
 exit 0

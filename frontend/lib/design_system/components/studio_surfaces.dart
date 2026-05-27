@@ -62,11 +62,9 @@ ButtonStyle _studioFormButtonDimensions(BuildContext context) {
     minimumSize: WidgetStatePropertyAll<Size>(
       Size(0, typography.buttonHeight),
     ),
-    padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
-    ),
-    tapTargetSize: MaterialTapTargetSize.padded,
-    visualDensity: VisualDensity.standard,
+    padding: WidgetStatePropertyAll<EdgeInsets>(typography.buttonPadding),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    visualDensity: VisualDensity.compact,
     textStyle: WidgetStatePropertyAll<TextStyle>(
       labelStyle ?? const TextStyle(fontWeight: FontWeight.w600),
     ),
@@ -88,18 +86,82 @@ ButtonStyle studioFormSecondaryButtonStyle(BuildContext context) {
   return OutlinedButton.styleFrom().merge(_studioFormButtonDimensions(context));
 }
 
+/// [FilledButton.tonal] on workbench forms.
+ButtonStyle studioFormTonalButtonStyle(BuildContext context) {
+  return FilledButton.styleFrom().merge(_studioFormButtonDimensions(context));
+}
+
+/// [FilledButton.icon] / [OutlinedButton.icon] on dense workbench rows.
+ButtonStyle studioFormIconLabeledButtonStyle(BuildContext context) {
+  return FilledButton.styleFrom(
+    iconSize: 18,
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  ).merge(_studioFormButtonDimensions(context));
+}
+
+/// [OutlinedButton.icon] on dense workbench rows.
+ButtonStyle studioFormOutlinedIconLabeledButtonStyle(BuildContext context) {
+  return OutlinedButton.styleFrom(
+    iconSize: 18,
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  ).merge(_studioFormButtonDimensions(context));
+}
+
+/// [TextButton.icon] secondary actions on dense workbench rows.
+ButtonStyle studioFormTextButtonIconStyle(BuildContext context) {
+  return TextButton.styleFrom(
+    iconSize: 18,
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  ).merge(_studioFormButtonDimensions(context));
+}
+
+/// Inset tonal chips (agent quick bar, compact step actions) at form control height.
+ButtonStyle studioFormInsetTonalChipStyle(BuildContext context) {
+  final tokens = StudioTokens.of(context);
+  return studioFormTonalButtonStyle(context).merge(
+    ButtonStyle(
+      backgroundColor: WidgetStatePropertyAll(tokens.bgInset),
+      foregroundColor: WidgetStatePropertyAll(tokens.textPrimary),
+      side: WidgetStatePropertyAll(BorderSide(color: tokens.borderDefault)),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Destructive [FilledButton] in dialogs (delete, revoke) at form control height.
+ButtonStyle studioFormDestructivePrimaryButtonStyle(BuildContext context) {
+  final tokens = StudioTokens.of(context);
+  final scheme = Theme.of(context).colorScheme;
+  return studioFormPrimaryButtonStyle(context).copyWith(
+    backgroundColor: WidgetStatePropertyAll(tokens.danger),
+    foregroundColor: WidgetStatePropertyAll(scheme.onError),
+  );
+}
+
+/// Destructive [FilledButton.icon] in dense forms.
+ButtonStyle studioFormDestructiveIconLabeledButtonStyle(BuildContext context) {
+  return FilledButton.styleFrom(
+    iconSize: 18,
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  ).merge(studioFormDestructivePrimaryButtonStyle(context));
+}
+
 ButtonStyle _studioToolbarButtonDimensions(BuildContext context) {
   final typography = StudioTypography.of(context);
-  final toolbarHeight = (typography.buttonHeight - 8).clamp(32.0, 40.0);
+  final toolbarHeight = typography.buttonHeight;
   final labelStyle = studioControlLabelStyle(context)?.copyWith(
     fontWeight: FontWeight.w600,
   );
   return ButtonStyle(
     minimumSize: WidgetStatePropertyAll<Size>(Size(0, toolbarHeight)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(
+    padding: const WidgetStatePropertyAll<EdgeInsets>(
       EdgeInsets.symmetric(
         horizontal: StudioSpacing.sm,
-        vertical: StudioLayoutSpacing.microGap,
+        vertical: StudioSpacing.xs,
       ),
     ),
     tapTargetSize: MaterialTapTargetSize.padded,

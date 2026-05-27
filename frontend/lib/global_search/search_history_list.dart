@@ -5,6 +5,7 @@ import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Search history dropdown: shows recent queries on focus, tap to fill and search, clear button.
@@ -221,10 +222,12 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
             ),
             child: TextButton.icon(
               onPressed: _handleClearHistory,
-              icon: const Icon(Icons.delete_outline, size: 18),
+              icon: const Icon(Icons.delete_outline),
               label: Text(l10n.globalSearchClearHistory),
-              style: TextButton.styleFrom(
-                foregroundColor: StudioTokens.of(context).danger,
+              style: studioFormTextButtonIconStyle(context).merge(
+                TextButton.styleFrom(
+                  foregroundColor: StudioTokens.of(context).danger,
+                ),
               ),
             ),
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/layout_breakpoints.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_toolbar_button.dart';
@@ -25,7 +27,7 @@ class TaskCenterActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return StudioFilterRow(
-      wideBreakpoint: 560,
+      wideBreakpoint: kStudioHandsetMaxWidth,
       children: [
         StudioToolbarButton(
           label: l10n.taskCenterOpenWorkbench,
@@ -100,11 +102,11 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
         ).textTheme.bodySmall?.copyWith(color: mutedColor),
       ),
       children: [
-        Wrap(
+        StudioDenseActionRow(
           spacing: 8,
-          runSpacing: 8,
           children: [
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingTaskProjects ? null : onLoadTaskProjects,
               child: Text(
                 loadingTaskProjects
@@ -113,6 +115,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingTaskCategories ? null : onLoadTaskCategories,
               child: Text(
                 loadingTaskCategories
@@ -121,6 +124,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingTaskApi ? null : onLoadTaskApi,
               child: Text(
                 loadingTaskApi
@@ -129,6 +133,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
               onPressed: loadingTaskDetailsByNumericId
                   ? null
                   : onProbeTaskDetailByNumericId,
@@ -150,6 +155,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
+          style: studioFormTonalButtonStyle(context),
           onPressed:
               loadingTaskDetailsUuid ||
                   taskDetailJobIdController.text.trim().isEmpty

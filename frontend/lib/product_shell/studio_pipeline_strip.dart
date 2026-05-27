@@ -91,9 +91,11 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     AppLocalizations l10n,
     double width,
   ) {
-    final narrow = width < 520;
+    final narrow = width < kStudioHandsetMaxWidth;
     final inline = width >= kStudioPipelineInlineMinWidth;
+    final stackedStrip = !inline;
     final denseChips = narrow || widget.compact;
+    final iconOnlyChips = narrow;
     final steps = <(ProductWorkspacePane, String, IconData)>[
       (
         ProductWorkspacePane.projects,
@@ -140,6 +142,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
           child: PipelineStepChip(
             useStudioTokens: true,
             compact: denseChips,
+            iconOnly: iconOnlyChips,
             label: step.$2,
             icon: step.$3,
             selected: widget.selectedPane == step.$1,
@@ -161,26 +164,22 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
           StudioSpacing.sm,
           widget.leadingContext != null ? StudioSpacing.sm : (inline ? StudioSpacing.xs : StudioSpacing.xs + 2),
         ),
-        child: inline || widget.leadingContext == null
-            ? _buildInlineHeader(
-                context,
-                tokens,
-                studio,
-                l10n,
-                stepChips,
-                leading: widget.leadingContext,
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: stackedStrip
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (widget.leadingContext != null) ...<Widget>[
                     widget.leadingContext!,
-                    const SizedBox(height: StudioSpacing.xs),
+                    SizedBox(
+                      height: narrow ? StudioSpacing.xs : StudioSpacing.sm,
+                    ),
                   ],
-                  _buildTitleBadge(context, tokens, studio, l10n),
-                  SizedBox(
-                    height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4,
-                  ),
+                  if (widget.leadingContext == null) ...<Widget>[
+                    _buildTitleBadge(context, tokens, studio, l10n),
+                    SizedBox(
+                      height: narrow ? StudioSpacing.xs + 2 : StudioSpacing.xs + 4,
+                    ),
+                  ],
                   _buildStepChipsRail(
                     context,
                     tokens,
@@ -189,6 +188,15 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
                     gap: StudioSpacing.xs,
                   ),
                 ],
+              )
+            : _buildInlineHeader(
+                context,
+                tokens,
+                studio,
+                l10n,
+                stepChips,
+                leading: widget.leadingContext,
+                narrow: narrow,
               ),
       ),
     );
@@ -201,16 +209,15 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
     AppLocalizations l10n,
     List<Widget> stepChips, {
     Widget? leading,
+    bool narrow = false,
   }) {
     // 当有 leading context 时，使用两行布局：上面是面包屑，下面是平台链
     if (leading != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // 第一行：面包屑导航
           leading,
-          const SizedBox(height: StudioSpacing.sm),
-          // 第二行：平台链标题 + 步骤标签
+          SizedBox(height: narrow ? StudioSpacing.xs : StudioSpacing.sm),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -231,7 +238,6 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
       );
     }
 
-    // 没有 leading context 时，保持原来的单行布局
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

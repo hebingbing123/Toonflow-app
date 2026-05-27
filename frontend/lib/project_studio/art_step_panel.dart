@@ -2,7 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_mode.dart';
+import '../demo/studio_demo_data.dart';
 import '../design_system/components/studio_card.dart';
+import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../project_editor/style_pack_catalog.dart';
@@ -191,6 +195,21 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     });
     try {
       final l10n = AppLocalizations.of(context)!;
+      if (ProductDemoMode.instance.shouldSkipLiveApi) {
+        final catalog = buildDemoStylePackCatalog(l10n);
+        if (!mounted) return;
+        setState(() {
+          _catalog = catalog;
+          _loadingCatalog = false;
+          _draftArtPack = normalizeArtStylePackPath(_draftArtPack).isEmpty
+              ? null
+              : normalizeArtStylePackPath(_draftArtPack);
+          _draftStoryPack = normalizeStoryStylePackPath(_draftStoryPack).isEmpty
+              ? null
+              : normalizeStoryStylePackPath(_draftStoryPack);
+        });
+        return;
+      }
       final loadCatalog =
           widget.catalogLoader ?? loadProjectStylePackCatalog;
       final catalog = await loadCatalog(widget.accessToken, l10n);
@@ -452,12 +471,11 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                   ],
                   catalogBody,
                   const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: <Widget>[
                       FilledButton.icon(
                         key: const Key('studio_art_step_save'),
+                        style: studioFormIconLabeledButtonStyle(context),
                         onPressed: _saving || !_dirty || _loadingCatalog
                             ? null
                             : _save,
@@ -477,16 +495,19 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                         ),
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: _saving || !_dirty ? null : _resetDraft,
                         child: Text(l10n.studioArtStepResetButton),
                       ),
                       TextButton.icon(
+                        style: studioFormTextButtonIconStyle(context),
                         onPressed: _openBriefContext,
                         icon: const Icon(Icons.article_outlined, size: 18),
                         label: Text(l10n.studioArtStepOpenSettings),
                       ),
                       if (widget.onOpenFullProjectSettings != null)
                         TextButton(
+                          style: studioFormButtonStyle(context),
                           onPressed: widget.onOpenFullProjectSettings,
                           child: Text(l10n.studioArtStepOpenFullSettings),
                         ),

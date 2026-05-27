@@ -9,6 +9,7 @@ import '../design_system/components/studio_code_dropdown_field.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -276,6 +277,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: FilledButton.tonalIcon(
+                      style: studioFormIconLabeledButtonStyle(context),
                       onPressed: widget.controller.submittingReport
                           ? null
                           : () => widget.controller.submitReport(
@@ -304,15 +306,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             ),
             if (widget.controller.queueEnabled) ...[
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.contentComplianceQueueTitle,
-                      style: studioPaneTitleStyle(context),
-                    ),
-                  ),
-                  TextButton.icon(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final stackQueueActions =
+                      constraints.maxWidth < kStudioHandsetMaxWidth;
+                  final clearFiltersButton = TextButton.icon(
+                    style: studioFormTextButtonIconStyle(context),
                     onPressed:
                         widget.controller.loadingQueue ||
                             (!_queueClaimedOnly &&
@@ -327,22 +326,57 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         : widget.controller.clearQueueFilters,
                     icon: const Icon(Icons.filter_alt_off_outlined),
                     label: Text(l10n.contentComplianceClearFilters),
-                  ),
-                  TextButton.icon(
+                  );
+                  final refreshButton = TextButton.icon(
+                    style: studioFormTextButtonIconStyle(context),
                     onPressed: widget.controller.loadingQueue
                         ? null
                         : widget.controller.loadQueue,
                     icon: const Icon(Icons.refresh),
                     label: Text(l10n.contentComplianceRefresh),
-                  ),
-                  TextButton.icon(
+                  );
+                  final copyCsvButton = TextButton.icon(
+                    style: studioFormTextButtonIconStyle(context),
                     onPressed: queue == null || queue.items.isEmpty
                         ? null
                         : _copyCurrentQueueCsv,
                     icon: const Icon(Icons.download_outlined),
                     label: Text(l10n.contentComplianceCopyCsv),
-                  ),
-                ],
+                  );
+                  if (stackQueueActions) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.contentComplianceQueueTitle,
+                          style: studioPaneTitleStyle(context),
+                        ),
+                        const SizedBox(height: 8),
+                        StudioDenseActionRow(
+                          spacing: 8,
+                          children: [
+                            clearFiltersButton,
+                            refreshButton,
+                            copyCsvButton,
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.contentComplianceQueueTitle,
+                          style: studioPaneTitleStyle(context),
+                        ),
+                      ),
+                      clearFiltersButton,
+                      refreshButton,
+                      copyCsvButton,
+                    ],
+                  );
+                },
               ),
               if (widget.controller.loadingQueue && queue == null)
                 _buildQueueLoadingSkeleton(context)
@@ -388,14 +422,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               style: theme.textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),
-                            Wrap(
+                            StudioDenseActionRow(
                               spacing: 8,
-                              runSpacing: 8,
                               children: [
                                 FilledButton(
                                   key: const ValueKey(
                                     'contentComplianceTopAlertPrimary',
                                   ),
+                                  style: studioFormPrimaryButtonStyle(context),
                                   onPressed: widget.controller.mutatingQueue
                                       ? null
                                       : () => _runEffectiveTopPrimaryAction(
@@ -411,6 +445,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ) !=
                                     null)
                                   FilledButton.tonal(
+                                    style: studioFormTonalButtonStyle(context),
                                     onPressed: widget.controller.mutatingQueue
                                         ? null
                                         : () async {
@@ -429,6 +464,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ),
                                   ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed: widget.controller.loadingQueue
                                       ? null
                                       : () =>
@@ -439,6 +475,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   key: const ValueKey(
                                     'contentComplianceResetAlertPreferences',
                                   ),
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed:
                                       _preferSecondaryAsPrimaryStages.isEmpty
                                       ? null
@@ -497,11 +534,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Wrap(
+                                      StudioDenseActionRow(
                                         spacing: 8,
-                                        runSpacing: 8,
                                         children: [
                                           OutlinedButton(
+                                            style: studioFormSecondaryButtonStyle(
+                                              context,
+                                            ),
                                             onPressed:
                                                 widget.controller.loadingQueue
                                                 ? null
@@ -514,6 +553,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                           ),
                                           if (alert.stage == 'over_capacity')
                                             FilledButton.tonal(
+                                              style: studioFormTonalButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget
                                                       .controller
@@ -528,6 +570,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             ),
                                           if (alert.stage == 'over_capacity')
                                             FilledButton(
+                                              style: studioFormPrimaryButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget
                                                       .controller
@@ -543,6 +588,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                           if (alert.stage ==
                                               'critical_unclaimed')
                                             OutlinedButton(
+                                              style: studioFormSecondaryButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget.controller.loadingQueue
                                                   ? null
@@ -568,6 +616,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                           if (alert.stage ==
                                               'critical_unclaimed')
                                             FilledButton(
+                                              style: studioFormPrimaryButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget
                                                       .controller
@@ -596,6 +647,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             ),
                                           if (alert.stage == 'stalled_claimed')
                                             OutlinedButton(
+                                              style: studioFormSecondaryButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget.controller.loadingQueue
                                                   ? null
@@ -620,6 +674,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             ),
                                           if (alert.stage == 'stalled_claimed')
                                             FilledButton.tonal(
+                                              style: studioFormTonalButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget
                                                       .controller
@@ -634,6 +691,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             ),
                                           if (alert.stage == 'escalated_72h')
                                             OutlinedButton(
+                                              style: studioFormSecondaryButtonStyle(
+                                                context,
+                                              ),
                                               onPressed:
                                                   widget.controller.loadingQueue
                                                   ? null
@@ -1012,7 +1072,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               style: OutlinedButton.styleFrom(
                                 alignment: Alignment.centerLeft,
                                 padding: const EdgeInsets.all(12),
-                              ),
+                              ).merge(studioFormSecondaryButtonStyle(context)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1112,7 +1172,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               style: OutlinedButton.styleFrom(
                                 alignment: Alignment.centerLeft,
                                 padding: const EdgeInsets.all(12),
-                              ),
+                              ).merge(studioFormSecondaryButtonStyle(context)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1274,11 +1334,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                               ),
                             ],
                             const SizedBox(height: StudioLayoutSpacing.inlineGap),
-                            Wrap(
+                            StudioDenseActionRow(
                               spacing: 8,
-                              runSpacing: 8,
                               children: [
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed: () {
                                     Clipboard.setData(
                                       ClipboardData(text: item.targetId),
@@ -1294,6 +1354,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   child: Text(l10n.contentComplianceCopyTarget),
                                 ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed: () {
                                     Clipboard.setData(
                                       ClipboardData(text: item.id),
@@ -1310,11 +1371,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 ),
                                 if (widget.onOpenTarget != null)
                                   OutlinedButton(
+                                    style: studioFormSecondaryButtonStyle(context),
                                     onPressed: () => widget.onOpenTarget!(item),
                                     child: Text(_openTargetLabel(l10n, item)),
                                   ),
                                 if (widget.onOpenOpsTarget != null)
                                   OutlinedButton(
+                                    style: studioFormSecondaryButtonStyle(context),
                                     onPressed: () =>
                                         widget.onOpenOpsTarget!(item),
                                     child: Text(
@@ -1322,6 +1385,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ),
                                   ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed:
                                       widget.controller.loadingAuditReportId ==
                                           item.id
@@ -1335,6 +1399,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                 ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed:
                                       widget.controller.mutatingQueue ||
                                           item.status != 'pending'
@@ -1347,6 +1412,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                 ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed:
                                       widget.controller.mutatingQueue ||
                                           (item.status != 'pending' &&
@@ -1364,6 +1430,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                 ),
                                 OutlinedButton(
+                                  style: studioFormSecondaryButtonStyle(context),
                                   onPressed:
                                       widget.controller.mutatingQueue ||
                                           (item.status != 'pending' &&
@@ -1398,9 +1465,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  StudioDenseActionRow(
                     children: [
                       StudioFilterChip(
                         label: Text(
@@ -1412,6 +1477,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         onSelected: (_) {},
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: widget.controller.mutatingQueue
                             ? null
                             : () {
@@ -1432,6 +1498,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         child: Text(l10n.contentComplianceSelectAllOpen),
                       ),
                       OutlinedButton(
+                        style: studioFormSecondaryButtonStyle(context),
                         onPressed: _selectedReportIds.isEmpty
                             ? null
                             : () => setState(() {
@@ -1440,6 +1507,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         child: Text(l10n.contentComplianceClearSelection),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed:
                             widget.controller.mutatingQueue ||
                                 _selectedReportIds.isEmpty
@@ -1448,6 +1516,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         child: Text(l10n.contentComplianceBulkReassign),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed: widget.controller.mutatingQueue
                             ? null
                             : () => _runAutoRebalance(dryRun: true),
@@ -1456,6 +1525,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         ),
                       ),
                       FilledButton(
+                        style: studioFormPrimaryButtonStyle(context),
                         onPressed: widget.controller.mutatingQueue
                             ? null
                             : () => _runAutoRebalance(dryRun: false),
@@ -1464,6 +1534,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         ),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed:
                             widget.controller.mutatingQueue ||
                                 _selectedReportIds.isEmpty
@@ -1472,6 +1543,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         child: Text(l10n.contentComplianceBulkClaim),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed:
                             widget.controller.mutatingQueue ||
                                 _selectedReportIds.isEmpty
@@ -1480,6 +1552,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         child: Text(l10n.contentComplianceBulkResolve),
                       ),
                       FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
                         onPressed:
                             widget.controller.mutatingQueue ||
                                 _selectedReportIds.isEmpty

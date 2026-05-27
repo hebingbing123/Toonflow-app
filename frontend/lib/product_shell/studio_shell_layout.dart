@@ -9,6 +9,7 @@ bool shouldShowStudioPipeline({
     return false;
   }
   // Pipeline strip is for production flow; utility panes (通知/设置/帮助) stay uncluttered.
+  // Workspace / project scope remains in the product title bar on all signed-in panes.
   return currentPane == ProductWorkspacePane.projects ||
       currentPane == ProductWorkspacePane.scriptWorkspace ||
       currentPane == ProductWorkspacePane.productionWorkspace ||
