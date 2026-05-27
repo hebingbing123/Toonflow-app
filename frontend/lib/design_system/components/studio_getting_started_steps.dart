@@ -64,8 +64,10 @@ class StudioGettingStartedSteps extends StatelessWidget {
                             child: Column(
                               children: <Widget>[
                                 Container(
-                                  width: 28,
-                                  height: 28,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 28,
+                                    minHeight: 28,
+                                  ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
@@ -76,11 +78,14 @@ class StudioGettingStartedSteps extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  child: Text(
-                                    '${i + 1}',
-                                    style: theme.labelLarge?.copyWith(
-                                      color: tokens.primary,
-                                      fontWeight: FontWeight.w700,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Text(
+                                      '${i + 1}',
+                                      style: theme.labelLarge?.copyWith(
+                                        color: tokens.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),

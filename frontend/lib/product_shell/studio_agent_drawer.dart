@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/tokens.dart';
@@ -132,8 +133,11 @@ class _StudioAgentDrawerHeader extends StatelessWidget {
           Expanded(
             child: Text(title, style: studioDialogTitleStyle(context)),
           ),
-          IconButton(
-            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          StudioIconButton(
+            icon: Icons.close,
+            label: MaterialLocalizations.of(context).closeButtonTooltip,
+            size: 20,
+            onPressed: () => Navigator.of(context).pop(),
             style: IconButton.styleFrom(
               backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),
               foregroundColor: tokens.textSecondary,
@@ -148,8 +152,6 @@ class _StudioAgentDrawerHeader extends StatelessWidget {
                 side: BorderSide(color: tokens.surfaceHighlight),
               ),
             ),
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, size: 20),
           ),
         ],
       ),

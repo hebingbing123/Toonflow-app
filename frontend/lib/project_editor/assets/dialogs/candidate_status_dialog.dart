@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import '../../../design_system/tokens.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
@@ -230,15 +231,15 @@ class _ProjectAssetCandidateStatusDialogState
                   const SizedBox(height: StudioSpacing.sm),
                   Row(
                     children: [
-                      IconButton(
-                        tooltip: l10n.projectEditorAssetCandidatePrevious,
+                      StudioIconButton(
+                        icon: Icons.chevron_left,
+                        label: l10n.projectEditorAssetCandidatePrevious,
                         onPressed: previousAssetNumericId == null
                             ? null
                             : () => _selectAsset(
                                 previousAssetNumericId,
                                 visibleAssets,
                               ),
-                        icon: const Icon(Icons.chevron_left),
                       ),
                       Expanded(
                         child: Text(
@@ -250,15 +251,15 @@ class _ProjectAssetCandidateStatusDialogState
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
-                      IconButton(
-                        tooltip: l10n.projectEditorAssetCandidateNext,
+                      StudioIconButton(
+                        icon: Icons.chevron_right,
+                        label: l10n.projectEditorAssetCandidateNext,
                         onPressed: nextAssetNumericId == null
                             ? null
                             : () => _selectAsset(
                                 nextAssetNumericId,
                                 visibleAssets,
                               ),
-                        icon: const Icon(Icons.chevron_right),
                       ),
                     ],
                   ),

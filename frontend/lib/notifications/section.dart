@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
+import '../design_system/components/studio_icon_button.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
@@ -708,41 +709,42 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                 ? null
                                 : () => _applyThrottleTemplate(template.id),
                           ),
-                          IconButton(
-                            tooltip: l10n.notificationsComplianceTooltipMoveUp,
+                          StudioIconButton(
+                            icon: Icons.arrow_upward,
+                            label: l10n.notificationsComplianceTooltipMoveUp,
+                            size: 18,
                             onPressed: widget.controller.savingPreferences
                                 ? null
                                 : () => _reorderTemplate(template.id, up: true),
-                            icon: const Icon(Icons.arrow_upward, size: 18),
                           ),
-                          IconButton(
-                            tooltip:
-                                l10n.notificationsComplianceTooltipMoveDown,
+                          StudioIconButton(
+                            icon: Icons.arrow_downward,
+                            label: l10n.notificationsComplianceTooltipMoveDown,
+                            size: 18,
                             onPressed: widget.controller.savingPreferences
                                 ? null
                                 : () =>
                                       _reorderTemplate(template.id, up: false),
-                            icon: const Icon(Icons.arrow_downward, size: 18),
                           ),
-                          IconButton(
-                            tooltip:
-                                l10n.notificationsComplianceTooltipEditTemplate,
+                          StudioIconButton(
+                            icon: Icons.edit_outlined,
+                            label: l10n.notificationsComplianceTooltipEditTemplate,
+                            size: 18,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !template.canEdit
                                 ? null
                                 : () => _editTemplate(template),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
                           ),
-                          IconButton(
-                            tooltip: l10n
-                                .notificationsComplianceTooltipDeleteTemplate,
+                          StudioIconButton(
+                            icon: Icons.delete_outline,
+                            label: l10n.notificationsComplianceTooltipDeleteTemplate,
+                            size: 18,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !template.canDelete
                                 ? null
                                 : () => _deleteTemplate(template),
-                            icon: const Icon(Icons.delete_outline, size: 18),
                           ),
                         ],
                       ),
@@ -812,9 +814,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                 ? null
                                 : () => _applyThrottleTemplate(template.id),
                           ),
-                          IconButton(
-                            tooltip: l10n
-                                .notificationsComplianceTooltipEditSharedTemplate,
+                          StudioIconButton(
+                            icon: Icons.edit_outlined,
+                            label: l10n.notificationsComplianceTooltipEditSharedTemplate,
+                            size: 18,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !widget
@@ -822,11 +825,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                         .canManageWorkspaceSharedTemplates
                                 ? null
                                 : () => _editWorkspaceSharedTemplate(template),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
                           ),
-                          IconButton(
-                            tooltip: l10n
-                                .notificationsComplianceTooltipDeleteSharedTemplate,
+                          StudioIconButton(
+                            icon: Icons.delete_outline,
+                            label: l10n.notificationsComplianceTooltipDeleteSharedTemplate,
+                            size: 18,
                             onPressed:
                                 widget.controller.savingPreferences ||
                                     !widget
@@ -835,7 +838,6 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                 ? null
                                 : () =>
                                       _deleteWorkspaceSharedTemplate(template),
-                            icon: const Icon(Icons.delete_outline, size: 18),
                           ),
                         ],
                       ),

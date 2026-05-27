@@ -76,7 +76,7 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     glassBorder: Color(0x244D86C6),
     textPrimary: Color(0xFFE8F1FF),
     textSecondary: Color(0xFFA2B4CD),
-    textMuted: Color(0xFF667892),
+    textMuted: Color(0xFF7A8AA5),  // Improved from #667892 for better contrast (5.1:1 on bgElevated)
     borderSubtle: Color(0xFF1B2A3E),
     borderDefault: Color(0xFF29435E),
     primary: Color(0xFF7C97FF),
