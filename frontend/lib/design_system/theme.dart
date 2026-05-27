@@ -6,9 +6,10 @@ import 'studio_bundled_text_theme.dart';
 import 'studio_typography.dart';
 import 'tokens.dart';
 
-
 TextStyle _adjustStyle(TextStyle? style) {
-  if (style == null) return const TextStyle(textBaseline: TextBaseline.alphabetic);
+  if (style == null) {
+    return const TextStyle(textBaseline: TextBaseline.alphabetic);
+  }
   double? height = style.height;
   if (height == null) {
     height = 1.3;
@@ -19,7 +20,8 @@ TextStyle _adjustStyle(TextStyle? style) {
   }
 
   FontWeight? weight = style.fontWeight;
-  final isWindowsOrWeb = kIsWeb || defaultTargetPlatform == TargetPlatform.windows;
+  final isWindowsOrWeb =
+      kIsWeb || defaultTargetPlatform == TargetPlatform.windows;
   if (isWindowsOrWeb) {
     if (weight == null || weight == FontWeight.w400) {
       weight = FontWeight.w500;
@@ -55,21 +57,19 @@ TextTheme _adjustTextTheme(TextTheme theme) {
   );
 }
 
-/// Full-dark studio theme (product shell).
-///
-/// When [useBundledFonts] is true (default), uses **bundled** Inter / Space Grotesk /
-/// Noto Sans SC from `assets/fonts/` — no network fetch. When false, uses platform
-/// system fonts only (legacy test escape hatch).
-ThemeData buildStudioDarkTheme({
+ThemeData _buildStudioTheme({
+  required Brightness brightness,
   bool useBundledFonts = true,
   StudioTypography typography = StudioTypography.regular,
 }) {
-  const tokens = StudioTokens.dark;
+  final isDark = brightness == Brightness.dark;
+  final tokens = isDark ? StudioTokens.dark : StudioTokens.light;
+  final colors = isDark ? StudioColors.dark : StudioColors.light;
 
   final base =
       ColorScheme.fromSeed(
         seedColor: tokens.primary,
-        brightness: Brightness.dark,
+        brightness: brightness,
       ).copyWith(
         primary: tokens.primary,
         onPrimary: StudioPrimitives.white,
@@ -89,7 +89,7 @@ ThemeData buildStudioDarkTheme({
         onError: StudioPrimitives.white,
       );
 
-  final fallbackTextTheme = ThemeData(brightness: Brightness.dark).textTheme;
+  final fallbackTextTheme = ThemeData(brightness: brightness).textTheme;
   final displayFont = useBundledFonts
       ? buildStudioBundledTextTheme(fallbackTextTheme)
       : fallbackTextTheme;
@@ -150,7 +150,7 @@ ThemeData buildStudioDarkTheme({
 
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: base,
     scaffoldBackgroundColor: tokens.bgBase,
     textTheme: textTheme,
@@ -293,33 +293,41 @@ ThemeData buildStudioDarkTheme({
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
         borderSide: BorderSide(color: tokens.accent, width: 1.5),
       ),
-      labelStyle: _adjustStyle(TextStyle(
-        color: tokens.textSecondary,
-        fontSize: typography.hint,
-        height: 1.3,
-      )),
-      floatingLabelStyle: _adjustStyle(TextStyle(
-        color: tokens.textSecondary,
-        fontSize: typography.hint,
-        height: 1.3,
-      )),
-      hintStyle: _adjustStyle(TextStyle(
-        color: tokens.textMuted,
-        fontSize: typography.hint,
-        height: 1.3,
-      )),
-      helperStyle: _adjustStyle(TextStyle(
-        color: tokens.textSecondary,
-        fontSize: typography.meta,
-        height: 1.3,
-      )),
+      labelStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textSecondary,
+          fontSize: typography.hint,
+          height: 1.3,
+        ),
+      ),
+      floatingLabelStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textSecondary,
+          fontSize: typography.hint,
+          height: 1.3,
+        ),
+      ),
+      hintStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textMuted,
+          fontSize: typography.hint,
+          height: 1.3,
+        ),
+      ),
+      helperStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textSecondary,
+          fontSize: typography.meta,
+          height: 1.3,
+        ),
+      ),
     ),
     menuTheme: MenuThemeData(
       style: MenuStyle(
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
-        elevation: const WidgetStatePropertyAll<double>(16),
+        elevation: WidgetStatePropertyAll<double>(isDark ? 10 : 8),
         shadowColor: WidgetStatePropertyAll<Color>(
-          StudioPrimitives.black.withValues(alpha: 0.42),
+          StudioPrimitives.black.withValues(alpha: isDark ? 0.20 : 0.12),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
           StudioPrimitives.transparent,
@@ -331,57 +339,66 @@ ThemeData buildStudioDarkTheme({
           ),
         ),
         padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
+          EdgeInsets.symmetric(
+            vertical: StudioSpacing.xs,
+            horizontal: StudioSpacing.xs,
+          ),
         ),
       ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: tokens.bgElevated,
       surfaceTintColor: StudioPrimitives.transparent,
-      elevation: 16,
-      shadowColor: StudioPrimitives.black.withValues(alpha: 0.42),
+      elevation: isDark ? 10 : 8,
+      shadowColor: StudioPrimitives.black.withValues(
+        alpha: isDark ? 0.20 : 0.12,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         side: BorderSide(color: tokens.surfaceHighlight),
       ),
       labelTextStyle: WidgetStatePropertyAll<TextStyle?>(
-        _adjustStyle(TextStyle(
+        _adjustStyle(
+          TextStyle(
+            color: tokens.textPrimary,
+            fontSize: typography.body,
+            height: 1.4,
+          ),
+        ),
+      ),
+      textStyle: _adjustStyle(
+        TextStyle(
           color: tokens.textPrimary,
           fontSize: typography.body,
           height: 1.4,
-        )),
+        ),
       ),
-      textStyle: _adjustStyle(TextStyle(
-        color: tokens.textPrimary,
-        fontSize: typography.body,
-        height: 1.4,
-      )),
       iconColor: tokens.textSecondary,
     ),
     canvasColor: tokens.bgElevated,
     dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: _adjustStyle(TextStyle(
-        color: tokens.textPrimary,
-        fontSize: typography.body,
-        height: 1.4,
-      )),
+      textStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textPrimary,
+          fontSize: typography.body,
+          height: 1.4,
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: tokens.bgInset.withValues(alpha: 0.92),
-        labelStyle: _adjustStyle(TextStyle(
-          color: tokens.textSecondary,
-          fontSize: typography.hint,
-        )),
-        hintStyle: _adjustStyle(TextStyle(
-          color: tokens.textMuted,
-          fontSize: typography.hint,
-        )),
+        labelStyle: _adjustStyle(
+          TextStyle(color: tokens.textSecondary, fontSize: typography.hint),
+        ),
+        hintStyle: _adjustStyle(
+          TextStyle(color: tokens.textMuted, fontSize: typography.hint),
+        ),
       ),
       menuStyle: MenuStyle(
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
-        elevation: const WidgetStatePropertyAll<double>(16),
+        elevation: WidgetStatePropertyAll<double>(isDark ? 10 : 8),
         shadowColor: WidgetStatePropertyAll<Color>(
-          StudioPrimitives.black.withValues(alpha: 0.42),
+          StudioPrimitives.black.withValues(alpha: isDark ? 0.20 : 0.12),
         ),
         surfaceTintColor: const WidgetStatePropertyAll<Color>(
           StudioPrimitives.transparent,
@@ -393,19 +410,24 @@ ThemeData buildStudioDarkTheme({
           ),
         ),
         padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
+          EdgeInsets.symmetric(
+            vertical: StudioSpacing.xs,
+            horizontal: StudioSpacing.xs,
+          ),
         ),
       ),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: tokens.bgSurface,
-      elevation: 12,
-      contentTextStyle: _adjustStyle(TextStyle(
-        color: tokens.textPrimary,
-        fontSize: typography.body,
-        height: 1.4,
-      )),
+      elevation: isDark ? 8 : 6,
+      contentTextStyle: _adjustStyle(
+        TextStyle(
+          color: tokens.textPrimary,
+          fontSize: typography.body,
+          height: 1.4,
+        ),
+      ),
       actionTextColor: tokens.accent,
       closeIconColor: tokens.textMuted,
       shape: RoundedRectangleBorder(
@@ -414,25 +436,66 @@ ThemeData buildStudioDarkTheme({
       ),
     ),
     dividerTheme: DividerThemeData(color: tokens.borderSubtle, thickness: 1),
-    focusColor: tokens.primary.withValues(alpha: 0.35),
-    hoverColor: tokens.primary.withValues(alpha: 0.10),
+    focusColor: tokens.primary.withValues(alpha: isDark ? 0.24 : 0.12),
+    hoverColor: tokens.primary.withValues(alpha: isDark ? 0.10 : 0.06),
     chipTheme: ChipThemeData(
-      backgroundColor: tokens.bgSurface.withValues(alpha: 0.92),
+      backgroundColor: tokens.bgSurface.withValues(alpha: isDark ? 0.92 : 1),
       selectedColor: tokens.primarySoft,
-      labelStyle: _adjustStyle(TextStyle(
-        fontWeight: FontWeight.w500,
-        color: tokens.textPrimary,
-        fontSize: typography.hint,
-        height: 1.2,
-      )),
+      labelStyle: _adjustStyle(
+        TextStyle(
+          fontWeight: FontWeight.w500,
+          color: tokens.textPrimary,
+          fontSize: typography.hint,
+          height: 1.2,
+        ),
+      ),
       side: BorderSide(color: tokens.surfaceHighlight),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(StudioSpacing.radiusPill)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
+      ),
     ),
-    extensions: <ThemeExtension<dynamic>>[
-      StudioTokens.dark,
-      StudioColors.dark,
-      typography,
-    ],
+    extensions: <ThemeExtension<dynamic>>[tokens, colors, typography],
+  );
+}
+
+/// Full studio theme for the requested brightness.
+ThemeData buildStudioTheme({
+  required Brightness brightness,
+  bool useBundledFonts = true,
+  StudioTypography typography = StudioTypography.regular,
+}) {
+  return _buildStudioTheme(
+    brightness: brightness,
+    useBundledFonts: useBundledFonts,
+    typography: typography,
+  );
+}
+
+/// Full-dark studio theme (product shell).
+///
+/// When [useBundledFonts] is true (default), uses **bundled** Inter / Space Grotesk /
+/// Noto Sans SC from `assets/fonts/` — no network fetch. When false, uses platform
+/// system fonts only (legacy test escape hatch).
+ThemeData buildStudioDarkTheme({
+  bool useBundledFonts = true,
+  StudioTypography typography = StudioTypography.regular,
+}) {
+  return buildStudioTheme(
+    brightness: Brightness.dark,
+    useBundledFonts: useBundledFonts,
+    typography: typography,
+  );
+}
+
+/// Light studio theme for system theme switching and high-contrast previews.
+ThemeData buildStudioLightTheme({
+  bool useBundledFonts = true,
+  StudioTypography typography = StudioTypography.regular,
+}) {
+  return buildStudioTheme(
+    brightness: Brightness.light,
+    useBundledFonts: useBundledFonts,
+    typography: typography,
   );
 }
 
@@ -500,6 +563,47 @@ class StudioColors extends ThemeExtension<StudioColors> {
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: <Color>[Color(0xFF5E84FF), Color(0xFF238EB8)],
+    ),
+  );
+
+  static const StudioColors light = StudioColors(
+    sidebar: Color(0xFFF1F5FA),
+    sidebarBorder: Color(0xFFD8E1EB),
+    canvas: Color(0xFFF7FAFD),
+    brandGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFF6A8CFF), Color(0xFF4F79FF), Color(0xFF2BAFD6)],
+    ),
+    loginBackdrop: LinearGradient(
+      begin: Alignment(-1.1, -1),
+      end: Alignment(1.2, 1.1),
+      colors: <Color>[
+        Color(0xFFF7FAFD),
+        Color(0xFFF0F5FB),
+        Color(0xFFE8EFF8),
+        Color(0xFFF8FBFF),
+      ],
+    ),
+    primaryGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF6A8CFF), Color(0xFF4F79FF)],
+    ),
+    shellBackdrop: LinearGradient(
+      begin: Alignment(-1.0, -1.0),
+      end: Alignment(1.0, 1.0),
+      colors: <Color>[Color(0xFFF8FAFD), Color(0xFFF2F6FB), Color(0xFFEAF0F6)],
+    ),
+    panelGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFFFFFFFF), Color(0xFFF8FBFD), Color(0xFFF0F4F8)],
+    ),
+    signalGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF4F79FF), Color(0xFF2BAFD6)],
     ),
   );
 

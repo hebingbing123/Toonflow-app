@@ -257,46 +257,46 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
           ] else ...[
             RepaintBoundary(
               child: Row(
-              children: [
-                Text(
-                  _formatDuration(_position),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace').withTabularFigures(),
-                ),
-                const SizedBox(width: StudioSpacing.xs),
-                Expanded(
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 4,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 6,
+                children: [
+                  Text(
+                    _formatDuration(_position),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(fontFamily: 'monospace')
+                        .withTabularFigures(),
+                  ),
+                  const SizedBox(width: StudioSpacing.xs),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 4,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 6,
+                        ),
+                        overlayShape: const RoundSliderOverlayShape(
+                          overlayRadius: 12,
+                        ),
                       ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 12,
+                      child: Slider(
+                        value: _duration.inMilliseconds > 0
+                            ? _position.inMilliseconds.toDouble()
+                            : 0,
+                        min: 0,
+                        max: _duration.inMilliseconds.toDouble(),
+                        onChanged: (value) {
+                          _seek(Duration(milliseconds: value.toInt()));
+                        },
                       ),
-                    ),
-                    child: Slider(
-                      value: _duration.inMilliseconds > 0
-                          ? _position.inMilliseconds.toDouble()
-                          : 0,
-                      min: 0,
-                      max: _duration.inMilliseconds.toDouble(),
-                      onChanged: (value) {
-                        _seek(Duration(milliseconds: value.toInt()));
-                      },
                     ),
                   ),
-                ),
-                const SizedBox(width: StudioSpacing.xs),
-                Text(
-                  _formatDuration(_duration),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace').withTabularFigures(),
-                ),
-              ],
-            ),
+                  const SizedBox(width: StudioSpacing.xs),
+                  Text(
+                    _formatDuration(_duration),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(fontFamily: 'monospace')
+                        .withTabularFigures(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: StudioSpacing.sm),
 
@@ -368,11 +368,11 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 SizedBox(
                   width: StudioLayoutSize.skeletonAvatar,
                   child: Text(
-                    l10n.shortVideoAudioVolumePercent(
-                      (_volume * 100).toInt(),
-                    ),
+                    l10n.shortVideoAudioVolumePercent((_volume * 100).toInt()),
                     textAlign: TextAlign.right,
-                    style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.withTabularFigures(),
                   ),
                 ),
               ],

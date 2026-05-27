@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../ix/studio_platform_modals.dart';
+import '../ix/studio_mobile_affordances.dart';
 import '../ix/studio_scroll_behavior.dart';
 import '../tokens.dart';
 import 'studio_surfaces.dart';
@@ -18,14 +20,30 @@ Future<T?> showStudioDialog<T>({
     return showCupertinoDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: builder,
+      builder: (ctx) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: studioSystemUiOverlayStyleForSurface(
+            Theme.of(ctx).dialogTheme.backgroundColor ??
+                Theme.of(ctx).colorScheme.surface,
+          ),
+          child: builder(ctx),
+        );
+      },
     );
   }
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: tokens.overlay,
-    builder: builder,
+    builder: (ctx) {
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: studioSystemUiOverlayStyleForSurface(
+          Theme.of(ctx).dialogTheme.backgroundColor ??
+              Theme.of(ctx).colorScheme.surface,
+        ),
+        child: builder(ctx),
+      );
+    },
   );
 }
 
@@ -64,7 +82,12 @@ Future<T?> showStudioBottomSheet<T>({
     return showCupertinoModalPopup<T>(
       context: context,
       barrierDismissible: isDismissible,
-      builder: (ctx) => sheetChrome(ctx, builder(ctx)),
+      builder: (ctx) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: studioSystemUiOverlayStyleForSurface(
+          StudioTokens.of(ctx).bgSurface,
+        ),
+        child: sheetChrome(ctx, builder(ctx)),
+      ),
     );
   }
 
@@ -77,7 +100,12 @@ Future<T?> showStudioBottomSheet<T>({
     enableDrag: enableDrag,
     backgroundColor: StudioPrimitives.transparent,
     barrierColor: tokens.overlay,
-    builder: (ctx) => sheetChrome(ctx, builder(ctx)),
+    builder: (ctx) => AnnotatedRegion<SystemUiOverlayStyle>(
+      value: studioSystemUiOverlayStyleForSurface(
+        StudioTokens.of(ctx).bgSurface,
+      ),
+      child: sheetChrome(ctx, builder(ctx)),
+    ),
   );
 }
 
@@ -95,14 +123,19 @@ Future<bool?> showStudioConfirmDialog({
   return showStudioDialog<bool>(
     context: context,
     barrierDismissible: barrierDismissible,
-      builder: (ctx) {
-      final resolvedCancel = cancelLabel ?? MaterialLocalizations.of(ctx).cancelButtonLabel;
-      final resolvedConfirm = confirmLabel ?? MaterialLocalizations.of(ctx).okButtonLabel;
+    builder: (ctx) {
+      final resolvedCancel =
+          cancelLabel ?? MaterialLocalizations.of(ctx).cancelButtonLabel;
+      final resolvedConfirm =
+          confirmLabel ?? MaterialLocalizations.of(ctx).okButtonLabel;
       if (studioPrefersCupertinoModals(ctx)) {
         return CupertinoAlertDialog(
           title: Text(title),
-          content: content ??
-              (message == null ? null : Text(message, style: studioSectionIntroStyle(ctx))),
+          content:
+              content ??
+              (message == null
+                  ? null
+                  : Text(message, style: studioSectionIntroStyle(ctx))),
           actions: <Widget>[
             CupertinoDialogAction(
               onPressed: () => Navigator.of(ctx).pop(false),
@@ -119,7 +152,8 @@ Future<bool?> showStudioConfirmDialog({
       }
       return StudioAlertDialog(
         title: Text(title),
-        content: content ??
+        content:
+            content ??
             (message == null
                 ? null
                 : Text(message, style: studioSectionIntroStyle(ctx))),
@@ -217,7 +251,10 @@ class StudioAlertDialog extends StatelessWidget {
       leading = Padding(
         padding: iconPadding ?? EdgeInsets.zero,
         child: IconTheme(
-          data: IconThemeData(color: iconColor ?? tokens.signal, size: 22),
+          data: IconThemeData(
+            color: iconColor ?? tokens.signal,
+            size: StudioIconSize.xl,
+          ),
           child: icon!,
         ),
       );
@@ -375,7 +412,8 @@ class StudioDialogShell extends StatelessWidget {
         ? viewport.height * maxHeightFactor
         : 720.0;
 
-    final headerTitle = titleWidget ??
+    final headerTitle =
+        titleWidget ??
         (title.isEmpty
             ? null
             : Text(title, style: studioDialogTitleStyle(context)));
@@ -435,11 +473,14 @@ class StudioDialogShell extends StatelessWidget {
                                     ? null
                                     : <Widget>[
                                         const SizedBox(
-                                          height: StudioLayoutSpacing.titleTight,
+                                          height:
+                                              StudioLayoutSpacing.titleTight,
                                         ),
                                         Text(
                                           subtitle!,
-                                          style: studioSectionIntroStyle(context),
+                                          style: studioSectionIntroStyle(
+                                            context,
+                                          ),
                                         ),
                                       ],
                               ],
@@ -462,14 +503,19 @@ class StudioDialogShell extends StatelessWidget {
                                 tapTargetSize: MaterialTapTargetSize.padded,
                                 visualDensity: VisualDensity.standard,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
+                                  borderRadius: BorderRadius.circular(
+                                    StudioSpacing.radiusComfort,
+                                  ),
                                   side: BorderSide(
                                     color: tokens.surfaceHighlight,
                                   ),
                                 ),
                               ),
                               onPressed: onClose,
-                              icon: const Icon(Icons.close, size: StudioIconSize.md),
+                              icon: const Icon(
+                                Icons.close,
+                                size: StudioIconSize.md,
+                              ),
                             ),
                         ],
                       ),
@@ -478,7 +524,10 @@ class StudioDialogShell extends StatelessWidget {
                       subtitle != null ||
                       leading != null ||
                       onClose != null)
-                    Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
+                    Divider(
+                      height: StudioControlSize.dividerThickness,
+                      color: tokens.borderSubtle,
+                    ),
                   Flexible(
                     child: scrollable
                         ? StudioScrollbar(
@@ -493,7 +542,10 @@ class StudioDialogShell extends StatelessWidget {
                           ),
                   ),
                   if (actions != null && actions!.isNotEmpty) ...<Widget>[
-                    Divider(height: StudioControlSize.dividerThickness, color: tokens.borderSubtle),
+                    Divider(
+                      height: StudioControlSize.dividerThickness,
+                      color: tokens.borderSubtle,
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         StudioSpacing.sm,
@@ -551,13 +603,20 @@ class StudioDialogInsetPanel extends StatelessWidget {
     final style = monospace
         ? base?.copyWith(
             fontFamily: 'monospace',
-            fontFamilyFallback: const <String>['Menlo', 'Consolas', 'monospace'],
+            fontFamilyFallback: const <String>[
+              'Menlo',
+              'Consolas',
+              'monospace',
+            ],
             height: 1.45,
           )
         : base;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
+      padding: const EdgeInsets.symmetric(
+        horizontal: StudioLayoutSpacing.insetDense,
+        vertical: StudioLayoutSpacing.inlineGap,
+      ),
       decoration: BoxDecoration(
         color: tokens.bgInset.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),

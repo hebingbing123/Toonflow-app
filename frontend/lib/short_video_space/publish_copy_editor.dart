@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 
@@ -95,6 +98,12 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _tagsController;
+  String _savedPlatformId = '';
+  String _savedTitle = '';
+  String _savedDescription = '';
+  String _savedTags = '';
+  bool _allowPopOnce = false;
+  bool _handlingPop = false;
 
   List<String> get _allIds => <String>[
     ...widget.domesticPlatformIds,
@@ -159,14 +168,23 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
 
   void _loadFieldsForPlatform(String pid) {
     final b = _blockFor(pid);
-    _titleController.text = (b?['title'] as String?)?.trim() ?? '';
-    _descriptionController.text = (b?['description'] as String?)?.trim() ?? '';
+    final title = (b?['title'] as String?)?.trim() ?? '';
+    final description = (b?['description'] as String?)?.trim() ?? '';
     final tags = b?['tags'];
+    final tagsText = tags is List
+        ? tags.map((e) => '$e'.trim()).join(', ')
+        : '';
+    _titleController.text = title;
+    _descriptionController.text = description;
     if (tags is List) {
-      _tagsController.text = tags.map((e) => '$e'.trim()).join(', ');
+      _tagsController.text = tagsText;
     } else {
       _tagsController.text = '';
     }
+    _savedPlatformId = pid;
+    _savedTitle = title;
+    _savedDescription = description;
+    _savedTags = tagsText;
   }
 
   void _selectPlatform(String pid) {
@@ -174,6 +192,52 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       _platformId = pid;
       _loadFieldsForPlatform(pid);
     });
+  }
+
+  bool get _dirty =>
+      _platformId != _savedPlatformId ||
+      _titleController.text.trim() != _savedTitle ||
+      _descriptionController.text.trim() != _savedDescription ||
+      _tagsController.text.trim() != _savedTags;
+
+  bool get _canPop => _allowPopOnce || !_dirty;
+
+  Future<void> _handlePopInvoked(bool didPop) async {
+    if (didPop || _handlingPop) {
+      return;
+    }
+    if (!_dirty) {
+      if (!mounted) return;
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).maybePop();
+      });
+      return;
+    }
+
+    _handlingPop = true;
+    try {
+      final discard = await showStudioConfirmDialog(
+        context: context,
+        title: 'Discard changes?',
+        message: 'You have unsaved publish copy changes. Leave anyway?',
+        confirmLabel: 'Discard',
+        cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+        destructive: true,
+        barrierDismissible: false,
+      );
+      if (discard != true || !mounted) {
+        return;
+      }
+      setState(() => _allowPopOnce = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).maybePop();
+      });
+    } finally {
+      _handlingPop = false;
+    }
   }
 
   Future<void> _save() async {
@@ -187,6 +251,13 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       _descriptionController.text,
       _tagsController.text,
     );
+    if (!mounted) return;
+    setState(() {
+      _savedPlatformId = _platformId;
+      _savedTitle = _titleController.text.trim();
+      _savedDescription = _descriptionController.text.trim();
+      _savedTags = _tagsController.text.trim();
+    });
   }
 
   Widget _chipRow(String heading, List<String> ids, Color outline) {
@@ -229,75 +300,83 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.shortVideoPublishCopyEditorSectionTitle,
-          style: theme.textTheme.labelSmall?.copyWith(color: muted),
-        ),
-        const SizedBox(height: StudioSpacing.xs),
-        _chipRow(
-          l10n.shortVideoSpaceTargetMarketDomestic,
-          widget.domesticPlatformIds,
-          muted,
-        ),
-        const SizedBox(height: StudioSpacing.xs),
-        _chipRow(
-          l10n.shortVideoSpaceTargetMarketOverseas,
-          widget.overseasPlatformIds,
-          muted,
-        ),
-        const SizedBox(height: StudioLayoutSpacing.inlineGap),
-        TextField(
-          controller: _titleController,
-          decoration: InputDecoration(
-            labelText: l10n.shortVideoPublishCopyFieldTitle,
-            border: const OutlineInputBorder(),
-            isDense: true,
+    return PopScope(
+      canPop: _canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        unawaited(_handlePopInvoked(didPop));
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.shortVideoPublishCopyEditorSectionTitle,
+            style: theme.textTheme.labelSmall?.copyWith(color: muted),
           ),
-          enabled: !widget.busy,
-          maxLines: 1,
-        ),
-        const SizedBox(height: StudioSpacing.xs),
-        TextField(
-          controller: _descriptionController,
-          decoration: InputDecoration(
-            labelText: l10n.shortVideoPublishCopyFieldDescription,
-            border: const OutlineInputBorder(),
-            isDense: true,
+          const SizedBox(height: StudioSpacing.xs),
+          _chipRow(
+            l10n.shortVideoSpaceTargetMarketDomestic,
+            widget.domesticPlatformIds,
+            muted,
           ),
-          enabled: !widget.busy,
-          minLines: 2,
-          maxLines: 5,
-        ),
-        const SizedBox(height: StudioSpacing.xs),
-        TextField(
-          controller: _tagsController,
-          decoration: InputDecoration(
-            labelText: l10n.shortVideoPublishCopyFieldTagsCommaHint,
-            border: const OutlineInputBorder(),
-            isDense: true,
+          const SizedBox(height: StudioSpacing.xs),
+          _chipRow(
+            l10n.shortVideoSpaceTargetMarketOverseas,
+            widget.overseasPlatformIds,
+            muted,
           ),
-          enabled: !widget.busy,
-          maxLines: 2,
-        ),
-        const SizedBox(height: StudioLayoutSpacing.inlineGap),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FilledButton.tonalIcon(
-            onPressed: widget.busy ? null : _save,
-            icon: widget.busy
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
-                  )
-                : const Icon(Icons.save_outlined),
-            label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoPublishCopyFieldTitle,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            enabled: !widget.busy,
+            maxLines: 1,
           ),
-        ),
-      ],
+          const SizedBox(height: StudioSpacing.xs),
+          TextField(
+            controller: _descriptionController,
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoPublishCopyFieldDescription,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            enabled: !widget.busy,
+            minLines: 2,
+            maxLines: 5,
+          ),
+          const SizedBox(height: StudioSpacing.xs),
+          TextField(
+            controller: _tagsController,
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoPublishCopyFieldTagsCommaHint,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            enabled: !widget.busy,
+            maxLines: 2,
+          ),
+          const SizedBox(height: StudioLayoutSpacing.inlineGap),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.tonalIcon(
+              onPressed: widget.busy ? null : _save,
+              icon: widget.busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: StudioControlSize.progressStroke,
+                      ),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

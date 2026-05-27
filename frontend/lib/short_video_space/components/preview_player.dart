@@ -503,7 +503,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                           decoration: BoxDecoration(
                             color: StudioTokens.of(context).primarySoft,
-                            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                            borderRadius: BorderRadius.circular(
+                              StudioSpacing.radiusDense,
+                            ),
                           ),
                           child: Text(
                             _currentDurationText!,
@@ -512,7 +514,8 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onPrimaryContainer,
-                                ).withTabularFigures(),
+                                )
+                                .withTabularFigures(),
                           ),
                         ),
                       ],
@@ -522,11 +525,13 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
               ],
 
               // 视频播放器
-              Container(
-                color: StudioTokens.of(context).bgBase,
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: _buildVideoContent(context),
+              RepaintBoundary(
+                child: Container(
+                  color: StudioTokens.of(context).bgBase,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: _buildVideoContent(context),
+                  ),
                 ),
               ),
 
@@ -574,7 +579,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           const SizedBox(width: StudioSpacing.xs),
                           Text(
                             '${_formatDuration(_playlistProgress)} / ${_formatDuration(_totalPlaylistDuration)}',
-                            style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.withTabularFigures(),
                           ),
                         ],
                       ),
@@ -582,62 +589,71 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                     ],
 
                     // 当前镜头进度条
-                    Row(
-                      children: [
-                        if (_isPlaylistMode)
-                          Icon(
-                            Icons.movie,
-                            size: StudioIconSize.xs,
-                            color: StudioTokens.of(context).textSecondary,
+                    RepaintBoundary(
+                      child: Row(
+                        children: [
+                          if (_isPlaylistMode)
+                            Icon(
+                              Icons.movie,
+                              size: StudioIconSize.xs,
+                              color: StudioTokens.of(context).textSecondary,
+                            ),
+                          if (_isPlaylistMode)
+                            const SizedBox(width: StudioSpacing.xs),
+                          Text(
+                            _formatDuration(_currentPosition),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.withTabularFigures(),
                           ),
-                        if (_isPlaylistMode) const SizedBox(width: StudioSpacing.xs),
-                        Text(
-                          _formatDuration(_currentPosition),
-                          style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
-                        ),
-                        const SizedBox(width: StudioSpacing.xs),
-                        Expanded(
-                          child: SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 2,
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 6,
+                          const SizedBox(width: StudioSpacing.xs),
+                          Expanded(
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 2,
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
+                                ),
+                                overlayShape: const RoundSliderOverlayShape(
+                                  overlayRadius: 12,
+                                ),
                               ),
-                              overlayShape: const RoundSliderOverlayShape(
-                                overlayRadius: 12,
+                              child: Slider(
+                                value: _totalDuration.inMilliseconds > 0
+                                    ? _currentPosition.inMilliseconds.toDouble()
+                                    : 0,
+                                min: 0,
+                                max: _totalDuration.inMilliseconds.toDouble(),
+                                onChanged: _isInitialized
+                                    ? (value) {
+                                        setState(() {
+                                          _isDragging = true;
+                                          _currentPosition = Duration(
+                                            milliseconds: value.toInt(),
+                                          );
+                                        });
+                                      }
+                                    : null,
+                                onChangeEnd: (value) {
+                                  setState(() {
+                                    _isDragging = false;
+                                  });
+                                  _seekTo(
+                                    Duration(milliseconds: value.toInt()),
+                                  );
+                                },
                               ),
                             ),
-                            child: Slider(
-                              value: _totalDuration.inMilliseconds > 0
-                                  ? _currentPosition.inMilliseconds.toDouble()
-                                  : 0,
-                              min: 0,
-                              max: _totalDuration.inMilliseconds.toDouble(),
-                              onChanged: _isInitialized
-                                  ? (value) {
-                                      setState(() {
-                                        _isDragging = true;
-                                        _currentPosition = Duration(
-                                          milliseconds: value.toInt(),
-                                        );
-                                      });
-                                    }
-                                  : null,
-                              onChangeEnd: (value) {
-                                setState(() {
-                                  _isDragging = false;
-                                });
-                                _seekTo(Duration(milliseconds: value.toInt()));
-                              },
-                            ),
                           ),
-                        ),
-                        const SizedBox(width: StudioSpacing.xs),
-                        Text(
-                          _formatDuration(_totalDuration),
-                          style: Theme.of(context).textTheme.bodySmall?.withTabularFigures(),
-                        ),
-                      ],
+                          const SizedBox(width: StudioSpacing.xs),
+                          Text(
+                            _formatDuration(_totalDuration),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.withTabularFigures(),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
 
