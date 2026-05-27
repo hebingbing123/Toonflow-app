@@ -41,6 +41,9 @@ StudioPlatformImageSurface _defaultSurface() {
 }
 
 /// High-fidelity bundled image with per-platform asset paths and [BoxFit].
+///
+/// The widget intentionally avoids cross-surface fallback so missing desktop /
+/// web artwork does not silently degrade to mobile artwork.
 class StudioPlatformImage extends StatelessWidget {
   const StudioPlatformImage({
     super.key,
@@ -64,10 +67,6 @@ class StudioPlatformImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = studioPlatformImageAsset(baseName, surface: surface);
-    final fallback = studioPlatformImageAsset(
-      baseName,
-      surface: StudioPlatformImageSurface.mobile,
-    );
 
     Widget image(String asset) {
       return Image.asset(
@@ -78,17 +77,7 @@ class StudioPlatformImage extends StatelessWidget {
         filterQuality: filterQuality,
         semanticLabel: semanticLabel,
         errorBuilder: (_, _, _) {
-          if (asset == fallback) {
-            return const SizedBox.shrink();
-          }
-          return Image.asset(
-            fallback,
-            fit: fit,
-            width: width,
-            height: height,
-            filterQuality: filterQuality,
-            semanticLabel: semanticLabel,
-          );
+          return const SizedBox.shrink();
         },
       );
     }
