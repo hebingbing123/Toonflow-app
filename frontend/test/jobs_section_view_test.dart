@@ -130,6 +130,9 @@ void main() {
   testWidgets('jobs section view renders summaries and rows', (
     WidgetTester tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -148,6 +151,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('任务作业'), findsOneWidget);
     expect(find.text('查看作业详情'), findsOneWidget);
@@ -170,6 +174,9 @@ void main() {
   testWidgets('jobs section view disables busy actions', (
     WidgetTester tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -208,6 +215,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(
       tester
@@ -250,6 +258,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(ListTile, _jobRowTitle('failed')));
     await tester.pump();
@@ -296,6 +305,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.widgetWithText(ListTile, _jobRowTitle('failed')), findsOneWidget);
     expect(find.widgetWithText(ListTile, _jobRowTitle('running')), findsOneWidget);
@@ -307,6 +317,9 @@ void main() {
   testWidgets('product studio hides flutter.probe regression panel', (
     WidgetTester tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [

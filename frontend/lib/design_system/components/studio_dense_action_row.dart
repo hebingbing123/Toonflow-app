@@ -9,11 +9,13 @@ class StudioDenseActionRow extends StatelessWidget {
     required this.children,
     this.spacing = StudioSpacing.xs,
     this.alignment = WrapAlignment.start,
+    this.expandToMaxWidth = true,
   });
 
   final List<Widget> children;
   final double spacing;
   final WrapAlignment alignment;
+  final bool expandToMaxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +37,18 @@ class StudioDenseActionRow extends StatelessWidget {
         }
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: constraints.maxWidth),
-            child: Align(
-              alignment: _wrapToAlign(alignment),
-              child: row,
-            ),
-          ),
+          child: expandToMaxWidth
+              ? ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                  child: Align(
+                    alignment: _wrapToAlign(alignment),
+                    child: row,
+                  ),
+                )
+              : Align(
+                  alignment: _wrapToAlign(alignment),
+                  child: row,
+                ),
         );
       },
     );

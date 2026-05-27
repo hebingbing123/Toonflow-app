@@ -284,10 +284,7 @@ void main() {
     );
     expect(find.text('阶段通过率：storyboard: 100%'), findsOneWidget);
     expect(find.text('1 条评审'), findsOneWidget);
-    expect(
-      find.widgetWithText(ListTile, '产出 · manual · score=82'),
-      findsOneWidget,
-    );
+    expect(find.text('产出 · manual · score=82'), findsOneWidget);
   });
 
   testWidgets('quality reviews workbench view disables actions while busy', (

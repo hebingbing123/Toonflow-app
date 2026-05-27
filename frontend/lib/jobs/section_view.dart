@@ -205,6 +205,7 @@ class JobsSectionView extends StatelessWidget {
                   if (!compact && actionButtons.isNotEmpty)
                     StudioDenseActionRow(
                       spacing: 4,
+                      expandToMaxWidth: false,
                       children: actionButtons,
                     ),
                   if (!compact) ...<Widget>[
@@ -234,6 +235,7 @@ class JobsSectionView extends StatelessWidget {
                 const SizedBox(height: 8),
                 StudioDenseActionRow(
                   spacing: 8,
+                  expandToMaxWidth: false,
                   children: actionButtons,
                 ),
               ],
@@ -340,6 +342,7 @@ class JobsSectionView extends StatelessWidget {
                 ? null
                 : StudioDenseActionRow(
                     spacing: 4,
+                    expandToMaxWidth: false,
                     children: actionButtons,
                   ),
           );
