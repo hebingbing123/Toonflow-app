@@ -6,6 +6,7 @@ import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -112,6 +113,17 @@ class _AccountSectionState extends State<AccountSection> {
   }
 
   Future<void> _deleteAccount() async {
+    final confirmed = await showStudioConfirmDialog(
+      context: context,
+      title: resolveAppLocalizationsForErrors(context).accountDeleteTitle,
+      message: resolveAppLocalizationsForErrors(context).accountDeleteDescription,
+      confirmLabel: resolveAppLocalizationsForErrors(context).accountDeleteButton,
+      cancelLabel: resolveAppLocalizationsForErrors(context).globalSearchCancel,
+      destructive: true,
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
     final response = await widget.controller.deleteAccount(
       confirmPhrase: _deletePhraseMatches(_confirmController.text)
           ? _deleteConfirmPhrase

@@ -20,6 +20,10 @@ import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+
+bool _globalSearchInFlight = false;
+DateTime? _globalSearchLockUntil;
+
 /// Global search bar component for the main navigation bar.
 ///
 /// **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 9.1, 9.6**
@@ -61,6 +65,7 @@ class GlobalSearchBar extends StatefulWidget {
   })?
   onNavigateToResults;
   final bool compact;
+
   /// VS Code–style title-bar search: ~28px tall, 12px text, no fixed width.
   final bool titleBarDense;
   final bool showLocalPrefsMenu;
@@ -490,7 +495,11 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   Widget _buildPaletteDivider(StudioTokens tokens) {
-    return Divider(height: StudioControlSize.dividerThickness, thickness: 1, color: tokens.surfaceHighlight);
+    return Divider(
+      height: StudioControlSize.dividerThickness,
+      thickness: 1,
+      color: tokens.surfaceHighlight,
+    );
   }
 
   List<Widget> _buildPaletteOverlayList({
@@ -667,7 +676,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             child: SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+              child: CircularProgressIndicator(
+                strokeWidth: StudioControlSize.progressStroke,
+              ),
             ),
           ),
         ),
@@ -779,7 +790,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                 constraints: const BoxConstraints(maxHeight: 440),
                 decoration: BoxDecoration(
                   color: tokens.bgElevated.withValues(alpha: 0.98),
-                  borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                  borderRadius: BorderRadius.circular(
+                    StudioSpacing.radiusDense,
+                  ),
                   border: Border.all(
                     color: tokens.primary.withValues(alpha: 0.38),
                   ),
@@ -851,7 +864,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   void _selectHistoryEntry(String query) {
     _controller.text = query;
     _hideHistory();
-    _performSearch();
+    unawaited(_performSearch());
   }
 
   ResultType? _resultTypeFromWireName(String raw) {
@@ -1002,13 +1015,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   /// Check if search can be triggered
   bool get _canSearch {
     final query = _controller.text.trim();
-    return query.length >= _minQueryLength;
+    return query.length >= _minQueryLength && !_globalSearchInFlight;
   }
 
   /// Perform search and navigate to results page
-  void _performSearch() {
+  Future<void> _performSearch() async {
     final l10n = resolveAppLocalizationsForErrors(context);
     final query = _controller.text.trim();
+    final now = DateTime.now();
 
     if (query.length < _minQueryLength) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1030,15 +1044,35 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       return;
     }
 
-    _hideHistory();
-    _focusNode.unfocus();
+    if (_globalSearchInFlight) {
+      return;
+    }
+    if (_globalSearchLockUntil != null &&
+        now.isBefore(_globalSearchLockUntil!)) {
+      return;
+    }
+    _globalSearchLockUntil = now.add(const Duration(milliseconds: 500));
+    _globalSearchInFlight = true;
+    if (mounted) {
+      setState(() {});
+    }
 
-    // Navigate to search results page
-    if (widget.onNavigateToResults != null) {
-      widget.onNavigateToResults!(query);
-    } else {
-      // Default navigation using named route
-      Navigator.pushNamed(context, '/search', arguments: {'query': query});
+    try {
+      _hideHistory();
+      _focusNode.unfocus();
+
+      // Navigate to search results page
+      if (widget.onNavigateToResults != null) {
+        widget.onNavigateToResults!(query);
+      } else {
+        // Default navigation using named route
+        Navigator.pushNamed(context, '/search', arguments: {'query': query});
+      }
+    } finally {
+      _globalSearchInFlight = false;
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
@@ -1061,7 +1095,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     // Enter: Trigger search
     if (event.logicalKey == LogicalKeyboardKey.enter) {
       if (_canSearch) {
-        _performSearch();
+        unawaited(_performSearch());
         return KeyEventResult.handled;
       }
     }
@@ -1127,20 +1161,22 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     final fieldBorder = _focusNode.hasFocus
         ? tokens.accent.withValues(alpha: 0.55)
         : tokens.surfaceHighlight.withValues(alpha: 0.4);
-    const fieldContentPadding = EdgeInsets.symmetric(vertical: StudioSpacing.xs);
+    const fieldContentPadding = EdgeInsets.symmetric(
+      vertical: StudioSpacing.xs,
+    );
     final hintStyle = (studioHintStyle(context) ?? const TextStyle()).copyWith(
       fontSize: typography.body,
       fontWeight: FontWeight.w500,
       height: 1.2,
       color: tokens.textSecondary.withValues(alpha: 0.86),
     );
-    final textStyle =
-        (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-      fontSize: typography.body,
-      color: textColor,
-      fontWeight: FontWeight.w500,
-      height: 1.2,
-    );
+    final textStyle = (theme.textTheme.bodyMedium ?? const TextStyle())
+        .copyWith(
+          fontSize: typography.body,
+          color: textColor,
+          fontWeight: FontWeight.w500,
+          height: 1.2,
+        );
 
     Widget searchGlyph({required Color color}) {
       return studioDecorativeIcon(
@@ -1204,7 +1240,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       ),
                       onSubmitted: (_) {
                         if (_canSearch) {
-                          _performSearch();
+                          unawaited(_performSearch());
                         }
                       },
                     ),
@@ -1280,138 +1316,153 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
               width: resolvedWidth,
               height: barHeight,
               decoration: BoxDecoration(
-            color: titleBarDense
-                ? tokens.bgInset.withValues(alpha: 0.92)
-                : null,
-            gradient: titleBarDense
-                ? null
-                : LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[
-                      tokens.bgSurface.withValues(alpha: 0.96),
-                      tokens.bgInset.withValues(alpha: 0.98),
-                    ],
-                  ),
-            borderRadius: BorderRadius.circular(barRadius),
-            border: Border.all(
-              color: _focusNode.hasFocus
-                  ? tokens.accent
-                  : tokens.surfaceHighlight,
-              width: _focusNode.hasFocus ? (titleBarDense ? 1.0 : 1.5) : 1,
-            ),
-            boxShadow: titleBarDense || !_focusNode.hasFocus
-                ? const <BoxShadow>[]
-                : studioInsetElevationShadow(
-                    context,
-                    alpha: 0.14,
-                    blurRadius: StudioSpacing.xs,
-                    spreadRadius: -2,
-                    offset: const Offset(0, StudioSpacing.chromeActionGap),
-                  ),
-          ),
-          child: Row(
-            children: [
-              // Search icon
-              Padding(
-                padding: EdgeInsets.only(left: leadingPadding, right: iconGap),
-                child: studioDecorativeIcon(
-                  Icons.search_rounded,
-                  size: iconSize,
+                color: titleBarDense
+                    ? tokens.bgInset.withValues(alpha: 0.92)
+                    : null,
+                gradient: titleBarDense
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                          tokens.bgSurface.withValues(alpha: 0.96),
+                          tokens.bgInset.withValues(alpha: 0.98),
+                        ],
+                      ),
+                borderRadius: BorderRadius.circular(barRadius),
+                border: Border.all(
                   color: _focusNode.hasFocus
-                      ? tokens.accent.withValues(alpha: titleBarDense ? 0.75 : 1.0)
-                      : (titleBarDense ? mutedIconColor : tokens.textMuted),
+                      ? tokens.accent
+                      : tokens.surfaceHighlight,
+                  width: _focusNode.hasFocus ? (titleBarDense ? 1.0 : 1.5) : 1,
                 ),
+                boxShadow: titleBarDense || !_focusNode.hasFocus
+                    ? const <BoxShadow>[]
+                    : studioInsetElevationShadow(
+                        context,
+                        alpha: 0.14,
+                        blurRadius: StudioSpacing.xs,
+                        spreadRadius: -2,
+                        offset: const Offset(0, StudioSpacing.chromeActionGap),
+                      ),
               ),
-
-              // Text input
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  decoration: InputDecoration(
-                    hintText: l10n.globalSearchInputHint,
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: fontSize,
-                      color: titleBarDense ? mutedHintColor : tokens.textMuted,
-                      fontWeight: titleBarDense ? FontWeight.w400 : null,
+              child: Row(
+                children: [
+                  // Search icon
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: leadingPadding,
+                      right: iconGap,
                     ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: textPadding),
+                    child: studioDecorativeIcon(
+                      Icons.search_rounded,
+                      size: iconSize,
+                      color: _focusNode.hasFocus
+                          ? tokens.accent.withValues(
+                              alpha: titleBarDense ? 0.75 : 1.0,
+                            )
+                          : (titleBarDense ? mutedIconColor : tokens.textMuted),
+                    ),
                   ),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: fontSize,
-                    color: titleBarDense
-                        ? (_controller.text.isEmpty
+
+                  // Text input
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      decoration: InputDecoration(
+                        hintText: l10n.globalSearchInputHint,
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: fontSize,
+                          color: titleBarDense
                               ? mutedHintColor
-                              : mutedFieldColor)
-                        : null,
-                    fontWeight: titleBarDense ? FontWeight.w400 : null,
-                  ),
+                              : tokens.textMuted,
+                          fontWeight: titleBarDense ? FontWeight.w400 : null,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: textPadding,
+                        ),
+                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: fontSize,
+                        color: titleBarDense
+                            ? (_controller.text.isEmpty
+                                  ? mutedHintColor
+                                  : mutedFieldColor)
+                            : null,
+                        fontWeight: titleBarDense ? FontWeight.w400 : null,
+                      ),
                   onSubmitted: (_) {
                     if (_canSearch) {
-                      _performSearch();
+                      unawaited(_performSearch());
                     }
                   },
-                ),
-              ),
-              if (widget.showLocalPrefsMenu)
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  icon: Icons.tune,
-                  tooltip: l10n.globalSearchLocalClientPrefsTooltip,
-                ),
-              // Loading indicator or search button
-              if (_loadingSuggestions)
-                Padding(
-                  padding: EdgeInsets.only(right: compact ? StudioLayoutSpacing.inlineGap : StudioLayoutSpacing.insetDense),
-                  child: SizedBox(
-                    width: iconSize,
-                    height: iconSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: StudioControlSize.progressStroke,
-                      color: tokens.accent,
                     ),
                   ),
-                )
-              else
-                IconButton(
-                  icon: Icon(
-                    Icons.arrow_outward_rounded,
-                    size: iconSize,
-                    fill: titleBarDense ? 0.15 : 0.0,
-                    color: _canSearch
-                        ? theme.colorScheme.onPrimary
-                        : (titleBarDense
-                              ? mutedIconColor
-                              : tokens.textMuted.withValues(alpha: 0.35)),
-                  ),
-                  onPressed: _canSearch ? _performSearch : null,
-                  style: IconButton.styleFrom(
-                    backgroundColor: _canSearch
-                        ? tokens.primary.withValues(
-                            alpha: titleBarDense ? 0.82 : 1.0,
-                          )
-                        : StudioPrimitives.transparent,
-                    foregroundColor: _canSearch
-                        ? theme.colorScheme.onPrimary
-                        : tokens.textMuted,
-                  ),
-                  padding: EdgeInsets.all(
-                    titleBarDense
-                        ? StudioSpacing.chromeActionGap
-                        : StudioSpacing.xs,
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: titleBarDense ? 26 : 0,
-                    minHeight: titleBarDense ? 26 : 0,
-                  ),
-                  tooltip: _canSearch
-                      ? l10n.globalSearchActionSearch
-                      : l10n.globalSearchEnterAtLeastChars(2),
-                ),
-            ],
-          ),
+                  if (widget.showLocalPrefsMenu)
+                    RiskyOperationConfirmPrefsOverflowMenu(
+                      icon: Icons.tune,
+                      tooltip: l10n.globalSearchLocalClientPrefsTooltip,
+                    ),
+                  // Loading indicator or search button
+              if (_globalSearchInFlight || _loadingSuggestions)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: compact
+                            ? StudioLayoutSpacing.inlineGap
+                            : StudioLayoutSpacing.insetDense,
+                      ),
+                      child: SizedBox(
+                        width: iconSize,
+                        height: iconSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: StudioControlSize.progressStroke,
+                          color: tokens.accent,
+                        ),
+                      ),
+                    )
+                  else
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_outward_rounded,
+                        size: iconSize,
+                        fill: titleBarDense ? 0.15 : 0.0,
+                        color: _canSearch
+                            ? theme.colorScheme.onPrimary
+                            : (titleBarDense
+                                  ? mutedIconColor
+                                  : tokens.textMuted.withValues(alpha: 0.35)),
+                      ),
+                      onPressed: _canSearch
+                          ? () => unawaited(_performSearch())
+                          : null,
+                      style: IconButton.styleFrom(
+                        backgroundColor: _canSearch
+                            ? tokens.primary.withValues(
+                                alpha: titleBarDense ? 0.82 : 1.0,
+                              )
+                            : StudioPrimitives.transparent,
+                        foregroundColor: _canSearch
+                            ? theme.colorScheme.onPrimary
+                            : tokens.textMuted,
+                      ),
+                      padding: EdgeInsets.all(
+                        titleBarDense
+                            ? StudioSpacing.chromeActionGap
+                            : StudioSpacing.xs,
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: titleBarDense ? 26 : 0,
+                        minHeight: titleBarDense ? 26 : 0,
+                      ),
+                      tooltip: _canSearch
+                          ? l10n.globalSearchActionSearch
+                          : l10n.globalSearchEnterAtLeastChars(2),
+                    ),
+                ],
+              ),
             );
           },
         ),

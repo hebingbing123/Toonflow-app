@@ -445,7 +445,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+              child: CircularProgressIndicator(
+                strokeWidth: StudioControlSize.progressStroke,
+              ),
             )
           : const Icon(Icons.key_outlined),
       label: Text(
@@ -738,7 +740,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+              child: CircularProgressIndicator(
+                strokeWidth: StudioControlSize.progressStroke,
+              ),
             )
           : const Icon(Icons.refresh_outlined),
       label: Text(l10n.apiKeysActionRotate),
