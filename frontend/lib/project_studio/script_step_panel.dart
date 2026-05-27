@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -593,10 +594,10 @@ class _ProjectStudioScriptStepPanelState
                 ),
               ),
               if (onClose != null)
-                IconButton(
-                  tooltip: l10n.studioScriptStepCloseAgent,
+                StudioIconButton(
+                  icon: Icons.close_rounded,
+                  label: l10n.studioScriptStepCloseAgent,
                   onPressed: onClose,
-                  icon: const Icon(Icons.close_rounded),
                 ),
             ],
           ),

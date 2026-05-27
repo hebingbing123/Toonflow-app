@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
@@ -177,10 +178,10 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     if (creatorJourneyCompactBarPrevIsExitToProjects(currentStep)) {
       final projectLabel = _milestoneLabel(l10n, 0);
       if (iconOnly) {
-        return IconButton(
-          tooltip: projectLabel,
+        return StudioIconButton(
+          icon: Icons.chevron_left_rounded,
+          label: projectLabel,
           onPressed: onBackToProjects,
-          icon: const Icon(Icons.chevron_left_rounded, size: 22),
           style: _compactIconStyle(tokens.textSecondary),
         );
       }
@@ -202,10 +203,10 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     final prevLabel = creatorJourneyCompactBarChromeLabel(l10n, prevStep);
     void onPressed() => onSelectStep(prevStep);
     if (iconOnly) {
-      return IconButton(
-        tooltip: prevLabel,
+      return StudioIconButton(
+        icon: Icons.chevron_left_rounded,
+        label: prevLabel,
         onPressed: onPressed,
-        icon: const Icon(Icons.chevron_left_rounded, size: 22),
         style: _compactIconStyle(tokens.textSecondary),
       );
     }
@@ -248,10 +249,10 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       return null;
     }
     if (iconOnly) {
-      return IconButton(
-        tooltip: tooltip,
+      return StudioIconButton(
+        icon: Icons.arrow_forward_rounded,
+        label: tooltip!,
         onPressed: onPressed,
-        icon: const Icon(Icons.arrow_forward_rounded, size: 20),
         style: _compactIconStyle(tokens.primary),
       );
     }
@@ -315,10 +316,11 @@ class CreatorJourneyCompactBar extends StatelessWidget {
     required bool collapseTools,
   }) {
     if (collapseTools) {
-      return IconButton(
-        tooltip: l10n.studioCreatorJourneyMoreStepsTooltip,
+      return StudioIconButton(
+        icon: Icons.more_horiz_rounded,
+        label: l10n.studioCreatorJourneyMoreStepsTooltip,
         onPressed: () => _showCollapsedToolsMenu(context, l10n),
-        icon: Icon(Icons.more_horiz_rounded, color: tokens.textSecondary),
+        color: tokens.textSecondary,
         style: _compactIconStyle(tokens.textSecondary),
       );
     }
@@ -328,10 +330,10 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       children: <Widget>[
         if (onOpenStepSetup != null)
           iconOnly
-              ? IconButton(
-                  tooltip: l10n.studioScriptStepSetupOpen,
+              ? StudioIconButton(
+                  icon: Icons.playlist_add_check_outlined,
+                  label: l10n.studioScriptStepSetupOpen,
                   onPressed: onOpenStepSetup,
-                  icon: const Icon(Icons.playlist_add_check_outlined, size: 20),
                   style: _compactIconStyle(tokens.textSecondary),
                 )
               : TextButton.icon(
@@ -350,10 +352,11 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                     visualDensity: VisualDensity.standard,
                   ),
                 ),
-        IconButton(
-          tooltip: l10n.studioCreatorJourneyCompactExpand,
+        StudioIconButton(
+          icon: Icons.unfold_more_rounded,
+          label: l10n.studioCreatorJourneyCompactExpand,
           onPressed: () => _showFullWorkflow(context),
-          icon: Icon(Icons.unfold_more_rounded, color: tokens.textSecondary),
+          color: tokens.textSecondary,
           style: _compactIconStyle(tokens.textSecondary),
         ),
         PopupMenuButton<CreatorWorkspaceMenuTarget>(

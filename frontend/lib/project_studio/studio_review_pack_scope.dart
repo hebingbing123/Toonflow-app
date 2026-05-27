@@ -6,6 +6,7 @@ import '../demo/product_demo_mode.dart';
 import '../demo/studio_demo_data.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_empty_state.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_entrance_motion.dart';
@@ -286,15 +287,15 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
       appBar: AppBar(
         title: Text(l10n.studioReviewPackTitle),
         actions: <Widget>[
-          IconButton(
-            tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+          StudioIconButton(
+            icon: Icons.refresh,
+            label: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
             onPressed: () => _load(isRetry: true),
-            icon: const Icon(Icons.refresh),
           ),
         ],
-        leading: IconButton(
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          icon: const Icon(Icons.arrow_back),
+        leading: StudioIconButton(
+          icon: Icons.arrow_back,
+          label: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => context.go(
             '/projects/${widget.projectNumericId}/${StudioStep.deliver.slug}',
           ),

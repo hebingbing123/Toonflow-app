@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/studio_responsive_layout.dart';
 import '../design_system/components/studio_ellipsis_tooltip_text.dart';
@@ -1642,15 +1643,14 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
             ),
             if (host.runningJobCount > 0)
               compact
-                  ? IconButton(
-                      tooltip:
-                          '${l10n.projectStudioOpenTasks} (${host.runningJobCount})',
-                      onPressed: host.onOpenTasks,
-                      icon: Badge(
-                        label: Text('${host.runningJobCount}'),
-                        child: const Icon(Icons.pending_actions_outlined, size: 20),
+                  ? Badge(
+                      label: Text('${host.runningJobCount}'),
+                      child: StudioIconButton(
+                        icon: Icons.pending_actions_outlined,
+                        label:
+                            '${l10n.projectStudioOpenTasks} (${host.runningJobCount})',
+                        onPressed: host.onOpenTasks,
                       ),
-                      visualDensity: VisualDensity.standard,
                     )
                   : Padding(
                       padding: const EdgeInsets.only(
@@ -1665,20 +1665,18 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                         ),
                       ),
                     ),
-            IconButton(
-              tooltip: l10n.studioAgentDrawerTitle,
+            StudioIconButton(
+              icon: Icons.smart_toy_outlined,
+              label: l10n.studioAgentDrawerTitle,
               onPressed: host.onOpenAgentDrawer,
-              icon: const Icon(Icons.smart_toy_outlined),
-              visualDensity: VisualDensity.standard,
             ),
             compact
-                ? IconButton(
-                    tooltip: l10n.studioOpenEpisodeConsole,
+                ? StudioIconButton(
+                    icon: Icons.terminal_outlined,
+                    label: l10n.studioOpenEpisodeConsole,
                     onPressed: () => context.push(
                       '/projects/${host.projectNumericId}/console/1',
                     ),
-                    icon: const Icon(Icons.dashboard_outlined, size: 20),
-                    visualDensity: VisualDensity.standard,
                   )
                 : TextButton(
                     onPressed: () => context.push(

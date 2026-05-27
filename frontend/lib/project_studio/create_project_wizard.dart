@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -112,9 +113,10 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
                         style: studioDialogTitleStyle(context),
                       ),
                       const Spacer(),
-                      IconButton(
+                      StudioIconButton(
+                        icon: Icons.close,
+                        label: MaterialLocalizations.of(context).closeButtonTooltip,
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),

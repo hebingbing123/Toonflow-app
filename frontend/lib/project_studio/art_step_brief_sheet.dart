@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -248,9 +249,10 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                       style: studioDialogTitleStyle(context),
                     ),
                   ),
-                  IconButton(
+                  StudioIconButton(
+                    icon: Icons.close,
+                    label: MaterialLocalizations.of(context).closeButtonTooltip,
                     onPressed: _saving ? null : _closeSheet,
-                    icon: const Icon(Icons.close),
                   ),
                 ],
               ),
