@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/tokens.dart';
@@ -174,8 +175,9 @@ Future<void> showProjectStudioStepSetupSheet(
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (sheetContext) {
-      return DraggableScrollableSheet(
+    builder: (sheetContext) => StudioSystemUiSurface(
+      surfaceColor: tokens.bgSurface,
+      child: DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.72,
         minChildSize: 0.4,
@@ -184,11 +186,18 @@ Future<void> showProjectStudioStepSetupSheet(
           return DecoratedBox(
             decoration: BoxDecoration(
               color: tokens.bgSurface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: ListView(
               controller: scrollController,
-              padding: const EdgeInsets.fromLTRB(StudioSpacing.sm, StudioSpacing.chromeActionGap, StudioSpacing.sm, StudioSpacing.md),
+              padding: const EdgeInsets.fromLTRB(
+                StudioSpacing.sm,
+                StudioSpacing.chromeActionGap,
+                StudioSpacing.sm,
+                StudioSpacing.md,
+              ),
               children: studioStaggeredChildren(
                 <Widget>[
                   Text(
@@ -211,8 +220,8 @@ Future<void> showProjectStudioStepSetupSheet(
             ),
           );
         },
-      );
-    },
+      ),
+    ),
   );
 }
 

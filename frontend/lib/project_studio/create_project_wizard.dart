@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_icon_button.dart';
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -15,9 +19,14 @@ Future<Map<String, dynamic>?> showCreateProjectWizard(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    isDismissible: false,
+    enableDrag: false,
     backgroundColor: StudioPrimitives.transparent,
     barrierColor: tokens.overlay,
-    builder: (ctx) => const _CreateProjectWizardSheet(),
+    builder: (ctx) => StudioSystemUiSurface(
+      surfaceColor: tokens.bgElevated,
+      child: const _CreateProjectWizardSheet(),
+    ),
   );
 }
 
@@ -32,6 +41,7 @@ class _CreateProjectWizardSheet extends StatefulWidget {
 class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
   final _page = PageController();
   var _step = 0;
+  var _allowPopOnce = false;
 
   final _name = TextEditingController();
   final _intro = TextEditingController();
@@ -48,6 +58,7 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
 
   void _go(int step) {
     setState(() => _step = step);
+    unawaited(studioLightImpact());
     _page.animateToPage(
       step,
       duration: const Duration(milliseconds: 280),
@@ -67,108 +78,157 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
     return fields;
   }
 
+  bool get _dirty =>
+      _step > 0 ||
+      _name.text.trim().isNotEmpty ||
+      _intro.text.trim().isNotEmpty ||
+      _novelPaste.text.trim().isNotEmpty;
+
+  Future<void> _confirmClose() async {
+    if (!_dirty) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+    final discard = await showStudioConfirmDialog(
+      context: context,
+      title: 'Discard project draft?',
+      message: 'You have unsaved project details. Leave this wizard?',
+      destructive: true,
+    );
+    if (!mounted || discard != true) {
+      return;
+    }
+    setState(() {
+      _allowPopOnce = true;
+    });
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     final l10n = AppLocalizations.of(context)!;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-            maxWidth: 640,
-          ),
-          child: Material(
-            color: tokens.bgElevated,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(StudioSpacing.radiusCard),
+    return PopScope(
+      canPop: _allowPopOnce || !_dirty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        unawaited(_confirmClose());
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottom),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+              maxWidth: 640,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const SizedBox(height: StudioSpacing.xs),
-                Container(
-                  width: StudioLayoutSize.skeletonAvatar,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: tokens.borderDefault,
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusHairline),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    StudioSpacing.md,
-                    StudioSpacing.sm,
-                    StudioSpacing.radiusComfort,
-                    StudioSpacing.xs,
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Text(
-                        l10n.studioCreateProjectWizardTitle,
-                        style: studioDialogTitleStyle(context),
+            child: Material(
+              color: tokens.bgElevated,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(StudioSpacing.radiusCard),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const SizedBox(height: StudioSpacing.xs),
+                  Container(
+                    width: StudioLayoutSize.skeletonAvatar,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: tokens.borderDefault,
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusHairline,
                       ),
-                      const Spacer(),
-                      StudioIconButton(
-                        icon: Icons.close,
-                        label: MaterialLocalizations.of(context).closeButtonTooltip,
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                _WizardStepIndicator(current: _step),
-                Flexible(
-                  child: PageView(
-                    controller: _page,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: <Widget>[
-                      _StepBasics(
-                        name: _name,
-                        intro: _intro,
-                        onChanged: () => setState(() {}),
-                      ),
-                      _StepNovelPaste(controller: _novelPaste),
-                      _StepReview(
-                        name: _name.text,
-                        intro: _intro.text,
-                        hasNovel: _novelPaste.text.trim().isNotEmpty,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(StudioSpacing.md),
-                  child: Row(
-                    children: <Widget>[
-                      if (_step > 0)
-                        TextButton(
-                          onPressed: () => _go(_step - 1),
-                          child: Text(l10n.studioWizardBack),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      StudioSpacing.md,
+                      StudioSpacing.sm,
+                      StudioSpacing.radiusComfort,
+                      StudioSpacing.xs,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          l10n.studioCreateProjectWizardTitle,
+                          style: studioDialogTitleStyle(context),
                         ),
-                      const Spacer(),
-                      if (_step < 2)
-                        StudioPrimaryButton(
-                          label: l10n.studioWizardNext,
-                          onPressed: _name.text.trim().isEmpty
-                              ? null
-                              : () => _go(_step + 1),
-                        )
-                      else
-                        StudioPrimaryButton(
-                          label: l10n.studioWizardCreate,
-                          onPressed: _name.text.trim().isEmpty
-                              ? null
-                              : () => Navigator.of(context).pop(_buildFields()),
+                        const Spacer(),
+                        StudioIconButton(
+                          icon: Icons.close,
+                          label: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
+                          onPressed: () {
+                            unawaited(_confirmClose());
+                          },
                         ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  _WizardStepIndicator(current: _step),
+                  Flexible(
+                    child: PageView(
+                      controller: _page,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: <Widget>[
+                        _StepBasics(
+                          name: _name,
+                          intro: _intro,
+                          onChanged: () => setState(() {}),
+                        ),
+                        _StepNovelPaste(controller: _novelPaste),
+                        _StepReview(
+                          name: _name.text,
+                          intro: _intro.text,
+                          hasNovel: _novelPaste.text.trim().isNotEmpty,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(StudioSpacing.md),
+                    child: Row(
+                      children: <Widget>[
+                        if (_step > 0)
+                          TextButton(
+                            onPressed: () => _go(_step - 1),
+                            child: Text(l10n.studioWizardBack),
+                          ),
+                        const Spacer(),
+                        if (_step < 2)
+                          StudioPrimaryButton(
+                            label: l10n.studioWizardNext,
+                            onPressed: _name.text.trim().isEmpty
+                                ? null
+                                : () => _go(_step + 1),
+                          )
+                        else
+                          StudioPrimaryButton(
+                            label: l10n.studioWizardCreate,
+                            onPressed: _name.text.trim().isEmpty
+                                ? null
+                                : () {
+                                    unawaited(studioMediumImpact());
+                                    setState(() {
+                                      _allowPopOnce = true;
+                                    });
+                                    Navigator.of(context).pop(_buildFields());
+                                  },
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

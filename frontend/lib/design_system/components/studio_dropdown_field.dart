@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../ix/studio_mobile_affordances.dart';
 import '../studio_typography.dart';
 import '../studio_motion.dart';
 import '../tokens.dart';
@@ -31,7 +34,7 @@ class StudioDropdownField<T> extends StatelessWidget {
     this.value,
     this.labelText,
     this.enabled = true,
-    this.width = 220,
+    this.width,
     this.emptyLabel,
     this.isDense = true,
     this.decoration,
@@ -79,7 +82,10 @@ class StudioDropdownField<T> extends StatelessWidget {
               selected: entry.value == value,
               enabled: _isEnabled && entry.enabled,
               onPressed: _isEnabled && entry.enabled
-                  ? () => onChanged!(entry.value)
+                  ? () {
+                      unawaited(studioLightImpact());
+                      onChanged!(entry.value);
+                    }
                   : null,
               child: entry.child,
             ),
@@ -95,6 +101,7 @@ class StudioDropdownField<T> extends StatelessWidget {
           decoration: decoration,
           onTap: _isEnabled
               ? () {
+                  unawaited(studioLightImpact());
                   if (controller.isOpen) {
                     controller.close();
                   } else {
@@ -195,7 +202,10 @@ class StudioDropdownButton<T> extends StatelessWidget {
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.xs),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: StudioSpacing.xs,
+          vertical: StudioSpacing.xs,
+        ),
       ),
     );
   }
@@ -289,6 +299,7 @@ class StudioIconMenuButton<T> extends StatelessWidget {
                   foregroundColor: entry.foregroundColor,
                   onPressed: entry.enabled
                       ? () {
+                          unawaited(studioLightImpact());
                           menuController?.close();
                           onSelected(entry.value);
                         }
@@ -304,6 +315,7 @@ class StudioIconMenuButton<T> extends StatelessWidget {
           style: style,
           tooltip: tooltip,
           onPressed: () {
+            unawaited(studioLightImpact());
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -368,6 +380,7 @@ class _StudioMultiSelectFieldState<T> extends State<StudioMultiSelectField<T>> {
         _selected.add(value);
       }
     });
+    unawaited(studioLightImpact());
     widget.onChanged(Set<T>.from(_selected));
   }
 
@@ -396,6 +409,7 @@ class _StudioMultiSelectFieldState<T> extends State<StudioMultiSelectField<T>> {
           enabled: widget.enabled,
           onTap: widget.enabled
               ? () {
+                  unawaited(studioLightImpact());
                   if (controller.isOpen) {
                     controller.close();
                   } else {
@@ -444,7 +458,12 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
         color: StudioPrimitives.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-          onTap: enabled ? onPressed : null,
+          onTap: enabled
+              ? () {
+                  unawaited(studioLightImpact());
+                  onPressed?.call();
+                }
+              : null,
           child: Ink(
             decoration: BoxDecoration(
               color: selected
@@ -453,20 +472,29 @@ class _StudioMultiSelectMenuRow<T> extends StatelessWidget {
               borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: StudioLayoutSpacing.insetDense, vertical: StudioLayoutSpacing.inlineGap),
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioLayoutSpacing.insetDense,
+                vertical: StudioLayoutSpacing.inlineGap,
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: DefaultTextStyle(
                       style: theme.textTheme.bodyMedium!.copyWith(
                         color: enabled ? tokens.textPrimary : tokens.textMuted,
-                        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                       child: child ?? Text(label),
                     ),
                   ),
                   if (selected)
-                    Icon(Icons.check_rounded, size: StudioIconSize.sm, color: tokens.accent),
+                    Icon(
+                      Icons.check_rounded,
+                      size: StudioIconSize.sm,
+                      color: tokens.accent,
+                    ),
                 ],
               ),
             ),
@@ -489,7 +517,11 @@ class StudioMenuDivider extends StatelessWidget {
         vertical: StudioSpacing.chromeActionGap,
         horizontal: StudioSpacing.xs,
       ),
-      child: Divider(height: StudioControlSize.dividerThickness, thickness: 1, color: tokens.borderSubtle),
+      child: Divider(
+        height: StudioControlSize.dividerThickness,
+        thickness: 1,
+        color: tokens.borderSubtle,
+      ),
     );
   }
 }
@@ -501,14 +533,19 @@ MenuStyle studioSelectMenuStyle(BuildContext context) {
     minimumSize: const WidgetStatePropertyAll<Size>(Size(180, 0)),
     maximumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 360)),
     padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(vertical: StudioSpacing.xs, horizontal: StudioSpacing.xs),
+      EdgeInsets.symmetric(
+        vertical: StudioSpacing.xs,
+        horizontal: StudioSpacing.xs,
+      ),
     ),
     elevation: const WidgetStatePropertyAll<double>(16),
     shadowColor: WidgetStatePropertyAll<Color>(
       studioShadowColor(context, alpha: 0.42),
     ),
     backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
-    surfaceTintColor: const WidgetStatePropertyAll<Color>(StudioPrimitives.transparent),
+    surfaceTintColor: const WidgetStatePropertyAll<Color>(
+      StudioPrimitives.transparent,
+    ),
     shape: WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -533,7 +570,10 @@ ButtonStyle studioMenuItemButtonStyle(
   return ButtonStyle(
     minimumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 40)),
     padding: const WidgetStatePropertyAll<EdgeInsets>(
-      EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioSpacing.sm),
+      EdgeInsets.symmetric(
+        horizontal: StudioSpacing.sm,
+        vertical: StudioSpacing.sm,
+      ),
     ),
     foregroundColor: WidgetStatePropertyAll<Color>(resolvedForeground),
     backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -612,7 +652,10 @@ class StudioSelectMenuItem extends StatelessWidget {
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (leading != null) ...[leading!, const SizedBox(width: StudioLayoutSpacing.inlineGap)],
+              if (leading != null) ...[
+                leading!,
+                const SizedBox(width: StudioLayoutSpacing.inlineGap),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,7 +680,12 @@ class StudioSelectMenuItem extends StatelessWidget {
         : title;
 
     return MenuItemButton(
-      onPressed: enabled ? onPressed : null,
+      onPressed: enabled
+          ? () {
+              unawaited(studioLightImpact());
+              onPressed?.call();
+            }
+          : null,
       style: studioMenuItemButtonStyle(
         context,
         enabled: enabled,
@@ -645,7 +693,11 @@ class StudioSelectMenuItem extends StatelessWidget {
         foregroundColor: foregroundColor,
       ),
       trailingIcon: _showsCheckmark && selected
-          ? Icon(Icons.check_rounded, size: StudioIconSize.sm, color: tokens.accent)
+          ? Icon(
+              Icons.check_rounded,
+              size: StudioIconSize.sm,
+              color: tokens.accent,
+            )
           : null,
       child: content,
     );
@@ -698,7 +750,7 @@ class StudioSelectFieldTrigger extends StatelessWidget {
                 : expanded
                 ? tokens.accent
                 : tokens.textMuted,
-            size: 22,
+            size: StudioIconSize.xl,
           ),
         ),
       ),
@@ -706,8 +758,9 @@ class StudioSelectFieldTrigger extends StatelessWidget {
           ? null
           : Text(
               valueLabel,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: enabled ? tokens.textPrimary : tokens.textMuted,
                 fontWeight: FontWeight.w500,
@@ -715,28 +768,36 @@ class StudioSelectFieldTrigger extends StatelessWidget {
             ),
     );
 
-    if (!hasLabel && (decoration == null || decoration!.border == InputBorder.none)) {
+    if (!hasLabel &&
+        (decoration == null || decoration!.border == InputBorder.none)) {
       return Semantics(
         button: true,
         enabled: enabled,
         label: valueLabel,
-        child: Material(
-          color: StudioPrimitives.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
+      child: Material(
+        color: StudioPrimitives.transparent,
+        child: InkWell(
+          onTap: onTap == null
+              ? null
+              : () {
+                  unawaited(studioLightImpact());
+                  onTap!();
+                },
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
                 horizontal: StudioSpacing.chromeActionGap,
                 vertical: StudioSpacing.xs,
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
                       valueLabel,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: enabled ? tokens.textPrimary : tokens.textMuted,
                       ),
@@ -745,7 +806,7 @@ class StudioSelectFieldTrigger extends StatelessWidget {
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: expanded ? tokens.accent : tokens.textMuted,
-                    size: 22,
+                    size: StudioIconSize.xl,
                   ),
                 ],
               ),
@@ -762,7 +823,12 @@ class StudioSelectFieldTrigger extends StatelessWidget {
       child: Material(
         color: StudioPrimitives.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: onTap == null
+              ? null
+              : () {
+                  unawaited(studioLightImpact());
+                  onTap!();
+                },
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
           child: field,
         ),
