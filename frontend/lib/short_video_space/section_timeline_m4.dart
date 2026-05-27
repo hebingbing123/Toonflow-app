@@ -78,15 +78,17 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
       runSpacing: StudioSpacing.chromeActionGap,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        IconButton(
-          tooltip: l10n.shortVideoTimelineUndo,
+        StudioIconButton(
+          icon: Icons.undo,
+          label: l10n.shortVideoTimelineUndo,
+          size: 20,
           onPressed: _undoStack.canUndo ? _undoLocal : null,
-          icon: const Icon(Icons.undo, size: 20),
         ),
-        IconButton(
-          tooltip: l10n.shortVideoTimelineRedo,
+        StudioIconButton(
+          icon: Icons.redo,
+          label: l10n.shortVideoTimelineRedo,
+          size: 20,
           onPressed: _undoStack.canRedo ? _redoLocal : null,
-          icon: const Icon(Icons.redo, size: 20),
         ),
         TextButton.icon(
           onPressed: _showRevisionHistorySheet,

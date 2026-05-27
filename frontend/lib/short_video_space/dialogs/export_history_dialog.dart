@@ -603,10 +603,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           const SizedBox(width: StudioSpacing.xs),
           Text(l10n.shortVideoSpaceDialogExportHistoryTitle),
           const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.refresh),
+          StudioIconButton(
+            icon: Icons.refresh,
+            label: l10n.shortVideoSpaceDialogExportHistoryRefresh,
             onPressed: _loading ? null : _loadHistory,
-            tooltip: l10n.shortVideoSpaceDialogExportHistoryRefresh,
           ),
         ],
       ),

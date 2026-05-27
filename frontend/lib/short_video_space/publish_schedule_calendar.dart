@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
@@ -73,11 +74,10 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
       children: [
         Row(
           children: [
-            IconButton(
-              tooltip: l10n.shortVideoPublishCalendarPrevMonth,
-              onPressed:
-                  widget.busy ? null : () => _shiftMonth(-1),
-              icon: const Icon(Icons.chevron_left),
+            StudioIconButton(
+              icon: Icons.chevron_left,
+              label: l10n.shortVideoPublishCalendarPrevMonth,
+              onPressed: widget.busy ? null : () => _shiftMonth(-1),
             ),
             Expanded(
               child: Text(
@@ -86,11 +86,10 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                 style: theme.textTheme.titleSmall,
               ),
             ),
-            IconButton(
-              tooltip: l10n.shortVideoPublishCalendarNextMonth,
-              onPressed:
-                  widget.busy ? null : () => _shiftMonth(1),
-              icon: const Icon(Icons.chevron_right),
+            StudioIconButton(
+              icon: Icons.chevron_right,
+              label: l10n.shortVideoPublishCalendarNextMonth,
+              onPressed: widget.busy ? null : () => _shiftMonth(1),
             ),
           ],
         ),

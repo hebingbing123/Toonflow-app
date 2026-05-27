@@ -516,32 +516,26 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Tooltip(
-          message: canUndo
+        StudioIconButton(
+          icon: Icons.undo,
+          label: canUndo
               ? l10n.shortVideoUndoTooltipWithDescription(undoDescription!)
               : l10n.shortVideoUndoTooltipEmpty,
-          child: IconButton(
-            icon: const Icon(Icons.undo),
-            onPressed: canUndo ? () => _performUndo() : null,
-          ),
+          onPressed: canUndo ? () => _performUndo() : null,
         ),
         const SizedBox(width: StudioSpacing.xs),
-        Tooltip(
-          message: canRedo
+        StudioIconButton(
+          icon: Icons.redo,
+          label: canRedo
               ? l10n.shortVideoRedoTooltipWithDescription(redoDescription!)
               : l10n.shortVideoRedoTooltipEmpty,
-          child: IconButton(
-            icon: const Icon(Icons.redo),
-            onPressed: canRedo ? () => _performRedo() : null,
-          ),
+          onPressed: canRedo ? () => _performRedo() : null,
         ),
         const SizedBox(width: StudioSpacing.xs),
-        Tooltip(
-          message: l10n.shortVideoOperationHistoryToolbarTooltip,
-          child: IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () => _showOperationHistoryDialog(),
-          ),
+        StudioIconButton(
+          icon: Icons.history,
+          label: l10n.shortVideoOperationHistoryToolbarTooltip,
+          onPressed: () => _showOperationHistoryDialog(),
         ),
       ],
     );

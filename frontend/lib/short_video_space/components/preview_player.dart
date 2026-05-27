@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../design_system/components/studio_icon_button.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
@@ -645,43 +646,41 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                       children: [
                         // 上一个镜头按钮（仅在播放列表模式下显示）
                         if (_isPlaylistMode) ...[
-                          IconButton(
+                          StudioIconButton(
+                            icon: Icons.skip_previous,
+                            label: l10n.shortVideoPreviewPlayerPreviousShot,
                             onPressed: _currentShotIndex > 0
                                 ? _playPreviousShot
                                 : null,
-                            icon: const Icon(Icons.skip_previous),
-                            tooltip: l10n.shortVideoPreviewPlayerPreviousShot,
                           ),
                           const SizedBox(width: StudioSpacing.xs),
                         ],
 
-                        IconButton(
+                        StudioIconButton(
+                          icon: Icons.stop,
+                          label: l10n.shortVideoPreviewPlayerStop,
                           onPressed: _isInitialized ? _stop : null,
-                          icon: const Icon(Icons.stop),
-                          tooltip: l10n.shortVideoPreviewPlayerStop,
                         ),
                         const SizedBox(width: StudioSpacing.xs),
-                        IconButton(
-                          onPressed: _isInitialized ? _togglePlayPause : null,
-                          icon: Icon(
-                            _isPlaying ? Icons.pause : Icons.play_arrow,
-                          ),
-                          iconSize: 32,
-                          tooltip: _isPlaying
+                        StudioIconButton(
+                          icon: _isPlaying ? Icons.pause : Icons.play_arrow,
+                          label: _isPlaying
                               ? l10n.shortVideoPreviewPlayerPause
                               : l10n.shortVideoPreviewPlayerPlay,
+                          size: 32,
+                          onPressed: _isInitialized ? _togglePlayPause : null,
                         ),
 
                         // 下一个镜头按钮（仅在播放列表模式下显示）
                         if (_isPlaylistMode) ...[
                           const SizedBox(width: StudioSpacing.xs),
-                          IconButton(
+                          StudioIconButton(
+                            icon: Icons.skip_next,
+                            label: l10n.shortVideoPreviewPlayerNextShot,
                             onPressed:
                                 _currentShotIndex < widget.playlist!.length - 1
                                 ? _playNextShot
                                 : null,
-                            icon: const Icon(Icons.skip_next),
-                            tooltip: l10n.shortVideoPreviewPlayerNextShot,
                           ),
                         ],
                       ],
