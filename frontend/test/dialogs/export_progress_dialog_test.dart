@@ -74,7 +74,7 @@ void main() {
 
     expect(find.text('导出进度'), findsOneWidget);
     expect(find.textContaining('获取进度失败'), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }

@@ -42,7 +42,7 @@ void main() {
 
     expect(find.text('导出历史'), findsOneWidget);
     expect(find.textContaining('加载导出历史失败'), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }

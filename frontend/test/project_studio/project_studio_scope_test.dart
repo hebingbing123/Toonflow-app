@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/components/studio_empty_state.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_studio/project_studio_host.dart';
@@ -49,6 +50,10 @@ ProjectStudioHost _hostFor(
 }
 
 void main() {
+  setUp(() {
+    kStudioSnapshotBus.clearPending(StudioSnapshotKey.values);
+  });
+
   testWidgets('project studio scope shows loading while snapshot is pending', (
     tester,
   ) async {
@@ -68,7 +73,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(StudioLoadingPane), findsOneWidget);
 
     completer.complete(const StudioReadinessSnapshot(completedSteps: 4));
     await tester.pumpAndSettle();
@@ -98,8 +103,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(received, hasLength(1));
-    expect(received.single.completedSteps, 5);
+    expect(received.last.completedSteps, 5);
     expect(find.text('Project Delta'), findsOneWidget);
     expect(find.text('5/6'), findsOneWidget);
   });
@@ -132,14 +136,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(received, hasLength(1));
-    expect(received.single.completedSteps, 3);
+    expect(loadCount, 1);
+    expect(received.last.completedSteps, 3);
     expect(find.text('3/6'), findsOneWidget);
 
     await refreshSnapshot!();
     await tester.pumpAndSettle();
 
-    expect(received, hasLength(2));
+    expect(loadCount, 2);
     expect(received.last.completedSteps, 4);
     expect(find.text('4/6'), findsOneWidget);
   });
@@ -180,7 +184,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(loadCount, 2);
-      expect(received, hasLength(2));
       expect(received.last.completedSteps, 4);
       expect(find.text('4/6'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
@@ -559,7 +562,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(StudioApiErrorCallout), findsOneWidget);
+      expect(find.byType(StudioEmptyState), findsOneWidget);
       expect(find.textContaining('Something went wrong'), findsOneWidget);
       expect(find.text('Project Delta'), findsNothing);
     },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/short_video_space/components/preview_player.dart';
 
 /// Unit tests for Task 9.4: PreviewPlayer Component
@@ -108,8 +109,7 @@ void main() {
         ),
       );
 
-      // Should show loading indicator initially
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(StudioMediaTileSkeleton), findsOneWidget);
     });
 
     testWidgets('should show play button when not playing', (WidgetTester tester) async {

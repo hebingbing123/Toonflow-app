@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
-import 'package:openflow_app/l10n/app_localizations_en.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/design_system/components/openflow_brand.dart';
 
 import '../support/product_shell_overlay_harness.dart';
@@ -21,9 +21,14 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      productShellOverlayTestApp(router, size: const Size(375, 667)),
+      productShellOverlayTestApp(
+        router,
+        size: const Size(375, 667),
+        locale: const Locale('zh'),
+      ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expectNoLayoutExceptions(tester);
   });
@@ -38,11 +43,16 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      productShellOverlayTestApp(router, size: const Size(390, 844)),
+      productShellOverlayTestApp(
+        router,
+        size: const Size(390, 844),
+        locale: const Locale('zh'),
+      ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    final l10n = AppLocalizationsEn();
+    final l10n = AppLocalizationsZh();
     expect(find.text(l10n.appTitle), findsOneWidget);
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);
@@ -60,11 +70,16 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      productShellOverlayTestApp(router, size: const Size(1180, 900)),
+      productShellOverlayTestApp(
+        router,
+        size: const Size(1180, 900),
+        locale: const Locale('zh'),
+      ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    final l10n = AppLocalizationsEn();
+    final l10n = AppLocalizationsZh();
     expect(find.text(l10n.appTitle), findsOneWidget);
     expect(find.text(l10n.studioStoryboardStudioTitle), findsOneWidget);
     expect(find.byType(GlobalSearchBar), findsOneWidget);

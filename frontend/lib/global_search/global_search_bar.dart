@@ -21,9 +21,6 @@ import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 
-bool _globalSearchInFlight = false;
-DateTime? _globalSearchLockUntil;
-
 /// Global search bar component for the main navigation bar.
 ///
 /// **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 9.1, 9.6**
@@ -105,6 +102,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   List<_PinnedSearchView> _recentViews = [];
   OverlayEntry? _overlayEntry;
   int _paletteSelectedIndex = 0;
+  bool _searchInFlight = false;
+  DateTime? _searchLockUntil;
 
   /// Minimum characters required to trigger search
   static const int _minQueryLength = 2;
@@ -1015,7 +1014,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   /// Check if search can be triggered
   bool get _canSearch {
     final query = _controller.text.trim();
-    return query.length >= _minQueryLength && !_globalSearchInFlight;
+    return query.length >= _minQueryLength && !_searchInFlight;
   }
 
   /// Perform search and navigate to results page
@@ -1044,15 +1043,15 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       return;
     }
 
-    if (_globalSearchInFlight) {
+    if (_searchInFlight) {
       return;
     }
-    if (_globalSearchLockUntil != null &&
-        now.isBefore(_globalSearchLockUntil!)) {
+    if (_searchLockUntil != null &&
+        now.isBefore(_searchLockUntil!)) {
       return;
     }
-    _globalSearchLockUntil = now.add(const Duration(milliseconds: 500));
-    _globalSearchInFlight = true;
+    _searchLockUntil = now.add(const Duration(milliseconds: 500));
+    _searchInFlight = true;
     if (mounted) {
       setState(() {});
     }
@@ -1069,7 +1068,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         Navigator.pushNamed(context, '/search', arguments: {'query': query});
       }
     } finally {
-      _globalSearchInFlight = false;
+      _searchInFlight = false;
       if (mounted) {
         setState(() {});
       }
@@ -1407,7 +1406,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       tooltip: l10n.globalSearchLocalClientPrefsTooltip,
                     ),
                   // Loading indicator or search button
-              if (_globalSearchInFlight || _loadingSuggestions)
+              if (_searchInFlight || _loadingSuggestions)
                     Padding(
                       padding: EdgeInsets.only(
                         right: compact

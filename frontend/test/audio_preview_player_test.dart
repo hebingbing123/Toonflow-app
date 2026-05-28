@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
 void main() {
@@ -87,8 +88,7 @@ void main() {
         ),
       );
 
-      // Verify loading indicator is shown
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(StudioMediaTileSkeleton), findsOneWidget);
       expect(find.text('正在加载音频…'), findsOneWidget);
     });
 
@@ -196,7 +196,7 @@ void main() {
       );
 
       // Initial state should show loading
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(StudioMediaTileSkeleton), findsOneWidget);
       expect(find.text('正在加载音频…'), findsOneWidget);
     });
 

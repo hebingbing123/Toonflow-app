@@ -790,9 +790,11 @@ class StudioSelectFieldTrigger extends StatelessWidget {
                 vertical: StudioSpacing.xs,
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  Flexible(
+                    fit: FlexFit.loose,
                     child: Text(
                       valueLabel,
                       maxLines: 2,

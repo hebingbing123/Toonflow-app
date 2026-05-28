@@ -42,15 +42,17 @@ class StudioFilterRow extends StatelessWidget {
           );
         }
         return switch (wideLayout) {
-          StudioFilterWideLayout.toolbarRow => Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: _spacedRow(children.map(_adaptForRow).toList()),
+          StudioFilterWideLayout.toolbarRow => Wrap(
+            spacing: spacing,
+            runSpacing: runSpacing,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: children.map(_adaptForWrap).toList(),
           ),
           StudioFilterWideLayout.wrap => Wrap(
             spacing: spacing,
             runSpacing: runSpacing,
             crossAxisAlignment: WrapCrossAlignment.center,
-            children: children,
+            children: children.map(_adaptForWrap).toList(),
           ),
         };
       },
@@ -66,25 +68,16 @@ class StudioFilterRow extends StatelessWidget {
     ];
   }
 
-  List<Widget> _spacedRow(List<Widget> items) {
-    return <Widget>[
-      for (var i = 0; i < items.length; i++) ...<Widget>[
-        if (i > 0) SizedBox(width: spacing),
-        items[i],
-      ],
-    ];
-  }
-
-  static Widget _adaptForRow(Widget child) {
+  static Widget _adaptForWrap(Widget child) {
     if (child is Expanded) {
-      return child;
+      return child.child;
     }
     if (child is Flexible) {
-      return child;
+      return child.child;
     }
     if (child is SizedBox) {
       if (child.width == double.infinity && child.child != null) {
-        return Expanded(child: child.child!);
+        return child.child!;
       }
       return child;
     }

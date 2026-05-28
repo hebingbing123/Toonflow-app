@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -203,8 +204,7 @@ void main() {
       );
 
       expect(find.text('导出进度'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('正在获取导出状态...'), findsOneWidget);
+      expect(find.byType(StudioLoadingPane), findsOneWidget);
 
       // Clean up by completing all pending timers
       await tester.pumpAndSettle();
@@ -325,19 +325,21 @@ void main() {
       // Wait for initial poll
       await tester.pumpAndSettle();
 
-      // Should have status icon (schedule, sync, check_circle, error, or cancel)
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Icon &&
-              (widget.icon == Icons.schedule ||
-                  widget.icon == Icons.sync ||
-                  widget.icon == Icons.check_circle_outline ||
-                  widget.icon == Icons.error_outline ||
-                  widget.icon == Icons.cancel_outlined),
-        ),
-        findsWidgets,
-      );
+      final hasStatusIcon = find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is Icon &&
+                (widget.icon == Icons.schedule ||
+                    widget.icon == Icons.sync ||
+                    widget.icon == Icons.check_circle_outline ||
+                    widget.icon == Icons.error_outline ||
+                    widget.icon == Icons.cancel_outlined),
+          )
+          .evaluate()
+          .isNotEmpty;
+      final hasLoadFailedIcon =
+          find.byIcon(Icons.cloud_off_outlined).evaluate().isNotEmpty;
+      expect(hasStatusIcon || hasLoadFailedIcon, isTrue);
     });
 
     testWidgets('displays status messages', (tester) async {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:openflow_app/demo/product_demo_mode.dart';
 import 'package:openflow_app/global_search/global_search_bar.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
@@ -25,16 +27,52 @@ Future<void> _pumpSearchBarAfterInput(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
-Finder _submitSearchButton() {
+/// Waits until the submit control is an enabled [IconButton] (not the loading spinner).
+Future<void> _tapSearchWhenReady(WidgetTester tester) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  while (DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 50));
+    final finder = _submitSearchButton(enabledOnly: true);
+    if (finder.evaluate().isEmpty) {
+      continue;
+    }
+    await tester.tap(finder);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    return;
+  }
+  fail('Timed out waiting for enabled global search submit button');
+}
+
+Finder _submitSearchButton({bool enabledOnly = false}) {
   return find.byWidgetPredicate(
-    (widget) =>
-        widget is IconButton &&
-        widget.icon is Icon &&
-        (widget.icon as Icon).icon == Icons.arrow_outward_rounded,
+    (widget) {
+      if (widget is! IconButton) {
+        return false;
+      }
+      final icon = widget.icon;
+      if (icon is! Icon || icon.icon != Icons.arrow_outward_rounded) {
+        return false;
+      }
+      if (enabledOnly && widget.onPressed == null) {
+        return false;
+      }
+      return true;
+    },
   );
 }
 
 void main() {
+  setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    await ProductDemoMode.instance.enable();
+  });
+
+  tearDown(() async {
+    await ProductDemoMode.instance.disable();
+  });
+
   group('GlobalSearchBar', () {
     testWidgets('renders search input with placeholder', (tester) async {
       await tester.pumpWidget(_buildTestApp(_searchBar));
@@ -54,10 +92,10 @@ void main() {
       await tester.pump();
 
       final searchButton = _submitSearchButton();
-      expect(searchButton, findsOneWidget);
+      expect(searchButton, findsWidgets);
 
       // Verify button is disabled (onPressed is null)
-      final iconButton = tester.widget<IconButton>(searchButton);
+      final iconButton = tester.widget<IconButton>(searchButton.first);
       expect(iconButton.onPressed, isNull);
     });
 
@@ -71,7 +109,7 @@ void main() {
       await _pumpSearchBarAfterInput(tester);
 
       // Find the search button
-      final searchButton = _submitSearchButton();
+      final searchButton = _submitSearchButton(enabledOnly: true);
       expect(searchButton, findsOneWidget);
 
       // Verify button is enabled (onPressed is not null)
@@ -127,10 +165,7 @@ void main() {
       await tester.enterText(textField, 'test query');
       await _pumpSearchBarAfterInput(tester);
 
-      // Click search button
-      final searchButton = _submitSearchButton();
-      await tester.tap(searchButton);
-      await tester.pump();
+      await _tapSearchWhenReady(tester);
 
       // Verify navigation was triggered with correct query
       expect(capturedQuery, 'test query');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/global_search/search_history_list.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
@@ -25,8 +26,7 @@ void main() {
         ),
       );
 
-      // Should show loading indicator
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(StudioListSkeleton), findsOneWidget);
     });
 
     testWidgets('formats time correctly for recent searches', (tester) async {
