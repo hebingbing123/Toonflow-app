@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bootstrap/global_error_handling.dart';
+import 'design_system/debug/debug.dart';
 import 'config.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'locale/app_locale_notifier.dart';
@@ -26,7 +27,15 @@ Future<void> main() async {
   }
 
   if (shouldOpenStatusPageForInitialUri(Uri.base)) {
-    runApp(MaterialApp(debugShowCheckedModeBanner: false, home: StatusPage()));
+    runApp(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: StatusPage(),
+        builder: (context, child) => DebugErrorOverlayHost(
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
+    );
     return;
   }
 

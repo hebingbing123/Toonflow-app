@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bootstrap/global_error_handling.dart';
+import 'design_system/debug/debug.dart';
 import 'config.dart';
 import 'design_system/ix/studio_scaffold_messenger.dart';
 import 'design_system/ix/studio_scroll_behavior.dart';
@@ -86,7 +87,11 @@ class OpenFlowHarnessApp extends StatelessWidget {
                   context,
                   Curves.easeInOutCubicEmphasized,
                 ),
-                child: StudioToastHost(child: child ?? const SizedBox.shrink()),
+                child: DebugErrorOverlayHost(
+                  child: StudioToastHost(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                ),
               );
             },
             home: home,

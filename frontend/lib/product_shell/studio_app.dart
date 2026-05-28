@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/debug/debug.dart';
 import '../design_system/ix/studio_scaffold_messenger.dart';
 import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
@@ -91,9 +92,11 @@ class _StudioProductAppState extends State<StudioProductApp> {
                       context,
                       Curves.easeInOutCubicEmphasized,
                     ),
-                    child: ProductDemoAppCoachHost(
-                      child: StudioToastHost(
-                        child: child ?? const SizedBox.shrink(),
+                    child: DebugErrorOverlayHost(
+                      child: ProductDemoAppCoachHost(
+                        child: StudioToastHost(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),

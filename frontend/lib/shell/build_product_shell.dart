@@ -2046,6 +2046,9 @@ extension _HomePageProductShell on _HomePageState {
       ),
     );
 
-    return tree;
+    return wrapAndroidWebTheme(
+      context,
+      wrapAndroidWebScrollBehaviour(tree),
+    );
   }
 }

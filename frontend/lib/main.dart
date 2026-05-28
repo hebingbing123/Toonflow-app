@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bootstrap/global_error_handling.dart';
+import 'design_system/debug/debug.dart';
 import 'config.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'design_system/ix/studio_mobile_affordances.dart';
@@ -34,7 +35,11 @@ Future<void> main() async {
         debugShowCheckedModeBanner: false,
         home: StatusPage(),
         builder: (context, child) {
-          return StudioSystemUiSurface(child: child ?? const SizedBox.shrink());
+          return DebugErrorOverlayHost(
+            child: StudioSystemUiSurface(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          );
         },
       ),
     );

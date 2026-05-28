@@ -17,6 +17,11 @@ class StudioMobileAffordances {
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS);
+
+  /// True only when running as a Flutter web app on an Android browser.
+  /// Used to gate popstate back-button interception in the product shell.
+  static bool get supportsAndroidWebBack =>
+      kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 }
 
 SystemUiOverlayStyle studioSystemUiOverlayStyleForSurface(Color surfaceColor) {

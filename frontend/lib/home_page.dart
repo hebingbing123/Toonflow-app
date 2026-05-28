@@ -156,6 +156,7 @@ import 'shell/product_scope_label.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_context_view.dart';
 import 'shell/outbound_webhook_event_chips.dart';
+import 'shell/android_web_shell_overrides.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
 import 'system_probes/account/controller.dart';
@@ -367,6 +368,7 @@ class _HomePageState extends State<HomePage> {
   Offset? _macOSTitleBarPointerDownPosition;
   bool _macOSTitleBarDragHandoff = false;
   int _studioPaneRouteSyncSuppressCount = 0;
+  Object? _popStateSubscription;
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
       WorkspaceRunController(
@@ -695,6 +697,7 @@ class _HomePageState extends State<HomePage> {
         _openBillingSubscribeFromShell,
       );
     }
+    _popStateSubscription = installAndroidWebPopStateListenerIfNeeded(context);
   }
 
   @override
@@ -1535,6 +1538,7 @@ class _HomePageState extends State<HomePage> {
     StudioSettingsHubNavigation.registerOpenSubscribeHandler(null);
     _detachStudioRouteListener();
     _unregisterDemoModeListener();
+    removeAndroidWebPopStateListener(_popStateSubscription);
     _authController.removeListener(_handleAuthChanged);
     _accountProbesController.removeListener(_handleAccountProbesChanged);
     _contentProbesController.removeListener(_handleContentProbesChanged);

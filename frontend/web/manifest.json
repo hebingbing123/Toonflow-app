@@ -8,6 +8,9 @@
     "description": "OpenFlow AI short drama studio",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "scope": "/",
+    "lang": "en",
+    "categories": ["productivity"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
