@@ -18,7 +18,7 @@ bool studioPointerChromeEnabled(BuildContext context) {
   return switch (defaultTargetPlatform) {
     TargetPlatform.macOS ||
     TargetPlatform.windows ||
-    TargetPlatform.linux => true,
+    TargetPlatform.linux => mq.size.width > kStudioHandsetMaxWidth,
     TargetPlatform.android || TargetPlatform.iOS =>
       mq.size.width >= kStudioGridDesktopMinWidth,
     _ => mq.size.width >= kStudioGridDesktopMinWidth,
@@ -29,6 +29,7 @@ bool studioPointerChromeEnabled(BuildContext context) {
 bool studioScrollbarThumbVisible(BuildContext context) {
   final mq = MediaQuery.maybeOf(context);
   if (mq == null) return false;
+  if (mq.size.width <= kStudioHandsetMaxWidth) return false;
   if (studioPointerChromeEnabled(context)) return true;
   return mq.size.shortestSide > kStudioHandsetMaxWidth;
 }

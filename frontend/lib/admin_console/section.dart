@@ -280,7 +280,15 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             LayoutBuilder(
               builder: (context, constraints) {
                 final split = studioUseThreePaneLayout(constraints.maxWidth);
-                final searchColumn = result == null
+                final searchColumn = widget.controller.searching && result == null
+                    ? const StudioListSkeleton(
+                        itemCount: 5,
+                        scrollable: false,
+                        padding: EdgeInsets.symmetric(
+                          vertical: StudioSpacing.xs,
+                        ),
+                      )
+                    : result == null
                     ? null
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

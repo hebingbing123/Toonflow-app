@@ -157,14 +157,18 @@ class _StudioScriptNovelInlineImportState
         ProductDemoMode.instance.shouldSkipLiveApi) {
       return;
     }
-    final checkpoint = await loadWholeBookImportCheckpoint(
-      widget.project.id,
-      accessToken: widget.accessToken,
-    );
-    if (!mounted) {
-      return;
+    try {
+      final checkpoint = await loadWholeBookImportCheckpoint(
+        widget.project.id,
+        accessToken: widget.accessToken,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() => _resumeCheckpoint = checkpoint);
+    } catch (_) {
+      // Best-effort resume hint; rate limits must not break the script pane.
     }
-    setState(() => _resumeCheckpoint = checkpoint);
   }
 
   Future<void> _pickWholeBookFile({required bool importAfterParse}) async {

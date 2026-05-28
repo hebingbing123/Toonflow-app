@@ -147,7 +147,6 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
                           ),
                           tooltip: 'Copy error to clipboard',
                           onPressed: _copyToClipboard,
-                          visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(
                             minWidth: StudioSpacing.touchTarget,

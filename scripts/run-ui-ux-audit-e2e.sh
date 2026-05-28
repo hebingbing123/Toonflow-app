@@ -53,7 +53,7 @@ mkdir -p "$BUILD_OUT/desktop" "$BUILD_OUT/mobile"
 
 set +e
 FLUTTER_RC=0
-for vp in desktop mobile; do
+for vp in mobile desktop; do
   log "Running viewport: $vp"
   flutter test integration_test/ui_ux_audit_gallery_test.dart -d "$DEVICE" \
     --timeout=none \
@@ -108,7 +108,7 @@ copy_audit_pngs() {
   fi
 }
 
-for vp in desktop mobile; do
+for vp in mobile desktop; do
   copy_audit_pngs "$vp"
 done
 

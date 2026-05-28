@@ -272,7 +272,7 @@ class WorkspaceContextView extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final useDense =
-                  titleBarDense || constraints.maxHeight < 36;
+                  titleBarDense || constraints.maxHeight < 52;
               final body = useDense
                   ? buildTitleBarDenseRow()
                   : buildTitleBarTwoLineColumn();

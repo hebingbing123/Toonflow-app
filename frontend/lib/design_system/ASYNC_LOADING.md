@@ -1,5 +1,7 @@
 # Studio async loading / empty / error
 
+Composer context: see [`UI_REFACTOR_CONTEXT.md`](UI_REFACTOR_CONTEXT.md).
+
 Use these components for **data-fetch surfaces** (lists, panels, dialogs, settings blocks). Do not use full-page `CircularProgressIndicator` or raw red `Text` for API failures.
 
 ## Loading

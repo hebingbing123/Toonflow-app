@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/ix/studio_pointer.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
@@ -250,45 +251,58 @@ class _ProjectGridCard extends StatelessWidget {
       summaryMaxLines: standalone ? 2 : 3,
     );
 
-    return Material(
-      color: StudioPrimitives.transparent,
+    return StudioPointerHover(
       borderRadius: cardRadius,
-      child: Container(
-        decoration: BoxDecoration(
-          color: selected
-              ? tokens.primarySoft.withValues(alpha: 0.28)
-              : tokens.bgSurface.withValues(alpha: 0.96),
+      builder: (context, hovered) {
+        return Material(
+          color: StudioPrimitives.transparent,
           borderRadius: cardRadius,
-          border: Border.all(
-            color: selected ? tokens.primary : tokens.borderSubtle,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        padding: EdgeInsets.all(
-          standalone
-              ? StudioLayoutSpacing.insetDense + StudioSpacing.radiusHairline
-              : StudioLayoutSpacing.section - 4,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: standalone ? MainAxisSize.min : MainAxisSize.max,
-          children: <Widget>[
-            if (standalone)
-              selectBody
-            else
-              Expanded(child: selectBody),
-            SizedBox(
-              width: double.infinity,
-              child: StudioToolbarButton(
-                key: Key('project_enter_studio_${project.numericId}'),
-                label: l10n.studioEnterStudio,
-                icon: Icons.arrow_outward,
-                onPressed: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: selected
+                  ? tokens.primarySoft.withValues(alpha: 0.28)
+                  : hovered
+                  ? tokens.bgElevated.withValues(alpha: 0.98)
+                  : tokens.bgSurface.withValues(alpha: 0.96),
+              borderRadius: cardRadius,
+              border: Border.all(
+                color: selected
+                    ? tokens.primary
+                    : hovered
+                    ? tokens.borderDefault
+                    : tokens.borderSubtle,
+                width: selected ? 1.5 : 1,
               ),
             ),
-          ],
-        ),
-      ),
+            padding: EdgeInsets.all(
+              standalone
+                  ? StudioLayoutSpacing.insetDense + StudioSpacing.radiusHairline
+                  : StudioLayoutSpacing.section - 4,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: standalone ? MainAxisSize.min : MainAxisSize.max,
+              children: <Widget>[
+                if (standalone)
+                  selectBody
+                else
+                  Expanded(child: selectBody),
+                SizedBox(
+                  width: double.infinity,
+                  child: StudioToolbarButton(
+                    key: Key('project_enter_studio_${project.numericId}'),
+                    label: l10n.studioEnterStudio,
+                    icon: Icons.arrow_outward,
+                    onPressed: onTap,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

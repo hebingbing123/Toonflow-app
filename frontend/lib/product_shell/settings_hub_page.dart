@@ -110,14 +110,19 @@ class _SettingsHubPageState extends State<SettingsHubPage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final contentWidth = constraints.maxWidth;
-        Widget tabScrollChild(Widget child) {
+        Widget tabScrollChild(Widget child, {bool scrollable = true}) {
+          final panel = SizedBox(width: contentWidth, child: child);
+          if (!scrollable) {
+            return panel;
+          }
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: StudioSpacing.lg),
-            child: SizedBox(width: contentWidth, child: child),
+            child: panel,
           );
         }
 
-        final tabView = TabBarView(
+        final tabView = FocusTraversalGroup(
+          child: TabBarView(
           controller: _tabController,
           children: <Widget>[
             tabScrollChild(
@@ -145,8 +150,10 @@ class _SettingsHubPageState extends State<SettingsHubPage>
                 onWorkspaceContextChanged: widget.onWorkspaceContextChanged,
                 currentWorkspaceId: widget.currentWorkspaceId,
               ),
+              scrollable: false,
             ),
           ],
+          ),
         );
         final finiteHeight = constraints.maxHeight.isFinite;
         final tabBody = finiteHeight
@@ -226,7 +233,7 @@ class _SettingsHeroCard extends StatelessWidget {
       tabs: <Widget>[
         for (var index = 0; index < modules.length; index++)
           Tab(
-            height: compact ? 66 : 72,
+            height: compact ? 80 : 84,
             child: Padding(
               padding: EdgeInsets.only(
                 right: !scrollableTabs && index < modules.length - 1

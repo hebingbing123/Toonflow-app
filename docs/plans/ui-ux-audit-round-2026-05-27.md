@@ -54,7 +54,7 @@
 
 - 新增 `studioFormTextButtonIconStyle`
 - 已改：美术步、合规队列、全局搜索（结果/历史）、通知「加载更多」
-- 待扫尾：旅程紧凑条、`studio_api_error_callout`、零星 Dialog 主按钮（UXR-06）
+- 扫尾完成：旅程紧凑条、`studio_api_error_callout`、合规/通知/团队工作区表单图标按钮；Dialog 主按钮已对齐 `studioFormPrimaryButtonStyle`（含短视频确认框）
 
 ### 批次 2 — 响应式（E2E 截图后，已完成 2026-05-27）
 
@@ -76,10 +76,13 @@
 - **根因**：`openSettingsTabByIndex` 在 `StudioSettingsHubNavigation.requestTab` 之后调用 `goProjectsHome()`，子树在 `consumePending` 前卸载，pending 丢失，始终落在默认「账户」Tab。
 - **修复**：已在 `real_product_shell_gallery_support.dart` 改为在 **TabBar 已就绪时直接点 Tab 标签**（中英），并 `ensureVisible` 以适配可滚动 Tab；`analyze-ui-ux-audit-screenshots.sh` 增加重复哈希摘要。
 
-### 批次 3 — 空态与错误态
+### 批次 3 — 空态与错误态（已完成 2026-05-28）
 
+- 通知合规导出/审计列表：首屏加载改用 `StudioListSkeleton`（非 pane 级 CPI）
+- 管理台搜索：查询中展示 `StudioListSkeleton`
 - 队列/列表统一 `StudioEmptyState` + 重试 CTA 高度
 - 登录/项目空态去重复 banner（矩阵 UX-06 已做，回归 E2E）
+- Agent 上下文：[`frontend/lib/design_system/UI_REFACTOR_CONTEXT.md`](../../frontend/lib/design_system/UI_REFACTOR_CONTEXT.md)
 
 ## 验收
 
@@ -89,6 +92,8 @@ bash scripts/analyze-ui-ux-audit-screenshots.sh
 bash scripts/studio-visual-debt-check.sh
 cd frontend && flutter analyze
 ```
+
+**E2E 回归（2026-05-28）**：`run-ui-ux-audit-e2e.sh` 绿（mobile 20 routes / 7 interactions，desktop 21 routes / 7 interactions）；`analyze-ui-ux-audit-screenshots.sh` 无过小 PNG。Harness 修复：嵌套滚动 `team_workspaces`、overlay 后 `ensureAuditShellReady`、Hero 收尾泵帧、429 时小说导入 checkpoint 不抛错。
 
 问题清单：`.codex/skills/ui-ux-audit/output/issues.json`  
 修复后更新 `fixPlanReady: true` 与 `summary.byPriority`。

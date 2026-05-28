@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/ix/studio_pointer.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
@@ -134,114 +135,120 @@ class SearchResultCard extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
-      elevation: isSelected ? 4 : 1,
-      color: isSelected 
-          ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.3)
-          : null,
-      child: Container(
-        decoration: isSelected
-            ? BoxDecoration(
-                border: Border.all(
-                  color: theme.colorScheme.primary,
-                  width: 2,
+    final cardRadius = BorderRadius.circular(StudioSpacing.radiusComfort);
+    return StudioPointerHover(
+      borderRadius: cardRadius,
+      builder: (context, hovered) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
+          elevation: isSelected ? 4 : (hovered ? 2 : 1),
+          color: isSelected
+              ? StudioTokens.of(context).primarySoft.withValues(alpha: 0.3)
+              : hovered
+              ? StudioTokens.of(context).bgElevated
+              : null,
+          child: Container(
+            decoration: isSelected
+                ? BoxDecoration(
+                    border: Border.all(
+                      color: theme.colorScheme.primary,
+                      width: 2,
+                    ),
+                    borderRadius: cardRadius,
+                  )
+                : null,
+            child: studioWrapClickCursor(
+              enabled: onTap != null,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: cardRadius,
+                child: Padding(
+                  padding: const EdgeInsets.all(StudioSpacing.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          StudioHero(
+                            tag: studioHeroTagSearchResultLeading(
+                              result.resultType,
+                              result.id,
+                            ),
+                            child: CircleAvatar(
+                              radius: 16,
+                              backgroundColor:
+                                  StudioTokens.of(context).primarySoft,
+                              child: Icon(
+                                _getTypeIcon(result.resultType),
+                                size: StudioIconSize.md,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              result.title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: StudioSpacing.xs,
+                              vertical: StudioSpacing.radiusHairline,
+                            ),
+                            decoration: BoxDecoration(
+                              color: StudioTokens.of(context).primarySoft,
+                              borderRadius: BorderRadius.circular(
+                                StudioSpacing.radiusDense,
+                              ),
+                            ),
+                            child: Text(
+                              _getTypeDisplayName(l10n, result.resultType),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: StudioSpacing.sm),
+                      _buildHighlightedSnippet(context, result.snippet),
+                      const SizedBox(height: StudioSpacing.sm),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: StudioIconSize.xxs,
+                            color: StudioTokens.of(context).textSecondary,
+                          ),
+                          const SizedBox(width: StudioSpacing.xs),
+                          Text(
+                            _formatTime(l10n, context, result.updatedAt),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: StudioTokens.of(context).textSecondary,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: StudioIconSize.xxs,
+                            color: StudioTokens.of(context).textSecondary,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-              )
-            : null,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-          child: Padding(
-            padding: const EdgeInsets.all(StudioSpacing.sm),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title and type badge
-                Row(
-                  children: [
-                    StudioHero(
-                      tag: studioHeroTagSearchResultLeading(
-                        result.resultType,
-                        result.id,
-                      ),
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: StudioTokens.of(context).primarySoft,
-                        child: Icon(
-                          _getTypeIcon(result.resultType),
-                          size: StudioIconSize.md,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: StudioSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        result.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: StudioTokens.of(context).primarySoft,
-                        borderRadius: BorderRadius.circular(
-                          StudioSpacing.radiusDense,
-                        ),
-                      ),
-                      child: Text(
-                        _getTypeDisplayName(l10n, result.resultType),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: StudioSpacing.sm),
-
-                // Highlighted snippet
-                _buildHighlightedSnippet(context, result.snippet),
-
-                const SizedBox(height: StudioSpacing.sm),
-
-                // Metadata row
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: StudioIconSize.xxs,
-                      color: StudioTokens.of(context).textSecondary,
-                    ),
-                    const SizedBox(width: StudioSpacing.xs),
-                    Text(
-                      _formatTime(l10n, context, result.updatedAt),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: StudioTokens.of(context).textSecondary,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: StudioIconSize.xxs,
-                      color: StudioTokens.of(context).textSecondary,
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

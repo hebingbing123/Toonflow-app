@@ -36,6 +36,38 @@ void main() {
     expect(find.byType(StudioPointerHover), findsOneWidget);
   });
 
+  testWidgets('pointer chrome and scrollbars off on handset-width macOS', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(375, 667));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildStudioDarkTheme(),
+        scrollBehavior: const StudioScrollBehavior(),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(375, 667)),
+          child: Scaffold(
+            body: ListView(
+              children: const [Text('Row')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      studioPointerChromeEnabled(tester.element(find.byType(ListView))),
+      isFalse,
+    );
+    expect(
+      studioScrollbarThumbVisible(tester.element(find.byType(ListView))),
+      isFalse,
+    );
+    expect(find.byType(Scrollbar), findsNothing);
+  });
+
   testWidgets('studioBuildListRowContextMenu orders destructive actions last', (
     tester,
   ) async {

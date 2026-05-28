@@ -17,6 +17,7 @@ import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_collapsible_filter_panel.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../design_system/components/studio_async_data_view.dart';
+import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -1182,69 +1183,81 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ),
               Align(
                 alignment: Alignment.centerLeft,
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
+                  style: studioFormOutlinedIconLabeledButtonStyle(context),
                   onPressed: widget.controller.loadingExportHistory
                       ? null
                       : _applyExportHistoryFilters,
-                  child: widget.controller.loadingExportHistory
+                  icon: widget.controller.loadingExportHistory
                       ? const SizedBox(
                           width: 14,
                           height: 14,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(l10n.notificationsComplianceFilterExports),
+                      : const Icon(Icons.filter_list_outlined, size: StudioIconSize.sm),
+                  label: Text(l10n.notificationsComplianceFilterExports),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: StudioSpacing.xs),
-        ...studioStaggeredChildren(
-          widget.controller.workspaceSharedAuditExports.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(
-                bottom: StudioSpacing.chromeActionGap,
-              ),
-              child: Tooltip(
-                message: _formatWorkspaceAuditExportItem(l10n, item),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        _formatWorkspaceAuditExportItem(l10n, item),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: muted,
+        if (widget.controller.loadingExportHistory &&
+            widget.controller.workspaceSharedAuditExports.isEmpty)
+          const StudioListSkeleton(
+            itemCount: 4,
+            scrollable: false,
+            padding: EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+          )
+        else
+          ...studioStaggeredChildren(
+            widget.controller.workspaceSharedAuditExports.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(
+                  bottom: StudioSpacing.chromeActionGap,
+                ),
+                child: Tooltip(
+                  message: _formatWorkspaceAuditExportItem(l10n, item),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          _formatWorkspaceAuditExportItem(l10n, item),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: muted,
+                        ),
                       ),
-                    ),
-                    StudioIconButton(
-                      icon: Icons.filter_alt_outlined,
-                      label:
-                          l10n.notificationsComplianceReuseExportFiltersTooltip,
-                      size: StudioIconSize.sm,
-                      onPressed: widget.controller.loadingWorkspaceSharedAudit
-                          ? null
-                          : () => _reuseExportRecordFilters(item),
-                    ),
-                    StudioIconButton(
-                      icon: Icons.download_outlined,
-                      label: _exportRecordDownloadTooltip(l10n, item),
-                      size: StudioIconSize.sm,
-                      onPressed: widget.controller.loadingExportHistory
-                          ? null
-                          : () => _redownloadFromExportRecord(item),
-                    ),
-                  ],
+                      StudioIconButton(
+                        icon: Icons.filter_alt_outlined,
+                        label: l10n
+                            .notificationsComplianceReuseExportFiltersTooltip,
+                        size: StudioIconSize.sm,
+                        onPressed:
+                            widget.controller.loadingWorkspaceSharedAudit
+                            ? null
+                            : () => _reuseExportRecordFilters(item),
+                      ),
+                      StudioIconButton(
+                        icon: Icons.download_outlined,
+                        label: _exportRecordDownloadTooltip(l10n, item),
+                        size: StudioIconSize.sm,
+                        onPressed: widget.controller.loadingExportHistory
+                            ? null
+                            : () => _redownloadFromExportRecord(item),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+            entranceKey: widget.controller.workspaceSharedAuditExports.length,
           ),
-          entranceKey: widget.controller.workspaceSharedAuditExports.length,
-        ),
         if (widget.controller.workspaceSharedExportHistoryHasMore)
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
+              style: studioFormTextButtonIconStyle(context),
               onPressed: widget.controller.loadingExportHistory
                   ? null
                   : widget.controller.loadMoreExportHistory,
@@ -1259,26 +1272,36 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
         const SizedBox(height: StudioSpacing.sm),
-        ...studioStaggeredChildren(
-          widget.controller.workspaceSharedComplianceAudit
-              .take(6)
-              .map(
-                (item) => Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: StudioSpacing.chromeActionGap,
-                  ),
-                  child: Text(
-                    _formatWorkspaceAuditItem(l10n, item),
-                    style: muted,
+        if (widget.controller.loadingWorkspaceSharedAudit &&
+            widget.controller.workspaceSharedComplianceAudit.isEmpty)
+          const StudioListSkeleton(
+            itemCount: 3,
+            scrollable: false,
+            padding: EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+          )
+        else
+          ...studioStaggeredChildren(
+            widget.controller.workspaceSharedComplianceAudit
+                .take(6)
+                .map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: StudioSpacing.chromeActionGap,
+                    ),
+                    child: Text(
+                      _formatWorkspaceAuditItem(l10n, item),
+                      style: muted,
+                    ),
                   ),
                 ),
-              ),
-          entranceKey: widget.controller.workspaceSharedComplianceAudit.length,
-        ),
+            entranceKey:
+                widget.controller.workspaceSharedComplianceAudit.length,
+          ),
         if (widget.controller.workspaceSharedAuditHasMore)
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
+              style: studioFormTextButtonIconStyle(context),
               onPressed: widget.controller.loadingWorkspaceSharedAudit
                   ? null
                   : widget.controller.loadMoreWorkspaceSharedComplianceAudit,
@@ -1359,7 +1382,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(item.message),
+              Text(
+                item.message,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: StudioSpacing.xs),
               Text(
                 '${_notificationTypeLabel(l10n, item.notificationType)} · ${_formatDateTime(item.createdAt)}',

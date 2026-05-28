@@ -121,6 +121,12 @@ class RealProductShellGalleryHarness {
     }
   }
 
+  /// Extra pumps after route / hero transitions so E2E does not retain stale
+  /// [Hero] tags (e.g. projects grid ↔ studio header).
+  Future<void> settleShell({int count = 48}) async {
+    await pumpFrames(count: count, step: const Duration(milliseconds: 16));
+  }
+
   Future<void> waitFor(
     Finder finder, {
     int maxTicks = 48,
@@ -382,21 +388,26 @@ class RealProductShellGalleryHarness {
   }
 
   Future<bool> navigateToUtilityPane(ProductWorkspacePane pane) async {
-    try {
-      final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
-      if (shellRoot.evaluate().isEmpty) {
-        return false;
-      }
-      final element = tester.element(shellRoot.first);
-      StudioShellNavigationScope.maybeOf(
-        element,
-      )?.selectProductWorkspacePane(pane);
-      GoRouter.of(element).go(studioUriForUtilityPane(pane));
-      await pumpFrames(count: 32);
-      return true;
-    } catch (_) {
-      return false;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (attempt > 0) {
+          await goProjectsHome();
+          await pumpFrames(count: 24);
+        }
+        final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
+        if (shellRoot.evaluate().isEmpty) {
+          continue;
+        }
+        final element = tester.element(shellRoot.first);
+        StudioShellNavigationScope.maybeOf(
+          element,
+        )?.selectProductWorkspacePane(pane);
+        GoRouter.of(element).go(studioUriForUtilityPane(pane));
+        await pumpFrames(count: 32);
+        return true;
+      } catch (_) {}
     }
+    return false;
   }
 
   /// GoRouter-first route capture — avoids «更多» menu scroll on narrow viewports.
@@ -419,6 +430,10 @@ class RealProductShellGalleryHarness {
 
   Future<bool> tryOpenNotificationsPane() async {
     await pumpFrames(count: 16);
+    if (await navigateToUtilityPane(ProductWorkspacePane.notifications)) {
+      return true;
+    }
+    await goProjectsHome();
     if (await navigateToUtilityPane(ProductWorkspacePane.notifications)) {
       return true;
     }
@@ -609,6 +624,10 @@ class RealProductShellGalleryHarness {
         find.text('New project').evaluate().isNotEmpty) {
       return;
     }
+    if (hasBlockingOverlay) {
+      await closeOverlay();
+      await pumpFrames(count: 16);
+    }
     if (find.text('剧本').evaluate().isNotEmpty) {
       await exitProjectStudio();
       await pumpFrames(count: 16);
@@ -724,9 +743,33 @@ class RealProductShellGalleryHarness {
       await pumpFrames();
       return;
     }
-    if (find.byType(ModalBarrier).evaluate().isNotEmpty) {
+    final menuOpen =
+        find.text('任务中心').evaluate().isNotEmpty ||
+        find.text('Task center').evaluate().isNotEmpty ||
+        find.text('制片与任务').evaluate().isNotEmpty ||
+        find.text('Production & tasks').evaluate().isNotEmpty;
+    if (menuOpen && find.byType(ModalBarrier).evaluate().isNotEmpty) {
       await tester.tapAt(const Offset(12, 12));
       await pumpFrames();
+    }
+  }
+
+  /// Re-anchor on projects home with shell + router ready (audit overlays).
+  Future<void> ensureAuditShellReady() async {
+    await goProjectsHome();
+    final candidates = <Finder>[
+      find.byKey(const ValueKey<String>('studio-shell-root')),
+      find.text('你的项目'),
+      find.text('新建项目'),
+      find.text('New project'),
+    ];
+    for (var i = 0; i < 120; i++) {
+      await pumpFrames(count: 1);
+      for (final finder in candidates) {
+        if (finder.evaluate().isNotEmpty) {
+          return;
+        }
+      }
     }
   }
 
@@ -741,18 +784,31 @@ class RealProductShellGalleryHarness {
     if (!menuAlreadyOpen) {
       await openMoreMenu();
     }
-    final menuScroll = find.byType(Scrollable);
+    final menuScroll = find.descendant(
+      of: find.byType(ModalBarrier),
+      matching: find.byType(Scrollable),
+    );
+    final scrollables = menuScroll.evaluate().isNotEmpty
+        ? menuScroll
+        : find.byType(Scrollable);
     for (var attempt = 0; attempt < 10; attempt++) {
       final matches = _moreMenuItem(label);
       if (matches.evaluate().isNotEmpty) {
+        try {
+          await tester.ensureVisible(matches.first);
+        } catch (_) {}
         await tester.tap(matches.first, warnIfMissed: false);
         await pumpFrames(count: 32);
         return;
       }
-      if (menuScroll.evaluate().isEmpty) {
+      if (scrollables.evaluate().isEmpty) {
         break;
       }
-      await tester.drag(menuScroll.last, const Offset(0, -220));
+      await tester.drag(
+        scrollables.last,
+        const Offset(0, -220),
+        warnIfMissed: false,
+      );
       await pumpFrames(count: 6);
     }
     expect(
@@ -1076,6 +1132,18 @@ class RealProductShellGalleryHarness {
   }
 
   Future<void> exitProjectStudio() async {
+    final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
+    if (shellRoot.evaluate().isNotEmpty) {
+      try {
+        GoRouter.of(tester.element(shellRoot.first)).go('/');
+        await settleShell();
+        if (find.text('新建项目').evaluate().isNotEmpty ||
+            find.text('你的项目').evaluate().isNotEmpty ||
+            find.text('New project').evaluate().isNotEmpty) {
+          return;
+        }
+      } catch (_) {}
+    }
     final closeIcons = find.byIcon(Icons.close);
     if (closeIcons.evaluate().isNotEmpty) {
       await tester.tap(closeIcons.first, warnIfMissed: false);
@@ -1097,6 +1165,7 @@ class RealProductShellGalleryHarness {
       await tester.tap(projectsTab.first, warnIfMissed: false);
       await pumpFrames(count: 16);
     }
+    await settleShell();
   }
 
   Future<bool> tryCaptureSeedProjectStudioInteractions() async {

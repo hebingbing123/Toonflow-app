@@ -15,8 +15,13 @@ Color studioPanelMutedColor(BuildContext context) {
 }
 
 /// Elevation shadow color from [StudioTokens.overlay].
+///
+/// Dark theme uses softer shadows so panels rely on [studioPanelBorderColor]
+/// instead of heavy glow (see studio visual guidelines).
 Color studioShadowColor(BuildContext context, {double alpha = 0.12}) {
-  return StudioTokens.of(context).overlay.withValues(alpha: alpha);
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final effectiveAlpha = isDark ? alpha * 0.42 : alpha;
+  return StudioTokens.of(context).overlay.withValues(alpha: effectiveAlpha);
 }
 
 /// Standard inset panel drop shadow (replaces hardcoded overlay blacks).

@@ -16,6 +16,26 @@ Page<void> _studioShellPlaceholderPage(GoRouterState state) {
   return const NoTransitionPage<void>(child: SizedBox.shrink());
 }
 
+/// Fade transition for full-screen modal routes (search, status) while the
+/// shell keeps [NoTransitionPage] for indexed tabs.
+CustomTransitionPage<void> studioFadeTransitionPage({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 220),
+    reverseTransitionDuration: const Duration(milliseconds: 180),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        child: child,
+      );
+    },
+  );
+}
+
 /// Full-screen shot list / grid studio (not the six-step SOP route).
 String studioStoryboardStudioRoute(int projectNumericId) =>
     '/projects/$projectNumericId/storyboard-studio';
@@ -162,15 +182,24 @@ GoRouter createStudioRouter() {
       ),
       GoRoute(
         path: '/search',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final query = state.uri.queryParameters['q'] ?? '';
           final accessToken = kSupabaseConfigured
               ? Supabase.instance.client.auth.currentSession?.accessToken
               : null;
-          return SearchResultsPage(query: query, accessToken: accessToken);
+          return studioFadeTransitionPage(
+            key: state.pageKey,
+            child: SearchResultsPage(query: query, accessToken: accessToken),
+          );
         },
       ),
-      GoRoute(path: '/status', builder: (context, state) => StatusPage()),
+      GoRoute(
+        path: '/status',
+        pageBuilder: (context, state) => studioFadeTransitionPage(
+          key: state.pageKey,
+          child: StatusPage(),
+        ),
+      ),
     ],
   );
 }

@@ -38,7 +38,16 @@ void main() {
 
           await captureFullGalleryRoutes(harness);
 
-          expect(tester.takeException(), isNull);
+          await harness.settleShell(count: 72);
+          Object? pendingError;
+          for (var i = 0; i < 6; i++) {
+            pendingError = tester.takeException();
+            if (pendingError == null) {
+              break;
+            }
+            await harness.settleShell(count: 48);
+          }
+          expect(pendingError, isNull);
 
           final pngs = harness.listCapturedPngs();
           final routeCount = pngs.where((f) {

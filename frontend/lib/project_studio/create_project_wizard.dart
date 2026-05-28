@@ -120,7 +120,8 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
         }
         unawaited(_confirmClose());
       },
-      child: Padding(
+      child: FocusTraversalGroup(
+        child: Padding(
         padding: EdgeInsets.only(bottom: bottom),
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -232,6 +233,7 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

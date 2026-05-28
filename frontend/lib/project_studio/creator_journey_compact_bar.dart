@@ -409,7 +409,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
           collapseTools: collapseTools,
         );
 
-        return Row(
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final row = Row(
           children: <Widget>[
             ?prev,
             Expanded(
@@ -429,6 +430,15 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             ?next,
             tools,
           ],
+        );
+        if (textScale <= 1.25) {
+          return row;
+        }
+        return ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: StudioSpacing.touchTarget + StudioSpacing.xs,
+          ),
+          child: row,
         );
       },
     );

@@ -32,12 +32,14 @@ Future<void> _captureInteractionOverlaysImpl(
   } catch (_) {
     await harness.closeOverlay();
   }
+  await harness.goProjectsHome();
 
   // —— 「更多」菜单 ——
   await harness.goProjectsHome();
   await harness.openMoreMenu();
   await harness.captureInteraction('more_menu_panel');
   await harness.closeMoreMenuIfOpen();
+  await harness.ensureAuditShellReady();
 
   // —— API 密钥：创建 Dialog ——
   if (await harness.navigateToUtilityPane(ProductWorkspacePane.apiKeys)) {
@@ -109,7 +111,7 @@ Future<void> _captureInteractionOverlaysImpl(
   }
 
   // —— 通知：筛选 / 设置 ——
-  if (await harness.tryOpenNotificationsPane()) {
+  if (await harness.navigateToUtilityPane(ProductWorkspacePane.notifications)) {
     await harness.pumpFrames(count: 20);
     await harness.tryTapForOverlayI18n(<String>[
       '筛选',
@@ -258,6 +260,7 @@ Future<void> captureFullGalleryRoutes(
         await harness.tryCaptureStudioStep('4. 分镜', 'storyboard_studio_step');
         await harness.exitProjectStudio();
         await harness.goProjectsHome();
+        await harness.settleShell();
       },
       label: 'seed_project_studio_routes',
       timeout: const Duration(seconds: 45),
@@ -268,6 +271,7 @@ Future<void> captureFullGalleryRoutes(
   await harness.capture('product_shell_chrome');
 
   await captureInteractionOverlays(harness);
+  await harness.settleShell();
   await harness.writeAuditManifest();
 }
 

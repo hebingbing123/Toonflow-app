@@ -1139,6 +1139,7 @@ class _ProductionPanel extends StatelessWidget {
                         if (onOpenDesktopDownloads != null) ...[
                           const SizedBox(height: StudioSpacing.radiusComfort),
                           FilledButton.tonalIcon(
+                            style: studioFormIconLabeledButtonStyle(context),
                             onPressed: onOpenDesktopDownloads,
                             icon: const Icon(Icons.download_outlined),
                             label: Text(l10n.shortVideoDownloadDesktopApp),

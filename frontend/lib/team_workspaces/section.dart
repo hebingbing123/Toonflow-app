@@ -373,8 +373,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
 
     return Padding(
       padding: const EdgeInsets.only(top: StudioSpacing.sm),
-      child: CustomScrollView(
-        slivers: <Widget>[
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final boundedHeight = constraints.maxHeight.isFinite;
+          return CustomScrollView(
+            shrinkWrap: !boundedHeight,
+            physics: boundedHeight
+                ? null
+                : const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[
           SliverToBoxAdapter(child: _buildStudioHeader(context, l10n)),
           const SliverToBoxAdapter(
             child: SizedBox(height: StudioLayoutSpacing.stackMedium),
@@ -474,7 +481,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           SliverToBoxAdapter(
             child: Align(
               alignment: Alignment.centerLeft,
-              child: TextButton.icon(
+              child: Semantics(
+                button: true,
+                label: _loading
+                    ? l10n.teamWorkspaceLoading
+                    : l10n.teamWorkspaceRefreshList,
+                child: TextButton.icon(
+                style: studioFormTextButtonIconStyle(context),
                 onPressed: _loading ? null : _load,
                 icon: _loading
                     ? const SizedBox(
@@ -488,6 +501,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       ? l10n.teamWorkspaceLoading
                       : l10n.teamWorkspaceRefreshList,
                 ),
+              ),
               ),
             ),
           ),
@@ -759,7 +773,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             ),
           ],
           const SliverToBoxAdapter(child: SizedBox(height: StudioSpacing.md)),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
