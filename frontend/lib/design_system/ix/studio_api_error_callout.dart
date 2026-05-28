@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/rust_api_error_format.dart';
@@ -65,18 +66,8 @@ class StudioApiErrorCallout extends StatelessWidget {
         );
         final retryButton = TextButton.icon(
           onPressed: onRetry,
-          style: TextButton.styleFrom(
-            foregroundColor: errorColor,
-            minimumSize: const Size(
-              StudioSpacing.iconTouchTarget,
-              StudioSpacing.iconTouchTarget,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: subtle ? 10 : 12,
-              vertical: subtle ? 8 : 10,
-            ),
-            tapTargetSize: MaterialTapTargetSize.padded,
-            visualDensity: VisualDensity.standard,
+          style: studioFormTextButtonIconStyle(context).copyWith(
+            foregroundColor: WidgetStatePropertyAll<Color>(errorColor),
           ),
           icon: const Icon(Icons.refresh_rounded, size: StudioIconSize.xxs),
           label: Text(l10n.studioRetry),

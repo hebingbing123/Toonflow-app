@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/tokens.dart';
@@ -196,10 +197,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
         onPressed: onBackToProjects,
         icon: const Icon(Icons.chevron_left_rounded, size: StudioIconSize.md),
         label: Text(projectLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
-        style: TextButton.styleFrom(
-          foregroundColor: tokens.textSecondary,
-          padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
-          visualDensity: VisualDensity.standard,
+        style: studioFormTextButtonIconStyle(context).copyWith(
+          foregroundColor: WidgetStatePropertyAll<Color>(tokens.textSecondary),
         ),
       );
     }
@@ -221,10 +220,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.chevron_left_rounded, size: StudioIconSize.md),
       label: Text(prevLabel, overflow: TextOverflow.ellipsis, maxLines: 1),
-      style: TextButton.styleFrom(
-        foregroundColor: tokens.textSecondary,
-        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
-        visualDensity: VisualDensity.standard,
+      style: studioFormTextButtonIconStyle(context).copyWith(
+        foregroundColor: WidgetStatePropertyAll<Color>(tokens.textSecondary),
       ),
     );
   }
@@ -267,10 +264,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.arrow_forward_rounded, size: StudioIconSize.sm),
       label: Text(label!, overflow: TextOverflow.ellipsis, maxLines: 1),
-      style: TextButton.styleFrom(
-        foregroundColor: tokens.primary,
-        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs),
-        visualDensity: VisualDensity.standard,
+      style: studioFormTextButtonIconStyle(context).copyWith(
+        foregroundColor: WidgetStatePropertyAll<Color>(tokens.primary),
       ),
     );
   }
@@ -351,12 +346,8 @@ class CreatorJourneyCompactBar extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: tokens.textSecondary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StudioSpacing.xs,
-                    ),
-                    visualDensity: VisualDensity.standard,
+                  style: studioFormTextButtonIconStyle(context).copyWith(
+                    foregroundColor: WidgetStatePropertyAll<Color>(tokens.textSecondary),
                   ),
                 ),
         StudioIconButton(
