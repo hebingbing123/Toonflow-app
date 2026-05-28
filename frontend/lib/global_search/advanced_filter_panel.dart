@@ -188,7 +188,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Header
           _buildHeader(),
           
-          const Divider(height: StudioControlSize.dividerThickness),
+          const Divider(height: 1),
           
           // Filter content
           Expanded(
@@ -198,7 +198,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             ),
           ),
           
-          const Divider(height: StudioControlSize.dividerThickness),
+          const Divider(height: 1),
           
           // Action buttons
           _buildActionButtons(),
@@ -216,7 +216,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
           // Header
           _buildHeader(),
           
-          const Divider(height: StudioControlSize.dividerThickness),
+          const Divider(height: 1),
           
           // Filter content
           Expanded(
@@ -226,7 +226,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             ),
           ),
           
-          const Divider(height: StudioControlSize.dividerThickness),
+          const Divider(height: 1),
           
           // Action buttons
           _buildActionButtons(),

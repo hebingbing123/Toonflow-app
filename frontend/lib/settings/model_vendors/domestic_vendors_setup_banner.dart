@@ -96,7 +96,7 @@ class _DomesticVendorsSetupBannerState extends State<DomesticVendorsSetupBanner>
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(Icons.flag_outlined, size: 22, color: tokens.primary),
+                Icon(Icons.flag_outlined, size: StudioIconSize.xl, color: tokens.primary),
                 const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
                   child: Column(

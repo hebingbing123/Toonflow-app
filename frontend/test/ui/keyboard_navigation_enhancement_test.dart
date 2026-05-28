@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -199,18 +198,13 @@ void main() {
     ) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
-      bool wasSubmitted = false;
-      String? submittedValue;
 
       await tester.pumpWidget(
         buildTestApp(
           child: TextField(
             controller: controller,
             textInputAction: TextInputAction.done,
-            onSubmitted: (value) {
-              wasSubmitted = true;
-              submittedValue = value;
-            },
+            onSubmitted: (_) {},
             decoration: const InputDecoration(labelText: 'Submit Field'),
           ),
         ),

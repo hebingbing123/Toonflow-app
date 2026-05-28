@@ -7,6 +7,8 @@ import 'design_system/ix/studio_scaffold_messenger.dart';
 import 'design_system/ix/studio_scroll_behavior.dart';
 import 'design_system/ix/studio_toast_overlay.dart';
 import 'design_system/studio_adaptive_theme.dart';
+import 'design_system/theme.dart';
+import 'design_system/studio_motion.dart';
 import 'design_system/google_fonts_runtime.dart';
 import 'home_page.dart';
 import 'l10n/app_localizations.dart';
@@ -52,6 +54,9 @@ class OpenFlowHarnessApp extends StatelessWidget {
           child: MaterialApp(
             scrollBehavior: const StudioScrollBehavior(),
             debugShowCheckedModeBanner: false,
+            theme: buildStudioLightTheme(),
+            darkTheme: buildStudioDarkTheme(),
+            themeMode: ThemeMode.system,
             onGenerateTitle: (ctx) =>
                 AppLocalizations.of(ctx)?.appTitle ??
                 lookupAppLocalizations(const Locale('en')).appTitle,
@@ -69,9 +74,21 @@ class OpenFlowHarnessApp extends StatelessWidget {
               }
               return supportedLocales.first;
             },
-            theme: studioAdaptiveDesktopTheme(context),
-            builder: (context, child) =>
-                StudioToastHost(child: child ?? const SizedBox.shrink()),
+            builder: (context, child) {
+              final adaptiveTheme = studioAdaptiveDesktopTheme(context);
+              return AnimatedTheme(
+                data: adaptiveTheme,
+                duration: studioAnimationDuration(
+                  context,
+                  const Duration(milliseconds: 240),
+                ),
+                curve: studioAnimationCurve(
+                  context,
+                  Curves.easeInOutCubicEmphasized,
+                ),
+                child: StudioToastHost(child: child ?? const SizedBox.shrink()),
+              );
+            },
             home: home,
             routes: {
               '/search': (context) {

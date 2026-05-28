@@ -20,21 +20,40 @@ class StudioBatchBar extends StatelessWidget {
     if (selectedCount <= 0) return const SizedBox.shrink();
     final tokens = StudioTokens.of(context);
     return Material(
-      elevation: 8,
+      elevation: 0,
       color: tokens.bgElevated,
       borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.sm, vertical: StudioLayoutSpacing.inlineGap),
-        child: Row(
-          children: <Widget>[
-            Text(
-              AppLocalizations.of(context)!.studioBatchSelectedCount(
-                selectedCount,
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
+          border: Border.all(color: tokens.borderSubtle),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: tokens.overlay.withValues(alpha: 0.08),
+              blurRadius: 8,
+              spreadRadius: -8,
+              offset: const Offset(0, 4),
             ),
-            const Spacer(),
-            ...actions,
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: StudioSpacing.sm,
+            vertical: StudioLayoutSpacing.inlineGap,
+          ),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: StudioSpacing.sm,
+            runSpacing: StudioSpacing.chromeActionGap,
+            children: <Widget>[
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.studioBatchSelectedCount(selectedCount),
+              ),
+              ...actions,
+            ],
+          ),
         ),
       ),
     );

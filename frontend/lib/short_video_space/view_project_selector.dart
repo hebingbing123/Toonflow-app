@@ -102,31 +102,10 @@ class _ProjectSelectorPanel extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: StudioSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: StudioDropdownButtonFormField<String>(
-                  initialValue: selectedProjectId,
-                  isExpanded: true,
-                  decoration: fieldDecoration.copyWith(
-                    labelText: l10n.shortVideoSpaceTargetProject,
-                  ),
-                  items: projectOptions
-                      .map(
-                        (project) => DropdownMenuItem<String>(
-                          value: project.id,
-                          child: Text(
-                            project.label,
-                            style: fieldTextStyle,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: loadingProjects ? null : onProjectChanged,
-                ),
-              ),
-              const SizedBox(width: StudioSpacing.sm),
-              OutlinedButton.icon(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 450;
+              final button = OutlinedButton.icon(
                 onPressed: loadingProjects ? null : onRefreshProjects,
                 icon: const Icon(Icons.refresh_outlined),
                 label: Text(
@@ -134,19 +113,70 @@ class _ProjectSelectorPanel extends StatelessWidget {
                       ? l10n.shortVideoSpaceLoading
                       : l10n.shortVideoSpaceRefreshProjects,
                 ),
-              ),
-            ],
+              );
+              final dropdown = StudioDropdownButtonFormField<String>(
+                initialValue: selectedProjectId,
+                isExpanded: true,
+                decoration: fieldDecoration.copyWith(
+                  labelText: l10n.shortVideoSpaceTargetProject,
+                ),
+                items: projectOptions
+                    .map(
+                      (project) => DropdownMenuItem<String>(
+                        value: project.id,
+                        child: Text(
+                          project.label,
+                          style: fieldTextStyle,
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: loadingProjects ? null : onProjectChanged,
+              );
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    dropdown,
+                    const SizedBox(height: StudioSpacing.sm),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: button,
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: dropdown),
+                  const SizedBox(width: StudioSpacing.sm),
+                  button,
+                ],
+              );
+            },
           ),
           if (onResetConfirmationDontShowAgain != null) ...[
             const SizedBox(height: StudioSpacing.xs),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton.icon(
+              child: TextButton(
                 onPressed: () => onResetConfirmationDontShowAgain!.call(context),
-                icon: const Icon(Icons.notifications_active_outlined, size: StudioIconSize.sm),
-                label: Text(l10n.shortVideoSpaceRestoreRiskyConfirmation),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.primary,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.notifications_active_outlined, size: StudioIconSize.sm),
+                    const SizedBox(width: StudioSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        l10n.shortVideoSpaceRestoreRiskyConfirmation,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -154,28 +184,31 @@ class _ProjectSelectorPanel extends StatelessWidget {
           const SizedBox(height: StudioSpacing.sm),
           _ModeSegmentedButton(mode: mode, onChanged: onModeChanged),
           const SizedBox(height: StudioSpacing.sm),
-          SegmentedButton<String>(
-            segments: [
-              ButtonSegment(
-                value: '9:16',
-                label: Text(l10n.shortVideoSpaceAspectRatioPortrait916),
-              ),
-              ButtonSegment(
-                value: '16:9',
-                label: Text(l10n.shortVideoSpaceAspectRatioLandscape169),
-              ),
-              ButtonSegment(
-                value: '1:1',
-                label: Text(l10n.shortVideoSpaceAspectRatioSquare11),
-              ),
-            ],
-            selected: {videoRatio},
-            onSelectionChanged: (selection) {
-              if (selection.isEmpty) {
-                return;
-              }
-              onVideoRatioChanged(selection.first);
-            },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                  value: '9:16',
+                  label: Text(l10n.shortVideoSpaceAspectRatioPortrait916),
+                ),
+                ButtonSegment(
+                  value: '16:9',
+                  label: Text(l10n.shortVideoSpaceAspectRatioLandscape169),
+                ),
+                ButtonSegment(
+                  value: '1:1',
+                  label: Text(l10n.shortVideoSpaceAspectRatioSquare11),
+                ),
+              ],
+              selected: {videoRatio},
+              onSelectionChanged: (selection) {
+                if (selection.isEmpty) {
+                  return;
+                }
+                onVideoRatioChanged(selection.first);
+              },
+            ),
           ),
           const SizedBox(height: StudioSpacing.sm),
           Text(
@@ -251,28 +284,31 @@ class _ProjectSelectorPanel extends StatelessWidget {
             style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: StudioSpacing.xs),
-          SegmentedButton<String>(
-            segments: [
-              ButtonSegment(
-                value: 'short',
-                label: Text(l10n.shortVideoSpaceDurationShort),
-              ),
-              ButtonSegment(
-                value: 'medium',
-                label: Text(l10n.shortVideoSpaceDurationMedium),
-              ),
-              ButtonSegment(
-                value: 'long',
-                label: Text(l10n.shortVideoSpaceDurationLong),
-              ),
-            ],
-            selected: {durationStrategy},
-            onSelectionChanged: (selection) {
-              if (loadingProjects || selection.isEmpty) {
-                return;
-              }
-              onDurationStrategyChanged(selection.first);
-            },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                  value: 'short',
+                  label: Text(l10n.shortVideoSpaceDurationShort),
+                ),
+                ButtonSegment(
+                  value: 'medium',
+                  label: Text(l10n.shortVideoSpaceDurationMedium),
+                ),
+                ButtonSegment(
+                  value: 'long',
+                  label: Text(l10n.shortVideoSpaceDurationLong),
+                ),
+              ],
+              selected: {durationStrategy},
+              onSelectionChanged: (selection) {
+                if (loadingProjects || selection.isEmpty) {
+                  return;
+                }
+                onDurationStrategyChanged(selection.first);
+              },
+            ),
           ),
           const SizedBox(height: StudioSpacing.sm),
           Text(

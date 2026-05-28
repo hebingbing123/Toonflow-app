@@ -314,7 +314,7 @@ class _StudioPipelineStripState extends State<StudioPipelineStrip> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.hub_outlined, size: 14, color: tokens.textMuted),
+            Icon(Icons.hub_outlined, size: StudioIconSize.xxs, color: tokens.textMuted),
             const SizedBox(width: StudioSpacing.xs - 2),
             Text(
               l10n.productPipelineStripTitle,

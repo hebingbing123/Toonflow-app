@@ -998,10 +998,11 @@ class _ProjectAssetHubCard extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final tokens = StudioTokens.of(context);
     final hub = overview.hub;
+    final narrow = MediaQuery.sizeOf(context).width < 600;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(StudioSpacing.sm),
+      padding: EdgeInsets.all(narrow ? 10.0 : StudioSpacing.sm),
       decoration: BoxDecoration(
         color: tokens.bgSurface,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -1095,12 +1096,15 @@ class _ProjectAssetHubCard extends StatelessWidget {
             const SizedBox(height: StudioSpacing.sm),
             LayoutBuilder(
               builder: (context, hubConstraints) {
-                final hubCardWidth = studioClampedPaneWidth(
-                  hubConstraints.maxWidth,
-                  fraction: 0.46,
-                  min: StudioLayoutSize.fieldStandard,
-                  max: 420,
-                );
+                final isSingleColumn = hubConstraints.maxWidth < 600;
+                final cardWidth = isSingleColumn
+                    ? hubConstraints.maxWidth
+                    : studioClampedPaneWidth(
+                        hubConstraints.maxWidth,
+                        fraction: 0.46,
+                        min: 280,
+                        max: 420,
+                      );
                 return Wrap(
               spacing: StudioSpacing.radiusComfort,
               runSpacing: StudioSpacing.radiusComfort,
@@ -1109,7 +1113,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 if (hub.characterSummaries.isNotEmpty)
                   _AssetHubListCard(
                     title: l10n.projectStudioAssetHubCharactersTitle,
-                    width: hubCardWidth,
+                    width: cardWidth,
                     children: hub.characterSummaries
                         .map(
                           (character) => _AssetHubLine(
@@ -1129,7 +1133,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                 if (hub.reusableRoleAssets.isNotEmpty)
                   _AssetHubListCard(
                     title: l10n.projectStudioAssetHubReusableRolesTitle,
-                    width: studioConstrainedDialogWidth(context, maxWidth: 420),
+                    width: cardWidth,
                     children: hub.reusableRoleAssets
                         .map(
                           (asset) => _AssetHubLine(
@@ -1486,7 +1490,7 @@ class _AssetHubListCard extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Container(
-        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+        padding: EdgeInsets.all(width < 300 ? StudioSpacing.xs : StudioSpacing.radiusComfort),
         decoration: BoxDecoration(
           color: tokens.bgInset,
           borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
@@ -1526,8 +1530,9 @@ class _AssetHubLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
+    final screenNarrow = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
+      padding: EdgeInsets.only(bottom: screenNarrow ? 4.0 : StudioLayoutSpacing.inlineGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

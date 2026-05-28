@@ -361,7 +361,7 @@ class _VoiceoverTrackPanel extends StatelessWidget {
       children: [
         if (peaks != null && peaks!.isNotEmpty)
           SizedBox(
-            height: StudioSpacing.touchTarget,
+            height: 48,
             child: CustomPaint(
               painter: _WaveformBarsPainter(
                 peaks!,

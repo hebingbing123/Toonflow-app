@@ -134,18 +134,14 @@ class JobsSectionView extends StatelessWidget {
           onPressed: model.retryingJobId == job.id
               ? null
               : () => callbacks.onRetryFailedJob(job),
-          child: Text(
-            model.retryingJobId == job.id ? '…' : l10n.jobsRetry,
-          ),
+          child: Text(model.retryingJobId == job.id ? '…' : l10n.jobsRetry),
         ),
       if (job.status == 'queued' || job.status == 'running')
         TextButton(
           onPressed: model.cancellingJobId == job.id
               ? null
               : () => callbacks.onCancelQueuedJob(job),
-          child: Text(
-            model.cancellingJobId == job.id ? '…' : l10n.jobsCancel,
-          ),
+          child: Text(model.cancellingJobId == job.id ? '…' : l10n.jobsCancel),
         ),
     ];
     return Material(
@@ -186,17 +182,24 @@ class JobsSectionView extends StatelessWidget {
                     ),
                   if (!compact) ...<Widget>[
                     const SizedBox(width: StudioSpacing.xs),
-                    Icon(Icons.chevron_right, size: StudioIconSize.md, color: tokens.textMuted),
+                    Icon(
+                      Icons.chevron_right,
+                      size: StudioIconSize.md,
+                      color: tokens.textMuted,
+                    ),
                   ],
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
+                padding: const EdgeInsets.only(
+                  top: StudioSpacing.chromeActionGap,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                      if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
+                      if (i > 0)
+                        const SizedBox(height: StudioLayoutSpacing.titleTight),
                       Text(
                         detailLines[i],
                         maxLines: 3,
@@ -255,9 +258,7 @@ class JobsSectionView extends StatelessWidget {
             onPressed: model.retryingJobId == job.id
                 ? null
                 : () => callbacks.onRetryFailedJob(job),
-            child: Text(
-              model.retryingJobId == job.id ? '…' : l10n.jobsRetry,
-            ),
+            child: Text(model.retryingJobId == job.id ? '…' : l10n.jobsRetry),
           ),
         if (job.status == 'queued' || job.status == 'running')
           TextButton(
@@ -284,7 +285,8 @@ class JobsSectionView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               for (var i = 0; i < detailLines.length; i++) ...<Widget>[
-                if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
+                if (i > 0)
+                  const SizedBox(height: StudioLayoutSpacing.titleTight),
                 Text(
                   detailLines[i],
                   maxLines: 3,
@@ -292,7 +294,7 @@ class JobsSectionView extends StatelessWidget {
                   style: detailStyle,
                 ),
               ],
-              if (compact && actionButtons.isNotEmpty) ...<Widget>[
+              if (actionButtons.isNotEmpty) ...<Widget>[
                 const SizedBox(height: StudioSpacing.xs),
                 StudioDenseActionRow(
                   spacing: StudioSpacing.xs,
@@ -310,20 +312,10 @@ class JobsSectionView extends StatelessWidget {
         onCancel: job.status == 'queued' || job.status == 'running'
             ? () => callbacks.onCancelQueuedJob(job)
             : null,
-        trailing: compact || actionButtons.isEmpty
-            ? null
-            : StudioDenseActionRow(
-                spacing: StudioSpacing.chromeActionGap,
-                expandToMaxWidth: false,
-                children: actionButtons,
-              ),
+        trailing: null,
       );
     }
-    return studioStaggeredItem(
-      index,
-      entranceKey: entranceKey,
-      child: tile,
-    );
+    return studioStaggeredItem(index, entranceKey: entranceKey, child: tile);
   }
 
   Widget _buildJobList(
@@ -381,7 +373,9 @@ class JobsSectionView extends StatelessWidget {
         ),
         StudioToolbarButton(
           label: l10n.jobsLoadFailed,
-          onPressed: model.loadingJobs ? null : callbacks.onLoadJobsStatusFailed,
+          onPressed: model.loadingJobs
+              ? null
+              : callbacks.onLoadJobsStatusFailed,
         ),
       ],
     );
@@ -481,7 +475,10 @@ class JobsSectionView extends StatelessWidget {
     }
     final l10n = resolveAppLocalizationsForErrors(context);
     return Padding(
-      padding: const EdgeInsets.only(top: StudioSpacing.radiusComfort, bottom: StudioSpacing.xs),
+      padding: const EdgeInsets.only(
+        top: StudioSpacing.radiusComfort,
+        bottom: StudioSpacing.xs,
+      ),
       child: Center(
         child: Text(
           l10n.jobsCountLabel(_visibleJobs().length),
@@ -539,7 +536,9 @@ class JobsSectionView extends StatelessWidget {
             ),
             FilledButton.tonal(
               style: studioFormTonalButtonStyle(context),
-              onPressed: model.loadingJobKinds ? null : callbacks.onLoadJobKinds,
+              onPressed: model.loadingJobKinds
+                  ? null
+                  : callbacks.onLoadJobKinds,
               child: Text(model.loadingJobKinds ? '…' : l10n.jobsLoadKinds),
             ),
             FilledButton.tonal(

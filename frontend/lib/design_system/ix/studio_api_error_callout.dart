@@ -38,7 +38,8 @@ class StudioApiErrorCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n =
+        AppLocalizations.of(context) ?? lookupAppLocalizations(const Locale('en'));
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final errorColor = theme.colorScheme.error;
@@ -77,7 +78,7 @@ class StudioApiErrorCallout extends StatelessWidget {
             tapTargetSize: MaterialTapTargetSize.padded,
             visualDensity: VisualDensity.standard,
           ),
-          icon: const Icon(Icons.refresh_rounded, size: 14),
+          icon: const Icon(Icons.refresh_rounded, size: StudioIconSize.xxs),
           label: Text(l10n.studioRetry),
         );
 
@@ -122,7 +123,9 @@ class StudioApiErrorCallout extends StatelessWidget {
                   width: subtle ? 1.5 : 2,
                   decoration: BoxDecoration(
                     color: errorColor.withValues(alpha: subtle ? 0.76 : 0.88),
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
+                    borderRadius: BorderRadius.circular(
+                      StudioSpacing.radiusPill,
+                    ),
                   ),
                 ),
               ),
@@ -144,7 +147,9 @@ class StudioApiErrorCallout extends StatelessWidget {
                   children: <Widget>[
                     subtle
                         ? Padding(
-                            padding: const EdgeInsets.only(top: StudioSpacing.radiusHairline),
+                            padding: const EdgeInsets.only(
+                              top: StudioSpacing.radiusHairline,
+                            ),
                             child: Icon(
                               Icons.error_outline,
                               size: StudioIconSize.xs,
@@ -190,8 +195,10 @@ class StudioApiErrorCallout extends StatelessWidget {
                               ),
                               if (compact && onDismiss != null) dismissButton,
                               if (!compact && (canRetry || onDismiss != null))
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                Wrap(
+                                  spacing: StudioSpacing.xs,
+                                  runSpacing: StudioSpacing.xs,
+                                  alignment: WrapAlignment.end,
                                   children: <Widget>[
                                     if (canRetry) retryButton,
                                     if (onDismiss != null) dismissButton,

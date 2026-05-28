@@ -436,7 +436,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.verified_outlined),
                 label: Text(l10n.shortVideoPublishPanelConfirmSemiAuto),
@@ -549,7 +549,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.note_add_outlined),
                       label: Text(l10n.shortVideoPublishPanelBootstrapDraft),
@@ -566,7 +566,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.cloud_upload_outlined),
                       label: Text(

@@ -77,7 +77,7 @@ class NovelCrawlDesktopDownloadHintPanel extends StatelessWidget {
               Icon(
                 isWeb ? Icons.laptop_mac_outlined : Icons.phone_iphone_outlined,
                 color: tokens.primary,
-                size: 22,
+                size: StudioIconSize.xl,
               ),
               const SizedBox(width: StudioLayoutSpacing.inlineGap),
               Expanded(

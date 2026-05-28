@@ -433,7 +433,7 @@ class _VendorCardState extends State<_VendorCard> {
                       const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     else
                       Switch(
@@ -449,7 +449,7 @@ class _VendorCardState extends State<_VendorCard> {
               ),
             ),
             if (_expanded) ...<Widget>[
-              const Divider(height: StudioSpacing.sm),
+              const Divider(height: 16),
               TextField(
                 controller: _baseUrlCtrl,
                 onChanged: (_) => setState(() {}),

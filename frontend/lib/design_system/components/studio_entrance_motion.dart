@@ -83,10 +83,7 @@ class StudioHero extends StatelessWidget {
       placeholderBuilder: placeholder == null
           ? null
           : (context, size, child) => placeholder!,
-      child: Material(
-        type: MaterialType.transparency,
-        child: child,
-      ),
+      child: Material(type: MaterialType.transparency, child: child),
     );
   }
 }
@@ -123,10 +120,7 @@ class StudioFadeSwitcher extends StatelessWidget {
         );
       },
       layoutBuilder: (current, previous) => current ?? const SizedBox.shrink(),
-      child: KeyedSubtree(
-        key: ValueKey<Object>(transitionKey),
-        child: child,
-      ),
+      child: KeyedSubtree(key: ValueKey<Object>(transitionKey), child: child),
     );
   }
 }
@@ -151,8 +145,9 @@ class StudioCrossFade extends StatelessWidget {
     return AnimatedCrossFade(
       firstChild: primary,
       secondChild: secondary,
-      crossFadeState:
-          showPrimary ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: showPrimary
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
       duration: studioAnimationDuration(context, duration),
       sizeCurve: studioAnimationCurve(context, Curves.easeInOut),
     );
@@ -230,11 +225,7 @@ class StudioAnimatedNumber extends StatelessWidget {
           ),
         );
       },
-      child: Text(
-        value,
-        key: ValueKey<String>(value),
-        style: style,
-      ),
+      child: Text(value, key: ValueKey<String>(value), style: style),
     );
   }
 }
@@ -294,10 +285,7 @@ class _StudioIndexedPaneFadeState extends State<StudioIndexedPaneFade>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: widget.child,
-    );
+    return FadeTransition(opacity: _opacity, child: widget.child);
   }
 }
 
@@ -317,7 +305,8 @@ class StudioStaggeredEntrance extends StatefulWidget {
   final Object? entranceKey;
 
   @override
-  State<StudioStaggeredEntrance> createState() => _StudioStaggeredEntranceState();
+  State<StudioStaggeredEntrance> createState() =>
+      _StudioStaggeredEntranceState();
 }
 
 class _StudioStaggeredEntranceState extends State<StudioStaggeredEntrance>
@@ -374,8 +363,10 @@ class _StudioStaggeredEntranceState extends State<StudioStaggeredEntrance>
     _controller.value = 0;
     final cappedIndex = widget.index.clamp(0, 12);
     final delay = Duration(
-      milliseconds: (cappedIndex * studioStaggerItemDelay.inMilliseconds)
-          .clamp(0, studioStaggerMaxDelay.inMilliseconds),
+      milliseconds: (cappedIndex * studioStaggerItemDelay.inMilliseconds).clamp(
+        0,
+        studioStaggerMaxDelay.inMilliseconds,
+      ),
     );
     _staggerTimer = Timer(delay, () {
       if (!mounted) return;
@@ -401,10 +392,7 @@ class _StudioStaggeredEntranceState extends State<StudioStaggeredEntrance>
     }
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _offset,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _offset, child: widget.child),
     );
   }
 }

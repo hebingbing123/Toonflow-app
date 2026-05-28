@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/short_video_readiness_localized.dart';
@@ -40,7 +44,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
     final controller = TextEditingController(
       text: feedback?.comment ?? '',
     );
-    final note = await showDialog<String?>(
+    final note = await showStudioDialog<String?>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
@@ -107,9 +111,12 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
       child: InkWell(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
-        onTap: () => context.go(
-          '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
-        ),
+        onTap: () {
+          unawaited(studioLightImpact());
+          context.go(
+            '/projects/$projectNumericId/${StudioStep.storyboard.slug}',
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(StudioLayoutSpacing.stackMedium),
           child: Column(
@@ -138,6 +145,7 @@ class StudioReviewPackStoryboardRow extends StatelessWidget {
                   PopupMenuButton<ReviewPackFeedbackStatus>(
                     tooltip: l10n.studioReviewPackFeedbackMenuTooltip,
                     onSelected: (ReviewPackFeedbackStatus value) {
+                      unawaited(studioMediumImpact());
                       CreatorJourneyTelemetry.record(
                         CreatorJourneyEvent(
                           'review_pack_feedback_set',

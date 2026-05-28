@@ -165,10 +165,9 @@ class ExportTaskProgress {
           ? ExportTaskStage.fromString(json['stage'] as String)
           : null,
       progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
-      errorMessage: json['error_message'] as String? ??
-          json['errorMessage'] as String?,
-      outputUrl:
-          json['output_url'] as String? ?? json['outputUrl'] as String?,
+      errorMessage:
+          json['error_message'] as String? ?? json['errorMessage'] as String?,
+      outputUrl: json['output_url'] as String? ?? json['outputUrl'] as String?,
     );
   }
 
@@ -243,7 +242,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(describeUserVisibleApiErrorResolved(context, e));
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(
+          describeUserVisibleApiErrorResolved(context, e),
+        );
       });
     }
   }
@@ -284,7 +285,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     String? outputUrl;
     final result = job.result;
     if (result != null) {
-      outputUrl = result['output_url'] as String? ??
+      outputUrl =
+          result['output_url'] as String? ??
           result['file_url'] as String? ??
           result['url'] as String?;
     }
@@ -331,7 +333,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _cancelling = false;
-        _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(describeUserVisibleApiErrorResolved(context, e));
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(
+          describeUserVisibleApiErrorResolved(context, e),
+        );
       });
     }
   }
@@ -433,8 +437,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                         progress.status == ExportTaskStatus.failed
                             ? theme.colorScheme.error
                             : progress.status == ExportTaskStatus.completed
-                                ? StudioTokens.of(context).success
-                                : theme.colorScheme.primary,
+                            ? StudioTokens.of(context).success
+                            : theme.colorScheme.primary,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.sm),
@@ -466,11 +470,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                     ),
                     const SizedBox(height: StudioSpacing.sm),
                     Container(
-                      padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                      padding: const EdgeInsets.all(
+                        StudioSpacing.radiusComfort,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(StudioSpacing.radiusDense),
+                        borderRadius: BorderRadius.circular(
+                          StudioSpacing.radiusDense,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -505,9 +512,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
             const SizedBox(height: StudioSpacing.sm),
             SelectableText(
-              l10n.shortVideoSpaceDialogExportProgressTaskId(
-                widget.taskId,
-              ),
+              l10n.shortVideoSpaceDialogExportProgressTaskId(widget.taskId),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: tokens.textSecondary,
                 fontFamily: 'monospace',
@@ -530,16 +535,16 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                   ),
                 ),
                 children: [
-                SelectableText(
-                  l10n.shortVideoSpaceDialogExportProgressTaskId(
-                    widget.taskId,
+                  SelectableText(
+                    l10n.shortVideoSpaceDialogExportProgressTaskId(
+                      widget.taskId,
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: tokens.textSecondary,
+                      fontFamily: 'monospace',
+                    ),
                   ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: tokens.textSecondary,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
+                ],
               ),
             ),
           ],
@@ -561,7 +566,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                    child: CircularProgressIndicator(
+                      strokeWidth: StudioControlSize.progressStroke,
+                    ),
                   )
                 : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
           ),
@@ -620,9 +627,11 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         if (progress.stage != null) {
           switch (progress.stage!) {
             case ExportTaskStage.initializing:
-              return l10n.shortVideoSpaceDialogExportProgressMessageInitializing;
+              return l10n
+                  .shortVideoSpaceDialogExportProgressMessageInitializing;
             case ExportTaskStage.loadingAssets:
-              return l10n.shortVideoSpaceDialogExportProgressMessageLoadingAssets;
+              return l10n
+                  .shortVideoSpaceDialogExportProgressMessageLoadingAssets;
             case ExportTaskStage.encoding:
               return l10n.shortVideoSpaceDialogExportProgressMessageEncoding;
             case ExportTaskStage.uploading:
@@ -635,7 +644,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       case ExportTaskStatus.completed:
         return l10n.shortVideoSpaceDialogExportProgressMessageCompleted;
       case ExportTaskStatus.failed:
-        return progress.errorMessage ?? l10n.shortVideoSpaceDialogExportProgressMessageFailed;
+        return progress.errorMessage ??
+            l10n.shortVideoSpaceDialogExportProgressMessageFailed;
       case ExportTaskStatus.cancelled:
         return l10n.shortVideoSpaceDialogExportProgressMessageCancelled;
     }

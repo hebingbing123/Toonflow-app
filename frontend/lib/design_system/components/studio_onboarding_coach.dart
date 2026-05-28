@@ -93,20 +93,26 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
             right: 24,
             bottom: 24,
             child: Material(
-              elevation: 12,
+              elevation: 4,
               borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
               color: StudioTokens.of(context).bgElevated,
               child: Padding(
                 padding: const EdgeInsets.all(StudioSpacing.sm),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: StudioLayoutSize.fieldStandard),
+                  constraints: const BoxConstraints(
+                    maxWidth: StudioLayoutSize.fieldStandard,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(messages[_step.clamp(0, messages.length - 1)]),
                       const SizedBox(height: StudioSpacing.sm),
-                      Row(
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.xs,
                         children: <Widget>[
                           Text(
                             l10n.studioOnboardingStepCounter(
@@ -114,7 +120,6 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
                               messages.length,
                             ),
                           ),
-                          const Spacer(),
                           if (_step > 0)
                             TextButton(
                               onPressed: () => setState(() => _step--),

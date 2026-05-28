@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
 import 'studio_typography.dart';
+import 'theme.dart';
 
 /// Studio desktop typography stays viewport-stable.
 ///
@@ -10,5 +10,9 @@ import 'studio_typography.dart';
 /// rhythm stable and switch only between a few tuned desktop profiles.
 ThemeData studioAdaptiveDesktopTheme(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;
-  return buildStudioDarkTheme(typography: studioTypographyForWidth(width));
+  final brightness = MediaQuery.platformBrightnessOf(context);
+  return buildStudioTheme(
+    brightness: brightness,
+    typography: studioTypographyForWidth(width),
+  );
 }

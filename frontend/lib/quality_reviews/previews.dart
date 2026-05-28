@@ -211,7 +211,8 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
         (scopeInsightRows?.isNotEmpty ?? false) ||
         (tokenEfficiencyRows?.isNotEmpty ?? false) ||
         (badCaseStats?.isNotEmpty ?? false);
-    final loading = !hasAnything &&
+    final loading =
+        !hasAnything &&
         (dashboardLoadState == StudioLoadState.loading || loadingDashboard);
     final isEmpty = !hasAnything && !loading;
 
@@ -222,8 +223,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           : null,
       onRetry: onRefreshDashboard,
       isEmpty: isEmpty,
-      empty: studioPresentation &&
-              dashboardLoadState == StudioLoadState.success
+      empty: studioPresentation && dashboardLoadState == StudioLoadState.success
           ? const SizedBox.shrink()
           : StudioEmptyState(
               title: l10n.qualityReviewsOpsDashboardTitle,
@@ -241,142 +241,147 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
           ? const EdgeInsets.symmetric(vertical: StudioSpacing.xs)
           : null,
       child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (refreshSummary != null) ...[
-          Text(
-            refreshSummary!,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: mutedColor),
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (freshnessMeta != null)
-          StudioFreshnessBanner(
-            meta: freshnessMeta!,
-            onRefresh: onRefreshDashboard,
-            loading: loadingDashboard,
-          ),
-        if (dashboardSummary != null) ...[
-          SelectableText(
-            dashboardSummary!,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (qualityStatsRows?.isNotEmpty == true) ...[
-          Text(
-            l10n.qualityReviewsTargetType,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          Wrap(
-            spacing: StudioSpacing.xs,
-            runSpacing: StudioSpacing.xs,
-            children: qualityStatsRows!
-                .take(4)
-                .map(
-                  (row) => StudioChip(
-                    label: Text(
-                      l10n.qualityReviewsTargetTypeChip(
-                        qualityTargetTypeLabel(row.targetType, l10n),
-                        row.passRatePercent.toStringAsFixed(1),
-                        row.totalReviews,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (refreshSummary != null) ...[
+            Text(
+              refreshSummary!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: mutedColor),
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (freshnessMeta != null)
+            StudioFreshnessBanner(
+              meta: freshnessMeta!,
+              onRefresh: onRefreshDashboard,
+              loading: loadingDashboard,
+            ),
+          if (dashboardSummary != null) ...[
+            SelectableText(
+              dashboardSummary!,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (qualityStatsRows?.isNotEmpty == true) ...[
+            Text(
+              l10n.qualityReviewsTargetType,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            Wrap(
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
+              children: qualityStatsRows!
+                  .take(4)
+                  .map(
+                    (row) => StudioChip(
+                      label: Text(
+                        l10n.qualityReviewsTargetTypeChip(
+                          qualityTargetTypeLabel(row.targetType, l10n),
+                          row.passRatePercent.toStringAsFixed(1),
+                          row.totalReviews,
+                        ),
                       ),
                     ),
-                  ),
-                )
-                .toList(growable: false),
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (stageGradeRows?.isNotEmpty == true) ...[
-          Text(
-            l10n.qualityReviewsStageGrade,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          Wrap(
-            spacing: StudioSpacing.xs,
-            runSpacing: StudioSpacing.xs,
-            children: stageGradeRows!
-                .take(4)
-                .map(
-                  (row) => StudioChip(
-                    label: Text(
-                      '${row.stage} A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount}',
-                    ),
-                  ),
-                )
-                .toList(growable: false),
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (badCaseStats?.isNotEmpty == true) ...[
-          Text(
-            l10n.qualityReviewsBadCaseHotspots,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          Wrap(
-            spacing: StudioSpacing.xs,
-            runSpacing: StudioSpacing.xs,
-            children: badCaseStats!
-                .take(4)
-                .map(
-                  (row) => StudioChip(
-                    label: Text(
-                      l10n.qualityReviewsBadCaseChip(
-                        row.badCaseCategory ?? l10n.qualityReviewsUncategorized,
-                        row.count,
+                  )
+                  .toList(growable: false),
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (stageGradeRows?.isNotEmpty == true) ...[
+            Text(
+              l10n.qualityReviewsStageGrade,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            Wrap(
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
+              children: stageGradeRows!
+                  .take(4)
+                  .map(
+                    (row) => StudioChip(
+                      label: Text(
+                        '${row.stage} A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount}',
                       ),
                     ),
-                  ),
-                )
-                .toList(growable: false),
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (scopeInsightRows?.isNotEmpty == true) ...[
-          Text(
-            l10n.qualityReviewsScopeLeaderboard,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          ...scopeInsightRows!
-              .take(3)
-              .map(
-                (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
-                  child: Text(
-                    '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                  .toList(growable: false),
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (badCaseStats?.isNotEmpty == true) ...[
+            Text(
+              l10n.qualityReviewsBadCaseHotspots,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            Wrap(
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
+              children: badCaseStats!
+                  .take(4)
+                  .map(
+                    (row) => StudioChip(
+                      label: Text(
+                        l10n.qualityReviewsBadCaseChip(
+                          row.badCaseCategory ??
+                              l10n.qualityReviewsUncategorized,
+                          row.count,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (scopeInsightRows?.isNotEmpty == true) ...[
+            Text(
+              l10n.qualityReviewsScopeLeaderboard,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            ...scopeInsightRows!
+                .take(3)
+                .map(
+                  (row) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: StudioSpacing.chromeActionGap,
+                    ),
+                    child: Text(
+                      '${row.scopeLabel} · pass=${row.passRatePercent.toStringAsFixed(1)}% · total=${row.totalReviews} · bad_case=${row.badCaseCount}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ),
                 ),
-              ),
-          const SizedBox(height: StudioSpacing.xs),
-        ],
-        if (tokenEfficiencyRows?.isNotEmpty == true) ...[
-          Text(
-            l10n.qualityReviewsTokenEfficiency,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          ...tokenEfficiencyRows!
-              .take(3)
-              .map(
-                (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
-                  child: Text(
-                    '${qualityTargetTypeLabel(row.targetType, l10n)} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
-                    style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: StudioSpacing.xs),
+          ],
+          if (tokenEfficiencyRows?.isNotEmpty == true) ...[
+            Text(
+              l10n.qualityReviewsTokenEfficiency,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            ...tokenEfficiencyRows!
+                .take(3)
+                .map(
+                  (row) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: StudioSpacing.chromeActionGap,
+                    ),
+                    child: Text(
+                      '${qualityTargetTypeLabel(row.targetType, l10n)} · prompt=${row.avgPromptChars.toStringAsFixed(0)} · memory=${row.avgMemoryStyleChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ),
                 ),
-              ),
+          ],
         ],
-      ],
-    ),
+      ),
     );
   }
 }
@@ -484,6 +489,7 @@ class QualityReviewsListPreview extends StatelessWidget {
       color: StudioTokens.of(context).textSecondary,
       height: 1.35,
     );
+    final previewReviews = reviews.take(8).toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -494,52 +500,66 @@ class QualityReviewsListPreview extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ...studioStaggeredChildren(
-          reviews.take(8).map((review) {
-          final detailLines = <String>[
-            review.id,
-            if (review.targetId != null && review.targetId!.isNotEmpty)
-              l10n.qualityReviewsPreviewDetailTarget(review.targetId!),
-            if (review.passed != null)
-              l10n.qualityReviewsPreviewDetailPassed(review.passed!.toString()),
-            if (review.isBadCase) l10n.qualityReviewsPreviewDetailBadCase,
-          ];
-          return StudioListRow(
-            dense: !compact,
-            contentPadding: EdgeInsets.zero,
-            minVerticalPadding: compact ? 10 : 6,
-            title: Text(
-              l10n.qualityReviewsPreviewListTitle(
-                qualityTargetTypeLabel(review.targetType, l10n),
-                qualitySourceLabel(review.source, l10n),
-                review.overallScore?.toString() ??
-                    l10n.qualityReviewsAbbrevNotAvailable,
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: previewReviews.length,
+          itemBuilder: (context, index) {
+            final review = previewReviews[index];
+            final detailLines = <String>[
+              review.id,
+              if (review.targetId != null && review.targetId!.isNotEmpty)
+                l10n.qualityReviewsPreviewDetailTarget(review.targetId!),
+              if (review.passed != null)
+                l10n.qualityReviewsPreviewDetailPassed(
+                  review.passed!.toString(),
+                ),
+              if (review.isBadCase) l10n.qualityReviewsPreviewDetailBadCase,
+            ];
+            return studioStaggeredItem(
+              index,
+              entranceKey: reviews.length,
+              child: StudioListRow(
+                dense: !compact,
+                contentPadding: EdgeInsets.zero,
+                minVerticalPadding: compact ? 10 : 6,
+                title: Text(
+                  l10n.qualityReviewsPreviewListTitle(
+                    qualityTargetTypeLabel(review.targetType, l10n),
+                    qualitySourceLabel(review.source, l10n),
+                    review.overallScore?.toString() ??
+                        l10n.qualityReviewsAbbrevNotAvailable,
+                  ),
+                  maxLines: compact ? 2 : 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(
+                    top: StudioSpacing.chromeActionGap,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      for (var i = 0; i < detailLines.length; i++) ...[
+                        if (i > 0)
+                          const SizedBox(
+                            height: StudioLayoutSpacing.titleTight,
+                          ),
+                        Text(
+                          detailLines[i],
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: detailStyle,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                trailing: compact ? null : const Icon(Icons.chevron_right),
+                onTap: () => onSelectQualityReview(review),
               ),
-              maxLines: compact ? 2 : 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  for (var i = 0; i < detailLines.length; i++) ...[
-                    if (i > 0) const SizedBox(height: StudioLayoutSpacing.titleTight),
-                    Text(
-                      detailLines[i],
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: detailStyle,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            trailing: compact ? null : const Icon(Icons.chevron_right),
-            onTap: () => onSelectQualityReview(review),
-          );
-          }),
-          entranceKey: reviews.length,
+            );
+          },
         ),
       ],
     );

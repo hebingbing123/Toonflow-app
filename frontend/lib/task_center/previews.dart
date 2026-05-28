@@ -194,7 +194,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
       height: 1.35,
     );
     final grouped = groupJobsByPhase(jobs);
-    final tiles = <Widget>[];
+    final previewItems = <_TaskJobPreviewItem>[];
     var shown = 0;
     for (final phase in taskCenterPhaseDisplayOrder) {
       final phaseJobs = grouped[phase];
@@ -202,13 +202,9 @@ class TaskCenterJobsPreview extends StatelessWidget {
         continue;
       }
       final phaseLabel = taskCenterShortVideoStageLabel(l10n, phaseJobs.first);
-      tiles.add(
-        Padding(
-          padding: const EdgeInsets.only(top: StudioLayoutSpacing.stackMedium),
-          child: Text(
-            '$phaseLabel (${phaseJobs.length})',
-            style: studioPaneTitleStyle(context),
-          ),
+      previewItems.add(
+        _TaskJobPreviewItem.sectionHeader(
+          header: '$phaseLabel (${phaseJobs.length})',
         ),
       );
       for (final job in phaseJobs) {
@@ -226,73 +222,11 @@ class TaskCenterJobsPreview extends StatelessWidget {
           if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
             l10n.taskCenterFailureReason(job.errorMessage!),
         ];
-        final tokens = StudioTokens.of(context);
-        tiles.add(
-          Material(
-            color: StudioPrimitives.transparent,
-            child: InkWell(
-              onTap: () => onSelectTaskJob(job),
-              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-              child: Container(
-                margin: const EdgeInsets.only(top: StudioSpacing.xs),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: StudioSpacing.radiusComfort,
-                  vertical: StudioSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: tokens.bgSurface.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(
-                    StudioSpacing.radiusButton,
-                  ),
-                  border: Border.all(color: tokens.borderSubtle),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            title,
-                            maxLines: compact ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: studioCardTitleStyle(context),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: StudioSpacing.chromeActionGap),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var i = 0; i < detailLines.length; i++)
-                                  ...<Widget>[
-                                    if (i > 0)
-                                      const SizedBox(height: StudioLayoutSpacing.titleTight),
-                                    Text(
-                                      detailLines[i],
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: detailStyle,
-                                    ),
-                                  ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!compact) ...<Widget>[
-                      const SizedBox(width: StudioSpacing.xs),
-                      Icon(
-                        Icons.chevron_right,
-                        size: StudioIconSize.md,
-                        color: tokens.textMuted,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+        previewItems.add(
+          _TaskJobPreviewItem.job(
+            job: job,
+            title: title,
+            detailLines: detailLines,
           ),
         );
       }
@@ -310,10 +244,125 @@ class TaskCenterJobsPreview extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ...tiles,
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: previewItems.length,
+          itemBuilder: (context, index) {
+            final item = previewItems[index];
+            if (item.isHeader) {
+              return Padding(
+                padding: const EdgeInsets.only(
+                  top: StudioLayoutSpacing.stackMedium,
+                ),
+                child: Text(
+                  item.headerLabel!,
+                  style: studioPaneTitleStyle(context),
+                ),
+              );
+            }
+            final tokens = StudioTokens.of(context);
+            final job = item.job!;
+            return Material(
+              color: StudioPrimitives.transparent,
+              child: InkWell(
+                onTap: () => onSelectTaskJob(job),
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+                child: Container(
+                  margin: const EdgeInsets.only(top: StudioSpacing.xs),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: StudioSpacing.radiusComfort,
+                    vertical: StudioSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: tokens.bgSurface.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(
+                      StudioSpacing.radiusButton,
+                    ),
+                    border: Border.all(color: tokens.borderSubtle),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              item.title!,
+                              maxLines: compact ? 2 : 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: studioCardTitleStyle(context),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: StudioSpacing.chromeActionGap,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (
+                                    var i = 0;
+                                    i < item.detailLines!.length;
+                                    i++
+                                  ) ...<Widget>[
+                                    if (i > 0)
+                                      const SizedBox(
+                                        height: StudioLayoutSpacing.titleTight,
+                                      ),
+                                    Text(
+                                      item.detailLines![i],
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: detailStyle,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!compact) ...<Widget>[
+                        const SizedBox(width: StudioSpacing.xs),
+                        Icon(
+                          Icons.chevron_right,
+                          size: StudioIconSize.md,
+                          color: tokens.textMuted,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
+}
+
+class _TaskJobPreviewItem {
+  const _TaskJobPreviewItem.sectionHeader({required String header})
+    : isHeader = true,
+      headerLabel = header,
+      job = null,
+      title = null,
+      detailLines = null;
+
+  const _TaskJobPreviewItem.job({
+    required this.job,
+    required this.title,
+    required this.detailLines,
+  }) : isHeader = false,
+       headerLabel = null;
+
+  final bool isHeader;
+  final String? headerLabel;
+  final JobRow? job;
+  final String? title;
+  final List<String>? detailLines;
 }
 
 /// Shows the compact project/category/task summaries above the workbench entry.

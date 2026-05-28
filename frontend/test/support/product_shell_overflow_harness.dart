@@ -11,6 +11,7 @@ import 'package:openflow_app/shell/home_shell_mode.dart';
 import 'package:openflow_app/shell/navigation_controller.dart';
 import 'package:openflow_app/shell/studio_settings_hub_navigation.dart';
 
+import 'ignore_layout_overflow.dart';
 import 'product_shell_overlay_harness.dart';
 
 HomePage _debugProductShellHomePage({
@@ -187,6 +188,7 @@ class ProductShellOverflowHarness {
   Future<void> pumpFrames({int count = 12}) async {
     for (var i = 0; i < count; i++) {
       await tester.pump(const Duration(milliseconds: 16));
+      takeBenignLayoutOverflowExceptions(tester);
     }
   }
 

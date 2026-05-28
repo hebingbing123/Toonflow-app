@@ -68,31 +68,59 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
   final Color sidebarBorder;
 
   static const StudioTokens dark = StudioTokens(
-    bgBase: Color(0xFF070D15),
-    bgSurface: Color(0xFF101825),
-    bgElevated: Color(0xFF152033),
-    bgInset: Color(0xFF0A1018),
-    glass: Color(0xBF0C1523),
-    glassBorder: Color(0x244D86C6),
-    textPrimary: Color(0xFFE8F1FF),
-    textSecondary: Color(0xFFA2B4CD),
-    textMuted: Color(0xFF7A8AA5),  // Improved from #667892 for better contrast (5.1:1 on bgElevated)
-    borderSubtle: Color(0xFF1B2A3E),
-    borderDefault: Color(0xFF29435E),
+    bgBase: Color(0xFF121212),
+    bgSurface: Color(0xFF181C22),
+    bgElevated: Color(0xFF20252D),
+    bgInset: Color(0xFF15181D),
+    glass: Color(0xE614181F),
+    glassBorder: Color(0x334A5F74),
+    textPrimary: Color(0xFFF1F5F9),
+    textSecondary: Color(0xFFBCC8D7),
+    textMuted: Color(0xFF8A96A6),
+    borderSubtle: Color(0xFF2A313A),
+    borderDefault: Color(0xFF3A4552),
     primary: Color(0xFF7C97FF),
-    primarySoft: Color(0xFF162A47),
+    primarySoft: Color(0xFF1A2436),
     accent: Color(0xFF34C8F0),
-    accentSoft: Color(0xFF0C303A),
+    accentSoft: Color(0xFF112B31),
     signal: Color(0xFF56B7FF),
     danger: Color(0xFFFF6D7A),
     warning: Color(0xFFFFB347),
     success: Color(0xFF35D49B),
-    overlay: Color(0xB3000000),
-    surfaceHighlight: Color(0xFF1D3650),
+    overlay: Color(0x99000000),
+    surfaceHighlight: Color(0xFF334253),
     panelGlow: Color(0xFF4E7FFF),
     panelGlowSecondary: Color(0xFF2CC3E6),
-    sidebar: Color(0xFF0A1320),
-    sidebarBorder: Color(0xFF15273B),
+    sidebar: Color(0xFF141922),
+    sidebarBorder: Color(0xFF252D37),
+  );
+
+  static const StudioTokens light = StudioTokens(
+    bgBase: Color(0xFFF3F6FA),
+    bgSurface: Color(0xFFFFFFFF),
+    bgElevated: Color(0xFFF8FAFD),
+    bgInset: Color(0xFFEAF0F6),
+    glass: Color(0xE6FFFFFF),
+    glassBorder: Color(0x3382A3BE),
+    textPrimary: Color(0xFF0F172A),
+    textSecondary: Color(0xFF475569),
+    textMuted: Color(0xFF64748B),
+    borderSubtle: Color(0xFFD7E0EA),
+    borderDefault: Color(0xFFB9C7D6),
+    primary: Color(0xFF4F79FF),
+    primarySoft: Color(0xFFDDE6FF),
+    accent: Color(0xFF0EA5C6),
+    accentSoft: Color(0xFFDDF8FC),
+    signal: Color(0xFF2980FF),
+    danger: Color(0xFFDC4F63),
+    warning: Color(0xFFF59E0B),
+    success: Color(0xFF10B981),
+    overlay: Color(0x29000000),
+    surfaceHighlight: Color(0xFFC9D5E2),
+    panelGlow: Color(0xFF6F92FF),
+    panelGlowSecondary: Color(0xFF39BCD9),
+    sidebar: Color(0xFFF1F5FA),
+    sidebarBorder: Color(0xFFD8E1EB),
   );
 
   static StudioTokens of(BuildContext context) {
@@ -196,6 +224,7 @@ abstract final class StudioSpacing {
   static const double sm = 16;
   static const double md = 24;
   static const double lg = 32;
+
   /// Minimum touch target size for tappable controls (Material guidance).
   static const double touchTarget = 48;
   static const double radiusButton = 10;
@@ -234,10 +263,12 @@ abstract final class StudioSpacing {
 
 /// Icon glyph sizes in chrome, lists, and toolbars.
 abstract final class StudioIconSize {
+  static const double xxs = 14;
   static const double xs = 16;
   static const double sm = 18;
   static const double md = 20;
   static const double lg = 24;
+  static const double xl = 22;
 }
 
 /// Hairline chrome and inline progress affordances.

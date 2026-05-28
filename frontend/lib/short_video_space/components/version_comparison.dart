@@ -703,7 +703,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.download, size: StudioIconSize.sm),
                       label: Text(l10n.shortVideoVersionComparisonExportReport),

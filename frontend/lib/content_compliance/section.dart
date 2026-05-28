@@ -150,7 +150,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
 
   Widget _buildQueueLoadingSkeleton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: StudioSpacing.radiusComfort),
       child: DecoratedBox(
         decoration: studioInsetPanelDecoration(context),
         child: const Padding(
@@ -158,7 +158,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              StudioSkeleton(height: StudioLayoutSize.skeletonLineTall),
+              StudioSkeleton(height: 18),
               SizedBox(height: StudioSpacing.sm),
               StudioSkeleton(height: 72),
               SizedBox(height: StudioSpacing.sm),
@@ -177,7 +177,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     final tokens = StudioTokens.of(context);
     final queue = widget.controller.queue;
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: StudioSpacing.sm),
       child: DecoratedBox(
         decoration:
             studioInsetPanelDecoration(
@@ -293,7 +293,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.report_outlined),
                       label: Text(
@@ -384,7 +384,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 _buildQueueLoadingSkeleton(context)
               else if (queue == null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: StudioSpacing.sm),
                   child: StudioEmptyState.emptyData(
                     title: l10n.contentComplianceQueueTitle,
                     subtitle: l10n.contentComplianceIntro,
@@ -506,7 +506,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         children: sortedAlerts
                             .map(
                               (alert) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(StudioLayoutSpacing.inlineGap),
@@ -1082,7 +1082,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   : () => _applyOwnerFilter(owner),
                               style: OutlinedButton.styleFrom(
                                 alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                               ).merge(studioFormSecondaryButtonStyle(context)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1193,7 +1193,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   : () => _applyWorkspaceFilter(workspace),
                               style: OutlinedButton.styleFrom(
                                 alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                               ).merge(studioFormSecondaryButtonStyle(context)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1241,7 +1241,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 const SizedBox(height: StudioSpacing.xs),
                 if (queue.items.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(vertical: StudioSpacing.md),
                     child: StudioEmptyState.emptyData(
                       title: l10n.contentComplianceQueueEmpty,
                       icon: Icons.fact_check_outlined,
@@ -1260,7 +1260,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.inlineGap),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
                         decoration: BoxDecoration(
                           color: tokens.bgSurface.withValues(alpha: 0.92),
                           border: Border.all(color: tokens.borderSubtle),

@@ -148,64 +148,65 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       loadingPlaceholder: StudioLoadingPlaceholder.list,
       loadingItemCount: 3,
       child: Card(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // History rows (Column avoids nested ListView shrinkWrap scroll issues)
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              for (var i = 0; i < _history.length; i++) ...<Widget>[
-                studioStaggeredItem(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // History rows (Column avoids nested ListView shrinkWrap scroll issues)
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _history.length,
+              itemBuilder: (context, i) {
+                return studioStaggeredItem(
                   i,
                   entranceKey: _history.length,
                   child: StudioListRow(
-                  dense: true,
-                  leading: const Icon(Icons.history, size: StudioIconSize.md),
-                  title: Text(
-                    _history[i].query,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    l10n.globalSearchResultRows(_history[i].resultCount),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  trailing: Text(
-                    _formatTime(_history[i].searchedAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: StudioTokens.of(context).textMuted,
+                    dense: true,
+                    leading: const Icon(Icons.history, size: StudioIconSize.md),
+                    title: Text(
+                      _history[i].query,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    subtitle: Text(
+                      l10n.globalSearchResultRows(_history[i].resultCount),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: Text(
+                      _formatTime(_history[i].searchedAt),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: StudioTokens.of(context).textMuted,
+                      ),
+                    ),
+                    onTap: () => widget.onHistorySelected(_history[i].query),
                   ),
-                  onTap: () => widget.onHistorySelected(_history[i].query),
-                ),
-                ),
-                if (i < _history.length - 1) const Divider(height: StudioControlSize.dividerThickness),
-              ],
-            ],
-          ),
-          const Divider(height: StudioControlSize.dividerThickness),
-          // Clear history
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: StudioSpacing.xs,
-              vertical: StudioSpacing.chromeActionGap,
+                );
+              },
+              separatorBuilder: (context, index) =>
+                  const Divider(height: StudioControlSize.dividerThickness),
             ),
-            child: TextButton.icon(
-              onPressed: _handleClearHistory,
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.globalSearchClearHistory),
-              style: studioFormTextButtonIconStyle(context).merge(
-                TextButton.styleFrom(
-                  foregroundColor: StudioTokens.of(context).danger,
+            const Divider(height: StudioControlSize.dividerThickness),
+            // Clear history
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: StudioSpacing.xs,
+                vertical: StudioSpacing.chromeActionGap,
+              ),
+              child: TextButton.icon(
+                onPressed: _handleClearHistory,
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.globalSearchClearHistory),
+                style: studioFormTextButtonIconStyle(context).merge(
+                  TextButton.styleFrom(
+                    foregroundColor: StudioTokens.of(context).danger,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 

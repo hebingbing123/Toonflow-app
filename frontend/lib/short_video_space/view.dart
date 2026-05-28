@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
@@ -1470,26 +1472,29 @@ class _ModeSegmentedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return SegmentedButton<ShortVideoMode>(
-      segments: [
-        ButtonSegment(
-          value: ShortVideoMode.animated,
-          icon: const Icon(Icons.auto_awesome_outlined),
-          label: Text(l10n.shortVideoSpaceModeTitleAnimated),
-        ),
-        ButtonSegment(
-          value: ShortVideoMode.liveAction,
-          icon: const Icon(Icons.person_outline),
-          label: Text(l10n.shortVideoSpaceModeTitleLive),
-        ),
-      ],
-      selected: {mode},
-      onSelectionChanged: (selection) {
-        if (selection.isEmpty) {
-          return;
-        }
-        onChanged(selection.first);
-      },
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SegmentedButton<ShortVideoMode>(
+        segments: [
+          ButtonSegment(
+            value: ShortVideoMode.animated,
+            icon: const Icon(Icons.auto_awesome_outlined),
+            label: Text(l10n.shortVideoSpaceModeTitleAnimated),
+          ),
+          ButtonSegment(
+            value: ShortVideoMode.liveAction,
+            icon: const Icon(Icons.person_outline),
+            label: Text(l10n.shortVideoSpaceModeTitleLive),
+          ),
+        ],
+        selected: {mode},
+        onSelectionChanged: (selection) {
+          if (selection.isEmpty) {
+            return;
+          }
+          onChanged(selection.first);
+        },
+      ),
     );
   }
 }
@@ -1500,6 +1505,57 @@ class _FlowLaneCell {
 
   final Widget node;
   final Widget caption;
+}
+
+/// Handset-friendly vertical stack when a horizontal lane would overflow.
+class _VerticalFlowLane extends StatelessWidget {
+  const _VerticalFlowLane({
+    required this.nodeMinHeight,
+    required this.cells,
+  });
+
+  final double nodeMinHeight;
+  final List<_FlowLaneCell> cells;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = studioMutedTextColor(context);
+    final children = <Widget>[];
+    for (var i = 0; i < cells.length; i++) {
+      if (i > 0) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: StudioSpacing.xs),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: studioDecorativeIcon(
+                Icons.arrow_downward_rounded,
+                size: StudioIconSize.sm,
+                color: muted.withValues(alpha: 0.78),
+              ),
+            ),
+          ),
+        );
+      }
+      children.add(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SizedBox(
+              height: nodeMinHeight,
+              child: cells[i].node,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            cells[i].caption,
+          ],
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    );
+  }
 }
 
 /// Arrows align to the vertical center of [nodeMinHeight]; captions sit in a second row.
@@ -1564,25 +1620,39 @@ class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
         SizedBox(width: widget.nodeWidth, child: widget.cells[i].caption),
       );
     }
-    final lane = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: nodeChildren,
-        ),
-        const SizedBox(height: StudioSpacing.xs),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: captionChildren,
-        ),
-      ],
-    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
+        final arrowCount = math.max(0, widget.cells.length - 1);
+        final totalLaneWidth =
+            widget.cells.length * widget.nodeWidth +
+            arrowCount * _HorizontalFlowLane._arrowSlotWidth;
+        if (viewportWidth < totalLaneWidth &&
+            viewportWidth < kStudioHandsetMaxWidth) {
+          return _VerticalFlowLane(
+            nodeMinHeight: widget.nodeMinHeight,
+            cells: widget.cells,
+          );
+        }
+        final lane = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: nodeChildren,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: captionChildren,
+            ),
+          ],
+        );
         final showScrollHint = viewportWidth < 720;
         return SizedBox(
           width: viewportWidth,
@@ -1598,12 +1668,12 @@ class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
               physics: const ClampingScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              clipBehavior: Clip.none,
+              clipBehavior: Clip.hardEdge,
               padding: const EdgeInsets.only(
                 bottom: StudioSpacing.chromeActionGap,
                 right: StudioSpacing.xs,
               ),
-              child: lane,
+              child: SizedBox(width: totalLaneWidth, child: lane),
             ),
           ),
         );

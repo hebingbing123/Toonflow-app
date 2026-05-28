@@ -253,7 +253,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
           subtitle: l10n.riskyPrefsMenuViewSilencesSubtitle,
           leading: studioDecorativeIcon(
             Icons.visibility_outlined,
-            size: 22,
+            size: StudioIconSize.xl,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
@@ -261,7 +261,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
           value: _RiskyPrefsOverflowValue.resetDestructiveConfirms,
           label: l10n.riskyPrefsMenuResetTitle,
           subtitle: l10n.riskyPrefsMenuResetSubtitle,
-          leading: studioDecorativeIcon(Icons.notifications_active_outlined, size: 22),
+          leading: studioDecorativeIcon(Icons.notifications_active_outlined, size: StudioIconSize.xl),
         ),
       ],
       onSelected: (value) {

@@ -1711,9 +1711,9 @@ extension _HomePageProductShell on _HomePageState {
               ? _kMacOSTitleBarHeightWithContext
               : _kMacOSTitleBarHeight)
         : compactTopChrome
-        ? (width < 560 ? 132.0 : 138.0)
+        ? (width < 560 ? 136.0 : 138.0)
         : stackedTopChrome
-        ? 112.0
+        ? 120.0
         : desktopXWide
         ? 78.0
         : desktopWide
@@ -1813,10 +1813,7 @@ extension _HomePageProductShell on _HomePageState {
                       const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       SizedBox(
                         width: double.infinity,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: titleBarWorkspaceContext,
-                        ),
+                        child: titleBarWorkspaceContext,
                       ),
                       const SizedBox(height: StudioLayoutSpacing.inlineGap),
                       Row(children: <Widget>[Expanded(child: globalSearchBar)]),

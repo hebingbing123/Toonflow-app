@@ -91,7 +91,7 @@ class ProjectStudioScriptStepPanel extends StatefulWidget {
 
 class _ProjectStudioScriptStepPanelState
     extends State<ProjectStudioScriptStepPanel> {
-  final List<ListNovelsResponse?> _novelsRef = <ListNovelsResponse?>[];
+  final List<ListNovelsResponse?> _novelsRef = <ListNovelsResponse?>[null];
   final List<bool> _novelsLoading = <bool>[false];
   final List<bool> _novelsBusy = <bool>[false];
   final List<bool> _assetsBusy = <bool>[false];

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../tokens.dart';
+
 /// Wide layout for [StudioFilterRow].
 enum StudioFilterWideLayout {
   /// [Wrap] — many chips/buttons (compliance admin, stage overrides).
@@ -16,8 +18,8 @@ class StudioFilterRow extends StatelessWidget {
     required this.children,
     this.wideBreakpoint = 720,
     this.wideLayout = StudioFilterWideLayout.wrap,
-    this.spacing = 8,
-    this.runSpacing = 8,
+    this.spacing = StudioSpacing.xs,
+    this.runSpacing = StudioSpacing.xs,
   });
 
   final List<Widget> children;
@@ -36,17 +38,13 @@ class StudioFilterRow extends StatelessWidget {
         if (!wide) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _spacedColumn(
-              children.map(_adaptForColumn).toList(),
-            ),
+            children: _spacedColumn(children.map(_adaptForColumn).toList()),
           );
         }
         return switch (wideLayout) {
           StudioFilterWideLayout.toolbarRow => Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: _spacedRow(
-              children.map(_adaptForRow).toList(),
-            ),
+            children: _spacedRow(children.map(_adaptForRow).toList()),
           ),
           StudioFilterWideLayout.wrap => Wrap(
             spacing: spacing,
@@ -106,7 +104,9 @@ class StudioFilterRow extends StatelessWidget {
     if (child is Flexible) {
       return SizedBox(width: double.infinity, child: child.child);
     }
-    if (child is SizedBox && child.width == double.infinity && child.child != null) {
+    if (child is SizedBox &&
+        child.width == double.infinity &&
+        child.child != null) {
       return SizedBox(width: double.infinity, child: child.child);
     }
     return child;

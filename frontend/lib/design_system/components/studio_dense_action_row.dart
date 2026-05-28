@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../tokens.dart';
 
-/// Horizontal action strip: keeps controls on one line with scroll when needed.
+/// Horizontal action strip that can wrap onto additional lines when space is tight.
 class StudioDenseActionRow extends StatelessWidget {
   const StudioDenseActionRow({
     super.key,
@@ -24,43 +24,24 @@ class StudioDenseActionRow extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        final row = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: _spaced(children),
+        final wrap = Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          alignment: alignment,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: children,
         );
         if (!constraints.hasBoundedWidth) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: row,
-          );
+          return wrap;
         }
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: expandToMaxWidth
-              ? ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                  child: Align(
-                    alignment: _wrapToAlign(alignment),
-                    child: row,
-                  ),
-                )
-              : Align(
-                  alignment: _wrapToAlign(alignment),
-                  child: row,
-                ),
-        );
+        return expandToMaxWidth
+            ? ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Align(alignment: _wrapToAlign(alignment), child: wrap),
+              )
+            : Align(alignment: _wrapToAlign(alignment), child: wrap);
       },
     );
-  }
-
-  List<Widget> _spaced(List<Widget> items) {
-    return <Widget>[
-      for (var i = 0; i < items.length; i++) ...<Widget>[
-        if (i > 0) SizedBox(width: spacing),
-        items[i],
-      ],
-    ];
   }
 
   Alignment _wrapToAlign(WrapAlignment wrap) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../design_system/tokens.dart';
 
@@ -5,6 +7,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_mobile_affordances.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 /// Store or remove LLM vendor API credentials (never shown in plain text after save).
@@ -16,7 +19,7 @@ Future<bool?> showVendorCredentialDialog({
   required bool hasCredential,
   bool apiKeyOptional = false,
 }) {
-  return showDialog<bool>(
+  return showStudioDialog<bool>(
     context: context,
     builder: (ctx) => _VendorCredentialDialog(
       accessToken: accessToken,
@@ -89,6 +92,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
 
     setState(() => _busy = true);
     try {
+      unawaited(studioLightImpact());
       await postSettingsVendorCredentialV1(
         widget.accessToken,
         vendorId: widget.vendorId,
@@ -125,6 +129,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
     }
     setState(() => _busy = true);
     try {
+      unawaited(studioMediumImpact());
       await deleteSettingsVendorCredentialV1(
         widget.accessToken,
         vendorId: widget.vendorId,

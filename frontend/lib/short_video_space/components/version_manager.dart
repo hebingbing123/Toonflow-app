@@ -213,7 +213,11 @@ class _VersionManagerState extends State<VersionManager> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: StudioIconSize.md, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.history,
+                    size: StudioIconSize.md,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: StudioSpacing.xs),
                   Expanded(
                     child: Text(
@@ -232,7 +236,10 @@ class _VersionManagerState extends State<VersionManager> {
                     FilledButton.tonalIcon(
                       style: studioFormIconLabeledButtonStyle(context),
                       onPressed: _isLoading ? null : _showCompareVersionsDialog,
-                      icon: const Icon(Icons.compare_arrows, size: StudioIconSize.sm),
+                      icon: const Icon(
+                        Icons.compare_arrows,
+                        size: StudioIconSize.sm,
+                      ),
                       label: Text(l10n.shortVideoVersionManagerCompareVersions),
                     ),
                   FilledButton.tonalIcon(
@@ -244,12 +251,15 @@ class _VersionManagerState extends State<VersionManager> {
                   FilledButton.tonalIcon(
                     style: studioFormIconLabeledButtonStyle(context),
                     onPressed: _isLoading ? null : _showSaveDraftDialog,
-                    icon: const Icon(Icons.save_outlined, size: StudioIconSize.sm),
+                    icon: const Icon(
+                      Icons.save_outlined,
+                      size: StudioIconSize.sm,
+                    ),
                     label: Text(l10n.shortVideoVersionManagerSaveDraft),
                   ),
                 ],
               ),
-                const SizedBox(height: StudioSpacing.sm),
+              const SizedBox(height: StudioSpacing.sm),
 
               if (_errorMessage != null) ...[
                 StudioApiErrorCallout(
@@ -262,255 +272,261 @@ class _VersionManagerState extends State<VersionManager> {
 
               // 当前版本信息
               Container(
-              padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
-              decoration: BoxDecoration(
-                color: StudioTokens.of(context).primarySoft,
-                borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: theme.colorScheme.primary,
-                    size: StudioIconSize.md,
-                  ),
-                  const SizedBox(width: StudioSpacing.xs),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.shortVideoVersionManagerCurrentVersion(
-                            currentVersion.name,
-                          ),
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        const SizedBox(height: StudioSpacing.xs),
-                        Text(
-                          l10n.shortVideoVersionManagerCurrentVersionMeta(
-                            currentVersion.shotCount,
-                            _formatDateTime(currentVersion.createdAt),
-                          ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: StudioSpacing.sm),
-
-            // 版本列表
-            Text(
-              l10n.shortVideoVersionManagerAllVersions(widget.versions.length),
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: StudioSpacing.xs),
-
-            if (widget.versions.isEmpty)
-              StudioEmptyState.emptyData(
-                title: l10n.shortVideoVersionManagerNoVersionsHint,
-                icon: Icons.layers_outlined,
-              )
-            else
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var index = 0; index < widget.versions.length; index++)
-                    Builder(
-                      builder: (context) {
-                        final version = widget.versions[index];
-                        final isCurrent = version.id == widget.currentVersionId;
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                          color: isCurrent
-                              ? StudioTokens.of(context).primarySoft.withValues(
-                                  alpha: 0.72,
-                                )
-                              : null,
-                          child: StudioListRow(
-                            onAlternate: !isCurrent && !_isLoading
-                                ? () => _handleSwitchVersion(version.id)
-                                : null,
-                            alternateLabel: l10n
-                                .shortVideoVersionManagerTooltipSwitchVersion,
-                            alternateIcon: Icons.swap_horiz,
-                            onDelete: !_isLoading && !isCurrent
-                                ? () => _handleDeleteVersion(version)
-                                : null,
-                            deleteLabel: l10n
-                                .shortVideoVersionManagerTooltipDeleteVersion,
-                            leading: Icon(
-                              isCurrent
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_unchecked,
-                              color: isCurrent
-                                  ? StudioTokens.of(context).primary
-                                  : StudioTokens.of(context).textSecondary,
-                            ),
-                            title: Text(
-                              version.name,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: isCurrent
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              l10n.shortVideoVersionManagerVersionRowSubtitle(
-                                version.shotCount,
-                                _formatDateTime(version.createdAt),
-                              ),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!isCurrent)
-                                  StudioIconButton(
-                                    icon: Icons.swap_horiz,
-                                    label: l10n
-                                        .shortVideoVersionManagerTooltipSwitchVersion,
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () => _handleSwitchVersion(version.id),
-                                  ),
-                                StudioIconButton(
-                                  icon: Icons.delete_outline,
-                                  label: l10n
-                                      .shortVideoVersionManagerTooltipDeleteVersion,
-                                  onPressed: _isLoading || isCurrent
-                                      ? null
-                                      : () => _handleDeleteVersion(version),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
-
-            const SizedBox(height: StudioSpacing.md),
-
-            // 草稿列表
-            Row(
-              children: [
-                Text(
-                  l10n.shortVideoVersionManagerDraftsHeader(
-                    widget.drafts.length,
-                    10,
-                  ),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+                decoration: BoxDecoration(
+                  color: StudioTokens.of(context).primarySoft,
+                  borderRadius: BorderRadius.circular(
+                    StudioSpacing.radiusDense,
                   ),
                 ),
-                const Spacer(),
-                if (widget.drafts.isNotEmpty)
-                  TextButton.icon(
-                    onPressed: _isLoading ? null : _showDraftsDialog,
-                    icon: const Icon(Icons.list, size: StudioIconSize.sm),
-                    label: Text(l10n.shortVideoVersionManagerViewAllDrafts),
-                  ),
-              ],
-            ),
-            const SizedBox(height: StudioSpacing.xs),
-
-            if (widget.drafts.isEmpty)
-              StudioEmptyState.emptyData(
-                title: l10n.shortVideoVersionManagerNoDraftsHint,
-                icon: Icons.drafts_outlined,
-              )
-            else
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var index = 0;
-                      index < (widget.drafts.length > 3 ? 3 : widget.drafts.length);
-                      index++)
-                    Builder(
-                      builder: (context) {
-                        final draft = widget.drafts[index];
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                          child: StudioCard(
-                            padding: EdgeInsets.zero,
-                            child: StudioListRow(
-                              onRestore: !_isLoading
-                                  ? () => _handleRestoreDraft(draft)
-                                  : null,
-                              onDelete: !_isLoading
-                                  ? () => _handleDeleteDraft(draft)
-                                  : null,
-                              deleteLabel: l10n
-                                  .shortVideoVersionManagerTooltipDeleteDraft,
-                              leading: Icon(
-                                Icons.drafts_outlined,
-                                color: theme.colorScheme.secondary,
-                              ),
-                              title: Text(
-                                draft.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              subtitle: Text(
-                                l10n.shortVideoVersionManagerDraftRowSubtitle(
-                                  draft.shotCount,
-                                  _formatDateTime(draft.savedAt),
-                                ),
-                                style: theme.textTheme.bodySmall,
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  StudioIconButton(
-                                    icon: Icons.restore,
-                                    label: l10n
-                                        .shortVideoVersionManagerTooltipRestoreDraft,
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () => _handleRestoreDraft(draft),
-                                  ),
-                                  StudioIconButton(
-                                    icon: Icons.delete_outline,
-                                    label: l10n
-                                        .shortVideoVersionManagerTooltipDeleteDraft,
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () => _handleDeleteDraft(draft),
-                                  ),
-                                ],
-                              ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: theme.colorScheme.primary,
+                      size: StudioIconSize.md,
+                    ),
+                    const SizedBox(width: StudioSpacing.xs),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.shortVideoVersionManagerCurrentVersion(
+                              currentVersion.name,
+                            ),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimaryContainer,
                             ),
                           ),
-                        );
-                      },
+                          const SizedBox(height: StudioSpacing.xs),
+                          Text(
+                            l10n.shortVideoVersionManagerCurrentVersionMeta(
+                              currentVersion.shotCount,
+                              _formatDateTime(currentVersion.createdAt),
+                            ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: StudioSpacing.sm),
+
+              // 版本列表
+              Text(
+                l10n.shortVideoVersionManagerAllVersions(
+                  widget.versions.length,
+                ),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: StudioSpacing.xs),
+
+              if (widget.versions.isEmpty)
+                StudioEmptyState.emptyData(
+                  title: l10n.shortVideoVersionManagerNoVersionsHint,
+                  icon: Icons.layers_outlined,
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.versions.length,
+                  itemBuilder: (context, index) {
+                    final version = widget.versions[index];
+                    final isCurrent = version.id == widget.currentVersionId;
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                      color: isCurrent
+                          ? StudioTokens.of(
+                              context,
+                            ).primarySoft.withValues(alpha: 0.72)
+                          : null,
+                      child: StudioListRow(
+                        onAlternate: !isCurrent && !_isLoading
+                            ? () => _handleSwitchVersion(version.id)
+                            : null,
+                        alternateLabel:
+                            l10n.shortVideoVersionManagerTooltipSwitchVersion,
+                        alternateIcon: Icons.swap_horiz,
+                        onDelete: !_isLoading && !isCurrent
+                            ? () => _handleDeleteVersion(version)
+                            : null,
+                        deleteLabel:
+                            l10n.shortVideoVersionManagerTooltipDeleteVersion,
+                        leading: Icon(
+                          isCurrent
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: isCurrent
+                              ? StudioTokens.of(context).primary
+                              : StudioTokens.of(context).textSecondary,
+                        ),
+                        title: Text(
+                          version.name,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: isCurrent
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.shortVideoVersionManagerVersionRowSubtitle(
+                            version.shotCount,
+                            _formatDateTime(version.createdAt),
+                          ),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isCurrent)
+                              StudioIconButton(
+                                icon: Icons.swap_horiz,
+                                label: l10n
+                                    .shortVideoVersionManagerTooltipSwitchVersion,
+                                onPressed: _isLoading
+                                    ? null
+                                    : () => _handleSwitchVersion(version.id),
+                              ),
+                            StudioIconButton(
+                              icon: Icons.delete_outline,
+                              label: l10n
+                                  .shortVideoVersionManagerTooltipDeleteVersion,
+                              onPressed: _isLoading || isCurrent
+                                  ? null
+                                  : () => _handleDeleteVersion(version),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+              const SizedBox(height: StudioSpacing.md),
+
+              // 草稿列表
+              Row(
+                children: [
+                  Text(
+                    l10n.shortVideoVersionManagerDraftsHeader(
+                      widget.drafts.length,
+                      10,
+                    ),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (widget.drafts.isNotEmpty)
+                    TextButton.icon(
+                      onPressed: _isLoading ? null : _showDraftsDialog,
+                      icon: const Icon(Icons.list, size: StudioIconSize.sm),
+                      label: Text(l10n.shortVideoVersionManagerViewAllDrafts),
                     ),
                 ],
               ),
+              const SizedBox(height: StudioSpacing.xs),
 
-            StudioAsyncDataView(
-              loading: _isLoading,
-              loadingPlaceholder: StudioLoadingPlaceholder.list,
-              loadingItemCount: 3,
-              scrollableLoading: false,
-              child: const SizedBox.shrink(),
-            ),
-          ],
+              if (widget.drafts.isEmpty)
+                StudioEmptyState.emptyData(
+                  title: l10n.shortVideoVersionManagerNoDraftsHint,
+                  icon: Icons.drafts_outlined,
+                )
+              else
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (
+                      var index = 0;
+                      index <
+                          (widget.drafts.length > 3 ? 3 : widget.drafts.length);
+                      index++
+                    )
+                      Builder(
+                        builder: (context) {
+                          final draft = widget.drafts[index];
+
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: StudioSpacing.xs,
+                            ),
+                            child: StudioCard(
+                              padding: EdgeInsets.zero,
+                              child: StudioListRow(
+                                onRestore: !_isLoading
+                                    ? () => _handleRestoreDraft(draft)
+                                    : null,
+                                onDelete: !_isLoading
+                                    ? () => _handleDeleteDraft(draft)
+                                    : null,
+                                deleteLabel: l10n
+                                    .shortVideoVersionManagerTooltipDeleteDraft,
+                                leading: Icon(
+                                  Icons.drafts_outlined,
+                                  color: theme.colorScheme.secondary,
+                                ),
+                                title: Text(
+                                  draft.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  l10n.shortVideoVersionManagerDraftRowSubtitle(
+                                    draft.shotCount,
+                                    _formatDateTime(draft.savedAt),
+                                  ),
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    StudioIconButton(
+                                      icon: Icons.restore,
+                                      label: l10n
+                                          .shortVideoVersionManagerTooltipRestoreDraft,
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () => _handleRestoreDraft(draft),
+                                    ),
+                                    StudioIconButton(
+                                      icon: Icons.delete_outline,
+                                      label: l10n
+                                          .shortVideoVersionManagerTooltipDeleteDraft,
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () => _handleDeleteDraft(draft),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+
+              StudioAsyncDataView(
+                loading: _isLoading,
+                loadingPlaceholder: StudioLoadingPlaceholder.list,
+                loadingItemCount: 3,
+                scrollableLoading: false,
+                child: const SizedBox.shrink(),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -593,8 +609,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarVersionCreated(name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarVersionCreated(name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -632,8 +649,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarVersionSwitched(version.name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarVersionSwitched(version.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -681,8 +699,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarVersionDeleted(version.name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarVersionDeleted(version.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -826,8 +845,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarDraftSaved(name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarDraftSaved(name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -878,59 +898,61 @@ class _VersionManagerState extends State<VersionManager> {
                         index,
                         entranceKey: widget.drafts.length,
                         child: Padding(
-                        padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-                        child: StudioCard(
-                          padding: EdgeInsets.zero,
-                          child: StudioListRow(
-                          onRestore: () {
-                            Navigator.of(context).pop();
-                            _handleRestoreDraft(draft);
-                          },
-                          onDelete: () {
-                            Navigator.of(context).pop();
-                            _handleDeleteDraft(draft);
-                          },
-                          deleteLabel:
-                              l10n.shortVideoVersionManagerTooltipDeleteDraft,
-                          leading: Icon(
-                            Icons.drafts_outlined,
-                            color: theme.colorScheme.secondary,
+                          padding: const EdgeInsets.only(
+                            bottom: StudioSpacing.xs,
                           ),
-                          title: Text(draft.name),
-                          subtitle: Text(
-                            l10n.shortVideoVersionManagerDraftListRowSubtitle(
-                              draft.shotCount,
-                              _formatDateTime(draft.savedAt),
+                          child: StudioCard(
+                            padding: EdgeInsets.zero,
+                            child: StudioListRow(
+                              onRestore: () {
+                                Navigator.of(context).pop();
+                                _handleRestoreDraft(draft);
+                              },
+                              onDelete: () {
+                                Navigator.of(context).pop();
+                                _handleDeleteDraft(draft);
+                              },
+                              deleteLabel: l10n
+                                  .shortVideoVersionManagerTooltipDeleteDraft,
+                              leading: Icon(
+                                Icons.drafts_outlined,
+                                color: theme.colorScheme.secondary,
+                              ),
+                              title: Text(draft.name),
+                              subtitle: Text(
+                                l10n.shortVideoVersionManagerDraftListRowSubtitle(
+                                  draft.shotCount,
+                                  _formatDateTime(draft.savedAt),
+                                ),
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StudioIconButton(
+                                    icon: Icons.restore,
+                                    label: l10n
+                                        .shortVideoVersionManagerTooltipRestoreDraft,
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      _handleRestoreDraft(draft);
+                                    },
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.delete_outline,
+                                    label: l10n
+                                        .shortVideoVersionManagerTooltipDeleteDraft,
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      _handleDeleteDraft(draft);
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              StudioIconButton(
-                                icon: Icons.restore,
-                                label:
-                                    l10n.shortVideoVersionManagerTooltipRestoreDraft,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  _handleRestoreDraft(draft);
-                                },
-                              ),
-                              StudioIconButton(
-                                icon: Icons.delete_outline,
-                                label:
-                                    l10n.shortVideoVersionManagerTooltipDeleteDraft,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  _handleDeleteDraft(draft);
-                                },
-                              ),
-                            ],
                           ),
                         ),
-                      ),
-                    ),
-                    );
+                      );
                     },
                   ),
           ),
@@ -969,8 +991,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarDraftRestored(draft.name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarDraftRestored(draft.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -1036,8 +1059,9 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              resolveAppLocalizationsForErrors(context)
-                  .shortVideoVersionManagerSnackbarDraftDeleted(draft.name),
+              resolveAppLocalizationsForErrors(
+                context,
+              ).shortVideoVersionManagerSnackbarDraftDeleted(draft.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
@@ -1127,7 +1151,9 @@ class _VersionManagerState extends State<VersionManager> {
                           vertical: StudioSpacing.xs,
                         ),
                       ),
-                      hint: Text(l10n.shortVideoVersionManagerCompareTargetHint),
+                      hint: Text(
+                        l10n.shortVideoVersionManagerCompareTargetHint,
+                      ),
                       initialValue: compareVersion?.id,
                       items: widget.versions.map((version) {
                         return DropdownMenuItem(
@@ -1158,7 +1184,8 @@ class _VersionManagerState extends State<VersionManager> {
                 ),
                 FilledButton(
                   style: studioFormPrimaryButtonStyle(dialogContext),
-                  onPressed: baseVersion != null &&
+                  onPressed:
+                      baseVersion != null &&
                           compareVersion != null &&
                           baseVersion!.id != compareVersion!.id
                       ? () {

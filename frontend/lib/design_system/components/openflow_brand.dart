@@ -31,10 +31,10 @@ class OpenFlowBrandMark extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: tokens.primary.withValues(alpha: 0.12),
-            blurRadius: size * 0.2,
-            spreadRadius: -size * 0.06,
-            offset: Offset(0, size * 0.08),
+            color: tokens.primary.withValues(alpha: 0.08),
+            blurRadius: size * 0.16,
+            spreadRadius: -size * 0.05,
+            offset: Offset(0, size * 0.05),
           ),
         ],
       ),

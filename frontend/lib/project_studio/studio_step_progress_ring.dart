@@ -45,10 +45,7 @@ class StudioStepProgressRing extends StatelessWidget {
             strokeWidth: strokeWidth,
           ),
           child: Center(
-            child: StudioAnimatedNumber(
-              value: label,
-              style: labelStyle,
-            ),
+            child: StudioAnimatedNumber(value: label, style: labelStyle),
           ),
         ),
       ),

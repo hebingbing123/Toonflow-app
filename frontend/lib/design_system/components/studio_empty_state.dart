@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/rust_api_error_format.dart';
 import '../tokens.dart';
+import '../studio_typography.dart';
 import 'studio_surfaces.dart';
 import 'studio_primary_button.dart';
 import 'studio_text_styles.dart';
@@ -162,6 +163,7 @@ class StudioEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final typography = StudioTypography.of(context);
     final glowAlpha = _quiet ? 0.08 : 0.14;
     final ringAlpha = _quiet ? 0.05 : 0.10;
 
@@ -320,10 +322,16 @@ class StudioEmptyState extends StatelessWidget {
                             SizedBox(
                               width: actionWidth,
                               child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: typography.buttonPadding,
+                                  minimumSize: Size(0, typography.buttonHeight),
+                                  visualDensity: VisualDensity.standard,
+                                ),
                                 onPressed: onSecondaryAction,
                                 child: Text(
                                   secondaryActionLabel!,
                                   textAlign: TextAlign.center,
+                                  softWrap: true,
                                 ),
                               ),
                             ),

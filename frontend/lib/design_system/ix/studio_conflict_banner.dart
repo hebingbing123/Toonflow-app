@@ -20,38 +20,76 @@ class StudioConflictBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
-    return Material(
-      color: tokens.danger.withValues(alpha: 0.12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: StudioSpacing.sm,
-          vertical: StudioSpacing.xs,
-        ),
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.warning_amber_rounded, color: tokens.danger, size: StudioIconSize.md),
-            const SizedBox(width: StudioSpacing.sm),
-            Expanded(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: tokens.textPrimary,
-                ),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 520;
+        final bodyStyle = Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: tokens.textPrimary);
+        final actions = <Widget>[
+          TextButton(onPressed: onRefresh, child: Text(l10n.studioRetry)),
+          if (onDismiss != null)
+            IconButton(
+              icon: const Icon(Icons.close, size: StudioIconSize.sm),
+              onPressed: onDismiss,
+              tooltip: l10n.studioDismiss,
             ),
-            TextButton(
-              onPressed: onRefresh,
-              child: Text(l10n.studioRetry),
+        ];
+
+        return Material(
+          color: tokens.danger.withValues(alpha: 0.12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.sm,
+              vertical: StudioSpacing.xs,
             ),
-            if (onDismiss != null)
-              IconButton(
-                icon: const Icon(Icons.close, size: StudioIconSize.sm),
-                onPressed: onDismiss,
-                tooltip: l10n.studioDismiss,
-              ),
-          ],
-        ),
-      ),
+            child: compact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: tokens.danger,
+                            size: StudioIconSize.md,
+                          ),
+                          const SizedBox(width: StudioSpacing.sm),
+                          Expanded(child: Text(message, style: bodyStyle)),
+                        ],
+                      ),
+                      const SizedBox(height: StudioSpacing.xs),
+                      Wrap(
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.xs,
+                        alignment: WrapAlignment.end,
+                        children: actions,
+                      ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: tokens.danger,
+                        size: StudioIconSize.md,
+                      ),
+                      const SizedBox(width: StudioSpacing.sm),
+                      Expanded(child: Text(message, style: bodyStyle)),
+                      const SizedBox(width: StudioSpacing.sm),
+                      Wrap(
+                        spacing: StudioSpacing.xs,
+                        runSpacing: StudioSpacing.xs,
+                        alignment: WrapAlignment.end,
+                        children: actions,
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

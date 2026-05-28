@@ -223,7 +223,7 @@ class _SidebarTileState extends State<_SidebarTile> {
                 : Tooltip(
                     message: widget.label,
                     child: Center(
-                      child: Icon(widget.icon, color: fg, size: 22),
+                      child: Icon(widget.icon, color: fg, size: StudioIconSize.xl),
                     ),
                   ),
           ),

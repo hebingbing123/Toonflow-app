@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_icon_button.dart';
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'creator_journey_menu.dart';
@@ -53,7 +57,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
 
   void _showFullWorkflow(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
+    showStudioBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -95,7 +99,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
   }
 
   void _showCollapsedToolsMenu(BuildContext context, AppLocalizations l10n) {
-    showModalBottomSheet<void>(
+    showStudioBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) {
@@ -105,6 +109,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
               leading: const Icon(Icons.playlist_add_check_outlined),
               title: Text(l10n.studioScriptStepSetupOpen),
               onTap: () {
+                unawaited(studioLightImpact());
                 Navigator.pop(sheetContext);
                 onOpenStepSetup!();
               },
@@ -113,6 +118,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             leading: const Icon(Icons.unfold_more_rounded),
             title: Text(l10n.studioCreatorJourneyCompactExpand),
             onTap: () {
+              unawaited(studioLightImpact());
               Navigator.pop(sheetContext);
               _showFullWorkflow(context);
             },
@@ -156,6 +162,7 @@ class CreatorJourneyCompactBar extends StatelessWidget {
             StudioListRow(
               title: entry.child ?? const SizedBox.shrink(),
               onTap: () {
+                unawaited(studioLightImpact());
                 Navigator.pop(sheetContext);
                 onWorkspaceMenuSelected(target);
               },

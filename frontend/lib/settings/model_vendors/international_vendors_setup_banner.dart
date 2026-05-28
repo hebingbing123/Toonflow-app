@@ -95,7 +95,7 @@ class _InternationalVendorsSetupBannerState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(Icons.public_outlined, size: 22, color: tokens.primary),
+                Icon(Icons.public_outlined, size: StudioIconSize.xl, color: tokens.primary),
                 const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
                   child: Column(

@@ -94,7 +94,7 @@ class _CandidateComparePanel extends StatelessWidget {
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: StudioControlSize.progressStroke,
+                                    strokeWidth: 2,
                                   ),
                                 )
                               : const Icon(Icons.check_circle_outline),
@@ -113,7 +113,7 @@ class _CandidateComparePanel extends StatelessWidget {
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: StudioControlSize.progressStroke,
+                                    strokeWidth: 2,
                                   ),
                                 )
                               : const Icon(Icons.movie_creation_outlined),

@@ -219,7 +219,7 @@ class SearchResultCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.access_time,
-                      size: 14,
+                      size: StudioIconSize.xxs,
                       color: StudioTokens.of(context).textSecondary,
                     ),
                     const SizedBox(width: StudioSpacing.xs),
@@ -232,7 +232,7 @@ class SearchResultCard extends StatelessWidget {
                     const Spacer(),
                     Icon(
                       Icons.arrow_forward_ios,
-                      size: 14,
+                      size: StudioIconSize.xxs,
                       color: StudioTokens.of(context).textSecondary,
                     ),
                   ],

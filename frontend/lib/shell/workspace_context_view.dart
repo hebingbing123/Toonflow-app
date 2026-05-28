@@ -303,7 +303,7 @@ class WorkspaceContextView extends StatelessWidget {
               children: <Widget>[
                 Icon(
                   Icons.workspaces_outline,
-                  size: 14,
+                  size: StudioIconSize.xxs,
                   color: tokens.accent,
                 ),
                 const SizedBox(width: StudioSpacing.xs),

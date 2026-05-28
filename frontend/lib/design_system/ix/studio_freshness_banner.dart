@@ -41,57 +41,111 @@ class StudioFreshnessBanner extends StatelessWidget {
       icon = Icons.check_circle_outline;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
-      padding: const EdgeInsets.all(StudioSpacing.sm),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
-        border: Border.all(color: textColor.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 560;
+        final title = isStale
+            ? l10n.qualityReviewsFreshnessStaleTitle
+            : l10n.qualityReviewsFreshnessFreshTitle;
+        final refreshButton = onRefresh == null
+            ? const SizedBox.shrink()
+            : TextButton(
+                onPressed: loading ? null : onRefresh,
+                child: Text(
+                  loading
+                      ? l10n.projectsBusyProcessing
+                      : l10n.qualityReviewsFreshnessRefresh,
+                ),
+              );
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: StudioSpacing.xs),
+          padding: const EdgeInsets.all(StudioSpacing.sm),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+            border: Border.all(color: textColor.withValues(alpha: 0.3)),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: textColor, size: StudioIconSize.lg),
-              const SizedBox(width: StudioSpacing.sm),
-              Expanded(
-                child: Column(
+              if (compact) ...<Widget>[
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      isStale
-                          ? l10n.qualityReviewsFreshnessStaleTitle
-                          : l10n.qualityReviewsFreshnessFreshTitle,
-                      style: studioAccentBannerTitleStyle(context, textColor),
-                    ),
-                    const SizedBox(height: StudioSpacing.xs),
-                    Text(
-                      l10n.qualityReviewsFreshnessStaleBody(
-                        refreshedLabel,
-                        ageLabel,
+                    Icon(icon, color: textColor, size: StudioIconSize.lg),
+                    const SizedBox(width: StudioSpacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: studioAccentBannerTitleStyle(
+                              context,
+                              textColor,
+                            ),
+                          ),
+                          const SizedBox(height: StudioSpacing.xs),
+                          Text(
+                            l10n.qualityReviewsFreshnessStaleBody(
+                              refreshedLabel,
+                              ageLabel,
+                            ),
+                            style: studioAccentBannerBodyStyle(
+                              context,
+                              textColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      style: studioAccentBannerBodyStyle(context, textColor),
                     ),
                   ],
                 ),
-              ),
-              if (onRefresh != null)
-                TextButton(
-                  onPressed: loading ? null : onRefresh,
-                  child: Text(
-                    loading
-                        ? l10n.projectsBusyProcessing
-                        : l10n.qualityReviewsFreshnessRefresh,
-                  ),
+                if (onRefresh != null) ...<Widget>[
+                  const SizedBox(height: StudioSpacing.xs),
+                  Align(alignment: Alignment.centerRight, child: refreshButton),
+                ],
+              ] else ...<Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, color: textColor, size: StudioIconSize.lg),
+                    const SizedBox(width: StudioSpacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: studioAccentBannerTitleStyle(
+                              context,
+                              textColor,
+                            ),
+                          ),
+                          const SizedBox(height: StudioSpacing.xs),
+                          Text(
+                            l10n.qualityReviewsFreshnessStaleBody(
+                              refreshedLabel,
+                              ageLabel,
+                            ),
+                            style: studioAccentBannerBodyStyle(
+                              context,
+                              textColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (onRefresh != null) refreshButton,
+                  ],
                 ),
+              ],
+              _FreshnessDetails(meta: meta, textColor: textColor),
             ],
           ),
-          _FreshnessDetails(meta: meta, textColor: textColor),
-        ],
-      ),
+        );
+      },
     );
   }
 

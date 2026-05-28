@@ -226,7 +226,7 @@ class _SettingsHeroCard extends StatelessWidget {
       tabs: <Widget>[
         for (var index = 0; index < modules.length; index++)
           Tab(
-            height: compact ? 58 : 62,
+            height: compact ? 66 : 72,
             child: Padding(
               padding: EdgeInsets.only(
                 right: !scrollableTabs && index < modules.length - 1
@@ -258,76 +258,74 @@ class _SettingsHeroCard extends StatelessWidget {
           compact ? StudioSpacing.sm : StudioLayoutSpacing.section - 2,
         ),
         child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (compact) ...<Widget>[
+              Text(title, style: studioPageTitleStyle(context)),
+              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
+              Text(subtitle, style: subtitleStyle),
+              const SizedBox(height: StudioSpacing.sm),
+              _SettingsSummaryTile(
+                compact: true,
+                module: summary,
+                modules: modules,
+                selectedIndex: selectedIndex,
+              ),
+            ] else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  if (compact) ...<Widget>[
-                    Text(title, style: studioPageTitleStyle(context)),
-                    const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-                    Text(subtitle, style: subtitleStyle),
-                    const SizedBox(height: StudioSpacing.sm),
-                    _SettingsSummaryTile(
-                      compact: true,
+                  Expanded(
+                    flex: wideDesktop ? 12 : 11,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(title, style: studioPageTitleStyle(context)),
+                        const SizedBox(
+                          height: StudioLayoutSpacing.titleSubtitle,
+                        ),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: Text(subtitle, style: subtitleStyle),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: wideDesktop ? 24 : 18),
+                  Flexible(
+                    flex: wideDesktop ? 8 : 9,
+                    child: _SettingsSummaryTile(
+                      compact: false,
                       module: summary,
                       modules: modules,
                       selectedIndex: selectedIndex,
                     ),
-                  ] else
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          flex: wideDesktop ? 12 : 11,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(title, style: studioPageTitleStyle(context)),
-                              const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 520,
-                                ),
-                                child: Text(subtitle, style: subtitleStyle),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: wideDesktop ? 24 : 18),
-                        Flexible(
-                          flex: wideDesktop ? 8 : 9,
-                          child: _SettingsSummaryTile(
-                            compact: false,
-                            module: summary,
-                            modules: modules,
-                            selectedIndex: selectedIndex,
-                          ),
-                        ),
-                      ],
-                    ),
-                  SizedBox(
-                    height: compact
-                        ? StudioLayoutSpacing.cardInner + 2
-                        : StudioLayoutSpacing.cardInner + 4,
                   ),
-                  if (scrollableTabs)
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-                        border: Border.all(
-                          color: tokens.borderSubtle.withValues(alpha: 0.55),
-                        ),
-                        color: tokens.bgInset.withValues(alpha: 0.84),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(
-                          StudioSpacing.chromeActionGap,
-                        ),
-                        child: tabBar,
-                      ),
-                    )
-                  else
-                    tabBar,
                 ],
               ),
+            SizedBox(
+              height: compact
+                  ? StudioLayoutSpacing.cardInner + 2
+                  : StudioLayoutSpacing.cardInner + 4,
+            ),
+            if (scrollableTabs)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+                  border: Border.all(
+                    color: tokens.borderSubtle.withValues(alpha: 0.55),
+                  ),
+                  color: tokens.bgInset.withValues(alpha: 0.84),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(StudioSpacing.chromeActionGap),
+                  child: tabBar,
+                ),
+              )
+            else
+              tabBar,
+          ],
+        ),
       ),
     );
   }
@@ -388,11 +386,17 @@ class _SettingsSummaryTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
+                    borderRadius: BorderRadius.circular(
+                      StudioSpacing.radiusComfort,
+                    ),
                     color: tokens.bgInset.withValues(alpha: 0.84),
                     border: Border.all(color: tokens.borderSubtle),
                   ),
-                  child: Icon(module.icon, size: StudioIconSize.sm, color: tokens.textSecondary),
+                  child: Icon(
+                    module.icon,
+                    size: StudioIconSize.sm,
+                    color: tokens.textSecondary,
+                  ),
                 ),
                 const SizedBox(width: StudioLayoutSpacing.inlineGap),
                 Expanded(
@@ -417,7 +421,9 @@ class _SettingsSummaryTile extends StatelessWidget {
                       vertical: StudioLayoutSpacing.microGap,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusPill,
+                      ),
                       border: Border.all(color: tokens.borderSubtle),
                       color: tokens.bgInset.withValues(alpha: 0.72),
                     ),
@@ -466,11 +472,13 @@ class _SettingsModuleTab extends StatelessWidget {
     final tokens = StudioTokens.of(context);
     final label = Text(
       module.label,
-      maxLines: 1,
+      maxLines: 2,
       overflow: expand ? TextOverflow.ellipsis : TextOverflow.visible,
-      style: studioControlLabelStyle(context)?.copyWith(
-        color: selected ? tokens.textPrimary : tokens.textSecondary,
-      ),
+      softWrap: true,
+      textAlign: expand ? TextAlign.center : TextAlign.start,
+      style: studioControlLabelStyle(
+        context,
+      )?.copyWith(color: selected ? tokens.textPrimary : tokens.textSecondary),
     );
 
     return AnimatedContainer(
@@ -480,12 +488,12 @@ class _SettingsModuleTab extends StatelessWidget {
       ),
       curve: studioAnimationCurve(context, Curves.easeOutCubic),
       constraints: BoxConstraints(
-        minWidth: expand ? 0 : (compact ? 120 : 148),
-        minHeight: compact ? 50 : 54,
+        minWidth: expand ? 0 : (compact ? 104 : 136),
+        minHeight: compact ? 58 : 64,
       ),
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 12 : 14,
-        vertical: compact ? 10 : 12,
+        vertical: compact ? 10 : 14,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(StudioSpacing.sm),

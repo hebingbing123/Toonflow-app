@@ -52,25 +52,31 @@ class _OverviewMigrationPanel extends StatelessWidget {
       builder: (context, constraints) {
         final sideBySide = constraints.maxWidth >= kStudioTwoColumnMinWidth;
         if (sideBySide) {
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(flex: 11, child: overview),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: StudioSpacing.md,
-                  ),
-                  child: VerticalDivider(
-                    width: 1,
-                    color: studioPanelBorderColor(context).withValues(
-                      alpha: 0.65,
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                flex: 11,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      right: BorderSide(
+                        width: 1,
+                        color: studioPanelBorderColor(context).withValues(
+                          alpha: 0.65,
+                        ),
+                      ),
                     ),
                   ),
+                  padding: const EdgeInsets.only(
+                    right: StudioSpacing.md,
+                  ),
+                  child: overview,
                 ),
-                Expanded(flex: 9, child: migration),
-              ],
-            ),
+              ),
+              const SizedBox(width: StudioSpacing.md),
+              Expanded(flex: 9, child: migration),
+            ],
           );
         }
         return Column(
@@ -935,14 +941,14 @@ class _ProductionPanel extends StatelessWidget {
                                       height: 14,
                                       child: latestExportUi.activeTaskRunning
                                           ? CircularProgressIndicator(
-                                              strokeWidth: StudioControlSize.progressStroke,
+                                              strokeWidth: 2,
                                               color: latestExportCardTextColor,
                                             )
                                           : Icon(
                                               latestExportUi.activeTaskFailed
                                                   ? Icons.error_outline
                                                   : Icons.schedule,
-                                              size: 14,
+                                              size: StudioIconSize.xxs,
                                               color: latestExportCardTextColor,
                                             ),
                                     ),
@@ -1027,7 +1033,7 @@ class _ProductionPanel extends StatelessWidget {
                                         width: 16,
                                         height: 16,
                                         child: CircularProgressIndicator(
-                                          strokeWidth: StudioControlSize.progressStroke,
+                                          strokeWidth: 2,
                                         ),
                                       )
                                     : const Icon(Icons.refresh),
@@ -1157,7 +1163,7 @@ class _ProductionPanel extends StatelessWidget {
                           ? const SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.file_upload_outlined),
                       label: Text(
@@ -1182,7 +1188,7 @@ class _ProductionPanel extends StatelessWidget {
                                 width: 14,
                                 height: 14,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: StudioControlSize.progressStroke,
+                                  strokeWidth: 2,
                                 ),
                               )
                             : const Icon(Icons.playlist_play_outlined),

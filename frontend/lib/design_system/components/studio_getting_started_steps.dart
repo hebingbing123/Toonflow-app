@@ -79,7 +79,7 @@ class StudioGettingStartedSteps extends StatelessWidget {
                                     ),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(4),
+                                    padding: const EdgeInsets.all(StudioSpacing.chromeActionGap),
                                     child: Text(
                                       '${i + 1}',
                                       style: theme.labelLarge?.copyWith(

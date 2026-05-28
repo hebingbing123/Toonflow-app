@@ -25,8 +25,15 @@ void main() {
 
     expect(find.text(zh.shortVideoSpaceCurrentProjectOverview), findsOneWidget);
     expect(find.text(zh.shortVideoSpaceSectionMigrationOrder), findsOneWidget);
-    expect(find.byType(IntrinsicHeight), findsWidgets);
-    expect(find.byType(VerticalDivider), findsOneWidget);
+    final containerFinder = find.ancestor(
+      of: find.text(zh.shortVideoSpaceCurrentProjectOverview),
+      matching: find.byType(Container),
+    ).first;
+    final Container container = tester.widget(containerFinder);
+    final decoration = container.decoration as BoxDecoration?;
+    final border = decoration?.border;
+    expect(border, isA<Border>());
+    expect((border as Border).right, isNot(BorderSide.none));
 
     final overviewTitle = find.text(zh.shortVideoSpaceCurrentProjectOverview);
     final migrationTitle = find.text(zh.shortVideoSpaceSectionMigrationOrder);

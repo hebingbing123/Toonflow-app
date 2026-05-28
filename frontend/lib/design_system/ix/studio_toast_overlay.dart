@@ -50,8 +50,7 @@ class StudioToastOverlay {
     Duration duration = const Duration(seconds: 4),
   }) {
     hide();
-    final overlay =
-        _appOverlay ?? Overlay.maybeOf(context, rootOverlay: true);
+    final overlay = _appOverlay ?? Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       return;
     }
@@ -62,8 +61,12 @@ class StudioToastOverlay {
         final theme = Theme.of(overlayContext);
         final typography = StudioTypography.of(overlayContext);
         final media = MediaQuery.of(overlayContext);
-        final maxWidth = (media.size.width - 32).clamp(StudioLayoutSize.fieldStandard, 400.0);
-        final accent = iconColor ??
+        final maxWidth = (media.size.width - 32).clamp(
+          StudioLayoutSize.fieldStandard,
+          400.0,
+        );
+        final accent =
+            iconColor ??
             switch (tone) {
               StudioToastTone.error => tokens.danger,
               StudioToastTone.warning => tokens.warning,
@@ -73,8 +76,8 @@ class StudioToastOverlay {
 
         final card = Material(
           color: StudioPrimitives.transparent,
-          elevation: 12,
-          shadowColor: studioShadowColor(overlayContext, alpha: 0.28),
+          elevation: 4,
+          shadowColor: studioShadowColor(overlayContext, alpha: 0.14),
           borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
@@ -96,12 +99,20 @@ class StudioToastOverlay {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.start,
+                        spacing: StudioSpacing.sm,
+                        runSpacing: StudioSpacing.xs,
                         children: <Widget>[
-                          Icon(icon ?? tone.icon, color: accent, size: 22),
-                          const SizedBox(width: StudioSpacing.sm),
-                          Expanded(
+                          Icon(
+                            icon ?? tone.icon,
+                            color: accent,
+                            size: StudioIconSize.xl,
+                          ),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: maxWidth - 84,
+                            ),
                             child: Text(
                               message,
                               style: theme.textTheme.bodyMedium?.copyWith(

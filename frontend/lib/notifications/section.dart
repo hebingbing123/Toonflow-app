@@ -131,10 +131,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     }
   }
 
-  Widget _buildStudioHeader(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
     final tokens = StudioTokens.of(context);
     return DecoratedBox(
       decoration:
@@ -183,9 +180,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.done_all_outlined, size: StudioIconSize.sm),
+                  : const Icon(
+                      Icons.done_all_outlined,
+                      size: StudioIconSize.sm,
+                    ),
               label: Text(l10n.notificationsMarkAllRead),
             ),
           ],
@@ -282,7 +282,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.done_all_outlined),
                   label: Text(l10n.notificationsMarkAllRead),
@@ -300,17 +300,19 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               child: ExpansionTile(
                 initiallyExpanded: false,
                 tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+                childrenPadding: const EdgeInsets.only(
+                  bottom: StudioSpacing.xs,
+                ),
                 title: Text(l10n.studioNotificationsAdvanced),
                 children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: RiskyOperationConfirmPrefsOverflowMenu(
-                    tooltip: l10n.notificationsRiskyPrefsTooltip,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RiskyOperationConfirmPrefsOverflowMenu(
+                      tooltip: l10n.notificationsRiskyPrefsTooltip,
+                    ),
                   ),
-                ),
-                const SizedBox(height: StudioSpacing.xs),
-                _buildComplianceAdminPanel(context, theme, l10n),
+                  const SizedBox(height: StudioSpacing.xs),
+                  _buildComplianceAdminPanel(context, theme, l10n),
                 ],
               ),
             )
@@ -329,11 +331,18 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ),
             ),
             scrollableLoading: true,
-            child: Column(
-              children: studioStaggeredChildren(
-                filtered.map((item) => _buildNotificationTile(context, l10n, item)),
-                entranceKey: '$_typeFilter:$_unreadOnly:$needle:${filtered.length}',
-              ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filtered.length,
+              itemBuilder: (context, index) {
+                return studioStaggeredItem(
+                  index,
+                  entranceKey:
+                      '$_typeFilter:$_unreadOnly:$needle:${filtered.length}',
+                  child: _buildNotificationTile(context, l10n, filtered[index]),
+                );
+              },
             ),
           ),
           if (widget.controller.hasMore) ...[
@@ -349,7 +358,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.expand_more),
                 label: Text(l10n.notificationsLoadMore),
@@ -471,9 +480,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
 
     final refreshButton = TextButton.icon(
       style: studioFormButtonStyle(context),
-      onPressed: widget.controller.loading
-          ? null
-          : widget.controller.refresh,
+      onPressed: widget.controller.loading ? null : widget.controller.refresh,
       icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
       label: Text(l10n.notificationsRefresh),
     );
@@ -537,11 +544,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
           ),
           const SizedBox(height: StudioSpacing.xs),
-          Semantics(
-            label: label,
-            textField: true,
-            child: child,
-          ),
+          Semantics(label: label, textField: true, child: child),
         ],
       ),
     );
@@ -574,279 +577,325 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   children: <Widget>[
                     Text(
                       l10n.notificationsComplianceClearedThrottleTitle,
-                style: theme.textTheme.bodyMedium,
-              ),
-              SizedBox(
-                width: studioAdaptiveFieldWidth(
-                  context,
-                  max: 160,
-                  min: 120,
-                ),
-                child: TextField(
-                  controller: _clearedThrottleController,
-                  focusNode: _clearedThrottleFocus,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: l10n.notificationsComplianceMinutesHint,
-                  ),
-                ),
-              ),
-              FilledButton.tonal(
-                style: studioFormTonalButtonStyle(context),
-                onPressed: widget.controller.savingPreferences
-                    ? null
-                    : _saveClearedThrottlePolicy,
-                child: widget.controller.savingPreferences
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
-                      )
-                    : Text(l10n.notificationsComplianceSavePolicy),
-              ),
-              OutlinedButton.icon(
-                style: studioFormOutlinedIconLabeledButtonStyle(context),
-                onPressed: widget.controller.savingPreferences
-                    ? null
-                    : _createTemplateFromCurrentPolicy,
-                icon: const Icon(Icons.add),
-                label: Text(l10n.notificationsComplianceSaveAsTemplate),
-              ),
-              OutlinedButton.icon(
-                style: studioFormOutlinedIconLabeledButtonStyle(context),
-                onPressed:
-                    widget.controller.savingPreferences ||
-                        !widget.controller.canManageWorkspaceSharedTemplates
-                    ? null
-                    : _createWorkspaceSharedTemplateFromCurrentPolicy,
-                icon: const Icon(Icons.group_work_outlined),
-                label: Text(l10n.notificationsComplianceSaveToWorkspaceShared),
-              ),
-              OutlinedButton.icon(
-                style: studioFormOutlinedIconLabeledButtonStyle(context),
-                onPressed: widget.controller.savingPreferences
-                    ? null
-                    : _exportTemplatesToClipboard,
-                icon: const Icon(Icons.upload_file_outlined),
-                label: Text(l10n.notificationsComplianceExportTemplatesJson),
-              ),
-              OutlinedButton.icon(
-                style: studioFormOutlinedIconLabeledButtonStyle(context),
-                onPressed: widget.controller.savingPreferences
-                    ? null
-                    : _openImportTemplatesDialog,
-                icon: const Icon(Icons.download_outlined),
-                label: Text(l10n.notificationsComplianceImportTemplatesJson),
-              ),
-            ],
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          Text(l10n.notificationsComplianceClearedHelpShort, style: muted),
-          const SizedBox(height: StudioSpacing.xs),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: StudioFilterChip(
-              selected: _customTemplatesOnly,
-              label: Text(l10n.notificationsComplianceCustomTemplatesOnly),
-              onSelected: (selected) {
-                setState(() {
-                  _customTemplatesOnly = selected;
-                });
-              },
-            ),
-          ),
-          const SizedBox(height: StudioSpacing.xs),
-          Wrap(
-            spacing: StudioSpacing.xs,
-            runSpacing: StudioSpacing.xs,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              ...widget.controller.complianceClearedTemplates
-                  .where(
-                    (template) =>
-                        !_customTemplatesOnly || template.kind == 'custom',
-                  )
-                  .map(
-                    (template) => StudioContextMenu(
-                      items: <StudioContextMenuItem>[
-                        StudioContextMenuItem(
-                          label: l10n.notificationsComplianceTemplateChip(
-                            template.label,
-                          ),
-                          icon: Icons.tune,
-                          enabled: !widget.controller.savingPreferences,
-                          onSelected: () => _applyThrottleTemplate(template.id),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    SizedBox(
+                      width: studioAdaptiveFieldWidth(
+                        context,
+                        max: 160,
+                        min: 120,
+                      ),
+                      child: TextField(
+                        controller: _clearedThrottleController,
+                        focusNode: _clearedThrottleFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: l10n.notificationsComplianceMinutesHint,
                         ),
-                        if (template.canEdit)
-                          StudioContextMenuItem(
-                            label: l10n.notificationsComplianceTooltipEditTemplate,
-                            icon: Icons.edit_outlined,
-                            enabled: !widget.controller.savingPreferences,
-                            onSelected: () => _editTemplate(template),
-                          ),
-                        if (template.canDelete)
-                          StudioContextMenuItem(
-                            label: l10n.notificationsComplianceTooltipDeleteTemplate,
-                            icon: Icons.delete_outline,
-                            destructive: true,
-                            enabled: !widget.controller.savingPreferences,
-                            onSelected: () => _deleteTemplate(template),
-                          ),
-                      ],
-                      child: Tooltip(
-                      message: template.description,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          StudioActionChip(
-                            label: Text(
-                              l10n.notificationsComplianceTemplateChip(
-                                template.label,
-                              ),
-                            ),
-                            onPressed: widget.controller.savingPreferences
-                                ? null
-                                : () => _applyThrottleTemplate(template.id),
-                          ),
-                          StudioIconButton(
-                            icon: Icons.arrow_upward,
-                            label: l10n.notificationsComplianceTooltipMoveUp,
-                            size: StudioIconSize.sm,
-                            onPressed: widget.controller.savingPreferences
-                                ? null
-                                : () => _reorderTemplate(template.id, up: true),
-                          ),
-                          StudioIconButton(
-                            icon: Icons.arrow_downward,
-                            label: l10n.notificationsComplianceTooltipMoveDown,
-                            size: StudioIconSize.sm,
-                            onPressed: widget.controller.savingPreferences
-                                ? null
-                                : () =>
-                                      _reorderTemplate(template.id, up: false),
-                          ),
-                          StudioIconButton(
-                            icon: Icons.edit_outlined,
-                            label: l10n.notificationsComplianceTooltipEditTemplate,
-                            size: StudioIconSize.sm,
-                            onPressed:
-                                widget.controller.savingPreferences ||
-                                    !template.canEdit
-                                ? null
-                                : () => _editTemplate(template),
-                          ),
-                          StudioIconButton(
-                            icon: Icons.delete_outline,
-                            label: l10n.notificationsComplianceTooltipDeleteTemplate,
-                            size: StudioIconSize.sm,
-                            onPressed:
-                                widget.controller.savingPreferences ||
-                                    !template.canDelete
-                                ? null
-                                : () => _deleteTemplate(template),
-                          ),
-                        ],
                       ),
                     ),
+                    FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
+                      onPressed: widget.controller.savingPreferences
+                          ? null
+                          : _saveClearedThrottlePolicy,
+                      child: widget.controller.savingPreferences
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.notificationsComplianceSavePolicy),
                     ),
+                    OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                      onPressed: widget.controller.savingPreferences
+                          ? null
+                          : _createTemplateFromCurrentPolicy,
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.notificationsComplianceSaveAsTemplate),
+                    ),
+                    OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                      onPressed:
+                          widget.controller.savingPreferences ||
+                              !widget
+                                  .controller
+                                  .canManageWorkspaceSharedTemplates
+                          ? null
+                          : _createWorkspaceSharedTemplateFromCurrentPolicy,
+                      icon: const Icon(Icons.group_work_outlined),
+                      label: Text(
+                        l10n.notificationsComplianceSaveToWorkspaceShared,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                      onPressed: widget.controller.savingPreferences
+                          ? null
+                          : _exportTemplatesToClipboard,
+                      icon: const Icon(Icons.upload_file_outlined),
+                      label: Text(
+                        l10n.notificationsComplianceExportTemplatesJson,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                      onPressed: widget.controller.savingPreferences
+                          ? null
+                          : _openImportTemplatesDialog,
+                      icon: const Icon(Icons.download_outlined),
+                      label: Text(
+                        l10n.notificationsComplianceImportTemplatesJson,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: StudioSpacing.xs),
+                Text(
+                  l10n.notificationsComplianceClearedHelpShort,
+                  style: muted,
+                ),
+                const SizedBox(height: StudioSpacing.xs),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: StudioFilterChip(
+                    selected: _customTemplatesOnly,
+                    label: Text(
+                      l10n.notificationsComplianceCustomTemplatesOnly,
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        _customTemplatesOnly = selected;
+                      });
+                    },
                   ),
-            ],
-          ),
-          if (widget
-              .controller
-              .workspaceSharedComplianceTemplates
-              .isNotEmpty) ...<Widget>[
-            const SizedBox(height: StudioSpacing.xs),
-            Text(
-              l10n.notificationsComplianceWorkspaceSharedHeader,
-              style: muted,
-            ),
-            const SizedBox(height: StudioSpacing.xs),
-            Wrap(
-              spacing: StudioSpacing.xs,
-              runSpacing: StudioSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: widget.controller.workspaceSharedComplianceTemplates
-                  .map(
-                    (template) => StudioContextMenu(
-                      items: <StudioContextMenuItem>[
-                        StudioContextMenuItem(
-                          label: l10n.notificationsComplianceSharedChip(
-                            template.label,
-                          ),
-                          icon: Icons.tune,
-                          enabled: !widget.controller.savingPreferences,
-                          onSelected: () => _applyThrottleTemplate(template.id),
-                        ),
-                        if (widget.controller.canManageWorkspaceSharedTemplates)
-                          StudioContextMenuItem(
-                            label: l10n
-                                .notificationsComplianceTooltipEditSharedTemplate,
-                            icon: Icons.edit_outlined,
-                            enabled: !widget.controller.savingPreferences,
-                            onSelected: () =>
-                                _editWorkspaceSharedTemplate(template),
-                          ),
-                        if (widget.controller.canManageWorkspaceSharedTemplates)
-                          StudioContextMenuItem(
-                            label: l10n
-                                .notificationsComplianceTooltipDeleteSharedTemplate,
-                            icon: Icons.delete_outline,
-                            destructive: true,
-                            enabled: !widget.controller.savingPreferences,
-                            onSelected: () =>
-                                _deleteWorkspaceSharedTemplate(template),
-                          ),
-                      ],
-                      child: Tooltip(
-                      message: template.description,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          StudioActionChip(
-                            label: Text(
-                              l10n.notificationsComplianceSharedChip(
-                                template.label,
+                ),
+                const SizedBox(height: StudioSpacing.xs),
+                Wrap(
+                  spacing: StudioSpacing.xs,
+                  runSpacing: StudioSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    ...widget.controller.complianceClearedTemplates
+                        .where(
+                          (template) =>
+                              !_customTemplatesOnly ||
+                              template.kind == 'custom',
+                        )
+                        .map(
+                          (template) => StudioContextMenu(
+                            items: <StudioContextMenuItem>[
+                              StudioContextMenuItem(
+                                label: l10n.notificationsComplianceTemplateChip(
+                                  template.label,
+                                ),
+                                icon: Icons.tune,
+                                enabled: !widget.controller.savingPreferences,
+                                onSelected: () =>
+                                    _applyThrottleTemplate(template.id),
+                              ),
+                              if (template.canEdit)
+                                StudioContextMenuItem(
+                                  label: l10n
+                                      .notificationsComplianceTooltipEditTemplate,
+                                  icon: Icons.edit_outlined,
+                                  enabled: !widget.controller.savingPreferences,
+                                  onSelected: () => _editTemplate(template),
+                                ),
+                              if (template.canDelete)
+                                StudioContextMenuItem(
+                                  label: l10n
+                                      .notificationsComplianceTooltipDeleteTemplate,
+                                  icon: Icons.delete_outline,
+                                  destructive: true,
+                                  enabled: !widget.controller.savingPreferences,
+                                  onSelected: () => _deleteTemplate(template),
+                                ),
+                            ],
+                            child: Tooltip(
+                              message: template.description,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StudioActionChip(
+                                    label: Text(
+                                      l10n.notificationsComplianceTemplateChip(
+                                        template.label,
+                                      ),
+                                    ),
+                                    onPressed:
+                                        widget.controller.savingPreferences
+                                        ? null
+                                        : () => _applyThrottleTemplate(
+                                            template.id,
+                                          ),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.arrow_upward,
+                                    label: l10n
+                                        .notificationsComplianceTooltipMoveUp,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences
+                                        ? null
+                                        : () => _reorderTemplate(
+                                            template.id,
+                                            up: true,
+                                          ),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.arrow_downward,
+                                    label: l10n
+                                        .notificationsComplianceTooltipMoveDown,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences
+                                        ? null
+                                        : () => _reorderTemplate(
+                                            template.id,
+                                            up: false,
+                                          ),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.edit_outlined,
+                                    label: l10n
+                                        .notificationsComplianceTooltipEditTemplate,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences ||
+                                            !template.canEdit
+                                        ? null
+                                        : () => _editTemplate(template),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.delete_outline,
+                                    label: l10n
+                                        .notificationsComplianceTooltipDeleteTemplate,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences ||
+                                            !template.canDelete
+                                        ? null
+                                        : () => _deleteTemplate(template),
+                                  ),
+                                ],
                               ),
                             ),
-                            onPressed: widget.controller.savingPreferences
-                                ? null
-                                : () => _applyThrottleTemplate(template.id),
                           ),
-                          StudioIconButton(
-                            icon: Icons.edit_outlined,
-                            label: l10n.notificationsComplianceTooltipEditSharedTemplate,
-                            size: StudioIconSize.sm,
-                            onPressed:
-                                widget.controller.savingPreferences ||
-                                    !widget
-                                        .controller
-                                        .canManageWorkspaceSharedTemplates
-                                ? null
-                                : () => _editWorkspaceSharedTemplate(template),
-                          ),
-                          StudioIconButton(
-                            icon: Icons.delete_outline,
-                            label: l10n.notificationsComplianceTooltipDeleteSharedTemplate,
-                            size: StudioIconSize.sm,
-                            onPressed:
-                                widget.controller.savingPreferences ||
-                                    !widget
-                                        .controller
-                                        .canManageWorkspaceSharedTemplates
-                                ? null
-                                : () =>
+                        ),
+                  ],
+                ),
+                if (widget
+                    .controller
+                    .workspaceSharedComplianceTemplates
+                    .isNotEmpty) ...<Widget>[
+                  const SizedBox(height: StudioSpacing.xs),
+                  Text(
+                    l10n.notificationsComplianceWorkspaceSharedHeader,
+                    style: muted,
+                  ),
+                  const SizedBox(height: StudioSpacing.xs),
+                  Wrap(
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: widget
+                        .controller
+                        .workspaceSharedComplianceTemplates
+                        .map(
+                          (template) => StudioContextMenu(
+                            items: <StudioContextMenuItem>[
+                              StudioContextMenuItem(
+                                label: l10n.notificationsComplianceSharedChip(
+                                  template.label,
+                                ),
+                                icon: Icons.tune,
+                                enabled: !widget.controller.savingPreferences,
+                                onSelected: () =>
+                                    _applyThrottleTemplate(template.id),
+                              ),
+                              if (widget
+                                  .controller
+                                  .canManageWorkspaceSharedTemplates)
+                                StudioContextMenuItem(
+                                  label: l10n
+                                      .notificationsComplianceTooltipEditSharedTemplate,
+                                  icon: Icons.edit_outlined,
+                                  enabled: !widget.controller.savingPreferences,
+                                  onSelected: () =>
+                                      _editWorkspaceSharedTemplate(template),
+                                ),
+                              if (widget
+                                  .controller
+                                  .canManageWorkspaceSharedTemplates)
+                                StudioContextMenuItem(
+                                  label: l10n
+                                      .notificationsComplianceTooltipDeleteSharedTemplate,
+                                  icon: Icons.delete_outline,
+                                  destructive: true,
+                                  enabled: !widget.controller.savingPreferences,
+                                  onSelected: () =>
                                       _deleteWorkspaceSharedTemplate(template),
+                                ),
+                            ],
+                            child: Tooltip(
+                              message: template.description,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  StudioActionChip(
+                                    label: Text(
+                                      l10n.notificationsComplianceSharedChip(
+                                        template.label,
+                                      ),
+                                    ),
+                                    onPressed:
+                                        widget.controller.savingPreferences
+                                        ? null
+                                        : () => _applyThrottleTemplate(
+                                            template.id,
+                                          ),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.edit_outlined,
+                                    label: l10n
+                                        .notificationsComplianceTooltipEditSharedTemplate,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences ||
+                                            !widget
+                                                .controller
+                                                .canManageWorkspaceSharedTemplates
+                                        ? null
+                                        : () => _editWorkspaceSharedTemplate(
+                                            template,
+                                          ),
+                                  ),
+                                  StudioIconButton(
+                                    icon: Icons.delete_outline,
+                                    label: l10n
+                                        .notificationsComplianceTooltipDeleteSharedTemplate,
+                                    size: StudioIconSize.sm,
+                                    onPressed:
+                                        widget.controller.savingPreferences ||
+                                            !widget
+                                                .controller
+                                                .canManageWorkspaceSharedTemplates
+                                        ? null
+                                        : () => _deleteWorkspaceSharedTemplate(
+                                            template,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
+                        )
+                        .toList(),
+                  ),
+                ],
               ],
             ),
           ),
@@ -872,28 +921,28 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                               gap: StudioSpacing.sm,
                             );
                             return SizedBox(
-                          width: fieldWidth,
-                          child: _complianceLabeledField(
-                            context,
-                            label:
-                                l10n.notificationsComplianceStageOverrideLabel(
-                              studioNotificationsComplianceStageLabel(
-                                l10n,
-                                stage,
+                              width: fieldWidth,
+                              child: _complianceLabeledField(
+                                context,
+                                label: l10n
+                                    .notificationsComplianceStageOverrideLabel(
+                                      studioNotificationsComplianceStageLabel(
+                                        l10n,
+                                        stage,
+                                      ),
+                                    ),
+                                width: fieldWidth,
+                                child: TextField(
+                                  controller: _stageThrottleControllers[stage],
+                                  focusNode: _stageThrottleFocusNodes[stage],
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    hintText: l10n
+                                        .notificationsComplianceStageOverrideHint,
+                                  ),
+                                ),
                               ),
-                            ),
-                            width: fieldWidth,
-                            child: TextField(
-                              controller: _stageThrottleControllers[stage],
-                              focusNode: _stageThrottleFocusNodes[stage],
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText: l10n
-                                    .notificationsComplianceStageOverrideHint,
-                              ),
-                            ),
-                          ),
                             );
                           },
                         ),
@@ -939,55 +988,55 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   _complianceLabeledField(
                     context,
                     label: l10n.notificationsComplianceFilterTemplateId,
-              child: TextField(
-                controller: _workspaceAuditTemplateFilterController,
-                decoration: const InputDecoration(isDense: true),
-              ),
-            ),
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceFilterAction,
-              child: StudioDropdownButtonFormField<String>(
-                initialValue: _workspaceAuditActionFilter,
-                isExpanded: true,
-                decoration: const InputDecoration(isDense: true),
-                items: <DropdownMenuItem<String>>[
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text(l10n.notificationsTypeAll),
+                    child: TextField(
+                      controller: _workspaceAuditTemplateFilterController,
+                      decoration: const InputDecoration(isDense: true),
+                    ),
                   ),
-                  DropdownMenuItem(
-                    value: 'upsert',
-                    child: Text(l10n.notificationsAuditActionUpsert),
+                  _complianceLabeledField(
+                    context,
+                    label: l10n.notificationsComplianceFilterAction,
+                    child: StudioDropdownButtonFormField<String>(
+                      initialValue: _workspaceAuditActionFilter,
+                      isExpanded: true,
+                      decoration: const InputDecoration(isDense: true),
+                      items: <DropdownMenuItem<String>>[
+                        DropdownMenuItem(
+                          value: '',
+                          child: Text(l10n.notificationsTypeAll),
+                        ),
+                        DropdownMenuItem(
+                          value: 'upsert',
+                          child: Text(l10n.notificationsAuditActionUpsert),
+                        ),
+                        DropdownMenuItem(
+                          value: 'delete',
+                          child: Text(l10n.notificationsAuditActionDelete),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _workspaceAuditActionFilter = value ?? '';
+                        });
+                      },
+                    ),
                   ),
-                  DropdownMenuItem(
-                    value: 'delete',
-                    child: Text(l10n.notificationsAuditActionDelete),
+                  _complianceLabeledField(
+                    context,
+                    label: l10n.notificationsComplianceFilterStartIso,
+                    child: TextField(
+                      controller: _workspaceAuditStartAtController,
+                      decoration: const InputDecoration(isDense: true),
+                    ),
                   ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _workspaceAuditActionFilter = value ?? '';
-                  });
-                },
-              ),
-            ),
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceFilterStartIso,
-              child: TextField(
-                controller: _workspaceAuditStartAtController,
-                decoration: const InputDecoration(isDense: true),
-              ),
-            ),
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceFilterEndIso,
-              child: TextField(
-                controller: _workspaceAuditEndAtController,
-                decoration: const InputDecoration(isDense: true),
-              ),
-            ),
+                  _complianceLabeledField(
+                    context,
+                    label: l10n.notificationsComplianceFilterEndIso,
+                    child: TextField(
+                      controller: _workspaceAuditEndAtController,
+                      decoration: const InputDecoration(isDense: true),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: StudioSpacing.xs),
@@ -1002,46 +1051,46 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                         : _reloadWorkspaceAuditWithFilters,
                     child: Text(l10n.notificationsComplianceApplyFilters),
                   ),
-            OutlinedButton.icon(
-              style: studioFormOutlinedIconLabeledButtonStyle(context),
-              onPressed: widget.controller.loadingWorkspaceSharedAudit
-                  ? null
-                  : _exportWorkspaceAuditJsonToClipboard,
-              icon: const Icon(Icons.data_object),
-              label: Text(l10n.notificationsComplianceDownloadAuditJson),
-            ),
-            OutlinedButton.icon(
-              style: studioFormOutlinedIconLabeledButtonStyle(context),
-              onPressed: widget.controller.loadingWorkspaceSharedAudit
-                  ? null
-                  : _exportWorkspaceAuditCsvToClipboard,
-              icon: const Icon(Icons.table_chart_outlined),
-              label: Text(l10n.notificationsComplianceDownloadAuditCsv),
-            ),
-            OutlinedButton.icon(
-              style: studioFormOutlinedIconLabeledButtonStyle(context),
-              onPressed:
-                  widget.controller.loadingWorkspaceSharedAudit ||
-                      widget
-                          .controller
-                          .enqueueingWorkspaceSharedAuditAsyncExport
-                  ? null
-                  : () => _enqueueWorkspaceSharedAuditExportAsync('json'),
-              icon: const Icon(Icons.hourglass_empty_outlined),
-              label: Text(l10n.notificationsComplianceAsyncJson),
-            ),
-            OutlinedButton.icon(
-              style: studioFormOutlinedIconLabeledButtonStyle(context),
-              onPressed:
-                  widget.controller.loadingWorkspaceSharedAudit ||
-                      widget
-                          .controller
-                          .enqueueingWorkspaceSharedAuditAsyncExport
-                  ? null
-                  : () => _enqueueWorkspaceSharedAuditExportAsync('csv'),
-              icon: const Icon(Icons.hourglass_empty_outlined),
-              label: Text(l10n.notificationsComplianceAsyncCsv),
-            ),
+                  OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    onPressed: widget.controller.loadingWorkspaceSharedAudit
+                        ? null
+                        : _exportWorkspaceAuditJsonToClipboard,
+                    icon: const Icon(Icons.data_object),
+                    label: Text(l10n.notificationsComplianceDownloadAuditJson),
+                  ),
+                  OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    onPressed: widget.controller.loadingWorkspaceSharedAudit
+                        ? null
+                        : _exportWorkspaceAuditCsvToClipboard,
+                    icon: const Icon(Icons.table_chart_outlined),
+                    label: Text(l10n.notificationsComplianceDownloadAuditCsv),
+                  ),
+                  OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    onPressed:
+                        widget.controller.loadingWorkspaceSharedAudit ||
+                            widget
+                                .controller
+                                .enqueueingWorkspaceSharedAuditAsyncExport
+                        ? null
+                        : () => _enqueueWorkspaceSharedAuditExportAsync('json'),
+                    icon: const Icon(Icons.hourglass_empty_outlined),
+                    label: Text(l10n.notificationsComplianceAsyncJson),
+                  ),
+                  OutlinedButton.icon(
+                    style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    onPressed:
+                        widget.controller.loadingWorkspaceSharedAudit ||
+                            widget
+                                .controller
+                                .enqueueingWorkspaceSharedAuditAsyncExport
+                        ? null
+                        : () => _enqueueWorkspaceSharedAuditExportAsync('csv'),
+                    icon: const Icon(Icons.hourglass_empty_outlined),
+                    label: Text(l10n.notificationsComplianceAsyncCsv),
+                  ),
                 ],
               ),
             ],
@@ -1057,7 +1106,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               dense: true,
               alternateLabel: l10n.notificationsComplianceCloseTooltip,
               alternateIcon: Icons.close,
-              onAlternate: widget.controller.clearWorkspaceSharedAsyncExportInfo,
+              onAlternate:
+                  widget.controller.clearWorkspaceSharedAsyncExportInfo,
               leading: Icon(
                 Icons.info_outline,
                 color: theme.colorScheme.primary,
@@ -1086,65 +1136,65 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               _complianceLabeledField(
                 context,
                 label: l10n.notificationsComplianceExportFormatFilter,
-              width: studioAdaptiveFieldWidth(context, max: 220, min: 160),
-              child: StudioDropdownButtonFormField<String>(
-                // Controlled by _exportHistoryFormat via setState.
-                // ignore: deprecated_member_use
-                value: _exportHistoryFormat,
-                isExpanded: true,
-                decoration: const InputDecoration(isDense: true),
-                items: <DropdownMenuItem<String>>[
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text(l10n.notificationsTypeAll),
-                  ),
-                  DropdownMenuItem(
-                    value: 'json',
-                    child: Text(l10n.notificationsComplianceExportFormatJson),
-                  ),
-                  DropdownMenuItem(
-                    value: 'csv',
-                    child: Text(l10n.notificationsComplianceExportFormatCsv),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _exportHistoryFormat = value ?? '';
-                  });
-                },
+                width: studioAdaptiveFieldWidth(context, max: 220, min: 160),
+                child: StudioDropdownButtonFormField<String>(
+                  // Controlled by _exportHistoryFormat via setState.
+                  // ignore: deprecated_member_use
+                  value: _exportHistoryFormat,
+                  isExpanded: true,
+                  decoration: const InputDecoration(isDense: true),
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(l10n.notificationsTypeAll),
+                    ),
+                    DropdownMenuItem(
+                      value: 'json',
+                      child: Text(l10n.notificationsComplianceExportFormatJson),
+                    ),
+                    DropdownMenuItem(
+                      value: 'csv',
+                      child: Text(l10n.notificationsComplianceExportFormatCsv),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _exportHistoryFormat = value ?? '';
+                    });
+                  },
+                ),
               ),
-            ),
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceExportedStartIso,
-              child: TextField(
-                controller: _exportHistoryExportedStartController,
-                decoration: const InputDecoration(isDense: true),
+              _complianceLabeledField(
+                context,
+                label: l10n.notificationsComplianceExportedStartIso,
+                child: TextField(
+                  controller: _exportHistoryExportedStartController,
+                  decoration: const InputDecoration(isDense: true),
+                ),
               ),
-            ),
-            _complianceLabeledField(
-              context,
-              label: l10n.notificationsComplianceExportedEndIso,
-              child: TextField(
-                controller: _exportHistoryExportedEndController,
-                decoration: const InputDecoration(isDense: true),
+              _complianceLabeledField(
+                context,
+                label: l10n.notificationsComplianceExportedEndIso,
+                child: TextField(
+                  controller: _exportHistoryExportedEndController,
+                  decoration: const InputDecoration(isDense: true),
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton(
-                onPressed: widget.controller.loadingExportHistory
-                    ? null
-                    : _applyExportHistoryFilters,
-                child: widget.controller.loadingExportHistory
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
-                      )
-                    : Text(l10n.notificationsComplianceFilterExports),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton(
+                  onPressed: widget.controller.loadingExportHistory
+                      ? null
+                      : _applyExportHistoryFilters,
+                  child: widget.controller.loadingExportHistory
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.notificationsComplianceFilterExports),
+                ),
               ),
-            ),
             ],
           ),
         ),
@@ -1152,7 +1202,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         ...studioStaggeredChildren(
           widget.controller.workspaceSharedAuditExports.map(
             (item) => Padding(
-              padding: const EdgeInsets.only(bottom: StudioSpacing.chromeActionGap),
+              padding: const EdgeInsets.only(
+                bottom: StudioSpacing.chromeActionGap,
+              ),
               child: Tooltip(
                 message: _formatWorkspaceAuditExportItem(l10n, item),
                 child: Row(
@@ -1167,7 +1219,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                     ),
                     StudioIconButton(
                       icon: Icons.filter_alt_outlined,
-                      label: l10n.notificationsComplianceReuseExportFiltersTooltip,
+                      label:
+                          l10n.notificationsComplianceReuseExportFiltersTooltip,
                       size: StudioIconSize.sm,
                       onPressed: widget.controller.loadingWorkspaceSharedAudit
                           ? null
@@ -1199,7 +1252,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.expand_more, size: StudioIconSize.sm),
               label: Text(l10n.notificationsComplianceMoreExportRecords),
@@ -1233,7 +1286,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.expand_more, size: StudioIconSize.sm),
               label: Text(l10n.notificationsComplianceLoadMoreAudit),
@@ -1284,7 +1337,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
             if (item.isUnread)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: StudioSpacing.xs, vertical: StudioSpacing.chromeActionGap),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: StudioSpacing.xs,
+                  vertical: StudioSpacing.chromeActionGap,
+                ),
                 decoration: BoxDecoration(
                   color: StudioTokens.of(context).primarySoft,
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusPill),

@@ -41,7 +41,7 @@ class ProductDemoModeBanner extends StatelessWidget {
                       ? Icons.smart_display_outlined
                       : Icons.route_outlined,
                   color: tokens.warning,
-                  size: 22,
+                  size: StudioIconSize.xl,
                 ),
                 const SizedBox(width: StudioSpacing.radiusComfort),
                 Expanded(

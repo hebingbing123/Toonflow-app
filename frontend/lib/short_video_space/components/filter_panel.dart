@@ -450,16 +450,17 @@ class _FilterPanelState extends State<FilterPanel> {
           // Search options
           if (_currentFilter.searchKeyword.isNotEmpty) ...[
             const SizedBox(height: StudioSpacing.xs),
-            Row(
+            Wrap(
+              spacing: StudioSpacing.xs,
+              runSpacing: StudioSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(l10n.shortVideoFilterPanelSearchScopeLabel),
-                const SizedBox(width: StudioSpacing.xs),
                 StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipSubtitle),
                   selected: _currentFilter.searchInSubtitles,
                   onSelected: _onSearchInSubtitlesChanged,
                 ),
-                const SizedBox(width: StudioSpacing.xs),
                 StudioFilterChip(
                   label: Text(l10n.shortVideoFilterPanelSearchChipVoiceover),
                   selected: _currentFilter.searchInVoiceover,

@@ -41,4 +41,5 @@ Future<void> expandAllStudioWorkbenchSections(WidgetTester tester) async {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
   }
+  await tester.pumpAndSettle();
 }

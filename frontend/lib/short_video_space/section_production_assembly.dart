@@ -1774,7 +1774,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     ? filteredTasks.length
                                     : filteredTasks.length,
                                 separatorBuilder: (context, _) =>
-                                    const Divider(height: StudioControlSize.dividerThickness),
+                                    const Divider(height: 1),
                                 itemBuilder: (_, index) {
                                   final task = filteredTasks[index];
                                   final shotNumeric = task.shotId == null

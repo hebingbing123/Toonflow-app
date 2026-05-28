@@ -87,7 +87,7 @@ class StudioPaneLoadingSkeleton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        const StudioSkeleton(height: StudioLayoutSize.skeletonLineTall),
+        const StudioSkeleton(height: 18),
         const SizedBox(height: StudioSpacing.sm),
         StudioSkeleton(height: rowA),
         const SizedBox(height: StudioSpacing.sm),
@@ -153,13 +153,13 @@ class StudioListCardSkeleton extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const StudioSkeleton(width: StudioLayoutSize.skeletonAvatar, height: StudioLayoutSize.skeletonAvatar, borderRadius: 10),
+                const StudioSkeleton(width: 40, height: 40, borderRadius: 10),
                 const SizedBox(width: StudioSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const StudioSkeleton(height: StudioLayoutSize.skeletonLineMedium),
+                      const StudioSkeleton(height: 16),
                       const SizedBox(height: StudioSpacing.xs),
                       StudioSkeleton(height: 12, width: subtitleWidth),
                       const SizedBox(height: StudioSpacing.sm),
@@ -311,7 +311,7 @@ class StudioDetailSkeleton extends StatelessWidget {
               ? constraints.maxHeight
               : MediaQuery.sizeOf(context).height,
           fraction: 0.5,
-          min: StudioLayoutSize.fieldStandard,
+          min: 280,
           max: 520,
         );
         final row = Row(
@@ -326,7 +326,7 @@ class StudioDetailSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  StudioSkeleton(height: StudioLayoutSize.skeletonLineTall),
+                  StudioSkeleton(height: 18),
                   SizedBox(height: StudioSpacing.sm),
                   StudioSkeleton(height: 44),
                   SizedBox(height: StudioSpacing.xs),

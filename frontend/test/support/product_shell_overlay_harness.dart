@@ -20,7 +20,7 @@ Widget productShellOverlayTestApp(
   Locale locale = const Locale('en'),
 }) {
   return MediaQuery(
-    data: MediaQueryData(size: size),
+    data: MediaQueryData(size: size, disableAnimations: true),
     child: MaterialApp.router(
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

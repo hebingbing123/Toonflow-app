@@ -124,7 +124,8 @@ void main() {
     testWidgets('Notification title with 2 lines truncates properly', (
       WidgetTester tester,
     ) async {
-      final longNotificationTitle = '通知：' + '这是一个非常重要的' * 80 + '通知标题';
+      final longNotificationTitle =
+          '通知：${'这是一个非常重要的' * 80}通知标题';
 
       await tester.pumpWidget(
         buildTestApp(
@@ -169,7 +170,7 @@ void main() {
     testWidgets('Dropdown menu item with long text truncates properly', (
       WidgetTester tester,
     ) async {
-      final longItemName = '角色名称：' + '非常长的' * 50 + '角色名';
+      final longItemName = '角色名称：${'非常长的' * 50}角色名';
 
       await tester.pumpWidget(
         buildTestApp(
@@ -210,7 +211,8 @@ void main() {
     testWidgets('Description text with 3 lines truncates properly', (
       WidgetTester tester,
     ) async {
-      final longDescription = '订阅计划描述：' + '这是一个详细的' * 100 + '描述文本';
+      final longDescription =
+          '订阅计划描述：${'这是一个详细的' * 100}描述文本';
 
       await tester.pumpWidget(
         buildTestApp(
@@ -364,7 +366,7 @@ void main() {
     testWidgets('Text in Card with long content does not overflow', (
       WidgetTester tester,
     ) async {
-      final longCardContent = '卡片内容：' + '这是一段很长的' * 80 + '卡片文本';
+      final longCardContent = '卡片内容：${'这是一段很长的' * 80}卡片文本';
 
       await tester.pumpWidget(
         buildTestApp(
