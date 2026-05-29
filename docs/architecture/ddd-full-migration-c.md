@@ -1,7 +1,7 @@
 # 全仓 DDD 迁移（选项 C）— 实施计划（草案）
 
 本文档描述：若决定在本仓库 **后端 `backend/`** 上实施 **选项 C（全仓按 DDD 思想重组领域层与应用层）**，建议的 **阶段划分、门禁、目标结构** 与 **风险**。  
-**不是**要求立即执行；可作为评审用路线图。与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 的关系：**契约（OpenAPI / `docs/websocket-events.md`）与对外 URL 不变**；**Harness** 继续负责工具、权限、观测；**DDD 主要作用于「业务规则与持久化编排」在 Rust 代码中的落点**。
+**不是**要求立即执行；可作为评审用路线图。与 [`harness-rust-flutter.md`](../roadmaps/harness-rust-flutter.md) 的关系：**契约（OpenAPI / `docs/websocket-events.md`）与对外 URL 不变**；**Harness** 继续负责工具、权限、观测；**DDD 主要作用于「业务规则与持久化编排」在 Rust 代码中的落点**。
 
 ---
 
@@ -92,7 +92,7 @@ backend/src/
 ### 阶段 4：收尾与删除死代码
 
 - 删除不再被调用的「旧直写 SQL 路径」。
-- 文档：在 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 或本文档 **更新「后端分层」小节**（一段话即可）。
+- 文档：在 [`harness-rust-flutter.md`](../roadmaps/harness-rust-flutter.md) 或本文档 **更新「后端分层」小节**（一段话即可）。
 - **完成定义复核**：见 §1 完成定义。
 
 ---
@@ -242,7 +242,7 @@ backend/src/
 
 ## 8. 附录：与现有文档的索引
 
-- 主路线图：[`harness-rust-flutter.md`](./harness-rust-flutter.md)
+- 主路线图：[`harness-rust-flutter.md`](../roadmaps/harness-rust-flutter.md)
 - Parity 与验收：[`electron-node-parity.md`](./electron-node-parity.md)
 - 工程约定：[`AGENTS.md`](../../AGENTS.md)
 

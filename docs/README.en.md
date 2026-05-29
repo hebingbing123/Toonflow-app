@@ -69,28 +69,27 @@ OpenFlow is a **proprietary cloud SaaS** AI short drama production platform base
 ### Directory Structure
 
 ```
-Openflow-app/
-├── backend/              # Rust backend service
-│   ├── src/             # Source code
-│   ├── data/skills/     # Skill Markdown files
-│   ├── Cargo.toml       # Dependency config
-│   └── README.md        # Backend docs
-├── frontend/            # Flutter frontend app
-│   ├── lib/             # Source code
-│   ├── pubspec.yaml     # Dependency config
-│   └── README.md        # Frontend docs
-├── supabase/            # Database migrations
-│   └── migrations/      # SQL migration files
-├── docs/                # Documentation
-│   └── plans/           # Technical roadmaps
-└── scripts/             # Utility scripts
+Toonflow-app/
+├── backend/                 # Rust server (openflow-server, :8666)
+├── frontend/                # Flutter Studio shell + Harness
+│   └── lib/
+│       ├── design_system/   # Studio design system
+│       ├── product_shell/   # Router, sidebar, login
+│       ├── short_video_space/
+│       ├── project_studio/
+│       └── rust_api/        # OpenAPI-aligned Dart API
+├── rust_core/               # Desktop native bridge
+├── supabase/migrations/
+├── docs/roadmaps/           # Technical roadmaps (start here)
+├── docs/plans/              # UI/UX, E2E, signoff
+└── scripts/                 # Gates and E2E
 ```
 
 For detailed descriptions:
-- **`backend/`**: Rust backend service (Axum + SQLx + Tokio), default port **8666**, see [`backend/README.md`](../backend/README.md)
-- **`frontend/`**: Flutter client (Desktop + Web), connects to backend via `API_BASE_URL`, see [`frontend/README.md`](../frontend/README.md)
-- **`docs/plans/`**: Technical roadmaps and design docs, main roadmap: [`harness-rust-flutter.md`](plans/harness-rust-flutter.md)
-- **`supabase/`**: Database migrations and config, Development: `supabase start` (local Docker), Production: Supabase cloud hosting
+- **`backend/`**: See [`backend/README.md`](../backend/README.md)
+- **`frontend/`**: Default entry `lib/main.dart` → `StudioProductApp`; see [`frontend/README.md`](../frontend/README.md)
+- **`docs/roadmaps/`**: Main index [`README.md`](roadmaps/README.md); blueprint [`master-roadmap.md`](roadmaps/master-roadmap.md)
+- **`supabase/`**: `supabase start` locally; hosted in production
 
 ---
 
@@ -215,14 +214,13 @@ flutter run -d macos --dart-define-from-file=dart_defines.dev.json
 ### Verify Installation
 
 ```bash
-# Health check
-curl http://127.0.0.1:8666/health
-
-# API documentation
+curl http://127.0.0.1:8666/api/v1/health
 open http://127.0.0.1:8666/api/v1/docs
 
-# Run tests
-yarn refactor:check
+# Engineering gate (prefer agent entry)
+yarn refactor:agent              # incremental (default)
+yarn refactor:agent --quick      # pre-commit
+yarn refactor:agent --full       # CI parity
 ```
 
 ---
@@ -276,15 +274,15 @@ flutter build macos    # macOS build
 
 ### CI & Engineering Standards
 
-**Local Refactor Gate**:
+**Refactor gate** (see [`scripts/REFACTOR_CHECK_MODES.md`](../scripts/REFACTOR_CHECK_MODES.md)):
+
 ```bash
-yarn refactor:check
+yarn refactor:agent              # daily default
+yarn refactor:agent --quick
+yarn refactor:agent --full       # before merge / release
 ```
 
-This script executes:
-1. OpenAPI parsing validation
-2. Rust checks (fmt + clippy + test)
-3. Flutter checks (analyze + test)
+`yarn refactor:check` remains the full CI-equivalent entry when needed.
 
 **Database Migrations**:
 ```bash
@@ -305,12 +303,14 @@ supabase db push   # Production
 
 ## 📚 Documentation
 
-- [Backend Development Guide](../backend/README.md)
-- [Frontend Development Guide](../frontend/README.md)
-- [Technical Roadmap](plans/harness-rust-flutter.md)
-- [Feature Parity Checklist](plans/electron-node-parity.md)
-- [Database Migration Guide](migration/database-migrations.md)
-- [WebSocket Event Protocol](websocket-events.md)
+- [Backend](../backend/README.md) · [Frontend](../frontend/README.md)
+- [Roadmaps index](roadmaps/README.md) · [Master roadmap](roadmaps/master-roadmap.md)
+- [Parity audit](roadmaps/parity-audit.md)
+- [Studio UI developer guide](plans/flutter-ui-ux-developer-guide.md)
+- [Short-video UI delivery](plans/short-video-ui-ux-rebuild.md)
+- [WebSocket events](api/websocket-events.md) (alias: [websocket-events.md](websocket-events.md))
+- [Database migrations](migration/database-migrations.md)
+- [Agent conventions](../AGENTS.md)
 
 ---
 

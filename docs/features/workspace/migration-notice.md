@@ -3,7 +3,7 @@
 **用途**：当团队 Workspace 能力进入默认发布面时，用这份文档向客户端、测试、运营说明“哪些行为和旧单用户语义不同”。  
 总表：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) W11.3。  
 路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。  
-差异背景：[`electron-node-parity.md`](./electron-node-parity.md) §2.2。
+差异背景：[`electron-node-parity.md`](../../roadmaps/electron-node-parity.md) §2.2。
 
 **注意**：本文档关注 **workspace 协作与可见性** 变化（W11.3）。关于 **计费口径迁移**（user-scope → workspace-scope billing，W8.2–W8.4），请参阅独立文档：[`workspace-billing-migration-notice.md`](./workspace-billing-migration-notice.md)。
 **补充**：除非另有明确公告，本文中的 workspace 上线说明**不**意味着 `plan_tier`、`daily_job_quota`、`jobs_today` 已切到 workspace-scope；当前仍以 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md) 的 **user-scope** 结论为准。

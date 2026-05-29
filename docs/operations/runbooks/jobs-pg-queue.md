@@ -1,7 +1,7 @@
 # PG 任务队列（`app_generation_job`）运维与平台 Runbook
 
 **真源**：队列实现 [`backend/src/jobs/queue/pg.rs`](../../backend/src/jobs/queue/pg.rs)、Worker [`backend/src/jobs/worker/mod.rs`](../../backend/src/jobs/worker/mod.rs)。  
-**旁路队列（Redis / 云托管）**：仅当 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) **WP-A1 Gate** 评审通过后再上；本 Runbook 以 **Postgres 为默认真源**（与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) §7.1 一致）。  
+**旁路队列（Redis / 云托管）**：仅当 [`jobs-saas.md`](../../roadmaps/jobs-saas.md) **WP-A1 Gate** 评审通过后再上；本 Runbook 以 **Postgres 为默认真源**（与 [`harness-rust-flutter.md`](../../roadmaps/harness-rust-flutter.md) §7.1 一致）。  
 **竖切清单**：[**`tasks-pg-queue-observability.md`**](./tasks-pg-queue-observability.md)。
 
 ---

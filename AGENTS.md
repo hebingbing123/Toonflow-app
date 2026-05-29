@@ -2,7 +2,7 @@
 
 ## 自动连续执行（不要等用户点「继续」）
 
-- 以 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 为顺序，**完成一个可提交增量后，立刻做下一阶段**（同一轮对话里尽量多步：改代码 → 跑检查 → `git commit`），**不要**在文末问「要不要继续下一步」。
+- 以 [`docs/roadmaps/master-roadmap.md`](docs/roadmaps/master-roadmap.md)（稳定链接 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)）为顺序，**完成一个可提交增量后，立刻做下一阶段**（同一轮对话里尽量多步：改代码 → 跑检查 → `git commit`），**不要**在文末问「要不要继续下一步」。
 - 仅在高风险操作（如删库、`rm -rf`、改生产密钥）时暂停向人类确认。
 - 默认 **小步多次 commit**，而不是停在「等你回复再继续」。
 
@@ -15,7 +15,7 @@
 
 ## 与 `master` 对照、体量与顺带修复
 
-- 当前分支若 **已删除旧 Node/Electron 代码**，需要对照旧实现时：**以 `master`（或文档/parity 表）为参考**，用 `git show master:<path>` 等查看历史文件；**真源**仍是 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 与仓库内 OpenAPI/WS 文档。
+- 当前分支若 **已删除旧 Node/Electron 代码**，需要对照旧实现时：**以 `master`（或文档/parity 表）为参考**，用 `git show master:<path>` 等查看历史文件；**真源**仍是 [`docs/roadmaps/master-roadmap.md`](docs/roadmaps/master-roadmap.md)（链接别名 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)）、OpenAPI 与 [`docs/api/websocket-events.md`](docs/api/websocket-events.md)。
 - **单文件体量**：`backend/`、`frontend/` 中 **避免单文件过长**（建议 **≤800 行**；明显膨胀时 **拆模块/组件**），与路线图「竖切、可维护」一致。
 - 对照 `master` 或 parity 时，若发现 **明确 bug、性能问题、明显不合理设计**，可在 **同一竖切/同一 PR 节奏内** 一并修复（避免无关大重构）。
 
@@ -36,7 +36,7 @@
 
 ## 重构栈门禁（自动跑，但别默认每次都全量）
 
-凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`openapi_spec/generated/`**、**`scripts/fixtures/openapi_stub_input.yaml`**（改后通常需跑 **`scripts/gen_openapi_utoipa_stubs.py`**））、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，Agent 必须自动跑与改动阶段匹配的门禁，但 **日常开发默认不要直接跑 `yarn refactor:check`**。
+凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`openapi_spec/generated/`**、**`scripts/fixtures/openapi_stub_input.yaml`**（改后通常需跑 **`scripts/gen_openapi_utoipa_stubs.py`**））、**`frontend/`**、**`docs/websocket-events.md`**、**`docs/api/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，Agent 必须自动跑与改动阶段匹配的门禁，但 **日常开发默认不要直接跑 `yarn refactor:check`**。
 
 **执行规则**：
 - Agent 日常只允许通过 `yarn refactor:agent` 这个入口触发门禁，**不要直接调用** `yarn refactor:check` / `yarn refactor:quick` / `yarn refactor:incremental`

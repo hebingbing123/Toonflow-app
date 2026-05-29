@@ -5,7 +5,7 @@
 
 **阅读提醒**：本文是 Workspace 功能真源，但其中仍会保留 jobs payload、HTTP 兼容字段、Harness attach 等过渡期表述；凡看到 `project_numeric_id` / legacy numeric，请默认理解为兼容回退，除非条目明确声明不是。
 
-**关联**：[`harness-rust-flutter.md`](./harness-rust-flutter.md)（组织/工作区按阶段）、[`openflow-platform-progress.md`](./openflow-platform-progress.md) §1 基线、迁移 `supabase/migrations/*app_workspace*`。  
+**关联**：[`harness-rust-flutter.md`](../../roadmaps/harness-rust-flutter.md)（组织/工作区按阶段）、[`openflow-platform-progress.md`](./openflow-platform-progress.md) §1 基线、迁移 `supabase/migrations/*app_workspace*`。  
 **门禁**：凡动 `backend/` / `frontend/` / OpenAPI / 迁移 / WS 文档，合并前 **`yarn refactor:check`**。
 
 ## 〇、全栈交付（适用于 W1–W11 全部条目）
@@ -80,7 +80,7 @@
   - **W4.5 决策定稿（2026-05-08）**：`app_generation_job` **不新增** `workspace_id` 列；空间可见性由 payload 中规范化后的 **`project_uuid`**（首选）/ **`project_numeric_id`**（legacy fallback）派生。理由：避免双写一致性负担（`project_id`/`workspace_id` 漂移）、兼容历史行、且与现有 project-membership helper 复用最稳。
   - **约束**：无 `project_*` 的 job 继续按 `owner_user_id` 个人视图；带 `project_*` 的 job 一律按「owner 或同 workspace 成员」判定读写权限。
 - [x] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**用户口径**在响应与 OpenAPI 中显式标注 `scope = user`（含 **`GET …/usage/summary`**、**`GET …/skills/summary`**、**`GET …/agents/memory/cost-overview`**、**`POST …/agents/memory/query`** 列表项、**`POST …/agents/memory/append|clear|optimize`** 响应，以及 quality 聚合端点）；workspace 级汇总仍待 W5/W8 产品定稿。
-- [x] **W4.7** Parity：**[`electron-node-parity.md`](./electron-node-parity.md)** §2.2 **「多用户可见范围」** 与旧栈差异说明已补充。
+- [x] **W4.7** Parity：**[`electron-node-parity.md`](../../roadmaps/electron-node-parity.md)** §2.2 **「多用户可见范围」** 与旧栈差异说明已补充。
 
 ---
 

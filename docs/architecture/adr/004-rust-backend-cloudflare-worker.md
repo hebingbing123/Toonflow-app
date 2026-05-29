@@ -231,7 +231,7 @@ flowchart LR
 
 ### 本仓库 **当前** 为何把 Harness 运行时放在后端？
 
-[`harness-rust-flutter.md`](./harness-rust-flutter.md) 的 Harness Engineering 主轴是：**单一可信执行面**——密钥、权限、观测、工具目录与旧 Node vm2 替代（`isolated.echo` / wasmi）都在 Rust 进程（未来 Worker）内闭环。Flutter 通过 **WS** 发 `harness.agent.run`，服务端跑 LLM + 多轮 `harness.tool.invoke`，避免：
+[`harness-rust-flutter.md`](../../roadmaps/harness-rust-flutter.md) 的 Harness Engineering 主轴是：**单一可信执行面**——密钥、权限、观测、工具目录与旧 Node vm2 替代（`isolated.echo` / wasmi）都在 Rust 进程（未来 Worker）内闭环。Flutter 通过 **WS** 发 `harness.agent.run`，服务端跑 LLM + 多轮 `harness.tool.invoke`，避免：
 
 - 在客户端复制一套工具权限与审计；
 - 把 `OPENAI_API_KEY` / 厂商密钥暴露给桌面/Web 二进制；

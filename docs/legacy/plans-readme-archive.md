@@ -8,8 +8,8 @@
 
 | 文档 | 说明 | 状态 |
 |------|------|------|
-| [`harness-rust-flutter.md`](./harness-rust-flutter.md) | **主路线图**：Rust + Flutter + Harness 重构完整计划 | ✅ 已完成 |
-| [`electron-node-parity.md`](./electron-node-parity.md) | 旧 Electron/Node 与新 Rust 后端功能对照表 | ✅ 已完成 |
+| [`harness-rust-flutter.md`](./harness-rust-flutter.md) | **主路线图**（→ [`../roadmaps/master-roadmap.md`](../roadmaps/master-roadmap.md)） | ✅ 已完成 |
+| [`electron-node-parity.md`](./electron-node-parity.md) | 旧 Electron/Node 与 Rust 后端对照（→ [`../roadmaps/parity-audit.md`](../roadmaps/parity-audit.md)） | ✅ 已完成 |
 | [`master-detailed-parity-audit.md`](./master-detailed-parity-audit.md) | 基于 `master` 的详细补漏审计 | ✅ 已完成 |
 | [`roadmap-index.md`](./roadmap-index.md) | 路线图总索引（按方向拆分） | 📚 参考 |
 

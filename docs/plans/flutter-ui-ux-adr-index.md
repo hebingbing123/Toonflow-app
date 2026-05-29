@@ -1,6 +1,6 @@
 # Flutter UI/UX — ADR 索引（27.1）
 
-轻量决策记录；全栈真源仍以 [`harness-rust-flutter.md`](harness-rust-flutter.md) 为准。
+轻量决策记录；全栈真源仍以 [`docs/roadmaps/master-roadmap.md`](../roadmaps/master-roadmap.md)（链接别名 [`harness-rust-flutter.md`](harness-rust-flutter.md)）为准。
 
 | ID | 决策 | 状态 |
 |----|------|------|
