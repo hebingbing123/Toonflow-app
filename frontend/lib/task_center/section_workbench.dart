@@ -273,23 +273,51 @@ class _TaskCenterWorkbenchDialogState
     if (job.status != 'failed') {
       return;
     }
+    final jobsSnapshot = List<JobRow>.from(_jobs);
+    final numericSnapshot = _numericIdTaskDetailText;
+    final uuidSnapshot = _uuidDetails;
+    final statusSnapshot = _statusLine;
     setState(() {
       _retryingJobId = job.id;
       _statusLine = null;
     });
     try {
-      final updated = await retryJob(widget.accessToken, job.id);
-      if (!mounted) return;
-      setState(() {
-        _mergeJobUpdate(updated, origin: l10n.taskCenterOriginRetrySubmitted);
-        _retryingJobId = null;
-      });
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (!mounted) return;
+          setState(() {
+            _jobs = studioReplaceJobInList(
+              _jobs,
+              studioJobRowWithStatus(job, 'queued'),
+            );
+          });
+        },
+        rollback: () {
+          if (!mounted) return;
+          setState(() {
+            _jobs = jobsSnapshot;
+            _numericIdTaskDetailText = numericSnapshot;
+            _uuidDetails = uuidSnapshot;
+            _statusLine = statusSnapshot;
+          });
+        },
+        commit: () async {
+          final updated = await retryJob(widget.accessToken, job.id);
+          if (!mounted) return;
+          setState(() {
+            _mergeJobUpdate(updated, origin: l10n.taskCenterOriginRetrySubmitted);
+          });
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _statusLine = describeUserVisibleApiErrorResolved(context, e);
-        _retryingJobId = null;
       });
+    } finally {
+      if (mounted) {
+        setState(() => _retryingJobId = null);
+      }
     }
   }
 
@@ -298,23 +326,51 @@ class _TaskCenterWorkbenchDialogState
     if (job.status != 'queued' && job.status != 'running') {
       return;
     }
+    final jobsSnapshot = List<JobRow>.from(_jobs);
+    final numericSnapshot = _numericIdTaskDetailText;
+    final uuidSnapshot = _uuidDetails;
+    final statusSnapshot = _statusLine;
     setState(() {
       _cancellingJobId = job.id;
       _statusLine = null;
     });
     try {
-      final updated = await cancelJob(widget.accessToken, job.id);
-      if (!mounted) return;
-      setState(() {
-        _mergeJobUpdate(updated, origin: l10n.taskCenterOriginTaskCancelled);
-        _cancellingJobId = null;
-      });
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (!mounted) return;
+          setState(() {
+            _jobs = studioReplaceJobInList(
+              _jobs,
+              studioJobRowWithStatus(job, 'cancelled'),
+            );
+          });
+        },
+        rollback: () {
+          if (!mounted) return;
+          setState(() {
+            _jobs = jobsSnapshot;
+            _numericIdTaskDetailText = numericSnapshot;
+            _uuidDetails = uuidSnapshot;
+            _statusLine = statusSnapshot;
+          });
+        },
+        commit: () async {
+          final updated = await cancelJob(widget.accessToken, job.id);
+          if (!mounted) return;
+          setState(() {
+            _mergeJobUpdate(updated, origin: l10n.taskCenterOriginTaskCancelled);
+          });
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _statusLine = describeUserVisibleApiErrorResolved(context, e);
-        _cancellingJobId = null;
       });
+    } finally {
+      if (mounted) {
+        setState(() => _cancellingJobId = null);
+      }
     }
   }
 

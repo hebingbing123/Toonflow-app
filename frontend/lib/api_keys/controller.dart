@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/studio_optimistic_api_key.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../rust_api.dart';
 
 typedef ApiKeysAccessTokenProvider = String? Function();
@@ -138,27 +140,134 @@ class ApiKeysController extends ChangeNotifier {
   Future<void> revokeKey(String apiKeyId, {String? reason}) async {
     await _runKeyMutation(apiKeyId, () async {
       final token = _accessToken;
-      if (token == null) return;
-      await revokeApiKeyV1(token, apiKeyId: apiKeyId, reason: reason);
-      await refresh();
+      if (token == null) {
+        return;
+      }
+      final index = items.indexWhere((item) => item.id == apiKeyId);
+      if (index < 0) {
+        await revokeApiKeyV1(token, apiKeyId: apiKeyId, reason: reason);
+        await refresh();
+        return;
+      }
+      final row = items[index];
+      final previousItems = items;
+      final previousActive = activeCount;
+      final previousRevoked = revokedCount;
+      await studioRunOptimisticMutation(
+        apply: () {
+          items = studioReplaceApiKeyInList(
+            items,
+            studioApiKeyWithStatus(row, ApiKeyStatusV1.revoked),
+          );
+          final counts = studioApiKeyCountsAfterStatusChange(
+            row: row,
+            nextStatus: ApiKeyStatusV1.revoked,
+            activeCount: activeCount,
+            revokedCount: revokedCount,
+          );
+          activeCount = counts.$1;
+          revokedCount = counts.$2;
+          notifyListeners();
+        },
+        rollback: () {
+          items = previousItems;
+          activeCount = previousActive;
+          revokedCount = previousRevoked;
+          notifyListeners();
+        },
+        commit: () async {
+          await revokeApiKeyV1(token, apiKeyId: apiKeyId, reason: reason);
+          await refresh();
+        },
+      );
     });
   }
 
   Future<void> activateKey(String apiKeyId) async {
     await _runKeyMutation(apiKeyId, () async {
       final token = _accessToken;
-      if (token == null) return;
-      await activateApiKeyV1(token, apiKeyId: apiKeyId);
-      await refresh();
+      if (token == null) {
+        return;
+      }
+      final index = items.indexWhere((item) => item.id == apiKeyId);
+      if (index < 0) {
+        await activateApiKeyV1(token, apiKeyId: apiKeyId);
+        await refresh();
+        return;
+      }
+      final row = items[index];
+      final previousItems = items;
+      final previousActive = activeCount;
+      final previousRevoked = revokedCount;
+      await studioRunOptimisticMutation(
+        apply: () {
+          items = studioReplaceApiKeyInList(
+            items,
+            studioApiKeyWithStatus(row, ApiKeyStatusV1.active),
+          );
+          final counts = studioApiKeyCountsAfterStatusChange(
+            row: row,
+            nextStatus: ApiKeyStatusV1.active,
+            activeCount: activeCount,
+            revokedCount: revokedCount,
+          );
+          activeCount = counts.$1;
+          revokedCount = counts.$2;
+          notifyListeners();
+        },
+        rollback: () {
+          items = previousItems;
+          activeCount = previousActive;
+          revokedCount = previousRevoked;
+          notifyListeners();
+        },
+        commit: () async {
+          await activateApiKeyV1(token, apiKeyId: apiKeyId);
+          await refresh();
+        },
+      );
     });
   }
 
   Future<void> deleteKey(String apiKeyId) async {
     await _runKeyMutation(apiKeyId, () async {
       final token = _accessToken;
-      if (token == null) return;
-      await deleteApiKeyV1(token, apiKeyId: apiKeyId);
-      await refresh();
+      if (token == null) {
+        return;
+      }
+      final index = items.indexWhere((item) => item.id == apiKeyId);
+      if (index < 0) {
+        await deleteApiKeyV1(token, apiKeyId: apiKeyId);
+        await refresh();
+        return;
+      }
+      final row = items[index];
+      final previousItems = items;
+      final previousActive = activeCount;
+      final previousRevoked = revokedCount;
+      await studioRunOptimisticMutation(
+        apply: () {
+          items = studioRemoveApiKeyById(items, apiKeyId);
+          final counts = studioApiKeyCountsAfterDelete(
+            row: row,
+            activeCount: activeCount,
+            revokedCount: revokedCount,
+          );
+          activeCount = counts.$1;
+          revokedCount = counts.$2;
+          notifyListeners();
+        },
+        rollback: () {
+          items = previousItems;
+          activeCount = previousActive;
+          revokedCount = previousRevoked;
+          notifyListeners();
+        },
+        commit: () async {
+          await deleteApiKeyV1(token, apiKeyId: apiKeyId);
+          await refresh();
+        },
+      );
     });
   }
 

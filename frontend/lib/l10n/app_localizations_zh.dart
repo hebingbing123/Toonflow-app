@@ -24,6 +24,75 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localeChinese => '简体中文';
 
   @override
+  String get themeSectionTitle => '外观';
+
+  @override
+  String get themeSystem => '跟随系统';
+
+  @override
+  String get themeLight => '浅色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get studioDesignFileDropZoneLabel => '将文件拖到此处或点击浏览';
+
+  @override
+  String get studioDesignPaginationPrevious => '上一页';
+
+  @override
+  String get studioDesignPaginationNext => '下一页';
+
+  @override
+  String get studioDesignTransferCancel => '取消';
+
+  @override
+  String get studioDesignTableEmptyLabel => '暂无数据';
+
+  @override
+  String get studioDesignBreadcrumbSemanticsLabel => '面包屑导航';
+
+  @override
+  String get studioDesignDebugCopyErrorLabel => '复制错误到剪贴板';
+
+  @override
+  String get studioDesignDebugNoDetailsAvailable => '暂无详细信息';
+
+  @override
+  String get studioNavigationForward => '前进';
+
+  @override
+  String get studioDiscardChangesTitle => '放弃更改？';
+
+  @override
+  String get studioDiscardAction => '放弃';
+
+  @override
+  String get studioDiscardArtDirectionMessage => '美术方向有未保存的更改，仍要离开吗？';
+
+  @override
+  String get studioDiscardScriptChangesMessage => '剧本有未保存的更改，仍要离开吗？';
+
+  @override
+  String get studioDiscardProjectDraftTitle => '放弃项目草稿？';
+
+  @override
+  String get studioDiscardProjectDraftMessage => '项目信息尚未保存，仍要离开向导吗？';
+
+  @override
+  String get studioNotFoundPageTitle => '页面未找到';
+
+  @override
+  String get studioNotFoundBackToHome => '返回首页';
+
+  @override
+  String get studioDiscardPublishCopyMessage => '发布文案有未保存的更改，仍要离开吗？';
+
+  @override
+  String get studioSidebarProductLabel => 'Studio';
+
+  @override
   String get localizedFormattingFileSizeZero => '0 B';
 
   @override
@@ -887,6 +956,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '当前状态：未配置 plan override，直接继承 defaults';
 
   @override
+  String get platformConfigPlanOverridesEnvLabel =>
+      'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON';
+
+  @override
   String get platformConfigWorkspaceEnterpriseIntro =>
       '当前 enterprise workspace 的公共覆盖层，会先于个人配置参与 effective 合成。';
 
@@ -1108,6 +1181,263 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productDemoGuideStartAutoplay => '自动导览';
 
   @override
+  String get demoHelpHubGettingStartedTitle => '快速入门（演示）';
+
+  @override
+  String get demoHelpHubStudioSopTitle => 'Studio 标准流程（演示）';
+
+  @override
+  String get demoHelpHubBillingFaqTitle => '计费与 Webhook 常见问题（演示）';
+
+  @override
+  String get demoStudioChecklistScriptLabel => '导入或创建剧本';
+
+  @override
+  String get demoStudioChecklistStoryboardLabel => '完成分镜';
+
+  @override
+  String get demoStudioHomeContinueStoryboardTitle => '继续分镜';
+
+  @override
+  String get demoStudioHomeOpenTasksTitle => '查看任务';
+
+  @override
+  String get demoStudioMetricContentLabel => '内容';
+
+  @override
+  String get demoStudioMetricStoryboardLabel => '分镜';
+
+  @override
+  String get demoStudioAssetsAnchorTitle => '补齐角色锚点';
+
+  @override
+  String get demoStudioAssetsRolesLabel => '角色资产';
+
+  @override
+  String get demoPublishDraftEpisode1Title => '第 1 集 · 竖屏成片';
+
+  @override
+  String get demoPublishDraftEpisode2Title => '第 2 集 · 竖屏成片';
+
+  @override
+  String get demoStudioProjectDisplayName => '春季短剧 · 演示';
+
+  @override
+  String get demoStudioArtStyleInkWash => '水墨古风';
+
+  @override
+  String get demoStudioReadinessSummary => '剧本与分镜进度良好，待补齐成片素材';
+
+  @override
+  String get demoStudioHomeSubheadline => '小说 1 / 剧本 2';
+
+  @override
+  String get demoStudioHomeContinueStoryboardDetail => '6 个分镜待确认';
+
+  @override
+  String get demoStudioHomeOpenStoryboardCta => '打开分镜步';
+
+  @override
+  String get demoStudioHomeTasksDetail => '1 个运行中任务';
+
+  @override
+  String get demoStudioHomeTasksCta => '任务中心';
+
+  @override
+  String get demoStudioMetricContentValue => '小说 1 / 剧本 2';
+
+  @override
+  String get demoStudioMetricContentDetail => '演示数据 · 可浏览完整六步流程';
+
+  @override
+  String get demoStudioMetricStoryboardValue => '4 / 6';
+
+  @override
+  String get demoStudioMetricStoryboardDetail => '2 待生成';
+
+  @override
+  String get demoStudioAssetsHubHeadline => '角色库已可用，还差 1 个锚点';
+
+  @override
+  String get demoStudioAssetsHubSubheadline => '补齐主角锚点后可进入分镜批量出图';
+
+  @override
+  String demoStudioAssetsAnchorDetail(String name) {
+    return '$name 仍缺少资产锚点';
+  }
+
+  @override
+  String get demoStudioAssetsOpenAssetsCta => '打开资产步';
+
+  @override
+  String get demoStudioCharacterLeadName => '林夏';
+
+  @override
+  String get demoStudioCharacterLeadAssetName => '林夏 · 定妆';
+
+  @override
+  String get demoStudioProjectSeason2Name => '都市情感 · 第二季';
+
+  @override
+  String get demoWorkspaceDisplayName => '演示工作区';
+
+  @override
+  String get demoWorkspaceArchiveName => '归档示例';
+
+  @override
+  String get demoApiKeyDesktopClientDisplayName => '桌面客户端 · 演示';
+
+  @override
+  String get demoApiKeyAuditEventCreated => '创建 API 密钥';
+
+  @override
+  String get demoShortVideoProjectConfigLine => '演示数据 · 竖屏短剧配置已载入';
+
+  @override
+  String get demoComplianceAlertCriticalTitle => '有未认领的严重举报';
+
+  @override
+  String get demoComplianceAlertCriticalMessage => '演示：优先处理待认领队列中的安全类举报。';
+
+  @override
+  String get demoComplianceReportDetail => '演示举报：示例安全类内容需人工复核。';
+
+  @override
+  String demoAgentAssistantBody(String projectName) {
+    return '演示助手：项目「$projectName」六步流程数据已载入。剧本 2 集、分镜 3 镜、装配/发布/质量面板均可浏览；运行 Agent 仅展示演示反馈，不会写入后端。';
+  }
+
+  @override
+  String get demoAgentWritebackDisabledLine => '（演示）写回已禁用 — 切换正式登录后可执行真实写回';
+
+  @override
+  String get demoBenchmarkCase1Summary => '演示：分镜情绪表达偏弱，需加强特写与光影对比';
+
+  @override
+  String get demoBenchmarkCase2Summary => '演示：视频提示词运动描述清晰，可作为基线';
+
+  @override
+  String get demoBenchmarkExperimentName => '分镜提示词 A/B · 演示';
+
+  @override
+  String get demoBenchmarkReviewPrompt => '演示：对比 baseline 与 variant 的分镜质量得分';
+
+  @override
+  String get demoBenchmarkStatusLine =>
+      '演示数据已加载 — 可浏览用例、实验与评审队列；运行/晋升操作在演示模式下不可用。';
+
+  @override
+  String get demoScriptEpisode1Name => '第 1 集 · 初遇';
+
+  @override
+  String get demoScriptEpisode2Name => '第 2 集 · 误会';
+
+  @override
+  String get demoNovelChapter1Title => '第一章 · 重逢';
+
+  @override
+  String get demoNovelChapter1Body => '演示章节：男女主在雨夜重逢，埋下后续误会伏笔。';
+
+  @override
+  String get demoAssetLeadLookName => '林夏 · 定妆';
+
+  @override
+  String get demoAssetLeadLookDescription => '主角定妆照';
+
+  @override
+  String get demoAssetRainyStreetName => '雨夜街道';
+
+  @override
+  String get demoAssetRainyStreetDescription => '外景参考';
+
+  @override
+  String get demoAssetCafeInteriorName => '咖啡馆内景';
+
+  @override
+  String get demoAssetCafeInteriorDescription => '待确认候选';
+
+  @override
+  String get demoStylePackFamilyWarmthName => '家庭温情';
+
+  @override
+  String get demoPublishDraft1Description => '演示发布草稿：待排期上传抖音。';
+
+  @override
+  String get demoPublishDraft2Description => '演示发布草稿：可打开筛选与批量排期面板。';
+
+  @override
+  String get demoPublishTagShortDrama => '短剧';
+
+  @override
+  String get demoPublishTagUrban => '都市';
+
+  @override
+  String demoAssemblySubtitleTemplate(int index) {
+    return '演示字幕 $index';
+  }
+
+  @override
+  String get demoTimelineSubtitleRainStreet => '雨夜街头，女主撑伞回头';
+
+  @override
+  String demoStudioAssetsPendingAnchorsCountDetail(int count) {
+    return '$count 个待锚点';
+  }
+
+  @override
+  String get demoStoryboardPromptRainStreet => '雨夜街头，女主撑伞回头，霓虹映在脸上';
+
+  @override
+  String get demoStoryboardPromptMaleCloseup => '男主近景，欲言又止，背景虚化';
+
+  @override
+  String get demoStoryboardPromptDuoResolve => '双人同框，误会即将解开';
+
+  @override
+  String get demoTaskCategoriesLine =>
+      '分类 2 个 · asset.generate.image, script.export.zip';
+
+  @override
+  String get demoAgentWsLogScriptsListed => '已列出 2 个剧本，建议从第 1 集继续分镜。';
+
+  @override
+  String get demoAgentWsLogAssemblyPreview => '装配预览：3 镜已就绪，1 镜待补素材。';
+
+  @override
+  String get productDemoNotificationExportReadyTitle => '导出已完成';
+
+  @override
+  String productDemoNotificationExportReadyMessage(String projectName) {
+    return '项目「$projectName」导出包已就绪，可在任务中心下载。';
+  }
+
+  @override
+  String get productDemoNotificationRenderFailedTitle => '渲染任务失败';
+
+  @override
+  String get productDemoNotificationRenderFailedMessage =>
+      'render.completed 超时，请在工作台重试。';
+
+  @override
+  String get studioCommandPaletteShortcutMac => '⌘K';
+
+  @override
+  String get studioCommandPaletteShortcutWindows => 'Ctrl+K';
+
+  @override
+  String get studioCommandPaletteKeywordsProjects => 'project, projects, 项目';
+
+  @override
+  String get studioCommandPaletteKeywordsNotifications =>
+      'notify, notification, notifications, 通知';
+
+  @override
+  String get studioCommandPaletteKeywordsSettings => 'settings, account, 设置';
+
+  @override
+  String get studioCommandPaletteKeywordsHelp => 'help, 帮助';
+
+  @override
   String get productDemoGuideExpandDetails => '展开';
 
   @override
@@ -1137,6 +1467,456 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productDemoGuideSectionNext => '下一步';
+
+  @override
+  String get demoTourIntroTitle => '从这里开始';
+
+  @override
+  String get demoTourIntroShortLabel => '项目首页';
+
+  @override
+  String get demoTourIntroPosition => '欢迎体验演示。接下来会走一条「做短剧并准备上线」的示范线。';
+
+  @override
+  String demoTourIntroGoal(String projectName) {
+    return '认识项目入口，并打开示例项目「$projectName」。';
+  }
+
+  @override
+  String get demoTourIntroBulletProgressRing => '项目卡片上的圆环（如 5/6）表示这个示例项目整体制作进度';
+
+  @override
+  String get demoTourIntroBulletStepCounter => '右上角「第 x / 24 步」是本次导览进度，两者含义不同';
+
+  @override
+  String get demoTourIntroDemoNote => '演示数据不会写入你的真实账号。';
+
+  @override
+  String get demoTourIntroNextHint => '点「下一步」进入示例项目，从「剧本」开始做片主线。';
+
+  @override
+  String demoTourIntroGuide(String projectName) {
+    return '浏览示例项目卡片与进度。可点进「$projectName」进入工作室，或点卡片下方「下一步」继续导览。';
+  }
+
+  @override
+  String demoTourBeatShortLabel(String slug, int part, int total) {
+    return '制作主线 · $slug · $part/$total';
+  }
+
+  @override
+  String get demoTourLaunchReadinessTitle => '上线 · ① 就绪度';
+
+  @override
+  String get demoTourLaunchReadinessShortLabel => '短视频 · 就绪';
+
+  @override
+  String get demoTourLaunchPublishTitle => '上线 · ② 发布检查';
+
+  @override
+  String get demoTourLaunchPublishShortLabel => '短视频 · 发布';
+
+  @override
+  String get demoTourUtilityReviewPackTitle => '审片包（深入）';
+
+  @override
+  String get demoTourUtilityReviewPackShortLabel => '审片包';
+
+  @override
+  String get demoTourUtilityReviewPackGoal => '【可选】练习审片包筛选、反馈与导出阻塞项。';
+
+  @override
+  String get demoTourUtilityReviewPackBulletThumbnails => '缩略图网格与反馈状态列';
+
+  @override
+  String get demoTourUtilityReviewPackBulletExpand => '展开行查看阻塞原因';
+
+  @override
+  String get demoTourUtilityReviewPackNextHint => '上线前团队常用；做完主线后可随时回来。';
+
+  @override
+  String get demoTourUtilityTasksTitle => '任务中心';
+
+  @override
+  String get demoTourUtilityTasksShortLabel => '任务中心';
+
+  @override
+  String get demoTourUtilityTasksGuide => '【可选】查看渲染、导出等后台任务。做片时用来盯进度，演示为示例记录。';
+
+  @override
+  String get demoTourUtilityQualityTitle => '质量评审';
+
+  @override
+  String get demoTourUtilityQualityShortLabel => '质量评审';
+
+  @override
+  String get demoTourUtilityQualityGuide => '【可选】浏览阶段评分与评审意见。上线不必须，适合质检岗位。';
+
+  @override
+  String get demoTourUtilityNotificationsTitle => '通知';
+
+  @override
+  String get demoTourUtilityNotificationsShortLabel => '通知';
+
+  @override
+  String get demoTourUtilityNotificationsGuide => '【可选】协作与任务通知。演示条目可标记已读。';
+
+  @override
+  String get demoTourUtilityProductionTitle => '制作工作台';
+
+  @override
+  String get demoTourUtilityProductionShortLabel => '制作工作台';
+
+  @override
+  String get demoTourUtilityProductionGuide => '【可选】跨项目 Agent 与流水线日志。进阶用户常用。';
+
+  @override
+  String get demoTourUtilityScriptTitle => '剧本工作台';
+
+  @override
+  String get demoTourUtilityScriptShortLabel => '剧本工作台';
+
+  @override
+  String get demoTourUtilityScriptGuide => '【可选】独立长剧本视图，适合多集连载。';
+
+  @override
+  String get demoTourUtilityHelpTitle => '帮助中心';
+
+  @override
+  String get demoTourUtilityHelpShortLabel => '帮助中心';
+
+  @override
+  String get demoTourUtilityHelpGoal => '【可选】查文档、Webhook 与计费说明。';
+
+  @override
+  String get demoTourUtilityHelpBulletSampleLists => '演示模式下列表为样例，不会改真实配置';
+
+  @override
+  String get demoTourUtilityHelpBulletAfterMainline => '做完「做片上线」主线后再来看即可';
+
+  @override
+  String get demoTourScript1Title => '剧本 · ① 内容与导入';
+
+  @override
+  String get demoTourScript1Position => '制作主线第 1/6 步：一切从剧本和场次开始。';
+
+  @override
+  String get demoTourScript1Goal => '确认本项目已有可拍的剧本/场次（演示已预填）。';
+
+  @override
+  String get demoTourScript1Bullet1 => '左侧：小说导入、剧本列表与场次入口';
+
+  @override
+  String get demoTourScript1Bullet2 => '可打开剧本工作台查看大纲与正文布局';
+
+  @override
+  String get demoTourScript1Bullet3 => '右侧 Agent 区：演示对话为只读样例';
+
+  @override
+  String get demoTourScript1DemoNote => '演示模式下保存会被拦截，可放心浏览。';
+
+  @override
+  String get demoTourScript1NextHint => '下一步：认识本步的模型与快捷操作区。';
+
+  @override
+  String get demoTourScript2Title => '剧本 · ② 模型与起步';
+
+  @override
+  String get demoTourScript2Goal => '了解如何为后续 AI 生成配置模型路由（真项目需在设置里填 API Key）。';
+
+  @override
+  String get demoTourScript2Bullet1 => '顶部或设置区：模型厂商 / 路由条';
+
+  @override
+  String get demoTourScript2Bullet2 => '起步模板与快捷动作：一键进入常见工作流';
+
+  @override
+  String get demoTourScript2Bullet3 => '项目驾驶舱：进度与下一步建议';
+
+  @override
+  String get demoTourScript2DemoNote => '真环境生成前请完成「设置 → 模型厂商」。';
+
+  @override
+  String get demoTourScript2NextHint => '剧本就绪后进入「美术」定视觉风格。';
+
+  @override
+  String get demoTourArt1Title => '美术 · ① 风格与画板';
+
+  @override
+  String get demoTourArt1Position => '制作主线第 2/6 步：统一全片视觉语言。';
+
+  @override
+  String get demoTourArt1Goal => '选定美术/叙事风格包，让后续出图一致。';
+
+  @override
+  String get demoTourArt1Bullet1 => '风格包选择器与参考说明';
+
+  @override
+  String get demoTourArt1Bullet2 => '可读性卡片：当前风格摘要';
+
+  @override
+  String get demoTourArt1Bullet3 => '需要时可打开完整项目设置';
+
+  @override
+  String get demoTourArt1DemoNote => '演示中修改不会保存到真实项目。';
+
+  @override
+  String get demoTourArt1NextHint => '下一步：对照就绪度清单补缺口。';
+
+  @override
+  String get demoTourArt2Title => '美术 · ② 就绪度';
+
+  @override
+  String get demoTourArt2Goal => '把美术步的阻塞项清掉，再进资产与分镜。';
+
+  @override
+  String get demoTourArt2Bullet1 => '就绪度分数与进度条';
+
+  @override
+  String get demoTourArt2Bullet2 => '检查清单：点条目可跳到对应操作（演示为样例）';
+
+  @override
+  String get demoTourArt2Bullet3 => '完成后顶栏「下一步」会指向资产步';
+
+  @override
+  String get demoTourArt2NextHint => '进入「资产」准备角色与参考素材。';
+
+  @override
+  String get demoTourAssets1Title => '资产 · ① 角色库';
+
+  @override
+  String get demoTourAssets1Position => '制作主线第 3/6 步：为分镜出图准备可复用素材。';
+
+  @override
+  String get demoTourAssets1Goal => '浏览角色/道具资产，确认演示项目里有哪些可用素材。';
+
+  @override
+  String get demoTourAssets1Bullet1 => '角色资产卡片与数量统计';
+
+  @override
+  String get demoTourAssets1Bullet2 => '打开资产步 / 资产编辑器查看详情';
+
+  @override
+  String get demoTourAssets1Bullet3 => 'Agent 侧栏：示例协作对话（只读）';
+
+  @override
+  String get demoTourAssets1DemoNote => '示例项目可能故意保留「待锚点」提示。';
+
+  @override
+  String get demoTourAssets1NextHint => '下一步：补齐主角锚点（真项目必做）。';
+
+  @override
+  String get demoTourAssets2Title => '资产 · ② 锚点';
+
+  @override
+  String get demoTourAssets2Goal => '理解「锚点」：锁定脸型/服装，分镜批量出图才稳定。';
+
+  @override
+  String get demoTourAssets2Bullet1 => '待锚点提示与「还差 N 个锚点」文案';
+
+  @override
+  String get demoTourAssets2Bullet2 => '补齐后可进入分镜批量出图';
+
+  @override
+  String get demoTourAssets2Bullet3 => '顶栏旅程条可随时切到分镜';
+
+  @override
+  String get demoTourAssets2NextHint => '资产就绪后进入「分镜」（导览会分 4 小步介绍）。';
+
+  @override
+  String get demoTourStoryboard1Title => '分镜 · ① 选集';
+
+  @override
+  String get demoTourStoryboard1Position => '制作主线第 4/6 步：把剧本变成可操作的镜头列表。';
+
+  @override
+  String get demoTourStoryboard1Goal => '在分镜工作室顶部选好要做的那一集（演示已预选示例集）。';
+
+  @override
+  String get demoTourStoryboard1Bullet1 => '集数 / 剧本下拉';
+
+  @override
+  String get demoTourStoryboard1Bullet2 => '若列表为空，需先回剧本步补场次';
+
+  @override
+  String get demoTourStoryboard1DemoNote => '演示不会修改真实镜头数据。';
+
+  @override
+  String get demoTourStoryboard1NextHint => '下一步：认识左侧镜头列表。';
+
+  @override
+  String get demoTourStoryboard2Title => '分镜 · ② 镜头列表';
+
+  @override
+  String get demoTourStoryboard2Goal => '逐镜检查编号、缩略图与状态（待出图 / 已出图等）。';
+
+  @override
+  String get demoTourStoryboard2Bullet1 => '左侧：镜头列表，点一条选中';
+
+  @override
+  String get demoTourStoryboard2Bullet2 => '中间：当前镜预览';
+
+  @override
+  String get demoTourStoryboard2Bullet3 => '右侧：提示词、时长等属性（演示只读）';
+
+  @override
+  String get demoTourStoryboard2NextHint => '列表齐全后，用工具栏做「网格批量出图」。';
+
+  @override
+  String get demoTourStoryboard3Title => '分镜 · ③ 批量出图';
+
+  @override
+  String get demoTourStoryboard3Goal => '一次为多镜生成画面（演示模拟入队，不扣费真渲染）。';
+
+  @override
+  String get demoTourStoryboard3Bullet1 => '工具栏：网格分镜 / 批量出图';
+
+  @override
+  String get demoTourStoryboard3Bullet2 => '弹窗选择行列数后确认';
+
+  @override
+  String get demoTourStoryboard3Bullet3 => '进度可在后面的「任务中心」查看';
+
+  @override
+  String get demoTourStoryboard3DemoNote => '真项目出图前请配置模型厂商 API Key。';
+
+  @override
+  String get demoTourStoryboard3NextHint => '某一镜不满意时，可进单镜/出图工作台精修。';
+
+  @override
+  String get demoTourStoryboard4Title => '分镜 · ④ 单镜精修';
+
+  @override
+  String get demoTourStoryboard4Goal => '对单镜改提示词、换图或重新生成，直到画面可用。';
+
+  @override
+  String get demoTourStoryboard4Bullet1 => '列表中的「打开出图工作台」等入口';
+
+  @override
+  String get demoTourStoryboard4Bullet2 => '工作台：提示词、参考图、生成记录（演示样例）';
+
+  @override
+  String get demoTourStoryboard4Bullet3 => '也可从制作工作台跨项目查看 Agent 输出';
+
+  @override
+  String get demoTourStoryboard4NextHint => '分镜画面稳定后进入「视频」步拼成片。';
+
+  @override
+  String get demoTourVideo1Title => '视频 · ① 成片策略';
+
+  @override
+  String get demoTourVideo1Position => '制作主线第 5/6 步：把分镜画面拼成可交付的视频。';
+
+  @override
+  String get demoTourVideo1Goal => '选择成片策略：首帧 / 尾帧 / 分镜板等模式（按项目需要）。';
+
+  @override
+  String get demoTourVideo1Bullet1 => '分段按钮切换成片模式';
+
+  @override
+  String get demoTourVideo1Bullet2 => '选择会按项目记住';
+
+  @override
+  String get demoTourVideo1Bullet3 => '演示不触发真实渲染队列';
+
+  @override
+  String get demoTourVideo1NextHint => '下一步：进入制作流水线查看生成与导出。';
+
+  @override
+  String get demoTourVideo2Title => '视频 · ② 制作流水线';
+
+  @override
+  String get demoTourVideo2Goal => '在制作工作台跟踪视频生成、写回与任务状态。';
+
+  @override
+  String get demoTourVideo2Bullet1 => '本步可跳转「打开制作 / Production」';
+
+  @override
+  String get demoTourVideo2Bullet2 => '任务中心汇总渲染与导出队列';
+
+  @override
+  String get demoTourVideo2Bullet3 => '真项目里在此等待成片完成';
+
+  @override
+  String get demoTourVideo2NextHint => '成片后进入「交付」做导出前检查。';
+
+  @override
+  String get demoTourDeliver1Title => '交付 · ① 导出清单';
+
+  @override
+  String get demoTourDeliver1Position => '制作主线第 6/6 步：确认可以交出成片。';
+
+  @override
+  String get demoTourDeliver1Goal => '对照交付清单，处理音乐、字幕、权限等阻塞项。';
+
+  @override
+  String get demoTourDeliver1Bullet1 => '交付步检查清单与准备度';
+
+  @override
+  String get demoTourDeliver1Bullet2 => '旅程条可打开「审片包」里程碑';
+
+  @override
+  String get demoTourDeliver1Bullet3 => '质量子页可看阶段评分（演示为样例）';
+
+  @override
+  String get demoTourDeliver1DemoNote => '这是上线前的质量闸口，不是可跳过的装饰页。';
+
+  @override
+  String get demoTourDeliver1NextHint => '下一步：用审片包收反馈、清阻塞。';
+
+  @override
+  String get demoTourDeliver2Title => '交付 · ② 过片与导出';
+
+  @override
+  String get demoTourDeliver2Goal => '从旅程条或菜单打开「审片包」，收齐反馈并清掉导出阻塞。';
+
+  @override
+  String get demoTourDeliver2Bullet1 => '交付页：导出准备度与阻塞摘要';
+
+  @override
+  String get demoTourDeliver2Bullet2 => '审片包：缩略图、反馈状态、筛选与展开';
+
+  @override
+  String get demoTourDeliver2Bullet3 => '全部通过后，才进入发布检查';
+
+  @override
+  String get demoTourDeliver2NextHint => '下一步进入「短视频空间」，走完就绪度与发布检查。';
+
+  @override
+  String get demoTourLaunchReadinessPosition => '从「做出片」到「能上线」：短视频空间负责发布前检查。';
+
+  @override
+  String get demoTourLaunchReadinessGoal => '看成片就绪度：缺素材、时长、封面等问题会在这里汇总。';
+
+  @override
+  String get demoTourLaunchReadinessBullet1 => '切换概览 / 时间线 / 发布等子页签';
+
+  @override
+  String get demoTourLaunchReadinessBullet2 => '就绪度指标与阻塞说明';
+
+  @override
+  String get demoTourLaunchReadinessBullet3 => '演示数据不会连接真实发布渠道';
+
+  @override
+  String get demoTourLaunchReadinessDemoNote => '真账号在此对接渠道；演示只走流程。';
+
+  @override
+  String get demoTourLaunchReadinessNextHint => '下一步：发布检查单。';
+
+  @override
+  String get demoTourLaunchPublishGoal => '走完发布前检查单，确认可以对外上线。';
+
+  @override
+  String get demoTourLaunchPublishBullet1 => '发布检查项与状态';
+
+  @override
+  String get demoTourLaunchPublishBullet2 => '时间线核对镜头与配音';
+
+  @override
+  String get demoTourLaunchPublishBullet3 => '通过后即完成「做片并上线」示范线';
+
+  @override
+  String get demoTourLaunchPublishNextHint => '主线结束后，导览会简短介绍任务、通知等辅助功能（可跳过）。';
 
   @override
   String get studioGettingStartedTitle => '快速入门';
@@ -2346,6 +3126,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get studioKeyboardShortcuts => '快捷键';
+
+  @override
+  String get studioKeyboardShortcutsIntro =>
+      '桌面与 Web 端产品级快捷键。各业务模块（如短视频）另有模块内快捷键说明。';
+
+  @override
+  String get studioShortcutCommandPaletteDescription => '打开命令面板';
+
+  @override
+  String get studioShortcutFormSubmitDescription => '在表单或单行输入对话框中提交当前字段';
+
+  @override
+  String get studioShortcutFormSubmitKeys => 'Enter';
 
   @override
   String get studioGridStoryboardHint => '生成一张宫格图，切分后自动分配到各镜头。';
@@ -3695,6 +4488,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsArtWorkbenchDelete => '删除当前画风';
 
   @override
+  String get projectsArtStyleDeleteConfirmTitle => '删除美术画风？';
+
+  @override
+  String get projectsArtStyleDeleteConfirmMessage => '将删除所选美术画风，且无法撤销。';
+
+  @override
   String get projectsArtWorkbenchCurrentStyle => '当前画风';
 
   @override
@@ -3977,6 +4776,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectMembersTooltipRemoveAcl => '移除显式 ACL';
+
+  @override
+  String get projectMembersRemoveAclConfirmMessage => '将从项目中移除此成员的显式 ACL。';
 
   @override
   String get projectMembersButtonRefresh => '刷新';
@@ -6997,6 +7799,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get platformStatusDegradedWarning => '平台状态出现降级，请关注 SLI 与热点端点';
 
   @override
+  String get platformStatusDegradedTrend => '降级端点趋势（近期刷新）';
+
+  @override
   String get platformStatusNotRefreshed => '未刷新';
 
   @override
@@ -9018,6 +9823,35 @@ class AppLocalizationsZh extends AppLocalizations {
       'POST delete-novel id=0';
 
   @override
+  String get projectEditorProbeScriptsBatchAddTitle => '运行批量添加探测？';
+
+  @override
+  String get projectEditorProbeScriptsBatchAddMessage =>
+      '此探测会创建临时剧本并在完成后立即删除，写入/删除流程无法撤销。';
+
+  @override
+  String get projectEditorProbeRunConfirm => '运行探测';
+
+  @override
+  String get projectEditorProbeNovelsBatchDeleteTitle => '批量删除探测？';
+
+  @override
+  String get projectEditorProbeNovelsBatchDeleteMessage => '将提交批量删除探测，且无法撤销。';
+
+  @override
+  String get projectEditorProbeNovelsDeleteTitle => '删除小说探测？';
+
+  @override
+  String get projectEditorProbeNovelsDeleteMessage => '将提交按数字 ID 删除的探测，且无法撤销。';
+
+  @override
+  String get projectEditorProbeAssetsDeleteImageTitle => '删除探测图片？';
+
+  @override
+  String get projectEditorProbeAssetsDeleteImageMessage =>
+      '将删除为所选资产创建的临时探测图片，且无法撤销。';
+
+  @override
   String get projectEditorNovelsProbeMutationUpdateNovelNoopButton =>
       'POST update-novel（空改）';
 
@@ -10345,6 +11179,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get skillsHarnessPrefsTooltip => '本机客户端偏好（调试壳，与各主面板标题旁 ⋯ 相同）';
+
+  @override
+  String get skillsHarnessRevokeWasmTitle => '撤销用户 WASM？';
+
+  @override
+  String get skillsHarnessRevokeWasmMessage => '将撤销所选用户 WASM 条目，且无法撤销。';
+
+  @override
+  String get skillsHarnessRevokeWasmReloadMessage =>
+      '将撤销所选用户 WASM 条目并重新加载列表，且无法撤销。';
+
+  @override
+  String get skillsHarnessRevokeConfirm => '撤销';
 
   @override
   String skillsHarnessToolsLabel(String line) {
@@ -13390,6 +14237,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoPreviewPlayerPause => '暂停';
+
+  @override
+  String get shortVideoPreviewPlayerShotPicker => '镜头';
+
+  @override
+  String shortVideoPreviewPlayerShotChip(int number) {
+    return '#$number';
+  }
+
+  @override
+  String get shortVideoImmersiveFullscreen => '全屏';
+
+  @override
+  String get shortVideoPreviewPaneEmpty => '生成或导出预览后可在此播放';
+
+  @override
+  String get shortVideoAgentInspectorTitle => '输出检视';
+
+  @override
+  String get shortVideoAgentInspectorEmpty => '运行生产工作流后在此查看输出';
+
+  @override
+  String get shortVideoMobileCreationParamsTitle => '创作参数';
+
+  @override
+  String get shortVideoMobileCreationParamsOpen => '参数';
+
+  @override
+  String get shortVideoMobileCreationParamsHint => '创作模式与画幅将写回当前项目配置。';
+
+  @override
+  String get shortVideoQualityMasterPaneTitle => '质量概览';
 
   @override
   String get shortVideoProductionBatchNoStoryboards => '还没有分镜，无法批量生成候选成片。';
@@ -21894,6 +22773,13 @@ class AppLocalizationsZh extends AppLocalizations {
       '密钥在服务端加密保存，保存后不会完整回显。';
 
   @override
+  String get settingsModelVendorsDeleteCredentialTitle => '删除供应商凭证？';
+
+  @override
+  String get settingsModelVendorsDeleteCredentialMessage =>
+      '将移除该供应商已保存的凭证，且无法撤销。';
+
+  @override
   String settingsModelVendorsCredentialHint(String hint) {
     return '当前密钥提示：$hint';
   }
@@ -22284,6 +23170,15 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get statusPageIntroBase =>
       '聚合 /health、/api/v1/health、/api/v1/ready、/api/v1/version。';
+
+  @override
+  String get statusPageEndpointHealthRoot => '/health';
+
+  @override
+  String get statusPageEndpointHealthV1 => '/api/v1/health';
+
+  @override
+  String get statusPageEndpointReadyV1 => '/api/v1/ready';
 
   @override
   String get statusPageIntroInternalSuffix =>

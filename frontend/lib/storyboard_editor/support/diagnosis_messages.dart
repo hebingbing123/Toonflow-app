@@ -189,7 +189,7 @@ String normalizeStoryboardWorkbenchErrorMessage(
     return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;
   }
   final normalized = trimmed
-      .replaceFirst(RegExp(r'^(Unknown error:|出现问题：)\s*'), '')
+      .replaceFirst(kStudioApiErrorLinePrefixPattern, '')
       .replaceFirst(RegExp(r'^RustApiException\([^)]*\):\s*'), '');
   if (normalized.isEmpty) {
     return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;

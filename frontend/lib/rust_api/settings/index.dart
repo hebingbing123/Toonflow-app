@@ -10,5 +10,6 @@ export 'notifications.dart';
 export 'outbound_webhook_platform.dart';
 export 'outbound_webhooks.dart';
 export 'platform_config.dart';
+export 'studio_ui.dart';
 export 'vendor_credentials.dart';
 export 'vendors_mutations.dart';

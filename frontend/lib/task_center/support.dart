@@ -1,4 +1,5 @@
 import '../l10n/app_localizations.dart';
+import '../platform/studio_content_heuristics.dart';
 import '../../rust_api.dart';
 
 String summarizeTaskProjects(
@@ -443,7 +444,7 @@ bool taskCenterJobFailedWithWritebackError(JobRow job) {
     return true;
   }
   final message = (job.errorMessage ?? '').toLowerCase();
-  return message.contains('writeback') || message.contains('写回');
+  return studioTaskMessageLooksLikeWritebackFailure(message);
 }
 
 String taskCenterFailedJobRetryLabel(AppLocalizations l10n, JobRow job) {

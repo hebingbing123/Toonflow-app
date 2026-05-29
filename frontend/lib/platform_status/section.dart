@@ -7,6 +7,7 @@ import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/components/studio_sparkline_chart.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
@@ -46,6 +47,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   MetricsResponse? _metrics;
   DateTime? _lastUpdatedAt;
   bool? _previousHealthy;
+  final List<double> _degradedHistory = <double>[];
   Timer? _autoRefreshTimer;
 
   @override
@@ -126,6 +128,10 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         _metrics = results[4] as MetricsResponse;
         _lastUpdatedAt = DateTime.now();
         _previousHealthy = nextHealth;
+        _degradedHistory.add(nextDegradedEndpoints.length.toDouble());
+        if (_degradedHistory.length > 24) {
+          _degradedHistory.removeAt(0);
+        }
       });
       if (previousHealthy != null && previousHealthy != nextHealth) {
         widget.onOverallHealthChanged?.call(nextHealth, nextDegradedEndpoints);
@@ -339,6 +345,18 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             ),
           ],
           const SizedBox(height: StudioSpacing.sm),
+          if (_degradedHistory.length >= 2) ...<Widget>[
+            Text(
+              l10n.platformStatusDegradedTrend,
+              style: studioSectionIntroStyle(context),
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            StudioSparklineChart(
+              values: _degradedHistory,
+              semanticsLabel: l10n.platformStatusDegradedTrend,
+            ),
+            const SizedBox(height: StudioSpacing.sm),
+          ],
           StudioAsyncDataView(
             loading: _loading && _health == null && _error == null,
             error: _health == null ? _error : null,

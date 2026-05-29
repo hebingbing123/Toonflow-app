@@ -13,6 +13,8 @@ import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../platform/studio_load_state.dart';
+import '../platform/studio_optimistic_job.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
 import 'previews.dart';

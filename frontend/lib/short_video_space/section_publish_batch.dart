@@ -127,11 +127,49 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       }
 
       final iso = dt.toUtc().toIso8601String();
-      final res = await batchSchedulePublishDrafts(
-        token,
-        project.id,
-        draftIds: _selectedDraftIds.toList(),
-        scheduledAtIso: iso,
+      final selectedIds = _selectedDraftIds.toList(growable: false);
+      final draftsSnapshot = List<PublishDraftRow>.from(_publishDrafts);
+      final selectionSnapshot = Set<String>.from(_selectedDraftIds);
+      final multiSnapshot = _multiSelectMode;
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (!context.mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = _publishDrafts
+                .map(
+                  (draft) => selectedIds.contains(draft.id)
+                      ? studioPublishDraftRowWithScheduledAt(draft, iso)
+                      : draft,
+                )
+                .toList(growable: false);
+            _multiSelectMode = false;
+            _selectedDraftIds = <String>{};
+            _batchValidation = null;
+          });
+        },
+        rollback: () {
+          if (!context.mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = draftsSnapshot;
+            _selectedDraftIds = selectionSnapshot;
+            _multiSelectMode = multiSnapshot;
+          });
+        },
+        commit: () async {
+          final res = await batchSchedulePublishDrafts(
+            token,
+            project.id,
+            draftIds: selectedIds,
+            scheduledAtIso: iso,
+          );
+          if (res.updated == 0 && selectedIds.isNotEmpty) {
+            throw StateError('batch schedule updated zero drafts');
+          }
+        },
       );
 
       await _refreshPublishSlice(project, token);
@@ -141,14 +179,8 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(res.updated, iso))),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(selectedIds.length, iso))),
       );
-
-      setState(() {
-        _multiSelectMode = false;
-        _selectedDraftIds = <String>{};
-        _batchValidation = null;
-      });
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -248,12 +280,67 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         }
       }
 
-      final res = await batchPublishDrafts(
-        token,
-        project.id,
-        draftIds: _selectedDraftIds.toList(),
-        immediate: true,
+      final selectedIds = _selectedDraftIds.toList(growable: false);
+      final draftsSnapshot = List<PublishDraftRow>.from(_publishDrafts);
+      final selectionSnapshot = Set<String>.from(_selectedDraftIds);
+      final multiSnapshot = _multiSelectMode;
+      PublishBatchPublishResponse? publishResult;
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = _publishDrafts
+                .map(
+                  (draft) => selectedIds.contains(draft.id)
+                      ? studioPublishDraftRowWithStatus(draft, 'publishing')
+                      : draft,
+                )
+                .toList(growable: false);
+            _multiSelectMode = false;
+            _selectedDraftIds = <String>{};
+            _batchValidation = null;
+          });
+        },
+        rollback: () {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = draftsSnapshot;
+            _selectedDraftIds = selectionSnapshot;
+            _multiSelectMode = multiSnapshot;
+          });
+        },
+        commit: () async {
+          publishResult = await batchPublishDrafts(
+            token,
+            project.id,
+            draftIds: selectedIds,
+            immediate: true,
+          );
+          if (publishResult!.enqueued == 0 && selectedIds.isNotEmpty) {
+            throw StateError('batch publish enqueued zero drafts');
+          }
+        },
       );
+
+      if (publishResult != null &&
+          publishResult!.failed.isNotEmpty &&
+          mounted) {
+        final failedIds =
+            publishResult!.failed.map((failure) => failure.draftId).toSet();
+        setState(() {
+          _publishDrafts = _publishDrafts
+              .map(
+                (draft) => failedIds.contains(draft.id)
+                    ? draftsSnapshot.firstWhere((row) => row.id == draft.id)
+                    : draft,
+              )
+              .toList(growable: false);
+        });
+      }
 
       await _refreshPublishSlice(project, token);
 
@@ -261,15 +348,17 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         return;
       }
 
+      final result = publishResult!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchPublishDone(res.successCount, res.failedCount))),
+        SnackBar(
+          content: Text(
+            l10n.shortVideoPublishBatchPublishDone(
+              result.successCount,
+              result.failedCount,
+            ),
+          ),
+        ),
       );
-
-      setState(() {
-        _multiSelectMode = false;
-        _selectedDraftIds = <String>{};
-        _batchValidation = null;
-      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -312,12 +401,61 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     setState(() {
       _publishBusy = true;
     });
+    final selectedIds = _selectedDraftIds.toList(growable: false);
+    final draftsSnapshot = List<PublishDraftRow>.from(_publishDrafts);
+    final selectionSnapshot = Set<String>.from(_selectedDraftIds);
+    final multiSnapshot = _multiSelectMode;
+    PublishBatchArchiveResponse? archiveResult;
     try {
-      final res = await batchArchivePublishDrafts(
-        token,
-        project.id,
-        draftIds: _selectedDraftIds.toList(),
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = studioRemovePublishDraftsById(
+              _publishDrafts,
+              selectedIds.toSet(),
+            );
+            _multiSelectMode = false;
+            _selectedDraftIds = <String>{};
+            _batchValidation = null;
+          });
+        },
+        rollback: () {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _publishDrafts = draftsSnapshot;
+            _selectedDraftIds = selectionSnapshot;
+            _multiSelectMode = multiSnapshot;
+          });
+        },
+        commit: () async {
+          archiveResult = await batchArchivePublishDrafts(
+            token,
+            project.id,
+            draftIds: selectedIds,
+          );
+          if (archiveResult!.archivedCount == 0 && selectedIds.isNotEmpty) {
+            throw StateError('batch archive archived zero drafts');
+          }
+        },
       );
+
+      if (archiveResult != null &&
+          archiveResult!.failed.isNotEmpty &&
+          mounted) {
+        final failedIds =
+            archiveResult!.failed.map((failure) => failure.draftId).toSet();
+        setState(() {
+          _publishDrafts = <PublishDraftRow>[
+            ..._publishDrafts,
+            ...draftsSnapshot.where((draft) => failedIds.contains(draft.id)),
+          ];
+        });
+      }
 
       await _refreshPublishSlice(project, token);
 
@@ -325,15 +463,14 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         return;
       }
 
+      final archivedCount = archiveResult?.archivedCount ?? selectedIds.length;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchArchivedCount(res.archivedCount))),
+        SnackBar(
+          content: Text(
+            l10n.shortVideoPublishBatchArchivedCount(archivedCount),
+          ),
+        ),
       );
-
-      setState(() {
-        _multiSelectMode = false;
-        _selectedDraftIds = <String>{};
-        _batchValidation = null;
-      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

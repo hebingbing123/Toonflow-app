@@ -49,7 +49,7 @@ Widget studioAccessibleIconButton({
 /// ```dart
 /// StudioIconButton(
 ///   icon: Icons.close,
-///   label: 'Close dialog',
+///   label: accessibleActionLabel,
 ///   onPressed: () => Navigator.pop(context),
 /// )
 /// ```
@@ -150,9 +150,13 @@ class StudioUtilityIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
-    final borderRadius = BorderRadius.circular(dense ? 4 : 12);
-    final iconSize = dense ? 17.0 : 21.0;
-    final boxSize = dense ? 28.0 : StudioSpacing.iconTouchTarget + 8.0;
+    final borderRadius = BorderRadius.circular(
+      dense ? StudioSpacing.radiusDense : StudioSpacing.radiusComfort,
+    );
+    final iconSize = dense ? StudioIconSize.sm : StudioIconSize.md;
+    final boxSize = dense
+        ? StudioSpacing.iconTouchTarget
+        : StudioSpacing.iconTouchTarget + StudioSpacing.xs;
 
     final iconWidget = Icon(
       icon,

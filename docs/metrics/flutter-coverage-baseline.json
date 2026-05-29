@@ -1,0 +1,8 @@
+{
+  "kpiTargetPercent": 80,
+  "note": "Run scripts/flutter_coverage_report.sh --write-baseline after flutter test --coverage to refresh linePercent.",
+  "linePercent": null,
+  "linesHit": null,
+  "linesFound": null,
+  "updatedAt": null
+}

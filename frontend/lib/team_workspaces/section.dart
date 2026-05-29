@@ -9,6 +9,8 @@ import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
+import '../platform/studio_optimistic_mutation.dart';
+import '../platform/studio_optimistic_workspace.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
@@ -265,6 +267,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   bool _includeArchived = false;
   String? _patchingWorkspaceId;
   String? _switchingWorkspaceId;
+  String? _optimisticCurrentWorkspaceId;
+
+  String? get _effectiveCurrentWorkspaceId =>
+      _optimisticCurrentWorkspaceId ?? widget.currentWorkspaceId;
 
   @override
   void dispose() {
@@ -305,10 +311,15 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
           _items = null;
           _error = null;
           _loading = false;
+          _optimisticCurrentWorkspaceId = null;
         });
       } else {
         _load();
       }
+    }
+    if (widget.currentWorkspaceId != oldWidget.currentWorkspaceId &&
+        widget.currentWorkspaceId == _optimisticCurrentWorkspaceId) {
+      setState(() => _optimisticCurrentWorkspaceId = null);
     }
   }
 
@@ -587,7 +598,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 final canManage = _canArchiveOrRestore(row);
                 final isCurrent = isCurrentWorkspaceRow(
                   row,
-                  widget.currentWorkspaceId,
+                  _effectiveCurrentWorkspaceId,
                 );
 
                 final tile = studioStaggeredItem(

@@ -359,6 +359,7 @@ pub struct BatchArchiveDraftsBody {
 #[serde(rename_all = "snake_case")]
 pub struct BatchArchiveDraftsResponse {
     pub archived: i64,
+    pub failed: Vec<BatchOperationFailure>,
 }
 
 /// P8: Batch validate multiple drafts before operation

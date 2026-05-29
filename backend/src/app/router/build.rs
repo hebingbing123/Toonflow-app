@@ -111,6 +111,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::notifications::router())
         .merge(settings::outbound_webhooks::router())
         .merge(settings::platform_config::router())
+        .merge(settings::studio_ui::router())
         .merge(settings::vendors::router())
         .route("/api/v1/me", get(handlers::me))
         .route(

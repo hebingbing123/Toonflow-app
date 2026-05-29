@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config.dart';
+import '../design_system/studio_page_transitions.dart';
 import '../global_search/search_results_page.dart';
 import '../home_page.dart';
 import '../project_studio/studio_overlay_mode.dart';
@@ -10,60 +11,11 @@ import '../project_studio/studio_step.dart';
 import '../shell/home_shell_mode.dart';
 import '../shell/navigation_controller.dart';
 import '../status_page.dart';
+import 'studio_route_guards.dart';
 import 'studio_shell_branches.dart';
 
 Page<void> _studioShellPlaceholderPage(GoRouterState state) {
   return const NoTransitionPage<void>(child: SizedBox.shrink());
-}
-
-/// Fade transition for full-screen modal routes (search, status) while the
-/// shell keeps [NoTransitionPage] for indexed tabs.
-CustomTransitionPage<void> studioFadeTransitionPage({
-  required LocalKey key,
-  required Widget child,
-}) {
-  return CustomTransitionPage<void>(
-    key: key,
-    child: child,
-    transitionDuration: const Duration(milliseconds: 220),
-    reverseTransitionDuration: const Duration(milliseconds: 180),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-        child: child,
-      );
-    },
-  );
-}
-
-/// Project studio push transition — overlaps routes briefly so [Hero] can fly.
-CustomTransitionPage<void> studioProjectStudioTransitionPage({
-  required LocalKey key,
-  required Widget child,
-}) {
-  return CustomTransitionPage<void>(
-    key: key,
-    child: child,
-    transitionDuration: const Duration(milliseconds: 280),
-    reverseTransitionDuration: const Duration(milliseconds: 220),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.02),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
-  );
 }
 
 /// Full-screen shot list / grid studio (not the six-step SOP route).
@@ -122,8 +74,10 @@ String studioProjectRootRedirectLocation(String projectNumericId) {
 
 /// Studio product routes.
 GoRouter createStudioRouter() {
+  final validStepSlugs = StudioStep.values.map((s) => s.slug).toSet();
   return GoRouter(
     initialLocation: '/',
+    errorBuilder: (context, state) => StudioNotFoundPage(key: state.pageKey),
     routes: <RouteBase>[
       GoRoute(
         path: '/notifications',
@@ -202,6 +156,8 @@ GoRouter createStudioRouter() {
       ),
       GoRoute(
         path: '/projects/:projectNumericId/:stepSlug',
+        redirect: (context, state) =>
+            studioProjectStepRedirect(state, validSlugs: validStepSlugs),
         pageBuilder: (context, state) {
           final id = int.parse(state.pathParameters['projectNumericId']!);
           return studioProjectStudioTransitionPage(

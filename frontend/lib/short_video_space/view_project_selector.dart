@@ -105,13 +105,19 @@ class _ProjectSelectorPanel extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 450;
-              final button = OutlinedButton.icon(
-                onPressed: loadingProjects ? null : onRefreshProjects,
-                icon: const Icon(Icons.refresh_outlined),
-                label: Text(
-                  loadingProjects
-                      ? l10n.shortVideoSpaceLoading
-                      : l10n.shortVideoSpaceRefreshProjects,
+              final button = StudioDebouncedAction(
+                enabled: !loadingProjects,
+                onPressed: loadingProjects
+                    ? null
+                    : () async => onRefreshProjects(),
+                builder: (context, onPressed) => OutlinedButton.icon(
+                  onPressed: onPressed,
+                  icon: const Icon(Icons.refresh_outlined),
+                  label: Text(
+                    loadingProjects
+                        ? l10n.shortVideoSpaceLoading
+                        : l10n.shortVideoSpaceRefreshProjects,
+                  ),
                 ),
               );
               final dropdown = StudioDropdownButtonFormField<String>(
@@ -350,24 +356,34 @@ class _ProjectSelectorPanel extends StatelessWidget {
           StudioDenseActionRow(
             spacing: StudioSpacing.xs,
             children: [
-              FilledButton.tonalIcon(
-                style: studioFormIconLabeledButtonStyle(context),
-                onPressed: creatingProject ? null : onCreateProject,
-                icon: const Icon(Icons.add_circle_outline),
-                label: Text(
-                  creatingProject
-                      ? l10n.shortVideoSpaceCreatingProject
-                      : l10n.shortVideoSpaceCreateProjectDirect,
+              StudioDebouncedAction(
+                enabled: !creatingProject,
+                onPressed: creatingProject ? null : () async => onCreateProject(),
+                builder: (context, onPressed) => FilledButton.tonalIcon(
+                  style: studioFormIconLabeledButtonStyle(context),
+                  onPressed: onPressed,
+                  icon: const Icon(Icons.add_circle_outline),
+                  label: Text(
+                    creatingProject
+                        ? l10n.shortVideoSpaceCreatingProject
+                        : l10n.shortVideoSpaceCreateProjectDirect,
+                  ),
                 ),
               ),
-              FilledButton.icon(
-                style: studioFormIconLabeledButtonStyle(context),
-                onPressed: savingProjectConfig ? null : onSaveProjectConfig,
-                icon: const Icon(Icons.save_outlined),
-                label: Text(
-                  savingProjectConfig
-                      ? l10n.shortVideoSpaceSavingProjectConfig
-                      : l10n.shortVideoSpaceSaveProjectConfigWriteback,
+              StudioDebouncedAction(
+                enabled: !savingProjectConfig,
+                onPressed: savingProjectConfig
+                    ? null
+                    : () async => onSaveProjectConfig(),
+                builder: (context, onPressed) => FilledButton.icon(
+                  style: studioFormIconLabeledButtonStyle(context),
+                  onPressed: onPressed,
+                  icon: const Icon(Icons.save_outlined),
+                  label: Text(
+                    savingProjectConfig
+                        ? l10n.shortVideoSpaceSavingProjectConfig
+                        : l10n.shortVideoSpaceSaveProjectConfigWriteback,
+                  ),
                 ),
               ),
               OutlinedButton.icon(

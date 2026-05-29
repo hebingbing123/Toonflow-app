@@ -22,5 +22,6 @@ mod projects_model_routing_roundtrip;
 mod projects_numeric_crud_roundtrip;
 mod projects_partial_patch_roundtrip;
 mod projects_style_config_roundtrip;
+mod publish_batch_archive_roundtrip;
 mod publish_quality_gate_job_roundtrip;
 mod workspace_suite;

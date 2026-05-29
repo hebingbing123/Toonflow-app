@@ -261,8 +261,12 @@ extension _HomePageProductStudioSteps on _HomePageState {
               },
         );
       case StudioStep.video:
+        final videoProject = _studioProjectRowForNumericId(projectNumericId);
         return StudioVideoStepPanel(
           projectNumericId: projectNumericId,
+          videoRatio: '9:16',
+          accessToken: _effectiveAccessToken,
+          projectUuid: videoProject?.id,
           onOpenProduction: () {
             final row = _studioProjectRowForNumericId(projectNumericId);
             _openShellPaneFromStudioOverlay(

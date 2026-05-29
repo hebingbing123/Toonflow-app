@@ -76,7 +76,7 @@
 |------|------|
 | 首屏列表加载 | `StudioSkeleton` 或网格骨架（`ProjectsGridView(loading: true)`） |
 | Pane 内刷新 / 保存 | `LinearProgressIndicator(minHeight: 2)` + 按钮文案「同步中」 |
-| 全页阻塞加载 | `Center(CircularProgressIndicator())` |
+| 全页阻塞加载 | `StudioPaneLoadingSkeleton` / `StudioListSkeleton`（**禁止**整页 `CircularProgressIndicator`） |
 | 可重试 API 失败 | `StudioApiErrorCallout` + `onRetry` |
 | 表单 / 登录校验 | inline 错误横幅（`errorContainer` 或 token 边框） |
 | 瞬时操作失败 | `SnackBar` / `StudioToastOverlay` |
@@ -117,6 +117,12 @@
 | Pane 标题 + 工具栏 | `studio_pane_header.dart`（`StudioPaneToolbar`）、`studio_toolbar_button.dart` |
 | 列表筛选（内联/折叠） | `studio_collapsible_filter_panel.dart`（默认内联；仅密集表单 `collapsible: true`） |
 | 空状态 | `frontend/lib/design_system/components/studio_empty_state.dart` |
+| 数据表格 / 树 / 时间轴 | `studio_table.dart`、`studio_tree.dart`、`studio_timeline.dart` |
+| 面包屑 / 分页 | `studio_breadcrumb.dart`、`studio_pagination.dart` |
+| 步骤条 / 抽屉 / 上传区 | `studio_stepper.dart`、`studio_drawer.dart`、`ix/studio_file_drop_zone.dart` |
+| 虚拟列表 / 网格 | `studio_list.dart`、`studio_grid.dart`（loading 时接骨架屏） |
+| 错误分类 | `frontend/lib/utils/error_handling.dart`（UI 文案仍用 `describeUserVisibleApiErrorResolved`） |
+| WCAG 对比度门禁 | `frontend/test/design_system/studio_token_contrast_test.dart`（由 `studio-visual-debt-check.sh` 触发） |
 | Token 色值表 | [`design-tokens.md`](design-tokens.md) |
 
 ## 巡检收尾说明（2026-05）

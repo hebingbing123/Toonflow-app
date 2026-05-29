@@ -292,30 +292,77 @@ pub(crate) async fn batch_set_draft_scheduled_at(
     Ok(res.rows_affected() as i64)
 }
 
-/// P8: Batch archive drafts
+#[derive(Debug, Clone)]
+pub(crate) struct BatchArchiveDraftsResult {
+    pub archived: i64,
+    pub failed: Vec<super::super::types::BatchOperationFailure>,
+}
+
+/// P8: Batch archive drafts — returns per-id failures for optimistic UI rollback.
 pub(crate) async fn batch_archive_drafts(
     pool: &PgPool,
     project_id: Uuid,
     draft_ids: &[Uuid],
-) -> Result<i64, ApiError> {
+) -> Result<BatchArchiveDraftsResult, ApiError> {
+    use std::collections::HashSet;
+
+    use super::super::types::BatchOperationFailure;
+
     if draft_ids.is_empty() {
-        return Ok(0);
+        return Ok(BatchArchiveDraftsResult {
+            archived: 0,
+            failed: Vec::new(),
+        });
     }
-    let res = sqlx::query(
-        r#"
-        UPDATE app_publish_draft SET
-          draft_status = 'archived',
-          updated_at = NOW()
-        WHERE project_id = $1 AND id = ANY($2::uuid[])
-          AND draft_status != 'archived'
-        "#,
-    )
-    .bind(project_id)
-    .bind(draft_ids)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(res.rows_affected() as i64)
+
+    let rows = fetch_drafts_by_ids(pool, project_id, draft_ids).await?;
+    let found: HashSet<Uuid> = rows.iter().map(|row| row.id).collect();
+    let mut failed = Vec::new();
+    let mut archivable = Vec::new();
+
+    for draft_id in draft_ids {
+        if !found.contains(draft_id) {
+            failed.push(BatchOperationFailure {
+                draft_id: *draft_id,
+                reason: "Draft not found".to_string(),
+            });
+            continue;
+        }
+        let row = rows
+            .iter()
+            .find(|row| row.id == *draft_id)
+            .expect("draft id in found set");
+        if row.draft_status == "archived" {
+            failed.push(BatchOperationFailure {
+                draft_id: *draft_id,
+                reason: "Draft already archived".to_string(),
+            });
+        } else {
+            archivable.push(*draft_id);
+        }
+    }
+
+    let archived = if archivable.is_empty() {
+        0
+    } else {
+        let res = sqlx::query(
+            r#"
+            UPDATE app_publish_draft SET
+              draft_status = 'archived',
+              updated_at = NOW()
+            WHERE project_id = $1 AND id = ANY($2::uuid[])
+              AND draft_status != 'archived'
+            "#,
+        )
+        .bind(project_id)
+        .bind(&archivable)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        res.rows_affected() as i64
+    };
+
+    Ok(BatchArchiveDraftsResult { archived, failed })
 }
 
 /// P8: Fetch multiple drafts for batch validation

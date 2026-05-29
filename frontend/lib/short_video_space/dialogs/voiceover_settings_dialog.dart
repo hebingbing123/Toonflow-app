@@ -390,16 +390,22 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 const SizedBox(height: StudioSpacing.sm),
                 Row(
                   children: [
-                    FilledButton.tonalIcon(
-                      onPressed: _previewBusy ? null : _runPreview,
-                      icon: _previewBusy
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
-                            )
-                          : const Icon(Icons.play_arrow),
-                      label: Text(l10n.shortVideoCharactersPreviewVoice),
+                    StudioDebouncedAction(
+                      enabled: !_previewBusy,
+                      onPressed: _previewBusy ? null : () async => _runPreview(),
+                      builder: (context, onPressed) => FilledButton.tonalIcon(
+                        onPressed: onPressed,
+                        icon: _previewBusy
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: StudioControlSize.progressStroke,
+                                ),
+                              )
+                            : const Icon(Icons.play_arrow),
+                        label: Text(l10n.shortVideoCharactersPreviewVoice),
+                      ),
                     ),
                     if (_previewStatusLine != null) ...[
                       const SizedBox(width: StudioSpacing.sm),
@@ -452,14 +458,17 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsCancel),
         ),
-        FilledButton(
-          style: studioFormPrimaryButtonStyle(context),
-          onPressed: () {
+        StudioDebouncedAction(
+          onPressed: () async {
             Navigator.of(context).pop(
               _currentSettings,
             );
           },
-          child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsSave),
+          builder: (context, onPressed) => FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
+            onPressed: onPressed,
+            child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsSave),
+          ),
         ),
       ],
     );

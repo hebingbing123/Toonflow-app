@@ -491,4 +491,25 @@ void main() {
     expect(panel.items.first.readinessLine, contains('真人参考镜头'));
     expect(panel.items.first.qualityLine, contains('坏例 1 条'));
   });
+
+  test('shortVideoWritebackIndicatesProblem uses API status not localized line', () {
+    expect(
+      shortVideoWritebackIndicatesProblem(
+        const StoryboardLastWritebackSummaryV1(status: 'ok'),
+      ),
+      isFalse,
+    );
+    expect(
+      shortVideoWritebackIndicatesProblem(
+        const StoryboardLastWritebackSummaryV1(status: 'incomplete'),
+      ),
+      isTrue,
+    );
+    expect(
+      shortVideoWritebackIndicatesProblem(
+        const StoryboardLastWritebackSummaryV1(status: 'failed', errorCode: 'x'),
+      ),
+      isTrue,
+    );
+  });
 }

@@ -1,4 +1,5 @@
 import '../../../l10n/app_localizations.dart';
+import '../../../platform/studio_content_heuristics.dart';
 
 part 'support/support.dart';
 part 'support/stage_status.dart';

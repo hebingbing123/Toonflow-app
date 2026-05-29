@@ -1,9 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/theme.dart';
 
 void main() {
+  testWidgets('StudioAlertDialog Enter submits single-field dialog', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildStudioDarkTheme(useBundledFonts: true),
+        home: Builder(
+          builder: (context) {
+            return TextButton(
+              onPressed: () {
+                showStudioDialog<bool>(
+                  context: context,
+                  builder: (ctx) => StudioAlertDialog(
+                    title: const Text('Save view'),
+                    content: TextField(
+                      controller: controller,
+                      autofocus: true,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Text('open-alert'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open-alert'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'My view');
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.text('open-alert'), findsOneWidget);
+  });
+
   testWidgets('StudioDialogShell non-scrollable body uses loose Flexible', (
     WidgetTester tester,
   ) async {

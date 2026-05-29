@@ -8,7 +8,7 @@ class StudioSkeleton extends StatefulWidget {
     super.key,
     this.width,
     this.height = 16,
-    this.borderRadius = 8,
+    this.borderRadius = StudioSpacing.radiusDense,
     this.shimmer = true,
   });
 

@@ -9,12 +9,14 @@ enum NativeBridgeStartupState { idle, skipped, ready, failed }
 class NativeBridgeStartupSnapshot {
   const NativeBridgeStartupSnapshot({
     required this.state,
-    required this.message,
+    this.message = '',
     this.libraryPath,
     this.error,
   });
 
   final NativeBridgeStartupState state;
+
+  /// Optional diagnostic text for logs/tests only; UI uses [nativeBridgeStartupMessage].
   final String message;
   final String? libraryPath;
   final Object? error;
@@ -46,7 +48,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
 
   NativeBridgeStartupSnapshot _snapshot = const NativeBridgeStartupSnapshot(
     state: NativeBridgeStartupState.idle,
-    message: 'Desktop bridge has not started yet.',
   );
   Future<NativeBridgeStartupSnapshot>? _startupFuture;
 
@@ -61,7 +62,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
       return _updateSnapshot(
         const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.skipped,
-          message: 'Web runtime skips the desktop Rust bridge.',
         ),
       );
     }
@@ -71,7 +71,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
       return _updateSnapshot(
         const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.ready,
-          message: 'Desktop Rust bridge is ready.',
         ),
       );
     } catch (defaultError) {
@@ -79,7 +78,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
         return _updateSnapshot(
           NativeBridgeStartupSnapshot(
             state: NativeBridgeStartupState.failed,
-            message: 'Desktop Rust bridge failed to initialize.',
             error: defaultError,
           ),
         );
@@ -94,7 +92,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
           return _updateSnapshot(
             NativeBridgeStartupSnapshot(
               state: NativeBridgeStartupState.ready,
-              message: 'Desktop Rust bridge loaded from $candidate.',
               libraryPath: candidate,
             ),
           );
@@ -110,7 +107,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
       return _updateSnapshot(
         NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.failed,
-          message: 'Desktop Rust bridge failed to initialize.',
           error: lastCandidateError ?? defaultError,
         ),
       );
@@ -135,7 +131,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
   static void _defaultLogSnapshot(NativeBridgeStartupSnapshot snapshot) {
     final details = <String>[
       'state=${snapshot.state.name}',
-      'message=${snapshot.message}',
       if (snapshot.libraryPath != null) 'library_path=${snapshot.libraryPath}',
       if (snapshot.error != null) 'error=${snapshot.error}',
     ];
@@ -147,7 +142,6 @@ class NativeBridgeBootstrap extends ChangeNotifier {
     _startupFuture = null;
     _snapshot = const NativeBridgeStartupSnapshot(
       state: NativeBridgeStartupState.idle,
-      message: 'Desktop bridge has not started yet.',
     );
     notifyListeners();
   }

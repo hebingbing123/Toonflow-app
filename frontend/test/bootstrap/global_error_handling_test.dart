@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/bootstrap/global_error_handling.dart';
 import 'package:openflow_app/design_system/debug/debug.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/product_shell/studio_theme.dart';
 
 void main() {
   tearDown(DebugErrorOverlayController.instance.resetForTest);
@@ -151,6 +153,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: StudioTheme.build(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: widget),
       ),
     );
@@ -158,7 +163,8 @@ void main() {
     expect(find.text('StateError'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.bug_report_outlined));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.textContaining('render-visible'), findsOneWidget);
     expect(find.textContaining('#0 build'), findsOneWidget);

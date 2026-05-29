@@ -9,41 +9,15 @@
 - **可忽略**：纯数字、HTTP 方法前缀、短 snake_case 字段名、`rust_api` 请求体 key 等。
 
 - 扫描根：`/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib`
-- 命中总数：**8**（Tier1: 3, Tier2: 5）
+- 命中总数：**0**（Tier1: 0, Tier2: 0）
 
 ## Tier 1 — 简单字面量（建议优先批量入库）
 
-### `project_editor/`（1 条）
-
-- **project_editor/project_members_panel.dart**
-  - L724 [param_string] `),             TextSpan(               text: value,               style: theme.textTheme.bodySmall?.copyWith(                 color: theme.c…`
-
-### `shell/`（1 条）
-
-- **shell/build_sections_product.dart**
-  - L1280 [text_widget] `env: TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON`
-
-### `status_page.dart/`（1 条）
-
-- **status_page.dart**
-  - L152 [param_string] `/health`
+_（无）_
 
 ## Tier 2 — 插值行内裸英文（需人工拆句）
 
-### `agent_workspaces/`（4 条）
-
-- **agent_workspaces/contexts/script/context_snapshot.dart**
-  - L203 [line_scan] `return '$prefix\n${_previewText(body, maxChars: 220)}';`
-  - L242 [line_scan] `return '$title\n${_previewText(description, maxChars: 180)}';`
-- **agent_workspaces/controls.dart**
-  - L112 [line_scan] `label: Text(entry.$2),`
-- **agent_workspaces/runtime_output_controller.dart**
-  - L90 [line_scan] `_assistantText = _trimWorkspaceText('$_assistantText$append');`
-
-### `shell/`（1 条）
-
-- **shell/platform_short_drama_pipeline_strip.dart**
-  - L72 [line_scan] `label: Text(s.$2),`
+_（无）_
 
 ## 建议的批量处理流程（脚本化）
 

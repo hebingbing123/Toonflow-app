@@ -35,6 +35,7 @@ pub mod notifications;
 pub mod openapi;
 pub mod outbound_webhooks;
 pub mod platform_config;
+pub mod studio_ui;
 pub mod vendors;
 
 pub use openapi::SettingsOpenApi;

@@ -8,7 +8,10 @@ import '../content_compliance/controller.dart';
 import '../config.dart';
 import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../rust_api.dart';
+import 'optimistic_read.dart';
+import 'optimistic_templates.dart';
 import 'download_stub.dart'
     if (dart.library.html) 'download_web.dart'
     if (dart.library.io) 'download_io.dart';
@@ -1009,13 +1012,27 @@ class NotificationsController extends ChangeNotifier {
     if (token == null || savingPreferences) {
       return;
     }
+    final previous = complianceClearedTemplates;
     savingPreferences = true;
     notifyListeners();
     try {
-      complianceClearedTemplates =
-          await deleteContentComplianceClearedTemplateV1(token, id);
-      await _loadPreferences(token);
-      _setError(null);
+      await studioRunOptimisticMutation(
+        apply: () {
+          complianceClearedTemplates =
+              studioRemoveComplianceTemplateById(complianceClearedTemplates, id);
+          notifyListeners();
+        },
+        rollback: () {
+          complianceClearedTemplates = previous;
+          notifyListeners();
+        },
+        commit: () async {
+          complianceClearedTemplates =
+              await deleteContentComplianceClearedTemplateV1(token, id);
+          await _loadPreferences(token);
+          _setError(null);
+        },
+      );
     } catch (error) {
       reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
@@ -1078,20 +1095,39 @@ class NotificationsController extends ChangeNotifier {
     if (token == null || savingPreferences) {
       return;
     }
+    final previousTemplates = workspaceSharedComplianceTemplates;
+    final previousCanManage = canManageWorkspaceSharedTemplates;
     savingPreferences = true;
     notifyListeners();
     try {
-      final result = await deleteWorkspaceSharedComplianceClearedTemplateV1(
-        token,
-        id,
+      await studioRunOptimisticMutation(
+        apply: () {
+          workspaceSharedComplianceTemplates =
+              studioRemoveComplianceTemplateById(
+                workspaceSharedComplianceTemplates,
+                id,
+              );
+          notifyListeners();
+        },
+        rollback: () {
+          workspaceSharedComplianceTemplates = previousTemplates;
+          canManageWorkspaceSharedTemplates = previousCanManage;
+          notifyListeners();
+        },
+        commit: () async {
+          final result = await deleteWorkspaceSharedComplianceClearedTemplateV1(
+            token,
+            id,
+          );
+          workspaceSharedComplianceTemplates = result.templates;
+          canManageWorkspaceSharedTemplates = result.canManage;
+          await reloadWorkspaceSharedComplianceAudit(
+            templateId: workspaceSharedAuditTemplateFilter,
+            action: workspaceSharedAuditActionFilter,
+          );
+          _setError(null);
+        },
       );
-      workspaceSharedComplianceTemplates = result.templates;
-      canManageWorkspaceSharedTemplates = result.canManage;
-      await reloadWorkspaceSharedComplianceAudit(
-        templateId: workspaceSharedAuditTemplateFilter,
-        action: workspaceSharedAuditActionFilter,
-      );
-      _setError(null);
     } catch (error) {
       reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
@@ -1159,15 +1195,45 @@ class NotificationsController extends ChangeNotifier {
     if (token == null) {
       return;
     }
+    final previousItems = items;
+    final previousUnread = unreadCount;
     try {
-      final response = await markNotificationsReadV1(token, <int>[
-        item.id,
-      ], read: read);
-      _mergeUpdatedItems(response.items);
-      unreadCount = response.unreadCount;
-      notifyListeners();
+      await studioRunOptimisticMutation(
+        apply: () {
+          items = items
+              .map(
+                (row) => row.id == item.id
+                    ? studioNotificationWithReadState(row, read: read)
+                    : row,
+              )
+              .toList(growable: false);
+          if (read && item.isUnread) {
+            unreadCount = (unreadCount - 1).clamp(0, unreadCount);
+          } else if (!read && !item.isUnread) {
+            unreadCount = unreadCount + 1;
+          }
+          notifyListeners();
+        },
+        rollback: () {
+          items = previousItems;
+          unreadCount = previousUnread;
+          notifyListeners();
+        },
+        commit: () async {
+          final response = await markNotificationsReadV1(token, <int>[
+            item.id,
+          ], read: read);
+          _mergeUpdatedItems(response.items);
+          unreadCount = response.unreadCount;
+          notifyListeners();
+        },
+      );
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     }
   }
 
@@ -1176,37 +1242,35 @@ class NotificationsController extends ChangeNotifier {
     if (token == null || markingAllRead) {
       return;
     }
+    final previousItems = items;
+    final previousUnread = unreadCount;
     markingAllRead = true;
     notifyListeners();
     try {
-      final response = await markAllNotificationsReadV1(token);
-      unreadCount = response.unreadCount;
-      items = items
-          .map(
-            (item) => item.isUnread
-                ? NotificationRecordV1(
-                    id: item.id,
-                    userId: item.userId,
-                    workspaceId: item.workspaceId,
-                    projectId: item.projectId,
-                    projectNumericId: item.projectNumericId,
-                    jobId: item.jobId,
-                    notificationType: item.notificationType,
-                    title: item.title,
-                    message: item.message,
-                    linkPath: item.linkPath,
-                    payload: item.payload,
-                    filePath: item.filePath,
-                    changedAt: item.changedAt,
-                    readAt: DateTime.now(),
-                    createdAt: item.createdAt,
-                    updatedAt: item.updatedAt,
-                  )
-                : item,
-          )
-          .toList(growable: false);
+      await studioRunOptimisticMutation(
+        apply: () {
+          items = studioNotificationsMarkAllRead(items);
+          unreadCount = 0;
+          notifyListeners();
+        },
+        rollback: () {
+          items = previousItems;
+          unreadCount = previousUnread;
+          notifyListeners();
+        },
+        commit: () async {
+          final response = await markAllNotificationsReadV1(token);
+          unreadCount = response.unreadCount;
+          items = studioNotificationsMarkAllRead(items);
+          notifyListeners();
+        },
+      );
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       markingAllRead = false;
       notifyListeners();

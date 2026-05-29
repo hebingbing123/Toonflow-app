@@ -3,6 +3,7 @@
 // individual files ≤800 lines.
 
 import '../../../l10n/app_localizations.dart';
+import '../../../platform/studio_content_heuristics.dart';
 import 'support.dart';
 
 part 'flow_logic_summary.dart';

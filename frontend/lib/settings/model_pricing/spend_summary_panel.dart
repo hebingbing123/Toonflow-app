@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design_system/components/studio_bar_chart.dart';
 import '../../design_system/components/studio_chip.dart';
 import '../../design_system/components/studio_metric_switch.dart';
 import '../../design_system/components/studio_text_styles.dart';
@@ -106,6 +107,21 @@ class _SpendSummaryBody extends StatelessWidget {
           l10n.studioModelPricingTitle,
           style: theme.textTheme.titleMedium,
         ),
+        if (rows.isNotEmpty) ...<Widget>[
+          const SizedBox(height: StudioSpacing.sm),
+          StudioBarChart(
+            semanticsLabel: l10n.studioModelPricingTitle,
+            entries: rows
+                .take(6)
+                .map(
+                  (row) => StudioBarChartEntry(
+                    label: row.modelName,
+                    value: row.estimatedCostCents.toDouble(),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+        ],
         const SizedBox(height: StudioSpacing.xs),
         ...rows.toList().asMap().entries.map((entry) {
           final row = entry.value;

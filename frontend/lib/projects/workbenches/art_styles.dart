@@ -224,10 +224,9 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
     }
     final confirmed = await showStudioConfirmDialog(
       context: context,
-      title: 'Delete art style?',
-      message:
-          'This will delete the selected art style and cannot be undone.',
-      confirmLabel: 'Delete',
+      title: l10n.projectsArtStyleDeleteConfirmTitle,
+      message: l10n.projectsArtStyleDeleteConfirmMessage,
+      confirmLabel: l10n.globalSearchDelete,
       cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
       destructive: true,
     );

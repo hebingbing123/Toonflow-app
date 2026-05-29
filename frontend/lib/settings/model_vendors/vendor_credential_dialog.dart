@@ -117,12 +117,12 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
   }
 
   Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showStudioConfirmDialog(
       context: context,
-      title: 'Delete vendor credential?',
-      message:
-          'This will remove the saved credential for this vendor and cannot be undone.',
-      confirmLabel: 'Delete',
+      title: l10n.settingsModelVendorsDeleteCredentialTitle,
+      message: l10n.settingsModelVendorsDeleteCredentialMessage,
+      confirmLabel: l10n.globalSearchDelete,
       cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
       destructive: true,
       onConfirmAction: () async {

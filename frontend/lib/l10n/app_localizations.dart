@@ -128,6 +128,144 @@ abstract class AppLocalizations {
   /// **'Simplified Chinese'**
   String get localeChinese;
 
+  /// No description provided for @themeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get themeSectionTitle;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @studioDesignFileDropZoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop files here or browse'**
+  String get studioDesignFileDropZoneLabel;
+
+  /// No description provided for @studioDesignPaginationPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get studioDesignPaginationPrevious;
+
+  /// No description provided for @studioDesignPaginationNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get studioDesignPaginationNext;
+
+  /// No description provided for @studioDesignTransferCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get studioDesignTransferCancel;
+
+  /// No description provided for @studioDesignTableEmptyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No rows'**
+  String get studioDesignTableEmptyLabel;
+
+  /// No description provided for @studioDesignBreadcrumbSemanticsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Breadcrumb'**
+  String get studioDesignBreadcrumbSemanticsLabel;
+
+  /// No description provided for @studioDesignDebugCopyErrorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy error to clipboard'**
+  String get studioDesignDebugCopyErrorLabel;
+
+  /// No description provided for @studioDesignDebugNoDetailsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No details available'**
+  String get studioDesignDebugNoDetailsAvailable;
+
+  /// No description provided for @studioNavigationForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get studioNavigationForward;
+
+  /// No description provided for @studioDiscardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get studioDiscardChangesTitle;
+
+  /// No description provided for @studioDiscardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get studioDiscardAction;
+
+  /// No description provided for @studioDiscardArtDirectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved art direction changes. Leave anyway?'**
+  String get studioDiscardArtDirectionMessage;
+
+  /// No description provided for @studioDiscardScriptChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved script changes. Leave anyway?'**
+  String get studioDiscardScriptChangesMessage;
+
+  /// No description provided for @studioDiscardProjectDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard project draft?'**
+  String get studioDiscardProjectDraftTitle;
+
+  /// No description provided for @studioDiscardProjectDraftMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved project details. Leave this wizard?'**
+  String get studioDiscardProjectDraftMessage;
+
+  /// No description provided for @studioNotFoundPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get studioNotFoundPageTitle;
+
+  /// No description provided for @studioNotFoundBackToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get studioNotFoundBackToHome;
+
+  /// No description provided for @studioDiscardPublishCopyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved publish copy changes. Leave anyway?'**
+  String get studioDiscardPublishCopyMessage;
+
+  /// No description provided for @studioSidebarProductLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio'**
+  String get studioSidebarProductLabel;
+
   /// No description provided for @localizedFormattingFileSizeZero.
   ///
   /// In en, this message translates to:
@@ -1690,6 +1828,12 @@ abstract class AppLocalizations {
   /// **'Status: no plan override; inherits defaults'**
   String get platformConfigPlanStateInactive;
 
+  /// No description provided for @platformConfigPlanOverridesEnvLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON'**
+  String get platformConfigPlanOverridesEnvLabel;
+
   /// No description provided for @platformConfigWorkspaceEnterpriseIntro.
   ///
   /// In en, this message translates to:
@@ -2110,6 +2254,492 @@ abstract class AppLocalizations {
   /// **'Auto tour'**
   String get productDemoGuideStartAutoplay;
 
+  /// No description provided for @demoHelpHubGettingStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started (demo)'**
+  String get demoHelpHubGettingStartedTitle;
+
+  /// No description provided for @demoHelpHubStudioSopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio SOP guide (demo)'**
+  String get demoHelpHubStudioSopTitle;
+
+  /// No description provided for @demoHelpHubBillingFaqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing & webhooks FAQ (demo)'**
+  String get demoHelpHubBillingFaqTitle;
+
+  /// No description provided for @demoStudioChecklistScriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Import or create a script'**
+  String get demoStudioChecklistScriptLabel;
+
+  /// No description provided for @demoStudioChecklistStoryboardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete storyboard'**
+  String get demoStudioChecklistStoryboardLabel;
+
+  /// No description provided for @demoStudioHomeContinueStoryboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue storyboard'**
+  String get demoStudioHomeContinueStoryboardTitle;
+
+  /// No description provided for @demoStudioHomeOpenTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View tasks'**
+  String get demoStudioHomeOpenTasksTitle;
+
+  /// No description provided for @demoStudioMetricContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get demoStudioMetricContentLabel;
+
+  /// No description provided for @demoStudioMetricStoryboardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get demoStudioMetricStoryboardLabel;
+
+  /// No description provided for @demoStudioAssetsAnchorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete character anchors'**
+  String get demoStudioAssetsAnchorTitle;
+
+  /// No description provided for @demoStudioAssetsRolesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Character assets'**
+  String get demoStudioAssetsRolesLabel;
+
+  /// No description provided for @demoPublishDraftEpisode1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode 1 · vertical video'**
+  String get demoPublishDraftEpisode1Title;
+
+  /// No description provided for @demoPublishDraftEpisode2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode 2 · vertical video'**
+  String get demoPublishDraftEpisode2Title;
+
+  /// No description provided for @demoStudioProjectDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Spring short drama · demo'**
+  String get demoStudioProjectDisplayName;
+
+  /// No description provided for @demoStudioArtStyleInkWash.
+  ///
+  /// In en, this message translates to:
+  /// **'Ink-wash guofeng'**
+  String get demoStudioArtStyleInkWash;
+
+  /// No description provided for @demoStudioReadinessSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Script and storyboard on track; finish video assets next'**
+  String get demoStudioReadinessSummary;
+
+  /// No description provided for @demoStudioHomeSubheadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels 1 / Scripts 2'**
+  String get demoStudioHomeSubheadline;
+
+  /// No description provided for @demoStudioHomeContinueStoryboardDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'6 storyboards pending review'**
+  String get demoStudioHomeContinueStoryboardDetail;
+
+  /// No description provided for @demoStudioHomeOpenStoryboardCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open storyboard step'**
+  String get demoStudioHomeOpenStoryboardCta;
+
+  /// No description provided for @demoStudioHomeTasksDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'1 running task'**
+  String get demoStudioHomeTasksDetail;
+
+  /// No description provided for @demoStudioHomeTasksCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Task center'**
+  String get demoStudioHomeTasksCta;
+
+  /// No description provided for @demoStudioMetricContentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels 1 / Scripts 2'**
+  String get demoStudioMetricContentValue;
+
+  /// No description provided for @demoStudioMetricContentDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data · explore the full six-step flow'**
+  String get demoStudioMetricContentDetail;
+
+  /// No description provided for @demoStudioMetricStoryboardValue.
+  ///
+  /// In en, this message translates to:
+  /// **'4 / 6'**
+  String get demoStudioMetricStoryboardValue;
+
+  /// No description provided for @demoStudioMetricStoryboardDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'2 pending generation'**
+  String get demoStudioMetricStoryboardDetail;
+
+  /// No description provided for @demoStudioAssetsHubHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Character library ready — 1 anchor missing'**
+  String get demoStudioAssetsHubHeadline;
+
+  /// No description provided for @demoStudioAssetsHubSubheadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete lead anchors to batch-generate storyboard images'**
+  String get demoStudioAssetsHubSubheadline;
+
+  /// No description provided for @demoStudioAssetsAnchorDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} still needs an asset anchor'**
+  String demoStudioAssetsAnchorDetail(String name);
+
+  /// No description provided for @demoStudioAssetsOpenAssetsCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open assets step'**
+  String get demoStudioAssetsOpenAssetsCta;
+
+  /// No description provided for @demoStudioCharacterLeadName.
+  ///
+  /// In en, this message translates to:
+  /// **'Lin Xia'**
+  String get demoStudioCharacterLeadName;
+
+  /// No description provided for @demoStudioCharacterLeadAssetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Lin Xia · final look'**
+  String get demoStudioCharacterLeadAssetName;
+
+  /// No description provided for @demoStudioProjectSeason2Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban romance · season 2'**
+  String get demoStudioProjectSeason2Name;
+
+  /// No description provided for @demoWorkspaceDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo workspace'**
+  String get demoWorkspaceDisplayName;
+
+  /// No description provided for @demoWorkspaceArchiveName.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived example'**
+  String get demoWorkspaceArchiveName;
+
+  /// No description provided for @demoApiKeyDesktopClientDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop client · demo'**
+  String get demoApiKeyDesktopClientDisplayName;
+
+  /// No description provided for @demoApiKeyAuditEventCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'API key created'**
+  String get demoApiKeyAuditEventCreated;
+
+  /// No description provided for @demoShortVideoProjectConfigLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data · vertical short-video config loaded'**
+  String get demoShortVideoProjectConfigLine;
+
+  /// No description provided for @demoComplianceAlertCriticalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unclaimed critical reports'**
+  String get demoComplianceAlertCriticalTitle;
+
+  /// No description provided for @demoComplianceAlertCriticalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: prioritize safety reports in the unclaimed queue.'**
+  String get demoComplianceAlertCriticalMessage;
+
+  /// No description provided for @demoComplianceReportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo report: sample safety content needs manual review.'**
+  String get demoComplianceReportDetail;
+
+  /// No description provided for @demoAgentAssistantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo assistant: six-step flow data for project \"{projectName}\" is loaded. Browse 2 scripts, 3 storyboard shots, assembly/publish/quality panels; running the agent only shows demo feedback and does not write to the backend.'**
+  String demoAgentAssistantBody(String projectName);
+
+  /// No description provided for @demoAgentWritebackDisabledLine.
+  ///
+  /// In en, this message translates to:
+  /// **'(Demo) Writeback disabled — sign in to run real writeback'**
+  String get demoAgentWritebackDisabledLine;
+
+  /// No description provided for @demoBenchmarkCase1Summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: storyboard emotion is weak; add close-ups and contrast'**
+  String get demoBenchmarkCase1Summary;
+
+  /// No description provided for @demoBenchmarkCase2Summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: video prompt motion is clear; usable as baseline'**
+  String get demoBenchmarkCase2Summary;
+
+  /// No description provided for @demoBenchmarkExperimentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard prompt A/B · demo'**
+  String get demoBenchmarkExperimentName;
+
+  /// No description provided for @demoBenchmarkReviewPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: compare baseline vs variant storyboard quality scores'**
+  String get demoBenchmarkReviewPrompt;
+
+  /// No description provided for @demoBenchmarkStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data loaded — browse cases, experiments, and review queue; run/promote disabled in demo mode'**
+  String get demoBenchmarkStatusLine;
+
+  /// No description provided for @demoScriptEpisode1Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode 1 · first meeting'**
+  String get demoScriptEpisode1Name;
+
+  /// No description provided for @demoScriptEpisode2Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode 2 · misunderstanding'**
+  String get demoScriptEpisode2Name;
+
+  /// No description provided for @demoNovelChapter1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter 1 · reunion'**
+  String get demoNovelChapter1Title;
+
+  /// No description provided for @demoNovelChapter1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo chapter: leads reunite in the rain; sets up a later misunderstanding.'**
+  String get demoNovelChapter1Body;
+
+  /// No description provided for @demoAssetLeadLookName.
+  ///
+  /// In en, this message translates to:
+  /// **'Lin Xia · final look'**
+  String get demoAssetLeadLookName;
+
+  /// No description provided for @demoAssetLeadLookDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lead character look'**
+  String get demoAssetLeadLookDescription;
+
+  /// No description provided for @demoAssetRainyStreetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainy street'**
+  String get demoAssetRainyStreetName;
+
+  /// No description provided for @demoAssetRainyStreetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Exterior reference'**
+  String get demoAssetRainyStreetDescription;
+
+  /// No description provided for @demoAssetCafeInteriorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Café interior'**
+  String get demoAssetCafeInteriorName;
+
+  /// No description provided for @demoAssetCafeInteriorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate pending review'**
+  String get demoAssetCafeInteriorDescription;
+
+  /// No description provided for @demoStylePackFamilyWarmthName.
+  ///
+  /// In en, this message translates to:
+  /// **'Family warmth'**
+  String get demoStylePackFamilyWarmthName;
+
+  /// No description provided for @demoPublishDraft1Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo publish draft: schedule upload to short-video platform.'**
+  String get demoPublishDraft1Description;
+
+  /// No description provided for @demoPublishDraft2Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo publish draft: open filters and batch scheduling.'**
+  String get demoPublishDraft2Description;
+
+  /// No description provided for @demoPublishTagShortDrama.
+  ///
+  /// In en, this message translates to:
+  /// **'Short drama'**
+  String get demoPublishTagShortDrama;
+
+  /// No description provided for @demoPublishTagUrban.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban'**
+  String get demoPublishTagUrban;
+
+  /// No description provided for @demoAssemblySubtitleTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo subtitle {index}'**
+  String demoAssemblySubtitleTemplate(int index);
+
+  /// No description provided for @demoTimelineSubtitleRainStreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainy street — she turns with umbrella'**
+  String get demoTimelineSubtitleRainStreet;
+
+  /// No description provided for @demoStudioAssetsPendingAnchorsCountDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending anchor(s)'**
+  String demoStudioAssetsPendingAnchorsCountDetail(int count);
+
+  /// No description provided for @demoStoryboardPromptRainStreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainy street — she turns with umbrella, neon on her face'**
+  String get demoStoryboardPromptRainStreet;
+
+  /// No description provided for @demoStoryboardPromptMaleCloseup.
+  ///
+  /// In en, this message translates to:
+  /// **'Male lead close-up, hesitant, blurred background'**
+  String get demoStoryboardPromptMaleCloseup;
+
+  /// No description provided for @demoStoryboardPromptDuoResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-shot — misunderstanding about to clear'**
+  String get demoStoryboardPromptDuoResolve;
+
+  /// No description provided for @demoTaskCategoriesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'2 categories · asset.generate.image, script.export.zip'**
+  String get demoTaskCategoriesLine;
+
+  /// No description provided for @demoAgentWsLogScriptsListed.
+  ///
+  /// In en, this message translates to:
+  /// **'Listed 2 scripts — continue storyboard from episode 1.'**
+  String get demoAgentWsLogScriptsListed;
+
+  /// No description provided for @demoAgentWsLogAssemblyPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly preview: 3 shots ready, 1 shot needs assets.'**
+  String get demoAgentWsLogAssemblyPreview;
+
+  /// No description provided for @productDemoNotificationExportReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export complete'**
+  String get productDemoNotificationExportReadyTitle;
+
+  /// No description provided for @productDemoNotificationExportReadyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Export pack for project \"{projectName}\" is ready. Download it from Task Center.'**
+  String productDemoNotificationExportReadyMessage(String projectName);
+
+  /// No description provided for @productDemoNotificationRenderFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Render job failed'**
+  String get productDemoNotificationRenderFailedTitle;
+
+  /// No description provided for @productDemoNotificationRenderFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'render.completed timed out. Retry from the workbench.'**
+  String get productDemoNotificationRenderFailedMessage;
+
+  /// No description provided for @studioCommandPaletteShortcutMac.
+  ///
+  /// In en, this message translates to:
+  /// **'⌘K'**
+  String get studioCommandPaletteShortcutMac;
+
+  /// No description provided for @studioCommandPaletteShortcutWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+K'**
+  String get studioCommandPaletteShortcutWindows;
+
+  /// No description provided for @studioCommandPaletteKeywordsProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'project, projects, 项目'**
+  String get studioCommandPaletteKeywordsProjects;
+
+  /// No description provided for @studioCommandPaletteKeywordsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'notify, notification, notifications, 通知'**
+  String get studioCommandPaletteKeywordsNotifications;
+
+  /// No description provided for @studioCommandPaletteKeywordsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'settings, account, 设置'**
+  String get studioCommandPaletteKeywordsSettings;
+
+  /// No description provided for @studioCommandPaletteKeywordsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'help, 帮助'**
+  String get studioCommandPaletteKeywordsHelp;
+
   /// No description provided for @productDemoGuideExpandDetails.
   ///
   /// In en, this message translates to:
@@ -2163,6 +2793,894 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Up next'**
   String get productDemoGuideSectionNext;
+
+  /// No description provided for @demoTourIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start here'**
+  String get demoTourIntroTitle;
+
+  /// No description provided for @demoTourIntroShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects home'**
+  String get demoTourIntroShortLabel;
+
+  /// No description provided for @demoTourIntroPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to the demo. You will follow a sample path from script to publish-ready.'**
+  String get demoTourIntroPosition;
+
+  /// No description provided for @demoTourIntroGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the project list and open the sample project \"{projectName}\".'**
+  String demoTourIntroGoal(String projectName);
+
+  /// No description provided for @demoTourIntroBulletProgressRing.
+  ///
+  /// In en, this message translates to:
+  /// **'The ring on a card (e.g. 5/6) is overall production progress for that sample project'**
+  String get demoTourIntroBulletProgressRing;
+
+  /// No description provided for @demoTourIntroBulletStepCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Step x of 24\" in the coach card is this tour only—the two numbers are not the same'**
+  String get demoTourIntroBulletStepCounter;
+
+  /// No description provided for @demoTourIntroDemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data is never saved to your real account.'**
+  String get demoTourIntroDemoNote;
+
+  /// No description provided for @demoTourIntroNextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Next to enter the sample project and start the Script leg of the main line.'**
+  String get demoTourIntroNextHint;
+
+  /// No description provided for @demoTourIntroGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse sample project cards and progress. Open \"{projectName}\" or tap Next on the card to continue the tour.'**
+  String demoTourIntroGuide(String projectName);
+
+  /// No description provided for @demoTourBeatShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line · {slug} · {part}/{total}'**
+  String demoTourBeatShortLabel(String slug, int part, int total);
+
+  /// No description provided for @demoTourLaunchReadinessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch · ① Readiness'**
+  String get demoTourLaunchReadinessTitle;
+
+  /// No description provided for @demoTourLaunchReadinessShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video · readiness'**
+  String get demoTourLaunchReadinessShortLabel;
+
+  /// No description provided for @demoTourLaunchPublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch · ② Publish gates'**
+  String get demoTourLaunchPublishTitle;
+
+  /// No description provided for @demoTourLaunchPublishShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video · publish'**
+  String get demoTourLaunchPublishShortLabel;
+
+  /// No description provided for @demoTourUtilityReviewPackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pack (deep dive)'**
+  String get demoTourUtilityReviewPackTitle;
+
+  /// No description provided for @demoTourUtilityReviewPackShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pack'**
+  String get demoTourUtilityReviewPackShortLabel;
+
+  /// No description provided for @demoTourUtilityReviewPackGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Practice Review pack filters, feedback, and export blockers.'**
+  String get demoTourUtilityReviewPackGoal;
+
+  /// No description provided for @demoTourUtilityReviewPackBulletThumbnails.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail grid and feedback status'**
+  String get demoTourUtilityReviewPackBulletThumbnails;
+
+  /// No description provided for @demoTourUtilityReviewPackBulletExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand rows to see blocker reasons'**
+  String get demoTourUtilityReviewPackBulletExpand;
+
+  /// No description provided for @demoTourUtilityReviewPackNextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Common before launch; revisit after the main line.'**
+  String get demoTourUtilityReviewPackNextHint;
+
+  /// No description provided for @demoTourUtilityTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get demoTourUtilityTasksTitle;
+
+  /// No description provided for @demoTourUtilityTasksShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get demoTourUtilityTasksShortLabel;
+
+  /// No description provided for @demoTourUtilityTasksGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Monitor render and export jobs. Useful while producing; demo rows are samples only.'**
+  String get demoTourUtilityTasksGuide;
+
+  /// No description provided for @demoTourUtilityQualityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get demoTourUtilityQualityTitle;
+
+  /// No description provided for @demoTourUtilityQualityShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get demoTourUtilityQualityShortLabel;
+
+  /// No description provided for @demoTourUtilityQualityGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Browse stage scores and review notes. Not required to launch; good for QA roles.'**
+  String get demoTourUtilityQualityGuide;
+
+  /// No description provided for @demoTourUtilityNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get demoTourUtilityNotificationsTitle;
+
+  /// No description provided for @demoTourUtilityNotificationsShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get demoTourUtilityNotificationsShortLabel;
+
+  /// No description provided for @demoTourUtilityNotificationsGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Collaboration and task alerts. Sample entries can be marked read.'**
+  String get demoTourUtilityNotificationsGuide;
+
+  /// No description provided for @demoTourUtilityProductionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace'**
+  String get demoTourUtilityProductionTitle;
+
+  /// No description provided for @demoTourUtilityProductionShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace'**
+  String get demoTourUtilityProductionShortLabel;
+
+  /// No description provided for @demoTourUtilityProductionGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Cross-project agent and pipeline logs—popular with power users.'**
+  String get demoTourUtilityProductionGuide;
+
+  /// No description provided for @demoTourUtilityScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workspace'**
+  String get demoTourUtilityScriptTitle;
+
+  /// No description provided for @demoTourUtilityScriptShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workspace'**
+  String get demoTourUtilityScriptShortLabel;
+
+  /// No description provided for @demoTourUtilityScriptGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Dedicated long-form script view for serial projects.'**
+  String get demoTourUtilityScriptGuide;
+
+  /// No description provided for @demoTourUtilityHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get demoTourUtilityHelpTitle;
+
+  /// No description provided for @demoTourUtilityHelpShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get demoTourUtilityHelpShortLabel;
+
+  /// No description provided for @demoTourUtilityHelpGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'[Optional] Browse docs, webhooks, and billing.'**
+  String get demoTourUtilityHelpGoal;
+
+  /// No description provided for @demoTourUtilityHelpBulletSampleLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists are samples in demo—no real settings change'**
+  String get demoTourUtilityHelpBulletSampleLists;
+
+  /// No description provided for @demoTourUtilityHelpBulletAfterMainline.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit after you finish the script-to-launch main line'**
+  String get demoTourUtilityHelpBulletAfterMainline;
+
+  /// No description provided for @demoTourScript1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Script · ① Content & import'**
+  String get demoTourScript1Title;
+
+  /// No description provided for @demoTourScript1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 1/6: everything starts with script and scenes.'**
+  String get demoTourScript1Position;
+
+  /// No description provided for @demoTourScript1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this project has shootable script content (preloaded in the demo).'**
+  String get demoTourScript1Goal;
+
+  /// No description provided for @demoTourScript1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Left rail: novel import, script list, and scene entry points'**
+  String get demoTourScript1Bullet1;
+
+  /// No description provided for @demoTourScript1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the script workbench to see outline vs body layout'**
+  String get demoTourScript1Bullet2;
+
+  /// No description provided for @demoTourScript1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent sidebar on the right is read-only sample chat'**
+  String get demoTourScript1Bullet3;
+
+  /// No description provided for @demoTourScript1DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves are blocked in demo mode—browse freely.'**
+  String get demoTourScript1DemoNote;
+
+  /// No description provided for @demoTourScript1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: model routing and quick actions on this step.'**
+  String get demoTourScript1NextHint;
+
+  /// No description provided for @demoTourScript2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Script · ② Models & starters'**
+  String get demoTourScript2Title;
+
+  /// No description provided for @demoTourScript2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'See how model routing is set up before AI generation (real projects need API keys in Settings).'**
+  String get demoTourScript2Goal;
+
+  /// No description provided for @demoTourScript2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Top or setup area: vendor routing bar'**
+  String get demoTourScript2Bullet1;
+
+  /// No description provided for @demoTourScript2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter templates and quick actions for common flows'**
+  String get demoTourScript2Bullet2;
+
+  /// No description provided for @demoTourScript2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Project cockpit: progress and suggested next actions'**
+  String get demoTourScript2Bullet3;
+
+  /// No description provided for @demoTourScript2DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In production, finish Settings → Model vendors before generating.'**
+  String get demoTourScript2DemoNote;
+
+  /// No description provided for @demoTourScript2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When script is ready, continue to Art for visual direction.'**
+  String get demoTourScript2NextHint;
+
+  /// No description provided for @demoTourArt1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Art · ① Style & boards'**
+  String get demoTourArt1Title;
+
+  /// No description provided for @demoTourArt1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 2/6: align the visual language for the whole piece.'**
+  String get demoTourArt1Position;
+
+  /// No description provided for @demoTourArt1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick art and story style packs so later images stay consistent.'**
+  String get demoTourArt1Goal;
+
+  /// No description provided for @demoTourArt1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Style pack picker and reference notes'**
+  String get demoTourArt1Bullet1;
+
+  /// No description provided for @demoTourArt1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness card with a summary of current style'**
+  String get demoTourArt1Bullet2;
+
+  /// No description provided for @demoTourArt1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full project settings when you need more control'**
+  String get demoTourArt1Bullet3;
+
+  /// No description provided for @demoTourArt1DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits in the demo are not persisted.'**
+  String get demoTourArt1DemoNote;
+
+  /// No description provided for @demoTourArt1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: use the readiness checklist to close gaps.'**
+  String get demoTourArt1NextHint;
+
+  /// No description provided for @demoTourArt2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Art · ② Readiness'**
+  String get demoTourArt2Title;
+
+  /// No description provided for @demoTourArt2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear blockers on the Art step before Assets and Storyboard.'**
+  String get demoTourArt2Goal;
+
+  /// No description provided for @demoTourArt2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness score and progress bar'**
+  String get demoTourArt2Bullet1;
+
+  /// No description provided for @demoTourArt2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist items jump to the related action (sample in demo)'**
+  String get demoTourArt2Bullet2;
+
+  /// No description provided for @demoTourArt2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'When ready, the top “Next” control aims at Assets'**
+  String get demoTourArt2Bullet3;
+
+  /// No description provided for @demoTourArt2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Assets for characters and references.'**
+  String get demoTourArt2NextHint;
+
+  /// No description provided for @demoTourAssets1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets · ① Character library'**
+  String get demoTourAssets1Title;
+
+  /// No description provided for @demoTourAssets1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 3/6: prepare reusable media before storyboard generation.'**
+  String get demoTourAssets1Position;
+
+  /// No description provided for @demoTourAssets1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse character and prop assets available in the sample project.'**
+  String get demoTourAssets1Goal;
+
+  /// No description provided for @demoTourAssets1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Character asset cards and counts'**
+  String get demoTourAssets1Bullet1;
+
+  /// No description provided for @demoTourAssets1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the asset step or asset editor for details'**
+  String get demoTourAssets1Bullet2;
+
+  /// No description provided for @demoTourAssets1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent sidebar shows sample collaboration (read-only)'**
+  String get demoTourAssets1Bullet3;
+
+  /// No description provided for @demoTourAssets1DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The sample may deliberately show a “pending anchor” hint.'**
+  String get demoTourAssets1DemoNote;
+
+  /// No description provided for @demoTourAssets1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: complete lead character anchors (required in real projects).'**
+  String get demoTourAssets1NextHint;
+
+  /// No description provided for @demoTourAssets2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets · ② Anchors'**
+  String get demoTourAssets2Title;
+
+  /// No description provided for @demoTourAssets2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchors lock face and wardrobe so batch storyboard generation stays consistent.'**
+  String get demoTourAssets2Goal;
+
+  /// No description provided for @demoTourAssets2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending-anchor hints and “N anchors left” copy'**
+  String get demoTourAssets2Bullet1;
+
+  /// No description provided for @demoTourAssets2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'After anchors, you can batch-generate storyboard frames'**
+  String get demoTourAssets2Bullet2;
+
+  /// No description provided for @demoTourAssets2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the journey strip to jump to Storyboard anytime'**
+  String get demoTourAssets2Bullet3;
+
+  /// No description provided for @demoTourAssets2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When assets are ready, continue to Storyboard (four short beats in this tour).'**
+  String get demoTourAssets2NextHint;
+
+  /// No description provided for @demoTourStoryboard1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard · ① Pick episode'**
+  String get demoTourStoryboard1Title;
+
+  /// No description provided for @demoTourStoryboard1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 4/6: turn script into an actionable shot list.'**
+  String get demoTourStoryboard1Position;
+
+  /// No description provided for @demoTourStoryboard1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the episode to work on at the top of Storyboard Studio (preselected in the demo).'**
+  String get demoTourStoryboard1Goal;
+
+  /// No description provided for @demoTourStoryboard1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode / script dropdown'**
+  String get demoTourStoryboard1Bullet1;
+
+  /// No description provided for @demoTourStoryboard1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'If the list is empty, go back to Script to add scenes'**
+  String get demoTourStoryboard1Bullet2;
+
+  /// No description provided for @demoTourStoryboard1DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The demo does not change real shot data.'**
+  String get demoTourStoryboard1DemoNote;
+
+  /// No description provided for @demoTourStoryboard1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: the shot list on the left.'**
+  String get demoTourStoryboard1NextHint;
+
+  /// No description provided for @demoTourStoryboard2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard · ② Shot list'**
+  String get demoTourStoryboard2Title;
+
+  /// No description provided for @demoTourStoryboard2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Review each shot’s index, thumbnail, and status (pending, generated, etc.).'**
+  String get demoTourStoryboard2Goal;
+
+  /// No description provided for @demoTourStoryboard2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Left: shot list—tap a row to select'**
+  String get demoTourStoryboard2Bullet1;
+
+  /// No description provided for @demoTourStoryboard2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Center: preview for the active shot'**
+  String get demoTourStoryboard2Bullet2;
+
+  /// No description provided for @demoTourStoryboard2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Right: prompt, duration, and properties (read-only in demo)'**
+  String get demoTourStoryboard2Bullet3;
+
+  /// No description provided for @demoTourStoryboard2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When the list looks good, use the toolbar for grid batch generation.'**
+  String get demoTourStoryboard2NextHint;
+
+  /// No description provided for @demoTourStoryboard3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard · ③ Batch images'**
+  String get demoTourStoryboard3Title;
+
+  /// No description provided for @demoTourStoryboard3Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate frames for many shots at once (demo simulates enqueue—no real billed render).'**
+  String get demoTourStoryboard3Goal;
+
+  /// No description provided for @demoTourStoryboard3Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolbar: grid storyboard / batch image generation'**
+  String get demoTourStoryboard3Bullet1;
+
+  /// No description provided for @demoTourStoryboard3Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick rows and columns in the dialog, then confirm'**
+  String get demoTourStoryboard3Bullet2;
+
+  /// No description provided for @demoTourStoryboard3Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Track progress later in Tasks'**
+  String get demoTourStoryboard3Bullet3;
+
+  /// No description provided for @demoTourStoryboard3DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure model vendor API keys before real generation.'**
+  String get demoTourStoryboard3DemoNote;
+
+  /// No description provided for @demoTourStoryboard3NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For a single weak frame, open the image workbench next.'**
+  String get demoTourStoryboard3NextHint;
+
+  /// No description provided for @demoTourStoryboard4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard · ④ Shot workbench'**
+  String get demoTourStoryboard4Title;
+
+  /// No description provided for @demoTourStoryboard4Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tune prompts, swap images, or regenerate one shot until it is usable.'**
+  String get demoTourStoryboard4Goal;
+
+  /// No description provided for @demoTourStoryboard4Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries such as “Open image workbench” on a shot row'**
+  String get demoTourStoryboard4Bullet1;
+
+  /// No description provided for @demoTourStoryboard4Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Workbench: prompts, references, generation history (samples)'**
+  String get demoTourStoryboard4Bullet2;
+
+  /// No description provided for @demoTourStoryboard4Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Production workspace shows cross-project agent output later'**
+  String get demoTourStoryboard4Bullet3;
+
+  /// No description provided for @demoTourStoryboard4NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When frames are stable, continue to Video to assemble the piece.'**
+  String get demoTourStoryboard4NextHint;
+
+  /// No description provided for @demoTourVideo1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Video · ① Assembly mode'**
+  String get demoTourVideo1Title;
+
+  /// No description provided for @demoTourVideo1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 5/6: assemble storyboard frames into deliverable video.'**
+  String get demoTourVideo1Position;
+
+  /// No description provided for @demoTourVideo1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how video is assembled: first frame, last frame, storyboard board, etc.'**
+  String get demoTourVideo1Goal;
+
+  /// No description provided for @demoTourVideo1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Segmented control for assembly mode'**
+  String get demoTourVideo1Bullet1;
+
+  /// No description provided for @demoTourVideo1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Choice is remembered per project'**
+  String get demoTourVideo1Bullet2;
+
+  /// No description provided for @demoTourVideo1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo does not enqueue real renders'**
+  String get demoTourVideo1Bullet3;
+
+  /// No description provided for @demoTourVideo1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: open the production pipeline for generation and export.'**
+  String get demoTourVideo1NextHint;
+
+  /// No description provided for @demoTourVideo2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Video · ② Production pipeline'**
+  String get demoTourVideo2Title;
+
+  /// No description provided for @demoTourVideo2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the production workspace to track video jobs, writebacks, and task status.'**
+  String get demoTourVideo2Goal;
+
+  /// No description provided for @demoTourVideo2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Production from this step when available'**
+  String get demoTourVideo2Bullet1;
+
+  /// No description provided for @demoTourVideo2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks aggregates render and export queues'**
+  String get demoTourVideo2Bullet2;
+
+  /// No description provided for @demoTourVideo2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'In real projects, wait here for the master to finish'**
+  String get demoTourVideo2Bullet3;
+
+  /// No description provided for @demoTourVideo2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After video is ready, open Deliver for pre-export checks.'**
+  String get demoTourVideo2NextHint;
+
+  /// No description provided for @demoTourDeliver1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver · ① Export checklist'**
+  String get demoTourDeliver1Title;
+
+  /// No description provided for @demoTourDeliver1Position.
+  ///
+  /// In en, this message translates to:
+  /// **'Main line step 6/6: confirm the piece is ready to hand off.'**
+  String get demoTourDeliver1Position;
+
+  /// No description provided for @demoTourDeliver1Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Work through the deliver checklist: audio, subtitles, rights, and blockers.'**
+  String get demoTourDeliver1Goal;
+
+  /// No description provided for @demoTourDeliver1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver checklists and readiness'**
+  String get demoTourDeliver1Bullet1;
+
+  /// No description provided for @demoTourDeliver1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Journey strip links to Review pack'**
+  String get demoTourDeliver1Bullet2;
+
+  /// No description provided for @demoTourDeliver1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality sub-tab shows stage scores (sample data)'**
+  String get demoTourDeliver1Bullet3;
+
+  /// No description provided for @demoTourDeliver1DemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a quality gate before launch—not a decorative screen.'**
+  String get demoTourDeliver1DemoNote;
+
+  /// No description provided for @demoTourDeliver1NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: use Review pack for feedback and blockers.'**
+  String get demoTourDeliver1NextHint;
+
+  /// No description provided for @demoTourDeliver2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver · ② Review & export'**
+  String get demoTourDeliver2Title;
+
+  /// No description provided for @demoTourDeliver2Goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Review pack from the journey strip or menu, collect feedback, and clear export blockers.'**
+  String get demoTourDeliver2Goal;
+
+  /// No description provided for @demoTourDeliver2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver tab: export readiness and blocker summary'**
+  String get demoTourDeliver2Bullet1;
+
+  /// No description provided for @demoTourDeliver2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pack: thumbnails, feedback, filters, and row detail'**
+  String get demoTourDeliver2Bullet2;
+
+  /// No description provided for @demoTourDeliver2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to publish checks only after blockers are cleared'**
+  String get demoTourDeliver2Bullet3;
+
+  /// No description provided for @demoTourDeliver2NextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: Short video for readiness and publish gates.'**
+  String get demoTourDeliver2NextHint;
+
+  /// No description provided for @demoTourLaunchReadinessPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'From “master done” to “ready to publish”: Short video handles pre-launch checks.'**
+  String get demoTourLaunchReadinessPosition;
+
+  /// No description provided for @demoTourLaunchReadinessGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Check master readiness—missing assets, duration, cover, etc. surface here.'**
+  String get demoTourLaunchReadinessGoal;
+
+  /// No description provided for @demoTourLaunchReadinessBullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch overview, timeline, publish, and other tabs'**
+  String get demoTourLaunchReadinessBullet1;
+
+  /// No description provided for @demoTourLaunchReadinessBullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness metrics and blocker explanations'**
+  String get demoTourLaunchReadinessBullet2;
+
+  /// No description provided for @demoTourLaunchReadinessBullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo does not connect to real distribution channels'**
+  String get demoTourLaunchReadinessBullet3;
+
+  /// No description provided for @demoTourLaunchReadinessDemoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Production accounts connect channels here; the demo is walkthrough only.'**
+  String get demoTourLaunchReadinessDemoNote;
+
+  /// No description provided for @demoTourLaunchReadinessNextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: the publish checklist.'**
+  String get demoTourLaunchReadinessNextHint;
+
+  /// No description provided for @demoTourLaunchPublishGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete pre-publish gates before going live.'**
+  String get demoTourLaunchPublishGoal;
+
+  /// No description provided for @demoTourLaunchPublishBullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish checklist and statuses'**
+  String get demoTourLaunchPublishBullet1;
+
+  /// No description provided for @demoTourLaunchPublishBullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline for shots and audio alignment'**
+  String get demoTourLaunchPublishBullet2;
+
+  /// No description provided for @demoTourLaunchPublishBullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing this completes the script-to-launch sample path'**
+  String get demoTourLaunchPublishBullet3;
+
+  /// No description provided for @demoTourLaunchPublishNextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After the main path, optional beats cover Tasks, notifications, and more.'**
+  String get demoTourLaunchPublishNextHint;
 
   /// No description provided for @studioGettingStartedTitle.
   ///
@@ -4407,6 +5925,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shortcuts'**
   String get studioKeyboardShortcuts;
+
+  /// No description provided for @studioKeyboardShortcutsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Product-wide shortcuts on desktop and web. Module-specific shortcuts (e.g. short video) appear in that workspace.'**
+  String get studioKeyboardShortcutsIntro;
+
+  /// No description provided for @studioShortcutCommandPaletteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open command palette'**
+  String get studioShortcutCommandPaletteDescription;
+
+  /// No description provided for @studioShortcutFormSubmitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the focused single-line field in forms and dialogs'**
+  String get studioShortcutFormSubmitDescription;
+
+  /// No description provided for @studioShortcutFormSubmitKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get studioShortcutFormSubmitKeys;
 
   /// No description provided for @studioGridStoryboardHint.
   ///
@@ -6692,6 +8234,18 @@ abstract class AppLocalizations {
   /// **'Delete current style'**
   String get projectsArtWorkbenchDelete;
 
+  /// No description provided for @projectsArtStyleDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete art style?'**
+  String get projectsArtStyleDeleteConfirmTitle;
+
+  /// No description provided for @projectsArtStyleDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete the selected art style and cannot be undone.'**
+  String get projectsArtStyleDeleteConfirmMessage;
+
   /// No description provided for @projectsArtWorkbenchCurrentStyle.
   ///
   /// In en, this message translates to:
@@ -7193,6 +8747,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove explicit ACL'**
   String get projectMembersTooltipRemoveAcl;
+
+  /// No description provided for @projectMembersRemoveAclConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the explicit ACL for this member from the project.'**
+  String get projectMembersRemoveAclConfirmMessage;
 
   /// No description provided for @projectMembersButtonRefresh.
   ///
@@ -12131,6 +13691,12 @@ abstract class AppLocalizations {
   /// **'Platform degraded; check SLI and hot endpoints'**
   String get platformStatusDegradedWarning;
 
+  /// No description provided for @platformStatusDegradedTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Degraded endpoints (recent refreshes)'**
+  String get platformStatusDegradedTrend;
+
   /// No description provided for @platformStatusNotRefreshed.
   ///
   /// In en, this message translates to:
@@ -15317,6 +16883,60 @@ abstract class AppLocalizations {
   /// **'POST delete-novel id=0'**
   String get projectEditorNovelsProbeMutationDeleteNovelZeroButton;
 
+  /// No description provided for @projectEditorProbeScriptsBatchAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run batch add probe?'**
+  String get projectEditorProbeScriptsBatchAddTitle;
+
+  /// No description provided for @projectEditorProbeScriptsBatchAddMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This probe creates temporary scripts and deletes them immediately after the probe completes. The write/delete flow cannot be undone.'**
+  String get projectEditorProbeScriptsBatchAddMessage;
+
+  /// No description provided for @projectEditorProbeRunConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Run probe'**
+  String get projectEditorProbeRunConfirm;
+
+  /// No description provided for @projectEditorProbeNovelsBatchDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch delete probe?'**
+  String get projectEditorProbeNovelsBatchDeleteTitle;
+
+  /// No description provided for @projectEditorProbeNovelsBatchDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will submit the batch-delete probe and cannot be undone.'**
+  String get projectEditorProbeNovelsBatchDeleteMessage;
+
+  /// No description provided for @projectEditorProbeNovelsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete probe novel?'**
+  String get projectEditorProbeNovelsDeleteTitle;
+
+  /// No description provided for @projectEditorProbeNovelsDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will submit the numeric-id delete probe and cannot be undone.'**
+  String get projectEditorProbeNovelsDeleteMessage;
+
+  /// No description provided for @projectEditorProbeAssetsDeleteImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete probe image?'**
+  String get projectEditorProbeAssetsDeleteImageTitle;
+
+  /// No description provided for @projectEditorProbeAssetsDeleteImageMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete the temporary probe image created for the selected asset and cannot be undone.'**
+  String get projectEditorProbeAssetsDeleteImageMessage;
+
   /// No description provided for @projectEditorNovelsProbeMutationUpdateNovelNoopButton.
   ///
   /// In en, this message translates to:
@@ -17342,6 +18962,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Local client preferences (debug shell; same overflow menu as other panel titles).'**
   String get skillsHarnessPrefsTooltip;
+
+  /// No description provided for @skillsHarnessRevokeWasmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke user WASM?'**
+  String get skillsHarnessRevokeWasmTitle;
+
+  /// No description provided for @skillsHarnessRevokeWasmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will revoke the selected user WASM entry and cannot be undone.'**
+  String get skillsHarnessRevokeWasmMessage;
+
+  /// No description provided for @skillsHarnessRevokeWasmReloadMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will revoke the selected user WASM entry, reload the list, and cannot be undone.'**
+  String get skillsHarnessRevokeWasmReloadMessage;
+
+  /// No description provided for @skillsHarnessRevokeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get skillsHarnessRevokeConfirm;
 
   /// No description provided for @skillsHarnessToolsLabel.
   ///
@@ -22143,6 +23787,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pause'**
   String get shortVideoPreviewPlayerPause;
+
+  /// No description provided for @shortVideoPreviewPlayerShotPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots'**
+  String get shortVideoPreviewPlayerShotPicker;
+
+  /// No description provided for @shortVideoPreviewPlayerShotChip.
+  ///
+  /// In en, this message translates to:
+  /// **'#{number}'**
+  String shortVideoPreviewPlayerShotChip(int number);
+
+  /// No description provided for @shortVideoImmersiveFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get shortVideoImmersiveFullscreen;
+
+  /// No description provided for @shortVideoPreviewPaneEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate or export a preview to play it here'**
+  String get shortVideoPreviewPaneEmpty;
+
+  /// No description provided for @shortVideoAgentInspectorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Output inspector'**
+  String get shortVideoAgentInspectorTitle;
+
+  /// No description provided for @shortVideoAgentInspectorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a production workflow to see output here'**
+  String get shortVideoAgentInspectorEmpty;
+
+  /// No description provided for @shortVideoMobileCreationParamsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation parameters'**
+  String get shortVideoMobileCreationParamsTitle;
+
+  /// No description provided for @shortVideoMobileCreationParamsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get shortVideoMobileCreationParamsOpen;
+
+  /// No description provided for @shortVideoMobileCreationParamsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode and aspect ratio are saved to the current project.'**
+  String get shortVideoMobileCreationParamsHint;
+
+  /// No description provided for @shortVideoQualityMasterPaneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality overview'**
+  String get shortVideoQualityMasterPaneTitle;
 
   /// No description provided for @shortVideoProductionBatchNoStoryboards.
   ///
@@ -35341,6 +37045,18 @@ abstract class AppLocalizations {
   /// **'Keys are encrypted server-side and never returned in full after save.'**
   String get settingsModelVendorsCredentialDialogBody;
 
+  /// No description provided for @settingsModelVendorsDeleteCredentialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete vendor credential?'**
+  String get settingsModelVendorsDeleteCredentialTitle;
+
+  /// No description provided for @settingsModelVendorsDeleteCredentialMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the saved credential for this vendor and cannot be undone.'**
+  String get settingsModelVendorsDeleteCredentialMessage;
+
   /// No description provided for @settingsModelVendorsCredentialHint.
   ///
   /// In en, this message translates to:
@@ -36024,6 +37740,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.'**
   String get statusPageIntroBase;
+
+  /// No description provided for @statusPageEndpointHealthRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'/health'**
+  String get statusPageEndpointHealthRoot;
+
+  /// No description provided for @statusPageEndpointHealthV1.
+  ///
+  /// In en, this message translates to:
+  /// **'/api/v1/health'**
+  String get statusPageEndpointHealthV1;
+
+  /// No description provided for @statusPageEndpointReadyV1.
+  ///
+  /// In en, this message translates to:
+  /// **'/api/v1/ready'**
+  String get statusPageEndpointReadyV1;
 
   /// No description provided for @statusPageIntroInternalSuffix.
   ///

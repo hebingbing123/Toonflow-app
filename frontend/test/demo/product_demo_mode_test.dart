@@ -25,7 +25,7 @@ void main() {
       onErrorChanged: (_) {},
       l10nProvider: () => l10n,
     );
-    ProductDemoCatalog.buildDefault().applyTo(
+    ProductDemoCatalog.buildDefault(l10n).applyTo(
       projectsController: controller,
       taskCenterController: TaskCenterController(
         accessTokenProvider: () => ProductDemoMode.guestAccessToken,

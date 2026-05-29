@@ -614,6 +614,7 @@ extension _HomePageProductShell on _HomePageState {
   }) {
     final tokens = StudioTokens.of(ctx);
     final localeCode = AppLocaleNotifier.instance.code;
+    final themeCode = StudioThemeModeNotifier.instance.code;
     final sectionLabelStyle = Theme.of(ctx).textTheme.labelSmall?.copyWith(
       color: tokens.textMuted,
       fontWeight: FontWeight.w700,
@@ -835,6 +836,36 @@ extension _HomePageProductShell on _HomePageState {
                       },
                     ),
                   sectionDivider(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      StudioSpacing.chromeActionGap,
+                      0,
+                      StudioSpacing.chromeActionGap,
+                      StudioSpacing.xs,
+                    ),
+                    child: Text(
+                      l10n.themeSectionTitle,
+                      style: sectionLabelStyle,
+                    ),
+                  ),
+                  for (final option in <(String, String, ThemeMode)>[
+                    ('system', l10n.themeSystem, ThemeMode.system),
+                    ('light', l10n.themeLight, ThemeMode.light),
+                    ('dark', l10n.themeDark, ThemeMode.dark),
+                  ])
+                    _buildProductShellMoreMenuRow(
+                      ctx,
+                      label: option.$2,
+                      icon: Icons.dark_mode_outlined,
+                      selected: themeCode == option.$1,
+                      onTap: () {
+                        dismissPanel();
+                        unawaited(
+                          StudioThemeModeNotifier.instance.setMode(option.$3),
+                        );
+                      },
+                    ),
+                  sectionDivider(),
                   _buildProductShellMoreMenuRow(
                     ctx,
                     label: l10n.authSignOut,
@@ -1018,14 +1049,14 @@ extension _HomePageProductShell on _HomePageState {
         id: 'projects',
         label: l10n.productNavProjects,
         icon: Icons.folder_special_outlined,
-        keywords: <String>['project', '项目'],
+        keywords: studioCommandPaletteKeywordsProjects(l10n),
         onInvoke: _goToProjectsHome,
       ),
       StudioCommandAction(
         id: 'notifications',
         label: l10n.productNavNotifications,
         icon: Icons.notifications_outlined,
-        keywords: <String>['notify', '通知'],
+        keywords: studioCommandPaletteKeywordsNotifications(l10n),
         onInvoke: () =>
             _selectProductUtilityPane(ProductWorkspacePane.notifications),
       ),
@@ -1033,14 +1064,14 @@ extension _HomePageProductShell on _HomePageState {
         id: 'settings',
         label: l10n.productNavAccount,
         icon: Icons.settings_outlined,
-        keywords: <String>['settings', '设置', 'account'],
+        keywords: studioCommandPaletteKeywordsSettings(l10n),
         onInvoke: () => _selectProductUtilityPane(ProductWorkspacePane.account),
       ),
       StudioCommandAction(
         id: 'help',
         label: l10n.productNavHelp,
         icon: Icons.help_outline,
-        keywords: <String>['help', '帮助'],
+        keywords: studioCommandPaletteKeywordsHelp(l10n),
         onInvoke: () => _selectProductUtilityPane(ProductWorkspacePane.helpHub),
       ),
     ];
@@ -1061,7 +1092,6 @@ extension _HomePageProductShell on _HomePageState {
           horizontal: StudioSpacing.chromeActionGap,
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const OpenFlowBrandMark(size: 36, borderRadius: 10),
             const SizedBox(width: StudioSpacing.sm),
@@ -1193,6 +1223,7 @@ extension _HomePageProductShell on _HomePageState {
     return ListenableBuilder(
       listenable: _shellNavigationController,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context)!;
         final canBack = _canProductShellGoBack();
         final canForward =
             _shellNavigationController.canGoForwardProductWorkspacePane;
@@ -1202,7 +1233,7 @@ extension _HomePageProductShell on _HomePageState {
             _buildMacOSNavChevronButton(
               context: context,
               icon: Icons.arrow_back,
-              tooltip: 'Back',
+              tooltip: l10n.studioBackPreviousPane,
               enabled: canBack,
               onPressed: canBack ? _handleProductShellBack : null,
             ),
@@ -1210,7 +1241,7 @@ extension _HomePageProductShell on _HomePageState {
             _buildMacOSNavChevronButton(
               context: context,
               icon: Icons.arrow_forward,
-              tooltip: 'Forward',
+              tooltip: l10n.studioNavigationForward,
               enabled: canForward,
               onPressed: canForward ? _handleProductShellForward : null,
             ),
@@ -1503,6 +1534,7 @@ extension _HomePageProductShell on _HomePageState {
             ListenableBuilder(
               listenable: _shellNavigationController,
               builder: (context, _) {
+                final l10n = AppLocalizations.of(context)!;
                 final canBack = _canProductShellGoBack();
                 final canForward =
                     _shellNavigationController.canGoForwardProductWorkspacePane;
@@ -1512,14 +1544,14 @@ extension _HomePageProductShell on _HomePageState {
                     StudioIconButton(
                       style: studioChromeIconButtonStyle(context),
                       icon: Icons.arrow_back_ios_new,
-                      label: 'Back',
+                      label: l10n.studioBackPreviousPane,
                       onPressed: canBack ? _handleProductShellBack : null,
                     ),
                     const SizedBox(width: StudioSpacing.xs),
                     StudioIconButton(
                       style: studioChromeIconButtonStyle(context),
                       icon: Icons.arrow_forward_ios,
-                      label: 'Forward',
+                      label: l10n.studioNavigationForward,
                       onPressed:
                           canForward ? _handleProductShellForward : null,
                     ),
@@ -1826,11 +1858,14 @@ extension _HomePageProductShell on _HomePageState {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          _buildStudioLogoHeader(
-                            context,
-                            appTitle,
-                            pageTitle,
-                            showPageTitle: false,
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: _buildStudioLogoHeader(
+                              context,
+                              appTitle,
+                              pageTitle,
+                              showPageTitle: false,
+                            ),
                           ),
                           const SizedBox(width: StudioSpacing.sm),
                           Flexible(child: titleBarWorkspaceContext),
@@ -1863,11 +1898,14 @@ extension _HomePageProductShell on _HomePageState {
                 : Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      _buildStudioLogoHeader(
-                        context,
-                        appTitle,
-                        pageTitle,
-                        showPageTitle: false,
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: _buildStudioLogoHeader(
+                          context,
+                          appTitle,
+                          pageTitle,
+                          showPageTitle: false,
+                        ),
                       ),
                       const SizedBox(width: StudioSpacing.sm),
                       Flexible(

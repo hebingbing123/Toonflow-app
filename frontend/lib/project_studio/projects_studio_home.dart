@@ -13,9 +13,12 @@ import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../projects/controller.dart';
 import '../rust_api.dart';
+import '../studio/pinned_projects_prefs.dart';
 import '../studio/recent_projects_prefs.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../team_workspaces/strings.dart';
 import 'studio_readiness.dart';
 import 'create_project_wizard.dart';
@@ -59,6 +62,7 @@ class ProjectsStudioHome extends StatefulWidget {
 
 class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   List<String> _recentIds = const <String>[];
+  Set<String> _pinnedIds = <String>{};
   final Map<String, int> _progressByProjectId = <String, int>{};
   var _loadingProjectProgress = false;
   String? _loadedProgressProjectsKey;
@@ -76,6 +80,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     widget.controller.addListener(_onProjectsControllerChanged);
     StudioStepPrefs.changes.addListener(_onStudioStepPrefsChanged);
     _loadRecent();
+    _loadPinned();
     _autoLoadProjects();
   }
 
@@ -117,6 +122,48 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     final ids = await StudioRecentProjectsPrefs.load();
     if (!mounted) return;
     setState(() => _recentIds = ids);
+  }
+
+  Future<void> _loadPinned() async {
+    final ids = await StudioPinnedProjectsPrefs.load(
+      accessToken: widget.accessToken,
+    );
+    if (!mounted) return;
+    setState(() => _pinnedIds = ids);
+  }
+
+  Future<void> _togglePinned(String projectId) async {
+    final previous = _pinnedIds;
+    Set<String>? optimistic;
+    try {
+      await studioRunOptimisticMutation(
+        apply: () {
+          final next = Set<String>.from(_pinnedIds);
+          if (next.contains(projectId)) {
+            next.remove(projectId);
+          } else {
+            next.add(projectId);
+          }
+          optimistic = next;
+          setState(() => _pinnedIds = next);
+        },
+        rollback: () {
+          setState(() => _pinnedIds = previous);
+        },
+        commit: () async {
+          final persisted = await StudioPinnedProjectsPrefs.toggle(
+            projectId,
+            accessToken: widget.accessToken,
+            current: optimistic ?? previous,
+          );
+          if (!mounted) return;
+          setState(() => _pinnedIds = persisted);
+        },
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _pinnedIds = previous);
+    }
   }
 
   void _autoLoadProjects() {
@@ -230,11 +277,18 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   }
 
   List<ProjectRow> _resolveRecent(List<ProjectRow> all) {
-    if (_recentIds.isEmpty) return const <ProjectRow>[];
+    if (_recentIds.isEmpty && _pinnedIds.isEmpty) {
+      return const <ProjectRow>[];
+    }
     final byId = {for (final p in all) p.id: p};
-    return _recentIds
+    final orderedIds = <String>[
+      ..._pinnedIds,
+      ..._recentIds.where((id) => !_pinnedIds.contains(id)),
+    ];
+    return orderedIds
         .map((id) => byId[id])
         .whereType<ProjectRow>()
+        .take(8)
         .toList(growable: false);
   }
 
@@ -473,6 +527,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                   completedSteps: _progressByProjectId[recent[i].id] ?? 0,
                   compact: compact,
                   selected: widget.currentProjectNumericId == recent[i].numericId,
+                  isPinned: _pinnedIds.contains(recent[i].id),
+                  onTogglePin: () => _togglePinned(recent[i].id),
                   onTap: widget.onSelectProjectScope == null
                       ? () => widget.onOpenProjectStudio(recent[i])
                       : () => widget.onSelectProjectScope!(recent[i]),
@@ -508,6 +564,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                     completedSteps: _progressByProjectId[project.id] ?? 0,
                     compact: compact,
                     selected: widget.currentProjectNumericId == project.numericId,
+                    isPinned: _pinnedIds.contains(project.id),
+                    onTogglePin: () => _togglePinned(project.id),
                     onTap: widget.onSelectProjectScope == null
                         ? () => widget.onOpenProjectStudio(project)
                         : () => widget.onSelectProjectScope!(project),
@@ -720,6 +778,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                               _progressByProjectId[p.id] ?? 0,
                           onSelectProject: widget.onSelectProjectScope,
                           onOpenProject: widget.onOpenProjectStudio,
+                          pinnedProjectIds: _pinnedIds,
+                          onTogglePin: _togglePinned,
                           asSliver: true,
                           contentWidth: contentMaxWidth,
                         ),
@@ -823,6 +883,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
               onSelectProject: widget.onSelectProjectScope,
               onOpenProject: widget.onOpenProjectStudio,
+              pinnedProjectIds: _pinnedIds,
+              onTogglePin: _togglePinned,
             ),
           );
         }
@@ -869,6 +931,8 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
                   progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
                   onSelectProject: widget.onSelectProjectScope,
                   onOpenProject: widget.onOpenProjectStudio,
+                  pinnedProjectIds: _pinnedIds,
+                  onTogglePin: _togglePinned,
                   contentWidth: constraints.maxWidth,
                   boundedMaxHeight: splitGridMaxHeight,
                 );
@@ -888,6 +952,8 @@ class _RecentProjectChip extends StatelessWidget {
     this.completedSteps = 0,
     this.selected = false,
     this.compact = false,
+    this.isPinned = false,
+    this.onTogglePin,
   });
 
   final ProjectRow project;
@@ -895,6 +961,8 @@ class _RecentProjectChip extends StatelessWidget {
   final int completedSteps;
   final bool selected;
   final bool compact;
+  final bool isPinned;
+  final VoidCallback? onTogglePin;
 
   @override
   Widget build(BuildContext context) {
@@ -941,6 +1009,18 @@ class _RecentProjectChip extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
+                  if (onTogglePin != null)
+                    StudioIconButton(
+                      label: isPinned
+                          ? l10n.globalSearchUnpin
+                          : l10n.globalSearchPinToSearchBar,
+                      tooltip: isPinned
+                          ? l10n.globalSearchUnpin
+                          : l10n.globalSearchPinToSearchBar,
+                      icon: isPinned ? Icons.star : Icons.star_border,
+                      onPressed: onTogglePin,
+                      size: compact ? 18 : 20,
+                    ),
                   if (selected)
                     Padding(
                       padding: const EdgeInsets.only(

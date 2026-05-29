@@ -39,6 +39,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     required this.panelGlowSecondary,
     required this.sidebar,
     required this.sidebarBorder,
+    required this.primaryHover,
+    required this.primaryPressed,
+    required this.primaryDisabled,
+    required this.primaryFocus,
+    required this.accentHover,
+    required this.accentPressed,
+    required this.accentDisabled,
+    required this.accentFocus,
+    required this.surfaceHover,
+    required this.surfacePressed,
+    required this.surfaceDisabled,
+    required this.info,
+    required this.infoSoft,
   });
 
   final Color bgBase;
@@ -66,6 +79,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
   final Color panelGlowSecondary;
   final Color sidebar;
   final Color sidebarBorder;
+  final Color primaryHover;
+  final Color primaryPressed;
+  final Color primaryDisabled;
+  final Color primaryFocus;
+  final Color accentHover;
+  final Color accentPressed;
+  final Color accentDisabled;
+  final Color accentFocus;
+  final Color surfaceHover;
+  final Color surfacePressed;
+  final Color surfaceDisabled;
+  final Color info;
+  final Color infoSoft;
 
   static const StudioTokens dark = StudioTokens(
     bgBase: Color(0xFF121212),
@@ -93,6 +119,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     panelGlowSecondary: Color(0xFF2CC3E6),
     sidebar: Color(0xFF141922),
     sidebarBorder: Color(0xFF252D37),
+    primaryHover: Color(0xFF95ABFF),
+    primaryPressed: Color(0xFF6578E0),
+    primaryDisabled: Color(0x617C97FF),
+    primaryFocus: Color(0xFF7C97FF),
+    accentHover: Color(0xFF4DD4F5),
+    accentPressed: Color(0xFF2AA8C8),
+    accentDisabled: Color(0x6134C8F0),
+    accentFocus: Color(0xFF34C8F0),
+    surfaceHover: Color(0xFF222830),
+    surfacePressed: Color(0xFF1A1E24),
+    surfaceDisabled: Color(0x99181C22),
+    info: Color(0xFF56B7FF),
+    infoSoft: Color(0xFF1A2A3A),
   );
 
   static const StudioTokens light = StudioTokens(
@@ -121,6 +160,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     panelGlowSecondary: Color(0xFF39BCD9),
     sidebar: Color(0xFFF1F5FA),
     sidebarBorder: Color(0xFFD8E1EB),
+    primaryHover: Color(0xFF6B8EFF),
+    primaryPressed: Color(0xFF3D63E8),
+    primaryDisabled: Color(0x614F79FF),
+    primaryFocus: Color(0xFF4F79FF),
+    accentHover: Color(0xFF26B8D9),
+    accentPressed: Color(0xFF0B8FA8),
+    accentDisabled: Color(0x610EA5C6),
+    accentFocus: Color(0xFF0EA5C6),
+    surfaceHover: Color(0xFFF0F4F8),
+    surfacePressed: Color(0xFFE8EEF4),
+    surfaceDisabled: Color(0x99FFFFFF),
+    info: Color(0xFF2980FF),
+    infoSoft: Color(0xFFDEE9FF),
   );
 
   static StudioTokens of(BuildContext context) {
@@ -154,6 +206,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     Color? panelGlowSecondary,
     Color? sidebar,
     Color? sidebarBorder,
+    Color? primaryHover,
+    Color? primaryPressed,
+    Color? primaryDisabled,
+    Color? primaryFocus,
+    Color? accentHover,
+    Color? accentPressed,
+    Color? accentDisabled,
+    Color? accentFocus,
+    Color? surfaceHover,
+    Color? surfacePressed,
+    Color? surfaceDisabled,
+    Color? info,
+    Color? infoSoft,
   }) {
     return StudioTokens(
       bgBase: bgBase ?? this.bgBase,
@@ -181,6 +246,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       panelGlowSecondary: panelGlowSecondary ?? this.panelGlowSecondary,
       sidebar: sidebar ?? this.sidebar,
       sidebarBorder: sidebarBorder ?? this.sidebarBorder,
+      primaryHover: primaryHover ?? this.primaryHover,
+      primaryPressed: primaryPressed ?? this.primaryPressed,
+      primaryDisabled: primaryDisabled ?? this.primaryDisabled,
+      primaryFocus: primaryFocus ?? this.primaryFocus,
+      accentHover: accentHover ?? this.accentHover,
+      accentPressed: accentPressed ?? this.accentPressed,
+      accentDisabled: accentDisabled ?? this.accentDisabled,
+      accentFocus: accentFocus ?? this.accentFocus,
+      surfaceHover: surfaceHover ?? this.surfaceHover,
+      surfacePressed: surfacePressed ?? this.surfacePressed,
+      surfaceDisabled: surfaceDisabled ?? this.surfaceDisabled,
+      info: info ?? this.info,
+      infoSoft: infoSoft ?? this.infoSoft,
     );
   }
 
@@ -214,6 +292,19 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       panelGlowSecondary: l(panelGlowSecondary, other.panelGlowSecondary),
       sidebar: l(sidebar, other.sidebar),
       sidebarBorder: l(sidebarBorder, other.sidebarBorder),
+      primaryHover: l(primaryHover, other.primaryHover),
+      primaryPressed: l(primaryPressed, other.primaryPressed),
+      primaryDisabled: l(primaryDisabled, other.primaryDisabled),
+      primaryFocus: l(primaryFocus, other.primaryFocus),
+      accentHover: l(accentHover, other.accentHover),
+      accentPressed: l(accentPressed, other.accentPressed),
+      accentDisabled: l(accentDisabled, other.accentDisabled),
+      accentFocus: l(accentFocus, other.accentFocus),
+      surfaceHover: l(surfaceHover, other.surfaceHover),
+      surfacePressed: l(surfacePressed, other.surfacePressed),
+      surfaceDisabled: l(surfaceDisabled, other.surfaceDisabled),
+      info: l(info, other.info),
+      infoSoft: l(infoSoft, other.infoSoft),
     );
   }
 }
@@ -245,6 +336,31 @@ abstract final class StudioSpacing {
   /// Drag handles and 2px micro connectors.
   static const double radiusHairline = 2;
 
+  /// Perfect circle avatars / round FABs.
+  static const double radiusCircle = 9999;
+
+  /// Sharp corners (tables, splitters).
+  static const double radiusNone = 0;
+
+  /// Platform-aware minimum touch target (Material / HIG).
+  static double touchTargetForPlatform(TargetPlatform platform) {
+    switch (platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        return 44;
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+        return controlHeight;
+    }
+  }
+
+  /// Touch target for the current [context] platform.
+  static double touchTargetForContext(BuildContext context) {
+    return touchTargetForPlatform(Theme.of(context).platform);
+  }
+
   /// Shared height for dense inputs, text buttons, and labeled actions.
   static const double controlHeight = 36;
 
@@ -269,6 +385,19 @@ abstract final class StudioIconSize {
   static const double md = 20;
   static const double lg = 24;
   static const double xl = 22;
+}
+
+/// Z-index layers for stacking contexts (use with [Material] elevation or [Stack]).
+abstract final class StudioZIndex {
+  static const int base = 0;
+  static const int dropdown = 1000;
+  static const int sticky = 1100;
+  static const int fixed = 1200;
+  static const int tooltip = 1300;
+  static const int overlay = 1400;
+  static const int modal = 1500;
+  static const int toast = 1600;
+  static const int debug = 9999;
 }
 
 /// Hairline chrome and inline progress affordances.

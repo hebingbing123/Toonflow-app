@@ -83,10 +83,9 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 final l10n = resolveAppLocalizationsForErrors(ctx);
                 final confirmed = await showStudioConfirmDialog(
                   context: ctx,
-                  title: 'Batch delete probe?',
-                  message:
-                      'This will submit the batch-delete probe and cannot be undone.',
-                  confirmLabel: 'Delete',
+                  title: l10n.projectEditorProbeNovelsBatchDeleteTitle,
+                  message: l10n.projectEditorProbeNovelsBatchDeleteMessage,
+                  confirmLabel: l10n.globalSearchDelete,
                   cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
                   destructive: true,
                 );
@@ -132,10 +131,9 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 final l10n = resolveAppLocalizationsForErrors(ctx);
                 final confirmed = await showStudioConfirmDialog(
                   context: ctx,
-                  title: 'Delete probe novel?',
-                  message:
-                      'This will submit the numeric-id delete probe and cannot be undone.',
-                  confirmLabel: 'Delete',
+                  title: l10n.projectEditorProbeNovelsDeleteTitle,
+                  message: l10n.projectEditorProbeNovelsDeleteMessage,
+                  confirmLabel: l10n.globalSearchDelete,
                   cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
                   destructive: true,
                 );

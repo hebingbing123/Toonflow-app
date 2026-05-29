@@ -24,6 +24,79 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localeChinese => 'Simplified Chinese';
 
   @override
+  String get themeSectionTitle => 'Appearance';
+
+  @override
+  String get themeSystem => 'System default';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get studioDesignFileDropZoneLabel => 'Drop files here or browse';
+
+  @override
+  String get studioDesignPaginationPrevious => 'Previous';
+
+  @override
+  String get studioDesignPaginationNext => 'Next';
+
+  @override
+  String get studioDesignTransferCancel => 'Cancel';
+
+  @override
+  String get studioDesignTableEmptyLabel => 'No rows';
+
+  @override
+  String get studioDesignBreadcrumbSemanticsLabel => 'Breadcrumb';
+
+  @override
+  String get studioDesignDebugCopyErrorLabel => 'Copy error to clipboard';
+
+  @override
+  String get studioDesignDebugNoDetailsAvailable => 'No details available';
+
+  @override
+  String get studioNavigationForward => 'Forward';
+
+  @override
+  String get studioDiscardChangesTitle => 'Discard changes?';
+
+  @override
+  String get studioDiscardAction => 'Discard';
+
+  @override
+  String get studioDiscardArtDirectionMessage =>
+      'You have unsaved art direction changes. Leave anyway?';
+
+  @override
+  String get studioDiscardScriptChangesMessage =>
+      'You have unsaved script changes. Leave anyway?';
+
+  @override
+  String get studioDiscardProjectDraftTitle => 'Discard project draft?';
+
+  @override
+  String get studioDiscardProjectDraftMessage =>
+      'You have unsaved project details. Leave this wizard?';
+
+  @override
+  String get studioNotFoundPageTitle => 'Page not found';
+
+  @override
+  String get studioNotFoundBackToHome => 'Back to home';
+
+  @override
+  String get studioDiscardPublishCopyMessage =>
+      'You have unsaved publish copy changes. Leave anyway?';
+
+  @override
+  String get studioSidebarProductLabel => 'Studio';
+
+  @override
   String get localizedFormattingFileSizeZero => '0 B';
 
   @override
@@ -944,6 +1017,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Status: no plan override; inherits defaults';
 
   @override
+  String get platformConfigPlanOverridesEnvLabel =>
+      'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON';
+
+  @override
   String get platformConfigWorkspaceEnterpriseIntro =>
       'Shared overlay for the current enterprise workspace; applied before personal settings in effective merge.';
 
@@ -1188,6 +1265,284 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDemoGuideStartAutoplay => 'Auto tour';
 
   @override
+  String get demoHelpHubGettingStartedTitle => 'Getting started (demo)';
+
+  @override
+  String get demoHelpHubStudioSopTitle => 'Studio SOP guide (demo)';
+
+  @override
+  String get demoHelpHubBillingFaqTitle => 'Billing & webhooks FAQ (demo)';
+
+  @override
+  String get demoStudioChecklistScriptLabel => 'Import or create a script';
+
+  @override
+  String get demoStudioChecklistStoryboardLabel => 'Complete storyboard';
+
+  @override
+  String get demoStudioHomeContinueStoryboardTitle => 'Continue storyboard';
+
+  @override
+  String get demoStudioHomeOpenTasksTitle => 'View tasks';
+
+  @override
+  String get demoStudioMetricContentLabel => 'Content';
+
+  @override
+  String get demoStudioMetricStoryboardLabel => 'Storyboard';
+
+  @override
+  String get demoStudioAssetsAnchorTitle => 'Complete character anchors';
+
+  @override
+  String get demoStudioAssetsRolesLabel => 'Character assets';
+
+  @override
+  String get demoPublishDraftEpisode1Title => 'Episode 1 · vertical video';
+
+  @override
+  String get demoPublishDraftEpisode2Title => 'Episode 2 · vertical video';
+
+  @override
+  String get demoStudioProjectDisplayName => 'Spring short drama · demo';
+
+  @override
+  String get demoStudioArtStyleInkWash => 'Ink-wash guofeng';
+
+  @override
+  String get demoStudioReadinessSummary =>
+      'Script and storyboard on track; finish video assets next';
+
+  @override
+  String get demoStudioHomeSubheadline => 'Novels 1 / Scripts 2';
+
+  @override
+  String get demoStudioHomeContinueStoryboardDetail =>
+      '6 storyboards pending review';
+
+  @override
+  String get demoStudioHomeOpenStoryboardCta => 'Open storyboard step';
+
+  @override
+  String get demoStudioHomeTasksDetail => '1 running task';
+
+  @override
+  String get demoStudioHomeTasksCta => 'Task center';
+
+  @override
+  String get demoStudioMetricContentValue => 'Novels 1 / Scripts 2';
+
+  @override
+  String get demoStudioMetricContentDetail =>
+      'Demo data · explore the full six-step flow';
+
+  @override
+  String get demoStudioMetricStoryboardValue => '4 / 6';
+
+  @override
+  String get demoStudioMetricStoryboardDetail => '2 pending generation';
+
+  @override
+  String get demoStudioAssetsHubHeadline =>
+      'Character library ready — 1 anchor missing';
+
+  @override
+  String get demoStudioAssetsHubSubheadline =>
+      'Complete lead anchors to batch-generate storyboard images';
+
+  @override
+  String demoStudioAssetsAnchorDetail(String name) {
+    return '$name still needs an asset anchor';
+  }
+
+  @override
+  String get demoStudioAssetsOpenAssetsCta => 'Open assets step';
+
+  @override
+  String get demoStudioCharacterLeadName => 'Lin Xia';
+
+  @override
+  String get demoStudioCharacterLeadAssetName => 'Lin Xia · final look';
+
+  @override
+  String get demoStudioProjectSeason2Name => 'Urban romance · season 2';
+
+  @override
+  String get demoWorkspaceDisplayName => 'Demo workspace';
+
+  @override
+  String get demoWorkspaceArchiveName => 'Archived example';
+
+  @override
+  String get demoApiKeyDesktopClientDisplayName => 'Desktop client · demo';
+
+  @override
+  String get demoApiKeyAuditEventCreated => 'API key created';
+
+  @override
+  String get demoShortVideoProjectConfigLine =>
+      'Demo data · vertical short-video config loaded';
+
+  @override
+  String get demoComplianceAlertCriticalTitle => 'Unclaimed critical reports';
+
+  @override
+  String get demoComplianceAlertCriticalMessage =>
+      'Demo: prioritize safety reports in the unclaimed queue.';
+
+  @override
+  String get demoComplianceReportDetail =>
+      'Demo report: sample safety content needs manual review.';
+
+  @override
+  String demoAgentAssistantBody(String projectName) {
+    return 'Demo assistant: six-step flow data for project \"$projectName\" is loaded. Browse 2 scripts, 3 storyboard shots, assembly/publish/quality panels; running the agent only shows demo feedback and does not write to the backend.';
+  }
+
+  @override
+  String get demoAgentWritebackDisabledLine =>
+      '(Demo) Writeback disabled — sign in to run real writeback';
+
+  @override
+  String get demoBenchmarkCase1Summary =>
+      'Demo: storyboard emotion is weak; add close-ups and contrast';
+
+  @override
+  String get demoBenchmarkCase2Summary =>
+      'Demo: video prompt motion is clear; usable as baseline';
+
+  @override
+  String get demoBenchmarkExperimentName => 'Storyboard prompt A/B · demo';
+
+  @override
+  String get demoBenchmarkReviewPrompt =>
+      'Demo: compare baseline vs variant storyboard quality scores';
+
+  @override
+  String get demoBenchmarkStatusLine =>
+      'Demo data loaded — browse cases, experiments, and review queue; run/promote disabled in demo mode';
+
+  @override
+  String get demoScriptEpisode1Name => 'Episode 1 · first meeting';
+
+  @override
+  String get demoScriptEpisode2Name => 'Episode 2 · misunderstanding';
+
+  @override
+  String get demoNovelChapter1Title => 'Chapter 1 · reunion';
+
+  @override
+  String get demoNovelChapter1Body =>
+      'Demo chapter: leads reunite in the rain; sets up a later misunderstanding.';
+
+  @override
+  String get demoAssetLeadLookName => 'Lin Xia · final look';
+
+  @override
+  String get demoAssetLeadLookDescription => 'Lead character look';
+
+  @override
+  String get demoAssetRainyStreetName => 'Rainy street';
+
+  @override
+  String get demoAssetRainyStreetDescription => 'Exterior reference';
+
+  @override
+  String get demoAssetCafeInteriorName => 'Café interior';
+
+  @override
+  String get demoAssetCafeInteriorDescription => 'Candidate pending review';
+
+  @override
+  String get demoStylePackFamilyWarmthName => 'Family warmth';
+
+  @override
+  String get demoPublishDraft1Description =>
+      'Demo publish draft: schedule upload to short-video platform.';
+
+  @override
+  String get demoPublishDraft2Description =>
+      'Demo publish draft: open filters and batch scheduling.';
+
+  @override
+  String get demoPublishTagShortDrama => 'Short drama';
+
+  @override
+  String get demoPublishTagUrban => 'Urban';
+
+  @override
+  String demoAssemblySubtitleTemplate(int index) {
+    return 'Demo subtitle $index';
+  }
+
+  @override
+  String get demoTimelineSubtitleRainStreet =>
+      'Rainy street — she turns with umbrella';
+
+  @override
+  String demoStudioAssetsPendingAnchorsCountDetail(int count) {
+    return '$count pending anchor(s)';
+  }
+
+  @override
+  String get demoStoryboardPromptRainStreet =>
+      'Rainy street — she turns with umbrella, neon on her face';
+
+  @override
+  String get demoStoryboardPromptMaleCloseup =>
+      'Male lead close-up, hesitant, blurred background';
+
+  @override
+  String get demoStoryboardPromptDuoResolve =>
+      'Two-shot — misunderstanding about to clear';
+
+  @override
+  String get demoTaskCategoriesLine =>
+      '2 categories · asset.generate.image, script.export.zip';
+
+  @override
+  String get demoAgentWsLogScriptsListed =>
+      'Listed 2 scripts — continue storyboard from episode 1.';
+
+  @override
+  String get demoAgentWsLogAssemblyPreview =>
+      'Assembly preview: 3 shots ready, 1 shot needs assets.';
+
+  @override
+  String get productDemoNotificationExportReadyTitle => 'Export complete';
+
+  @override
+  String productDemoNotificationExportReadyMessage(String projectName) {
+    return 'Export pack for project \"$projectName\" is ready. Download it from Task Center.';
+  }
+
+  @override
+  String get productDemoNotificationRenderFailedTitle => 'Render job failed';
+
+  @override
+  String get productDemoNotificationRenderFailedMessage =>
+      'render.completed timed out. Retry from the workbench.';
+
+  @override
+  String get studioCommandPaletteShortcutMac => '⌘K';
+
+  @override
+  String get studioCommandPaletteShortcutWindows => 'Ctrl+K';
+
+  @override
+  String get studioCommandPaletteKeywordsProjects => 'project, projects, 项目';
+
+  @override
+  String get studioCommandPaletteKeywordsNotifications =>
+      'notify, notification, notifications, 通知';
+
+  @override
+  String get studioCommandPaletteKeywordsSettings => 'settings, account, 设置';
+
+  @override
+  String get studioCommandPaletteKeywordsHelp => 'help, 帮助';
+
+  @override
   String get productDemoGuideExpandDetails => 'Expand';
 
   @override
@@ -1217,6 +1572,552 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productDemoGuideSectionNext => 'Up next';
+
+  @override
+  String get demoTourIntroTitle => 'Start here';
+
+  @override
+  String get demoTourIntroShortLabel => 'Projects home';
+
+  @override
+  String get demoTourIntroPosition =>
+      'Welcome to the demo. You will follow a sample path from script to publish-ready.';
+
+  @override
+  String demoTourIntroGoal(String projectName) {
+    return 'Find the project list and open the sample project \"$projectName\".';
+  }
+
+  @override
+  String get demoTourIntroBulletProgressRing =>
+      'The ring on a card (e.g. 5/6) is overall production progress for that sample project';
+
+  @override
+  String get demoTourIntroBulletStepCounter =>
+      '\"Step x of 24\" in the coach card is this tour only—the two numbers are not the same';
+
+  @override
+  String get demoTourIntroDemoNote =>
+      'Demo data is never saved to your real account.';
+
+  @override
+  String get demoTourIntroNextHint =>
+      'Tap Next to enter the sample project and start the Script leg of the main line.';
+
+  @override
+  String demoTourIntroGuide(String projectName) {
+    return 'Browse sample project cards and progress. Open \"$projectName\" or tap Next on the card to continue the tour.';
+  }
+
+  @override
+  String demoTourBeatShortLabel(String slug, int part, int total) {
+    return 'Main line · $slug · $part/$total';
+  }
+
+  @override
+  String get demoTourLaunchReadinessTitle => 'Launch · ① Readiness';
+
+  @override
+  String get demoTourLaunchReadinessShortLabel => 'Short video · readiness';
+
+  @override
+  String get demoTourLaunchPublishTitle => 'Launch · ② Publish gates';
+
+  @override
+  String get demoTourLaunchPublishShortLabel => 'Short video · publish';
+
+  @override
+  String get demoTourUtilityReviewPackTitle => 'Review pack (deep dive)';
+
+  @override
+  String get demoTourUtilityReviewPackShortLabel => 'Review pack';
+
+  @override
+  String get demoTourUtilityReviewPackGoal =>
+      '[Optional] Practice Review pack filters, feedback, and export blockers.';
+
+  @override
+  String get demoTourUtilityReviewPackBulletThumbnails =>
+      'Thumbnail grid and feedback status';
+
+  @override
+  String get demoTourUtilityReviewPackBulletExpand =>
+      'Expand rows to see blocker reasons';
+
+  @override
+  String get demoTourUtilityReviewPackNextHint =>
+      'Common before launch; revisit after the main line.';
+
+  @override
+  String get demoTourUtilityTasksTitle => 'Tasks';
+
+  @override
+  String get demoTourUtilityTasksShortLabel => 'Tasks';
+
+  @override
+  String get demoTourUtilityTasksGuide =>
+      '[Optional] Monitor render and export jobs. Useful while producing; demo rows are samples only.';
+
+  @override
+  String get demoTourUtilityQualityTitle => 'Quality';
+
+  @override
+  String get demoTourUtilityQualityShortLabel => 'Quality';
+
+  @override
+  String get demoTourUtilityQualityGuide =>
+      '[Optional] Browse stage scores and review notes. Not required to launch; good for QA roles.';
+
+  @override
+  String get demoTourUtilityNotificationsTitle => 'Notifications';
+
+  @override
+  String get demoTourUtilityNotificationsShortLabel => 'Notifications';
+
+  @override
+  String get demoTourUtilityNotificationsGuide =>
+      '[Optional] Collaboration and task alerts. Sample entries can be marked read.';
+
+  @override
+  String get demoTourUtilityProductionTitle => 'Production workspace';
+
+  @override
+  String get demoTourUtilityProductionShortLabel => 'Production workspace';
+
+  @override
+  String get demoTourUtilityProductionGuide =>
+      '[Optional] Cross-project agent and pipeline logs—popular with power users.';
+
+  @override
+  String get demoTourUtilityScriptTitle => 'Script workspace';
+
+  @override
+  String get demoTourUtilityScriptShortLabel => 'Script workspace';
+
+  @override
+  String get demoTourUtilityScriptGuide =>
+      '[Optional] Dedicated long-form script view for serial projects.';
+
+  @override
+  String get demoTourUtilityHelpTitle => 'Help';
+
+  @override
+  String get demoTourUtilityHelpShortLabel => 'Help';
+
+  @override
+  String get demoTourUtilityHelpGoal =>
+      '[Optional] Browse docs, webhooks, and billing.';
+
+  @override
+  String get demoTourUtilityHelpBulletSampleLists =>
+      'Lists are samples in demo—no real settings change';
+
+  @override
+  String get demoTourUtilityHelpBulletAfterMainline =>
+      'Visit after you finish the script-to-launch main line';
+
+  @override
+  String get demoTourScript1Title => 'Script · ① Content & import';
+
+  @override
+  String get demoTourScript1Position =>
+      'Main line step 1/6: everything starts with script and scenes.';
+
+  @override
+  String get demoTourScript1Goal =>
+      'Confirm this project has shootable script content (preloaded in the demo).';
+
+  @override
+  String get demoTourScript1Bullet1 =>
+      'Left rail: novel import, script list, and scene entry points';
+
+  @override
+  String get demoTourScript1Bullet2 =>
+      'Open the script workbench to see outline vs body layout';
+
+  @override
+  String get demoTourScript1Bullet3 =>
+      'Agent sidebar on the right is read-only sample chat';
+
+  @override
+  String get demoTourScript1DemoNote =>
+      'Saves are blocked in demo mode—browse freely.';
+
+  @override
+  String get demoTourScript1NextHint =>
+      'Next: model routing and quick actions on this step.';
+
+  @override
+  String get demoTourScript2Title => 'Script · ② Models & starters';
+
+  @override
+  String get demoTourScript2Goal =>
+      'See how model routing is set up before AI generation (real projects need API keys in Settings).';
+
+  @override
+  String get demoTourScript2Bullet1 => 'Top or setup area: vendor routing bar';
+
+  @override
+  String get demoTourScript2Bullet2 =>
+      'Starter templates and quick actions for common flows';
+
+  @override
+  String get demoTourScript2Bullet3 =>
+      'Project cockpit: progress and suggested next actions';
+
+  @override
+  String get demoTourScript2DemoNote =>
+      'In production, finish Settings → Model vendors before generating.';
+
+  @override
+  String get demoTourScript2NextHint =>
+      'When script is ready, continue to Art for visual direction.';
+
+  @override
+  String get demoTourArt1Title => 'Art · ① Style & boards';
+
+  @override
+  String get demoTourArt1Position =>
+      'Main line step 2/6: align the visual language for the whole piece.';
+
+  @override
+  String get demoTourArt1Goal =>
+      'Pick art and story style packs so later images stay consistent.';
+
+  @override
+  String get demoTourArt1Bullet1 => 'Style pack picker and reference notes';
+
+  @override
+  String get demoTourArt1Bullet2 =>
+      'Readiness card with a summary of current style';
+
+  @override
+  String get demoTourArt1Bullet3 =>
+      'Open full project settings when you need more control';
+
+  @override
+  String get demoTourArt1DemoNote => 'Edits in the demo are not persisted.';
+
+  @override
+  String get demoTourArt1NextHint =>
+      'Next: use the readiness checklist to close gaps.';
+
+  @override
+  String get demoTourArt2Title => 'Art · ② Readiness';
+
+  @override
+  String get demoTourArt2Goal =>
+      'Clear blockers on the Art step before Assets and Storyboard.';
+
+  @override
+  String get demoTourArt2Bullet1 => 'Readiness score and progress bar';
+
+  @override
+  String get demoTourArt2Bullet2 =>
+      'Checklist items jump to the related action (sample in demo)';
+
+  @override
+  String get demoTourArt2Bullet3 =>
+      'When ready, the top “Next” control aims at Assets';
+
+  @override
+  String get demoTourArt2NextHint =>
+      'Continue to Assets for characters and references.';
+
+  @override
+  String get demoTourAssets1Title => 'Assets · ① Character library';
+
+  @override
+  String get demoTourAssets1Position =>
+      'Main line step 3/6: prepare reusable media before storyboard generation.';
+
+  @override
+  String get demoTourAssets1Goal =>
+      'Browse character and prop assets available in the sample project.';
+
+  @override
+  String get demoTourAssets1Bullet1 => 'Character asset cards and counts';
+
+  @override
+  String get demoTourAssets1Bullet2 =>
+      'Open the asset step or asset editor for details';
+
+  @override
+  String get demoTourAssets1Bullet3 =>
+      'Agent sidebar shows sample collaboration (read-only)';
+
+  @override
+  String get demoTourAssets1DemoNote =>
+      'The sample may deliberately show a “pending anchor” hint.';
+
+  @override
+  String get demoTourAssets1NextHint =>
+      'Next: complete lead character anchors (required in real projects).';
+
+  @override
+  String get demoTourAssets2Title => 'Assets · ② Anchors';
+
+  @override
+  String get demoTourAssets2Goal =>
+      'Anchors lock face and wardrobe so batch storyboard generation stays consistent.';
+
+  @override
+  String get demoTourAssets2Bullet1 =>
+      'Pending-anchor hints and “N anchors left” copy';
+
+  @override
+  String get demoTourAssets2Bullet2 =>
+      'After anchors, you can batch-generate storyboard frames';
+
+  @override
+  String get demoTourAssets2Bullet3 =>
+      'Use the journey strip to jump to Storyboard anytime';
+
+  @override
+  String get demoTourAssets2NextHint =>
+      'When assets are ready, continue to Storyboard (four short beats in this tour).';
+
+  @override
+  String get demoTourStoryboard1Title => 'Storyboard · ① Pick episode';
+
+  @override
+  String get demoTourStoryboard1Position =>
+      'Main line step 4/6: turn script into an actionable shot list.';
+
+  @override
+  String get demoTourStoryboard1Goal =>
+      'Select the episode to work on at the top of Storyboard Studio (preselected in the demo).';
+
+  @override
+  String get demoTourStoryboard1Bullet1 => 'Episode / script dropdown';
+
+  @override
+  String get demoTourStoryboard1Bullet2 =>
+      'If the list is empty, go back to Script to add scenes';
+
+  @override
+  String get demoTourStoryboard1DemoNote =>
+      'The demo does not change real shot data.';
+
+  @override
+  String get demoTourStoryboard1NextHint => 'Next: the shot list on the left.';
+
+  @override
+  String get demoTourStoryboard2Title => 'Storyboard · ② Shot list';
+
+  @override
+  String get demoTourStoryboard2Goal =>
+      'Review each shot’s index, thumbnail, and status (pending, generated, etc.).';
+
+  @override
+  String get demoTourStoryboard2Bullet1 =>
+      'Left: shot list—tap a row to select';
+
+  @override
+  String get demoTourStoryboard2Bullet2 =>
+      'Center: preview for the active shot';
+
+  @override
+  String get demoTourStoryboard2Bullet3 =>
+      'Right: prompt, duration, and properties (read-only in demo)';
+
+  @override
+  String get demoTourStoryboard2NextHint =>
+      'When the list looks good, use the toolbar for grid batch generation.';
+
+  @override
+  String get demoTourStoryboard3Title => 'Storyboard · ③ Batch images';
+
+  @override
+  String get demoTourStoryboard3Goal =>
+      'Generate frames for many shots at once (demo simulates enqueue—no real billed render).';
+
+  @override
+  String get demoTourStoryboard3Bullet1 =>
+      'Toolbar: grid storyboard / batch image generation';
+
+  @override
+  String get demoTourStoryboard3Bullet2 =>
+      'Pick rows and columns in the dialog, then confirm';
+
+  @override
+  String get demoTourStoryboard3Bullet3 => 'Track progress later in Tasks';
+
+  @override
+  String get demoTourStoryboard3DemoNote =>
+      'Configure model vendor API keys before real generation.';
+
+  @override
+  String get demoTourStoryboard3NextHint =>
+      'For a single weak frame, open the image workbench next.';
+
+  @override
+  String get demoTourStoryboard4Title => 'Storyboard · ④ Shot workbench';
+
+  @override
+  String get demoTourStoryboard4Goal =>
+      'Tune prompts, swap images, or regenerate one shot until it is usable.';
+
+  @override
+  String get demoTourStoryboard4Bullet1 =>
+      'Entries such as “Open image workbench” on a shot row';
+
+  @override
+  String get demoTourStoryboard4Bullet2 =>
+      'Workbench: prompts, references, generation history (samples)';
+
+  @override
+  String get demoTourStoryboard4Bullet3 =>
+      'Production workspace shows cross-project agent output later';
+
+  @override
+  String get demoTourStoryboard4NextHint =>
+      'When frames are stable, continue to Video to assemble the piece.';
+
+  @override
+  String get demoTourVideo1Title => 'Video · ① Assembly mode';
+
+  @override
+  String get demoTourVideo1Position =>
+      'Main line step 5/6: assemble storyboard frames into deliverable video.';
+
+  @override
+  String get demoTourVideo1Goal =>
+      'Choose how video is assembled: first frame, last frame, storyboard board, etc.';
+
+  @override
+  String get demoTourVideo1Bullet1 => 'Segmented control for assembly mode';
+
+  @override
+  String get demoTourVideo1Bullet2 => 'Choice is remembered per project';
+
+  @override
+  String get demoTourVideo1Bullet3 => 'Demo does not enqueue real renders';
+
+  @override
+  String get demoTourVideo1NextHint =>
+      'Next: open the production pipeline for generation and export.';
+
+  @override
+  String get demoTourVideo2Title => 'Video · ② Production pipeline';
+
+  @override
+  String get demoTourVideo2Goal =>
+      'Use the production workspace to track video jobs, writebacks, and task status.';
+
+  @override
+  String get demoTourVideo2Bullet1 =>
+      'Open Production from this step when available';
+
+  @override
+  String get demoTourVideo2Bullet2 =>
+      'Tasks aggregates render and export queues';
+
+  @override
+  String get demoTourVideo2Bullet3 =>
+      'In real projects, wait here for the master to finish';
+
+  @override
+  String get demoTourVideo2NextHint =>
+      'After video is ready, open Deliver for pre-export checks.';
+
+  @override
+  String get demoTourDeliver1Title => 'Deliver · ① Export checklist';
+
+  @override
+  String get demoTourDeliver1Position =>
+      'Main line step 6/6: confirm the piece is ready to hand off.';
+
+  @override
+  String get demoTourDeliver1Goal =>
+      'Work through the deliver checklist: audio, subtitles, rights, and blockers.';
+
+  @override
+  String get demoTourDeliver1Bullet1 => 'Deliver checklists and readiness';
+
+  @override
+  String get demoTourDeliver1Bullet2 => 'Journey strip links to Review pack';
+
+  @override
+  String get demoTourDeliver1Bullet3 =>
+      'Quality sub-tab shows stage scores (sample data)';
+
+  @override
+  String get demoTourDeliver1DemoNote =>
+      'This is a quality gate before launch—not a decorative screen.';
+
+  @override
+  String get demoTourDeliver1NextHint =>
+      'Next: use Review pack for feedback and blockers.';
+
+  @override
+  String get demoTourDeliver2Title => 'Deliver · ② Review & export';
+
+  @override
+  String get demoTourDeliver2Goal =>
+      'Open Review pack from the journey strip or menu, collect feedback, and clear export blockers.';
+
+  @override
+  String get demoTourDeliver2Bullet1 =>
+      'Deliver tab: export readiness and blocker summary';
+
+  @override
+  String get demoTourDeliver2Bullet2 =>
+      'Review pack: thumbnails, feedback, filters, and row detail';
+
+  @override
+  String get demoTourDeliver2Bullet3 =>
+      'Move to publish checks only after blockers are cleared';
+
+  @override
+  String get demoTourDeliver2NextHint =>
+      'Next: Short video for readiness and publish gates.';
+
+  @override
+  String get demoTourLaunchReadinessPosition =>
+      'From “master done” to “ready to publish”: Short video handles pre-launch checks.';
+
+  @override
+  String get demoTourLaunchReadinessGoal =>
+      'Check master readiness—missing assets, duration, cover, etc. surface here.';
+
+  @override
+  String get demoTourLaunchReadinessBullet1 =>
+      'Switch overview, timeline, publish, and other tabs';
+
+  @override
+  String get demoTourLaunchReadinessBullet2 =>
+      'Readiness metrics and blocker explanations';
+
+  @override
+  String get demoTourLaunchReadinessBullet3 =>
+      'Demo does not connect to real distribution channels';
+
+  @override
+  String get demoTourLaunchReadinessDemoNote =>
+      'Production accounts connect channels here; the demo is walkthrough only.';
+
+  @override
+  String get demoTourLaunchReadinessNextHint => 'Next: the publish checklist.';
+
+  @override
+  String get demoTourLaunchPublishGoal =>
+      'Complete pre-publish gates before going live.';
+
+  @override
+  String get demoTourLaunchPublishBullet1 => 'Publish checklist and statuses';
+
+  @override
+  String get demoTourLaunchPublishBullet2 =>
+      'Timeline for shots and audio alignment';
+
+  @override
+  String get demoTourLaunchPublishBullet3 =>
+      'Finishing this completes the script-to-launch sample path';
+
+  @override
+  String get demoTourLaunchPublishNextHint =>
+      'After the main path, optional beats cover Tasks, notifications, and more.';
 
   @override
   String get studioGettingStartedTitle => 'Quick start';
@@ -2494,6 +3395,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioKeyboardShortcuts => 'Shortcuts';
+
+  @override
+  String get studioKeyboardShortcutsIntro =>
+      'Product-wide shortcuts on desktop and web. Module-specific shortcuts (e.g. short video) appear in that workspace.';
+
+  @override
+  String get studioShortcutCommandPaletteDescription => 'Open command palette';
+
+  @override
+  String get studioShortcutFormSubmitDescription =>
+      'Submit the focused single-line field in forms and dialogs';
+
+  @override
+  String get studioShortcutFormSubmitKeys => 'Enter';
 
   @override
   String get studioGridStoryboardHint =>
@@ -3889,6 +4804,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsArtWorkbenchDelete => 'Delete current style';
 
   @override
+  String get projectsArtStyleDeleteConfirmTitle => 'Delete art style?';
+
+  @override
+  String get projectsArtStyleDeleteConfirmMessage =>
+      'This will delete the selected art style and cannot be undone.';
+
+  @override
   String get projectsArtWorkbenchCurrentStyle => 'Current style';
 
   @override
@@ -4184,6 +5106,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectMembersTooltipRemoveAcl => 'Remove explicit ACL';
+
+  @override
+  String get projectMembersRemoveAclConfirmMessage =>
+      'This will remove the explicit ACL for this member from the project.';
 
   @override
   String get projectMembersButtonRefresh => 'Refresh';
@@ -7301,6 +8227,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Platform degraded; check SLI and hot endpoints';
 
   @override
+  String get platformStatusDegradedTrend =>
+      'Degraded endpoints (recent refreshes)';
+
+  @override
   String get platformStatusNotRefreshed => 'Not refreshed';
 
   @override
@@ -9424,6 +10354,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'POST delete-novel id=0';
 
   @override
+  String get projectEditorProbeScriptsBatchAddTitle => 'Run batch add probe?';
+
+  @override
+  String get projectEditorProbeScriptsBatchAddMessage =>
+      'This probe creates temporary scripts and deletes them immediately after the probe completes. The write/delete flow cannot be undone.';
+
+  @override
+  String get projectEditorProbeRunConfirm => 'Run probe';
+
+  @override
+  String get projectEditorProbeNovelsBatchDeleteTitle => 'Batch delete probe?';
+
+  @override
+  String get projectEditorProbeNovelsBatchDeleteMessage =>
+      'This will submit the batch-delete probe and cannot be undone.';
+
+  @override
+  String get projectEditorProbeNovelsDeleteTitle => 'Delete probe novel?';
+
+  @override
+  String get projectEditorProbeNovelsDeleteMessage =>
+      'This will submit the numeric-id delete probe and cannot be undone.';
+
+  @override
+  String get projectEditorProbeAssetsDeleteImageTitle => 'Delete probe image?';
+
+  @override
+  String get projectEditorProbeAssetsDeleteImageMessage =>
+      'This will delete the temporary probe image created for the selected asset and cannot be undone.';
+
+  @override
   String get projectEditorNovelsProbeMutationUpdateNovelNoopButton =>
       'POST update-novel (noop)';
 
@@ -10825,6 +11786,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get skillsHarnessPrefsTooltip =>
       'Local client preferences (debug shell; same overflow menu as other panel titles).';
+
+  @override
+  String get skillsHarnessRevokeWasmTitle => 'Revoke user WASM?';
+
+  @override
+  String get skillsHarnessRevokeWasmMessage =>
+      'This will revoke the selected user WASM entry and cannot be undone.';
+
+  @override
+  String get skillsHarnessRevokeWasmReloadMessage =>
+      'This will revoke the selected user WASM entry, reload the list, and cannot be undone.';
+
+  @override
+  String get skillsHarnessRevokeConfirm => 'Revoke';
 
   @override
   String skillsHarnessToolsLabel(String line) {
@@ -14039,6 +15014,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoPreviewPlayerPause => 'Pause';
+
+  @override
+  String get shortVideoPreviewPlayerShotPicker => 'Shots';
+
+  @override
+  String shortVideoPreviewPlayerShotChip(int number) {
+    return '#$number';
+  }
+
+  @override
+  String get shortVideoImmersiveFullscreen => 'Full screen';
+
+  @override
+  String get shortVideoPreviewPaneEmpty =>
+      'Generate or export a preview to play it here';
+
+  @override
+  String get shortVideoAgentInspectorTitle => 'Output inspector';
+
+  @override
+  String get shortVideoAgentInspectorEmpty =>
+      'Run a production workflow to see output here';
+
+  @override
+  String get shortVideoMobileCreationParamsTitle => 'Creation parameters';
+
+  @override
+  String get shortVideoMobileCreationParamsOpen => 'Parameters';
+
+  @override
+  String get shortVideoMobileCreationParamsHint =>
+      'Mode and aspect ratio are saved to the current project.';
+
+  @override
+  String get shortVideoQualityMasterPaneTitle => 'Quality overview';
 
   @override
   String get shortVideoProductionBatchNoStoryboards =>
@@ -22964,6 +23974,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keys are encrypted server-side and never returned in full after save.';
 
   @override
+  String get settingsModelVendorsDeleteCredentialTitle =>
+      'Delete vendor credential?';
+
+  @override
+  String get settingsModelVendorsDeleteCredentialMessage =>
+      'This will remove the saved credential for this vendor and cannot be undone.';
+
+  @override
   String settingsModelVendorsCredentialHint(String hint) {
     return 'Current key hint: $hint';
   }
@@ -23373,6 +24391,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statusPageIntroBase =>
       'Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.';
+
+  @override
+  String get statusPageEndpointHealthRoot => '/health';
+
+  @override
+  String get statusPageEndpointHealthV1 => '/api/v1/health';
+
+  @override
+  String get statusPageEndpointReadyV1 => '/api/v1/ready';
 
   @override
   String get statusPageIntroInternalSuffix =>

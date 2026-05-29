@@ -4,6 +4,9 @@ part of 'section.dart';
 
 extension _ShortVideoTimelineM2M3 on _TimelineNleEditorState {
   Future<void> _applyRoughCutTemplate(String templateId) async {
+    if (_templateBusy) {
+      return;
+    }
     final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _templateBusy = true;

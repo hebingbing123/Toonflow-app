@@ -37,6 +37,7 @@ class ShortVideoDemoSnapshot {
 }
 
 ShortVideoDemoSnapshot buildDemoShortVideoOverviewSnapshot() {
+  final l10n = rustApiLookupL10nFromPlatform();
   return ShortVideoDemoSnapshot(
     projectStats: const ProjectStats(
       scriptCount: 2,
@@ -46,9 +47,9 @@ ShortVideoDemoSnapshot buildDemoShortVideoOverviewSnapshot() {
       videoCount: 0,
     ),
     productionOverview: buildDemoStudioProductionOverview(),
-    assetsOverview: buildDemoStudioAssetsOverview(),
+    assetsOverview: buildDemoStudioAssetsOverview(l10n),
     shotReadiness: buildDemoStudioShortVideoReadiness(),
-    publishDrafts: buildDemoPublishDrafts(),
+    publishDrafts: buildDemoPublishDrafts(l10n),
     candidateCompareRows: buildDemoStoryboardShots(),
     candidateCompareReviews: const <QualityReview>[
       QualityReview(
@@ -64,7 +65,7 @@ ShortVideoDemoSnapshot buildDemoShortVideoOverviewSnapshot() {
       ),
     ],
     scopedRunningJobCount: 1,
-    projectConfigLine: '演示数据 · 竖屏短剧配置已载入',
+    projectConfigLine: l10n.demoShortVideoProjectConfigLine,
     assembly: buildDemoStudioShortVideoAssembly(),
     exportCheck: buildDemoStudioShortVideoExportCheck(),
     timeline: buildDemoStudioShortVideoTimeline(),

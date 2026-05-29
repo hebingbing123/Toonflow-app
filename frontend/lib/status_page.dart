@@ -215,19 +215,19 @@ class _StatusPageState extends State<StatusPage> {
                     <Widget>[
                       _MetricTile(
                         width: tileWidth,
-                        label: '/health',
+                        label: l10n.statusPageEndpointHealthRoot,
                         value: _healthRoot!.status,
                         detail: _healthRoot!.service,
                       ),
                       _MetricTile(
                         width: tileWidth,
-                        label: '/api/v1/health',
+                        label: l10n.statusPageEndpointHealthV1,
                         value: _healthV1!.status,
                         detail: _healthV1!.service,
                       ),
                       _MetricTile(
                         width: tileWidth,
-                        label: '/api/v1/ready',
+                        label: l10n.statusPageEndpointReadyV1,
                         value: _ready!.status,
                         detail: l10n.statusPageReadyDatabaseLine(_ready!.database),
                       ),

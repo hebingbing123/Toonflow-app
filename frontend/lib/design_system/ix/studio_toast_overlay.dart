@@ -28,6 +28,8 @@ class StudioToastOverlay {
   static OverlayEntry? _entry;
   static Timer? _autoHideTimer;
   static OverlayState? _appOverlay;
+  static final List<_QueuedToast> _queue = <_QueuedToast>[];
+  static bool _draining = false;
 
   /// Binds the navigator overlay from [MaterialApp.builder] (see [StudioToastHost]).
   static void bindAppOverlay(OverlayState? overlay) {
@@ -35,6 +37,17 @@ class StudioToastOverlay {
   }
 
   static void hide() {
+    _autoHideTimer?.cancel();
+    _autoHideTimer = null;
+    _entry?.remove();
+    _entry = null;
+    _draining = false;
+    if (_queue.isNotEmpty) {
+      _drainQueue();
+    }
+  }
+
+  static void _clearCurrentEntry() {
     _autoHideTimer?.cancel();
     _autoHideTimer = null;
     _entry?.remove();
@@ -51,10 +64,46 @@ class StudioToastOverlay {
     VoidCallback? onAction,
     VoidCallback? onDismiss,
     Duration duration = const Duration(seconds: 4),
+    bool highPriority = false,
   }) {
-    hide();
-    final overlay = _appOverlay ?? Overlay.maybeOf(context, rootOverlay: true);
+    final request = _QueuedToast(
+      context: context,
+      message: message,
+      tone: tone,
+      icon: icon,
+      iconColor: iconColor,
+      actionLabel: actionLabel,
+      onAction: onAction,
+      onDismiss: onDismiss,
+      duration: duration,
+      highPriority: highPriority,
+    );
+    if (highPriority) {
+      _queue.insert(0, request);
+    } else {
+      _queue.add(request);
+    }
+    _drainQueue();
+  }
+
+  static void _drainQueue() {
+    if (_draining || _queue.isEmpty) {
+      return;
+    }
+    final next = _queue.removeAt(0);
+    if (!next.context.mounted) {
+      _drainQueue();
+      return;
+    }
+    _draining = true;
+    _present(next);
+  }
+
+  static void _present(_QueuedToast request) {
+    _clearCurrentEntry();
+    final overlay = _appOverlay ?? Overlay.maybeOf(request.context, rootOverlay: true);
     if (overlay == null) {
+      _draining = false;
       return;
     }
 
@@ -69,8 +118,8 @@ class StudioToastOverlay {
           400.0,
         );
         final accent =
-            iconColor ??
-            switch (tone) {
+            request.iconColor ??
+            switch (request.tone) {
               StudioToastTone.error => tokens.danger,
               StudioToastTone.warning => tokens.warning,
               StudioToastTone.success => tokens.success,
@@ -95,7 +144,7 @@ class StudioToastOverlay {
                         runSpacing: StudioSpacing.xs,
                         children: <Widget>[
                           Icon(
-                            icon ?? tone.icon,
+                            request.icon ?? request.tone.icon,
                             color: accent,
                             size: StudioIconSize.xl,
                           ),
@@ -104,7 +153,7 @@ class StudioToastOverlay {
                               maxWidth: maxWidth - 84,
                             ),
                             child: Text(
-                              message,
+                              request.message,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: tokens.textPrimary,
                                 fontSize: typography.body,
@@ -121,22 +170,23 @@ class StudioToastOverlay {
                             style: studioUtilityIconButtonStyle(overlayContext),
                             onPressed: () {
                               hide();
-                              onDismiss?.call();
+                              request.onDismiss?.call();
                             },
                           ),
                         ],
                       ),
-                      if (actionLabel != null && onAction != null) ...<Widget>[
+                      if (request.actionLabel != null &&
+                          request.onAction != null) ...<Widget>[
                         const SizedBox(height: StudioSpacing.xs),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
                               hide();
-                              onAction();
+                              request.onAction!();
                             },
                             child: Text(
-                              actionLabel,
+                              request.actionLabel!,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: tokens.accent,
                               ),
@@ -193,8 +243,34 @@ class StudioToastOverlay {
     );
 
     overlay.insert(_entry!);
-    _autoHideTimer = Timer(duration, hide);
+    _autoHideTimer = Timer(request.duration, hide);
   }
+}
+
+class _QueuedToast {
+  const _QueuedToast({
+    required this.context,
+    required this.message,
+    required this.tone,
+    this.icon,
+    this.iconColor,
+    this.actionLabel,
+    this.onAction,
+    this.onDismiss,
+    required this.duration,
+    required this.highPriority,
+  });
+
+  final BuildContext context;
+  final String message;
+  final StudioToastTone tone;
+  final IconData? icon;
+  final Color? iconColor;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final VoidCallback? onDismiss;
+  final Duration duration;
+  final bool highPriority;
 }
 
 /// Registers the app [Overlay] for toasts when [StudioScaffoldMessenger] sits

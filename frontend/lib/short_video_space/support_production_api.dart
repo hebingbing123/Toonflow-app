@@ -7,6 +7,20 @@ import 'support_project_api.dart';
 import 'support_publish_api.dart';
 import 'view.dart';
 
+/// Whether [writeback] should render as a warning/error chip (not localized text).
+bool shortVideoWritebackIndicatesProblem(StoryboardLastWritebackSummaryV1? writeback) {
+  if (writeback == null) {
+    return false;
+  }
+  switch (writeback.status.trim()) {
+    case 'failed':
+    case 'incomplete':
+      return true;
+    default:
+      return false;
+  }
+}
+
 String? formatShortVideoWritebackLine(
   AppLocalizations l10n,
   StoryboardLastWritebackSummaryV1? writeback,
@@ -419,6 +433,7 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
             badCases,
           );
     final candidateUrls = row.mediaSlots?.candidateVideoUrls ?? const <String>[];
+    final lastWriteback = row.mediaSlots?.lastWriteback;
     return ShortVideoCandidateCompareItemUi(
       storyboardNumericId: row.id,
       scriptNumericId: row.scriptId,
@@ -428,7 +443,8 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
       liveActionReferenceShotUrls: row.liveActionReferenceShotUrls,
       readinessLine: readinessLine,
       qualityLine: qualityLine,
-      writebackLine: formatShortVideoWritebackLine(l10n, row.mediaSlots?.lastWriteback),
+      writebackLine: formatShortVideoWritebackLine(l10n, lastWriteback),
+      writebackIndicatesProblem: shortVideoWritebackIndicatesProblem(lastWriteback),
       onSetCurrent: (row.mediaSlots?.currentVideoUrl ?? '').trim().isEmpty
           ? null
           : () => onSetCurrent?.call(row),

@@ -9,6 +9,9 @@ import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../platform/studio_load_state.dart';
+import '../platform/studio_offline_cache.dart';
+import '../platform/studio_optimistic_job.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../studio/job_center.dart';
 import 'product_scope.dart';
 import '../../rust_api.dart';
@@ -140,15 +143,25 @@ class JobsController extends ChangeNotifier {
       final fetched = await fetchJobs(token, kind: kind, status: status);
       jobs = fetched;
       jobsLoadState = StudioLoadState.success;
-    } catch (e) {
-      jobsLoadState = StudioLoadState.error;
-      jobsLastError = e;
-      reportRustOrDescribeApiError(
-        e,
-        onErrorChanged: _setError,
-        l10n: _l10nResolved,
-        showGlobalSnackBar: false,
+      await StudioOfflineCache.putJson(
+        'pane.jobs',
+        fetched.map(_jobRowCacheJson).toList(growable: false),
       );
+    } catch (e) {
+      final restored = await _tryRestoreJobsFromOfflineCache(e);
+      if (restored) {
+        jobsLoadState = StudioLoadState.success;
+        jobsLastError = null;
+      } else {
+        jobsLoadState = StudioLoadState.error;
+        jobsLastError = e;
+        reportRustOrDescribeApiError(
+          e,
+          onErrorChanged: _setError,
+          l10n: _l10nResolved,
+          showGlobalSnackBar: false,
+        );
+      }
     } finally {
       loadingJobs = false;
       notifyListeners();
@@ -268,12 +281,27 @@ class JobsController extends ChangeNotifier {
     if (token == null || (job.status != 'queued' && job.status != 'running')) {
       return;
     }
+    final jobsSnapshot = jobs == null ? null : List<JobRow>.from(jobs!);
+    final jobByIdSnapshot = jobByIdLine;
     cancellingJobId = job.id;
     _setError(null);
     notifyListeners();
     try {
-      final updated = await cancelJob(token, job.id);
-      _upsertJob(updated);
+      await studioRunOptimisticMutation(
+        apply: () {
+          _upsertJob(studioJobRowWithStatus(job, 'cancelled'));
+          notifyListeners();
+        },
+        rollback: () => _restoreJobsListSnapshot(
+          jobsSnapshot: jobsSnapshot,
+          jobByIdLineSnapshot: jobByIdSnapshot,
+        ),
+        commit: () async {
+          final updated = await cancelJob(token, job.id);
+          _upsertJob(updated);
+          notifyListeners();
+        },
+      );
     } catch (e) {
       reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
@@ -285,12 +313,27 @@ class JobsController extends ChangeNotifier {
   Future<void> retryFailedJob(JobRow job) async {
     final token = _accessToken;
     if (token == null || job.status != 'failed') return;
+    final jobsSnapshot = jobs == null ? null : List<JobRow>.from(jobs!);
+    final jobByIdSnapshot = jobByIdLine;
     retryingJobId = job.id;
     _setError(null);
     notifyListeners();
     try {
-      final updated = await retryJob(token, job.id);
-      _upsertJob(updated);
+      await studioRunOptimisticMutation(
+        apply: () {
+          _upsertJob(studioJobRowWithStatus(job, 'queued'));
+          notifyListeners();
+        },
+        rollback: () => _restoreJobsListSnapshot(
+          jobsSnapshot: jobsSnapshot,
+          jobByIdLineSnapshot: jobByIdSnapshot,
+        ),
+        commit: () async {
+          final updated = await retryJob(token, job.id);
+          _upsertJob(updated);
+          notifyListeners();
+        },
+      );
     } catch (e) {
       reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
@@ -395,6 +438,21 @@ class JobsController extends ChangeNotifier {
     }
   }
 
+  void _restoreJobsListSnapshot({
+    required List<JobRow>? jobsSnapshot,
+    required String? jobByIdLineSnapshot,
+  }) {
+    jobs = jobsSnapshot == null ? null : List<JobRow>.from(jobsSnapshot);
+    jobByIdLine = jobByIdLineSnapshot;
+    StudioJobCenter.instance.clear();
+    if (jobs != null) {
+      for (final row in jobs!) {
+        _syncStudioJobCenter(row);
+      }
+    }
+    notifyListeners();
+  }
+
   void _upsertJob(JobRow updated) {
     _syncStudioJobCenter(updated);
     if (jobs != null) {
@@ -444,6 +502,48 @@ class JobsController extends ChangeNotifier {
         _lastStatusFilter!.trim().isEmpty ||
         row.status == _lastStatusFilter;
     return matchesKind && matchesStatus;
+  }
+
+  Map<String, dynamic> _jobRowCacheJson(JobRow row) {
+    return <String, dynamic>{
+      'numeric_task_id': row.numericTaskId,
+      'id': row.id,
+      'owner_user_id': row.ownerUserId,
+      'kind': row.kind,
+      'status': row.status,
+      'payload': row.payload,
+      if (row.result != null) 'result': row.result,
+      if (row.errorMessage != null) 'error_message': row.errorMessage,
+      if (row.errorDetails != null) 'error_details': row.errorDetails,
+      if (row.idempotencyKey != null) 'idempotency_key': row.idempotencyKey,
+      if (row.claimedBy != null) 'claimed_by': row.claimedBy,
+      'created_at': row.createdAt,
+      'updated_at': row.updatedAt,
+      if (row.jobSubKind != null) 'job_sub_kind': row.jobSubKind,
+      if (row.productionPhase != null) 'production_phase': row.productionPhase,
+    };
+  }
+
+  Future<bool> _tryRestoreJobsFromOfflineCache(Object error) async {
+    if (!studioLooksLikeConnectivityError(error)) {
+      return false;
+    }
+    final cached = await StudioOfflineCache.readPayload('pane.jobs');
+    if (cached is! List) {
+      return false;
+    }
+    final restored = <JobRow>[];
+    for (final item in cached) {
+      if (item is! Map) {
+        continue;
+      }
+      restored.add(JobRow.fromJson(Map<String, dynamic>.from(item)));
+    }
+    if (restored.isEmpty) {
+      return false;
+    }
+    jobs = restored;
+    return true;
   }
 
   Future<void> closeLiveUpdates() async {

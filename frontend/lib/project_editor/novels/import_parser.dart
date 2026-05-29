@@ -1,6 +1,7 @@
 import 'package:html/parser.dart' as html_parser;
 
 import '../../l10n/app_localizations.dart';
+import '../../platform/studio_content_heuristics.dart';
 
 class ParsedNovelChapter {
   const ParsedNovelChapter({
@@ -52,16 +53,6 @@ class NovelImportQualityReport {
   bool get canImport => blockers.isEmpty;
 }
 
-final RegExp _chapterHeaderPattern = RegExp(
-  r'^\s*((?:第[0-9零一二三四五六七八九十百千万两〇]+[章节回集部篇卷]|(?:序章|尾声|番外))(?:[^\n\r]{0,36}))\s*$',
-  multiLine: true,
-);
-
-final RegExp _junkLinePattern = RegExp(
-  r'(?:收藏本站|最新网址|手机阅读|本章未完|点击下一页|上一章|下一章|广告|版权归|请记住本站)',
-  caseSensitive: false,
-);
-
 ExtractedCrawlerContent extractCrawlerContentFromHtml(
   AppLocalizations l10n,
   String rawHtml, {
@@ -95,8 +86,7 @@ String? _discoverNextPageUrl(dynamic document, Uri? pageUri) {
     final rel = (anchor.attributes['rel'] ?? '').toLowerCase().trim();
     final text = (anchor.text ?? '').trim().toLowerCase();
     if (rel == 'next' ||
-        text.contains('下一页') ||
-        text.contains('下页') ||
+        studioContentContainsAny(text, kNovelCrawlNextPageLinkTexts) ||
         text == 'next') {
       final href = (anchor.attributes['href'] ?? '').trim();
       final normalized = _normalizeDiscoveredUrl(href, pageUri);
@@ -109,9 +99,7 @@ String? _discoverNextPageUrl(dynamic document, Uri? pageUri) {
 }
 
 List<String> _discoverChapterUrls(dynamic document, Uri? pageUri) {
-  final chapterLabelPattern = RegExp(
-    r'(?:第[0-9零一二三四五六七八九十百千万两〇]+[章节回集部篇卷]|序章|尾声|番外)',
-  );
+  final chapterLabelPattern = kNovelCrawlChapterLabelPattern;
   final discovered = <String>{};
   final anchors = document.querySelectorAll('a');
   for (final anchor in anchors) {
@@ -175,7 +163,7 @@ String _normalizeExtractedText(String raw) {
       .split('\n')
       .map((line) => line.replaceAll(RegExp(r'[ \t]{2,}'), ' ').trim())
       .where((line) => line.isNotEmpty)
-      .where((line) => !_junkLinePattern.hasMatch(line))
+      .where((line) => !kNovelCrawlJunkLinePattern.hasMatch(line))
       .toList(growable: false);
   return lines.join('\n').replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
 }
@@ -287,7 +275,7 @@ List<ParsedNovelChapter> parseWholeBookNovelText(
     return const <ParsedNovelChapter>[];
   }
 
-  final matches = _chapterHeaderPattern.allMatches(normalized).toList();
+  final matches = kNovelCrawlChapterHeaderPattern.allMatches(normalized).toList();
   if (matches.isEmpty) {
     return reindexParsedNovelChapters(
       l10n,

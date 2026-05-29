@@ -177,6 +177,41 @@ double studioFlowNodeWidth(
   return (available / nodeCount).clamp(minNodeWidth, maxNodeWidth).toDouble();
 }
 
+/// LayoutBuilder-based responsive shell (mobile → tablet → desktop → wide).
+class StudioResponsiveLayout extends StatelessWidget {
+  const StudioResponsiveLayout({
+    super.key,
+    required this.mobile,
+    this.tablet,
+    this.desktop,
+    this.wide,
+  });
+
+  final WidgetBuilder mobile;
+  final WidgetBuilder? tablet;
+  final WidgetBuilder? desktop;
+  final WidgetBuilder? wide;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final breakpoint = StudioBreakpoint.fromWidth(constraints.maxWidth);
+        switch (breakpoint) {
+          case StudioBreakpoint.wide:
+            return (wide ?? desktop ?? tablet ?? mobile)(context);
+          case StudioBreakpoint.desktop:
+            return (desktop ?? tablet ?? mobile)(context);
+          case StudioBreakpoint.tablet:
+            return (tablet ?? mobile)(context);
+          case StudioBreakpoint.mobile:
+            return mobile(context);
+        }
+      },
+    );
+  }
+}
+
 /// Metrics/chips: [Wrap] on handset, [GridView] on wider panes.
 class StudioResponsiveChipGrid extends StatelessWidget {
   const StudioResponsiveChipGrid({

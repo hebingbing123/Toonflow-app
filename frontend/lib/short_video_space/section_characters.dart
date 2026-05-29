@@ -12,6 +12,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
     }
     setState(() {
       _loadingCharacters = true;
+      _charactersLoadError = null;
     });
     try {
       final rows = await listProjectCharactersV1(token, project.id);
@@ -19,11 +20,13 @@ extension _ShortVideoSpaceSectionCharactersExtension
       setState(() {
         _projectCharacters = rows;
         _loadingCharacters = false;
+        _charactersLoadError = null;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loadingCharacters = false;
+        _charactersLoadError = e;
         _charactersStatusLine = describeUserVisibleApiErrorResolved(context, e);
       });
     }
@@ -138,9 +141,12 @@ extension _ShortVideoSpaceSectionCharactersExtension
           ),
           const SizedBox(height: StudioSpacing.xs),
           if (_loadingCharacters)
-            Text(
-              l10n.shortVideoCharactersLoading,
-              style: theme.textTheme.bodySmall?.copyWith(color: studioPanelMutedColor(context)),
+            const StudioListSkeleton(itemCount: 3)
+          else if (_charactersLoadError != null)
+            StudioEmptyState.loadFailed(
+              context,
+              error: _charactersLoadError,
+              onRetry: _loadProjectCharacters,
             )
           else if (_projectCharacters.isEmpty)
             StudioEmptyState.emptyData(
@@ -188,23 +194,30 @@ extension _ShortVideoSpaceSectionCharactersExtension
                         spacing: StudioSpacing.xs,
                         runSpacing: StudioSpacing.chromeActionGap,
                         children: [
-                          OutlinedButton.icon(
-                            onPressed: () =>
-                                unawaited(_previewProjectCharacterVoice(character)),
-                            icon: const Icon(Icons.volume_up_outlined, size: StudioIconSize.sm),
-                            label: Text(l10n.shortVideoCharactersPreviewVoice),
-                          ),
-                          OutlinedButton(
-                            onPressed: () => unawaited(
-                              _editCharacterVoiceDialog(character),
+                          StudioDebouncedAction(
+                            onPressed: () async =>
+                                _previewProjectCharacterVoice(character),
+                            builder: (context, onPressed) => OutlinedButton.icon(
+                              onPressed: onPressed,
+                              icon: const Icon(Icons.volume_up_outlined, size: StudioIconSize.sm),
+                              label: Text(l10n.shortVideoCharactersPreviewVoice),
                             ),
-                            child: Text(l10n.shortVideoCharactersEditVoice),
                           ),
-                          OutlinedButton(
-                            onPressed: () => unawaited(
-                              _cloneCharacterVoiceDialog(character),
+                          StudioDebouncedAction(
+                            onPressed: () async =>
+                                _editCharacterVoiceDialog(character),
+                            builder: (context, onPressed) => OutlinedButton(
+                              onPressed: onPressed,
+                              child: Text(l10n.shortVideoCharactersEditVoice),
                             ),
-                            child: Text(l10n.shortVideoCharactersCloneVoice),
+                          ),
+                          StudioDebouncedAction(
+                            onPressed: () async =>
+                                _cloneCharacterVoiceDialog(character),
+                            builder: (context, onPressed) => OutlinedButton(
+                              onPressed: onPressed,
+                              child: Text(l10n.shortVideoCharactersCloneVoice),
+                            ),
                           ),
                         ],
                       ),

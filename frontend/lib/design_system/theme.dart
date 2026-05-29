@@ -189,6 +189,7 @@ ThemeData _buildStudioTheme({
       style: studioInteractiveButtonMouseCursor(
         FilledButton.styleFrom(
           backgroundColor: tokens.primary,
+          disabledBackgroundColor: tokens.primaryDisabled,
           foregroundColor: StudioPrimitives.white,
           elevation: 0,
           shadowColor: StudioPrimitives.transparent,
@@ -293,7 +294,7 @@ ThemeData _buildStudioTheme({
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-        borderSide: BorderSide(color: tokens.accent, width: 1.5),
+        borderSide: BorderSide(color: tokens.primaryFocus, width: 2),
       ),
       labelStyle: _adjustStyle(
         TextStyle(
@@ -446,8 +447,8 @@ ThemeData _buildStudioTheme({
       ),
     ),
     scrollbarTheme: studioScrollbarTheme(tokens),
-    focusColor: tokens.primary.withValues(alpha: isDark ? 0.24 : 0.12),
-    hoverColor: tokens.primary.withValues(alpha: isDark ? 0.10 : 0.06),
+    focusColor: tokens.primaryFocus.withValues(alpha: isDark ? 0.24 : 0.12),
+    hoverColor: tokens.primaryHover.withValues(alpha: isDark ? 0.14 : 0.08),
     chipTheme: ChipThemeData(
       backgroundColor: tokens.bgSurface.withValues(alpha: isDark ? 0.92 : 1),
       selectedColor: tokens.primarySoft,

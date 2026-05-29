@@ -397,9 +397,8 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.notificationsActionCancel),
         ),
-        FilledButton(
-          style: studioFormPrimaryButtonStyle(context),
-          onPressed: () {
+        StudioDebouncedAction(
+          onPressed: () async {
             Navigator.of(context).pop(
               ExportSettings(
                 format: _selectedFormat,
@@ -409,7 +408,11 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
               ),
             );
           },
-          child: Text(l10n.shortVideoExportSettingsStartExport),
+          builder: (context, onPressed) => FilledButton(
+            style: studioFormPrimaryButtonStyle(context),
+            onPressed: onPressed,
+            child: Text(l10n.shortVideoExportSettingsStartExport),
+          ),
         ),
       ],
     );

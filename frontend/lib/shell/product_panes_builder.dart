@@ -268,7 +268,7 @@ extension _HomePageProductPanesBuilder on _HomePageState {
           enabled: _platformConfig.benchmarkPaneEnabled,
           title: l10n.productNavBenchmark,
           reason: l10n.productPaneDisabledBenchmark,
-          child: BenchmarkSection(
+          child: DeferredBenchmarkSection(
             accessToken: _effectiveAccessToken,
             debugSnapshot: _activeDemoCatalog?.benchmarkSnapshot,
             demoMode: _isDemoModeActive,

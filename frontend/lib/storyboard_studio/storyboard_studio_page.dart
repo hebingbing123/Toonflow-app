@@ -1111,6 +1111,10 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       );
     }
 
+    final handsetAppBar =
+        studioWidthTier(MediaQuery.sizeOf(context).width) ==
+        StudioWidthTier.handset;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: tokens.bgBase,
@@ -1129,34 +1133,48 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
           if (_scripts.length > 1)
             Padding(
               padding: const EdgeInsets.only(right: StudioSpacing.xs),
-              child: StudioDropdownButton<int>(
-                value: _scriptNumericId,
-                items: _scripts
-                    .map(
-                      (s) => DropdownMenuItem<int>(
-                        value: s.numericId,
-                        child: Text(
-                          s.name?.trim().isNotEmpty == true
-                              ? s.name!.trim()
-                              : l10n.studioEpisodeConsoleTitle(s.numericId),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: handsetAppBar ? 132 : 240,
+                ),
+                child: StudioDropdownButton<int>(
+                  value: _scriptNumericId,
+                  items: _scripts
+                      .map(
+                        (s) => DropdownMenuItem<int>(
+                          value: s.numericId,
+                          child: Text(
+                            s.name?.trim().isNotEmpty == true
+                                ? s.name!.trim()
+                                : l10n.studioEpisodeConsoleTitle(s.numericId),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _loadingShots
-                    ? null
-                    : (value) async {
-                        setState(() {
-                          _scriptNumericId = value;
-                          _selectedShotId = null;
-                          _shots = <ProductionStoryboardItemV1>[];
-                          _dataVersion = null;
-                        });
-                        await _loadShots();
-                      },
+                      )
+                      .toList(),
+                  onChanged: _loadingShots
+                      ? null
+                      : (value) async {
+                          setState(() {
+                            _scriptNumericId = value;
+                            _selectedShotId = null;
+                            _shots = <ProductionStoryboardItemV1>[];
+                            _dataVersion = null;
+                          });
+                          await _loadShots();
+                        },
+                ),
               ),
             ),
-          TextButton(onPressed: topAction, child: Text(topActionLabel)),
+          if (handsetAppBar)
+            StudioIconButton(
+              icon: Icons.movie_creation_outlined,
+              label: topActionLabel,
+              style: studioUtilityIconButtonStyle(context),
+              onPressed: topAction,
+            )
+          else
+            TextButton(onPressed: topAction, child: Text(topActionLabel)),
         ],
       ),
       body: workspaceBody,

@@ -104,10 +104,9 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                 final first = assetsRef[0]!.items.first;
                 final confirmed = await showStudioConfirmDialog(
                   context: ctx,
-                  title: 'Delete probe image?',
-                  message:
-                      'This will delete the temporary probe image created for the selected asset and cannot be undone.',
-                  confirmLabel: 'Delete',
+                  title: l10n.projectEditorProbeAssetsDeleteImageTitle,
+                  message: l10n.projectEditorProbeAssetsDeleteImageMessage,
+                  confirmLabel: l10n.globalSearchDelete,
                   cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
                   destructive: true,
                 );
@@ -248,7 +247,10 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                     p.id,
                     first.numericId,
                     row.id,
-                    {'state': '已完成', 'sort_index': row.sortIndex + 1},
+                    {
+                      'state': kStudioAssetImageStateCompleted,
+                      'sort_index': row.sortIndex + 1,
+                    },
                   );
                   await deleteProjectAssetImageByProjectIds(
                     token,

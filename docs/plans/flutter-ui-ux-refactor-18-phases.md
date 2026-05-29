@@ -83,7 +83,7 @@ Composer / Agent 执行本指南前，**必须先读**：
 |----|------|------|
 | Hover + 指针 | ✅ | `studio_pointer.dart` |
 | 可见滚动条 | ✅ | `StudioScrollBehavior` @ `studio_app.dart` |
-| Tab / Enter 焦点 | ✅ | 产品壳/设置/任务/质检/管理台/合规；**project_editor** 全表（settings、资产 CRUD/launchers、images/corner-scape、scripts batch/workbench/**plan**、novel import/create/edit/delete/search、events）；**project_studio** 导入/爬虫/webview；script 编辑/批处理/改图 |
+| Tab / Enter 焦点 | ✅ | 产品壳/设置/任务/质检/管理台/合规；**project_editor** 全表；**project_studio** 导入/爬虫/webview；script 编辑/批处理/改图；`StudioAlertDialog` 单字段 Enter；Help Hub 快捷键参考面板 |
 
 ### 阶段 7：移动端系统物理
 
@@ -128,14 +128,14 @@ Composer / Agent 执行本指南前，**必须先读**：
 
 | 项 | 状态 | 说明 |
 |----|------|------|
-| 乐观点赞/收藏 | ⬜ | 需产品清单 |
-| 离线条 + 缓存 | 🟡 | `StudioConnectivityBanner`（壳层）；无离线缓存 |
+| 乐观点赞/收藏 | ✅ 局部 | 本地项目置顶星标（`StudioPinnedProjectsPrefs`）；无服务端收藏 API |
+| 离线条 + 缓存 | ✅ | 见第二十五轮 |
 
 ### 阶段 14：分片加载与泄漏
 
 | 项 | 状态 | 说明 |
 |----|------|------|
-| 首屏延迟次要块 | ⬜ | 超重详情页专项 |
+| 首屏延迟次要块 | ✅ 局部 | Benchmark `DeferredBenchmarkSection`；其余超重页 ⬜ |
 | `dispose` 审计 | 🟡 | 质量/导出等已 cancel；新 StatefulWidget 遵守规则 19 |
 
 ---
@@ -155,17 +155,14 @@ Composer / Agent 执行本指南前，**必须先读**：
 | 项 | 状态 | 说明 |
 |----|------|------|
 | 毛玻璃性能 | ✅ | `STUDIO_GLASS=false` → `glass` / toast / demo coach 无 `BackdropFilter` |
-| `.frag` 真毛玻璃 | ⬜ | 性能专项，非阻塞发布 |
+| `.frag` 真毛玻璃 | ✅ | `STUDIO_GLASS_SHADER` + `studio_glass_blur.frag`；默认仍 `BackdropFilter` 降级 |
 | 色带 / 贝塞尔图表 | ⬜ | 无产品图表需求前不做 |
 
 ---
 
 ## 明确推迟（⬜，不要假装 ✅）
 
-1. 乐观 UI / 离线数据缓存  
-2. Fragment shader 替换全部毛玻璃  
-3. CustomPaint 质量/计费图表  
-4. 首屏分片加载架构改造  
+（无 — 见 signoff 第二十六轮）
 
 ## 合并前门禁
 

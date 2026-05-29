@@ -11,6 +11,7 @@ Writes: .tmp/frontend_lib_i18n_scan.md
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from collections import defaultdict
@@ -20,6 +21,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 LIB = REPO / "frontend" / "lib"
 OUT = REPO / ".tmp" / "frontend_lib_i18n_scan.md"
+
+# CJK in string literals allowed only in the heuristics hub (not UI copy).
+CJK_LITERAL_ALLOWLIST = frozenset({"platform/studio_content_heuristics.dart"})
+CJK_IN_STRING = re.compile(r"(['\"])(.*?[\u4e00-\u9fff].*?)\1")
 
 SKIP_NAMES = {
     "app_localizations.dart",
@@ -65,7 +70,13 @@ def looks_like_api_or_tech(s: str) -> bool:
     t = s.strip()
     if not t:
         return True
-    if t.startswith(("http://", "https://", "package:", "assets/", "/api/")):
+    if t.startswith("/"):
+        return True
+    if t.startswith(("http://", "https://", "package:", "assets:", "/api/")):
+        return True
+    if t.startswith("env:"):
+        return True
+    if re.fullmatch(r"[a-z][a-z0-9-]{2,}", t) and "-" in t:
         return True
     if re.match(r"^(GET|POST|PUT|PATCH|DELETE|HEAD)\s+", t):
         return True
@@ -147,12 +158,80 @@ def scan_file(path: Path) -> list[Hit]:
         raw = m.group(2)
         add("1_simple", "text_widget", m.start(), raw)
 
+    for ln_idx, line in enumerate(lines, start=1):
+        if tier2_line_suspicious(line):
+            hits.append(
+                Hit(
+                    "2_mixed",
+                    "mixed_text",
+                    ln_idx,
+                    line.strip()[:220],
+                    line.strip()[:400],
+                )
+            )
+        if command_palette_keywords_suspicious(line):
+            hits.append(
+                Hit(
+                    "1_simple",
+                    "command_palette_keywords",
+                    ln_idx,
+                    line.strip()[:220],
+                    line.strip()[:400],
+                )
+            )
+
+    seen: set[tuple] = set()
+    out: list[Hit] = []
+    for h in hits:
+        k = (h.tier, h.category, h.line, h.value)
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(h)
+    out.sort(key=lambda x: (x.tier, x.line))
+    return out
+
+
 # Tier 2: suspicious glue / dev English in UI lines (not exhaustive).
 TIER2_SUBSTRINGS = re.compile(
     r"(?i)(invite\s+token|please\s+enter|unexpected\s+response|emotion:|"
     r"\bscope=|\benv:|\bHTTP\s|\bPASS\b|\bFAIL\b|vendors:|agent-deploy:)",
     re.MULTILINE,
 )
+
+
+def scan_cjk_literals_outside_heuristics() -> list[tuple[str, int, str]]:
+    """Returns (rel_path, line_no, snippet) for CJK string literals outside allowlist."""
+    hits: list[tuple[str, int, str]] = []
+    for path in sorted(LIB.rglob("*.dart")):
+        rel = str(path.relative_to(LIB))
+        if rel.startswith("l10n/") or rel.startswith("demo/"):
+            continue
+        if rel in CJK_LITERAL_ALLOWLIST:
+            continue
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for ln_idx, line in enumerate(lines, start=1):
+            stripped = line.strip()
+            if stripped.startswith("//"):
+                continue
+            if "l10n." in line or "AppLocalizations" in line:
+                continue
+            for m in CJK_IN_STRING.finditer(line):
+                hits.append((rel, ln_idx, m.group(2)[:120]))
+    return hits
+
+
+def command_palette_keywords_suspicious(line: str) -> bool:
+    """Inline `keywords: <String>['en', '中文']` without l10n helpers."""
+    if "keywords:" not in line or "<String>[" not in line:
+        return False
+    if "l10n." in line or "studioCommandPaletteKeywords" in line:
+        return False
+    if "ignore:" in line:
+        return False
+    return bool(re.search(r"[\u4e00-\u9fff]", line)) or bool(
+        re.search(r"'[A-Za-z]{3,}'", line)
+    )
 
 
 def tier2_line_suspicious(line: str) -> bool:
@@ -166,19 +245,16 @@ def tier2_line_suspicious(line: str) -> bool:
         return False
     return raw_english_outside_interpolation(line)
 
-    seen: set[tuple] = set()
-    out: list[Hit] = []
-    for h in hits:
-        k = (h.tier, h.category, h.line, h.value)
-        if k in seen:
-            continue
-        seen.add(k)
-        out.append(h)
-    out.sort(key=lambda x: (x.tier, str(path), x.line))
-    return out
-
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Scan frontend/lib for hardcoded UI strings.")
+    parser.add_argument(
+        "--check-tier1",
+        action="store_true",
+        help="Exit 1 when Tier1 (simple literal) hits > 0 (for CI gates).",
+    )
+    args = parser.parse_args()
+
     if not LIB.is_dir():
         print(f"Missing {LIB}", file=sys.stderr)
         return 1
@@ -254,7 +330,27 @@ def main() -> int:
     o.append("4. CI 可选：在 PR 中附加本扫描报告 diff，避免回潮。\n")
 
     OUT.write_text("".join(o), encoding="utf-8")
-    print(f"Wrote {OUT} (total {total})")
+    tier1 = counts["1_simple"]
+    cjk_hits = scan_cjk_literals_outside_heuristics()
+    print(f"Wrote {OUT} (total {total}, tier1 {tier1}, cjk_outside_heuristics {len(cjk_hits)})")
+    if args.check_tier1 and tier1 > 0:
+        print(
+            f"FAIL: {tier1} Tier1 hardcoded literal(s) — see {OUT}",
+            file=sys.stderr,
+        )
+        return 1
+    if args.check_tier1 and cjk_hits:
+        print(
+            f"FAIL: {len(cjk_hits)} CJK string literal(s) outside "
+            f"{', '.join(sorted(CJK_LITERAL_ALLOWLIST))} — move to "
+            "platform/studio_content_heuristics.dart or arb",
+            file=sys.stderr,
+        )
+        for rel, ln, snippet in cjk_hits[:12]:
+            print(f"  {rel}:{ln} `{snippet[:80]}`", file=sys.stderr)
+        if len(cjk_hits) > 12:
+            print(f"  ... +{len(cjk_hits) - 12} more", file=sys.stderr)
+        return 1
     return 0
 
 

@@ -16,8 +16,9 @@ class BenchmarkDemoSnapshot {
 }
 
 BenchmarkDemoSnapshot buildDemoBenchmarkSnapshot() {
+  final l10n = rustApiLookupL10nFromPlatform();
   return BenchmarkDemoSnapshot(
-    cases: const <BenchmarkCaseV1>[
+    cases: <BenchmarkCaseV1>[
       BenchmarkCaseV1(
         id: 'bench-case-demo-1',
         projectId: 7,
@@ -26,7 +27,7 @@ BenchmarkDemoSnapshot buildDemoBenchmarkSnapshot() {
         caseType: 'bad_case',
         issueTags: <String>['composition', 'emotion'],
         weight: 2,
-        summary: '演示：分镜情绪表达偏弱，需加强特写与光影对比',
+        summary: l10n.demoBenchmarkCase1Summary,
         lastVerifiedAt: '2026-05-10T08:00:00Z',
       ),
       BenchmarkCaseV1(
@@ -37,14 +38,14 @@ BenchmarkDemoSnapshot buildDemoBenchmarkSnapshot() {
         caseType: 'golden',
         issueTags: <String>['motion'],
         weight: 1,
-        summary: '演示：视频提示词运动描述清晰，可作为基线',
+        summary: l10n.demoBenchmarkCase2Summary,
         lastVerifiedAt: '2026-05-11T10:00:00Z',
       ),
     ],
-    experiments: const <ExperimentRunV1>[
+    experiments: <ExperimentRunV1>[
       ExperimentRunV1(
         id: 'exp-demo-1',
-        name: '分镜提示词 A/B · 演示',
+        name: l10n.demoBenchmarkExperimentName,
         status: 'completed',
         sampleTier: 'smoke',
         stageScope: <String>['storyboard_panel', 'video_prompt'],
@@ -54,7 +55,7 @@ BenchmarkDemoSnapshot buildDemoBenchmarkSnapshot() {
         completedAt: '2026-05-01T01:00:00Z',
       ),
     ],
-    reviewQueue: const <ReviewQueueItemV1>[
+    reviewQueue: <ReviewQueueItemV1>[
       ReviewQueueItemV1(
         id: 'review-demo-1',
         experimentRunId: 'exp-demo-1',
@@ -62,10 +63,10 @@ BenchmarkDemoSnapshot buildDemoBenchmarkSnapshot() {
         reviewType: 'quality_gate',
         status: 'pending',
         priority: 1,
-        prompt: '演示：对比 baseline 与 variant 的分镜质量得分',
+        prompt: l10n.demoBenchmarkReviewPrompt,
         submittedScore: null,
       ),
     ],
-    statusLine: '演示数据已加载 — 可浏览用例、实验与评审队列；运行/晋升操作在演示模式下不可用。',
+    statusLine: l10n.demoBenchmarkStatusLine,
   );
 }

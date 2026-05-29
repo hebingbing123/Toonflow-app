@@ -653,9 +653,9 @@ String _memoryClassificationLabel(String memoryName, String content) {
   }
   final deliverySignals = _countKeywordMatches(
     content,
-    _deliveryMemoryKeywords,
+    kAgentMemoryDeliveryKeywords,
   );
-  final visualSignals = _countKeywordMatches(content, _visualMemoryKeywords);
+  final visualSignals = _countKeywordMatches(content, kAgentMemoryVisualKeywords);
   if (deliverySignals > 0 && visualSignals > 0) {
     return _memClsDelVis;
   }
@@ -690,7 +690,7 @@ String _memoryActionLabel(
       (_extractMemoryKeyValue(content, 'subject') ?? '').isNotEmpty;
   final hasDelivery =
       _extractMemoryKeyValue(content, 'delivery')?.isNotEmpty == true ||
-      _countKeywordMatches(content, _deliveryMemoryKeywords) > 0;
+      _countKeywordMatches(content, kAgentMemoryDeliveryKeywords) > 0;
   final riskTags = (_extractMemoryKeyValue(content, 'riskTags') ?? '')
       .toLowerCase();
   final hasHighValueRisk =
@@ -847,35 +847,3 @@ String _memorySemanticDedupKey(String content) {
   return semantic.replaceAll(RegExp(r'\s+'), '').toLowerCase();
 }
 
-const List<String> _deliveryMemoryKeywords = <String>[
-  '表演',
-  '语气',
-  '情绪',
-  '呼吸',
-  '停顿',
-  '眼神',
-  '口型',
-  '微表情',
-  'emotion',
-  'expression',
-  'delivery',
-  'lip',
-];
-
-const List<String> _visualMemoryKeywords = <String>[
-  '镜头',
-  '光影',
-  '光线',
-  '逆光',
-  '暖光',
-  '冷光',
-  '运镜',
-  '构图',
-  '机位',
-  '近景',
-  '中景',
-  '远景',
-  'camera',
-  'lighting',
-  'framing',
-];

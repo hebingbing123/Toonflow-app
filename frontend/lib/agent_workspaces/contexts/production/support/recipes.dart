@@ -616,28 +616,5 @@ List<String> _splitMarkdownTableRow(String line) {
       .toList(growable: false);
 }
 
-String _normalizeStoryboardTableColumn(String column) {
-  switch (column.trim()) {
-    case '序号':
-    case 'id':
-      return 'id';
-    case '画面描述':
-    case 'description':
-      return 'description';
-    case '场景':
-    case 'scene':
-      return 'scene';
-    case '时长':
-    case 'duration':
-      return 'duration';
-    case '景别':
-    case 'camera':
-      return 'camera';
-    case '关联资产ID':
-    case '关联资产Ids':
-    case 'associateAssetsIds':
-      return 'associateAssetsIds';
-    default:
-      return column.trim();
-  }
-}
+String _normalizeStoryboardTableColumn(String column) =>
+    studioNormalizeProductionStoryboardTableColumn(column);

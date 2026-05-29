@@ -9,6 +9,8 @@ extension _HomePageBuildSections on _HomePageState {
       _buildOverviewSection(),
       const SizedBox(height: StudioSpacing.sm),
       _buildLocaleSection(context),
+      const SizedBox(height: StudioSpacing.sm),
+      _buildThemeSection(context),
       if (kInternalOpsToken.isNotEmpty) ...[
         const SizedBox(height: StudioSpacing.sm),
         const JobQueueStatsCard(),
@@ -70,6 +72,57 @@ extension _HomePageBuildSections on _HomePageState {
                   onChanged: (String? v) {
                     if (v != null) {
                       notifier.setLocaleCode(v);
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
+    final notifier = StudioThemeModeNotifier.instance;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              l10n.themeSectionTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: StudioSpacing.xs),
+            ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, _) {
+                return StudioDropdownButton<String>(
+                  isExpanded: true,
+                  value: notifier.code,
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem<String>(
+                      value: 'system',
+                      child: Text(l10n.themeSystem),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'light',
+                      child: Text(l10n.themeLight),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'dark',
+                      child: Text(l10n.themeDark),
+                    ),
+                  ],
+                  onChanged: (String? v) {
+                    if (v != null) {
+                      unawaited(notifier.setModeCode(v));
                     }
                   },
                 );

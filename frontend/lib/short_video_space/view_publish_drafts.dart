@@ -1,21 +1,38 @@
 part of 'view.dart';
 
 class ShortVideoPublishDraftsPanel extends StatelessWidget {
-  const ShortVideoPublishDraftsPanel({super.key, required this.publishPanelUi});
+  const ShortVideoPublishDraftsPanel({
+    super.key,
+    required this.publishPanelUi,
+    this.showDraftList = true,
+    this.showDraftDetail = true,
+  });
 
   final ShortVideoPublishPanelUi publishPanelUi;
+  final bool showDraftList;
+  final bool showDraftDetail;
 
   @override
   Widget build(BuildContext context) {
-    return _PublishDraftsPanel(publishPanelUi: publishPanelUi);
+    return _PublishDraftsPanel(
+      publishPanelUi: publishPanelUi,
+      showDraftList: showDraftList,
+      showDraftDetail: showDraftDetail,
+    );
   }
 }
 
 /// Draft list and management widget
 class _PublishDraftsPanel extends StatelessWidget {
-  const _PublishDraftsPanel({required this.publishPanelUi});
+  const _PublishDraftsPanel({
+    required this.publishPanelUi,
+    this.showDraftList = true,
+    this.showDraftDetail = true,
+  });
 
   final ShortVideoPublishPanelUi publishPanelUi;
+  final bool showDraftList;
+  final bool showDraftDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +79,10 @@ class _PublishDraftsPanel extends StatelessWidget {
             const SizedBox(height: StudioSpacing.xs),
           ],
           if (publishPanelUi.unavailable)
-            Text(
-              publishPanelUi.headline,
-              style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
+            StudioApiErrorCallout(
+              error: publishPanelUi.headline,
+              onRetry: publishPanelUi.onRefreshPublish,
+              emphasis: StudioApiErrorCalloutEmphasis.subtle,
             )
           else
             StudioAsyncDataView(
@@ -77,7 +95,8 @@ class _PublishDraftsPanel extends StatelessWidget {
               publishPanelUi.headline,
               style: theme.textTheme.bodyMedium?.copyWith(color: studioPanelMutedColor(context)),
             ),
-            if (publishPanelUi.matrixDomesticLines.isNotEmpty) ...[
+            if (publishPanelUi.matrixDomesticLines.isNotEmpty &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelMatrixDomesticLabel,
@@ -90,7 +109,8 @@ class _PublishDraftsPanel extends StatelessWidget {
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
-            if (publishPanelUi.matrixOverseasLines.isNotEmpty) ...[
+            if (publishPanelUi.matrixOverseasLines.isNotEmpty &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelMatrixOverseasLabel,
@@ -103,7 +123,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
-            if (publishPanelUi.prepareLines.isNotEmpty) ...[
+            if (publishPanelUi.prepareLines.isNotEmpty && showDraftDetail) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelPrepareChecks,
@@ -116,7 +136,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                   child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
-            if (publishPanelUi.draftLines.isNotEmpty) ...[
+            if (publishPanelUi.draftLines.isNotEmpty && showDraftList) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Row(
                 children: [
@@ -196,48 +216,85 @@ class _PublishDraftsPanel extends StatelessWidget {
                           spacing: StudioSpacing.xs,
                           children: [
                             if (publishPanelUi.onBatchScheduleDrafts != null)
-                              FilledButton.tonalIcon(
-                                style: studioFormIconLabeledButtonStyle(context),
+                              StudioDebouncedAction(
+                                enabled: !publishPanelUi.publishBusy,
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
-                                    : () => publishPanelUi.onBatchScheduleDrafts
-                                          ?.call(context),
-                                icon: const Icon(Icons.schedule, size: StudioIconSize.sm),
-                                label: Text(
-                                  l10n.shortVideoPublishPanelBatchSchedule,
+                                    : () async => publishPanelUi
+                                          .onBatchScheduleDrafts!
+                                          .call(context),
+                                builder: (context, onPressed) =>
+                                    FilledButton.tonalIcon(
+                                  style: studioFormIconLabeledButtonStyle(
+                                    context,
+                                  ),
+                                  onPressed: onPressed,
+                                  icon: const Icon(
+                                    Icons.schedule,
+                                    size: StudioIconSize.sm,
+                                  ),
+                                  label: Text(
+                                    l10n.shortVideoPublishPanelBatchSchedule,
+                                  ),
                                 ),
                               ),
                             if (publishPanelUi.onBatchPublishDrafts != null)
-                              FilledButton.icon(
-                                style: studioFormIconLabeledButtonStyle(context),
+                              StudioDebouncedAction(
+                                enabled: !publishPanelUi.publishBusy,
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
-                                    : publishPanelUi.onBatchPublishDrafts,
-                                icon: const Icon(Icons.publish, size: StudioIconSize.sm),
-                                label: Text(
-                                  l10n.shortVideoPublishPanelBatchPublish,
+                                    : () async =>
+                                        publishPanelUi.onBatchPublishDrafts!(),
+                                builder: (context, onPressed) =>
+                                    FilledButton.icon(
+                                  style: studioFormIconLabeledButtonStyle(
+                                    context,
+                                  ),
+                                  onPressed: onPressed,
+                                  icon: const Icon(
+                                    Icons.publish,
+                                    size: StudioIconSize.sm,
+                                  ),
+                                  label: Text(
+                                    l10n.shortVideoPublishPanelBatchPublish,
+                                  ),
                                 ),
                               ),
                             if (publishPanelUi.onBatchArchiveDrafts != null)
-                              OutlinedButton.icon(
-                                style: studioFormOutlinedIconLabeledButtonStyle(context),
+                              StudioDebouncedAction(
+                                enabled: !publishPanelUi.publishBusy,
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
-                                    : publishPanelUi.onBatchArchiveDrafts,
-                                icon: const Icon(Icons.archive, size: StudioIconSize.sm),
-                                label: Text(
-                                  l10n.shortVideoPublishPanelBatchArchive,
+                                    : () async =>
+                                        publishPanelUi.onBatchArchiveDrafts!(),
+                                builder: (context, onPressed) =>
+                                    OutlinedButton.icon(
+                                  style: studioFormOutlinedIconLabeledButtonStyle(
+                                    context,
+                                  ),
+                                  onPressed: onPressed,
+                                  icon: const Icon(
+                                    Icons.archive,
+                                    size: StudioIconSize.sm,
+                                  ),
+                                  label: Text(
+                                    l10n.shortVideoPublishPanelBatchArchive,
+                                  ),
                                 ),
                               ),
                             if (publishPanelUi.onCompareDrafts != null)
-                              OutlinedButton.icon(
-                                style: studioFormOutlinedIconLabeledButtonStyle(context),
+                              StudioDebouncedAction(
+                                enabled: !publishPanelUi.publishBusy,
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
-                                    : publishPanelUi.onCompareDrafts,
-                                icon: const Icon(Icons.compare, size: StudioIconSize.sm),
-                                label: Text(
-                                  l10n.shortVideoPublishPanelCompareDrafts,
+                                    : () async => publishPanelUi.onCompareDrafts!(),
+                                builder: (context, onPressed) => OutlinedButton.icon(
+                                  style: studioFormOutlinedIconLabeledButtonStyle(context),
+                                  onPressed: onPressed,
+                                  icon: const Icon(Icons.compare, size: StudioIconSize.sm),
+                                  label: Text(
+                                    l10n.shortVideoPublishPanelCompareDrafts,
+                                  ),
                                 ),
                               ),
                           ],
@@ -354,7 +411,8 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
             ],
             if (publishPanelUi.publishDraftOptions.length > 1 &&
-                publishPanelUi.onSelectPublishDraft != null) ...[
+                publishPanelUi.onSelectPublishDraft != null &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioLayoutSpacing.inlineGap),
               Text(
                 l10n.shortVideoPublishPanelCurrentDraftLabel,
@@ -410,40 +468,95 @@ class _PublishDraftsPanel extends StatelessWidget {
                 !publishPanelUi.unavailable &&
                 publishPanelUi.publishPrimaryDraftId.isNotEmpty &&
                 (publishPanelUi.publishDomesticTargetIds.isNotEmpty ||
-                    publishPanelUi.publishOverseasTargetIds.isNotEmpty)) ...[
-              const SizedBox(height: StudioSpacing.sm),
-              PublishPlatformCopyEditor(
-                key: ValueKey(
-                  '${publishPanelUi.publishPrimaryDraftId}_${publishPanelUi.publishCopyEditorRevision}',
-                ),
-                draftId: publishPanelUi.publishPrimaryDraftId,
-                domesticPlatformIds: publishPanelUi.publishDomesticTargetIds,
-                overseasPlatformIds: publishPanelUi.publishOverseasTargetIds,
-                platformLabels: publishPanelUi.publishPlatformLabels,
-                platformCopy: publishPanelUi.publishPlatformCopySnapshot,
-                busy: publishPanelUi.publishBusy,
-                onCommit: publishPanelUi.onCommitPublishPlatformCopy,
+                    publishPanelUi.publishOverseasTargetIds.isNotEmpty) &&
+                showDraftDetail)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide =
+                      showDraftList &&
+                      constraints.maxWidth >= kStudioTwoColumnMinWidth;
+                  final editor = PublishPlatformCopyEditor(
+                    key: ValueKey(
+                      '${publishPanelUi.publishPrimaryDraftId}_${publishPanelUi.publishCopyEditorRevision}',
+                    ),
+                    draftId: publishPanelUi.publishPrimaryDraftId,
+                    domesticPlatformIds:
+                        publishPanelUi.publishDomesticTargetIds,
+                    overseasPlatformIds:
+                        publishPanelUi.publishOverseasTargetIds,
+                    platformLabels: publishPanelUi.publishPlatformLabels,
+                    platformCopy: publishPanelUi.publishPlatformCopySnapshot,
+                    busy: publishPanelUi.publishBusy,
+                    onCommit: publishPanelUi.onCommitPublishPlatformCopy,
+                  );
+                  if (!wide) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: StudioSpacing.sm),
+                        editor,
+                      ],
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: StudioSpacing.sm),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.shortVideoPublishPanelCurrentDraftLabel,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: studioPanelMutedColor(context),
+                                ),
+                              ),
+                              const SizedBox(height: StudioSpacing.xs),
+                              Text(
+                                publishPanelUi.draftLines.isNotEmpty
+                                    ? publishPanelUi.draftLines.first
+                                    : publishPanelUi.publishPrimaryDraftId,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: StudioSpacing.sm),
+                        Expanded(flex: 3, child: editor),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
             if (publishPanelUi.awaitingSemiAutoJobId != null &&
-                publishPanelUi.onConfirmSemiAuto != null) ...[
+                publishPanelUi.onConfirmSemiAuto != null &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioSpacing.sm),
-              FilledButton.tonalIcon(
-                onPressed: publishPanelUi.publishBusy
-                    ? null
-                    : publishPanelUi.onConfirmSemiAuto,
-                icon: publishPanelUi.publishBusy
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.verified_outlined),
-                label: Text(l10n.shortVideoPublishPanelConfirmSemiAuto),
+              StudioDebouncedAction(
+                enabled: !publishPanelUi.publishBusy,
+                onPressed: shortVideoDebouncedVoid(
+                  publishPanelUi.publishBusy,
+                  publishPanelUi.onConfirmSemiAuto,
+                ),
+                builder: (context, onPressed) => FilledButton.tonalIcon(
+                  onPressed: onPressed,
+                  icon: publishPanelUi.publishBusy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.verified_outlined),
+                  label: Text(l10n.shortVideoPublishPanelConfirmSemiAuto),
+                ),
               ),
             ],
             if (publishPanelUi.publishAutomationModesByPlatform.isNotEmpty &&
-                publishPanelUi.onChangePublishAutomationMode != null) ...[
+                publishPanelUi.onChangePublishAutomationMode != null &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoPublishPanelAutomationByPlatform,
@@ -516,7 +629,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                   ),
                 ),
             ],
-            if (publishPanelUi.onBootstrapPublishDraft != null ||
+            if ((publishPanelUi.onBootstrapPublishDraft != null ||
                 publishPanelUi.onEnqueuePublishJob != null ||
                 publishPanelUi.onEnqueueAllDrafts != null ||
                 publishPanelUi.onRetryFailedPublishJobs != null ||
@@ -525,136 +638,196 @@ class _PublishDraftsPanel extends StatelessWidget {
                 publishPanelUi.onClearPublishSchedule != null ||
                 publishPanelUi.onScheduleFirstDraft != null ||
                 publishPanelUi.onScheduleAllDraftsSameTime != null ||
-                publishPanelUi.onOpenPublishTroubleshooting != null) ...[
+                publishPanelUi.onOpenPublishTroubleshooting != null) &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioSpacing.sm),
               StudioDenseActionRow(
                 spacing: StudioSpacing.xs,
                 children: [
                   if (publishPanelUi.onRefreshPublish != null)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onRefreshPublish,
-                      icon: const Icon(Icons.refresh),
-                      label: Text(l10n.shortVideoPublishPanelRefreshPublish),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onRefreshPublish,
+                      ),
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(l10n.shortVideoPublishPanelRefreshPublish),
+                      ),
                     ),
                   if (publishPanelUi.onBootstrapPublishDraft != null)
-                    FilledButton.tonalIcon(
-                      style: studioFormIconLabeledButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onBootstrapPublishDraft,
-                      icon: publishPanelUi.publishBusy
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.note_add_outlined),
-                      label: Text(l10n.shortVideoPublishPanelBootstrapDraft),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onBootstrapPublishDraft,
+                      ),
+                      builder: (context, onPressed) => FilledButton.tonalIcon(
+                        style: studioFormIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: publishPanelUi.publishBusy
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.note_add_outlined),
+                        label: Text(l10n.shortVideoPublishPanelBootstrapDraft),
+                      ),
                     ),
                   if (publishPanelUi.onEnqueuePublishJob != null)
-                    FilledButton.icon(
-                      style: studioFormIconLabeledButtonStyle(context),
+                    StudioDebouncedAction(
+                      enabled:
+                          !publishPanelUi.publishBusy &&
+                          publishPanelUi.exportReady,
                       onPressed:
                           (publishPanelUi.publishBusy ||
                               !publishPanelUi.exportReady)
                           ? null
-                          : publishPanelUi.onEnqueuePublishJob,
-                      icon: publishPanelUi.publishBusy
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.cloud_upload_outlined),
-                      label: Text(
-                        publishPanelUi.exportReady
-                            ? l10n.shortVideoPublishPanelEnqueueJob
-                            : l10n.shortVideoPublishPanelEnqueueJobBlocked,
+                          : shortVideoDebouncedVoid(
+                              false,
+                              publishPanelUi.onEnqueuePublishJob,
+                            ),
+                      builder: (context, onPressed) => FilledButton.icon(
+                        style: studioFormIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: publishPanelUi.publishBusy
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.cloud_upload_outlined),
+                        label: Text(
+                          publishPanelUi.exportReady
+                              ? l10n.shortVideoPublishPanelEnqueueJob
+                              : l10n.shortVideoPublishPanelEnqueueJobBlocked,
+                        ),
                       ),
                     ),
                   if (publishPanelUi.onEnqueueAllDrafts != null)
-                    FilledButton.tonal(
-                      style: studioFormTonalButtonStyle(context),
+                    StudioDebouncedAction(
+                      enabled:
+                          !publishPanelUi.publishBusy &&
+                          publishPanelUi.exportReady,
                       onPressed:
                           (publishPanelUi.publishBusy ||
                               !publishPanelUi.exportReady)
                           ? null
-                          : publishPanelUi.onEnqueueAllDrafts,
-                      child: Text(
-                        publishPanelUi.exportReady
-                            ? l10n.shortVideoPublishPanelEnqueueAllDrafts
-                            : l10n.shortVideoPublishPanelEnqueueAllDraftsBlocked,
+                          : shortVideoDebouncedVoid(
+                              false,
+                              publishPanelUi.onEnqueueAllDrafts,
+                            ),
+                      builder: (context, onPressed) => FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
+                        onPressed: onPressed,
+                        child: Text(
+                          publishPanelUi.exportReady
+                              ? l10n.shortVideoPublishPanelEnqueueAllDrafts
+                              : l10n
+                                    .shortVideoPublishPanelEnqueueAllDraftsBlocked,
+                        ),
                       ),
                     ),
                   if (publishPanelUi.onRetryFailedPublishJobs != null)
-                    FilledButton.tonal(
-                      style: studioFormTonalButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onRetryFailedPublishJobs,
-                      child: Text(l10n.shortVideoPublishPanelRetryFailedJobs),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onRetryFailedPublishJobs,
+                      ),
+                      builder: (context, onPressed) => FilledButton.tonal(
+                        style: studioFormTonalButtonStyle(context),
+                        onPressed: onPressed,
+                        child: Text(l10n.shortVideoPublishPanelRetryFailedJobs),
+                      ),
                     ),
                   if (publishPanelUi.onSuggestPublishCopy != null)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onSuggestPublishCopy,
-                      icon: const Icon(Icons.auto_awesome_outlined),
-                      label: Text(l10n.shortVideoPublishPanelSuggestCopy),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onSuggestPublishCopy,
+                      ),
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.auto_awesome_outlined),
+                        label: Text(l10n.shortVideoPublishPanelSuggestCopy),
+                      ),
                     ),
                   if (publishPanelUi.onClearPublishSchedule != null)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onClearPublishSchedule,
-                      icon: const Icon(Icons.schedule_outlined),
-                      label: Text(l10n.shortVideoPublishPanelClearSchedule),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onClearPublishSchedule,
+                      ),
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.schedule_outlined),
+                        label: Text(l10n.shortVideoPublishPanelClearSchedule),
+                      ),
                     ),
                   if (publishPanelUi.onScheduleFirstDraft != null &&
                       publishPanelUi.publishPrimaryDraftId.isNotEmpty)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
                       onPressed: publishPanelUi.publishBusy
                           ? null
-                          : () => publishPanelUi.onScheduleFirstDraft?.call(
+                          : () async => publishPanelUi.onScheduleFirstDraft!(
                               context,
                             ),
-                      icon: const Icon(Icons.event_available_outlined),
-                      label: Text(
-                        l10n.shortVideoPublishPanelScheduleCurrentDraft,
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.event_available_outlined),
+                        label: Text(
+                          l10n.shortVideoPublishPanelScheduleCurrentDraft,
+                        ),
                       ),
                     ),
                   if (publishPanelUi.onScheduleAllDraftsSameTime != null &&
                       publishPanelUi.draftLines.length > 1)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
                       onPressed: publishPanelUi.publishBusy
                           ? null
-                          : () => publishPanelUi.onScheduleAllDraftsSameTime
-                                ?.call(context),
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      label: Text(l10n.shortVideoPublishPanelScheduleAllDrafts),
+                          : () async => publishPanelUi
+                                .onScheduleAllDraftsSameTime!
+                                .call(context),
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.calendar_month_outlined),
+                        label: Text(l10n.shortVideoPublishPanelScheduleAllDrafts),
+                      ),
                     ),
                   if (publishPanelUi.onOpenPublishTroubleshooting != null)
-                    OutlinedButton.icon(
-                      style: studioFormOutlinedIconLabeledButtonStyle(context),
-                      onPressed: publishPanelUi.publishBusy
-                          ? null
-                          : publishPanelUi.onOpenPublishTroubleshooting,
-                      icon: const Icon(Icons.bug_report_outlined),
-                      label: Text(
-                        l10n.shortVideoPublishPanelOpenTroubleshooting,
+                    StudioDebouncedAction(
+                      enabled: !publishPanelUi.publishBusy,
+                      onPressed: shortVideoDebouncedVoid(
+                        publishPanelUi.publishBusy,
+                        publishPanelUi.onOpenPublishTroubleshooting,
+                      ),
+                      builder: (context, onPressed) => OutlinedButton.icon(
+                        style: studioFormOutlinedIconLabeledButtonStyle(context),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.bug_report_outlined),
+                        label: Text(
+                          l10n.shortVideoPublishPanelOpenTroubleshooting,
+                        ),
                       ),
                     ),
                 ],
               ),
             ],
-            if (publishPanelUi.publishBatchResultLines.isNotEmpty) ...[
+            if (publishPanelUi.publishBatchResultLines.isNotEmpty &&
+                showDraftDetail) ...[
               const SizedBox(height: StudioSpacing.sm),
               Text(
                 l10n.shortVideoPublishPanelBatchResultSummary,

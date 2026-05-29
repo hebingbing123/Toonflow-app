@@ -98,10 +98,11 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
       _novelPaste.text.trim().isNotEmpty;
 
   Future<bool> _confirmDiscardDraft() async {
+    final l10n = AppLocalizations.of(context)!;
     final discard = await showStudioConfirmDialog(
       context: context,
-      title: 'Discard project draft?',
-      message: 'You have unsaved project details. Leave this wizard?',
+      title: l10n.studioDiscardProjectDraftTitle,
+      message: l10n.studioDiscardProjectDraftMessage,
       destructive: true,
     );
     return discard == true;

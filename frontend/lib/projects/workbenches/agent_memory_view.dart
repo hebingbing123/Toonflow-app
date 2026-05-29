@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/components/studio_dropdown_field.dart
 import '../../design_system/tokens.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../platform/studio_content_heuristics.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';

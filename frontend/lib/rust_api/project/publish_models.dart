@@ -284,35 +284,71 @@ class PublishBlockingReason {
   }
 }
 
-class PublishBatchPublishResponse {
-  const PublishBatchPublishResponse({
-    required this.successCount,
-    required this.failedCount,
-    required this.jobIds,
+class PublishBatchOperationFailure {
+  const PublishBatchOperationFailure({
+    required this.draftId,
+    required this.reason,
   });
 
-  final int successCount;
-  final int failedCount;
-  final List<String> jobIds;
+  final String draftId;
+  final String reason;
+
+  factory PublishBatchOperationFailure.fromJson(Map<String, dynamic> json) {
+    return PublishBatchOperationFailure(
+      draftId: json['draft_id'] as String? ?? '',
+      reason: json['reason'] as String? ?? '',
+    );
+  }
+}
+
+class PublishBatchPublishResponse {
+  const PublishBatchPublishResponse({
+    required this.enqueued,
+    required this.failed,
+  });
+
+  final int enqueued;
+  final List<PublishBatchOperationFailure> failed;
+
+  int get successCount => enqueued;
+
+  int get failedCount => failed.length;
 
   factory PublishBatchPublishResponse.fromJson(Map<String, dynamic> json) {
-    final raw = json['job_ids'] as List<dynamic>? ?? const <dynamic>[];
+    final raw = json['failed'] as List<dynamic>? ?? const <dynamic>[];
     return PublishBatchPublishResponse(
-      successCount: (json['success_count'] as num?)?.toInt() ?? 0,
-      failedCount: (json['failed_count'] as num?)?.toInt() ?? 0,
-      jobIds: raw.map((e) => '$e').toList(growable: false),
+      enqueued: (json['enqueued'] as num?)?.toInt() ?? 0,
+      failed: raw
+          .map(
+            (item) => PublishBatchOperationFailure.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
     );
   }
 }
 
 class PublishBatchArchiveResponse {
-  const PublishBatchArchiveResponse({required this.archivedCount});
+  const PublishBatchArchiveResponse({
+    required this.archivedCount,
+    required this.failed,
+  });
 
   final int archivedCount;
+  final List<PublishBatchOperationFailure> failed;
 
   factory PublishBatchArchiveResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['failed'] as List<dynamic>? ?? const <dynamic>[];
     return PublishBatchArchiveResponse(
-      archivedCount: (json['archived_count'] as num?)?.toInt() ?? 0,
+      archivedCount: (json['archived'] as num?)?.toInt() ?? 0,
+      failed: raw
+          .map(
+            (item) => PublishBatchOperationFailure.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
     );
   }
 }

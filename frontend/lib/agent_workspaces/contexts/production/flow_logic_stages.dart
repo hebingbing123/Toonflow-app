@@ -1044,10 +1044,10 @@ bool _productionScriptPlanStoryboardReady(Object? value) {
   return sections.any((section) {
     final normalized = section.replaceAll(RegExp(r'\s+'), ' ').trim();
     return normalized.contains('④') ||
-        normalized.contains('分场景') ||
-        normalized.contains('画面意图') ||
-        normalized.contains('镜头意图') ||
-        normalized.contains('情绪');
+        studioContentContainsAny(
+          normalized,
+          kProductionScriptStoryboardReadySectionTokens,
+        );
   });
 }
 

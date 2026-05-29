@@ -708,7 +708,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
+                    l10n.platformConfigPlanOverridesEnvLabel,
                     style: studioSectionIntroStyle(context),
                   ),
                   if (_response!.planOverride != null) ...<Widget>[

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -181,12 +182,7 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
                                     ),
                                     TextButton(
                                       onPressed: _dismiss,
-                                      style: TextButton.styleFrom(
-                                        visualDensity: VisualDensity.compact,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: StudioSpacing.xs,
-                                        ),
-                                      ),
+                                      style: studioFormTextButtonIconStyle(context),
                                       child: Text(l10n.studioOnboardingSkip),
                                     ),
                                   ],
@@ -558,7 +554,9 @@ class _CommandPaletteHint extends StatelessWidget {
               vertical: StudioSpacing.xs,
             ),
             child: Text(
-              '⌘K',
+              defaultTargetPlatform == TargetPlatform.macOS
+                  ? l10n.studioCommandPaletteShortcutMac
+                  : l10n.studioCommandPaletteShortcutWindows,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: tokens.textPrimary,

@@ -7355,6 +7355,66 @@ paths:
       - bearerAuth: []
       tags:
       - settings
+  /api/v1/settings/studio-ui/prefs:
+    get:
+      operationId: getStudioUiPrefsV1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
+    put:
+      operationId: putStudioUiPrefsV1
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - settings
   /api/v1/skills:
     get:
       operationId: listSkillsV1

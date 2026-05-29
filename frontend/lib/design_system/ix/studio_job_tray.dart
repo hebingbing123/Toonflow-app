@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/studio_code_labels.dart';
 import '../../studio/job_center.dart';
+import '../../platform/studio_transfer_queue.dart';
+import '../components/studio_transfer_progress.dart';
 import '../components/studio_dialog_shell.dart';
 import '../components/studio_entrance_motion.dart';
 import '../components/studio_metric_switch.dart';
@@ -66,6 +68,22 @@ class StudioJobTray extends StatelessWidget {
                   sheetL10n.studioJobTraySheetTitle,
                   style: Theme.of(ctx).textTheme.titleMedium,
                 ),
+              ),
+              ListenableBuilder(
+                listenable: StudioTransferQueue.instance,
+                builder: (context, _) {
+                  final transfers = StudioTransferQueue.instance.items;
+                  if (transfers.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: StudioSpacing.sm,
+                      vertical: StudioSpacing.xs,
+                    ),
+                    child: StudioTransferProgressList(items: transfers),
+                  );
+                },
               ),
               ...jobs.indexed.map(
                 (entry) => studioStaggeredItem(

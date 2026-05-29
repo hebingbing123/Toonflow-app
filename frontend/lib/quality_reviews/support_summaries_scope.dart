@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/studio_content_heuristics.dart';
 import 'quality_reviews_l10n.dart';
 import 'support_actions.dart';
 import 'support_models.dart';
@@ -201,20 +202,25 @@ String? summarizeScopeRepairQueueFromQualityReviews(
     final comments = (row.comments ?? '').toLowerCase();
     return (row.dialogueNaturalness != null &&
             qualityScorePercent(row.dialogueNaturalness) < 80) ||
-        comments.contains('生硬') ||
-        comments.contains('朗读') ||
-        comments.contains('没情绪') ||
-        comments.contains('无情绪');
+        studioContentContainsAnyLower(
+          comments,
+          kQualityReviewStiffDeliveryCommentTokens,
+        );
   }
 
   bool hasVisualRisk(QualityReview row) {
     final comments = (row.comments ?? '').toLowerCase();
     return (row.visualQuality != null &&
             qualityScorePercent(row.visualQuality) < 80) ||
-        comments.contains('穿帮') ||
-        comments.contains('不自然') ||
+        studioContentContainsAnyLower(
+          comments,
+          kQualityReviewVisualCommentTokens,
+        ) ||
         comments.contains('ai') ||
-        comments.contains('假');
+        studioContentContainsAnyLower(
+          comments,
+          kQualityReviewFakeVisualCommentTokens,
+        );
   }
 
   for (final row in rows) {

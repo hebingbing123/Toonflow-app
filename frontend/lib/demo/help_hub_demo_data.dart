@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 OutboundWebhookListResponseV1 buildDemoHelpHubWebhookList() {
@@ -73,21 +74,21 @@ buildDemoHelpHubWebhookDeliveries() {
   };
 }
 
-HelpHubConfigResponseV1 buildDemoHelpHubConfig() {
-  const items = <HelpHubLinkItemV1>[
+HelpHubConfigResponseV1 buildDemoHelpHubConfig(AppLocalizations l10n) {
+  final items = <HelpHubLinkItemV1>[
     HelpHubLinkItemV1(
       id: 'docs-getting-started',
-      title: 'Getting started (demo)',
+      title: l10n.demoHelpHubGettingStartedTitle,
       url: 'https://docs.example.com/toonflow/getting-started',
     ),
     HelpHubLinkItemV1(
       id: 'docs-studio-sop',
-      title: 'Studio SOP guide (demo)',
+      title: l10n.demoHelpHubStudioSopTitle,
       url: 'https://docs.example.com/toonflow/studio-sop',
     ),
     HelpHubLinkItemV1(
       id: 'docs-billing-faq',
-      title: 'Billing & webhooks FAQ (demo)',
+      title: l10n.demoHelpHubBillingFaqTitle,
       url: 'https://docs.example.com/toonflow/billing',
     ),
   ];

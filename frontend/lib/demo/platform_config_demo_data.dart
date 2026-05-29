@@ -2,6 +2,7 @@ import '../rust_api.dart';
 
 /// Preloaded platform config API response for demo mode.
 PlatformConfigResponseV1 buildDemoPlatformConfigResponse() {
+  final l10n = rustApiLookupL10nFromPlatform();
   const effective = PlatformConfigToggleSetV1.defaults;
   return PlatformConfigResponseV1(
     scope: 'workspace',
@@ -14,9 +15,9 @@ PlatformConfigResponseV1 buildDemoPlatformConfigResponse() {
     hasUserOverride: true,
     workspaceOverride: effective,
     hasWorkspaceOverride: true,
-    currentWorkspace: const PlatformConfigWorkspaceContextV1(
+    currentWorkspace: PlatformConfigWorkspaceContextV1(
       id: 'workspace-demo',
-      name: '演示工作区',
+      name: l10n.demoWorkspaceDisplayName,
       workspaceType: 'team',
       role: 'owner',
       canManageOverride: true,

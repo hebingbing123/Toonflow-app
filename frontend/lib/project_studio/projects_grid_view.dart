@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../demo/product_demo_tour_anchors.dart';
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_tap.dart';
 import '../design_system/ix/studio_pointer.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
@@ -29,6 +32,8 @@ class ProjectsGridView extends StatelessWidget {
     this.contentWidth,
     this.demoTourAnchorId,
     this.boundedMaxHeight,
+    this.pinnedProjectIds,
+    this.onTogglePin,
   });
 
   final List<ProjectRow> projects;
@@ -38,6 +43,10 @@ class ProjectsGridView extends StatelessWidget {
   final bool loading;
   final int Function(ProjectRow project)? progressForProject;
   final Object? listEntranceKey;
+
+  /// Pinned project UUIDs for star affordance on grid cards.
+  final Set<String>? pinnedProjectIds;
+  final Future<void> Function(String projectId)? onTogglePin;
 
   /// When true, returns a [SliverGrid] (or [SliverToBoxAdapter]) for [CustomScrollView].
   final bool asSliver;
@@ -181,6 +190,10 @@ class ProjectsGridView extends StatelessWidget {
         onTap: () => onOpenProject(project),
         dense: layout.useDenseSingleCard,
         standalone: layout.useStandaloneSingleCard,
+        isPinned: pinnedProjectIds?.contains(project.id) ?? false,
+        onTogglePin: onTogglePin == null
+            ? null
+            : () => unawaited(onTogglePin!(project.id)),
       ),
     );
     if (layout.useDenseSingleCard) {
@@ -215,6 +228,10 @@ class ProjectsGridView extends StatelessWidget {
             ? null
             : () => onSelectProject!(project),
         onTap: () => onOpenProject(project),
+        isPinned: pinnedProjectIds?.contains(project.id) ?? false,
+        onTogglePin: onTogglePin == null
+            ? null
+            : () => unawaited(onTogglePin!(project.id)),
       ),
     );
     if (index == 0 &&
@@ -394,6 +411,8 @@ class _ProjectGridCard extends StatelessWidget {
     required this.onTap,
     this.dense = false,
     this.standalone = false,
+    this.isPinned = false,
+    this.onTogglePin,
   });
 
   final ProjectRow project;
@@ -404,6 +423,8 @@ class _ProjectGridCard extends StatelessWidget {
   final bool dense;
   /// Intrinsic-height card for phone / narrow pane (no [Expanded] body).
   final bool standalone;
+  final bool isPinned;
+  final VoidCallback? onTogglePin;
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +464,8 @@ class _ProjectGridCard extends StatelessWidget {
       titleMaxLines: standalone ? 2 : 2,
       summaryMaxLines: standalone ? 2 : 3,
       fillHeight: !standalone,
+      isPinned: isPinned,
+      onTogglePin: onTogglePin,
     );
 
     return StudioPointerHover(
@@ -513,6 +536,8 @@ class _ProjectGridCard extends StatelessWidget {
     required int titleMaxLines,
     required int summaryMaxLines,
     bool fillHeight = false,
+    bool isPinned = false,
+    VoidCallback? onTogglePin,
   }) {
     final content = Padding(
       padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
@@ -543,6 +568,18 @@ class _ProjectGridCard extends StatelessWidget {
                     ),
                     const SizedBox(width: StudioSpacing.xs),
                   ],
+                  if (onTogglePin != null)
+                    StudioIconButton(
+                      label: isPinned
+                          ? l10n.globalSearchUnpin
+                          : l10n.globalSearchPinToSearchBar,
+                      tooltip: isPinned
+                          ? l10n.globalSearchUnpin
+                          : l10n.globalSearchPinToSearchBar,
+                      icon: isPinned ? Icons.star : Icons.star_border,
+                      onPressed: onTogglePin,
+                      size: StudioIconSize.sm,
+                    ),
                   StudioStepProgressRing(
                     completedSteps: completedSteps,
                     heroTag: studioHeroTagProjectProgress(project.numericId),
@@ -593,10 +630,10 @@ class _ProjectGridCard extends StatelessWidget {
           ),
         );
 
-    return GestureDetector(
+    return StudioTap(
       key: Key('project_select_scope_${project.numericId}'),
-      behavior: HitTestBehavior.opaque,
       onTap: onSelect ?? onTap,
+      borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
       child: fillHeight
           ? SizedBox(
               width: double.infinity,
@@ -643,10 +680,10 @@ class _ProjectGridCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              child: GestureDetector(
+              child: StudioTap(
                 key: Key('project_select_scope_${project.numericId}'),
-                behavior: HitTestBehavior.opaque,
                 onTap: onSelect ?? onTap,
+                borderRadius: cardRadius,
                 child: Padding(
                   padding: EdgeInsets.zero,
                   child: Column(

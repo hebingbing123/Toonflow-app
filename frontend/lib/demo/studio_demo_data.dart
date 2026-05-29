@@ -6,15 +6,16 @@ import '../rust_api.dart';
 
 const demoStudioProjectUuid = '00000000-0000-0000-0000-000000000007';
 
-ProjectHome buildDemoStudioProjectHome() {
+ProjectHome buildDemoStudioProjectHome(AppLocalizations l10n) {
+  final projectName = l10n.demoStudioProjectDisplayName;
   return ProjectHome(
     project: ProjectRow(
       id: demoStudioProjectUuid,
       numericId: 7,
-      name: '春季短剧 · 演示',
+      name: projectName,
       artStylePack: 'art_skills/2D_chinese_guofeng',
       storyStylePack: 'story_skills/Family_warmth',
-      artStyle: '水墨古风',
+      artStyle: l10n.demoStudioArtStyleInkWash,
       projectAccessMode: 'inherited',
       projectAccessRole: 'owner',
     ),
@@ -26,57 +27,57 @@ ProjectHome buildDemoStudioProjectHome() {
       videoCount: 0,
     ),
     readinessScore: 68,
-    readinessSummary: '剧本与分镜进度良好，待补齐成片素材',
-    onboarding: const ProjectHomeOnboarding(
+    readinessSummary: l10n.demoStudioReadinessSummary,
+    onboarding: ProjectHomeOnboarding(
       complete: false,
       checklist: <ProjectHomeChecklistItem>[
         ProjectHomeChecklistItem(
           key: 'script',
-          label: '导入或创建剧本',
+          label: l10n.demoStudioChecklistScriptLabel,
           done: true,
         ),
         ProjectHomeChecklistItem(
           key: 'storyboard',
-          label: '完成分镜',
+          label: l10n.demoStudioChecklistStoryboardLabel,
           done: false,
         ),
       ],
     ),
     styleBibleReady: true,
     cockpit: ProjectHomeCockpit(
-      headline: '春季短剧 · 演示',
-      subheadline: '小说 1 / 剧本 2',
+      headline: projectName,
+      subheadline: l10n.demoStudioHomeSubheadline,
       primaryAction: ProjectHomeAction(
         key: 'continue_storyboard',
-        title: '继续分镜',
-        detail: '6 个分镜待确认',
+        title: l10n.demoStudioHomeContinueStoryboardTitle,
+        detail: l10n.demoStudioHomeContinueStoryboardDetail,
         targetStep: 'storyboard',
-        ctaLabel: '打开分镜步',
+        ctaLabel: l10n.demoStudioHomeOpenStoryboardCta,
         launchIntent: const ProjectHomeLaunchIntent(targetStep: 'storyboard'),
       ),
-      secondaryActions: const <ProjectHomeAction>[
+      secondaryActions: <ProjectHomeAction>[
         ProjectHomeAction(
           key: 'open_tasks',
-          title: '查看任务',
-          detail: '1 个运行中任务',
+          title: l10n.demoStudioHomeOpenTasksTitle,
+          detail: l10n.demoStudioHomeTasksDetail,
           targetStep: 'tasks',
-          ctaLabel: '任务中心',
-          launchIntent: ProjectHomeLaunchIntent(action: 'open_tasks'),
+          ctaLabel: l10n.demoStudioHomeTasksCta,
+          launchIntent: const ProjectHomeLaunchIntent(action: 'open_tasks'),
         ),
       ],
-      metrics: const <ProjectHomeMetric>[
+      metrics: <ProjectHomeMetric>[
         ProjectHomeMetric(
           key: 'content',
-          label: '内容',
-          value: '小说 1 / 剧本 2',
-          detail: '演示数据 · 可浏览完整六步流程',
+          label: l10n.demoStudioMetricContentLabel,
+          value: l10n.demoStudioMetricContentValue,
+          detail: l10n.demoStudioMetricContentDetail,
         ),
         ProjectHomeMetric(
           key: 'storyboard',
-          label: '分镜',
-          value: '4 / 6',
-          detail: '2 待生成',
-          launchIntent: ProjectHomeLaunchIntent(targetStep: 'storyboard'),
+          label: l10n.demoStudioMetricStoryboardLabel,
+          value: l10n.demoStudioMetricStoryboardValue,
+          detail: l10n.demoStudioMetricStoryboardDetail,
+          launchIntent: const ProjectHomeLaunchIntent(targetStep: 'storyboard'),
         ),
       ],
       starterTemplates: const <ProjectHomeStarterTemplate>[],
@@ -84,8 +85,9 @@ ProjectHome buildDemoStudioProjectHome() {
   );
 }
 
-ProjectAssetsOverview buildDemoStudioAssetsOverview() {
-  return const ProjectAssetsOverview(
+ProjectAssetsOverview buildDemoStudioAssetsOverview(AppLocalizations l10n) {
+  final leadName = l10n.demoStudioCharacterLeadName;
+  return ProjectAssetsOverview(
     schemaVersion: 1,
     totalCount: 4,
     candidateCounts: AssetsOverviewCandidateCounts(
@@ -96,27 +98,27 @@ ProjectAssetsOverview buildDemoStudioAssetsOverview() {
     ),
     byAssetType: <AssetsOverviewTypeGroup>[],
     hub: AssetsOverviewHub(
-      headline: '角色库已可用，还差 1 个锚点',
-      subheadline: '补齐主角锚点后可进入分镜批量出图',
+      headline: l10n.demoStudioAssetsHubHeadline,
+      subheadline: l10n.demoStudioAssetsHubSubheadline,
       primaryAction: AssetsOverviewHubAction(
         key: 'anchor_characters',
-        title: '补齐角色锚点',
-        detail: '林夏 仍缺少资产锚点',
+        title: l10n.demoStudioAssetsAnchorTitle,
+        detail: l10n.demoStudioAssetsAnchorDetail(leadName),
         targetStep: 'assets',
-        ctaLabel: '打开资产步',
+        ctaLabel: l10n.demoStudioAssetsOpenAssetsCta,
       ),
       metrics: <AssetsOverviewHubMetric>[
         AssetsOverviewHubMetric(
           key: 'roles',
-          label: '角色资产',
+          label: l10n.demoStudioAssetsRolesLabel,
           value: '3',
-          detail: '1 个待锚点',
+          detail: l10n.demoStudioAssetsPendingAnchorsCountDetail(1),
         ),
       ],
       characterSummaries: <AssetsOverviewCharacterSummary>[
         AssetsOverviewCharacterSummary(
           characterId: 'char-lead',
-          name: '林夏',
+          name: leadName,
           assetId: null,
           assetName: null,
           linkedScriptNumericIds: <int>[3],
@@ -128,10 +130,10 @@ ProjectAssetsOverview buildDemoStudioAssetsOverview() {
         AssetsOverviewRoleSummary(
           assetId: 'asset-lead',
           numericId: 71,
-          name: '林夏 · 定妆',
+          name: l10n.demoStudioCharacterLeadAssetName,
           candidateStatus: 'linked',
           linkedScriptNumericIds: <int>[3],
-          linkedCharacterNames: <String>['林夏'],
+          linkedCharacterNames: <String>[leadName],
         ),
       ],
     ),
@@ -192,6 +194,7 @@ ProjectShortVideoReadiness buildDemoStudioShortVideoReadiness() {
 }
 
 ProjectShortVideoAssembly buildDemoStudioShortVideoAssembly() {
+  final l10n = rustApiLookupL10nFromPlatform();
   return ProjectShortVideoAssembly.fromJson(<String, dynamic>{
     'schema_version': 1,
     'project_defaults': <String, dynamic>{
@@ -211,21 +214,24 @@ ProjectShortVideoAssembly buildDemoStudioShortVideoAssembly() {
     'scripts': <Map<String, dynamic>>[
       <String, dynamic>{
         'script_numeric_id': 3,
-        'script_name': '第 1 集 · 初遇',
+        'script_name': l10n.demoScriptEpisode1Name,
         'shots': <Map<String, dynamic>>[
           _demoAssemblyShotJson(
+            l10n: l10n,
             storyboardId: 'sb-demo-101',
             storyboardNumericId: 101,
             sbIndex: 1,
             ready: true,
           ),
           _demoAssemblyShotJson(
+            l10n: l10n,
             storyboardId: 'sb-demo-102',
             storyboardNumericId: 102,
             sbIndex: 2,
             ready: false,
           ),
           _demoAssemblyShotJson(
+            l10n: l10n,
             storyboardId: 'sb-demo-103',
             storyboardNumericId: 103,
             sbIndex: 3,
@@ -238,6 +244,7 @@ ProjectShortVideoAssembly buildDemoStudioShortVideoAssembly() {
 }
 
 Map<String, dynamic> _demoAssemblyShotJson({
+  required AppLocalizations l10n,
   required String storyboardId,
   required int storyboardNumericId,
   required int sbIndex,
@@ -251,7 +258,7 @@ Map<String, dynamic> _demoAssemblyShotJson({
     'selected_media_kind': ready ? 'video' : 'none',
     'duration': '3.2s',
     'state': ready ? 'ready' : 'draft',
-    'subtitle_text': ready ? '演示字幕 $sbIndex' : null,
+    'subtitle_text': ready ? l10n.demoAssemblySubtitleTemplate(sbIndex) : null,
     'subtitle_source': ready ? 'storyboard' : 'none',
     'voiceover_script_ready': ready,
     'voiceover_state': ready ? 'ready' : 'pending',
@@ -296,6 +303,7 @@ ProjectShortVideoExportCheck buildDemoStudioShortVideoExportCheck() {
 }
 
 ProjectShortVideoTimelineV1 buildDemoStudioShortVideoTimeline() {
+  final l10n = rustApiLookupL10nFromPlatform();
   return ProjectShortVideoTimelineV1.fromJson(<String, dynamic>{
     'schemaVersion': 1,
     'timelineVersion': 'demo-timeline-v1',
@@ -320,14 +328,14 @@ ProjectShortVideoTimelineV1 buildDemoStudioShortVideoTimeline() {
           'storyboardNumericId': 101,
           'startMs': 0,
           'endMs': 3200,
-          'text': '雨夜街头，女主撑伞回头',
+          'text': l10n.demoTimelineSubtitleRainStreet,
         },
       ],
     },
     'scripts': <Map<String, dynamic>>[
       <String, dynamic>{
         'scriptNumericId': 3,
-        'scriptName': '第 1 集 · 初遇',
+        'scriptName': l10n.demoScriptEpisode1Name,
         'shots': <dynamic>[],
       },
     ],
@@ -363,50 +371,60 @@ TaskCenterGetTaskApiResult buildDemoRecentProjectTasks() {
 }
 
 ProjectDetail buildDemoProjectDetail() {
+  final l10n = rustApiLookupL10nFromPlatform();
   return ProjectDetail(
     project: ProjectRow(
       id: demoStudioProjectUuid,
       numericId: 7,
-      name: '春季短剧 · 演示',
+      name: l10n.demoStudioProjectDisplayName,
       artStylePack: 'art_skills/2D_chinese_guofeng',
       storyStylePack: 'story_skills/Family_warmth',
-      artStyle: '水墨古风',
+      artStyle: l10n.demoStudioArtStyleInkWash,
       projectAccessMode: 'inherited',
       projectAccessRole: 'owner',
     ),
-    scripts: const <ScriptBrief>[
-      ScriptBrief(numericId: 3, name: '第 1 集 · 初遇', extractState: 1),
-      ScriptBrief(numericId: 4, name: '第 2 集 · 误会', extractState: 0),
+    scripts: <ScriptBrief>[
+      ScriptBrief(
+        numericId: 3,
+        name: l10n.demoScriptEpisode1Name,
+        extractState: 1,
+      ),
+      ScriptBrief(
+        numericId: 4,
+        name: l10n.demoScriptEpisode2Name,
+        extractState: 0,
+      ),
     ],
   );
 }
 
 ListAssetsResponse buildDemoProjectAssetsList() {
-  return const ListAssetsResponse(
+  final l10n = rustApiLookupL10nFromPlatform();
+  return ListAssetsResponse(
     total: 3,
     items: <AssetRow>[
       AssetRow(
         id: 'asset-lead',
         numericId: 71,
-        name: '林夏 · 定妆',
+        name: l10n.demoAssetLeadLookName,
         assetType: 'role',
-        description: '主角定妆照',
+        description: l10n.demoAssetLeadLookDescription,
         candidateStatus: 'linked',
       ),
       AssetRow(
         id: 'asset-scene-1',
         numericId: 72,
-        name: '雨夜街道',
+        name: l10n.demoAssetRainyStreetName,
         assetType: 'scene',
-        description: '外景参考',
+        description: l10n.demoAssetRainyStreetDescription,
         candidateStatus: 'linked',
       ),
       AssetRow(
         id: 'asset-pending',
         numericId: 73,
-        name: '咖啡馆内景',
+        name: l10n.demoAssetCafeInteriorName,
         assetType: 'scene',
-        description: '待确认候选',
+        description: l10n.demoAssetCafeInteriorDescription,
         candidateStatus: 'pending',
       ),
     ],
@@ -458,7 +476,7 @@ StylePackCatalog buildDemoStylePackCatalog(AppLocalizations l10n) {
     artPacks: <StylePackOption>[
       StylePackOption(
         path: 'art_skills/2D_chinese_guofeng',
-        name: '水墨古风',
+        name: l10n.demoStudioArtStyleInkWash,
         description: l10n.projectEditorStylePackTagArt,
         tag: l10n.projectEditorStylePackTagArt,
       ),
@@ -466,7 +484,7 @@ StylePackCatalog buildDemoStylePackCatalog(AppLocalizations l10n) {
     storyPacks: <StylePackOption>[
       StylePackOption(
         path: 'story_skills/Family_warmth',
-        name: '家庭温情',
+        name: l10n.demoStylePackFamilyWarmthName,
         description: l10n.projectEditorStylePackTagStory,
         tag: l10n.projectEditorStylePackTagStory,
       ),
@@ -478,12 +496,13 @@ Future<StudioReadinessSnapshot> buildDemoStudioReadinessSnapshot(
   String accessToken,
   String projectUuid,
 ) async {
+  final l10n = rustApiLookupL10nFromPlatform();
   return StudioReadinessSnapshot(
     completedSteps: 5,
     runningJobCount: 0,
     failedJobCount: 0,
-    home: buildDemoStudioProjectHome(),
-    assetsOverview: buildDemoStudioAssetsOverview(),
+    home: buildDemoStudioProjectHome(l10n),
+    assetsOverview: buildDemoStudioAssetsOverview(l10n),
     readiness: buildDemoStudioShortVideoReadiness(),
     production: buildDemoStudioProductionOverview(),
   );
@@ -493,6 +512,7 @@ Future<ProjectStudioScriptStepDebugContent> buildDemoScriptStepContent(
   String accessToken,
   String projectUuid,
 ) async {
+  final l10n = rustApiLookupL10nFromPlatform();
   return ProjectStudioScriptStepDebugContent(
     novels: ListNovelsResponse(
       total: 1,
@@ -501,23 +521,23 @@ Future<ProjectStudioScriptStepDebugContent> buildDemoScriptStepContent(
           id: 'novel-demo-1',
           numericId: 501,
           chapterIndex: 1,
-          chapter: '第一章 · 重逢',
-          chapterData: '演示章节：男女主在雨夜重逢，埋下后续误会伏笔。',
+          chapter: l10n.demoNovelChapter1Title,
+          chapterData: l10n.demoNovelChapter1Body,
           eventState: 0,
           intakeSource: 'paste',
           intakeStatus: 'ready',
         ),
       ],
     ),
-    scripts: const <ScriptBrief>[
+    scripts: <ScriptBrief>[
       ScriptBrief(
         numericId: 3,
-        name: '第 1 集 · 初遇',
+        name: l10n.demoScriptEpisode1Name,
         extractState: 1,
       ),
       ScriptBrief(
         numericId: 4,
-        name: '第 2 集 · 误会',
+        name: l10n.demoScriptEpisode2Name,
         extractState: 0,
       ),
     ],
@@ -531,14 +551,14 @@ Future<ProjectStudioScriptStepDebugContent> buildDemoScriptStepContent(
   );
 }
 
-List<PublishDraftRow> buildDemoPublishDrafts() {
+List<PublishDraftRow> buildDemoPublishDrafts(AppLocalizations l10n) {
   return <PublishDraftRow>[
     PublishDraftRow(
       id: 'draft-demo-1',
       projectId: demoStudioProjectUuid,
-      title: '第 1 集 · 竖屏成片',
-      description: '演示发布草稿：待排期上传抖音。',
-      tags: <String>['短剧', '都市'],
+      title: l10n.demoPublishDraftEpisode1Title,
+      description: l10n.demoPublishDraft1Description,
+      tags: <String>[l10n.demoPublishTagShortDrama, l10n.demoPublishTagUrban],
       draftStatus: 'ready',
       scriptId: '3',
       scheduledAt: '2026-05-20T10:00:00Z',
@@ -546,9 +566,9 @@ List<PublishDraftRow> buildDemoPublishDrafts() {
     PublishDraftRow(
       id: 'draft-demo-2',
       projectId: demoStudioProjectUuid,
-      title: '第 2 集 · 竖屏成片',
-      description: '演示发布草稿：可打开筛选与批量排期面板。',
-      tags: <String>['短剧'],
+      title: l10n.demoPublishDraftEpisode2Title,
+      description: l10n.demoPublishDraft2Description,
+      tags: <String>[l10n.demoPublishTagShortDrama],
       draftStatus: 'draft',
       scriptId: '4',
     ),
@@ -556,40 +576,42 @@ List<PublishDraftRow> buildDemoPublishDrafts() {
 }
 
 List<ScriptWorkbenchDetailRow> buildDemoStoryboardScripts() {
-  return const <ScriptWorkbenchDetailRow>[
+  final l10n = rustApiLookupL10nFromPlatform();
+  return <ScriptWorkbenchDetailRow>[
     ScriptWorkbenchDetailRow(
       numericId: 3,
-      name: '第 1 集 · 初遇',
+      name: l10n.demoScriptEpisode1Name,
       relatedAssets: <ScriptRelatedAssetBrief>[],
     ),
     ScriptWorkbenchDetailRow(
       numericId: 4,
-      name: '第 2 集 · 误会',
+      name: l10n.demoScriptEpisode2Name,
       relatedAssets: <ScriptRelatedAssetBrief>[],
     ),
   ];
 }
 
 List<ProductionStoryboardItemV1> buildDemoStoryboardShots() {
-  return const <ProductionStoryboardItemV1>[
+  final l10n = rustApiLookupL10nFromPlatform();
+  return <ProductionStoryboardItemV1>[
     ProductionStoryboardItemV1(
       id: 101,
       scriptId: 3,
-      prompt: '雨夜街头，女主撑伞回头，霓虹映在脸上',
+      prompt: l10n.demoStoryboardPromptRainStreet,
       state: 'ready',
       sbIndex: 1,
     ),
     ProductionStoryboardItemV1(
       id: 102,
       scriptId: 3,
-      prompt: '男主近景，欲言又止，背景虚化',
+      prompt: l10n.demoStoryboardPromptMaleCloseup,
       state: 'draft',
       sbIndex: 2,
     ),
     ProductionStoryboardItemV1(
       id: 103,
       scriptId: 3,
-      prompt: '双人同框，误会即将解开',
+      prompt: l10n.demoStoryboardPromptDuoResolve,
       state: 'draft',
       sbIndex: 3,
     ),

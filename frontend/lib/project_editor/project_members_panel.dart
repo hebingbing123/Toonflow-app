@@ -251,8 +251,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     final confirmed = await showStudioConfirmDialog(
       context: context,
       title: l10n.projectMembersTooltipRemoveAcl,
-      message:
-          'This will remove the explicit ACL for this member from the project.',
+      message: l10n.projectMembersRemoveAclConfirmMessage,
       confirmLabel: l10n.projectMembersTooltipRemoveAcl,
       cancelLabel: l10n.globalSearchCancel,
       destructive: true,

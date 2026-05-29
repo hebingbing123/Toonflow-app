@@ -172,10 +172,7 @@ List<int> extractProductionReferencedAssetIdsForStoryboardIds(
 List<int> extractProductionScriptPlanAssetIds(Object? flowData) {
   if (flowData is! String) return const <int>[];
   final ids = <int>{};
-  for (final match in RegExp(
-    r'(?:资产|asset)\s*[#：:\s]?\s*([\d\s,，、]+)',
-    caseSensitive: false,
-  ).allMatches(flowData)) {
+  for (final match in kProductionScriptPlanAssetIdPattern.allMatches(flowData)) {
     final raw = match.group(1) ?? '';
     for (final token in raw.split(RegExp(r'[\s,，、]+'))) {
       final numericId = int.tryParse(token.trim());
@@ -194,20 +191,7 @@ List<String> extractProductionScriptPlanAssetTypes(Object? flowData) {
   }
   final normalized = flowData.replaceAll(RegExp(r'</?scriptPlan>'), '');
   final assetTypes = <String>{'role', 'scene'};
-  final toolSignals = <Pattern>[
-    '道具',
-    '物件',
-    '兵器',
-    '武器',
-    '法器',
-    '信物',
-    '令牌',
-    '玉佩',
-    '佩剑',
-    'tool',
-    'prop',
-  ];
-  if (toolSignals.any((signal) => normalized.contains(signal))) {
+  if (studioContentContainsAny(normalized, kProductionAssetToolSignalTokens)) {
     assetTypes.add('tool');
   }
   final sortedTypes = assetTypes.toList()
@@ -466,7 +450,7 @@ String _extractProductionCoverageDigest(
   if (ratioMatch == null) return '';
   final sampled = int.tryParse(ratioMatch.group(1)!) ?? 0;
   final total = int.tryParse(ratioMatch.group(2)!) ?? 0;
-  final expandMatchZh = RegExp(r'待展开\s*(\d+)\s*行').firstMatch(detail);
+  final expandMatchZh = kProductionStoryboardExpandRowsZhPattern.firstMatch(detail);
   if (expandMatchZh != null) {
     final remaining = int.tryParse(expandMatchZh.group(1)!) ?? 0;
     return l10n.agentWorkspaceProductionStoryboardTableCoverageWithPending(

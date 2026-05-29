@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
+import '../design_system/studio_typography.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
@@ -373,10 +374,11 @@ class CreatorJourneyStrip extends StatelessWidget {
     }
 
     if (sheetPresentation) {
+      final metaSize = StudioTypography.of(context).meta;
       final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
         fontWeight: FontWeight.w600,
         height: 1.15,
-        fontSize: 11,
+        fontSize: metaSize,
       );
       return buildStripRow(iconSize: 20, labelStyle: labelStyle);
     }
@@ -385,10 +387,11 @@ class CreatorJourneyStrip extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final iconSize = width.isFinite && width < 520 ? 18.0 : 20.0;
+        final metaSize = StudioTypography.of(context).meta;
         final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
           height: 1.15,
-          fontSize: width.isFinite && width < 520 ? 10.5 : 11,
+          fontSize: metaSize,
         );
 
         final row = buildStripRow(iconSize: iconSize, labelStyle: labelStyle);

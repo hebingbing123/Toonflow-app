@@ -1803,9 +1803,29 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
       return;
     }
     final id = row.workspace.id;
+    final previousItems =
+        _items == null ? null : List<WorkspaceListItem>.from(_items!);
     setState(() => _patchingWorkspaceId = id);
     try {
-      await patchWorkspaceV1(token, id, PatchWorkspaceBody(archive: archive));
+      await studioRunOptimisticMutation(
+        apply: () {
+          if (_items == null) {
+            return;
+          }
+          setState(() {
+            _items = studioReplaceWorkspaceInList(
+              _items!,
+              studioWorkspaceListItemWithArchive(row, archived: archive),
+            );
+          });
+        },
+        rollback: () {
+          setState(() => _items = previousItems);
+        },
+        commit: () async {
+          await patchWorkspaceV1(token, id, PatchWorkspaceBody(archive: archive));
+        },
+      );
       if (!mounted) {
         return;
       }
@@ -1847,11 +1867,22 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
       return;
     }
     final id = row.workspace.id;
+    final previousCurrent = _effectiveCurrentWorkspaceId;
     setState(() => _switchingWorkspaceId = id);
     try {
-      await patchCurrentWorkspaceV1(
-        token,
-        PatchCurrentWorkspaceBody(workspaceId: id),
+      await studioRunOptimisticMutation(
+        apply: () {
+          setState(() => _optimisticCurrentWorkspaceId = id);
+        },
+        rollback: () {
+          setState(() => _optimisticCurrentWorkspaceId = previousCurrent);
+        },
+        commit: () async {
+          await patchCurrentWorkspaceV1(
+            token,
+            PatchCurrentWorkspaceBody(workspaceId: id),
+          );
+        },
       );
       if (!mounted) {
         return;

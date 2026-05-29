@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../ix/studio_focus_trap.dart';
 import '../ix/studio_form_keyboard.dart';
 import '../ix/studio_platform_modals.dart';
 import '../ix/studio_mobile_affordances.dart';
@@ -34,7 +35,7 @@ Future<T?> showStudioDialog<T>({
             Theme.of(ctx).dialogTheme.backgroundColor ??
                 Theme.of(ctx).colorScheme.surface,
           ),
-          child: builder(ctx),
+          child: StudioFocusTrap(child: builder(ctx)),
         );
       },
     );
@@ -49,7 +50,7 @@ Future<T?> showStudioDialog<T>({
           Theme.of(ctx).dialogTheme.backgroundColor ??
               Theme.of(ctx).colorScheme.surface,
         ),
-        child: builder(ctx),
+        child: StudioFocusTrap(child: builder(ctx)),
       );
     },
   );
@@ -113,7 +114,9 @@ Future<T?> showStudioBottomSheet<T>({
         value: studioSystemUiOverlayStyleForSurface(
           StudioTokens.of(ctx).bgSurface,
         ),
-        child: sheetChrome(ctx, builder(ctx)),
+        child: StudioFocusTrap(
+          child: sheetChrome(ctx, builder(ctx)),
+        ),
       ),
     );
   }
@@ -131,7 +134,9 @@ Future<T?> showStudioBottomSheet<T>({
       value: studioSystemUiOverlayStyleForSurface(
         StudioTokens.of(ctx).bgSurface,
       ),
-      child: sheetChrome(ctx, builder(ctx)),
+      child: StudioFocusTrap(
+        child: sheetChrome(ctx, builder(ctx)),
+      ),
     ),
   );
 }
@@ -380,6 +385,8 @@ class _StudioConfirmDialogState extends State<_StudioConfirmDialog> {
 class StudioAlertDialog extends StatelessWidget {
   const StudioAlertDialog({
     super.key,
+    this.onEnterSubmit,
+    this.enterSubmitEnabled = true,
     this.icon,
     this.iconPadding,
     this.iconColor,
@@ -409,6 +416,15 @@ class StudioAlertDialog extends StatelessWidget {
     this.maxHeightFactor = 0.88,
     this.showCloseButton = true,
   });
+
+  /// When set, Enter on a single-line field triggers this callback.
+  ///
+  /// When null and [enterSubmitEnabled] is true, a lone single-line [TextField] in
+  /// [content] auto-wires to the trailing [FilledButton] in [actions].
+  final VoidCallback? onEnterSubmit;
+
+  /// When false, never binds Enter (including auto-infer).
+  final bool enterSubmitEnabled;
 
   final Widget? icon;
   final EdgeInsetsGeometry? iconPadding;
@@ -467,7 +483,7 @@ class StudioAlertDialog extends StatelessWidget {
 
     final shellActions = actions;
 
-    return StudioDialogShell(
+    final shell = StudioDialogShell(
       title: _resolveTitleString(title) ?? '',
       titleWidget: resolvedTitle,
       leading: leading,
@@ -478,6 +494,20 @@ class StudioAlertDialog extends StatelessWidget {
       maxHeightFactor: maxHeightFactor,
       scrollable: scrollable,
       child: paddedBody,
+    );
+
+    final resolvedEnterSubmit = studioResolveAlertDialogEnterSubmit(
+      enterSubmitEnabled: enterSubmitEnabled,
+      onEnterSubmit: onEnterSubmit,
+      content: content,
+      actions: actions,
+    );
+    if (resolvedEnterSubmit == null) {
+      return shell;
+    }
+    return StudioFormKeyboardScope(
+      onEnterSubmit: resolvedEnterSubmit,
+      child: shell,
     );
   }
 

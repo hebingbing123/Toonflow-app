@@ -93,6 +93,7 @@ class _BrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: <Widget>[
         const OpenFlowBrandMark(size: 40),
@@ -110,7 +111,7 @@ class _BrandHeader extends StatelessWidget {
                 )?.copyWith(color: tokens.textPrimary, fontWeight: FontWeight.w700),
               ),
               Text(
-                'Studio',
+                l10n.studioSidebarProductLabel,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: tokens.textMuted,
                 ),

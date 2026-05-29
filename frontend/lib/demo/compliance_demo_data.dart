@@ -1,6 +1,9 @@
 import '../content_compliance/controller.dart';
+import '../l10n/rust_api_error_format.dart';
 
 ContentComplianceQueueResponseV1 buildDemoContentComplianceQueue() {
+  final l10n = rustApiLookupL10nFromPlatform();
+  final projectName = l10n.demoStudioProjectDisplayName;
   return ContentComplianceQueueResponseV1.fromJson(<String, dynamic>{
     'summary': <String, dynamic>{
       'pending': 1,
@@ -27,8 +30,8 @@ ContentComplianceQueueResponseV1 buildDemoContentComplianceQueue() {
         'level': 'critical',
         'stage': 'critical_unclaimed',
         'count': 1,
-        'title': '有未认领的严重举报',
-        'message': '演示：优先处理待认领队列中的安全类举报。',
+        'title': l10n.demoComplianceAlertCriticalTitle,
+        'message': l10n.demoComplianceAlertCriticalMessage,
       },
     ],
     'workspaceSummaries': <dynamic>[],
@@ -42,14 +45,14 @@ ContentComplianceQueueResponseV1 buildDemoContentComplianceQueue() {
         'targetType': 'project',
         'targetId': '00000000-0000-0000-0000-000000000007',
         'workspaceId': 'workspace-demo',
-        'workspaceName': '演示工作区',
+        'workspaceName': l10n.demoWorkspaceDisplayName,
         'projectId': '00000000-0000-0000-0000-000000000007',
-        'projectName': '春季短剧 · 演示',
+        'projectName': projectName,
         'category': 'safety',
         'severity': 'critical',
         'status': 'pending',
         'escalationStage': 'critical_unclaimed',
-        'detail': '演示举报：示例安全类内容需人工复核。',
+        'detail': l10n.demoComplianceReportDetail,
         'claimedByLabel': null,
         'claimedAt': null,
         'resolutionLabel': null,

@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
+import 'studio_glass_shader.dart';
 import 'tokens.dart';
 
 /// Dark glass panel for sidebar/topbar chrome. Content previews should use solid [StudioTokens.bgSurface].
-class StudioGlassPanel extends StatelessWidget {
+class StudioGlassPanel extends StatefulWidget {
   const StudioGlassPanel({
     super.key,
     required this.child,
@@ -24,37 +23,60 @@ class StudioGlassPanel extends StatelessWidget {
   }
 
   @override
+  State<StudioGlassPanel> createState() => _StudioGlassPanelState();
+}
+
+class _StudioGlassPanelState extends State<StudioGlassPanel> {
+  @override
+  void initState() {
+    super.initState();
+    StudioGlassShader.scheduleWarmUp();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     final content = Padding(
-      padding: padding ?? EdgeInsets.zero,
-      child: child,
+      padding: widget.padding ?? EdgeInsets.zero,
+      child: widget.child,
     );
 
-    if (!glassEnabled) {
+    if (!StudioGlassPanel.glassEnabled) {
       return DecoratedBox(
         decoration: BoxDecoration(
           color: tokens.bgElevated,
-          border: border ?? Border(bottom: BorderSide(color: tokens.borderSubtle)),
+          border: widget.border ??
+              Border(bottom: BorderSide(color: tokens.borderSubtle)),
         ),
         child: content,
       );
     }
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: tokens.glass,
-            border: border ??
-                Border(
-                  bottom: BorderSide(color: tokens.glassBorder),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(
+          constraints.maxWidth.isFinite ? constraints.maxWidth : 800,
+          constraints.maxHeight.isFinite ? constraints.maxHeight : 600,
+        );
+        return ClipRect(
+          child: BackdropFilter(
+            filter: StudioGlassShader.blurFilter(
+              sigma: widget.blur,
+              textureSize: size,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: tokens.glass,
+                border: widget.border ??
+                    Border(
+                      bottom: BorderSide(color: tokens.glassBorder),
+                    ),
+              ),
+              child: content,
+            ),
           ),
-          child: content,
-        ),
-      ),
+        );
+      },
     );
   }
 }

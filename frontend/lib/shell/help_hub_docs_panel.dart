@@ -51,7 +51,7 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
         _loading = true;
         _error = null;
       });
-      final cfg = buildDemoHelpHubConfig();
+      final cfg = buildDemoHelpHubConfig(resolveAppLocalizationsForErrors(context));
       if (!mounted) {
         return;
       }
@@ -540,6 +540,12 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
+          StudioKeyboardShortcutsPanel(
+            title: l10n.studioKeyboardShortcuts,
+            intro: l10n.studioKeyboardShortcutsIntro,
+            entries: buildStudioProductKeyboardShortcuts(l10n),
+          ),
+          const SizedBox(height: StudioSpacing.sm),
           TextField(
             controller: _helpHubSearchController,
             decoration: InputDecoration(labelText: l10n.helpHubSearchLabel),

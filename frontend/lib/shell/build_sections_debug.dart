@@ -86,12 +86,12 @@ extension _HomePageBuildDebugSections on _HomePageState {
       onPersistUserWasmProbe: _skillsHarnessController.persistUserWasmProbe,
       onLoadUserWasmList: _skillsHarnessController.loadUserWasmList,
       onRevokeUserWasmProbe: () async {
+        final l10n = resolveAppLocalizationsForErrors(context);
         final confirmed = await showStudioConfirmDialog(
           context: context,
-          title: 'Revoke user WASM?',
-          message:
-              'This will revoke the selected user WASM entry and cannot be undone.',
-          confirmLabel: 'Revoke',
+          title: l10n.skillsHarnessRevokeWasmTitle,
+          message: l10n.skillsHarnessRevokeWasmMessage,
+          confirmLabel: l10n.skillsHarnessRevokeConfirm,
           cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
           destructive: true,
         );
@@ -101,12 +101,12 @@ extension _HomePageBuildDebugSections on _HomePageState {
         await _skillsHarnessController.revokeUserWasmProbe();
       },
       onRevokeUserWasmProbeAndReloadList: () async {
+        final l10n = resolveAppLocalizationsForErrors(context);
         final confirmed = await showStudioConfirmDialog(
           context: context,
-          title: 'Revoke user WASM?',
-          message:
-              'This will revoke the selected user WASM entry, reload the list, and cannot be undone.',
-          confirmLabel: 'Revoke',
+          title: l10n.skillsHarnessRevokeWasmTitle,
+          message: l10n.skillsHarnessRevokeWasmReloadMessage,
+          confirmLabel: l10n.skillsHarnessRevokeConfirm,
           cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
           destructive: true,
         );

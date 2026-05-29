@@ -6,7 +6,9 @@ extension _HomePageProductDemoMode on _HomePageState {
   ProductDemoCatalog? get _activeDemoCatalog =>
       widget.debugPreviewData ??
       (ProductDemoMode.instance.isActive
-          ? ProductDemoCatalog.buildDefault()
+          ? ProductDemoCatalog.buildDefault(
+              resolveAppLocalizationsForErrors(context),
+            )
           : null);
 
   bool get _hasDemoCatalog => _activeDemoCatalog != null;

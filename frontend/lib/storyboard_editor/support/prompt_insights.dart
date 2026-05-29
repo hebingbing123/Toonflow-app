@@ -150,8 +150,10 @@ _StoryboardPromptCompression _compactStoryboardPrompt({
   final canTrimGeneric =
       diagnostics.promptChars >= 520 ||
       diagnostics.memoryStyleChars >= 96 ||
-      diagnostics.memorySuppressedBucketCounts['动作'] != null ||
-      diagnostics.memorySuppressedBucketCounts['光影'] != null;
+      studioContentBucketHit(
+        diagnostics.memorySuppressedBucketCounts.keys,
+        kStoryboardMemorySuppressedTrimBuckets,
+      );
 
   for (final fragment in fragments) {
     final normalized = _normalizeStoryboardPromptText(fragment).toLowerCase();
@@ -190,56 +192,16 @@ String _normalizeStoryboardPromptText(String text) {
 bool _isLowValueStoryboardPromptFragment(String fragment) {
   final normalized = _normalizeStoryboardPromptText(fragment).toLowerCase();
   if (normalized.isEmpty) return false;
-  final hasPerformanceSignal = _storyboardPromptKeywords.any(
+  final hasPerformanceSignal = kStoryboardPromptPerformanceKeywords.any(
     (keyword) => normalized.contains(keyword),
   );
   if (hasPerformanceSignal) {
     return false;
   }
-  return _storyboardGenericTrimKeywords.any(
+  return kStoryboardPromptGenericTrimKeywords.any(
     (keyword) => normalized.contains(keyword),
   );
 }
-
-const List<String> _storyboardPromptKeywords = <String>[
-  '表情',
-  '情绪',
-  '眼神',
-  '口型',
-  '微表情',
-  '呼吸',
-  '停顿',
-  '台词',
-  '语气',
-  '人物',
-  '角色',
-  'identity',
-  'expression',
-  'emotion',
-  'lip',
-  'face',
-];
-
-const List<String> _storyboardGenericTrimKeywords = <String>[
-  '光影',
-  '光线',
-  '镜头',
-  '运镜',
-  '跟拍',
-  '推拉',
-  '摇镜',
-  '氛围',
-  '节奏',
-  '动作',
-  '缓慢',
-  '唯美',
-  'cinematic',
-  'lighting',
-  'camera',
-  'tracking shot',
-  'moody',
-  'atmosphere',
-];
 
 String buildStoryboardVideoPromptDiagnosticsLine(
   AppLocalizations l10n,
@@ -554,15 +516,13 @@ List<String> buildStoryboardVideoPromptRepairSuggestions(
     addTagged('continuity', l10n.storyboardRepairSuggestContinuity);
   }
   if (diagnostics.memoryDeliveryPriorityApplied ||
-      hitBuckets.contains('表演') ||
-      hitBuckets.contains('语气') ||
+      studioContentBucketHit(hitBuckets, kStoryboardRepairDeliveryBucketTokens) ||
       diagnostics.memoryDeliveryChars >= 24) {
     addTagged('delivery', l10n.storyboardRepairSuggestDelivery);
   }
   if (diagnostics.promptChars >= 520 ||
       diagnostics.memoryStyleChars >= 96 ||
-      topSuppressedBucket == '动作' ||
-      topSuppressedBucket == '光影') {
+      kStoryboardMemorySuppressedTrimBuckets.contains(topSuppressedBucket)) {
     addTagged('trim_generic', l10n.storyboardRepairSuggestTrimGeneric);
   }
   if (diagnostics.negativePromptChars > 0 &&

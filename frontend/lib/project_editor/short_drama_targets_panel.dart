@@ -6,6 +6,7 @@ import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/app_localizations.dart';
+import '../platform/studio_content_heuristics.dart';
 import '../rust_api.dart';
 
 /// Wave-1 Moneyprinter-style short-drama flags on the project row, editable
@@ -53,9 +54,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
 
   static _ShortDramaFlavor _flavorFromProject(ProjectRow project) {
     final value = (project.mode ?? '').trim().toLowerCase();
-    if (value.contains('live') ||
-        value.contains('real') ||
-        value.contains('真人')) {
+    if (studioProjectModeLooksLiveAction(value)) {
       return _ShortDramaFlavor.liveAction;
     }
     return _ShortDramaFlavor.animated;

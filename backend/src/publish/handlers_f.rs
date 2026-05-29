@@ -324,8 +324,11 @@ pub(crate) async fn batch_archive_publish_drafts(
     let pool = state.require_pool()?;
     let _scope = require_project_write_scope(&state, uid, project_id).await?;
 
-    let archived = batch_archive_drafts(pool, project_id, &body.draft_ids).await?;
-    Ok(Json(BatchArchiveDraftsResponse { archived }))
+    let result = batch_archive_drafts(pool, project_id, &body.draft_ids).await?;
+    Ok(Json(BatchArchiveDraftsResponse {
+        archived: result.archived,
+        failed: result.failed,
+    }))
 }
 
 /// P8: Batch validate multiple drafts before operation

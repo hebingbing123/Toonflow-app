@@ -205,7 +205,7 @@ class _CoachCalloutCard extends StatelessWidget {
     final bottom = _dockBottom + MediaQuery.paddingOf(context).bottom;
 
     final card = Semantics(
-      label: 'product-demo-coach-overlay',
+      label: ProductDemoCoachKeys.semanticsOverlay,
       container: true,
       explicitChildNodes: true,
       child: Material(

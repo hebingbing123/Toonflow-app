@@ -57,7 +57,6 @@ void main() {
         runtime: runtime,
         snapshot: const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.idle,
-          message: 'Desktop Rust bridge is starting.',
         ),
       ),
       isFalse,
@@ -67,7 +66,6 @@ void main() {
         runtime: runtime,
         snapshot: const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.ready,
-          message: 'Desktop Rust bridge is ready.',
         ),
       ),
       isTrue,
@@ -92,7 +90,6 @@ void main() {
         runtime: webRuntime,
         snapshot: const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.skipped,
-          message: 'Web runtime skips the desktop Rust bridge.',
         ),
       ),
       webRuntime.detail,
@@ -103,7 +100,6 @@ void main() {
         runtime: desktopRuntime,
         snapshot: const NativeBridgeStartupSnapshot(
           state: NativeBridgeStartupState.failed,
-          message: 'Desktop Rust bridge failed to initialize.',
         ),
       ),
       en.nativeBridgeMessageInitFailed,

@@ -528,6 +528,83 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     }
   }
 
+  Widget _wrapPaneWithInspector(BuildContext context, Widget pane) {
+    if (_pane != AgentWorkspacePane.production &&
+        _pane != AgentWorkspacePane.script) {
+      return pane;
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < kStudioGridDesktopMinWidth) {
+          return pane;
+        }
+        final l10n = resolveAppLocalizationsForErrors(context);
+        final theme = Theme.of(context);
+        final tokens = StudioTokens.of(context);
+        final resultLine = (widget.workspaceLastToolResultLine ?? '').trim();
+        final writebackLine = (widget.workspaceWritebackLine ?? '').trim();
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 3, child: pane),
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.only(left: StudioSpacing.sm),
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(StudioSpacing.sm),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.shortVideoAgentInspectorTitle,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: StudioSpacing.xs),
+                        if (resultLine.isEmpty && writebackLine.isEmpty)
+                          Text(
+                            l10n.shortVideoAgentInspectorEmpty,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: tokens.textMuted,
+                            ),
+                          )
+                        else ...[
+                          if ((widget.workspaceLastToolName ?? '')
+                              .trim()
+                              .isNotEmpty)
+                            Text(
+                              widget.workspaceLastToolName!.trim(),
+                              style: theme.textTheme.labelMedium,
+                            ),
+                          if (resultLine.isNotEmpty)
+                            Text(
+                              resultLine,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          if (writebackLine.isNotEmpty) ...[
+                            const SizedBox(height: StudioSpacing.xs),
+                            Text(
+                              writebackLine,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: tokens.textMuted,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// Agent 工作区外层视图，负责标题、范围输入与 pane 壳层布局。
   Widget _buildAgentWorkspacesSectionView(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -572,7 +649,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         ),
       ],
       const SizedBox(height: StudioSpacing.sm),
-      _buildPaneBody(context),
+      _wrapPaneWithInspector(context, _buildPaneBody(context)),
       const SizedBox(height: StudioSpacing.md),
     ];
 

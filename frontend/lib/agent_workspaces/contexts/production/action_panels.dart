@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../design_system/components/studio_chip.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_debounced_action.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -267,13 +268,17 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               );
             }
 
-            final workflowButton = FilledButton.tonal(
-              style: studioFormTonalButtonStyle(context),
-              onPressed: busy ? null : onRunProductionWorkspace,
-              child: Text(
-                loadingProductionWorkspaceRun
-                    ? '…'
-                    : l10n.agentWorkspaceProductionRunWorkflow,
+            final workflowButton = StudioDebouncedAction(
+              enabled: !busy,
+              onPressed: () async => onRunProductionWorkspace(),
+              builder: (context, onPressed) => FilledButton.tonal(
+                style: studioFormTonalButtonStyle(context),
+                onPressed: onPressed,
+                child: Text(
+                  loadingProductionWorkspaceRun
+                      ? '…'
+                      : l10n.agentWorkspaceProductionRunWorkflow,
+                ),
               ),
             );
             final probeButton = FilledButton.tonal(
@@ -294,15 +299,17 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                     : l10n.agentWorkspaceProductionRunSubAgent,
               ),
             );
-            final writebackButton = FilledButton(
-              style: studioFormPrimaryButtonStyle(context),
-              onPressed: busy || !hasLastToolResult
-                  ? null
-                  : onWriteBackProductionFlowResult,
-              child: Text(
-                loadingProductionResultWriteback
-                    ? '…'
-                    : l10n.agentWorkspaceProductionWritebackToolResult,
+            final writebackButton = StudioDebouncedAction(
+              enabled: !busy && hasLastToolResult,
+              onPressed: () async => onWriteBackProductionFlowResult(),
+              builder: (context, onPressed) => FilledButton(
+                style: studioFormPrimaryButtonStyle(context),
+                onPressed: onPressed,
+                child: Text(
+                  loadingProductionResultWriteback
+                      ? '…'
+                      : l10n.agentWorkspaceProductionWritebackToolResult,
+                ),
               ),
             );
 

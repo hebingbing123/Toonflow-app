@@ -19,7 +19,8 @@ void main() {
       expect(snapshot.state, NativeBridgeStartupState.ready);
       expect(snapshot.libraryPath, isNull);
       expect(loggedSnapshot.state, NativeBridgeStartupState.ready);
-      expect(loggedSnapshots.single.message, 'Desktop Rust bridge is ready.');
+      expect(loggedSnapshots.single.state, NativeBridgeStartupState.ready);
+      expect(loggedSnapshots.single.message, isEmpty);
     },
   );
 

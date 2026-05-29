@@ -15,8 +15,11 @@ bool isBackendDefaultPersonalWorkspaceName(String name) {
   if (trimmed.isEmpty) {
     return false;
   }
-  final lower = trimmed.toLowerCase();
-  return lower == 'personal workspace' || trimmed == '个人工作区';
+  final en =
+      lookupAppLocalizations(const Locale('en')).workspaceContextPersonalDefaultName;
+  final zh =
+      lookupAppLocalizations(const Locale('zh')).workspaceContextPersonalDefaultName;
+  return trimmed.toLowerCase() == en.toLowerCase() || trimmed == zh;
 }
 
 class WorkspaceContextView extends StatelessWidget {

@@ -8,6 +8,7 @@ import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/studio_adaptive_theme.dart';
 import '../design_system/studio_motion.dart';
+import '../design_system/studio_theme_mode_notifier.dart';
 import '../design_system/theme.dart';
 import '../l10n/app_localizations.dart';
 import '../locale/app_locale_notifier.dart';
@@ -38,6 +39,7 @@ class _StudioProductAppState extends State<StudioProductApp> {
       router: _router,
       shellNavigation: _shellNavigation,
     );
+    StudioThemeModeNotifier.instance.load();
   }
 
   @override
@@ -51,7 +53,10 @@ class _StudioProductAppState extends State<StudioProductApp> {
     return StudioShellNavigationScope(
       navigation: _shellNavigation,
       child: ListenableBuilder(
-        listenable: AppLocaleNotifier.instance,
+        listenable: Listenable.merge([
+          AppLocaleNotifier.instance,
+          StudioThemeModeNotifier.instance,
+        ]),
         builder: (context, _) {
           return StudioScaffoldMessenger(
             key: kRustApiRootScaffoldMessengerKey,
@@ -60,7 +65,7 @@ class _StudioProductAppState extends State<StudioProductApp> {
               debugShowCheckedModeBanner: false,
               theme: buildStudioLightTheme(),
               darkTheme: buildStudioDarkTheme(),
-              themeMode: ThemeMode.system,
+              themeMode: StudioThemeModeNotifier.instance.mode,
               onGenerateTitle: (ctx) =>
                   AppLocalizations.of(ctx)?.appTitle ??
                   lookupAppLocalizations(const Locale('en')).appTitle,

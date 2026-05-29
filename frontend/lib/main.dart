@@ -9,6 +9,7 @@ import 'design_system/google_fonts_runtime.dart';
 import 'design_system/ix/studio_mobile_affordances.dart';
 import 'locale/app_locale_notifier.dart';
 import 'native_bridge/native_bridge_bootstrap.dart';
+import 'platform/studio_desktop_notifications.dart';
 import 'product_shell/studio_app.dart';
 import 'status_page.dart';
 
@@ -20,6 +21,7 @@ Future<void> main() async {
   await AppLocaleNotifier.instance.load();
   configureGoogleFontsRuntime();
   await NativeBridgeBootstrap.instance.ensureStarted();
+  await StudioDesktopNotifications.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   if (kSupabaseConfigured) {

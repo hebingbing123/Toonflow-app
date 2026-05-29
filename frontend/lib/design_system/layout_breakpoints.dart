@@ -130,6 +130,30 @@ double projectsHomeContentMaxWidth(double contentWidth, {required bool isPhone})
   return double.infinity;
 }
 
+/// Kiro-style responsive breakpoint (maps to product constants; see
+/// `docs/plans/flutter-ui-ux-breakpoint-mapping.md`).
+enum StudioBreakpoint {
+  mobile(maxWidth: kStudioHandsetMaxWidth),
+  tablet(maxWidth: kStudioGridDesktopMinWidth),
+  desktop(maxWidth: 1280),
+  wide(maxWidth: double.infinity);
+
+  const StudioBreakpoint({required this.maxWidth});
+  final double maxWidth;
+
+  static StudioBreakpoint fromWidth(double width) {
+    if (width < mobile.maxWidth) return mobile;
+    if (width < tablet.maxWidth) return tablet;
+    if (width < desktop.maxWidth) return desktop;
+    return wide;
+  }
+
+  bool get isMobile => this == mobile;
+  bool get isTablet => this == tablet;
+  bool get isDesktop => this == desktop;
+  bool get isWide => this == wide;
+}
+
 /// Resolves recent-project chip width from pane [contentWidth].
 double projectsHomeRecentCardWidth(double contentWidth, {required bool isPhone}) {
   if (isPhone) {

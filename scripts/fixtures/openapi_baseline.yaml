@@ -1700,8 +1700,13 @@ components:
         archived:
           format: int64
           type: integer
+        failed:
+          items:
+            $ref: '#/components/schemas/BatchOperationFailure'
+          type: array
       required:
       - archived
+      - failed
       type: object
     BatchMutateContentReportsBody:
       additionalProperties: false

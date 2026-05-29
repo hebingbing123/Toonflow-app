@@ -17,4 +17,5 @@ abstract final class ProductDemoCoachKeys {
   static const semanticsNext = 'Demo tour next step';
   static const semanticsPrevious = 'Demo tour previous step';
   static const semanticsExit = 'Exit demo';
+  static const semanticsOverlay = 'product-demo-coach-overlay';
 }

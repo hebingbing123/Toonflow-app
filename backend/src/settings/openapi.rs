@@ -71,6 +71,8 @@ use utoipa::OpenApi;
     crate::settings::notifications::post_notifications_content_compliance_cleared_templates_shared_audit_export_async,
     crate::settings::platform_config::get_platform_config,
     crate::settings::platform_config::post_platform_config,
+    crate::settings::studio_ui::get_studio_ui_prefs,
+    crate::settings::studio_ui::put_studio_ui_prefs,
     crate::settings::outbound_webhooks::post_outbound_webhook_create,
     crate::settings::outbound_webhooks::get_outbound_webhook_list,
     crate::settings::outbound_webhooks::patch_outbound_webhook,

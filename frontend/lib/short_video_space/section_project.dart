@@ -141,9 +141,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
 
   ShortVideoMode _modeFromProject(ProjectRow project) {
     final value = (project.mode ?? '').trim().toLowerCase();
-    if (value.contains('live') ||
-        value.contains('real') ||
-        value.contains('真人')) {
+    if (studioProjectModeLooksLiveAction(value)) {
       return ShortVideoMode.liveAction;
     }
     return ShortVideoMode.animated;

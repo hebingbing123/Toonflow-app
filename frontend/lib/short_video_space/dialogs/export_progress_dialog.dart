@@ -560,19 +560,23 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
             child: Text(l10n.shortVideoSpaceDialogExportProgressCloseButton),
           ),
         if (progress != null && !progress.status.isTerminal)
-          TextButton(
-            onPressed: _cancelling ? null : _cancelExport,
-            child: _cancelling
-                ? const StudioRepaintBoundary(
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: StudioControlSize.progressStroke,
+          StudioDebouncedAction(
+            enabled: !_cancelling,
+            onPressed: _cancelling ? null : () async => _cancelExport(),
+            builder: (context, onPressed) => TextButton(
+              onPressed: onPressed,
+              child: _cancelling
+                  ? const StudioRepaintBoundary(
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: StudioControlSize.progressStroke,
+                        ),
                       ),
-                    ),
-                  )
-                : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
+                    )
+                  : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),
+            ),
           ),
         if (progress?.status.isTerminal == true)
           TextButton(
@@ -586,11 +590,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
           ),
         if (progress?.status == ExportTaskStatus.completed &&
             (progress?.outputUrl?.trim().isNotEmpty ?? false))
-          FilledButton.tonalIcon(
-            style: studioFormIconLabeledButtonStyle(context),
-            onPressed: () => _downloadExportOutput(progress!),
-            icon: const Icon(Icons.download_outlined),
-            label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
+          StudioDebouncedAction(
+            onPressed: () async => _downloadExportOutput(progress!),
+            builder: (context, onPressed) => FilledButton.tonalIcon(
+              style: studioFormIconLabeledButtonStyle(context),
+              onPressed: onPressed,
+              icon: const Icon(Icons.download_outlined),
+              label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
+            ),
           ),
         if (progress?.status.isTerminal == true)
           FilledButton(

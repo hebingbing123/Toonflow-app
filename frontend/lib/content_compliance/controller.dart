@@ -7,8 +7,10 @@ import '../config.dart';
 import '../demo/product_demo_mode.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/rust_api_feedback.dart';
+import '../platform/studio_optimistic_mutation.dart';
 import '../rust_api/core.dart';
 import '../rust_api/settings/notifications.dart';
+import 'optimistic_queue.dart';
 
 typedef ContentComplianceAccessTokenProvider = String? Function();
 typedef ContentComplianceErrorSink = void Function(String? error);
@@ -670,6 +672,15 @@ class ContentComplianceController extends ChangeNotifier {
     await _mutateQueue(
       '$kApiBaseUrl/api/v1/internal/compliance/reports/$id/claim',
       <String, dynamic>{'actorLabel': actorLabel},
+      applyQueue: (current) => studioComplianceQueueUpdateReports(
+        current,
+        {id},
+        (row) => studioComplianceReportWithStatus(
+          row,
+          status: 'claimed',
+          actorLabel: actorLabel,
+        ),
+      ),
     );
   }
 
@@ -689,29 +700,74 @@ class ContentComplianceController extends ChangeNotifier {
         if ((resolutionNote ?? '').trim().isNotEmpty)
           'resolutionNote': resolutionNote!.trim(),
       },
+      applyQueue: (current) => studioComplianceQueueUpdateReports(
+        current,
+        {id},
+        (row) => studioComplianceReportWithStatus(
+          row,
+          status: status,
+          actorLabel: actorLabel,
+          resolutionNote: resolutionNote,
+        ),
+      ),
     );
   }
 
-  Future<void> _mutateQueue(String url, Map<String, dynamic> body) async {
+  Future<void> _mutateQueue(
+    String url,
+    Map<String, dynamic> body, {
+    ContentComplianceQueueResponseV1? Function(
+      ContentComplianceQueueResponseV1? queue,
+    )?
+    applyQueue,
+  }) async {
     if (!queueEnabled || mutatingQueue) {
       return;
     }
+    final previousQueue = queue;
     mutatingQueue = true;
     _setError(null);
     notifyListeners();
     try {
-      final res = await http
-          .post(
-            Uri.parse(url),
-            headers: {
-              'x-openflow-internal-token': kInternalOpsToken.trim(),
-              'content-type': 'application/json',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(const Duration(seconds: 15));
-      ensureHttpSuccess(res);
-      await loadQueue();
+      if (applyQueue == null) {
+        final res = await http
+            .post(
+              Uri.parse(url),
+              headers: {
+                'x-openflow-internal-token': kInternalOpsToken.trim(),
+                'content-type': 'application/json',
+              },
+              body: jsonEncode(body),
+            )
+            .timeout(const Duration(seconds: 15));
+        ensureHttpSuccess(res);
+        await loadQueue();
+        return;
+      }
+      await studioRunOptimisticMutation(
+        apply: () {
+          queue = applyQueue(queue);
+          notifyListeners();
+        },
+        rollback: () {
+          queue = previousQueue;
+          notifyListeners();
+        },
+        commit: () async {
+          final res = await http
+              .post(
+                Uri.parse(url),
+                headers: {
+                  'x-openflow-internal-token': kInternalOpsToken.trim(),
+                  'content-type': 'application/json',
+                },
+                body: jsonEncode(body),
+              )
+              .timeout(const Duration(seconds: 15));
+          ensureHttpSuccess(res);
+          await loadQueue();
+        },
+      );
     } catch (error) {
       reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
@@ -791,31 +847,56 @@ class ContentComplianceController extends ChangeNotifier {
     mutatingQueue = true;
     _setError(null);
     notifyListeners();
+    final previousQueue = queue;
+    final selected = reportIds.toSet();
+    final nextStatus = studioComplianceStatusForBatchAction(action);
+    ContentComplianceBatchMutateResponseV1? response;
     try {
-      final res = await http
-          .post(
-            Uri.parse(
-              '$kApiBaseUrl/api/v1/internal/compliance/reports/batch-mutate',
+      await studioRunOptimisticMutation(
+        apply: () {
+          queue = studioComplianceQueueUpdateReports(
+            queue,
+            selected,
+            (row) => studioComplianceReportWithStatus(
+              row,
+              status: nextStatus,
+              actorLabel: actorLabel,
+              resolutionNote: resolutionNote,
             ),
-            headers: {
-              'x-openflow-internal-token': kInternalOpsToken.trim(),
-              'content-type': 'application/json',
-            },
-            body: jsonEncode(<String, dynamic>{
-              'reportIds': reportIds,
-              'action': action,
-              'actorLabel': actorLabel,
-              'disposition': disposition,
-              if ((resolutionNote ?? '').trim().isNotEmpty)
-                'resolutionNote': resolutionNote!.trim(),
-            }),
-          )
-          .timeout(const Duration(seconds: 20));
-      ensureHttpSuccess(res);
-      final response = ContentComplianceBatchMutateResponseV1.fromJson(
-        jsonDecode(res.body) as Map<String, dynamic>,
+          );
+          notifyListeners();
+        },
+        rollback: () {
+          queue = previousQueue;
+          notifyListeners();
+        },
+        commit: () async {
+          final res = await http
+              .post(
+                Uri.parse(
+                  '$kApiBaseUrl/api/v1/internal/compliance/reports/batch-mutate',
+                ),
+                headers: {
+                  'x-openflow-internal-token': kInternalOpsToken.trim(),
+                  'content-type': 'application/json',
+                },
+                body: jsonEncode(<String, dynamic>{
+                  'reportIds': reportIds,
+                  'action': action,
+                  'actorLabel': actorLabel,
+                  'disposition': disposition,
+                  if ((resolutionNote ?? '').trim().isNotEmpty)
+                    'resolutionNote': resolutionNote!.trim(),
+                }),
+              )
+              .timeout(const Duration(seconds: 20));
+          ensureHttpSuccess(res);
+          response = ContentComplianceBatchMutateResponseV1.fromJson(
+            jsonDecode(res.body) as Map<String, dynamic>,
+          );
+          await loadQueue();
+        },
       );
-      await loadQueue();
       return response;
     } catch (error) {
       reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/design_system/debug/debug.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/product_shell/studio_theme.dart';
 
 void main() {
@@ -19,12 +20,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: StudioTheme.build(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: DebugOverlayWidget(snapshot: snapshot),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
   }
 
   group('DebugOverlayWidget', () {

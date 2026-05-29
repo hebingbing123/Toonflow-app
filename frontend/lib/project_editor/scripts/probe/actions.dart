@@ -19,10 +19,9 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 final confirmed = await showStudioConfirmDialog(
                   context: ctx,
-                  title: 'Run batch add probe?',
-                  message:
-                      'This probe creates temporary scripts and deletes them immediately after the probe completes. The write/delete flow cannot be undone.',
-                  confirmLabel: 'Run probe',
+                  title: l10n.projectEditorProbeScriptsBatchAddTitle,
+                  message: l10n.projectEditorProbeScriptsBatchAddMessage,
+                  confirmLabel: l10n.projectEditorProbeRunConfirm,
                   cancelLabel: MaterialLocalizations.of(ctx).cancelButtonLabel,
                   destructive: true,
                 );

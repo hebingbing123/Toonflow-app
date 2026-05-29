@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Studio Ops Dashboard</title>
+  <style>
+    :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 2rem; background: #0f1115; color: #e8eaed; }
+    h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+    .meta { color: #9aa0a6; font-size: 0.875rem; margin-bottom: 1.5rem; }
+    table { border-collapse: collapse; width: min(720px, 100%); }
+    th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #2a2f3a; }
+    .ok { color: #6ee7a8; }
+    .fail { color: #f87171; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 0.75rem; color: #c4c7ce; }
+  </style>
+</head>
+<body>
+  <h1>Studio Ops Dashboard</h1>
+  <p class="meta">API base: http://127.0.0.1:8666 · generated 2026-05-29T06:06:59Z UTC</p>
+  <table>
+    <thead><tr><th>Probe</th><th>HTTP</th><th>Body (trimmed)</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script>
+    const probes = [{"path":"/health","status":200,"ok":true,"body":"{\"status\":\"ok\",\"service\":\"openflow-server\"}"},{"path":"/ready","status":404,"ok":false,"body":"<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <meta\n      name=\"description\"\n      content=\"OpenFlow \u2014 AI \u77ed\u5267\u5de5\u5382\u3002\u4ece\u6587\u5b57\u5230\u6210\u7247\u5168\u6d41\u7a0b\u81ea\u52a8\u5316\uff0c\u652f\u6301\u5267\u672c\u3001\u5206\u955c\u3001\u7d20\u6750\u7ba1\u7406\u4e0e\u56e2\u961f\u534f\u4f5c\u3002Rust + Flutter \u9ad8\u6027\u80fd\u521b\u4f5c\u5e73\u53f0\u3002\"\n    />\n    <meta name=\"theme-color"},{"path":"/version","status":404,"ok":false,"body":"<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <meta\n      name=\"description\"\n      content=\"OpenFlow \u2014 AI \u77ed\u5267\u5de5\u5382\u3002\u4ece\u6587\u5b57\u5230\u6210\u7247\u5168\u6d41\u7a0b\u81ea\u52a8\u5316\uff0c\u652f\u6301\u5267\u672c\u3001\u5206\u955c\u3001\u7d20\u6750\u7ba1\u7406\u4e0e\u56e2\u961f\u534f\u4f5c\u3002Rust + Flutter \u9ad8\u6027\u80fd\u521b\u4f5c\u5e73\u53f0\u3002\"\n    />\n    <meta name=\"theme-color"}];
+    const tbody = document.getElementById('rows');
+    for (const row of probes) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + row.path + '</td>'
+        + '<td class="' + (row.ok ? 'ok' : 'fail') + '">' + row.status + '</td>'
+        + '<td><pre>' + row.body.replace(/</g, '&lt;') + '</pre></td>';
+      tbody.appendChild(tr);
+    }
+  </script>
+</body>
+</html>

@@ -392,6 +392,39 @@ void main() {
       expect(nextButton.onPressed, isNull);
     });
 
+    testWidgets('should display shot picker chips in playlist mode', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreviewPlayer(
+              playlist: [
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video1.mp4',
+                  shotNumber: 1,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video2.mp4',
+                  shotNumber: 2,
+                ),
+                ShotPreviewItem(
+                  videoUrl: 'https://example.com/video3.mp4',
+                  shotNumber: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('Shots'), findsOneWidget);
+      expect(find.byType(ChoiceChip), findsNWidgets(3));
+      expect(find.text('#1'), findsOneWidget);
+      expect(find.text('#2'), findsOneWidget);
+      expect(find.text('#3'), findsOneWidget);
+    });
+
     testWidgets('should display total playlist progress', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -546,13 +579,14 @@ void main() {
   });
 
   group('PreviewPlayer - UI Layout', () {
-    testWidgets('should display video in 16:9 aspect ratio', (WidgetTester tester) async {
+    testWidgets('should display video in project aspect ratio', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: PreviewPlayer(
               videoUrl: 'https://example.com/video.mp4',
               shotNumber: 1,
+              videoRatio: '16:9',
             ),
           ),
         ),
@@ -560,7 +594,6 @@ void main() {
 
       await tester.pump();
 
-      // Should have AspectRatio widget with 16/9 ratio
       final aspectRatio = tester.widget<AspectRatio>(
         find.byType(AspectRatio),
       );

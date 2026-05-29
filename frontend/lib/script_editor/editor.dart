@@ -108,11 +108,12 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
   }
 
   Future<bool> _confirmDiscard() async {
+    final l10n = resolveAppLocalizationsForErrors(widget.dialogContext);
     final discard = await showStudioConfirmDialog(
       context: widget.dialogContext,
-      title: 'Discard changes?',
-      message: 'You have unsaved script changes. Leave anyway?',
-      confirmLabel: 'Discard',
+      title: l10n.studioDiscardChangesTitle,
+      message: l10n.studioDiscardScriptChangesMessage,
+      confirmLabel: l10n.studioDiscardAction,
       cancelLabel: MaterialLocalizations.of(
         widget.dialogContext,
       ).cancelButtonLabel,
@@ -227,9 +228,10 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(widget.dialogContext);
     final viewportWidth = MediaQuery.sizeOf(widget.dialogContext).width;
+    final wide = viewportWidth >= kStudioTwoColumnMinWidth;
     final dialogWidth = viewportWidth.isFinite
-        ? viewportWidth.clamp(320.0, 720.0)
-        : 720.0;
+        ? viewportWidth.clamp(320.0, wide ? 1200.0 : 720.0)
+        : (wide ? 1200.0 : 720.0);
 
     return StudioDirtyPopGuard(
       isDirty: _dirty,
@@ -242,58 +244,84 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
           child: SingleChildScrollView(
             child: StudioFormKeyboardScope(
               onEnterSubmit: _saving ? null : () => _saveChanges(l10n),
-              child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _nameCtrl,
-                  enabled: !_saving,
-                  decoration: InputDecoration(
-                    labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
-                  ),
-                ),
-                const SizedBox(height: StudioLayoutSpacing.listItem),
-                TextField(
-                  controller: _contentCtrl,
-                  enabled: !_saving,
-                  minLines: 4,
-                  maxLines: 12,
-                  decoration: InputDecoration(
-                    labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
-                    alignLabelWithHint: true,
-                  ),
-                ),
-                const SizedBox(height: StudioLayoutSpacing.listItem),
-                TextField(
-                  controller: _stateCtrl,
-                  enabled: !_saving,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText:
-                        l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: _saving ? null : _openStoryboardStep,
-                    child: Text(l10n.scriptEditorOpenStoryboards),
-                  ),
-                ),
-                const SizedBox(height: StudioLayoutSpacing.insetComfortable),
-                _ScriptWorkbenchPanel(
-                  token: widget.token,
-                  projectId: widget.projectId,
-                  scriptNumericId: widget.script.numericId,
-                  onExtractStateSynced: (extractState) {
-                    if (!mounted) return;
-                    _stateCtrl.text = extractState?.toString() ?? '';
-                  },
-                  onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
-                ),
-              ],
-            ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide =
+                      constraints.maxWidth >= kStudioTwoColumnMinWidth;
+                  final fields = Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: _nameCtrl,
+                        enabled: !_saving,
+                        decoration: InputDecoration(
+                          labelText:
+                              l10n.scriptEditorFieldNameLabelClearIfEmpty,
+                        ),
+                      ),
+                      const SizedBox(height: StudioLayoutSpacing.listItem),
+                      TextField(
+                        controller: _contentCtrl,
+                        enabled: !_saving,
+                        minLines: wide ? 8 : 4,
+                        maxLines: wide ? 16 : 12,
+                        decoration: InputDecoration(
+                          labelText: l10n
+                              .scriptEditorFieldContentLabelClearIfEmpty,
+                          alignLabelWithHint: true,
+                        ),
+                      ),
+                      const SizedBox(height: StudioLayoutSpacing.listItem),
+                      TextField(
+                        controller: _stateCtrl,
+                        enabled: !_saving,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: l10n
+                              .scriptEditorFieldExtractStateLabelClearIfEmpty,
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: _saving ? null : _openStoryboardStep,
+                          child: Text(l10n.scriptEditorOpenStoryboards),
+                        ),
+                      ),
+                    ],
+                  );
+                  final workbench = _ScriptWorkbenchPanel(
+                    token: widget.token,
+                    projectId: widget.projectId,
+                    scriptNumericId: widget.script.numericId,
+                    onExtractStateSynced: (extractState) {
+                      if (!mounted) return;
+                      _stateCtrl.text = extractState?.toString() ?? '';
+                    },
+                    onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
+                  );
+                  if (!wide) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        fields,
+                        const SizedBox(height: StudioLayoutSpacing.insetComfortable),
+                        workbench,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 3, child: fields),
+                      const SizedBox(width: StudioSpacing.sm),
+                      Expanded(flex: 2, child: workbench),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

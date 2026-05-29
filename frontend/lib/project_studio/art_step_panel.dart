@@ -301,11 +301,12 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   }
 
   Future<bool> _confirmDiscard() async {
+    final l10n = AppLocalizations.of(context)!;
     final discard = await showStudioConfirmDialog(
       context: context,
-      title: 'Discard changes?',
-      message: 'You have unsaved art direction changes. Leave anyway?',
-      confirmLabel: 'Discard',
+      title: l10n.studioDiscardChangesTitle,
+      message: l10n.studioDiscardArtDirectionMessage,
+      confirmLabel: l10n.studioDiscardAction,
       cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
       destructive: true,
       barrierDismissible: false,

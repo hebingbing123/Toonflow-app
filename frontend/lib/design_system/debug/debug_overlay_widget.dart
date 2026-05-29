@@ -3,6 +3,7 @@ import 'dart:convert' show LineSplitter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../components/studio_icon_button.dart';
 import '../tokens.dart';
 
@@ -81,8 +82,9 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
   }
 
   void _copyToClipboard() {
+    final l10n = AppLocalizations.of(context)!;
     final text = widget.snapshot.fullText.trim().isEmpty
-        ? 'No details available'
+        ? l10n.studioDesignDebugNoDetailsAvailable
         : widget.snapshot.fullText;
     Clipboard.setData(ClipboardData(text: text));
   }
@@ -91,20 +93,17 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    final maxPanelHeight = MediaQuery.sizeOf(context).height * 0.6;
 
     return Align(
       alignment: Alignment.bottomCenter,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        // When collapsed: fixed 48 px touch target.
-        // When expanded: unconstrained (null height lets Column size to content).
-        height: _expanded ? null : StudioSpacing.touchTarget,
-        constraints: _expanded
-            ? BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * 0.6,
-              )
-            : null,
+        height: _expanded ? maxPanelHeight : StudioSpacing.touchTarget,
+        constraints: BoxConstraints(maxHeight: maxPanelHeight),
         child: Material(
           color: tokens.danger.withValues(alpha: 0.92),
           child: Column(
@@ -142,7 +141,7 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
                         // Copy-to-clipboard button
                         StudioIconButton(
                           icon: Icons.copy_outlined,
-                          label: 'Copy error to clipboard',
+                          label: l10n.studioDesignDebugCopyErrorLabel,
                           size: 18,
                           color: tokens.textPrimary,
                           onPressed: _copyToClipboard,
@@ -194,8 +193,9 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
     final hasStack = snapshot.stackLines.isNotEmpty;
 
     if (!hasMessage && !hasStack) {
+      final l10n = AppLocalizations.of(context)!;
       return SelectableText(
-        'No details available',
+        l10n.studioDesignDebugNoDetailsAvailable,
         style: textTheme.bodySmall?.copyWith(
           color: tokens.textSecondary,
           fontFamily: 'monospace',

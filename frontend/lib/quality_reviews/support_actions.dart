@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/studio_content_heuristics.dart';
 import 'enum_labels.dart';
 import 'support_models.dart';
 
@@ -112,20 +113,21 @@ List<String> buildQualityReviewRepairSuggestions(
         l10n.qualityReviewsSuggestionContinuity,
       );
     }
-    if (hitBuckets.contains('表演') ||
-        hitBuckets.contains('语气') ||
+    if (studioContentBucketHit(hitBuckets, kQualityReviewDeliveryBucketTokens) ||
         dialogueNaturalness < 80 ||
-        comments.contains('生硬') ||
-        comments.contains('朗读') ||
-        comments.contains('没情绪') ||
-        comments.contains('无情绪')) {
+        studioContentContainsAnyLower(
+          comments,
+          kQualityReviewStiffDeliveryCommentTokens,
+        )) {
       addTagged(
         'delivery',
         l10n.qualityReviewsSuggestionDelivery,
       );
     }
-    if (suppressedBuckets.contains('动作') ||
-        suppressedBuckets.contains('光影') ||
+    if (studioContentBucketHit(
+          suppressedBuckets,
+          kQualityReviewTrimBucketTokens,
+        ) ||
         promptChars >= 520 ||
         memoryStyleChars >= 96) {
       addTagged(
@@ -157,7 +159,7 @@ List<String> buildQualityReviewRepairSuggestions(
     }
     if (roleScopeRows > 0 &&
         dialogueNaturalness < 85 &&
-        comments.contains('情绪')) {
+        studioContentContainsAny(comments, kQualityReviewEmotionCommentTokens)) {
       addTagged(
         'role_scope_keep',
         l10n.qualityReviewsSuggestionRoleScopeKeep,
@@ -169,8 +171,10 @@ List<String> buildQualityReviewRepairSuggestions(
       (badCaseCategory.contains('emotion') ||
           badCaseCategory.contains('dialogue') ||
           badCaseCategory.contains('performance') ||
-          comments.contains('情绪') ||
-          comments.contains('台词'))) {
+          studioContentContainsAnyLower(
+            comments,
+            kQualityReviewEmotionCommentTokens,
+          ))) {
     addTagged(
       'emotion',
       l10n.qualityReviewsSuggestionEmotion,
@@ -179,8 +183,10 @@ List<String> buildQualityReviewRepairSuggestions(
   if (row.isBadCase &&
       (badCaseCategory.contains('visual') ||
           badCaseCategory.contains('consistency') ||
-          comments.contains('穿帮') ||
-          comments.contains('不自然'))) {
+          studioContentContainsAnyLower(
+            comments,
+            kQualityReviewVisualCommentTokens,
+          ))) {
     addTagged(
       'visual',
       l10n.qualityReviewsSuggestionVisual,

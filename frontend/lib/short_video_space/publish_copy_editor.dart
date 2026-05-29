@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_debounced_action.dart';
 import '../design_system/ix/studio_dirty_pop_guard.dart';
 import '../design_system/ix/studio_form_keyboard.dart';
+import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef PublishPlatformCopyCommit =
@@ -95,11 +99,14 @@ class PublishPlatformCopyEditor extends StatefulWidget {
       _PublishPlatformCopyEditorState();
 }
 
-class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
+class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor>
+    with SingleTickerProviderStateMixin {
   late String _platformId;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _tagsController;
+  late AnimationController _shakeController;
+  String? _titleInlineError;
   String _savedPlatformId = '';
   String _savedTitle = '';
   String _savedDescription = '';
@@ -117,6 +124,10 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
     _tagsController = TextEditingController();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
     _loadFieldsForPlatform(_platformId);
   }
 
@@ -148,6 +159,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
 
   @override
   void dispose() {
+    _shakeController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     _tagsController.dispose();
@@ -200,11 +212,12 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       _tagsController.text.trim() != _savedTags;
 
   Future<bool> _confirmDiscard() async {
+    final l10n = AppLocalizations.of(context)!;
     final discard = await showStudioConfirmDialog(
       context: context,
-      title: 'Discard changes?',
-      message: 'You have unsaved publish copy changes. Leave anyway?',
-      confirmLabel: 'Discard',
+      title: l10n.studioDiscardChangesTitle,
+      message: l10n.studioDiscardPublishCopyMessage,
+      confirmLabel: l10n.studioDiscardAction,
       cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
       destructive: true,
       barrierDismissible: false,
@@ -217,6 +230,16 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
     if (fn == null || _platformId.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
+    if (_titleController.text.trim().isEmpty) {
+      setState(() {
+        _titleInlineError = l10n.shortVideoPublishCopyFieldTitle;
+      });
+      unawaited(_shakeController.forward(from: 0));
+      unawaited(studioLightImpact());
+      return;
+    }
+    setState(() => _titleInlineError = null);
     await fn(
       _platformId,
       _titleController.text,
@@ -298,16 +321,30 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
             muted,
           ),
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
-          TextField(
+          AnimatedBuilder(
+            animation: _shakeController,
+            builder: (context, child) {
+              final t = _shakeController.value;
+              final dx = math.sin(t * math.pi * 6) * 10 * (1 - t);
+              return Transform.translate(offset: Offset(dx, 0), child: child);
+            },
+            child: TextField(
             controller: _titleController,
             decoration: InputDecoration(
               labelText: l10n.shortVideoPublishCopyFieldTitle,
               border: const OutlineInputBorder(),
               isDense: true,
+              errorText: _titleInlineError,
             ),
             enabled: !widget.busy,
             maxLines: 1,
             textInputAction: TextInputAction.next,
+            onChanged: (_) {
+              if (_titleInlineError != null) {
+                setState(() => _titleInlineError = null);
+              }
+            },
+          ),
           ),
           const SizedBox(height: StudioSpacing.xs),
           TextField(
@@ -335,18 +372,22 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
           const SizedBox(height: StudioLayoutSpacing.inlineGap),
           Align(
             alignment: Alignment.centerLeft,
-            child: FilledButton.tonalIcon(
-              onPressed: widget.busy ? null : _save,
-              icon: widget.busy
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: StudioControlSize.progressStroke,
-                      ),
-                    )
-                  : const Icon(Icons.save_outlined),
-              label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),
+            child: StudioDebouncedAction(
+              enabled: !widget.busy,
+              onPressed: widget.busy ? null : () async => _save(),
+              builder: (context, onPressed) => FilledButton.tonalIcon(
+                onPressed: onPressed,
+                icon: widget.busy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: StudioControlSize.progressStroke,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),
+              ),
             ),
           ),
         ],

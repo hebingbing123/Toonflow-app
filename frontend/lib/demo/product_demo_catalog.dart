@@ -8,6 +8,7 @@ import '../project_studio/project_studio_scope.dart';
 import '../projects/controller.dart';
 import '../quality_reviews/controller.dart';
 import '../rust_api.dart';
+import '../l10n/app_localizations.dart';
 import '../task_center/controller.dart';
 import 'agent_workspace_demo_data.dart';
 import 'benchmark_demo_data.dart';
@@ -21,6 +22,9 @@ import 'short_video_demo_data.dart';
 import 'studio_demo_data.dart';
 
 const demoProjectUuid = demoStudioProjectUuid;
+
+/// Demo art-style API slug (not localized user copy).
+const kDemoArtStyleSlugLabel = 'ink';
 
 final _demoNotificationCreatedAt1 = DateTime.utc(2026, 5, 10);
 final _demoNotificationChangedAt2 = DateTime.utc(2026, 5, 11, 8);
@@ -108,50 +112,52 @@ class ProductDemoCatalog {
   final ShortVideoDemoSnapshot? shortVideoOverviewSnapshot;
   final PlatformConfigResponseV1? platformConfigResponse;
 
-  static ProductDemoCatalog buildDefault() {
+  static ProductDemoCatalog buildDefault([AppLocalizations? l10n]) {
+    final d = l10n ?? rustApiLookupL10nFromPlatform();
+    final demoProjectDisplayName = d.demoStudioProjectDisplayName;
     return ProductDemoCatalog(
       productScopedProjectNumericId: 7,
-      projects: const <ProjectRow>[
+      projects: <ProjectRow>[
         ProjectRow(
           id: demoProjectUuid,
           numericId: 7,
-          name: '春季短剧 · 演示',
+          name: demoProjectDisplayName,
           createTimeMs: 1,
           projectAccessMode: 'inherited',
           projectAccessRole: 'owner',
           artStylePack: 'art_skills/2D_chinese_guofeng',
           storyStylePack: 'story_skills/Family_warmth',
-          artStyle: '水墨古风',
+          artStyle: d.demoStudioArtStyleInkWash,
         ),
         ProjectRow(
           id: '00000000-0000-0000-0000-000000000008',
           numericId: 8,
-          name: '都市情感 · 第二季',
+          name: d.demoStudioProjectSeason2Name,
           createTimeMs: 2,
           projectAccessMode: 'inherited',
           projectAccessRole: 'member',
         ),
       ],
-      artStyles: const <ArtStyleRow>[
+      artStyles: <ArtStyleRow>[
         ArtStyleRow(
           id: 'style-ink',
           numericId: 11,
-          name: '水墨古风',
-          label: 'ink',
+          name: d.demoStudioArtStyleInkWash,
+          label: kDemoArtStyleSlugLabel,
           prompt: 'soft ink wash, muted palette',
           fileUrl: '/api/v1/art-styles/numeric/11/cover',
         ),
       ],
       projectsSummaryLine: 'projects=2',
       artStylesLine: 'total=1',
-      taskProjects: const <TaskCenterProjectItem>[
+      taskProjects: <TaskCenterProjectItem>[
         TaskCenterProjectItem(
           numericId: 7,
-          name: '春季短剧 · 演示',
+          name: demoProjectDisplayName,
           projectUuid: demoProjectUuid,
         ),
       ],
-      taskCategoriesLine: '分类 2 个 · asset.generate.image, script.export.zip',
+      taskCategoriesLine: d.demoTaskCategoriesLine,
       taskApiSummaryLine: 'page=1 limit=10 · total=3 · page_rows=3',
       taskApiJobs: const <JobRow>[
         JobRow(
@@ -246,8 +252,10 @@ class ProductDemoCatalog {
           projectNumericId: 7,
           jobId: 'job-101',
           notificationType: 'export.ready',
-          title: '导出已完成',
-          message: '项目「春季短剧 · 演示」导出包已就绪，可在任务中心下载。',
+          title: d.productDemoNotificationExportReadyTitle,
+          message: d.productDemoNotificationExportReadyMessage(
+            demoProjectDisplayName,
+          ),
           linkPath: '/?pane=tasks',
           payload: <String, dynamic>{'project_numeric_id': 7},
           filePath: null,
@@ -264,8 +272,8 @@ class ProductDemoCatalog {
           projectNumericId: 7,
           jobId: 'job-103',
           notificationType: 'job.failed',
-          title: '渲染任务失败',
-          message: 'render.completed 超时，请在工作台重试。',
+          title: d.productDemoNotificationRenderFailedTitle,
+          message: d.productDemoNotificationRenderFailedMessage,
           linkPath: '/?pane=tasks',
           payload: <String, dynamic>{'project_numeric_id': 7},
           filePath: null,
@@ -294,9 +302,9 @@ class ProductDemoCatalog {
         subscriptionCurrentPeriodEndAt: DateTime.utc(2026, 12, 31),
         dailyJobQuota: 200,
         jobsToday: 12,
-        currentWorkspace: const WorkspaceSummary(
+        currentWorkspace: WorkspaceSummary(
           id: 'workspace-demo',
-          name: '演示工作区',
+          name: d.demoWorkspaceDisplayName,
           workspaceType: 'team',
         ),
       ),
@@ -305,7 +313,7 @@ class ProductDemoCatalog {
         ApiKeyRecordV1(
           id: 'key-demo-1',
           publicId: 'ofk_demo_01',
-          displayName: '桌面客户端 · 演示',
+          displayName: d.demoApiKeyDesktopClientDisplayName,
           scope: ApiKeyScopeV1.readWrite,
           status: ApiKeyStatusV1.active,
           keyHint: '•••• 7a2f',
@@ -319,12 +327,12 @@ class ProductDemoCatalog {
           lastUsedMethod: 'GET',
         ),
       ],
-      apiKeyAuditItems: const <ApiKeyAuditRecordV1>[
+      apiKeyAuditItems: <ApiKeyAuditRecordV1>[
         ApiKeyAuditRecordV1(
           id: 'audit-demo-1',
           apiKeyId: 'key-demo-1',
           eventType: 'created',
-          eventSummary: '创建 API 密钥',
+          eventSummary: d.demoApiKeyAuditEventCreated,
           metadata: <String, dynamic>{},
           createdAt: '2026-04-01T00:00:00Z',
         ),
@@ -335,7 +343,7 @@ class ProductDemoCatalog {
           workspace: WorkspaceResponse(
             id: 'workspace-demo',
             ownerUserId: 'demo-user',
-            name: '演示工作区',
+            name: d.demoWorkspaceDisplayName,
             workspaceType: 'team',
             metadata: const <String, dynamic>{'demo': true},
             createdAt: _demoWorkspaceCreatedAt,
@@ -347,7 +355,7 @@ class ProductDemoCatalog {
           workspace: WorkspaceResponse(
             id: 'workspace-archive',
             ownerUserId: 'demo-user',
-            name: '归档示例',
+            name: d.demoWorkspaceArchiveName,
             workspaceType: 'personal',
             metadata: const <String, dynamic>{},
             archivedAt: DateTime.utc(2026, 3, 1),
@@ -356,7 +364,7 @@ class ProductDemoCatalog {
           ),
         ),
       ],
-      publishDrafts: buildDemoPublishDrafts(),
+      publishDrafts: buildDemoPublishDrafts(d),
       platformStatusSnapshot: buildDemoPlatformStatusSnapshot(),
       storyboardDebugScripts: buildDemoStoryboardScripts(),
       storyboardDebugShots: buildDemoStoryboardShots(),
