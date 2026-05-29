@@ -9,6 +9,7 @@ import '../../design_system/tokens.dart';
 import '../../rust_api.dart';
 import 'plan_workbench_support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class ProjectScriptPlanWorkbenchViewModel {
   const ProjectScriptPlanWorkbenchViewModel({
@@ -78,7 +79,9 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
       content: SizedBox(
         width: studioConstrainedDialogWidth(context, maxWidth: 720),
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.localBusy ? null : callbacks.onSave,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -258,6 +261,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                       ),
                     ),
             ],
+          ),
           ),
         ),
       ),

@@ -7,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../demo/product_demo_mode.dart';
+import '../design_system/studio_interaction_timing.dart';
 import '../design_system/studio_typography.dart';
 import '../design_system/components/studio_decorative_icon.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_loading_placeholders.dart';
@@ -130,7 +132,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   void _onTextChanged() {
     _paletteSelectedIndex = 0;
     _overlayTextDebounce?.cancel();
-    _overlayTextDebounce = Timer(const Duration(milliseconds: 48), () {
+    _overlayTextDebounce = Timer(StudioInteractionTiming.overlayRebuildDebounce, () {
       if (!mounted) {
         return;
       }
@@ -166,7 +168,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       }
       return;
     }
-    _suggestionDebounce = Timer(const Duration(milliseconds: 400), () {
+    _suggestionDebounce = Timer(StudioInteractionTiming.searchThrottle, () {
       unawaited(_fetchSuggestions(q));
     });
   }
@@ -1050,7 +1052,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         now.isBefore(_searchLockUntil!)) {
       return;
     }
-    _searchLockUntil = now.add(const Duration(milliseconds: 500));
+    _searchLockUntil = now.add(StudioInteractionTiming.searchSubmitLock);
     _searchInFlight = true;
     if (mounted) {
       setState(() {});
@@ -1423,17 +1425,17 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       ),
                     )
                   else
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_outward_rounded,
-                        size: iconSize,
-                        fill: titleBarDense ? 0.15 : 0.0,
-                        color: _canSearch
-                            ? theme.colorScheme.onPrimary
-                            : (titleBarDense
-                                  ? mutedIconColor
-                                  : tokens.textMuted.withValues(alpha: 0.35)),
-                      ),
+                    StudioIconButton(
+                      icon: Icons.arrow_outward_rounded,
+                      label: _canSearch
+                          ? l10n.globalSearchActionSearch
+                          : l10n.globalSearchEnterAtLeastChars(2),
+                      size: iconSize,
+                      color: _canSearch
+                          ? theme.colorScheme.onPrimary
+                          : (titleBarDense
+                                ? mutedIconColor
+                                : tokens.textMuted.withValues(alpha: 0.35)),
                       onPressed: _canSearch
                           ? () => unawaited(_performSearch())
                           : null,
@@ -1446,19 +1448,16 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                         foregroundColor: _canSearch
                             ? theme.colorScheme.onPrimary
                             : tokens.textMuted,
+                        padding: EdgeInsets.all(
+                          titleBarDense
+                              ? StudioSpacing.chromeActionGap
+                              : StudioSpacing.xs,
+                        ),
+                        minimumSize: Size(
+                          titleBarDense ? 26 : StudioSpacing.iconTouchTarget,
+                          titleBarDense ? 26 : StudioSpacing.iconTouchTarget,
+                        ),
                       ),
-                      padding: EdgeInsets.all(
-                        titleBarDense
-                            ? StudioSpacing.chromeActionGap
-                            : StudioSpacing.xs,
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: titleBarDense ? 26 : 0,
-                        minHeight: titleBarDense ? 26 : 0,
-                      ),
-                      tooltip: _canSearch
-                          ? l10n.globalSearchActionSearch
-                          : l10n.globalSearchEnterAtLeastChars(2),
                     ),
                 ],
               ),

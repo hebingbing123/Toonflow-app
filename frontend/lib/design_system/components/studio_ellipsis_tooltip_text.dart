@@ -22,6 +22,7 @@ class StudioEllipsisTooltipText extends StatefulWidget {
 
 class _StudioEllipsisTooltipTextState extends State<StudioEllipsisTooltipText> {
   bool _overflows = false;
+  double? _lastCheckedWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,10 @@ class _StudioEllipsisTooltipTextState extends State<StudioEllipsisTooltipText> {
   }
 
   void _scheduleOverflowCheck(double maxWidth, TextDirection textDirection) {
+    if (_lastCheckedWidth == maxWidth) {
+      return;
+    }
+    _lastCheckedWidth = maxWidth;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;

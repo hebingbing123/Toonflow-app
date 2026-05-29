@@ -55,6 +55,8 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
   var _loading = true;
   Object? _error;
   Timer? _jobPollTimer;
+  Future<void>? _loadInFlight;
+  var _jobPollBackoffSeconds = 4;
 
   @override
   void initState() {
@@ -90,14 +92,96 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
   void _scheduleJobPollIfNeeded(StudioReadinessSnapshot snap) {
     _jobPollTimer?.cancel();
     if (snap.runningJobCount <= 0) {
+      _jobPollBackoffSeconds = 4;
       return;
     }
-    _jobPollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      unawaited(_load());
+    _jobPollTimer = Timer.periodic(
+      Duration(seconds: _jobPollBackoffSeconds),
+      (_) {
+        unawaited(_pollJobCountsOnly());
+      },
+    );
+  }
+
+  Future<void> _pollJobCountsOnly() async {
+    if (_readiness == null) {
+      return;
+    }
+    try {
+      final counts = await fetchProjectJobCounts(
+        widget.accessToken,
+        widget.projectUuid,
+      );
+      if (!mounted) {
+        return;
+      }
+      _jobPollBackoffSeconds = 4;
+      final current = _readiness!;
+      if (current.runningJobCount == counts.runningJobCount &&
+          current.failedJobCount == counts.failedJobCount) {
+        if (counts.runningJobCount <= 0) {
+          _jobPollTimer?.cancel();
+        }
+        return;
+      }
+      final next = StudioReadinessSnapshot(
+        completedSteps: current.completedSteps,
+        readiness: current.readiness,
+        production: current.production,
+        home: current.home,
+        assetsOverview: current.assetsOverview,
+        runningJobCount: counts.runningJobCount,
+        failedJobCount: counts.failedJobCount,
+      );
+      setState(() => _readiness = next);
+      _scheduleJobPollIfNeeded(next);
+    } catch (e) {
+      if (_isRateLimitedError(e)) {
+        _jobPollBackoffSeconds = (_jobPollBackoffSeconds * 2).clamp(4, 60);
+        _jobPollTimer?.cancel();
+        _scheduleJobPollIfNeeded(_readiness!);
+      }
+    }
+  }
+
+  bool _isRateLimitedError(Object error) {
+    if (error is RustApiException) {
+      return error.statusCode == 429 || error.statusCode == 503;
+    }
+    return false;
+  }
+
+  bool _snapshotsEqualForUi(
+    StudioReadinessSnapshot? a,
+    StudioReadinessSnapshot b,
+  ) {
+    if (a == null) {
+      return false;
+    }
+    return a.completedSteps == b.completedSteps &&
+        a.runningJobCount == b.runningJobCount &&
+        a.failedJobCount == b.failedJobCount &&
+        identical(a.readiness, b.readiness) &&
+        identical(a.production, b.production) &&
+        identical(a.home, b.home) &&
+        identical(a.assetsOverview, b.assetsOverview);
+  }
+
+  Future<void> _load({bool showLoadingIndicator = true}) {
+    final inFlight = _loadInFlight;
+    if (inFlight != null) {
+      return inFlight;
+    }
+    final future = _loadImpl(showLoadingIndicator: showLoadingIndicator);
+    _loadInFlight = future;
+    return future.whenComplete(() {
+      if (identical(_loadInFlight, future)) {
+        _loadInFlight = null;
+      }
     });
   }
 
-  Future<void> _load({bool showLoadingIndicator = true}) async {
+  Future<void> _loadImpl({required bool showLoadingIndicator}) async {
     if (showLoadingIndicator) {
       setState(() {
         _loading = true;
@@ -110,15 +194,31 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
         widget.projectUuid,
       );
       if (!mounted) return;
+      if (_snapshotsEqualForUi(_readiness, snapshot)) {
+        if (showLoadingIndicator) {
+          setState(() => _loading = false);
+        }
+        _scheduleJobPollIfNeeded(snapshot);
+        return;
+      }
       setState(() {
         _readiness = snapshot;
         if (showLoadingIndicator) {
           _loading = false;
         }
       });
+      _jobPollBackoffSeconds = 4;
       _scheduleJobPollIfNeeded(snapshot);
     } catch (e) {
       if (!mounted) return;
+      if (_isRateLimitedError(e) && !showLoadingIndicator) {
+        _jobPollBackoffSeconds = (_jobPollBackoffSeconds * 2).clamp(4, 60);
+        _jobPollTimer?.cancel();
+        if (_readiness != null) {
+          _scheduleJobPollIfNeeded(_readiness!);
+        }
+        return;
+      }
       setState(() {
         if (showLoadingIndicator) {
           _error = e;
@@ -140,6 +240,34 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
       child: ProjectStudioPage(host: widget.hostFactory(snap, _load)),
     );
   }
+}
+
+typedef ProjectJobCounts = ({int runningJobCount, int failedJobCount});
+
+Future<ProjectJobCounts> fetchProjectJobCounts(
+  String accessToken,
+  String projectUuid,
+) async {
+  if (ProductDemoMode.instance.shouldSkipLiveApi) {
+    return (runningJobCount: 0, failedJobCount: 0);
+  }
+  var runningJobCount = 0;
+  var failedJobCount = 0;
+  final active = await Future.wait([
+    fetchJobs(accessToken, status: 'running', limit: 50),
+    fetchJobs(accessToken, status: 'queued', limit: 50),
+    fetchJobs(accessToken, status: 'failed', limit: 20),
+  ]);
+  final running = [...active[0], ...active[1]];
+  final failed = active[2];
+  bool matchesProject(JobRow row) =>
+      row.payload['project_uuid']?.toString() == projectUuid;
+  runningJobCount = running.where(matchesProject).length;
+  failedJobCount = failed.where(matchesProject).length;
+  return (
+    runningJobCount: runningJobCount,
+    failedJobCount: failedJobCount,
+  );
 }
 
 Future<StudioReadinessSnapshot> _defaultLoadSnapshot(
@@ -177,17 +305,9 @@ Future<StudioReadinessSnapshot> _defaultLoadSnapshot(
   var runningJobCount = 0;
   var failedJobCount = 0;
   try {
-    final active = await Future.wait([
-      fetchJobs(accessToken, status: 'running', limit: 50),
-      fetchJobs(accessToken, status: 'queued', limit: 50),
-      fetchJobs(accessToken, status: 'failed', limit: 20),
-    ]);
-    final running = [...active[0], ...active[1]];
-    final failed = active[2];
-    bool matchesProject(JobRow row) =>
-        row.payload['project_uuid']?.toString() == projectUuid;
-    runningJobCount = running.where(matchesProject).length;
-    failedJobCount = failed.where(matchesProject).length;
+    final counts = await fetchProjectJobCounts(accessToken, projectUuid);
+    runningJobCount = counts.runningJobCount;
+    failedJobCount = counts.failedJobCount;
   } catch (_) {}
 
   return StudioReadinessSnapshot(

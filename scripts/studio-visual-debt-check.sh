@@ -42,6 +42,15 @@ else
   echo "OK"
 fi
 
+echo "== No raw IconButton outside studio_icon_button =="
+if rg '\bIconButton\(' "$LIB" --glob '*.dart' \
+  --glob '!**/design_system/components/studio_icon_button.dart' 2>/dev/null; then
+  echo "FAIL: use StudioIconButton / studioAccessibleIconButton"
+  fail=1
+else
+  echo "OK"
+fi
+
 echo "== No fontSize 10/11 outside tokens/typography =="
 if rg 'fontSize:\s*(10|11)\b' "$LIB" --glob '*.dart' \
   --glob '!**/design_system/studio_typography.dart' \

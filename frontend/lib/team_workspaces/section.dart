@@ -8,7 +8,6 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../config.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
@@ -21,8 +20,11 @@ import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/studio_scheduler.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
@@ -332,19 +334,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    l10n.teamWorkspaceTitle,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.taskCenterLocalClientPrefs,
-                ),
-              ],
+            StudioPaneTitleMenuRow(
+              title: l10n.teamWorkspaceTitle,
+              menuTooltip: l10n.taskCenterLocalClientPrefs,
             ),
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             Text(
@@ -390,28 +382,32 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
             child: StudioCollapsibleFilterPanel(
               collapsible: true,
               title: l10n.teamWorkspaceCreateAction,
-              child: StudioFilterRow(
-                wideLayout: StudioFilterWideLayout.toolbarRow,
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: l10n.teamWorkspaceEnterpriseNameLabel,
-                        border: const OutlineInputBorder(),
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: _creating ? null : _create,
+                child: StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceEnterpriseNameLabel,
+                          border: const OutlineInputBorder(),
+                        ),
+                        textInputAction: TextInputAction.done,
                       ),
                     ),
-                  ),
-                  FilledButton(
-                    style: studioFormPrimaryButtonStyle(context),
-                    onPressed: _creating ? null : _create,
-                    child: Text(
-                      _creating
-                          ? l10n.teamWorkspaceCreating
-                          : l10n.teamWorkspaceCreateAction,
+                    FilledButton(
+                      style: studioFormPrimaryButtonStyle(context),
+                      onPressed: _creating ? null : _create,
+                      child: Text(
+                        _creating
+                            ? l10n.teamWorkspaceCreating
+                            : l10n.teamWorkspaceCreateAction,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -438,29 +434,33 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               subtitle: _acceptInviteTokenController.text.trim().isNotEmpty
                   ? l10n.teamWorkspaceInviteTokenInputLabel
                   : null,
-              child: StudioFilterRow(
-                wideLayout: StudioFilterWideLayout.toolbarRow,
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _acceptInviteTokenController,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        labelText: l10n.teamWorkspaceInviteTokenInputLabel,
-                        border: const OutlineInputBorder(),
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: _acceptingInvite ? null : _acceptInvite,
+                child: StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _acceptInviteTokenController,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: l10n.teamWorkspaceInviteTokenInputLabel,
+                          border: const OutlineInputBorder(),
+                        ),
+                        textInputAction: TextInputAction.done,
                       ),
                     ),
-                  ),
-                  FilledButton.tonal(
-                    style: studioFormTonalButtonStyle(context),
-                    onPressed: _acceptingInvite ? null : _acceptInvite,
-                    child: Text(
-                      _acceptingInvite
-                          ? l10n.teamWorkspaceJoining
-                          : l10n.teamWorkspaceAcceptInviteAction,
+                    FilledButton.tonal(
+                      style: studioFormTonalButtonStyle(context),
+                      onPressed: _acceptingInvite ? null : _acceptInvite,
+                      child: Text(
+                        _acceptingInvite
+                            ? l10n.teamWorkspaceJoining
+                            : l10n.teamWorkspaceAcceptInviteAction,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

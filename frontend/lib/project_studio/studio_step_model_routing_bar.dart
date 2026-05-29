@@ -48,6 +48,7 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
   final Map<String, List<ModelListEntry>> _catalogByFilter =
       <String, List<ModelListEntry>>{};
   final Map<String, String?> _draftBySlot = <String, String?>{};
+  Future<void>? _loadInFlight;
 
   @override
   void initState() {
@@ -95,7 +96,27 @@ class _StudioStepModelRoutingBarState extends State<StudioStepModelRoutingBar> {
     }
   }
 
-  Future<void> _load() async {
+  Future<void> _load() {
+    final inFlight = _loadInFlight;
+    if (inFlight != null) {
+      return inFlight;
+    }
+    if (_routing != null && _catalogByFilter.isNotEmpty) {
+      if (_loading) {
+        setState(() => _loading = false);
+      }
+      return Future<void>.value();
+    }
+    final future = _loadImpl();
+    _loadInFlight = future;
+    return future.whenComplete(() {
+      if (identical(_loadInFlight, future)) {
+        _loadInFlight = null;
+      }
+    });
+  }
+
+  Future<void> _loadImpl() async {
     setState(() {
       _loading = true;
       _error = null;

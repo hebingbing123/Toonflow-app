@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
@@ -59,6 +62,7 @@ class _NovelCrawlLoginWebViewDialogState
   double _progress = 0;
   bool _capturing = false;
   String? _errorLine;
+  Timer? _progressThrottle;
 
   @override
   void initState() {
@@ -70,8 +74,26 @@ class _NovelCrawlLoginWebViewDialogState
 
   @override
   void dispose() {
+    _progressThrottle?.cancel();
     _urlCtrl.dispose();
     super.dispose();
+  }
+
+  void _updateProgress(double next) {
+    if (!mounted) {
+      return;
+    }
+    if ((next - _progress).abs() < 0.02 && next > 0 && next < 1) {
+      return;
+    }
+    setState(() => _progress = next);
+  }
+
+  void _scheduleProgressUpdate(double next) {
+    _progressThrottle?.cancel();
+    _progressThrottle = Timer(const Duration(milliseconds: 120), () {
+      _updateProgress(next);
+    });
   }
 
   WebUri? get _startUri {
@@ -189,7 +211,22 @@ class _NovelCrawlLoginWebViewDialogState
           min: 400,
           max: 640,
         ),
-        child: Column(
+        child: StudioFormKeyboardScope(
+          onEnterSubmit: _capturing
+              ? null
+              : () {
+                  final controller = studioFocusedTextField(
+                    FocusManager.instance.primaryFocus?.context,
+                  )?.controller;
+                  if (controller == _urlCtrl) {
+                    unawaited(_openUrl());
+                    return;
+                  }
+                  if (startUri != null) {
+                    unawaited(_captureCookies());
+                  }
+                },
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Row(
@@ -257,7 +294,7 @@ class _NovelCrawlLoginWebViewDialogState
                             setState(() => _progress = 0.05);
                           },
                           onProgressChanged: (_, progress) {
-                            setState(() => _progress = progress / 100);
+                            _scheduleProgressUpdate(progress / 100);
                           },
                           onLoadStop: (_, _) {
                             setState(() => _progress = 1);
@@ -273,6 +310,7 @@ class _NovelCrawlLoginWebViewDialogState
               ),
             ),
           ],
+        ),
         ),
       ),
     );

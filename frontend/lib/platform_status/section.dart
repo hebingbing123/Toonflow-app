@@ -8,13 +8,13 @@ import 'package:openflow_app/design_system/components/studio_async_data_view.dar
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/studio_responsive_layout.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 
 import '../demo/platform_status_demo_data.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
@@ -214,18 +214,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    l10n.platformStatusTitle,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.taskCenterLocalClientPrefs,
-                ),
-              ],
+            StudioPaneTitleMenuRow(
+              title: l10n.platformStatusTitle,
+              menuTooltip: l10n.taskCenterLocalClientPrefs,
             ),
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             Text(l10n.platformStatusIntro, style: studioSectionIntroStyle(context)),

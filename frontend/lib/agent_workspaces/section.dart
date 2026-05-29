@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controls.dart';
 import 'contexts/production/support.dart';

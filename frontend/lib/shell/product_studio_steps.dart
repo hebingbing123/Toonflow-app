@@ -172,23 +172,26 @@ extension _HomePageProductStudioSteps on _HomePageState {
       case StudioStep.assets:
         final pendingAssetId = _pendingStudioAssetNumericId;
         if (pendingAssetId != null) {
-          _pendingStudioAssetNumericId = null;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final row = _studioProjectRowForNumericId(projectNumericId);
-            if (row == null || !mounted) return;
-            _openProjectAssetsWorkbenchFromStudio(
-              row,
-              ProjectStudioAssetEditorTarget(
-                kind: ProjectStudioAssetEditorTargetKind.confirmCandidates,
-                preferredAssetNumericId: pendingAssetId,
-              ),
-              onProjectSnapshotChanged: () async {
-                kStudioSnapshotBus.invalidate(
-                  StudioSnapshotInvalidation.workbenchMedia,
-                );
-              },
-            );
-          });
+          StudioScheduler.scheduleOnceUntil(
+            'studio_assets_pending_${projectNumericId}_$pendingAssetId',
+            () {
+              _pendingStudioAssetNumericId = null;
+              final row = _studioProjectRowForNumericId(projectNumericId);
+              if (row == null || !mounted) return;
+              _openProjectAssetsWorkbenchFromStudio(
+                row,
+                ProjectStudioAssetEditorTarget(
+                  kind: ProjectStudioAssetEditorTargetKind.confirmCandidates,
+                  preferredAssetNumericId: pendingAssetId,
+                ),
+                onProjectSnapshotChanged: () async {
+                  kStudioSnapshotBus.invalidate(
+                    StudioSnapshotInvalidation.workbenchMedia,
+                  );
+                },
+              );
+            },
+          );
         }
         return ProjectStudioAgentFocusBody(
           openLabel: l10n.productAgentProductionWorkspaceTitle,

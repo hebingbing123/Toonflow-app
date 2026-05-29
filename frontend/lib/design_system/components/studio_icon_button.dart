@@ -6,6 +6,39 @@ import '../ix/studio_pointer.dart';
 import '../ix/studio_mobile_affordances.dart';
 import '../tokens.dart';
 
+/// Wraps a Material [IconButton] (or custom icon child) with Semantics + Tooltip.
+///
+/// Use when [StudioIconButton] cannot represent the trigger (e.g. [MenuAnchor]
+/// builder with a custom [iconWidget]).
+Widget studioAccessibleIconButton({
+  required String label,
+  required VoidCallback? onPressed,
+  required Widget icon,
+  ButtonStyle? style,
+  String? tooltip,
+}) {
+  final tooltipMessage = tooltip ?? label;
+  return Semantics(
+    button: true,
+    label: label,
+    enabled: onPressed != null,
+    child: Tooltip(
+      message: tooltipMessage,
+      waitDuration: const Duration(milliseconds: 350),
+      child: IconButton(
+        style: style,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                unawaited(studioLightImpact());
+                onPressed();
+              },
+        icon: icon,
+      ),
+    ),
+  );
+}
+
 /// Accessible icon button with built-in Semantics and Tooltip.
 ///
 /// Use this instead of raw [IconButton] for icon-only buttons to ensure

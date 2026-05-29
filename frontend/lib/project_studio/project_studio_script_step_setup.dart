@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_entrance_motion.dart';
-import '../design_system/ix/studio_mobile_affordances.dart';
+import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_workbench_section.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -114,6 +116,7 @@ class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
+              style: studioFormTextButtonIconStyle(context),
               onPressed: onOpenModelRoutingSettings,
               icon: const Icon(Icons.hub_outlined, size: StudioIconSize.sm),
               label: Text(l10n.studioScriptStepModelRoutingSettingsLink),
@@ -163,65 +166,79 @@ class ProjectStudioScriptStepSetupPanel extends StatelessWidget {
 }
 
 /// Opens step prep in a tall sheet (script or generic panel).
+///
+/// Uses a fixed-height scroll column (not [DraggableScrollableSheet]) so Web
+/// does not hang on nested scroll / layout loops when opening from the compact bar.
 Future<void> showProjectStudioStepSetupSheet(
   BuildContext context, {
   required String title,
   required String subtitle,
   required Widget body,
 }) {
-  final tokens = StudioTokens.of(context);
-  return showModalBottomSheet<void>(
+  return showStudioBottomSheet<void>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    useSafeArea: true,
-    builder: (sheetContext) => StudioSystemUiSurface(
-      surfaceColor: tokens.bgSurface,
-      child: DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.72,
-        minChildSize: 0.4,
-        maxChildSize: 0.92,
-        builder: (context, scrollController) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              color: tokens.bgSurface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+    builder: (sheetContext) {
+      final tokens = StudioTokens.of(sheetContext);
+      final sheetHeight = MediaQuery.sizeOf(sheetContext).height * 0.72;
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: SizedBox(
+          height: sheetHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  StudioSpacing.sm,
+                  StudioSpacing.chromeActionGap,
+                  StudioSpacing.sm,
+                  StudioSpacing.xs,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: studioStaggeredChildren(
+                    <Widget>[
+                      Text(
+                        title,
+                        style: Theme.of(sheetContext)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: tokens.textPrimary,
+                            ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: studioHintStyle(sheetContext),
+                      ),
+                    ],
+                    entranceKey: title,
+                  ),
+                ),
               ),
-            ),
-            child: ListView(
-              controller: scrollController,
-              padding: const EdgeInsets.fromLTRB(
-                StudioSpacing.sm,
-                StudioSpacing.chromeActionGap,
-                StudioSpacing.sm,
-                StudioSpacing.md,
-              ),
-              children: studioStaggeredChildren(
-                <Widget>[
-                  Text(
-                    title,
-                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: tokens.textPrimary,
+              Expanded(
+                child: StudioScrollbar(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                      StudioSpacing.sm,
+                      StudioLayoutSpacing.inlineGap,
+                      StudioSpacing.sm,
+                      StudioSpacing.md,
                     ),
+                    child: body,
                   ),
-                  const SizedBox(height: StudioSpacing.xs),
-                  Text(
-                    subtitle,
-                    style: studioHintStyle(sheetContext),
-                  ),
-                  const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                  body,
-                ],
-                entranceKey: title,
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
 

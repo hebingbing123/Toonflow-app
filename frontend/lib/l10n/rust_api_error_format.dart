@@ -28,6 +28,24 @@ String formatRetryAfterMsForDisplay(AppLocalizations l10n, int retryAfterMs) {
       : l10n.rustApiClientRetryAfterHoursMinutes(hours, remainMinutes);
 }
 
+/// Whether [error] likely indicates connectivity / reachability (offline banner).
+bool studioLooksLikeConnectivityError(Object error) {
+  if (error is http.ClientException) {
+    return true;
+  }
+  if (error is RustApiException) {
+    final status = error.statusCode;
+    if (status == 408 || status == 502 || status == 503 || status == 504) {
+      return true;
+    }
+  }
+  final lower = error.toString().toLowerCase();
+  return lower.contains('socket') ||
+      lower.contains('connection refused') ||
+      lower.contains('failed host lookup') ||
+      lower.contains('network is unreachable');
+}
+
 /// User-facing summary for [RustApiException] (client checks, JSON errors, HTTP status).
 String formatRustApiExceptionForDisplay(
   AppLocalizations l10n,

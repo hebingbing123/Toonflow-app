@@ -7,6 +7,8 @@ import 'package:openflow_app/bootstrap/global_error_handling.dart';
 import 'package:openflow_app/design_system/debug/debug.dart';
 
 void main() {
+  tearDown(DebugErrorOverlayController.instance.resetForTest);
+
   test('configureGlobalErrorHandling installs FlutterError.onError', () {
     final previous = FlutterError.onError;
     addTearDown(() => FlutterError.onError = previous);
@@ -179,6 +181,40 @@ void main() {
       StackTrace.fromString('#0 async'),
     );
 
+    expect(DebugErrorOverlayController.instance.snapshot.value, isNull);
+    // report() is deferred to the next frame.
+  });
+
+  test('ErrorWidget.builder returns shrink for flex overflow', () {
+    final previousBuilder = ErrorWidget.builder;
+    addTearDown(() => ErrorWidget.builder = previousBuilder);
+
+    configureGlobalErrorHandling(logName: 'test.overflow.shrink');
+    final details = FlutterErrorDetails(
+      exception: FlutterError('A RenderFlex overflowed by 42 pixels on the right.'),
+    );
+    final widget = ErrorWidget.builder(details);
+    expect(widget, isA<SizedBox>());
+    expect(DebugErrorOverlayController.instance.snapshot.value, isNull);
+  });
+
+  testWidgets('deferred overlay report appears after pump', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SizedBox.shrink(),
+      ),
+    );
+    DebugErrorOverlayController.instance.report(
+      FlutterErrorDetails(
+        exception: Exception('zone leak'),
+        stack: StackTrace.fromString('#0 async'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
     final snapshot = DebugErrorOverlayController.instance.snapshot.value;
     expect(snapshot, isNotNull);
     expect(snapshot!.message, contains('zone leak'));
@@ -214,42 +250,6 @@ void main() {
         if (stackLineCount > 0) {
           expect(snapshot.stackLines, isNotEmpty);
         }
-      }
-    });
-  });
-
-  group('Property 3: PlatformDispatcher async errors reach builder', () {
-    test('for 100 random error/stack pairs', () {
-      final previousFlutter = FlutterError.onError;
-      final previousBuilder = ErrorWidget.builder;
-      final previousPlatform = PlatformDispatcher.instance.onError;
-      addTearDown(() {
-        FlutterError.onError = previousFlutter;
-        ErrorWidget.builder = previousBuilder;
-        PlatformDispatcher.instance.onError = previousPlatform;
-      });
-
-      configureGlobalErrorHandling(logName: 'test.property3');
-      final innerBuilder = ErrorWidget.builder;
-
-      final rng = Random(99);
-      for (var i = 0; i < 100; i++) {
-        FlutterErrorDetails? captured;
-        ErrorWidget.builder = (FlutterErrorDetails details) {
-          captured = details;
-          return innerBuilder(details);
-        };
-
-        final error = Exception('async-$i-${rng.nextInt(5000)}');
-        final stack = StackTrace.fromString(
-          List.generate(rng.nextInt(12), (j) => '#$j async').join('\n'),
-        );
-
-        PlatformDispatcher.instance.onError!(error, stack);
-
-        expect(captured, isNotNull);
-        expect(identical(captured!.exception, error), isTrue);
-        expect(captured!.stack, stack);
       }
     });
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
@@ -67,6 +68,7 @@ class QualityReviewIdLookupRow extends StatelessWidget {
     final field = TextField(
       controller: controller,
       onChanged: onChanged,
+      textInputAction: TextInputAction.done,
       style: qualityReviewsFieldTextStyle(context),
       decoration: qualityReviewsInputDecoration(
         context,
@@ -74,23 +76,26 @@ class QualityReviewIdLookupRow extends StatelessWidget {
       ),
     );
     final width = MediaQuery.sizeOf(context).width;
-    if (width < 520) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          field,
-          const SizedBox(height: StudioSpacing.xs),
-          action,
-        ],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Expanded(child: field),
-        const SizedBox(width: StudioSpacing.xs),
-        action,
-      ],
+    final body = width < 520
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              field,
+              const SizedBox(height: StudioSpacing.xs),
+              action,
+            ],
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Expanded(child: field),
+              const SizedBox(width: StudioSpacing.xs),
+              action,
+            ],
+          );
+    return StudioFormKeyboardScope(
+      onEnterSubmit: enabled ? onSubmit : null,
+      child: body,
     );
   }
 }

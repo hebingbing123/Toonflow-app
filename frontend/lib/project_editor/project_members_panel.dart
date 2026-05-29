@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
@@ -382,6 +384,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
+              style: studioFormTextButtonIconStyle(context),
               onPressed: _loading || _loadingWorkspaceMembers ? null : _reload,
               icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
               label: Text(l10n.projectMembersButtonRefresh),
@@ -544,6 +547,12 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               Expanded(
                 child: TextField(
                   controller: _manualUserIdCtrl,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (!_adding) {
+                      unawaited(_addManual());
+                    }
+                  },
                   decoration: InputDecoration(
                     labelText: l10n.projectMembersFieldManualUserId,
                     hintText: l10n.projectMembersFieldManualUserIdHint,

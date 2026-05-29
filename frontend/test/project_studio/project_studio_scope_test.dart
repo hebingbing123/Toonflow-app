@@ -195,6 +195,8 @@ void main() {
   testWidgets(
     'project studio scope renders cockpit content from project home',
     (tester) async {
+      await ensureProjectStudioTestSurface(tester);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       const home = ProjectHome(
         project: ProjectRow(
           id: 'project-42',

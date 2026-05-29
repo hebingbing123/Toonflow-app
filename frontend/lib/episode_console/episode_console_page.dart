@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/components/studio_icon_button.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -30,9 +32,10 @@ class EpisodeConsolePage extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       backgroundColor: tokens.bgBase,
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          icon: const Icon(Icons.arrow_back),
+        leading: StudioIconButton(
+          icon: Icons.arrow_back,
+          label: MaterialLocalizations.of(context).backButtonTooltip,
+          style: studioUtilityIconButtonStyle(context),
           onPressed: () {
             if (context.canPop()) {
               context.pop();

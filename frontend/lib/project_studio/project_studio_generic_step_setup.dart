@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../design_system/tokens.dart';
+import '../design_system/components/studio_surfaces.dart';
 import 'project_studio_cockpit_panel.dart';
 import 'studio_agent_quick_bar.dart';
 import 'studio_step.dart';
@@ -40,6 +41,7 @@ class ProjectStudioGenericStepSetupPanel extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
+              style: studioFormTextButtonIconStyle(context),
               onPressed: onOpenModelRoutingSettings,
               icon: const Icon(Icons.hub_outlined, size: StudioIconSize.sm),
               label: Text(l10n.studioScriptStepModelRoutingSettingsLink),

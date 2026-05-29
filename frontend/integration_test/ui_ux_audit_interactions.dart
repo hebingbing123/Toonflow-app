@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_primary_button.dart';
 import 'package:openflow_app/shell/navigation_controller.dart';
 
 import 'support/real_product_shell_gallery_support.dart';
@@ -23,26 +24,47 @@ Future<void> _captureInteractionOverlaysImpl(
 ) async {
   // Skip global workbench dialogs (API-heavy, caused 30m+ stalls in audit).
 
-  // —— 新建项目：BottomSheet 向导 ——
-  await harness.goProjectsHome();
-  try {
-    await harness.tapCreateProjectWizard(openOnly: true);
-    await harness.captureInteraction('create_project_wizard_open');
-    await harness.closeOverlay();
-  } catch (_) {
-    await harness.closeOverlay();
-  }
-  await harness.goProjectsHome();
-
-  // —— 「更多」菜单 ——
-  await harness.goProjectsHome();
-  await harness.openMoreMenu();
-  await harness.captureInteraction('more_menu_panel');
-  await harness.closeMoreMenuIfOpen();
+  await harness.exitProjectStudio();
   await harness.ensureAuditShellReady();
 
+  Future<void> runOverlayStep(String label, Future<void> Function() step) async {
+    try {
+      await step();
+    } catch (e, st) {
+      print('E2E_AUDIT_OVERLAY_STEP_FAIL=$label error=$e');
+      print(st);
+      await harness.closeOverlay();
+      await harness.ensureAuditShellReady();
+    } finally {
+      await harness.recoverAuditNavigationAnchor();
+    }
+  }
+
+  // —— 新建项目：BottomSheet 向导 ——
+  await runOverlayStep('create_project_wizard', () async {
+    await harness.goProjectsHome();
+    if (!await harness.tryTapCreateProjectWizard(openOnly: true)) {
+      return;
+    }
+    await harness.captureInteraction('create_project_wizard_open');
+    await harness.closeOverlay();
+    await harness.goProjectsHome();
+  });
+
+  // —— 「更多」菜单 ——
+  await runOverlayStep('more_menu', () async {
+    await harness.goProjectsHome();
+    await harness.openMoreMenu();
+    await harness.captureInteraction('more_menu_panel');
+    await harness.closeMoreMenuIfOpen();
+    await harness.ensureAuditShellReady();
+  });
+
   // —— API 密钥：创建 Dialog ——
-  if (await harness.navigateToUtilityPane(ProductWorkspacePane.apiKeys)) {
+  await runOverlayStep('api_keys', () async {
+  if (!await harness.navigateToUtilityPane(ProductWorkspacePane.apiKeys)) {
+    return;
+  }
     await harness.pumpFrames(count: 20);
     await harness.tryTapForOverlayI18n(<String>[
       '创建 API 密钥',
@@ -51,19 +73,23 @@ Future<void> _captureInteractionOverlaysImpl(
     ], 'api_keys_create_dialog');
     await harness.closeOverlay();
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 内容合规（侧栏/队列态） ——
-  if (await harness.navigateToUtilityPane(
-    ProductWorkspacePane.contentCompliance,
-  )) {
+  await runOverlayStep('content_compliance', () async {
+    if (!await harness.navigateToUtilityPane(
+      ProductWorkspacePane.contentCompliance,
+    )) {
+      return;
+    }
     await harness.pumpFrames(count: 20);
     await harness.captureInteraction('content_compliance_pane');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 帮助 Hub ——
-  if (await harness.tryOpenHelpHubPane()) {
+  await runOverlayStep('help_hub', () async {
+    if (!await harness.tryOpenHelpHubPane()) {
+      return;
+    }
     await harness.pumpFrames(count: 20);
     await harness.tryTapForOverlayI18n(<String>[
       '添加 Webhook',
@@ -72,12 +98,14 @@ Future<void> _captureInteractionOverlaysImpl(
     ], 'help_hub_add_webhook');
     await harness.captureInteraction('help_hub_pane');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 平台配置：供应商 Dialog ——
-  if (await harness.navigateToUtilityPane(
-    ProductWorkspacePane.platformConfig,
-  )) {
+  await runOverlayStep('platform_config', () async {
+    if (!await harness.navigateToUtilityPane(
+      ProductWorkspacePane.platformConfig,
+    )) {
+      return;
+    }
     await harness.pumpFrames(count: 20);
     await harness.tryTapForOverlayI18n(<String>[
       '添加供应商',
@@ -85,20 +113,24 @@ Future<void> _captureInteractionOverlaysImpl(
       '连接供应商',
     ], 'platform_config_vendor_dialog');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 任务中心：可折叠筛选 ——
-  if (await harness.navigateToUtilityPane(ProductWorkspacePane.tasks)) {
+  await runOverlayStep('task_center', () async {
+    if (!await harness.navigateToUtilityPane(ProductWorkspacePane.tasks)) {
+      return;
+    }
     await harness.refreshTaskCenterIfPossible();
     await harness.pumpFrames(count: 24);
     await harness.tryCaptureCollapsibleFilter('task_center');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 多平台分发：筛选面板 ——
-  if (await harness.navigateToUtilityPane(
-    ProductWorkspacePane.shortVideoSpace,
-  )) {
+  await runOverlayStep('short_video', () async {
+    if (!await harness.navigateToUtilityPane(
+      ProductWorkspacePane.shortVideoSpace,
+    )) {
+      return;
+    }
     await harness.pumpFrames(count: 24);
     await harness.tryTapForOverlayI18n(<String>[
       '筛选',
@@ -108,10 +140,14 @@ Future<void> _captureInteractionOverlaysImpl(
     await harness.tryCaptureCollapsibleFilter('short_video');
     await harness.captureInteraction('short_video_space_pane');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 通知：筛选 / 设置 ——
-  if (await harness.navigateToUtilityPane(ProductWorkspacePane.notifications)) {
+  await runOverlayStep('notifications', () async {
+    if (!await harness.navigateToUtilityPane(
+      ProductWorkspacePane.notifications,
+    )) {
+      return;
+    }
     await harness.pumpFrames(count: 20);
     await harness.tryTapForOverlayI18n(<String>[
       '筛选',
@@ -121,11 +157,79 @@ Future<void> _captureInteractionOverlaysImpl(
     await harness.tryCaptureCollapsibleFilter('notifications');
     await harness.captureInteraction('notifications_pane');
     await harness.goProjectsHome();
-  }
+  });
 
-  // —— 项目工作室：仅针对本 run 创建的种子项目 ——
-  await harness.goProjectsHome();
-  await harness.tryCaptureSeedProjectStudioInteractions();
+  await runOverlayStep('journey_workflow_dialog', () async {
+    if (!await harness.tryOpenSeedProjectStudioViaRoute()) {
+      return;
+    }
+    await harness.pumpFrames(count: 20);
+    if (!await harness.tryOpenCreatorJourneyWorkflowDialog()) {
+      return;
+    }
+    await harness.captureInteraction('journey_workflow_dialog');
+    await harness.closeOverlay();
+    await harness.exitProjectStudio();
+    await harness.goProjectsHome();
+  });
+
+  await runOverlayStep('art_brief_sheet', () async {
+    if (!await harness.tryOpenSeedProjectStudioViaRoute()) {
+      return;
+    }
+    await harness.goStudioStepSlug('art');
+    await harness.pumpFrames(count: 20);
+    if (!await harness.tryOpenArtStepBriefSheet()) {
+      await harness.exitProjectStudio();
+      return;
+    }
+    await harness.captureInteraction('art_brief_sheet');
+    await harness.closeOverlay();
+    await harness.exitProjectStudio();
+    await harness.goProjectsHome();
+  });
+
+  await runOverlayStep('script_setup_sheet_close', () async {
+    if (!await harness.tryOpenSeedProjectStudioViaRoute()) {
+      return;
+    }
+    await harness.goStudioStepSlug('script');
+    await harness.pumpFrames(count: 20);
+    if (!await harness.tryOpenScriptSetupSheetOverlay()) {
+      await harness.exitProjectStudio();
+      return;
+    }
+    await harness.captureInteraction('script_setup_sheet');
+    await harness.closeOverlay();
+    await harness.pumpFrames(count: 12);
+    expect(find.text('新建项目').evaluate().isNotEmpty ||
+        find.text('你的项目').evaluate().isNotEmpty ||
+        find.text('New project').evaluate().isNotEmpty, isTrue);
+    await harness.exitProjectStudio();
+    await harness.goProjectsHome();
+  });
+
+  await runOverlayStep('more_menu_narrow', () async {
+    await harness.goProjectsHome();
+    await harness.openMoreMenu();
+    await harness.captureInteraction('more_menu_web_375');
+    await harness.closeMoreMenuIfOpen();
+    await harness.ensureAuditShellReady();
+  });
+
+  await runOverlayStep('global_search_filter', () async {
+    if (!await harness.tryOpenGlobalSearchFilterSheet()) {
+      return;
+    }
+    await harness.captureInteraction('global_search_filter');
+    await harness.closeOverlay();
+    await harness.goProjectsHome();
+  });
+
+  await runOverlayStep('seed_project_studio', () async {
+    await harness.goProjectsHome();
+    await harness.tryCaptureSeedProjectStudioInteractions();
+  });
 }
 
 /// Route gallery + interaction overlays (shared by audit test).
@@ -276,19 +380,41 @@ Future<void> captureFullGalleryRoutes(
 }
 
 extension _UiUxAuditGalleryFlows on RealProductShellGalleryHarness {
-  Future<void> tapCreateProjectWizard({bool openOnly = false}) async {
-    final create = find.text('新建项目');
-    final createEn = find.text('New project');
-    if (create.evaluate().isEmpty && createEn.evaluate().isEmpty) {
-      throw TestFailure('No create-project button found');
+  Future<bool> tryTapCreateProjectWizard({bool openOnly = false}) async {
+    await recoverAuditNavigationAnchor();
+    for (final label in <String>['新建项目', 'New project']) {
+      final finder = find.text(label);
+      if (finder.evaluate().isEmpty) {
+        continue;
+      }
+      try {
+        await tester.ensureVisible(finder.last);
+      } catch (_) {}
+      await tester.tap(finder.last, warnIfMissed: false);
+      final titleZh = find.text('创建项目');
+      final titleEn = find.text('Create project');
+      await waitFor(titleZh.evaluate().isNotEmpty ? titleZh : titleEn);
+      return true;
     }
-    final target = create.evaluate().isNotEmpty ? create : createEn;
-    await tester.tap(target.last, warnIfMissed: false);
+    final primaryButtons = find.byType(StudioPrimaryButton);
+    if (primaryButtons.evaluate().isEmpty) {
+      return false;
+    }
+    await tester.tap(primaryButtons.last, warnIfMissed: false);
     final titleZh = find.text('创建项目');
     final titleEn = find.text('Create project');
-    await waitFor(titleZh.evaluate().isNotEmpty ? titleZh : titleEn);
-    if (openOnly) {
-      return;
+    try {
+      await waitFor(titleZh.evaluate().isNotEmpty ? titleZh : titleEn);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> tapCreateProjectWizard({bool openOnly = false}) async {
+    final opened = await tryTapCreateProjectWizard(openOnly: openOnly);
+    if (!opened) {
+      throw TestFailure('No create-project button found');
     }
   }
 

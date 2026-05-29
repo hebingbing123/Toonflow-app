@@ -54,19 +54,9 @@ class _HelpHubSection extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(StudioLayoutSpacing.insetComfortable),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.helpHubDocsTitle,
-                        style: studioPaneTitleStyle(context),
-                      ),
-                    ),
-                    RiskyOperationConfirmPrefsOverflowMenu(
-                      tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
-                    ),
-                  ],
+                child: StudioPaneTitleMenuRow(
+                  title: l10n.helpHubDocsTitle,
+                  menuTooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
                 ),
               ),
             ),

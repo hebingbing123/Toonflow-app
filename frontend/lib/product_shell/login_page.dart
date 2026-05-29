@@ -9,6 +9,7 @@ import '../config.dart'
 import '../design_system/components/studio_decorative_icon.dart';
 import '../design_system/components/openflow_brand.dart';
 import '../design_system/components/studio_primary_button.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/ix/studio_toast_overlay.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/layout_breakpoints.dart';
@@ -962,6 +963,25 @@ class _AuthPanel extends StatelessWidget {
   final VoidCallback? onExploreDemo;
   final bool compact;
 
+  void _handleAuthPanelEnter(BuildContext context) {
+    if (mode == _AuthMode.signIn) {
+      onSubmit();
+      return;
+    }
+    final focused = studioFocusedTextField(
+      FocusManager.instance.primaryFocus?.context,
+    );
+    final key = focused?.key;
+    if (key == const Key('product-auth-password-confirm')) {
+      onSubmit();
+      return;
+    }
+    if (key == const Key('product-auth-email') ||
+        key == const Key('product-auth-password')) {
+      FocusScope.of(context).nextFocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1039,7 +1059,14 @@ class _AuthPanel extends StatelessWidget {
                   context,
                 )?.copyWith(color: theme.colorScheme.error),
               )
-            else ...<Widget>[
+            else
+              StudioFormKeyboardScope(
+                onEnterSubmit: authController.authInFlight
+                    ? null
+                    : () => _handleAuthPanelEnter(context),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
               TextField(
                 key: const Key('product-auth-email'),
                 controller: authController.emailController,
@@ -1106,22 +1133,21 @@ class _AuthPanel extends StatelessWidget {
                       color: theme.colorScheme.error.withValues(alpha: 0.24),
                     ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.xs,
                     children: <Widget>[
                       Icon(
                         Icons.error_outline_rounded,
                         color: theme.colorScheme.error,
                         size: StudioIconSize.sm,
                       ),
-                      const SizedBox(width: StudioSpacing.xs),
-                      Expanded(
-                        child: Text(
-                          errorMessage!,
-                          style: studioHintStyle(
-                            context,
-                          )?.copyWith(color: theme.colorScheme.error),
-                        ),
+                      Text(
+                        errorMessage!,
+                        style: studioHintStyle(
+                          context,
+                        )?.copyWith(color: theme.colorScheme.error),
                       ),
                     ],
                   ),
@@ -1162,7 +1188,9 @@ class _AuthPanel extends StatelessWidget {
                   ),
                 ),
               ],
-            ],
+                  ],
+                ),
+              ),
           ],
         ),
       ),

@@ -1147,7 +1147,12 @@ extension _HomePageProductShell on _HomePageState {
     return SizedBox(
       width: _kMacOSNavChevronBox,
       height: _kMacOSNavChevronBox,
-      child: IconButton(
+      child: StudioIconButton(
+        icon: icon,
+        label: tooltip,
+        size: _kMacOSNavChevronIcon,
+        color: color,
+        onPressed: enabled ? onPressed : null,
         style: IconButton.styleFrom(
           padding: EdgeInsets.zero,
           minimumSize: const Size(
@@ -1166,9 +1171,6 @@ extension _HomePageProductShell on _HomePageState {
               ? tokens.bgInset.withValues(alpha: 0.75)
               : StudioPrimitives.transparent,
         ),
-        onPressed: enabled ? onPressed : null,
-        tooltip: tooltip,
-        icon: Icon(icon, size: _kMacOSNavChevronIcon, weight: 300),
       ),
     );
   }
@@ -1390,14 +1392,12 @@ extension _HomePageProductShell on _HomePageState {
     required AppLocalizations l10n,
     required bool moreMenuOpen,
   }) {
-    return IconButton(
+    return StudioIconButton(
+      icon: moreMenuOpen ? Icons.apps : Icons.apps_rounded,
+      label: l10n.productShellMoreMenu,
+      size: _kMacOSTitleBarIconSize,
       style: _macOSTitleBarIconStyle(context),
-      tooltip: l10n.productShellMoreMenu,
       onPressed: _toggleMacOSTitleBarMoreMenu,
-      icon: Icon(
-        moreMenuOpen ? Icons.apps : Icons.apps_rounded,
-        size: _kMacOSTitleBarIconSize,
-      ),
     );
   }
 
@@ -1959,7 +1959,19 @@ extension _HomePageProductShell on _HomePageState {
                           : ListView(
                               padding: EdgeInsets.all(shellSurfacePadding),
                               children: <Widget>[
-                                if (_error != null) ...<Widget>[
+                                if (_error != null &&
+                                    studioLooksLikeConnectivityError(
+                                      _error!,
+                                    )) ...<Widget>[
+                                  StudioConnectivityBanner(
+                                    error: _error!,
+                                    onDismiss: () =>
+                                        setState(() => _error = null),
+                                  ),
+                                  const SizedBox(
+                                    height: StudioLayoutSpacing.inlineGap,
+                                  ),
+                                ] else if (_error != null) ...<Widget>[
                                   StudioApiErrorCallout(
                                     error: _error!,
                                     emphasis:

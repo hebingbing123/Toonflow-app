@@ -7,6 +7,7 @@ Attach these files before any UI/UX change:
 - [`../platform/studio_load_state.dart`](../platform/studio_load_state.dart) — pane load states
 - [`ASYNC_LOADING.md`](ASYNC_LOADING.md) — loading / empty / error matrix
 - [`docs/product/ux/studio-visual-guidelines.md`](../../../docs/product/ux/studio-visual-guidelines.md)
+- [`docs/plans/flutter-ui-ux-refactor-18-phases.md`](../../../docs/plans/flutter-ui-ux-refactor-18-phases.md) — 18 阶段对照与下一批范围
 
 ## Rules
 
@@ -18,6 +19,24 @@ Attach these files before any UI/UX change:
 6. Dense icon actions: `studioFormTextButtonIconStyle` / `studioUtilityIconButtonStyle`.
 7. Errors: `describeUserVisibleApiErrorResolved` — never `e.toString()` in UI.
 8. Desktop pointer: [`ix/studio_pointer.dart`](ix/studio_pointer.dart) when adding hover/cursor to custom tappables.
+9. Submit debounce: [`studio_interaction_timing.dart`](studio_interaction_timing.dart) + [`components/studio_debounced_action.dart`](components/studio_debounced_action.dart) — `StudioPrimaryButton` / `showStudioConfirmDialog` (optional `onConfirmAction`); live search uses `searchThrottle` (300ms).
+10. Icon-only actions: [`components/studio_icon_button.dart`](components/studio_icon_button.dart) — `StudioIconButton` / `StudioUtilityIconButton` / `studioAccessibleIconButton`; **no** raw `IconButton` in `lib/` (enforced by `studio-visual-debt-check.sh`).
+11. Metric typography: `studioMetricTextStyle` / `studioMetricTitleStyle` + `StudioMetricSwitch` for animated metric changes.
+12. Repaint hotspots: `StudioRepaintBoundary` on tray spinners / toast chrome / short-video batch+export CPIs.
+13. Connectivity: `StudioConnectivityBanner` when `studioLooksLikeConnectivityError(error)` (product shell list pane).
+14. Metric chips: `StudioMetricSwitch` + `studioMetricTextStyle` for numeric labels (billing, short-video overview).
+15. Form keyboard: `StudioFormKeyboardScope` + `studioFormFieldAcceptsEnterSubmit` + `studioFocusedTextField` — Enter submits on single-line fields; multiline keeps newline. **Project editor**: settings dialog (`editor_dialog_content`), asset create/edit/filter/delete/link/clip-upload/edit-image launchers, images workbench, corner-scape filter, generation dialog, scripts batch + workbench + **plan workbench**, novel import/create/edit/delete/search sections, novel events, audit/members search (`onSubmitted`). **Exempt**: `candidate_status_dialog` (dropdown-only). **Project studio**: wizard, art brief/panel, novel inline import, crawl auth, crawl login webview. **Elsewhere**: script edit/batch/edit-image, login, API keys, vendors, settings, team/account, admin, quality/task, compliance, harness auth. **Global search**: `onSubmitted` + shortcuts only (never wrap `global_search_bar`). **Notifications**: filter + `TextInputAction.search` / `onSubmitted`.
+16. Hero: `StudioHero` wraps `HeroMode(enabled: route.isCurrent)` so background routes in the stack do not duplicate tags (projects grid ↔ studio header).
+17. Truncated copy: prefer `StudioEllipsisTooltipText` over bare `Text` + ellipsis when full string helps (search titles, pane headers).
+18. Narrow projects harness: `projects/section.dart` stacks title/actions below `kStudioPipelineInlineMinWidth` (760px content pane).
+19. Unsaved back guard: `StudioDirtyPopGuard` on wizards, script editor, art step, publish copy editor (`popBlocked` while saving).
+20. Timers: cancel in `dispose` (export progress/history, assembly poll, filter debounce).
+21. Pane title + prefs menu: [`components/studio_pane_header.dart`](components/studio_pane_header.dart) — `StudioPaneTitleMenuRow` (stacks below `kStudioPipelineInlineMinWidth`); multi-action pane headers may use `_buildNotificationsPaneHeaderRow`-style `Wrap` for trailing buttons; toolbars with actions use `StudioPaneToolbar` / `StudioPaneHeader`.
+22. Glass perf: `--dart-define=STUDIO_GLASS=false` disables `BackdropFilter` in [`glass.dart`](glass.dart), [`ix/studio_toast_overlay.dart`](ix/studio_toast_overlay.dart), and demo [`product_demo_coach_overlay.dart`](../demo/product_demo_coach_overlay.dart) (solid elevated surface instead).
+23. Scrollbars: `StudioScrollBehavior` on `MaterialApp` (`studio_app.dart`) — visible thumbs when width &gt; `kStudioHandsetMaxWidth`; wrap ad-hoc scroll views with `StudioScrollbar` only when not under `MaterialApp`.
+24. Raw `GestureDetector`: only `studio_tap.dart`, `debug_overlay_widget.dart`, `build_product_shell.dart` (see visual guidelines).
+25. `TextButton.icon` in product UI: `studioFormTextButtonIconStyle` — no bare `VisualDensity.compact` in business `lib/`.
+26. Post-frame guards: use [`studio_scheduler.dart`](studio_scheduler.dart) (`StudioScheduler.scheduleOncePerFrame` / `scheduleOnceUntil`) — **never** bare `addPostFrameCallback` + `setState` inside `build`, `LayoutBuilder`, or `StatefulBuilder` builders (web tab freeze risk).
 
 ## Verification
 

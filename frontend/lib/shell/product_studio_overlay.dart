@@ -180,7 +180,7 @@ extension _HomePageProductStudioOverlay on _HomePageState {
               completedSteps: readiness.completedSteps,
               runningJobCount: readiness.runningJobCount,
               failedJobCount: readiness.failedJobCount,
-              onExit: () => context.go('/'),
+              onExit: () => exitProjectStudioRoute(context),
               onStepChanged: (step) {
                 if (!_isDemoModeActive) {
                   return;

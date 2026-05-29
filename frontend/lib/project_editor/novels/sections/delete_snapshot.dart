@@ -17,7 +17,59 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
     required TextEditingController generateIdsCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   }) {
-    return Column(
+    void submitDeleteOnEnter() {
+      if (localBusy) {
+        return;
+      }
+      final controller = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      )?.controller;
+      if (controller == deleteNovelIdCtrl) {
+        unawaited(
+          _runNovelWorkbenchAction(
+            ctx: ctx,
+            setDialogState: setDialogState,
+            setLocalState: setLocalState,
+            novelsBusy: novelsBusy,
+            setLocalBusy: setLocalBusy,
+            action: () => _deleteNovelWorkbenchChapter(
+              l10n: l10n,
+              token: token,
+              project: project,
+              deleteNovelIdCtrl: deleteNovelIdCtrl,
+              refreshWorkbench: refreshWorkbench,
+              setLocalState: setLocalState,
+              applyInfoLine: updateInfoLine,
+            ),
+          ),
+        );
+        return;
+      }
+      if (controller == generateIdsCtrl) {
+        unawaited(
+          _runNovelWorkbenchAction(
+            ctx: ctx,
+            setDialogState: setDialogState,
+            setLocalState: setLocalState,
+            novelsBusy: novelsBusy,
+            setLocalBusy: setLocalBusy,
+            action: () => _generateNovelWorkbenchEvents(
+              l10n: l10n,
+              token: token,
+              project: project,
+              generateIdsCtrl: generateIdsCtrl,
+              refreshWorkbench: refreshWorkbench,
+              setLocalState: setLocalState,
+              applyInfoLine: updateInfoLine,
+            ),
+          ),
+        );
+      }
+    }
+
+    return StudioFormKeyboardScope(
+      onEnterSubmit: localBusy ? null : submitDeleteOnEnter,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -86,6 +138,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           child: Text(l10n.projectEditorNovelsWorkbenchDeleteGenerateEventsButton),
         ),
       ],
+    ),
     );
   }
 

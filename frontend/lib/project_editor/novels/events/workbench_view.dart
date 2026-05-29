@@ -6,6 +6,7 @@ import '../../../design_system/components/studio_surfaces.dart';
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class NovelEventsWorkbenchDialogViewModel {
   const NovelEventsWorkbenchDialogViewModel({
@@ -74,12 +75,38 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
+    void handleEnterSubmit() {
+      if (model.localBusy) {
+        return;
+      }
+      final controller = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      )?.controller;
+      if (controller == model.searchCtrl) {
+        callbacks.onSearch?.call();
+        return;
+      }
+      if (controller == model.createNameCtrl ||
+          controller == model.createDetailCtrl ||
+          controller == model.createChapterIdsCtrl) {
+        callbacks.onCreate?.call();
+        return;
+      }
+      if (controller == model.batchDeleteIdsCtrl) {
+        callbacks.onBatchDelete?.call();
+        return;
+      }
+      callbacks.onSave?.call();
+    }
+
     return StudioAlertDialog(
       title: Text(l10n.projectEditorNovelsEventsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.localBusy ? null : handleEnterSubmit,
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -244,6 +271,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                 child: Text(l10n.projectEditorNovelsEventsBatchDeleteButton),
               ),
             ],
+          ),
           ),
         ),
       ),

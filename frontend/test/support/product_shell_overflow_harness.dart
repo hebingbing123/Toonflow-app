@@ -318,6 +318,58 @@ class ProductShellOverflowHarness {
       'Import novel',
       '新建剧本',
       'New script',
+      '剧本设置',
+      'Script setup',
     ]);
+  }
+
+  Future<bool> openCreatorJourneyWorkflowDialog() async {
+    await goLocation('/projects/7/script');
+    await pumpFrames(count: 24);
+    if (await tryTapFirstLabel(<String>['全流程', 'Full workflow'])) {
+      return find
+          .text('六步工作流')
+          .evaluate()
+          .isNotEmpty ||
+          find.text('Six-step workflow').evaluate().isNotEmpty;
+    }
+    final expand = find.byTooltip('全流程');
+    if (expand.evaluate().isEmpty) {
+      final expandEn = find.byTooltip('Full workflow');
+      if (expandEn.evaluate().isNotEmpty) {
+        await tester.tap(expandEn.first, warnIfMissed: false);
+        await pumpFrames(count: 16);
+        return find.text('六步工作流').evaluate().isNotEmpty ||
+            find.text('Six-step workflow').evaluate().isNotEmpty;
+      }
+      return false;
+    }
+    await tester.tap(expand.first, warnIfMissed: false);
+    await pumpFrames(count: 16);
+    return find.text('六步工作流').evaluate().isNotEmpty ||
+        find.text('Six-step workflow').evaluate().isNotEmpty;
+  }
+
+  Future<bool> openArtStepBriefSheet() async {
+    await goLocation('/projects/7/art');
+    await pumpFrames(count: 24);
+    return tryTapFirstLabel(<String>[
+      '立项与品牌约束',
+      'Project brief & brand',
+      '立项与视觉约束',
+    ]);
+  }
+
+  Future<bool> openCreatorCompactToolsSheet() async {
+    await goLocation('/projects/7/script');
+    await pumpFrames(count: 24);
+    final icons = find.byIcon(Icons.more_horiz_rounded);
+    if (icons.evaluate().isEmpty) {
+      return false;
+    }
+    await tester.tap(icons.last, warnIfMissed: false);
+    await pumpFrames(count: 16);
+    return find.text('全流程').evaluate().isNotEmpty ||
+        find.text('Full workflow').evaluate().isNotEmpty;
   }
 }

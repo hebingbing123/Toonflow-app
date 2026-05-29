@@ -19,7 +19,8 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('项目'), findsOneWidget);
+    expect(find.text('快速上手'), findsOneWidget);
+    expect(find.text('进入项目'), findsOneWidget);
     expect(find.text('下一步'), findsOneWidget);
   });
 

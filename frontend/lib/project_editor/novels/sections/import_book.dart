@@ -41,7 +41,50 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
       applyImportPreview(normalized, message);
     }
 
-    return Column(
+    void submitImportOnEnter() {
+      if (localBusy) {
+        return;
+      }
+      final controller = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      )?.controller;
+      if (controller == importUrlCtrl) {
+        unawaited(
+          _runNovelWorkbenchAction(
+            ctx: ctx,
+            setDialogState: setDialogState,
+            setLocalState: setLocalState,
+            novelsBusy: novelsBusy,
+            setLocalBusy: setLocalBusy,
+            action: () => _crawlNovelSourcePreview(
+              l10n: l10n,
+              token: token,
+              project: project,
+              importUrlCtrl: importUrlCtrl,
+              importRawTextCtrl: importRawTextCtrl,
+              importExecutionSideCtrl: importExecutionSideCtrl,
+              applyInfoLine: updateInfoLine,
+              applyImportPreview: applyImportPreview,
+              crawlAuth: crawlAuthOverride,
+            ),
+          ),
+        );
+        return;
+      }
+      if (controller == importBatchSizeCtrl) {
+        final rows = _parseNovelImportPreview(l10n, importRawTextCtrl.text);
+        applyImportPreview(
+          rows,
+          rows.isEmpty
+              ? l10n.projectEditorNovelsActionPreparseResultEmpty
+              : l10n.projectEditorNovelsActionPreparseResultOk(rows.length),
+        );
+      }
+    }
+
+    return StudioFormKeyboardScope(
+      onEnterSubmit: localBusy ? null : submitImportOnEnter,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -751,6 +794,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           ),
         ],
       ],
+    ),
     );
   }
 }

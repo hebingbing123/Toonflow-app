@@ -1512,6 +1512,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioOnboardingDone => '完成';
 
   @override
+  String get studioOnboardingSkip => '跳过引导';
+
+  @override
+  String get studioOnboardingTitle => '快速上手';
+
+  @override
+  String get studioOnboardingStep1Title => '进入项目';
+
+  @override
+  String get studioOnboardingStep2Title => '六步工作流';
+
+  @override
+  String get studioOnboardingStep3Title => '命令面板';
+
+  @override
   String get studioOnboardingStep1 => '从应用导航进入「项目」开始创作。';
 
   @override

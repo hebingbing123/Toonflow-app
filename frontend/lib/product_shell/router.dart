@@ -36,6 +36,36 @@ CustomTransitionPage<void> studioFadeTransitionPage({
   );
 }
 
+/// Project studio push transition — overlaps routes briefly so [Hero] can fly.
+CustomTransitionPage<void> studioProjectStudioTransitionPage({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 280),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.02),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 /// Full-screen shot list / grid studio (not the six-step SOP route).
 String studioStoryboardStudioRoute(int projectNumericId) =>
     '/projects/$projectNumericId/storyboard-studio';
@@ -172,11 +202,14 @@ GoRouter createStudioRouter() {
       ),
       GoRoute(
         path: '/projects/:projectNumericId/:stepSlug',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = int.parse(state.pathParameters['projectNumericId']!);
-          return buildProjectStudioHomePage(
-            projectNumericId: id,
-            stepSlug: state.pathParameters['stepSlug'],
+          return studioProjectStudioTransitionPage(
+            key: state.pageKey,
+            child: buildProjectStudioHomePage(
+              projectNumericId: id,
+              stepSlug: state.pathParameters['stepSlug'],
+            ),
           );
         },
       ),

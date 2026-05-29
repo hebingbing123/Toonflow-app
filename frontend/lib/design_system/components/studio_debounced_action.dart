@@ -2,15 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../studio_interaction_timing.dart';
+
 /// Debounces rapid taps on primary actions (submit, purchase, save).
 ///
-/// Default [duration] is 500ms per Studio interaction safety guidelines.
+/// Default [duration] is [StudioInteractionTiming.submitDebounce].
 class StudioDebouncedAction extends StatefulWidget {
   const StudioDebouncedAction({
     super.key,
     required this.onPressed,
     required this.builder,
-    this.duration = const Duration(milliseconds: 500),
+    this.duration = StudioInteractionTiming.submitDebounce,
     this.enabled = true,
   });
 

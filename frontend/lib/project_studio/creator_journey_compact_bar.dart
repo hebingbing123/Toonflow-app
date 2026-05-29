@@ -57,45 +57,13 @@ class CreatorJourneyCompactBar extends StatelessWidget {
   }
 
   void _showFullWorkflow(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showStudioBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        final tokens = StudioTokens.of(sheetContext);
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              StudioSpacing.sm,
-              StudioSpacing.xs,
-              StudioSpacing.sm,
-              StudioSpacing.md,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  l10n.studioCreatorJourneyCompactExpandTitle,
-                  style: Theme.of(sheetContext).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: tokens.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                CreatorJourneyStrip(
-                  currentStep: currentStep,
-                  failedJobCount: failedJobCount,
-                  onSelectMilestone: onSelectStep,
-                  onBackToProjects: onBackToProjects,
-                  onOpenReviewPackMilestone: onOpenReviewPackMilestone,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    showCreatorJourneyWorkflowDialog(
+      context,
+      currentStep: currentStep,
+      failedJobCount: failedJobCount,
+      onSelectMilestone: onSelectStep,
+      onBackToProjects: onBackToProjects,
+      onOpenReviewPackMilestone: onOpenReviewPackMilestone,
     );
   }
 
@@ -171,7 +139,14 @@ class CreatorJourneyCompactBar extends StatelessWidget {
           );
         }
         sheetChildren.add(const SizedBox(height: StudioSpacing.xs));
-        return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: sheetChildren));
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: sheetChildren,
+            ),
+          ),
+        );
       },
     );
   }
@@ -409,36 +384,53 @@ class CreatorJourneyCompactBar extends StatelessWidget {
           collapseTools: collapseTools,
         );
 
-        final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final row = Row(
+        final pill = ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 260),
+          child: _buildCurrentPill(
+            context: context,
+            l10n: l10n,
+            tokens: tokens,
+            currentLabel: currentLabel,
+            labelStyle: labelStyle,
+          ),
+        );
+        final trailing = Row(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            ?prev,
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 260),
-                  child: _buildCurrentPill(
-                    context: context,
-                    l10n: l10n,
-                    tokens: tokens,
-                    currentLabel: currentLabel,
-                    labelStyle: labelStyle,
-                  ),
-                ),
-              ),
-            ),
             ?next,
             tools,
           ],
         );
+        // Stack keeps the focus pill visually centered while prev/trailing hug
+        // the bar edges. A flex Row with Flexible(prev)+Expanded(pill) split
+        // remaining width 50/50 and parked trailing beside the pill slot.
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final bar = SizedBox(
+          width: constraints.maxWidth,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  ?prev,
+                  const Spacer(),
+                  trailing,
+                ],
+              ),
+              pill,
+            ],
+          ),
+        );
         if (textScale <= 1.25) {
-          return row;
+          return bar;
         }
         return ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: StudioSpacing.touchTarget + StudioSpacing.xs,
           ),
-          child: row,
+          child: bar,
         );
       },
     );

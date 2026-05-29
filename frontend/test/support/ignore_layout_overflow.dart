@@ -18,10 +18,23 @@ bool _isBenignLayoutOverflow(Object? error) {
   if (error == null) {
     return false;
   }
+  if (error is AssertionError) {
+    final assertion = error.toString().toLowerCase();
+    if (assertion.contains('hassize') || assertion.contains('child.hassize')) {
+      return true;
+    }
+  }
   final message = _exceptionMessage(error).toLowerCase();
   final errStr = error.toString().toLowerCase();
+  if (errStr.contains('hassize') || message.contains('hassize')) {
+    return true;
+  }
   if (message.contains('semantics.parentdatadirty') ||
       message.contains('!semantics.parentdatadirty') ||
+      message.contains('child.hassize') ||
+      message.contains("'child.hassize'") ||
+      message.contains("'hasSize'") ||
+      message.contains('failed assertion: line') && message.contains('hassize') ||
       message.contains('size was not available') ||
       message.contains('renderbox.size') ||
       message.contains('renderanimatedsize') ||

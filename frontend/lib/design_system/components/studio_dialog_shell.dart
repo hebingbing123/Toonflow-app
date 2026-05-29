@@ -1,11 +1,19 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../ix/studio_form_keyboard.dart';
 import '../ix/studio_platform_modals.dart';
 import '../ix/studio_mobile_affordances.dart';
 import '../ix/studio_scroll_behavior.dart';
+import '../studio_interaction_timing.dart';
+import '../studio_modal_presentation.dart';
 import '../tokens.dart';
+import 'studio_debounced_action.dart';
+import 'studio_icon_button.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
@@ -78,6 +86,25 @@ Future<T?> showStudioBottomSheet<T>({
     );
   }
 
+  if (studioModalPresentationFor(isScrollControlled: isScrollControlled) ==
+      StudioModalPresentation.webTallDialog) {
+    return showStudioDialog<T>(
+      context: context,
+      barrierDismissible: isDismissible,
+      builder: (ctx) {
+        return StudioWebTallSheetDialog(
+          showDragHandle: showDragHandle,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(ctx).bottom,
+            ),
+            child: builder(ctx),
+          ),
+        );
+      },
+    );
+  }
+
   if (studioPrefersCupertinoModals(context)) {
     return showCupertinoModalPopup<T>(
       context: context,
@@ -109,7 +136,82 @@ Future<T?> showStudioBottomSheet<T>({
   );
 }
 
+/// Centered tall panel for Web (replaces scroll-controlled bottom sheets).
+///
+/// Uses full corner radius and a single surface — do not wrap with [sheetChrome].
+class StudioWebTallSheetDialog extends StatelessWidget {
+  const StudioWebTallSheetDialog({
+    super.key,
+    required this.child,
+    this.showDragHandle = false,
+    this.maxWidth = 760,
+    this.maxHeightFactor = 0.88,
+  });
+
+  final Widget child;
+  final bool showDragHandle;
+  final double maxWidth;
+  final double maxHeightFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    final viewport = MediaQuery.sizeOf(context);
+    final width = math.min(
+      math.max(viewport.width - StudioSpacing.md * 2, 320.0),
+      maxWidth,
+    );
+    final maxHeight = viewport.height * maxHeightFactor;
+
+    return Dialog(
+      backgroundColor: StudioPrimitives.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: StudioSpacing.md,
+        vertical: StudioSpacing.lg,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: width, maxHeight: maxHeight),
+        child: Material(
+          color: tokens.bgSurface.withValues(alpha: 0.98),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+            side: BorderSide(color: tokens.borderSubtle),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (showDragHandle) ...<Widget>[
+                const SizedBox(height: StudioSpacing.xs),
+                Center(
+                  child: Container(
+                    width: StudioLayoutSize.skeletonAvatar,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: tokens.borderDefault,
+                      borderRadius: BorderRadius.circular(
+                        StudioSpacing.radiusHairline,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Simple confirm/cancel dialog using studio chrome.
+///
+/// When [onConfirmAction] is set, the confirm button runs that future (shows
+/// inline loading) and only pops `true` after success. Otherwise confirm pops
+/// `true` immediately. Confirm is debounced to prevent double submission.
 Future<bool?> showStudioConfirmDialog({
   required BuildContext context,
   required String title,
@@ -119,65 +221,159 @@ Future<bool?> showStudioConfirmDialog({
   String? cancelLabel,
   bool destructive = false,
   bool barrierDismissible = true,
+  Future<void> Function()? onConfirmAction,
 }) {
   return showStudioDialog<bool>(
     context: context,
-    barrierDismissible: barrierDismissible,
-    builder: (ctx) {
-      final resolvedCancel =
-          cancelLabel ?? MaterialLocalizations.of(ctx).cancelButtonLabel;
-      final resolvedConfirm =
-          confirmLabel ?? MaterialLocalizations.of(ctx).okButtonLabel;
-      if (studioPrefersCupertinoModals(ctx)) {
-        return CupertinoAlertDialog(
-          title: Text(title),
-          content:
-              content ??
-              (message == null
-                  ? null
-                  : Text(message, style: studioSectionIntroStyle(ctx))),
+    barrierDismissible: barrierDismissible && onConfirmAction == null,
+    builder: (ctx) => _StudioConfirmDialog(
+      title: title,
+      message: message,
+      content: content,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      destructive: destructive,
+      onConfirmAction: onConfirmAction,
+    ),
+  );
+}
+
+class _StudioConfirmDialog extends StatefulWidget {
+  const _StudioConfirmDialog({
+    required this.title,
+    this.message,
+    this.content,
+    this.confirmLabel,
+    this.cancelLabel,
+    this.destructive = false,
+    this.onConfirmAction,
+  });
+
+  final String title;
+  final String? message;
+  final Widget? content;
+  final String? confirmLabel;
+  final String? cancelLabel;
+  final bool destructive;
+  final Future<void> Function()? onConfirmAction;
+
+  @override
+  State<_StudioConfirmDialog> createState() => _StudioConfirmDialogState();
+}
+
+class _StudioConfirmDialogState extends State<_StudioConfirmDialog> {
+  bool _confirmBusy = false;
+  DateTime? _lastConfirmTap;
+
+  Future<void> _handleConfirm() async {
+    if (_confirmBusy) return;
+    final now = DateTime.now();
+    if (_lastConfirmTap != null &&
+        now.difference(_lastConfirmTap!) <
+            StudioInteractionTiming.submitDebounce) {
+      return;
+    }
+    _lastConfirmTap = now;
+    final action = widget.onConfirmAction;
+    if (action == null) {
+      if (mounted) Navigator.of(context).pop(true);
+      return;
+    }
+    setState(() => _confirmBusy = true);
+    try {
+      await action();
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (_) {
+      if (mounted) setState(() => _confirmBusy = false);
+    }
+  }
+
+  void _handleCancel() {
+    if (_confirmBusy) return;
+    Navigator.of(context).pop(false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedCancel =
+        widget.cancelLabel ?? MaterialLocalizations.of(context).cancelButtonLabel;
+    final resolvedConfirm =
+        widget.confirmLabel ?? MaterialLocalizations.of(context).okButtonLabel;
+    final body =
+        widget.content ??
+        (widget.message == null
+            ? null
+            : Text(widget.message!, style: studioSectionIntroStyle(context)));
+
+    final confirmChild = _confirmBusy
+        ? SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: widget.destructive
+                  ? Theme.of(context).colorScheme.onError
+                  : Theme.of(context).colorScheme.onPrimary,
+            ),
+          )
+        : Text(resolvedConfirm);
+
+    if (studioPrefersCupertinoModals(context)) {
+      return StudioFormKeyboardScope(
+        onEnterSubmit: _confirmBusy ? null : () => unawaited(_handleConfirm()),
+        child: CupertinoAlertDialog(
+          title: Text(widget.title),
+          content: body,
           actions: <Widget>[
             CupertinoDialogAction(
-              onPressed: () => Navigator.of(ctx).pop(false),
+              onPressed: _confirmBusy ? null : _handleCancel,
               child: Text(resolvedCancel),
             ),
             CupertinoDialogAction(
-              isDestructiveAction: destructive,
-              isDefaultAction: !destructive,
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(resolvedConfirm),
+              isDestructiveAction: widget.destructive,
+              isDefaultAction: !widget.destructive,
+              onPressed: _confirmBusy ? null : () => unawaited(_handleConfirm()),
+              child: confirmChild,
             ),
           ],
+        ),
+      );
+    }
+
+    Widget buildMaterialConfirm(VoidCallback? onPressed) {
+      if (widget.destructive) {
+        return FilledButton(
+          style: studioFormDestructivePrimaryButtonStyle(context),
+          onPressed: onPressed,
+          child: confirmChild,
         );
       }
-      return StudioAlertDialog(
-        title: Text(title),
-        content:
-            content ??
-            (message == null
-                ? null
-                : Text(message, style: studioSectionIntroStyle(ctx))),
+      return FilledButton(
+        style: studioFormPrimaryButtonStyle(context),
+        onPressed: onPressed,
+        child: confirmChild,
+      );
+    }
+
+    return StudioFormKeyboardScope(
+      onEnterSubmit: _confirmBusy ? null : _handleConfirm,
+      child: StudioAlertDialog(
+        title: Text(widget.title),
+        content: body,
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
+            onPressed: _confirmBusy ? null : _handleCancel,
             child: Text(resolvedCancel),
           ),
-          if (destructive)
-            FilledButton(
-              style: studioFormDestructivePrimaryButtonStyle(ctx),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(resolvedConfirm),
-            )
-          else
-            FilledButton(
-              style: studioFormPrimaryButtonStyle(ctx),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(resolvedConfirm),
-            ),
+          StudioDebouncedAction(
+            enabled: !_confirmBusy,
+            onPressed: _handleConfirm,
+            builder: (ctx, onPressed) => buildMaterialConfirm(onPressed),
+          ),
         ],
-      );
-    },
-  );
+      ),
+    );
+  }
 }
 
 /// Drop-in replacement for [AlertDialog] with studio panel chrome.
@@ -418,6 +614,23 @@ class StudioDialogShell extends StatelessWidget {
             ? null
             : Text(title, style: studioDialogTitleStyle(context)));
 
+    final bodySection = scrollable
+        ? Flexible(
+            child: StudioScrollbar(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(StudioSpacing.sm),
+                child: child,
+              ),
+            ),
+          )
+        : Flexible(
+            fit: FlexFit.loose,
+            child: Padding(
+              padding: const EdgeInsets.all(StudioSpacing.sm),
+              child: child,
+            ),
+          );
+
     return Dialog(
       backgroundColor: StudioPrimitives.transparent,
       insetPadding: const EdgeInsets.symmetric(
@@ -443,7 +656,7 @@ class StudioDialogShell extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (headerTitle != null ||
@@ -487,10 +700,13 @@ class StudioDialogShell extends StatelessWidget {
                             ),
                           ),
                           if (onClose != null)
-                            IconButton(
-                              tooltip: MaterialLocalizations.of(
+                            StudioIconButton(
+                              icon: Icons.close,
+                              label: MaterialLocalizations.of(
                                 context,
                               ).closeButtonTooltip,
+                              size: StudioIconSize.md,
+                              color: tokens.textSecondary,
                               style: IconButton.styleFrom(
                                 backgroundColor: tokens.bgSurface.withValues(
                                   alpha: 0.78,
@@ -512,10 +728,6 @@ class StudioDialogShell extends StatelessWidget {
                                 ),
                               ),
                               onPressed: onClose,
-                              icon: const Icon(
-                                Icons.close,
-                                size: StudioIconSize.md,
-                              ),
                             ),
                         ],
                       ),
@@ -528,19 +740,7 @@ class StudioDialogShell extends StatelessWidget {
                       height: StudioControlSize.dividerThickness,
                       color: tokens.borderSubtle,
                     ),
-                  Flexible(
-                    child: scrollable
-                        ? StudioScrollbar(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.all(StudioSpacing.sm),
-                              child: child,
-                            ),
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.all(StudioSpacing.sm),
-                            child: child,
-                          ),
-                  ),
+                  bodySection,
                   if (actions != null && actions!.isNotEmpty) ...<Widget>[
                     Divider(
                       height: StudioControlSize.dividerThickness,

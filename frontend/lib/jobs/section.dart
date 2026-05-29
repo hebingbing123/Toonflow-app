@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/studio_scheduler.dart';
 import '../platform/studio_load_state.dart';
 import 'controller.dart';
 import 'section_view.dart';
@@ -24,7 +25,7 @@ class _JobsSectionState extends State<JobsSection> {
     super.initState();
     if (widget.studioPresentation &&
         widget.controller.jobsLoadState == StudioLoadState.initial) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      StudioScheduler.scheduleOnceUntil('jobs_section_initial_load', () {
         if (!mounted) return;
         widget.controller.loadJobs();
       });

@@ -8,11 +8,12 @@ import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_pane_header.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../design_system/studio_motion.dart';
 import '../l10n/app_localizations.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
@@ -90,19 +91,9 @@ class _AccountSectionState extends State<AccountSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    l10n.accountSectionTitle,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.accountRiskyPrefsTooltip,
-                ),
-              ],
+            StudioPaneTitleMenuRow(
+              title: l10n.accountSectionTitle,
+              menuTooltip: l10n.accountRiskyPrefsTooltip,
             ),
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             Text(l10n.accountSectionSubtitle, style: studioSectionIntroStyle(context)),
@@ -519,7 +510,9 @@ class _AccountSectionState extends State<AccountSection> {
         );
         final form = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: split ? 360 : double.infinity),
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: canDelete ? _deleteAccount : null,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _buildDeleteConfirmPrompt(context, l10n),
@@ -527,6 +520,7 @@ class _AccountSectionState extends State<AccountSection> {
               TextField(
                 controller: _confirmController,
                 onChanged: (_) => setState(() {}),
+                textInputAction: TextInputAction.done,
                 autocorrect: false,
                 enableSuggestions: false,
                 smartDashesType: SmartDashesType.disabled,
@@ -567,6 +561,7 @@ class _AccountSectionState extends State<AccountSection> {
                 ),
               ),
             ],
+            ),
           ),
         );
 

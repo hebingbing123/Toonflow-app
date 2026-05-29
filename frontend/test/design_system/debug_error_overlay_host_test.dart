@@ -22,6 +22,7 @@ void main() {
       FlutterErrorDetails(exception: StateError('async failure')),
     );
     await tester.pump();
+    await tester.pump();
 
     expect(find.byType(DebugOverlayWidget), findsOneWidget);
     expect(find.text('StateError'), findsOneWidget);
@@ -41,6 +42,7 @@ void main() {
     DebugErrorOverlayController.instance.report(
       FlutterErrorDetails(exception: Exception('gone')),
     );
+    await tester.pump();
     await tester.pump();
     expect(find.byType(DebugOverlayWidget), findsOneWidget);
 

@@ -4,6 +4,7 @@ import '../../../../rust_api.dart';
 import 'workbench_dialog_view_contract.dart';
 import 'workbench_dialog_view_sections.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 export 'workbench_dialog_view_contract.dart';
 
@@ -31,13 +32,16 @@ class AssetImagesWorkbenchDialogView extends StatelessWidget {
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: buildAssetImagesWorkbenchSections(
-              context,
-              model: model,
-              callbacks: callbacks,
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: () => _submitAssetImagesWorkbenchOnEnter(model, callbacks),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: buildAssetImagesWorkbenchSections(
+                context,
+                model: model,
+                callbacks: callbacks,
+              ),
             ),
           ),
         ),
@@ -50,5 +54,24 @@ class AssetImagesWorkbenchDialogView extends StatelessWidget {
       ],
     );
   }
+}
 
+void _submitAssetImagesWorkbenchOnEnter(
+  AssetImagesWorkbenchDialogViewModel model,
+  AssetImagesWorkbenchDialogViewCallbacks callbacks,
+) {
+  final controller = studioFocusedTextField(
+    FocusManager.instance.primaryFocus?.context,
+  )?.controller;
+  if (controller == model.createFilePathController ||
+      controller == model.createStateController ||
+      controller == model.createSortController) {
+    callbacks.onCreateImage?.call();
+    return;
+  }
+  if (controller == model.patchFilePathController ||
+      controller == model.patchStateController ||
+      controller == model.patchSortController) {
+    callbacks.onPatchImage?.call();
+  }
 }

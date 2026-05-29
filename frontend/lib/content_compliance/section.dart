@@ -20,6 +20,7 @@ import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 // Split into multiple files for maintainability
 part 'section_helpers.dart';
@@ -211,7 +212,17 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             StudioCollapsibleFilterPanel(
               collapsible: true,
               title: l10n.contentComplianceSubmitReportTitle,
-              child: Column(
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: widget.controller.submittingReport
+                    ? null
+                    : () => widget.controller.submitReport(
+                          targetType: _targetType,
+                          targetId: _targetIdController.text,
+                          category: _category,
+                          severity: _severity,
+                          detail: _detailController.text,
+                        ),
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   StudioFilterRow(
@@ -259,10 +270,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   const SizedBox(height: StudioSpacing.xs),
                   TextField(
                     controller: _targetIdController,
+                    textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       labelText: l10n.contentComplianceFieldTargetUuid,
                       hintText: l10n.contentComplianceTargetUuidHint,
-                      isDense: true,
                     ),
                   ),
                   const SizedBox(height: StudioSpacing.xs),
@@ -272,7 +283,6 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     decoration: InputDecoration(
                       labelText: l10n.contentComplianceDetailLabel,
                       hintText: l10n.contentComplianceDetailHint,
-                      isDense: true,
                     ),
                   ),
                   const SizedBox(height: StudioSpacing.sm),
@@ -304,6 +314,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
             if (widget.controller.queueEnabled) ...[

@@ -387,7 +387,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
         return StatefulBuilder(
           builder: (context, setModalState) {
             if (loading && members.isEmpty && error == null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
+              StudioScheduler.scheduleOnceUntil('team_workspace_members_load', () {
                 loadMembers(setModalState);
               });
             }
@@ -1124,9 +1124,10 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                     ),
                                   ),
                                 if (canTransferOwner)
-                                  IconButton(
-                                    tooltip:
-                                        l10n.teamWorkspaceTransferOwnerTooltip,
+                                  StudioIconButton(
+                                    icon: Icons.swap_horiz_outlined,
+                                    label: l10n.teamWorkspaceTransferOwnerTooltip,
+                                    style: studioUtilityIconButtonStyle(context),
                                     onPressed: mutatingMemberUserId != null
                                         ? null
                                         : () async {
@@ -1167,17 +1168,14 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
                                               );
                                             }
                                           },
-                                    icon: const Icon(Icons.swap_horiz_outlined),
                                   ),
-                                IconButton(
-                                  tooltip:
-                                      l10n.teamWorkspaceRemoveMemberTooltip,
+                                StudioIconButton(
+                                  icon: Icons.person_remove_outlined,
+                                  label: l10n.teamWorkspaceRemoveMemberTooltip,
+                                  style: studioUtilityIconButtonStyle(context),
                                   onPressed: mutatingMemberUserId != null
                                       ? null
                                       : removeMember,
-                                  icon: const Icon(
-                                    Icons.person_remove_outlined,
-                                  ),
                                 ),
                               ],
                             ),
@@ -1322,7 +1320,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
         return StatefulBuilder(
           builder: (context, setModalState) {
             if (loading && invites.isEmpty && error == null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
+              StudioScheduler.scheduleOnceUntil('team_workspace_invites_load', () {
                 loadInvites(setModalState);
               });
             }

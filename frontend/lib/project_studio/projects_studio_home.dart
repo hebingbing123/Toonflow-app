@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../demo/product_demo_mode.dart';
@@ -19,6 +21,7 @@ import 'studio_readiness.dart';
 import 'create_project_wizard.dart';
 import 'projects_grid_view.dart';
 import 'projects_studio_home_layout.dart';
+import 'studio_step_prefs.dart';
 import 'studio_step_progress_ring.dart';
 
 /// Product-shell projects home (Wave 2): grid, recent row, wizard create.
@@ -57,6 +60,10 @@ class ProjectsStudioHome extends StatefulWidget {
 class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   List<String> _recentIds = const <String>[];
   final Map<String, int> _progressByProjectId = <String, int>{};
+  var _loadingProjectProgress = false;
+  String? _loadedProgressProjectsKey;
+  Timer? _progressReloadDebounce;
+  int _progressLoadGeneration = 0;
 
   bool get _enterpriseEmpty =>
       widget.currentWorkspaceType == 'enterprise' &&
@@ -66,8 +73,44 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_onProjectsControllerChanged);
+    StudioStepPrefs.changes.addListener(_onStudioStepPrefsChanged);
     _loadRecent();
     _autoLoadProjects();
+  }
+
+  @override
+  void dispose() {
+    _progressReloadDebounce?.cancel();
+    widget.controller.removeListener(_onProjectsControllerChanged);
+    StudioStepPrefs.changes.removeListener(_onStudioStepPrefsChanged);
+    super.dispose();
+  }
+
+  void _scheduleProgressReload({bool force = false}) {
+    _progressReloadDebounce?.cancel();
+    _progressReloadDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) {
+        return;
+      }
+      unawaited(_loadReadinessForProjects(force: force));
+    });
+  }
+
+  void _onProjectsControllerChanged() {
+    final projects = widget.controller.projects;
+    if (projects == null || projects.isEmpty) {
+      return;
+    }
+    final key = projects.map((project) => project.id).join('|');
+    if (key == _loadedProgressProjectsKey) {
+      return;
+    }
+    _scheduleProgressReload();
+  }
+
+  void _onStudioStepPrefsChanged() {
+    _scheduleProgressReload(force: true);
   }
 
   Future<void> _loadRecent() async {
@@ -89,9 +132,12 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
     }
   }
 
-  Future<void> _loadReadinessForProjects() async {
+  Future<void> _loadReadinessForProjects({bool force = false}) async {
     if (widget.controller.skipDemoApi ||
         ProductDemoMode.instance.shouldSkipLiveApi) {
+      return;
+    }
+    if (_loadingProjectProgress && !force) {
       return;
     }
     final token = widget.accessToken;
@@ -102,9 +148,21 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         projects.isEmpty) {
       return;
     }
-    final next = <String, int>{};
-    for (final project in projects.take(12)) {
-      try {
+    final projectsKey = projects.map((project) => project.id).join('|');
+    if (!force && projectsKey == _loadedProgressProjectsKey) {
+      return;
+    }
+
+    _loadingProjectProgress = true;
+    final generation = ++_progressLoadGeneration;
+    final targets = projects.take(24).toList(growable: false);
+    try {
+      final lastSteps = await StudioStepPrefs.loadLastSteps(
+        targets.map((project) => project.numericId),
+      );
+      final next = <String, int>{};
+
+      Future<int> loadProgressFor(ProjectRow project) async {
         ProjectShortVideoReadiness? readiness;
         ProjectProductionOverview? production;
         try {
@@ -119,20 +177,45 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
             project.id,
           );
         } catch (_) {}
-        next[project.id] = computeStudioCompletedSteps(
+        return computeProjectListProgressSteps(
           readiness: readiness,
           production: production,
+          lastVisitedStep: lastSteps[project.numericId],
         );
-      } catch (_) {
-        next[project.id] = 1;
+      }
+
+      const batchSize = 4;
+      for (var start = 0; start < targets.length; start += batchSize) {
+        if (!mounted || generation != _progressLoadGeneration) {
+          return;
+        }
+        final batch = targets
+            .skip(start)
+            .take(batchSize)
+            .toList(growable: false);
+        final entries = await Future.wait(
+          batch.map((project) async {
+            return MapEntry(project.id, await loadProgressFor(project));
+          }),
+        );
+        for (final entry in entries) {
+          next[entry.key] = entry.value;
+        }
+      }
+      if (!mounted || generation != _progressLoadGeneration) {
+        return;
+      }
+      setState(() {
+        _progressByProjectId
+          ..clear()
+          ..addAll(next);
+        _loadedProgressProjectsKey = projectsKey;
+      });
+    } finally {
+      if (generation == _progressLoadGeneration) {
+        _loadingProjectProgress = false;
       }
     }
-    if (!mounted) return;
-    setState(() {
-      _progressByProjectId
-        ..clear()
-        ..addAll(next);
-    });
   }
 
   Future<void> _createProject() async {
@@ -384,7 +467,7 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               width: recentCardWidth,
               height: compact ? 112 : 132,
               child: StudioStaggeredEntrance(
-                index: i,
+                index: i > 8 ? 0 : i,
                 child: _RecentProjectChip(
                   project: recent[i],
                   completedSteps: _progressByProjectId[recent[i].id] ?? 0,
@@ -418,9 +501,9 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               final project = recent[index];
               return SizedBox(
                 width: recentCardWidth,
-                child: StudioStaggeredEntrance(
-                  index: index,
-                  child: _RecentProjectChip(
+                child: _wrapRecentEntrance(
+                  index,
+                  _RecentProjectChip(
                     project: project,
                     completedSteps: _progressByProjectId[project.id] ?? 0,
                     compact: compact,
@@ -436,6 +519,13 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
         ),
       ],
     );
+  }
+
+  Widget _wrapRecentEntrance(int index, Widget child) {
+    if (index > 8) {
+      return child;
+    }
+    return StudioStaggeredEntrance(index: index, child: child);
   }
 
   @override
@@ -481,124 +571,312 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
               StudioSpacing.md,
             );
 
-            return Align(
-              alignment: Alignment.topCenter,
-              child: SingleChildScrollView(
-                padding: scrollPadding,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: contentMaxWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      _buildHeader(
-                        context,
-                        l10n,
-                        layout,
-                        includeCreateAction:
-                            !projectsEmpty || _enterpriseEmpty,
-                      ),
-                  if (_enterpriseEmpty) ...<Widget>[
-                    const SizedBox(height: StudioLayoutSpacing.section - 4),
-                    _EnterpriseEmptyBanner(
-                      workspaceName: widget.currentWorkspaceName,
-                      creating: widget.controller.creatingProject,
-                      onCreate: _createProject,
-                      onOpenTeamWorkspaces: widget.onOpenTeamWorkspaces,
-                    ),
-                  ],
-                  if (widget.currentProjectNumericId == null &&
-                      projects.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: StudioLayoutSpacing.section - 4),
-                    _SelectProjectHintBanner(
-                      message: l10n.studioPipelineSelectProjectFirst,
-                    ),
-                  ],
-                  if (useSplitOverview) ...<Widget>[
-                    const SizedBox(height: StudioLayoutSpacing.section + 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            final splitGridMaxHeight = MediaQuery.sizeOf(context).height * 0.72;
+            final overviewArgs = (
+              context: context,
+              l10n: l10n,
+              layout: layout,
+              projects: projects,
+              projectsEmpty: projectsEmpty,
+              showRecentRail: showRecentRail,
+              recent: recent,
+              recentCardWidth: recentCardWidth,
+              gridEntranceKey: gridEntranceKey,
+              showProjectsLoading: showProjectsLoading,
+              contentWidth: contentWidth,
+              useSplitOverview: useSplitOverview,
+            );
+
+            if (!constraints.hasBoundedHeight) {
+              // Product shell wraps panes in an outer ListView; avoid nested
+              // viewports and SliverConstrainedCrossAxis under shrink-wrap.
+              return Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: scrollPadding,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: contentMaxWidth),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        SizedBox(
-                          width: recentCardWidth + 24,
-                          child: _buildRecentRail(
-                            context,
-                            l10n,
-                            recent,
-                            vertical: true,
-                            recentCardWidth: recentCardWidth + 24,
-                          ),
+                        ..._buildOverviewColumnChildren(
+                          context: overviewArgs.context,
+                          l10n: overviewArgs.l10n,
+                          layout: overviewArgs.layout,
+                          projects: overviewArgs.projects,
+                          projectsEmpty: overviewArgs.projectsEmpty,
+                          showRecentRail: overviewArgs.showRecentRail,
+                          recent: overviewArgs.recent,
+                          recentCardWidth: overviewArgs.recentCardWidth,
+                          gridEntranceKey: overviewArgs.gridEntranceKey,
+                          showProjectsLoading: overviewArgs.showProjectsLoading,
+                          contentWidth: overviewArgs.contentWidth,
+                          useSplitOverview: overviewArgs.useSplitOverview,
+                          includeGrid: !useSplitOverview,
                         ),
-                        const SizedBox(width: StudioSpacing.md),
-                        Expanded(
-                          child: ProductDemoTourAnchor(
-                            anchorId: ProductDemoTourAnchorIds.projectsGrid,
-                            child: ProjectsGridView(
-                              projects: projects,
-                              loading: widget.controller.loadingProjects,
-                              listEntranceKey: gridEntranceKey,
-                              currentProjectNumericId:
-                                  widget.currentProjectNumericId,
-                              progressForProject: (p) =>
-                                  _progressByProjectId[p.id] ?? 0,
-                              onSelectProject: widget.onSelectProjectScope,
-                              onOpenProject: widget.onOpenProjectStudio,
-                            ),
+                        if (useSplitOverview)
+                          _buildSplitOverviewGridRow(
+                            context: context,
+                            l10n: l10n,
+                            projects: projects,
+                            recent: recent,
+                            recentCardWidth: recentCardWidth,
+                            gridEntranceKey: gridEntranceKey,
+                            showProjectsLoading: showProjectsLoading,
+                            splitGridMaxHeight: splitGridMaxHeight,
                           ),
-                        ),
                       ],
                     ),
-                  ] else ...<Widget>[
-                    if (showRecentRail) ...<Widget>[
-                      const SizedBox(height: StudioLayoutSpacing.section + 4),
-                      _buildRecentRail(
-                        context,
-                        l10n,
-                        recent,
-                        vertical: false,
-                        recentCardWidth: recentCardWidth,
-                        compact: layout.isPhone,
+                  ),
+                ),
+              );
+            }
+
+            return Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: scrollPadding,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverConstrainedCrossAxis(
+                      maxExtent: contentMaxWidth,
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate(
+                          _buildOverviewColumnChildren(
+                            context: overviewArgs.context,
+                            l10n: overviewArgs.l10n,
+                            layout: overviewArgs.layout,
+                            projects: overviewArgs.projects,
+                            projectsEmpty: overviewArgs.projectsEmpty,
+                            showRecentRail: overviewArgs.showRecentRail,
+                            recent: overviewArgs.recent,
+                            recentCardWidth: overviewArgs.recentCardWidth,
+                            gridEntranceKey: overviewArgs.gridEntranceKey,
+                            showProjectsLoading: overviewArgs.showProjectsLoading,
+                            contentWidth: overviewArgs.contentWidth,
+                            useSplitOverview: overviewArgs.useSplitOverview,
+                            includeGrid: false,
+                          ),
+                        ),
                       ),
-                    ],
-                    const SizedBox(height: StudioLayoutSpacing.stackMedium),
-                    if (showProjectsLoading)
-                      ProjectsGridView(
-                        projects: const <ProjectRow>[],
-                        loading: true,
-                        currentProjectNumericId: widget.currentProjectNumericId,
-                        onSelectProject: widget.onSelectProjectScope,
-                        onOpenProject: widget.onOpenProjectStudio,
+                    ),
+                    if (useSplitOverview &&
+                        (showProjectsLoading || projects.isNotEmpty))
+                      SliverConstrainedCrossAxis(
+                        maxExtent: contentMaxWidth,
+                        sliver: SliverToBoxAdapter(
+                          child: _buildSplitOverviewGridRow(
+                            context: context,
+                            l10n: l10n,
+                            projects: projects,
+                            recent: recent,
+                            recentCardWidth: recentCardWidth,
+                            gridEntranceKey: gridEntranceKey,
+                            showProjectsLoading: showProjectsLoading,
+                            splitGridMaxHeight: splitGridMaxHeight,
+                          ),
+                        ),
+                      )
+                    else if (showProjectsLoading)
+                      SliverConstrainedCrossAxis(
+                        maxExtent: contentMaxWidth,
+                        sliver: SliverToBoxAdapter(
+                          child: ProjectsGridView(
+                            projects: const <ProjectRow>[],
+                            loading: true,
+                            contentWidth: contentMaxWidth,
+                            currentProjectNumericId:
+                                widget.currentProjectNumericId,
+                            onSelectProject: widget.onSelectProjectScope,
+                            onOpenProject: widget.onOpenProjectStudio,
+                          ),
+                        ),
                       )
                     else if (projects.isEmpty)
-                      _buildEmptyProjectsOverview(
-                        context,
-                        l10n,
-                        contentWidth,
-                        isPhone: layout.isPhone,
-                        enterpriseGuided: _enterpriseEmpty,
+                      SliverConstrainedCrossAxis(
+                        maxExtent: contentMaxWidth,
+                        sliver: SliverToBoxAdapter(
+                          child: _buildEmptyProjectsOverview(
+                            context,
+                            l10n,
+                            contentWidth,
+                            isPhone: layout.isPhone,
+                            enterpriseGuided: _enterpriseEmpty,
+                          ),
+                        ),
                       )
                     else
-                      ProductDemoTourAnchor(
-                        anchorId: ProductDemoTourAnchorIds.projectsGrid,
-                        child: ProjectsGridView(
+                      SliverConstrainedCrossAxis(
+                        maxExtent: contentMaxWidth,
+                        sliver: ProjectsGridView(
                           projects: projects,
                           loading: widget.controller.loadingProjects,
                           listEntranceKey: gridEntranceKey,
-                          currentProjectNumericId: widget.currentProjectNumericId,
+                          demoTourAnchorId: ProductDemoTourAnchorIds.projectsGrid,
+                          currentProjectNumericId:
+                              widget.currentProjectNumericId,
                           progressForProject: (p) =>
                               _progressByProjectId[p.id] ?? 0,
                           onSelectProject: widget.onSelectProjectScope,
                           onOpenProject: widget.onOpenProjectStudio,
+                          asSliver: true,
+                          contentWidth: contentMaxWidth,
                         ),
                       ),
                   ],
-                ],
+                ),
               ),
-            ),
-          ),
-        );
+            );
           },
         );
       },
+    );
+  }
+
+  List<Widget> _buildOverviewColumnChildren({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required ProjectsStudioHomeLayout layout,
+    required List<ProjectRow> projects,
+    required bool projectsEmpty,
+    required bool showRecentRail,
+    required List<ProjectRow> recent,
+    required double recentCardWidth,
+    required Object? gridEntranceKey,
+    required bool showProjectsLoading,
+    required double contentWidth,
+    required bool useSplitOverview,
+    bool includeGrid = true,
+  }) {
+    final children = <Widget>[
+      _buildHeader(
+        context,
+        l10n,
+        layout,
+        includeCreateAction: !projectsEmpty || _enterpriseEmpty,
+      ),
+    ];
+    if (_enterpriseEmpty) {
+      children.addAll(<Widget>[
+        const SizedBox(height: StudioLayoutSpacing.section - 4),
+        _EnterpriseEmptyBanner(
+          workspaceName: widget.currentWorkspaceName,
+          creating: widget.controller.creatingProject,
+          onCreate: _createProject,
+          onOpenTeamWorkspaces: widget.onOpenTeamWorkspaces,
+        ),
+      ]);
+    }
+    if (widget.currentProjectNumericId == null && projects.isNotEmpty) {
+      children.addAll(<Widget>[
+        const SizedBox(height: StudioLayoutSpacing.section - 4),
+        _SelectProjectHintBanner(
+          message: l10n.studioPipelineSelectProjectFirst,
+        ),
+      ]);
+    }
+    if (!useSplitOverview) {
+      if (showRecentRail) {
+        children.addAll(<Widget>[
+          const SizedBox(height: StudioLayoutSpacing.section + 4),
+          _buildRecentRail(
+            context,
+            l10n,
+            recent,
+            vertical: false,
+            recentCardWidth: recentCardWidth,
+            compact: layout.isPhone,
+          ),
+        ]);
+      }
+      if (includeGrid) {
+        children.add(const SizedBox(height: StudioLayoutSpacing.stackMedium));
+        if (showProjectsLoading) {
+          children.add(
+            ProjectsGridView(
+              projects: const <ProjectRow>[],
+              loading: true,
+              currentProjectNumericId: widget.currentProjectNumericId,
+              onSelectProject: widget.onSelectProjectScope,
+              onOpenProject: widget.onOpenProjectStudio,
+            ),
+          );
+        } else if (projects.isEmpty) {
+          children.add(
+            _buildEmptyProjectsOverview(
+              context,
+              l10n,
+              contentWidth,
+              isPhone: layout.isPhone,
+              enterpriseGuided: _enterpriseEmpty,
+            ),
+          );
+        } else {
+          children.add(
+            ProjectsGridView(
+              projects: projects,
+              loading: widget.controller.loadingProjects,
+              listEntranceKey: gridEntranceKey,
+              demoTourAnchorId: ProductDemoTourAnchorIds.projectsGrid,
+              currentProjectNumericId: widget.currentProjectNumericId,
+              progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
+              onSelectProject: widget.onSelectProjectScope,
+              onOpenProject: widget.onOpenProjectStudio,
+            ),
+          );
+        }
+      }
+    }
+    return children;
+  }
+
+  Widget _buildSplitOverviewGridRow({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required List<ProjectRow> projects,
+    required List<ProjectRow> recent,
+    required double recentCardWidth,
+    required Object? gridEntranceKey,
+    required bool showProjectsLoading,
+    required double splitGridMaxHeight,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: StudioLayoutSpacing.section + 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            width: recentCardWidth + 24,
+            child: _buildRecentRail(
+              context,
+              l10n,
+              recent,
+              vertical: true,
+              recentCardWidth: recentCardWidth + 24,
+            ),
+          ),
+          const SizedBox(width: StudioSpacing.md),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return ProjectsGridView(
+                  projects: projects,
+                  loading: widget.controller.loadingProjects,
+                  listEntranceKey: gridEntranceKey,
+                  demoTourAnchorId: ProductDemoTourAnchorIds.projectsGrid,
+                  currentProjectNumericId: widget.currentProjectNumericId,
+                  progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
+                  onSelectProject: widget.onSelectProjectScope,
+                  onOpenProject: widget.onOpenProjectStudio,
+                  contentWidth: constraints.maxWidth,
+                  boundedMaxHeight: splitGridMaxHeight,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

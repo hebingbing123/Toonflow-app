@@ -15,10 +15,10 @@ const double kStudioPipelineInlineMinWidth = 760;
 const double kStudioCompactHeaderMinWidth = 720;
 
 /// Project-studio [CreatorJourneyCompactBar]: icon-only prev/next/setup.
-const double kStudioJourneyCompactBarIconOnlyMinWidth = 720;
+const double kStudioJourneyCompactBarIconOnlyMinWidth = 960;
 
 /// Collapse expand + more-steps into one overflow menu beside next/setup icons.
-const double kStudioJourneyCompactBarCollapseToolsMinWidth = 520;
+const double kStudioJourneyCompactBarCollapseToolsMinWidth = 860;
 
 /// Product shell: stacked / multi-row top chrome below this width (non-integrated bar).
 const double kStudioShellCompactTopChromeMaxWidth = 860;

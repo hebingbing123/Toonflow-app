@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_chip.dart';
+import '../../design_system/components/studio_metric_switch.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 
@@ -127,9 +128,13 @@ class _SpendSummaryBody extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(row.modelName, style: theme.textTheme.titleSmall),
-                        Text(
-                          '¥${formatCnyFromCents(row.estimatedCostCents)} · ${row.callCount} calls',
-                          style: theme.textTheme.bodySmall?.withTabularFigures(),
+                        StudioMetricSwitch(
+                          transitionKey:
+                              '${row.estimatedCostCents}|${row.callCount}',
+                          child: Text(
+                            '¥${formatCnyFromCents(row.estimatedCostCents)} · ${row.callCount} calls',
+                            style: theme.textTheme.bodySmall?.withTabularFigures(),
+                          ),
                         ),
                         if (row.avgQualityScore != null)
                           Text(

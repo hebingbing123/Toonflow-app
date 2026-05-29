@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import '../design_system/components/studio_icon_button.dart';
@@ -587,13 +588,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                     trailing: Wrap(
                       spacing: 4,
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            view.pinned
-                                ? Icons.push_pin
-                                : Icons.push_pin_outlined,
-                          ),
-                          tooltip: view.pinned
+                        StudioIconButton(
+                          icon: view.pinned
+                              ? Icons.push_pin
+                              : Icons.push_pin_outlined,
+                          label: view.pinned
                               ? l10n.globalSearchUnpin
                               : l10n.globalSearchPinToSearchBar,
                           onPressed: () async {
@@ -625,9 +624,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             );
                           },
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: l10n.globalSearchDelete,
+                        StudioIconButton(
+                          icon: Icons.delete_outline,
+                          label: l10n.globalSearchDelete,
                           onPressed: () async {
                             final next = views
                                 .where((item) => item.id != view.id)
@@ -844,6 +843,91 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     return KeyEventResult.ignored;
   }
 
+  List<Widget> _buildAppBarActions(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool isMobile,
+  }) {
+    final filterButton = Badge(
+      isLabelVisible: _filters.hasActiveFilters,
+      label: Text(
+        l10n.l10nBatch_775383c7b6(_filters.activeFilterCount),
+      ),
+      child: StudioIconButton(
+        icon: Icons.filter_list,
+        label: l10n.globalSearchTooltipFilter,
+        onPressed: isMobile ? _showMobileFilterDrawer : _toggleFilterPanel,
+      ),
+    );
+
+    if (!isMobile) {
+      return <Widget>[
+        StudioIconButton(
+          icon: Icons.bookmark_add_outlined,
+          label: l10n.globalSearchTooltipSaveCurrentView,
+          onPressed: _saveCurrentView,
+        ),
+        StudioIconButton(
+          icon: Icons.collections_bookmark_outlined,
+          label: l10n.globalSearchTooltipSavedViews,
+          onPressed: _openSavedViews,
+        ),
+        StudioIconButton(
+          icon: Icons.link,
+          label: l10n.globalSearchTooltipCopyDeepLink,
+          onPressed: _copySearchLink,
+        ),
+        filterButton,
+        const RiskyOperationConfirmPrefsOverflowMenu(),
+      ];
+    }
+
+    return <Widget>[
+      filterButton,
+      PopupMenuButton<_SearchResultsOverflowAction>(
+        tooltip: l10n.productShellMoreMenu,
+        onSelected: (_SearchResultsOverflowAction action) {
+          switch (action) {
+            case _SearchResultsOverflowAction.saveView:
+              _saveCurrentView();
+            case _SearchResultsOverflowAction.savedViews:
+              _openSavedViews();
+            case _SearchResultsOverflowAction.copyLink:
+              _copySearchLink();
+          }
+        },
+        itemBuilder: (BuildContext context) =>
+            <PopupMenuEntry<_SearchResultsOverflowAction>>[
+          PopupMenuItem<_SearchResultsOverflowAction>(
+            value: _SearchResultsOverflowAction.saveView,
+            child: ListTile(
+              leading: const Icon(Icons.bookmark_add_outlined),
+              title: Text(l10n.globalSearchTooltipSaveCurrentView),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+          PopupMenuItem<_SearchResultsOverflowAction>(
+            value: _SearchResultsOverflowAction.savedViews,
+            child: ListTile(
+              leading: const Icon(Icons.collections_bookmark_outlined),
+              title: Text(l10n.globalSearchTooltipSavedViews),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+          PopupMenuItem<_SearchResultsOverflowAction>(
+            value: _SearchResultsOverflowAction.copyLink,
+            child: ListTile(
+              leading: const Icon(Icons.link),
+              title: Text(l10n.globalSearchTooltipCopyDeepLink),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+        ],
+      ),
+      const RiskyOperationConfirmPrefsOverflowMenu(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -857,38 +941,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(l10n.globalSearchTitle(widget.query)),
-          actions: [
-            StudioIconButton(
-              icon: Icons.bookmark_add_outlined,
-              label: l10n.globalSearchTooltipSaveCurrentView,
-              onPressed: _saveCurrentView,
-            ),
-            StudioIconButton(
-              icon: Icons.collections_bookmark_outlined,
-              label: l10n.globalSearchTooltipSavedViews,
-              onPressed: _openSavedViews,
-            ),
-            StudioIconButton(
-              icon: Icons.link,
-              label: l10n.globalSearchTooltipCopyDeepLink,
-              onPressed: _copySearchLink,
-            ),
-            // Filter button with badge
-            Badge(
-              isLabelVisible: _filters.hasActiveFilters,
-              label: Text(
-                l10n.l10nBatch_775383c7b6(_filters.activeFilterCount),
-              ),
-              child: StudioIconButton(
-                icon: Icons.filter_list,
-                label: l10n.globalSearchTooltipFilter,
-                onPressed: isMobile
-                    ? _showMobileFilterDrawer
-                    : _toggleFilterPanel,
-              ),
-            ),
-            const RiskyOperationConfirmPrefsOverflowMenu(),
-          ],
+          actions: _buildAppBarActions(
+            context,
+            l10n,
+            isMobile: isMobile,
+          ),
         ),
         body: Row(
           children: [
@@ -909,30 +966,73 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           ),
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search,
-                            size: StudioIconSize.md,
-                            color: StudioTokens.of(context).textSecondary,
-                          ),
-                          const SizedBox(width: StudioSpacing.xs),
-                          Expanded(
-                            child: Text(
-                              l10n.globalSearchFoundResults(_response!.total),
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final narrow =
+                              constraints.maxWidth < kStudioHandsetMaxWidth;
+                          final summaryLine = Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.search,
+                                size: StudioIconSize.md,
                                 color: StudioTokens.of(context).textSecondary,
                               ),
-                            ),
-                          ),
-                          if (_filters.hasActiveFilters)
-                            TextButton.icon(
-                              onPressed: _clearFilters,
-                              icon: const Icon(Icons.clear_outlined),
-                              label: Text(l10n.globalSearchClearFilters),
-                              style: studioFormTextButtonIconStyle(context),
-                            ),
-                        ],
+                              const SizedBox(width: StudioSpacing.xs),
+                              Expanded(
+                                child: Text(
+                                  l10n.globalSearchFoundResults(
+                                    _response!.total,
+                                  ),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color:
+                                        StudioTokens.of(context).textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                          final clearFilters = _filters.hasActiveFilters
+                              ? TextButton.icon(
+                                  onPressed: _clearFilters,
+                                  icon: const Icon(Icons.clear_outlined),
+                                  label: Text(l10n.globalSearchClearFilters),
+                                  style: studioFormTextButtonIconStyle(context),
+                                )
+                              : null;
+                          if (narrow && clearFilters != null) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                summaryLine,
+                                const SizedBox(height: StudioSpacing.xs),
+                                clearFilters,
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.search,
+                                size: StudioIconSize.md,
+                                color:
+                                    StudioTokens.of(context).textSecondary,
+                              ),
+                              const SizedBox(width: StudioSpacing.xs),
+                              Expanded(
+                                child: Text(
+                                  l10n.globalSearchFoundResults(
+                                    _response!.total,
+                                  ),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color:
+                                        StudioTokens.of(context).textSecondary,
+                                  ),
+                                ),
+                              ),
+                              ?clearFilters,
+                            ],
+                          );
+                        },
                       ),
                     ),
                   if (!_isLoading &&
@@ -1316,20 +1416,37 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     await showStudioBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => AdvancedFilterPanel(
-          initialFilters: _filters,
-          onFiltersChanged: (newFilters) {
-            _onFiltersChanged(newFilters);
-            Navigator.of(context).pop();
-          },
-          isMobile: true,
-        ),
-      ),
+      builder: (sheetContext) {
+        void onFiltersChanged(SearchFilters newFilters) {
+          _onFiltersChanged(newFilters);
+          Navigator.of(sheetContext).pop();
+        }
+
+        if (kIsWeb) {
+          final sheetHeight = MediaQuery.sizeOf(sheetContext).height * 0.85;
+          return SizedBox(
+            height: sheetHeight,
+            child: AdvancedFilterPanel(
+              initialFilters: _filters,
+              onFiltersChanged: onFiltersChanged,
+              isMobile: true,
+            ),
+          );
+        }
+
+        // studio-modal: draggable-allowed — native/mobile only; Web uses fixed height above.
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) => AdvancedFilterPanel(
+            initialFilters: _filters,
+            onFiltersChanged: onFiltersChanged,
+            isMobile: true,
+          ),
+        );
+      },
     );
   }
 }
@@ -1453,3 +1570,5 @@ class _SearchViewTemplate {
   final Set<ResultType> resultTypes;
   final int? daysBack;
 }
+
+enum _SearchResultsOverflowAction { saveView, savedViews, copyLink }

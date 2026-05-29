@@ -441,8 +441,10 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
             onPressed: _clearTimeRange,
             icon: const Icon(Icons.clear, size: StudioIconSize.sm),
             label: Text(l10n.globalSearchClearTimeRange),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+            style: studioFormTextButtonIconStyle(context).merge(
+              TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],

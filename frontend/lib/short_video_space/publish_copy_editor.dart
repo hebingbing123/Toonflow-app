@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/ix/studio_dirty_pop_guard.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 
@@ -102,9 +104,6 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
   String _savedTitle = '';
   String _savedDescription = '';
   String _savedTags = '';
-  bool _allowPopOnce = false;
-  bool _handlingPop = false;
-
   List<String> get _allIds => <String>[
     ...widget.domesticPlatformIds,
     ...widget.overseasPlatformIds,
@@ -200,44 +199,17 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       _descriptionController.text.trim() != _savedDescription ||
       _tagsController.text.trim() != _savedTags;
 
-  bool get _canPop => _allowPopOnce || !_dirty;
-
-  Future<void> _handlePopInvoked(bool didPop) async {
-    if (didPop || _handlingPop) {
-      return;
-    }
-    if (!_dirty) {
-      if (!mounted) return;
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).maybePop();
-      });
-      return;
-    }
-
-    _handlingPop = true;
-    try {
-      final discard = await showStudioConfirmDialog(
-        context: context,
-        title: 'Discard changes?',
-        message: 'You have unsaved publish copy changes. Leave anyway?',
-        confirmLabel: 'Discard',
-        cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
-        destructive: true,
-        barrierDismissible: false,
-      );
-      if (discard != true || !mounted) {
-        return;
-      }
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).maybePop();
-      });
-    } finally {
-      _handlingPop = false;
-    }
+  Future<bool> _confirmDiscard() async {
+    final discard = await showStudioConfirmDialog(
+      context: context,
+      title: 'Discard changes?',
+      message: 'You have unsaved publish copy changes. Leave anyway?',
+      confirmLabel: 'Discard',
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+      barrierDismissible: false,
+    );
+    return discard == true;
   }
 
   Future<void> _save() async {
@@ -300,12 +272,13 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       return const SizedBox.shrink();
     }
 
-    return PopScope(
-      canPop: _canPop,
-      onPopInvokedWithResult: (didPop, _) {
-        unawaited(_handlePopInvoked(didPop));
-      },
-      child: Column(
+    return StudioDirtyPopGuard(
+      isDirty: _dirty,
+      popBlocked: widget.busy,
+      onConfirmDiscard: _confirmDiscard,
+      child: StudioFormKeyboardScope(
+        onEnterSubmit: widget.busy ? null : () => unawaited(_save()),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -334,6 +307,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
             ),
             enabled: !widget.busy,
             maxLines: 1,
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: StudioSpacing.xs),
           TextField(
@@ -376,6 +350,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

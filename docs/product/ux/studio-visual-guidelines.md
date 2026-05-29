@@ -19,6 +19,12 @@
 - **禁止**在 Shell / 工作室 UI 写死 `Color(0x…)` 或 `Colors.green.shade100` 做状态（深色主题会发灰/发飘）。
 - `Theme.colorScheme.outline` / `outlineVariant` 仅用于非 Studio 主题或遗留 harness；Studio 面板改用 `studioPanelBorderColor()`（见 `studio_surfaces.dart`）。
 
+### 表单按钮字色（浅色面板）
+
+- 工作台 / 对话框内 **`FilledButton`** 使用 `studioFormPrimaryButtonStyle`（或 `studioToolbarPrimaryButtonStyle`），字色为 `ColorScheme.onPrimary`（浅色主题下为白字），**不要**把 `TextTheme.labelLarge`（带 `textPrimary`）直接 merge 进 `ButtonStyle.textStyle`。
+- 平面 / inset 上的 **`FilledButton.tonal`** 用 `studioFormTonalButtonStyle`；浅底 chip 用 `studioFormInsetTonalChipStyle`（`textPrimary` 字 + `bgInset` 底）。
+- 度量复用 `studioFormButtonLabelMetrics`（仅字号/字重，不含 `Color`）。
+
 ## 间距
 
 - 网格：`StudioSpacing`（8 / 16 / 24 / 32）。
@@ -30,6 +36,14 @@
 - 通过 `StudioTypography` + `studio_*Style` 助手；compact 档 `meta`/`label` ≥ 12px。
 - Badge / 元信息：`studioBadgeTextStyle` 或 `typography.meta`。
 - 等宽仅用于 job id、JSON 折叠区（见 [`design-tokens.md`](design-tokens.md)）。
+
+## 裸 `GestureDetector`（登记豁免）
+
+以下保留裸手势，不强制改 `InkWell`/`StudioTap`：
+
+- [`studio_tap.dart`](../../../frontend/lib/design_system/components/studio_tap.dart) — 设计系统点击抽象
+- [`debug_overlay_widget.dart`](../../../frontend/lib/design_system/debug/debug_overlay_widget.dart) — 调试浮层拖拽
+- [`build_product_shell.dart`](../../../frontend/lib/shell/build_product_shell.dart) — Shell 级手势命中
 
 ## 点击热区
 
@@ -177,3 +191,9 @@
 | 阶段 9：编辑器 IA + Hero | 脚本/分镜编辑对话框主字段优先、批量工作台诊断置底；脚本步小说区可折叠；`ExpansionTile` 默认收起；登录 Hero 动效/舞台略降噪；登录错误文案修复 |
 | UX Comfort Phase 1–2 | `StudioPrimaryButton` / `StudioEmptyState` / `StudioGettingStartedSteps`；项目首页标题区阴影降噪、空状态+入门步骤并排、最近项目 chip 层级 |
 | UX Comfort Phase 3 | 目标测试 + `studio-visual-debt-check` + 黄金图（`projects_empty` / `01_login` / desktop_layouts） |
+
+## Raster / DPI（新资源 PR）
+
+- 位图放在 `frontend/assets/images/`（或模块子目录），提供 **1.5x / 2.0x / 3.0x** 变体目录（`2.0x/`、`3.0x/`）或矢量（SVG → `flutter_svg`）。
+- 禁止在 `lib/` 引用未声明的 `assets/` 路径；`pubspec.yaml` 与黄金图同步更新。
+- 桌面壳优先矢量与 token 色；照片类资源按最长边 ≤ 2048px 导出以控制包体。

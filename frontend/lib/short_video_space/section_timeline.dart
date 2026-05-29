@@ -71,6 +71,7 @@ extension _ShortVideoSpaceSectionTimelineExtension
                   ),
                 ),
                 TextButton.icon(
+                  style: studioFormTextButtonIconStyle(context),
                   onPressed: _loadingTimeline ? null : _loadShortVideoTimeline,
                   icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                   label: Text(l10n.shortVideoCharactersRefresh),

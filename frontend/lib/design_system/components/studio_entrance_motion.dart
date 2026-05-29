@@ -18,6 +18,10 @@ const Duration studioStaggerItemDelay = Duration(milliseconds: 48);
 const Duration studioStaggerMaxDelay = Duration(milliseconds: 420);
 
 /// Hero tag for the six-step progress ring (projects home → project studio).
+///
+/// Pair with the same tag on [StudioStepProgressRing] in the studio pane header.
+/// Entry from the projects grid must use [openProjectStudioRoute] with
+/// `pushFromProjectsHome: true` so the source route stays mounted during flight.
 String studioHeroTagProjectProgress(int projectNumericId) =>
     'studio.hero.project.progress.$projectNumericId';
 
@@ -78,12 +82,19 @@ class StudioHero extends StatelessWidget {
     if (tag == null || tag!.isEmpty) {
       return child;
     }
-    return Hero(
-      tag: tag!,
-      placeholderBuilder: placeholder == null
-          ? null
-          : (context, size, child) => placeholder!,
-      child: Material(type: MaterialType.transparency, child: child),
+    // When a studio route is pushed on top (projects grid still in the stack),
+    // disable heroes on the background route so E2E/runtime do not see duplicate tags.
+    final route = ModalRoute.of(context);
+    final heroEnabled = route == null || route.isCurrent;
+    return HeroMode(
+      enabled: heroEnabled,
+      child: Hero(
+        tag: tag!,
+        placeholderBuilder: placeholder == null
+            ? null
+            : (context, size, child) => placeholder!,
+        child: Material(type: MaterialType.transparency, child: child),
+      ),
     );
   }
 }

@@ -20,7 +20,44 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
     required TextEditingController patchIntakeNoteCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   }) {
-    return Column(
+    void submitEditOnEnter() {
+      if (localBusy) {
+        return;
+      }
+      final controller = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      )?.controller;
+      if (controller == patchBodyCtrl) {
+        return;
+      }
+      unawaited(
+        _runNovelWorkbenchAction(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          setLocalState: setLocalState,
+          novelsBusy: novelsBusy,
+          setLocalBusy: setLocalBusy,
+          action: () => _saveNovelWorkbenchChapter(
+            l10n: l10n,
+            token: token,
+            project: project,
+            selectedNovelIdCtrl: selectedNovelIdCtrl,
+            patchChapterCtrl: patchChapterCtrl,
+            patchBodyCtrl: patchBodyCtrl,
+            patchIntakeStatusCtrl: patchIntakeStatusCtrl,
+            patchIntakeSourceUrlCtrl: patchIntakeSourceUrlCtrl,
+            patchIntakeNoteCtrl: patchIntakeNoteCtrl,
+            refreshWorkbench: refreshWorkbench,
+            setLocalState: setLocalState,
+            applyInfoLine: updateInfoLine,
+          ),
+        ),
+      );
+    }
+
+    return StudioFormKeyboardScope(
+      onEnterSubmit: localBusy ? null : submitEditOnEnter,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -135,6 +172,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
           child: Text(l10n.projectEditorNovelsWorkbenchEditSaveButton),
         ),
       ],
+    ),
     );
   }
 }

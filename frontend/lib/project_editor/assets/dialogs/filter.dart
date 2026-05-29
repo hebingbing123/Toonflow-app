@@ -32,7 +32,9 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                     collapsible: true,
                     title: l10n.projectEditorAssetFilterDialogTitle,
                     initiallyExpanded: true,
-                    child: Column(
+                    child: StudioFormKeyboardScope(
+                      onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                      child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
@@ -40,7 +42,6 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                           initialValue: selectedScriptNumericId,
                           decoration: InputDecoration(
                             labelText: l10n.projectEditorAssetFilterByScript,
-                            isDense: true,
                           ),
                           items: <DropdownMenuItem<int?>>[
                             DropdownMenuItem<int?>(
@@ -69,7 +70,6 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                             labelText:
                                 l10n.projectEditorAssetFilterAssetTypeOptional,
                             hintText: l10n.projectEditorAssetFilterAssetTypeHint,
-                            isDense: true,
                           ),
                         ),
                         const SizedBox(height: StudioSpacing.xs),
@@ -79,7 +79,6 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                           decoration: InputDecoration(
                             labelText:
                                 l10n.projectEditorAssetFilterNameContainsOptional,
-                            isDense: true,
                           ),
                         ),
                         const SizedBox(height: StudioSpacing.xs),
@@ -94,7 +93,6 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                                 textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
                                   labelText: l10n.projectEditorAssetFilterPage,
-                                  isDense: true,
                                 ),
                               ),
                             ),
@@ -106,13 +104,13 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                                 onSubmitted: (_) => Navigator.of(dialogCtx).pop(true),
                                 decoration: InputDecoration(
                                   labelText: l10n.projectEditorAssetFilterLimit,
-                                  isDense: true,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ],
+                    ),
                     ),
                   ),
                 ),

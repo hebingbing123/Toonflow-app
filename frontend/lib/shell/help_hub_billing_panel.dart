@@ -461,7 +461,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             initialValue: _billingProvider,
                             decoration: InputDecoration(
                               labelText: l10n.billingAuditProviderLabel,
-                              isDense: true,
                             ),
                             items: <DropdownMenuItem<String>>[
                               DropdownMenuItem(
@@ -495,7 +494,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             initialValue: _billingSort,
                             decoration: InputDecoration(
                               labelText: l10n.billingAuditSortLabel,
-                              isDense: true,
                             ),
                             items: <DropdownMenuItem<String>>[
                               DropdownMenuItem(
@@ -544,7 +542,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       decoration: InputDecoration(
                         labelText: l10n.billingAuditEventTypeLabel,
                         hintText: l10n.billingAuditEventTypeHint,
-                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
@@ -553,7 +550,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       decoration: InputDecoration(
                         labelText: l10n.billingAuditProviderEventIdLabel,
                         hintText: l10n.billingAuditProviderEventIdHint,
-                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
@@ -562,7 +558,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       decoration: InputDecoration(
                         labelText: l10n.billingAuditRawEventIdLabel,
                         hintText: l10n.billingAuditRawEventIdHint,
-                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
@@ -571,7 +566,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       decoration: InputDecoration(
                         labelText: l10n.billingAuditProviderEventIdPrefixLabel,
                         hintText: l10n.billingAuditProviderPrefixHint,
-                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
@@ -580,7 +574,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                       decoration: InputDecoration(
                         labelText: l10n.billingAuditRawEventIdPrefixLabel,
                         hintText: l10n.billingAuditRawPrefixHint,
-                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: StudioSpacing.xs),
@@ -596,7 +589,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                               labelText:
                                   l10n.billingAuditEventCreatedFromLabel,
                               hintText: l10n.billingAuditEventCreatedFromHint,
-                              isDense: true,
                             ),
                           ),
                         ),
@@ -607,7 +599,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             decoration: InputDecoration(
                               labelText: l10n.billingAuditEventCreatedToLabel,
                               hintText: l10n.billingAuditEventCreatedToHint,
-                              isDense: true,
                             ),
                           ),
                         ),
@@ -618,7 +609,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             decoration: InputDecoration(
                               labelText: l10n.billingAuditCreatedFromLabel,
                               hintText: l10n.billingAuditEventCreatedFromHint,
-                              isDense: true,
                             ),
                           ),
                         ),
@@ -629,7 +619,6 @@ class _HelpHubBillingPanelState extends State<HelpHubBillingPanel> {
                             decoration: InputDecoration(
                               labelText: l10n.billingAuditCreatedToLabel,
                               hintText: l10n.billingAuditEventCreatedToHint,
-                              isDense: true,
                             ),
                           ),
                         ),

@@ -7,7 +7,9 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 import 'package:openflow_app/design_system/ix/studio_mobile_affordances.dart';
+import 'package:openflow_app/design_system/components/studio_repaint_boundary.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 
 /// Store or remove LLM vendor API credentials (never shown in plain text after save).
@@ -123,36 +125,27 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
       confirmLabel: 'Delete',
       cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
       destructive: true,
+      onConfirmAction: () async {
+        unawaited(studioMediumImpact());
+        await deleteSettingsVendorCredentialV1(
+          widget.accessToken,
+          vendorId: widget.vendorId,
+        );
+      },
     );
     if (confirmed != true || !mounted) {
       return;
     }
-    setState(() => _busy = true);
-    try {
-      unawaited(studioMediumImpact());
-      await deleteSettingsVendorCredentialV1(
-        widget.accessToken,
-        vendorId: widget.vendorId,
-      );
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(describeUserVisibleApiErrorResolved(context, e)),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return StudioAlertDialog(
+    return StudioFormKeyboardScope(
+      onEnterSubmit: _busy ? null : () => unawaited(_save()),
+      child: StudioAlertDialog(
       title: Text(l10n.settingsModelVendorsCredentialDialogTitle(widget.vendorName)),
       content: SizedBox(
         width: studioConstrainedDialogWidth(context, maxWidth: 420),
@@ -179,6 +172,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
             TextField(
               controller: _apiKeyCtrl,
               obscureText: true,
+              textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 labelText: l10n.settingsModelVendorsFieldApiKey,
               ),
@@ -187,6 +181,7 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
             TextField(
               controller: _apiSecretCtrl,
               obscureText: true,
+              textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 labelText: l10n.settingsModelVendorsFieldApiSecret,
               ),
@@ -195,6 +190,12 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
             TextField(
               controller: _apiTokenCtrl,
               obscureText: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) {
+                if (!_busy) {
+                  unawaited(_save());
+                }
+              },
               decoration: InputDecoration(
                 labelText: l10n.settingsModelVendorsFieldApiToken,
               ),
@@ -216,14 +217,17 @@ class _VendorCredentialDialogState extends State<_VendorCredentialDialog> {
           style: studioFormPrimaryButtonStyle(context),
           onPressed: _busy ? null : _save,
           child: _busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              ? const StudioRepaintBoundary(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 )
               : Text(l10n.projectEditorAssetCrudSave),
         ),
       ],
+      ),
     );
   }
 }

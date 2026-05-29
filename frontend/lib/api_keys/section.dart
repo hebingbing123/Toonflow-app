@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../design_system/components/studio_chip.dart';
 import '../design_system/components/studio_icon_button.dart';
@@ -6,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/components/studio_collapsible_filter_panel.dart';
@@ -15,8 +16,10 @@ import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 enum _ExpiryPreset { none, sevenDays, thirtyDays, ninetyDays, custom }
@@ -157,7 +160,32 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               });
             }
 
-            return StudioAlertDialog(
+            void submitRotate() {
+              final expiresAt = switch (expiryPreset) {
+                _ExpiryPreset.none => null,
+                _ExpiryPreset.sevenDays => _expiryToIso(
+                  _ExpiryPreset.sevenDays,
+                  null,
+                ),
+                _ExpiryPreset.thirtyDays => _expiryToIso(
+                  _ExpiryPreset.thirtyDays,
+                  null,
+                ),
+                _ExpiryPreset.ninetyDays => _expiryToIso(
+                  _ExpiryPreset.ninetyDays,
+                  null,
+                ),
+                _ExpiryPreset.custom =>
+                  customDate == DateTime.fromMillisecondsSinceEpoch(0)
+                      ? ''
+                      : _expiryToIso(_ExpiryPreset.custom, customDate),
+              };
+              Navigator.of(context).pop(expiresAt);
+            }
+
+            return StudioFormKeyboardScope(
+              onEnterSubmit: submitRotate,
+              child: StudioAlertDialog(
               title: Text(l10n.apiKeysRotateTitle(item.displayName)),
               content: SizedBox(
                 width: studioConstrainedDialogWidth(context, maxWidth: 420),
@@ -255,31 +283,11 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 ),
                 FilledButton(
                   style: studioFormPrimaryButtonStyle(context),
-                  onPressed: () {
-                    final expiresAt = switch (expiryPreset) {
-                      _ExpiryPreset.none => null,
-                      _ExpiryPreset.sevenDays => _expiryToIso(
-                        _ExpiryPreset.sevenDays,
-                        null,
-                      ),
-                      _ExpiryPreset.thirtyDays => _expiryToIso(
-                        _ExpiryPreset.thirtyDays,
-                        null,
-                      ),
-                      _ExpiryPreset.ninetyDays => _expiryToIso(
-                        _ExpiryPreset.ninetyDays,
-                        null,
-                      ),
-                      _ExpiryPreset.custom =>
-                        customDate == DateTime.fromMillisecondsSinceEpoch(0)
-                            ? ''
-                            : _expiryToIso(_ExpiryPreset.custom, customDate),
-                    };
-                    Navigator.of(context).pop(expiresAt);
-                  },
+                  onPressed: submitRotate,
                   child: Text(l10n.apiKeysActionRotate),
                 ),
               ],
+            ),
             );
           },
         );
@@ -297,7 +305,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     try {
       final confirmed = await showStudioDialog<bool>(
         context: context,
-        builder: (context) => StudioAlertDialog(
+        builder: (context) => StudioFormKeyboardScope(
+          onEnterSubmit: () => Navigator.of(context).pop(true),
+          child: StudioAlertDialog(
           title: Text(l10n.apiKeysRevokeTitle(item.displayName)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -330,6 +340,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             ),
           ],
         ),
+        ),
       );
       if (confirmed == true) {
         await widget.controller.revokeKey(
@@ -344,8 +355,16 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     }
   }
 
-  Widget _buildStudioHeader(BuildContext context, AppLocalizations l10n) {
+  Widget _buildStudioHeader(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required bool compact,
+  }) {
     final tokens = StudioTokens.of(context);
+    final titleRow = StudioPaneTitleMenuRow(
+      title: l10n.apiKeysSectionTitle,
+      menuTooltip: l10n.apiKeysRiskyPrefsTooltip,
+    );
     return DecoratedBox(
       decoration:
           studioInsetPanelDecoration(
@@ -366,22 +385,14 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    l10n.apiKeysSectionTitle,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.apiKeysRiskyPrefsTooltip,
-                ),
-              ],
-            ),
+            titleRow,
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
-            Text(l10n.apiKeysIntroBody, style: studioSectionIntroStyle(context)),
+            Text(
+              l10n.apiKeysIntroBody,
+              style: studioSectionIntroStyle(context),
+              maxLines: compact ? 4 : 3,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
@@ -395,13 +406,15 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 420;
 
-        return Padding(
+        return StudioFormKeyboardScope(
+          onEnterSubmit: widget.controller.creating ? null : _createKey,
+          child: Padding(
           padding: EdgeInsets.only(top: compact ? StudioSpacing.radiusComfort : StudioSpacing.sm),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _buildStudioHeader(context, l10n),
+                _buildStudioHeader(context, l10n, compact: compact),
                 SizedBox(height: compact ? 10 : StudioLayoutSpacing.stackMedium),
                 _buildCreatePanel(context, l10n, compact: compact),
                 SizedBox(height: compact ? 12 : 14),
@@ -411,6 +424,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               ],
             ),
           ),
+        ),
         );
       },
     );
@@ -432,6 +446,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 : widget.controller.refresh,
           )
         : TextButton.icon(
+            style: studioFormTextButtonIconStyle(context),
             onPressed: widget.controller.loading
                 ? null
                 : widget.controller.refresh,
@@ -475,6 +490,12 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           TextField(
             controller: _displayNameController,
             maxLength: 80,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              if (!widget.controller.creating) {
+                unawaited(_createKey());
+              }
+            },
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: l10n.apiKeysDisplayNameLabel,

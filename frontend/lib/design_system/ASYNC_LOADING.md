@@ -31,6 +31,8 @@ Reference implementations (`StudioAsyncDataView`): main shell sections (`task_ce
 
 **Intentionally not wrapped** (local/inline UX): `global_search_bar` palette suggestions, button `CircularProgressIndicator(strokeWidth: 2)`, pagination load-more, agent card action spinners, `StudioSkeleton` height-4 inline rows, preview-byte loading in asset workbench.
 
+**Nested `ListView.builder(shrinkWrap: true)`** (allowed when parent scrolls): `notifications/section` filter results inside `StudioAsyncDataView` (`NeverScrollableScrollPhysics`); `projects_grid_view` inside parent scroll — do not convert to shrinkWrap-free nested scroll without profiling.
+
 Format errors with `describeUserVisibleApiErrorResolved(context, e)` — never `e.toString()` in UI.
 
 ## Keep as-is

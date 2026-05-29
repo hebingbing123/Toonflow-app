@@ -223,11 +223,13 @@ class StudioResponsiveChipGrid extends StatelessWidget {
             runSpacing: spacing,
             children: <Widget>[
               for (var i = 0; i < children.length; i++)
-                studioStaggeredItem(
-                  i,
-                  entranceKey: entranceKey ?? children.length,
-                  child: children[i],
-                ),
+                i > 12
+                    ? children[i]
+                    : studioStaggeredItem(
+                        i,
+                        entranceKey: entranceKey ?? children.length,
+                        child: children[i],
+                      ),
             ],
           );
         }
@@ -241,11 +243,17 @@ class StudioResponsiveChipGrid extends StatelessWidget {
             childAspectRatio: childAspectRatio,
           ),
           itemCount: children.length,
-          itemBuilder: (context, index) => studioStaggeredItem(
-            index,
-            entranceKey: entranceKey ?? children.length,
-            child: children[index],
-          ),
+          itemBuilder: (context, index) {
+            final child = children[index];
+            if (index > 12) {
+              return child;
+            }
+            return studioStaggeredItem(
+              index,
+              entranceKey: entranceKey ?? children.length,
+              child: child,
+            );
+          },
         );
       },
     );

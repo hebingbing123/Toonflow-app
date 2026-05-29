@@ -496,19 +496,10 @@ class _HelpHubDocsPanelState extends State<HelpHubDocsPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.helpHubDocsTitle,
-                  style: studioCardTitleStyle(context),
-                ),
-              ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
-              ),
-            ],
+          StudioPaneTitleMenuRow(
+            title: l10n.helpHubDocsTitle,
+            titleStyle: studioCardTitleStyle(context),
+            menuTooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
           ),
           const SizedBox(height: StudioSpacing.xs),
           Text(

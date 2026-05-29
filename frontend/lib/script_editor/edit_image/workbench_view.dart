@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../design_system/components/studio_entrance_motion.dart';
 import '../../design_system/studio_responsive_layout.dart';
@@ -11,6 +13,7 @@ import 'package:openflow_app/design_system/components/studio_dense_action_row.da
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
   const ScriptEditImageWorkbenchDialogViewModel({
@@ -87,12 +90,31 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 780.0)
         : 780.0;
+
+    void handleEnterSubmit() {
+      if (model.busy) {
+        return;
+      }
+      final focused = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      );
+      final controller = focused?.controller;
+      if (controller == model.stepIdCtrl ||
+          controller == model.stepStatusCtrl) {
+        unawaited(callbacks.onUpdateStepStatus());
+        return;
+      }
+      unawaited(callbacks.onGenerateFlowImage());
+    }
+
     return StudioAlertDialog(
       title: Text(l10n.scriptEditorEditImageWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.busy ? null : handleEnterSubmit,
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -296,6 +318,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
               ],
             ],
           ),
+        ),
         ),
       ),
       actions: [

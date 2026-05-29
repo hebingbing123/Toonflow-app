@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> openProjectStudioStepSetup(WidgetTester tester) async {
   final setupLabel = find.text('Setup');
   if (setupLabel.evaluate().isNotEmpty) {
-    await tester.tap(setupLabel);
+    await tester.tap(setupLabel.first);
     await tester.pumpAndSettle();
     return;
   }
@@ -13,17 +13,63 @@ Future<void> openProjectStudioStepSetup(WidgetTester tester) async {
   if (setupIcon.evaluate().isNotEmpty) {
     await tester.tap(setupIcon.first);
     await tester.pumpAndSettle();
+    return;
   }
+  final collapsedTools = find.byIcon(Icons.more_horiz_rounded);
+  if (collapsedTools.evaluate().isNotEmpty) {
+    await tester.tap(collapsedTools.last);
+    await tester.pumpAndSettle();
+    final setupInSheet = find.text('Setup');
+    if (setupInSheet.evaluate().isNotEmpty) {
+      await tester.tap(setupInSheet.first);
+      await tester.pumpAndSettle();
+    }
+  }
+}
+
+/// Taps the compact journey bar "next" control (text or icon-only).
+Future<void> tapProjectStudioCompactBarNext(
+  WidgetTester tester, {
+  String? nextLabel,
+}) async {
+  if (nextLabel != null) {
+    final text = find.text(nextLabel);
+    if (text.evaluate().isNotEmpty) {
+      await tester.tap(text);
+      await tester.pumpAndSettle();
+      return;
+    }
+  }
+  final icons = find.byIcon(Icons.arrow_forward_rounded);
+  expect(icons, findsWidgets);
+  await tester.tap(icons.last);
+  await tester.pumpAndSettle();
+}
+
+/// Asserts the header progress ring label (allows animated number settle).
+Future<void> expectStudioStepProgressRing(
+  WidgetTester tester,
+  String label,
+) async {
+  await tester.pump(const Duration(milliseconds: 350));
+  expect(find.text(label), findsOneWidget);
 }
 
 /// Opens the workspace / more-steps menu on the compact journey bar.
 Future<void> openProjectStudioWorkspaceMenu(WidgetTester tester) async {
   final tune = find.byIcon(Icons.tune_rounded);
-  if (tune.evaluate().isEmpty) {
-    await tester.tap(find.text('Workspace'));
-  } else {
+  if (tune.evaluate().isNotEmpty) {
     await tester.tap(tune.last);
+    await tester.pumpAndSettle();
+    return;
   }
+  final collapsedTools = find.byIcon(Icons.more_horiz_rounded);
+  if (collapsedTools.evaluate().isNotEmpty) {
+    await tester.tap(collapsedTools.last);
+    await tester.pumpAndSettle();
+    return;
+  }
+  await tester.tap(find.text('Workspace'));
   await tester.pumpAndSettle();
 }
 

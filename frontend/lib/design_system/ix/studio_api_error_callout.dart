@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_icon_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -53,17 +54,16 @@ class StudioApiErrorCallout extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 560;
         final subtle = emphasis == StudioApiErrorCalloutEmphasis.subtle;
-        final dismissButton = IconButton(
-          onPressed: onDismiss,
-          icon: const Icon(Icons.close, size: StudioIconSize.sm),
-          color: tokens.textSecondary,
-          tooltip: l10n.studioDismiss,
-          visualDensity: VisualDensity.standard,
-          constraints: const BoxConstraints(
-            minWidth: StudioSpacing.iconTouchTarget,
-            minHeight: StudioSpacing.iconTouchTarget,
-          ),
-        );
+        final Widget? dismissButton = onDismiss == null
+            ? null
+            : StudioIconButton(
+                icon: Icons.close,
+                label: l10n.studioDismiss,
+                size: StudioIconSize.sm,
+                color: tokens.textSecondary,
+                style: studioUtilityIconButtonStyle(context),
+                onPressed: onDismiss,
+              );
         final retryButton = TextButton.icon(
           onPressed: onRetry,
           style: studioFormTextButtonIconStyle(context).copyWith(
@@ -184,7 +184,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                                           ),
                                 ),
                               ),
-                              if (compact && onDismiss != null) dismissButton,
+                              if (compact) ?dismissButton,
                               if (!compact && (canRetry || onDismiss != null))
                                 Wrap(
                                   spacing: StudioSpacing.xs,
@@ -192,7 +192,7 @@ class StudioApiErrorCallout extends StatelessWidget {
                                   alignment: WrapAlignment.end,
                                   children: <Widget>[
                                     if (canRetry) retryButton,
-                                    if (onDismiss != null) dismissButton,
+                                    ?dismissButton,
                                   ],
                                 ),
                             ],

@@ -12,6 +12,8 @@ import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'studio_workbench_test_helpers.dart';
+
 Widget _routerApp(GoRouter router) {
   return MaterialApp.router(
     theme: buildStudioDarkTheme(useBundledFonts: true),
@@ -190,6 +192,8 @@ void main() {
   testWidgets('compact bar next from script navigates to art step', (
     WidgetTester tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     late GoRouter router;
     final host = ProjectStudioHost(
       projectNumericId: 42,
@@ -221,8 +225,7 @@ void main() {
 
     expect(find.text('body-script'), findsOneWidget);
 
-    await tester.tap(find.text('Next: Art'));
-    await tester.pumpAndSettle();
+    await tapProjectStudioCompactBarNext(tester, nextLabel: 'Next: Art');
 
     expect(find.text('body-art'), findsOneWidget);
     expect(find.text('body-script'), findsNothing);

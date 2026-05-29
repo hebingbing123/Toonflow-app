@@ -29,7 +29,12 @@ class _AuthSectionContent extends StatelessWidget {
                   l10n.authSupabaseNotConfigured,
                   style: Theme.of(context).textTheme.bodySmall,
                 )
-              else ...[
+              else
+                StudioFormKeyboardScope(
+                  onEnterSubmit: callbacks.onSignIn,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                 TextField(
                   controller: model.emailController,
                   decoration: InputDecoration(
@@ -38,6 +43,7 @@ class _AuthSectionContent extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: StudioSpacing.xs),
                 TextField(
@@ -47,6 +53,7 @@ class _AuthSectionContent extends StatelessWidget {
                   ),
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
+                  textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: StudioSpacing.sm),
                 StudioDenseActionRow(
@@ -71,7 +78,9 @@ class _AuthSectionContent extends StatelessWidget {
                 ),
                 if (model.signedIn)
                   _AuthSignedInPanel(model: model, callbacks: callbacks),
-              ],
+                    ],
+                  ),
+                ),
             ],
           ),
         ),

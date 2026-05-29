@@ -3,11 +3,67 @@ import 'package:go_router/go_router.dart';
 
 import '../../design_system/layout_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
+import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../product_shell/studio_shell_scope.dart';
 import '../tokens.dart';
 import 'studio_entrance_motion.dart';
 import 'studio_ellipsis_tooltip_text.dart';
+import 'studio_icon_button.dart';
 import 'studio_text_styles.dart';
+
+/// Title + risky-operation prefs menu; stacks when pane width is below [breakpoint].
+class StudioPaneTitleMenuRow extends StatelessWidget {
+  const StudioPaneTitleMenuRow({
+    super.key,
+    this.title,
+    this.titleWidget,
+    this.titleStyle,
+    this.menu,
+    this.menuTooltip,
+    this.breakpoint = kStudioPipelineInlineMinWidth,
+  }) : assert(title != null || titleWidget != null);
+
+  final String? title;
+  final Widget? titleWidget;
+  final TextStyle? titleStyle;
+  final Widget? menu;
+  final String? menuTooltip;
+  final double breakpoint;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedTitle = titleWidget ??
+        Text(
+          title!,
+          style: titleStyle ?? studioPaneTitleStyle(context),
+        );
+    final prefsMenu =
+        menu ??
+        RiskyOperationConfirmPrefsOverflowMenu(tooltip: menuTooltip);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < breakpoint;
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              resolvedTitle,
+              const SizedBox(height: StudioSpacing.sm),
+              Align(alignment: Alignment.centerLeft, child: prefsMenu),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(child: resolvedTitle),
+            prefsMenu,
+          ],
+        );
+      },
+    );
+  }
+}
 
 /// Merges [StudioPaneHeader] with inline toolbar actions (no separate 「筛选」 row).
 class StudioPaneToolbar extends StatelessWidget {
@@ -137,14 +193,19 @@ class StudioPaneHeader extends StatelessWidget {
       if (!effectiveShowBack) {
         return null;
       }
-      return IconButton(
-        padding: const EdgeInsets.only(left: 0, right: StudioSpacing.xs),
-        constraints: const BoxConstraints(
-          minWidth: StudioSpacing.iconTouchTarget + 4,
-          minHeight: StudioSpacing.iconTouchTarget + 4,
-        ),
-        tooltip: l10n.studioBackPreviousPane,
+      return StudioIconButton(
+        icon: Icons.arrow_back,
+        label: l10n.studioBackPreviousPane,
         style: IconButton.styleFrom(
+          padding: const EdgeInsets.only(left: 0, right: StudioSpacing.xs),
+          minimumSize: const Size(
+            StudioSpacing.iconTouchTarget + 4,
+            StudioSpacing.iconTouchTarget + 4,
+          ),
+          fixedSize: const Size(
+            StudioSpacing.iconTouchTarget + 4,
+            StudioSpacing.iconTouchTarget + 4,
+          ),
           backgroundColor: tokens.bgSurface.withValues(alpha: 0.78),
           foregroundColor: tokens.textSecondary,
           shape: RoundedRectangleBorder(
@@ -152,7 +213,6 @@ class StudioPaneHeader extends StatelessWidget {
             side: BorderSide(color: tokens.surfaceHighlight),
           ),
         ),
-        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (onBack != null) {
             onBack!();
@@ -173,7 +233,12 @@ class StudioPaneHeader extends StatelessWidget {
 
     final titleWidget = StudioHero(
       tag: titleHeroTag,
-      child: Text(title, style: resolvedTitleStyle),
+      child: Text(
+        title,
+        style: resolvedTitleStyle,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
     final titleBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

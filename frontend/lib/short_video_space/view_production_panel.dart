@@ -936,7 +936,8 @@ class _ProductionPanel extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    SizedBox(
+                                    StudioRepaintBoundary(
+                                      child: SizedBox(
                                       width: 14,
                                       height: 14,
                                       child: latestExportUi.activeTaskRunning
@@ -951,6 +952,7 @@ class _ProductionPanel extends StatelessWidget {
                                               size: StudioIconSize.xxs,
                                               color: latestExportCardTextColor,
                                             ),
+                                    ),
                                     ),
                                     const SizedBox(width: StudioSpacing.xs),
                                     Expanded(
@@ -1029,11 +1031,13 @@ class _ProductionPanel extends StatelessWidget {
                                     ? null
                                     : onStartExport,
                                 icon: exportActionBusy
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                    ? const StudioRepaintBoundary(
+                                        child: SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
                                         ),
                                       )
                                     : const Icon(Icons.refresh),
@@ -1161,10 +1165,12 @@ class _ProductionPanel extends StatelessWidget {
                           ? null
                           : onStartExport,
                       icon: exportActionBusy
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          ? const StudioRepaintBoundary(
+                              child: SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
                             )
                           : const Icon(Icons.file_upload_outlined),
                       label: Text(
@@ -1185,11 +1191,13 @@ class _ProductionPanel extends StatelessWidget {
                             ? null
                             : onStartPreAssembly,
                         icon: preAssemblyActionBusy
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                            ? const StudioRepaintBoundary(
+                                child: SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               )
                             : const Icon(Icons.playlist_play_outlined),

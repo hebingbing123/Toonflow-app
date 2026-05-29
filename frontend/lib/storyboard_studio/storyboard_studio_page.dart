@@ -8,6 +8,7 @@ import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/components/studio_icon_button.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -841,6 +842,7 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
+                      style: studioFormTextButtonIconStyle(context),
                       onPressed: () => setState(() => _selectedShotId = null),
                       icon: const Icon(Icons.arrow_back),
                       label: Text(l10n.studioStoryboardShotList),
@@ -1113,8 +1115,10 @@ class _StoryboardStudioPageState extends State<StoryboardStudioPage> {
       resizeToAvoidBottomInset: true,
       backgroundColor: tokens.bgBase,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
+        leading: StudioIconButton(
+          icon: Icons.close,
+          label: MaterialLocalizations.of(context).closeButtonTooltip,
+          style: studioUtilityIconButtonStyle(context),
           onPressed: _closeStudio,
         ),
         title: Text(

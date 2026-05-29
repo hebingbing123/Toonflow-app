@@ -28,7 +28,35 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     required TextEditingController continuityCtrl,
     required List<ScriptBrief> scriptList,
   }) {
-    return SingleChildScrollView(
+    return StudioFormKeyboardScope(
+      onEnterSubmit: dialogState.saving[0]
+          ? null
+          : () => _submitProjectEditorDialogPatch(
+                ctx: ctx,
+                setDialogState: setDialogState,
+                token: token,
+                p: p,
+                dialogState: dialogState,
+                nameCtrl: nameCtrl,
+                introCtrl: introCtrl,
+                premiseCtrl: premiseCtrl,
+                audienceCtrl: audienceCtrl,
+                toneCtrl: toneCtrl,
+                hookCtrl: hookCtrl,
+                visualCtrl: visualCtrl,
+                textModelCtrl: textModelCtrl,
+                multimodalModelCtrl: multimodalModelCtrl,
+                imageModelCtrl: imageModelCtrl,
+                videoModelCtrl: videoModelCtrl,
+                voiceModelCtrl: voiceModelCtrl,
+                voiceProfileCtrl: voiceProfileCtrl,
+                brandNameCtrl: brandNameCtrl,
+                brandPromiseCtrl: brandPromiseCtrl,
+                visualMotifsCtrl: visualMotifsCtrl,
+                forbiddenCtrl: forbiddenCtrl,
+                continuityCtrl: continuityCtrl,
+              ),
+      child: SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -96,6 +124,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
           const SizedBox(height: StudioSpacing.sm),
           _buildProjectEditorPublishSection(ctx: ctx, token: token, p: p),
         ],
+      ),
       ),
     );
   }

@@ -60,43 +60,47 @@ class _StudioPickGridState extends State<StudioPickGrid> {
             desktopWide: 4,
           );
           return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: StudioSpacing.sm,
-          crossAxisSpacing: StudioSpacing.sm,
-          childAspectRatio: 16 / 9,
-        ),
-        itemCount: widget.candidateUrls.length,
-        itemBuilder: (context, i) {
-          final selected = i == _index;
-          final url = widget.candidateUrls[i];
-          return StudioStaggeredEntrance(
-            index: i,
-            entranceKey: widget.candidateUrls.length,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-                border: Border.all(
-                  color: selected
-                      ? StudioTokens.of(context).primary
-                      : StudioTokens.of(context).borderSubtle,
-                  width: selected ? 2 : 1,
-                ),
-              ),
-              child: StudioMediaCard(
-                imageUrl: url,
-                heroTag: 'studio.hero.pick_grid.$i.$url',
-                onTap: () {
-                  setState(() => _index = i);
-                  widget.onSelected(i);
-                },
-              ),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: StudioSpacing.sm,
+              crossAxisSpacing: StudioSpacing.sm,
+              childAspectRatio: 16 / 9,
             ),
+            itemCount: widget.candidateUrls.length,
+            itemBuilder: (context, i) {
+              final selected = i == _index;
+              final url = widget.candidateUrls[i];
+              final cell = DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+                  border: Border.all(
+                    color: selected
+                        ? StudioTokens.of(context).primary
+                        : StudioTokens.of(context).borderSubtle,
+                    width: selected ? 2 : 1,
+                  ),
+                ),
+                child: StudioMediaCard(
+                  imageUrl: url,
+                  heroTag: 'studio.hero.pick_grid.$i.$url',
+                  onTap: () {
+                    setState(() => _index = i);
+                    widget.onSelected(i);
+                  },
+                ),
+              );
+              if (i > 12) {
+                return cell;
+              }
+              return StudioStaggeredEntrance(
+                index: i,
+                entranceKey: widget.candidateUrls.length,
+                child: cell,
+              );
+            },
           );
-        },
-      );
         },
       ),
     );

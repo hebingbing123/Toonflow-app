@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dropdown_field.dart';
+import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/layout_breakpoints.dart';
 import '../design_system/studio_network_image.dart';
 import '../design_system/studio_responsive_layout.dart';
@@ -15,6 +16,8 @@ import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_dense_action_row.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_decorative_icon.dart';
+import '../design_system/components/studio_metric_switch.dart';
+import '../design_system/components/studio_repaint_boundary.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
@@ -1653,13 +1656,10 @@ class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
             ),
           ],
         );
-        final showScrollHint = viewportWidth < 720;
         return SizedBox(
           width: viewportWidth,
-          child: Scrollbar(
+          child: StudioScrollbar(
             controller: _scrollController,
-            thumbVisibility: showScrollHint,
-            interactive: true,
             notificationPredicate: (ScrollNotification notification) =>
                 notification.metrics.axis == Axis.horizontal,
             child: SingleChildScrollView(
@@ -1970,7 +1970,6 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -1982,11 +1981,16 @@ class _MetricChip extends StatelessWidget {
         border: Border.all(color: tokens.borderSubtle),
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
       ),
-      child: Text(
-        resolveAppLocalizationsForErrors(
-          context,
-        ).shortVideoMetricChipLine(label, value),
-        style: theme.textTheme.labelMedium?.copyWith(color: tokens.textSecondary),
+      child: StudioMetricSwitch(
+        transitionKey: value,
+        child: Text(
+          resolveAppLocalizationsForErrors(
+            context,
+          ).shortVideoMetricChipLine(label, value),
+          style: studioMetricTextStyle(context)?.copyWith(
+            color: tokens.textSecondary,
+          ),
+        ),
       ),
     );
   }

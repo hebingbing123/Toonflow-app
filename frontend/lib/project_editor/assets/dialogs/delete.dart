@@ -31,7 +31,9 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
               title: Text(dlgL10n.projectEditorAssetDeleteDialogTitle),
               content: SizedBox(
                 width: studioConstrainedDialogWidth(context, maxWidth: 420),
-                child: StudioDropdownButtonFormField<int>(
+                child: StudioFormKeyboardScope(
+                  onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                  child: StudioDropdownButtonFormField<int>(
                   initialValue: selectedAssetNumericId,
                   decoration: InputDecoration(
                     labelText: dlgL10n.projectEditorAssetDeleteDialogTargetLabel,
@@ -51,6 +53,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                     if (v == null) return;
                     setState(() => selectedAssetNumericId = v);
                   },
+                ),
                 ),
               ),
               actions: [

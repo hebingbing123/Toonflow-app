@@ -54,10 +54,11 @@ void main() {
             final base = f.uri.pathSegments.last;
             return base.startsWith('regular_');
           }).length;
-          final interactionCount = pngs.where((f) {
+          final interactionPngCount = pngs.where((f) {
             final base = f.uri.pathSegments.last;
             return base.startsWith('interaction_');
           }).length;
+          final interactionCount = harness.interactionCount;
 
           expect(
             routeCount,
@@ -69,6 +70,12 @@ void main() {
             greaterThanOrEqualTo(vp.id == 'mobile' ? 6 : 6),
             reason:
                 '${vp.id}: interactions $interactionCount (dialogs/sheets/menus/expand)',
+          );
+          expect(
+            interactionPngCount,
+            greaterThanOrEqualTo(interactionCount),
+            reason:
+                '${vp.id}: interaction PNGs on disk ($interactionPngCount) vs manifest ($interactionCount)',
           );
           for (final f in pngs) {
             expect(

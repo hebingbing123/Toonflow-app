@@ -3,7 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../components/studio_icon_button.dart';
+import '../components/studio_repaint_boundary.dart';
 import '../components/studio_surfaces.dart';
+import '../glass.dart';
 import '../studio_typography.dart';
 import '../tokens.dart';
 
@@ -74,21 +77,8 @@ class StudioToastOverlay {
               StudioToastTone.info => tokens.primary,
             };
 
-        final card = Material(
-          color: StudioPrimitives.transparent,
-          elevation: 4,
-          shadowColor: studioShadowColor(overlayContext, alpha: 0.14),
-          borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: tokens.glass,
-                  border: Border.all(color: tokens.glassBorder),
-                ),
-                child: Padding(
+        final toastRadius = BorderRadius.circular(StudioSpacing.radiusCard);
+        final toastBody = Padding(
                   padding: const EdgeInsets.fromLTRB(
                     StudioSpacing.sm,
                     StudioLayoutSpacing.stackMedium,
@@ -122,17 +112,17 @@ class StudioToastOverlay {
                               ),
                             ),
                           ),
-                          IconButton(
+                          StudioIconButton(
+                            icon: Icons.close_rounded,
+                            label: MaterialLocalizations.of(overlayContext)
+                                .closeButtonTooltip,
+                            size: StudioIconSize.md,
+                            color: tokens.textMuted,
                             style: studioUtilityIconButtonStyle(overlayContext),
                             onPressed: () {
                               hide();
                               onDismiss?.call();
                             },
-                            icon: Icon(
-                              Icons.close_rounded,
-                              size: StudioIconSize.md,
-                              color: tokens.textMuted,
-                            ),
                           ),
                         ],
                       ),
@@ -156,9 +146,38 @@ class StudioToastOverlay {
                       ],
                     ],
                   ),
+                );
+        final toastSurface = StudioGlassPanel.glassEnabled
+            ? ClipRRect(
+                borderRadius: toastRadius,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: tokens.glass,
+                      border: Border.all(color: tokens.glassBorder),
+                    ),
+                    child: toastBody,
+                  ),
                 ),
-              ),
-            ),
+              )
+            : DecoratedBox(
+                decoration: BoxDecoration(
+                  color: tokens.bgElevated.withValues(alpha: 0.96),
+                  border: Border.all(color: tokens.glassBorder),
+                  borderRadius: toastRadius,
+                ),
+                child: toastBody,
+              );
+
+        final card = StudioRepaintBoundary(
+          child: Material(
+            color: StudioPrimitives.transparent,
+            elevation: 4,
+            shadowColor: studioShadowColor(overlayContext, alpha: 0.14),
+            borderRadius: toastRadius,
+            clipBehavior: Clip.antiAlias,
+            child: toastSurface,
           ),
         );
 

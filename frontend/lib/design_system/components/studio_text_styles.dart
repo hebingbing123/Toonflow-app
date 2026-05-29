@@ -219,3 +219,13 @@ extension TextStyleTabularFigures on TextStyle {
   }
 }
 
+/// Body text for metrics (usage counts, prices, durations) — tabular digits.
+TextStyle? studioMetricTextStyle(BuildContext context) {
+  return studioSectionIntroStyle(context)?.withTabularFigures();
+}
+
+/// Prominent metric values (plan price, quota headline).
+TextStyle? studioMetricTitleStyle(BuildContext context) {
+  return studioPageTitleStyle(context)?.withTabularFigures();
+}
+

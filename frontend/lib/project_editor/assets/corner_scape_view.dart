@@ -13,6 +13,7 @@ import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class CornerScapeWorkbenchDialogViewModel {
   const CornerScapeWorkbenchDialogViewModel({
@@ -82,7 +83,18 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.busy || model.loading
+                ? null
+                : () {
+                    final controller = studioFocusedTextField(
+                      FocusManager.instance.primaryFocus?.context,
+                    )?.controller;
+                    if (controller == model.typesCtrl) {
+                      callbacks.onRefresh();
+                    }
+                  },
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -269,6 +281,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                 ),
               ],
             ],
+          ),
           ),
         ),
       ),

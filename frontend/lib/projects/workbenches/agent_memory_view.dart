@@ -11,6 +11,7 @@ import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
@@ -455,8 +456,10 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                         ).textTheme.bodySmall?.copyWith(color: muted),
                       ),
                     ),
-                    IconButton(
-                      tooltip: l10n.agentMemoryCopyChecklistTooltip,
+                    StudioIconButton(
+                      icon: Icons.copy_all_rounded,
+                      label: l10n.agentMemoryCopyChecklistTooltip,
+                      style: studioUtilityIconButtonStyle(context),
                       onPressed: () async {
                         await Clipboard.setData(
                           ClipboardData(text: executionChecklist),
@@ -466,7 +469,6 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           SnackBar(content: Text(l10n.agentMemoryChecklistCopiedSnack)),
                         );
                       },
-                      icon: const Icon(Icons.copy_all_rounded),
                     ),
                   ],
                 ),

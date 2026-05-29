@@ -168,7 +168,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                     initialValue: _actionFilter ?? '',
                     decoration: InputDecoration(
                       labelText: l10n.projectEditorAuditActionFilterLabel,
-                      isDense: true,
                     ),
                     items: <DropdownMenuItem<String>>[
                       DropdownMenuItem<String>(
@@ -216,10 +215,11 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                   child: TextField(
                     controller: _searchCtrl,
                     onChanged: (_) => setState(() {}),
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (_) => _reload(),
                     decoration: InputDecoration(
                       labelText: l10n.projectEditorAuditSearchLabel,
                       prefixIcon: const Icon(Icons.search),
-                      isDense: true,
                     ),
                   ),
                 ),
@@ -267,6 +267,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
             children: [
               if (_hasMore)
                 TextButton.icon(
+                  style: studioFormTextButtonIconStyle(context),
                   onPressed: _loadingMore ? null : _loadMore,
                   icon: _loadingMore
                       ? const SizedBox(
@@ -278,6 +279,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                   label: Text(l10n.projectEditorAuditLoadMore),
                 ),
               TextButton.icon(
+                style: studioFormTextButtonIconStyle(context),
                 onPressed: _loading || _loadingMore ? null : _reload,
                 icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                 label: Text(l10n.projectEditorAuditRefresh),

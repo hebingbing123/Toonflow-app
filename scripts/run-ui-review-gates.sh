@@ -11,6 +11,9 @@ flutter pub get
 echo "== Studio visual debt baseline =="
 bash "$ROOT/scripts/studio-visual-debt-check.sh"
 
+echo "== Studio freeze risk baseline =="
+bash "$ROOT/scripts/studio-freeze-risk-check.sh"
+
 echo "== UI widget + dialog tests (non-golden) =="
 # Exclude *golden* files and desktop layout gallery (golden tests inside filename).
 # shellcheck disable=SC2046

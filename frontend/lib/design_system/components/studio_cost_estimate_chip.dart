@@ -6,6 +6,7 @@ import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
 import '../../design_system/ix/studio_api_error_callout.dart';
 import '../../design_system/tokens.dart';
+import 'studio_metric_switch.dart';
 import 'studio_text_styles.dart';
 class StudioCostEstimateChip extends StatelessWidget {
   const StudioCostEstimateChip({
@@ -25,8 +26,11 @@ class StudioCostEstimateChip extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (loading) {
-      return StudioChip(
-        label: Text(l10n.studioCostEstimateLoading),
+      return StudioMetricSwitch(
+        transitionKey: 'loading',
+        child: StudioChip(
+          label: Text(l10n.studioCostEstimateLoading),
+        ),
       );
     }
     if (error != null) {
@@ -50,21 +54,30 @@ class StudioCostEstimateChip extends StatelessWidget {
             backgroundColor: theme.colorScheme.secondaryContainer,
           )
         else
-          StudioChip(
-            label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
-            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
+          StudioMetricSwitch(
+            transitionKey: '${est.credits}|$cny',
+            child: StudioChip(
+              label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
+              labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
+            ),
           ),
         if (est.quotaImpactJobs > 0)
-          StudioChip(
-            label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
-            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
+          StudioMetricSwitch(
+            transitionKey: est.quotaImpactJobs,
+            child: StudioChip(
+              label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
+              labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
+            ),
           ),
         if (pct != null && est.dailyJobQuota != null)
-          StudioChip(
-            label: Text(
-              l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
+          StudioMetricSwitch(
+            transitionKey: pct.toStringAsFixed(0),
+            child: StudioChip(
+              label: Text(
+                l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
+              ),
+              labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
             ),
-            labelStyle: theme.chipTheme.labelStyle?.withTabularFigures(),
           ),
       ],
     );

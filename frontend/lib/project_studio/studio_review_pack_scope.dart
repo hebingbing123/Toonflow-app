@@ -393,15 +393,19 @@ class _StudioReviewPackScopeState extends State<StudioReviewPackScope> {
                     separatorBuilder: (_, _) => const SizedBox(height: StudioLayoutSpacing.inlineGap),
                     itemBuilder: (context, index) {
                       final row = rows[index];
+                      final rowWidget = StudioReviewPackStoryboardRow(
+                        row: row,
+                        projectNumericId: widget.projectNumericId,
+                        feedback: _feedbackByStoryboard[row.storyboardNumericId],
+                        onSubmitFeedback: _submitReviewPackFeedback,
+                      );
+                      if (index > 12) {
+                        return rowWidget;
+                      }
                       return studioStaggeredItem(
                         index,
                         entranceKey: rows.length,
-                        child: StudioReviewPackStoryboardRow(
-                          row: row,
-                          projectNumericId: widget.projectNumericId,
-                          feedback: _feedbackByStoryboard[row.storyboardNumericId],
-                          onSubmitFeedback: _submitReviewPackFeedback,
-                        ),
+                        child: rowWidget,
                       );
                     },
                   ),

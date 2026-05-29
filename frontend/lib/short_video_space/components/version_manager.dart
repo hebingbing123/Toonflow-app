@@ -429,6 +429,7 @@ class _VersionManagerState extends State<VersionManager> {
                   const Spacer(),
                   if (widget.drafts.isNotEmpty)
                     TextButton.icon(
+                      style: studioFormTextButtonIconStyle(context),
                       onPressed: _isLoading ? null : _showDraftsDialog,
                       icon: const Icon(Icons.list, size: StudioIconSize.sm),
                       label: Text(l10n.shortVideoVersionManagerViewAllDrafts),

@@ -97,3 +97,5 @@ cd frontend && flutter analyze
 
 问题清单：`.codex/skills/ui-ux-audit/output/issues.json`  
 修复后更新 `fixPlanReady: true` 与 `summary.byPriority`。
+
+**2026-05-28 backlog 字面 100%**：B1 `project_editor` 剩余竖切（plan workbench、novel sections、asset launchers）Enter 键盘；`studioFormButtonLabelMetrics` 修复浅色主按钮字色；UXR `TextButton.icon` 高流量 token；E2E + golden 回归绿。

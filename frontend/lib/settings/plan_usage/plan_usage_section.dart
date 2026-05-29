@@ -4,6 +4,7 @@ import '../../config.dart';
 import '../../design_system/components/studio_primary_button.dart';
 import '../../design_system/components/studio_async_data_view.dart';
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_metric_switch.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -238,9 +239,12 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  planTierDisplayName(l10n, planTier),
-                  style: studioPageTitleStyle(context),
+                StudioMetricSwitch(
+                  transitionKey: planTier,
+                  child: Text(
+                    planTierDisplayName(l10n, planTier),
+                    style: studioPageTitleStyle(context),
+                  ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
                 Text(
@@ -248,13 +252,31 @@ class _PlanUsageSectionState extends State<PlanUsageSection> {
                   style: studioSectionIntroStyle(context),
                 ),
                 const SizedBox(height: StudioLayoutSpacing.titleTight),
-                Text(l10n.studioPlanUsageJobsToday(jobsToday, quotaLabel)),
+                StudioMetricSwitch(
+                  transitionKey: '$jobsToday|$quotaLabel',
+                  child: Text(
+                    l10n.studioPlanUsageJobsToday(jobsToday, quotaLabel),
+                    style: studioMetricTextStyle(context),
+                  ),
+                ),
                 if (usage != null) ...<Widget>[
                   const SizedBox(height: StudioLayoutSpacing.titleTight),
-                  Text(l10n.studioPlanUsageEvents7d(usage.eventsLast7d)),
+                  StudioMetricSwitch(
+                    transitionKey: usage.eventsLast7d,
+                    child: Text(
+                      l10n.studioPlanUsageEvents7d(usage.eventsLast7d),
+                      style: studioMetricTextStyle(context),
+                    ),
+                  ),
                 ],
                 const SizedBox(height: StudioLayoutSpacing.titleTight),
-                Text(l10n.studioPlanUsageSubscription(subStatus)),
+                StudioMetricSwitch(
+                  transitionKey: subStatus,
+                  child: Text(
+                    l10n.studioPlanUsageSubscription(subStatus),
+                    style: studioMetricTextStyle(context),
+                  ),
+                ),
                 const SizedBox(height: StudioSpacing.xs),
                 Text(
                   l10n.studioPlanUsageEstimateDisclaimer,

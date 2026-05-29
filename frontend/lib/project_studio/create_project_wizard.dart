@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_icon_button.dart';
+import '../design_system/ix/studio_dirty_pop_guard.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/ix/studio_mobile_affordances.dart';
@@ -10,21 +13,18 @@ import '../design_system/components/studio_text_styles.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 
-/// Three-step create flow (full-screen sheet, not [AlertDialog]).
+/// Three-step create flow (tall sheet; Web uses [StudioWebTallSheetDialog]).
 Future<Map<String, dynamic>?> showCreateProjectWizard(
   BuildContext context,
 ) async {
   final tokens = StudioTokens.of(context);
-  return showModalBottomSheet<Map<String, dynamic>>(
+  return showStudioBottomSheet<Map<String, dynamic>>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
     isDismissible: false,
     enableDrag: false,
-    backgroundColor: StudioPrimitives.transparent,
-    barrierColor: tokens.overlay,
     builder: (ctx) => StudioSystemUiSurface(
-      surfaceColor: tokens.bgElevated,
+      surfaceColor: kIsWeb ? StudioPrimitives.transparent : tokens.bgElevated,
       child: const _CreateProjectWizardSheet(),
     ),
   );
@@ -66,6 +66,19 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
     );
   }
 
+  void _handleEnterSubmit() {
+    if (_name.text.trim().isEmpty) {
+      return;
+    }
+    if (_step < 2) {
+      _go(_step + 1);
+      return;
+    }
+    unawaited(studioMediumImpact());
+    setState(() => _allowPopOnce = true);
+    Navigator.of(context).pop(_buildFields());
+  }
+
   Map<String, dynamic> _buildFields() {
     final fields = <String, dynamic>{
       'name': _name.text.trim(),
@@ -84,26 +97,14 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
       _intro.text.trim().isNotEmpty ||
       _novelPaste.text.trim().isNotEmpty;
 
-  Future<void> _confirmClose() async {
-    if (!_dirty) {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-      return;
-    }
+  Future<bool> _confirmDiscardDraft() async {
     final discard = await showStudioConfirmDialog(
       context: context,
       title: 'Discard project draft?',
       message: 'You have unsaved project details. Leave this wizard?',
       destructive: true,
     );
-    if (!mounted || discard != true) {
-      return;
-    }
-    setState(() {
-      _allowPopOnce = true;
-    });
-    Navigator.of(context).pop();
+    return discard == true;
   }
 
   @override
@@ -112,43 +113,45 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
     final l10n = AppLocalizations.of(context)!;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
-    return PopScope(
-      canPop: _allowPopOnce || !_dirty,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
-        unawaited(_confirmClose());
-      },
-      child: FocusTraversalGroup(
+    return StudioDirtyPopGuard(
+      isDirty: _dirty,
+      allowPop: _allowPopOnce,
+      onConfirmDiscard: _confirmDiscardDraft,
+      child: StudioFormKeyboardScope(
+        onEnterSubmit: _handleEnterSubmit,
         child: Padding(
         padding: EdgeInsets.only(bottom: bottom),
         child: Align(
-          alignment: Alignment.bottomCenter,
+          alignment:
+              kIsWeb ? Alignment.center : Alignment.bottomCenter,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.sizeOf(context).height * 0.88,
               maxWidth: 640,
             ),
             child: Material(
-              color: tokens.bgElevated,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(StudioSpacing.radiusCard),
-              ),
+              color: kIsWeb ? StudioPrimitives.transparent : tokens.bgElevated,
+              borderRadius: kIsWeb
+                  ? BorderRadius.zero
+                  : const BorderRadius.vertical(
+                      top: Radius.circular(StudioSpacing.radiusCard),
+                    ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const SizedBox(height: StudioSpacing.xs),
-                  Container(
-                    width: StudioLayoutSize.skeletonAvatar,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: tokens.borderDefault,
-                      borderRadius: BorderRadius.circular(
-                        StudioSpacing.radiusHairline,
+                  if (!kIsWeb) ...<Widget>[
+                    const SizedBox(height: StudioSpacing.xs),
+                    Container(
+                      width: StudioLayoutSize.skeletonAvatar,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: tokens.borderDefault,
+                        borderRadius: BorderRadius.circular(
+                          StudioSpacing.radiusHairline,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       StudioSpacing.md,
@@ -168,8 +171,17 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
                           label: MaterialLocalizations.of(
                             context,
                           ).closeButtonTooltip,
-                          onPressed: () {
-                            unawaited(_confirmClose());
+                          onPressed: () async {
+                            if (!_dirty) {
+                              Navigator.of(context).pop();
+                              return;
+                            }
+                            final discard = await _confirmDiscardDraft();
+                            if (!context.mounted || !discard) {
+                              return;
+                            }
+                            setState(() => _allowPopOnce = true);
+                            Navigator.of(context).pop();
                           },
                         ),
                       ],
@@ -185,6 +197,14 @@ class _CreateProjectWizardSheetState extends State<_CreateProjectWizardSheet> {
                           name: _name,
                           intro: _intro,
                           onChanged: () => setState(() {}),
+                          onAdvanceStep: () {
+                            if (_name.text.trim().isEmpty) {
+                              return;
+                            }
+                            if (_step < 2) {
+                              _go(_step + 1);
+                            }
+                          },
                         ),
                         _StepNovelPaste(controller: _novelPaste),
                         _StepReview(
@@ -331,11 +351,13 @@ class _StepBasics extends StatelessWidget {
     required this.name,
     required this.intro,
     required this.onChanged,
+    required this.onAdvanceStep,
   });
 
   final TextEditingController name;
   final TextEditingController intro;
   final VoidCallback onChanged;
+  final VoidCallback onAdvanceStep;
 
   @override
   Widget build(BuildContext context) {
@@ -353,10 +375,12 @@ class _StepBasics extends StatelessWidget {
           TextField(
             controller: name,
             autofocus: true,
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
               labelText: l10n.projectsDialogFieldName,
             ),
             onChanged: (_) => onChanged(),
+            onSubmitted: (_) => onAdvanceStep(),
           ),
           const SizedBox(height: StudioSpacing.sm),
           TextField(
@@ -365,6 +389,7 @@ class _StepBasics extends StatelessWidget {
             decoration: InputDecoration(
               labelText: l10n.projectsDialogFieldIntro,
             ),
+            onChanged: (_) => onChanged(),
           ),
         ],
       ),

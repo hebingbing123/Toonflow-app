@@ -162,6 +162,8 @@ void main() {
   testWidgets(
     'project studio restores saved step and runs step agent actions',
     (tester) async {
+      await ensureProjectStudioTestSurface(tester);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       SharedPreferences.setMockInitialValues(<String, Object>{
         'studio_last_step_42': 'storyboard',
       });
@@ -247,7 +249,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Project Delta'), findsOneWidget);
-      expect(find.text('3/6'), findsOneWidget);
+      await expectStudioStepProgressRing(tester, '4/6');
       expect(find.text('Version mismatch detected'), findsOneWidget);
       expect(find.text('body-storyboard'), findsOneWidget);
       await openProjectStudioStepSetup(tester);
@@ -1874,6 +1876,8 @@ void main() {
   testWidgets('script step shows creator starter strip and applies plot template', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'script',
     });
@@ -2050,6 +2054,8 @@ void main() {
   testWidgets('compact bar next from storyboard goes to deliver not review-pack', (
     tester,
   ) async {
+    await ensureProjectStudioTestSurface(tester);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues(<String, Object>{
       'studio_last_step_42': 'storyboard',
     });
@@ -2101,7 +2107,7 @@ void main() {
     expect(find.text('Next: $deliverShort'), findsOneWidget);
     expect(find.text('Next: $reviewPack'), findsNothing);
 
-    await tester.tap(find.text('Next: $deliverShort'));
+    await tapProjectStudioCompactBarNext(tester, nextLabel: 'Next: $deliverShort');
     await tester.pumpAndSettle();
 
     expect(find.text('body-deliver'), findsOneWidget);

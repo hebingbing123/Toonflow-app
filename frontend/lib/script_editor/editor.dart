@@ -71,8 +71,6 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
   late final TextEditingController _contentCtrl;
   late final TextEditingController _stateCtrl;
   var _saving = false;
-  bool _allowPopOnce = false;
-  bool _handlingPop = false;
 
   @override
   void initState() {
@@ -109,46 +107,19 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
         _stateCtrl.text != (script.extractState?.toString() ?? '');
   }
 
-  bool get _canPop => _allowPopOnce || _saving || !_dirty;
-
-  Future<void> _handlePopInvoked(bool didPop) async {
-    if (didPop || _handlingPop || _saving) {
-      return;
-    }
-    if (!_dirty) {
-      if (!mounted) return;
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(widget.dialogContext).maybePop();
-      });
-      return;
-    }
-
-    _handlingPop = true;
-    try {
-      final discard = await showStudioConfirmDialog(
-        context: widget.dialogContext,
-        title: 'Discard changes?',
-        message: 'You have unsaved script changes. Leave anyway?',
-        confirmLabel: 'Discard',
-        cancelLabel: MaterialLocalizations.of(
-          widget.dialogContext,
-        ).cancelButtonLabel,
-        destructive: true,
-        barrierDismissible: false,
-      );
-      if (discard != true || !mounted) {
-        return;
-      }
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(widget.dialogContext).maybePop();
-      });
-    } finally {
-      _handlingPop = false;
-    }
+  Future<bool> _confirmDiscard() async {
+    final discard = await showStudioConfirmDialog(
+      context: widget.dialogContext,
+      title: 'Discard changes?',
+      message: 'You have unsaved script changes. Leave anyway?',
+      confirmLabel: 'Discard',
+      cancelLabel: MaterialLocalizations.of(
+        widget.dialogContext,
+      ).cancelButtonLabel,
+      destructive: true,
+      barrierDismissible: false,
+    );
+    return discard == true;
   }
 
   Future<void> _deleteScript(AppLocalizations l10n) async {
@@ -260,17 +231,18 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
         ? viewportWidth.clamp(320.0, 720.0)
         : 720.0;
 
-    return PopScope(
-      canPop: _canPop,
-      onPopInvokedWithResult: (didPop, _) {
-        unawaited(_handlePopInvoked(didPop));
-      },
+    return StudioDirtyPopGuard(
+      isDirty: _dirty,
+      popBlocked: _saving,
+      onConfirmDiscard: _confirmDiscard,
       child: StudioAlertDialog(
         title: Text(l10n.scriptEditorDialogTitle(widget.script.numericId)),
         content: SizedBox(
           width: dialogWidth,
           child: SingleChildScrollView(
-            child: Column(
+            child: StudioFormKeyboardScope(
+              onEnterSubmit: _saving ? null : () => _saveChanges(l10n),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -321,6 +293,7 @@ class _ScriptEditorDialogState extends State<_ScriptEditorDialog> {
                   onOpenEditImageWorkbench: widget.onOpenEditImageWorkbench,
                 ),
               ],
+            ),
             ),
           ),
         ),

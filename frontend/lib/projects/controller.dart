@@ -189,6 +189,8 @@ class ProjectsController extends ChangeNotifier {
         onErrorChanged: _setError,
         l10n: _l10nResolved,
       );
+      // Exit infinite skeleton when the first fetch fails (projects stays null).
+      projects ??= const <ProjectRow>[];
     } finally {
       loadingProjects = false;
       notifyListeners();

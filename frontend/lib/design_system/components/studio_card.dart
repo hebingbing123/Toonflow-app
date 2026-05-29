@@ -52,6 +52,7 @@ class StudioCard extends StatelessWidget {
     return StudioPointerHover(
       enabled: true,
       borderRadius: radius,
+      liftShadow: false,
       builder: (context, hovered) {
         return studioWrapClickCursor(
           enabled: true,
@@ -60,9 +61,8 @@ class StudioCard extends StatelessWidget {
             child: InkWell(
               onTap: onTap,
               borderRadius: radius,
-              hoverColor: studioPointerChromeEnabled(context)
-                  ? tokens.primary.withValues(alpha: 0.08)
-                  : null,
+              hoverColor: studioNestedMaterialHover,
+              highlightColor: studioNestedMaterialHighlight,
               child: AnimatedScale(
                 scale: hovered ? 1.008 : 1,
                 duration: const Duration(milliseconds: 140),

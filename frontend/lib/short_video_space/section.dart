@@ -24,6 +24,8 @@ import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_loading_placeholders.dart';
+import '../design_system/components/studio_repaint_boundary.dart';
+import '../design_system/studio_scheduler.dart';
 import '../design_system/ix/studio_api_error_callout.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_dense_action_row.dart';
@@ -176,6 +178,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ExportTaskV1? _activeExportTask;
   ExportHistoryItem? _latestSuccessfulExport;
   Timer? _assemblyJobPollTimer;
+  var _assemblyJobPollBackoffSeconds = 3;
   final PanelVersionManager _panelVersionManager = PanelVersionManager();
   final GlobalKey _assemblyInputPanelKey = GlobalKey();
   final GlobalKey _publishSectionKey = GlobalKey();
@@ -272,7 +275,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     if (widget.debugOverviewSnapshot != null) {
       _applyDemoOverviewSnapshot(widget.debugOverviewSnapshot!);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    StudioScheduler.scheduleOnceUntil('short_video_section_init', () {
+      if (!mounted) return;
       if (widget.debugProjects == null &&
           !ProductDemoMode.instance.shouldSkipLiveApi) {
         _loadProjects();
@@ -493,7 +497,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             widget.embedScope == ShortVideoSpaceEmbedScope.publish ||
             widget.embedScope == ShortVideoSpaceEmbedScope.quality)) {
       _didScrollToInitialFocus = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      StudioScheduler.scheduleOnceUntil('short_video_section_focus_scroll', () {
+        if (!mounted) return;
         _maybeScrollToInitialFocus();
       });
     }

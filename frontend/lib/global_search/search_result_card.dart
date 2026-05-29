@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_surfaces.dart';
+import '../design_system/components/studio_ellipsis_tooltip_text.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/ix/studio_pointer.dart';
 import '../design_system/tokens.dart';
@@ -138,6 +140,7 @@ class SearchResultCard extends StatelessWidget {
     final cardRadius = BorderRadius.circular(StudioSpacing.radiusComfort);
     return StudioPointerHover(
       borderRadius: cardRadius,
+      liftShadow: false,
       builder: (context, hovered) {
         return Card(
           margin: const EdgeInsets.only(bottom: StudioSpacing.radiusComfort),
@@ -162,6 +165,8 @@ class SearchResultCard extends StatelessWidget {
               child: InkWell(
                 onTap: onTap,
                 borderRadius: cardRadius,
+                hoverColor: studioNestedMaterialHover,
+                highlightColor: studioNestedMaterialHighlight,
                 child: Padding(
                   padding: const EdgeInsets.all(StudioSpacing.sm),
                   child: Column(
@@ -187,13 +192,12 @@ class SearchResultCard extends StatelessWidget {
                           ),
                           const SizedBox(width: StudioSpacing.xs),
                           Expanded(
-                            child: Text(
-                              result.title,
+                            child: StudioEllipsisTooltipText(
+                              text: result.title,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                               maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Container(

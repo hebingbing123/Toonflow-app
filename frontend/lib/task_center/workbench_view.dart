@@ -9,6 +9,7 @@ import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_workbench_section.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -220,7 +221,6 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         controller: model.pageCtrl,
                         decoration: InputDecoration(
                           labelText: l10n.taskCenterFieldPage,
-                          isDense: true,
                         ),
                       ),
                     ),
@@ -229,7 +229,6 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         controller: model.limitCtrl,
                         decoration: InputDecoration(
                           labelText: l10n.taskCenterFieldPageSize,
-                          isDense: true,
                         ),
                       ),
                     ),
@@ -246,7 +245,6 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         decoration: InputDecoration(
                           labelText:
                               l10n.taskCenterFieldProjectNumericIdOptional,
-                          isDense: true,
                         ),
                       ),
                     ),
@@ -255,7 +253,6 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                         controller: model.projectUuidCtrl,
                         decoration: InputDecoration(
                           labelText: l10n.taskCenterFieldProjectUuidOptional,
-                          isDense: true,
                         ),
                       ),
                     ),
@@ -350,74 +347,94 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final stacked = constraints.maxWidth < 520;
-                    final field = TextField(
-                      controller: model.numericTaskIdCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldNumericTaskId,
-                      ),
-                    );
-                    final button = _WorkbenchToolbarButton(
-                      icon: Icons.manage_search_outlined,
-                      label: model.loadingNumericIdTaskDetail
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterLoadNumericIdDetails,
-                      onPressed: model.loadingNumericIdTaskDetail
-                          ? null
-                          : callbacks.onLoadNumericIdTaskDetail,
-                      emphasized: true,
-                    );
-                    if (stacked) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[field, const SizedBox(height: StudioSpacing.xs), button],
+                StudioFormKeyboardScope(
+                  onEnterSubmit: model.loadingNumericIdTaskDetail
+                      ? null
+                      : callbacks.onLoadNumericIdTaskDetail,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final stacked = constraints.maxWidth < 520;
+                      final field = TextField(
+                        controller: model.numericTaskIdCtrl,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: l10n.taskCenterFieldNumericTaskId,
+                        ),
                       );
-                    }
-                    return Row(
-                      children: <Widget>[
-                        Expanded(child: field),
-                        const SizedBox(width: StudioSpacing.xs),
-                        button,
-                      ],
-                    );
-                  },
+                      final button = _WorkbenchToolbarButton(
+                        icon: Icons.manage_search_outlined,
+                        label: model.loadingNumericIdTaskDetail
+                            ? l10n.projectsBusyProcessing
+                            : l10n.taskCenterLoadNumericIdDetails,
+                        onPressed: model.loadingNumericIdTaskDetail
+                            ? null
+                            : callbacks.onLoadNumericIdTaskDetail,
+                        emphasized: true,
+                      );
+                      if (stacked) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            field,
+                            const SizedBox(height: StudioSpacing.xs),
+                            button,
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: <Widget>[
+                          Expanded(child: field),
+                          const SizedBox(width: StudioSpacing.xs),
+                          button,
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final stacked = constraints.maxWidth < 520;
-                    final field = TextField(
-                      controller: model.uuidCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldTaskUuid,
-                      ),
-                    );
-                    final button = _WorkbenchToolbarButton(
-                      icon: Icons.fingerprint_outlined,
-                      label: model.loadingUuidDetails
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterLoadUuidDetails,
-                      onPressed: model.loadingUuidDetails
-                          ? null
-                          : callbacks.onLoadUuidDetails,
-                      emphasized: true,
-                    );
-                    if (stacked) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[field, const SizedBox(height: StudioSpacing.xs), button],
+                StudioFormKeyboardScope(
+                  onEnterSubmit: model.loadingUuidDetails
+                      ? null
+                      : callbacks.onLoadUuidDetails,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final stacked = constraints.maxWidth < 520;
+                      final field = TextField(
+                        controller: model.uuidCtrl,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: l10n.taskCenterFieldTaskUuid,
+                        ),
                       );
-                    }
-                    return Row(
-                      children: <Widget>[
-                        Expanded(child: field),
-                        const SizedBox(width: StudioSpacing.xs),
-                        button,
-                      ],
-                    );
-                  },
+                      final button = _WorkbenchToolbarButton(
+                        icon: Icons.fingerprint_outlined,
+                        label: model.loadingUuidDetails
+                            ? l10n.projectsBusyProcessing
+                            : l10n.taskCenterLoadUuidDetails,
+                        onPressed: model.loadingUuidDetails
+                            ? null
+                            : callbacks.onLoadUuidDetails,
+                        emphasized: true,
+                      );
+                      if (stacked) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            field,
+                            const SizedBox(height: StudioSpacing.xs),
+                            button,
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: <Widget>[
+                          Expanded(child: field),
+                          const SizedBox(width: StudioSpacing.xs),
+                          button,
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 if (detailLines.isNotEmpty) ...<Widget>[
                   const SizedBox(height: StudioLayoutSpacing.inlineGap),

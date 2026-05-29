@@ -1605,6 +1605,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studioOnboardingDone => 'Done';
 
   @override
+  String get studioOnboardingSkip => 'Skip tour';
+
+  @override
+  String get studioOnboardingTitle => 'Quick start';
+
+  @override
+  String get studioOnboardingStep1Title => 'Open Projects';
+
+  @override
+  String get studioOnboardingStep2Title => 'Six-step pipeline';
+
+  @override
+  String get studioOnboardingStep3Title => 'Command palette';
+
+  @override
   String get studioOnboardingStep1 =>
       'Open Projects from the app navigation to start creating.';
 

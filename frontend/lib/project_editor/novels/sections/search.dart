@@ -18,6 +18,23 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
     required void Function(String value) updateInfoLine,
     required void Function(List<NovelRow> rows, String infoLine) applyResult,
   }) {
+    Future<void> runSearch() => _runNovelWorkbenchAction(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          setLocalState: setLocalState,
+          novelsBusy: novelsBusy,
+          setLocalBusy: setLocalBusy,
+          action: () => _searchNovelWorkbenchRows(
+            l10n: l10n,
+            token: token,
+            project: project,
+            searchCtrl: searchCtrl,
+            searchIntakeStatusCtrl: searchIntakeStatusCtrl,
+            searchIntakeSourceCtrl: searchIntakeSourceCtrl,
+            applyResult: applyResult,
+          ),
+        );
+
     return StudioCollapsibleFilterPanel(
       collapsible: true,
       title: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
@@ -29,10 +46,11 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
         children: <Widget>[
           TextField(
             controller: searchCtrl,
+            textInputAction: TextInputAction.search,
+            onSubmitted: localBusy ? null : (_) => unawaited(runSearch()),
             decoration: InputDecoration(
               labelText: l10n.projectEditorNovelsWorkbenchSearchKeywordLabel,
               helperText: l10n.projectEditorNovelsWorkbenchSearchKeywordHelper,
-              isDense: true,
             ),
           ),
           const SizedBox(height: StudioSpacing.xs),
@@ -48,7 +66,6 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                   decoration: InputDecoration(
                     labelText:
                         l10n.projectEditorNovelsWorkbenchSearchIntakeStatusLabel,
-                    isDense: true,
                   ),
                   items: <DropdownMenuItem<String>>[
                     DropdownMenuItem(
@@ -93,7 +110,6 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                   decoration: InputDecoration(
                     labelText:
                         l10n.projectEditorNovelsWorkbenchSearchIntakeSourceLabel,
-                    isDense: true,
                   ),
                   items: <DropdownMenuItem<String>>[
                     DropdownMenuItem(
@@ -139,24 +155,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
             children: <Widget>[
               FilledButton.tonal(
                 style: studioFormTonalButtonStyle(ctx),
-                onPressed: localBusy
-                    ? null
-                    : () => _runNovelWorkbenchAction(
-                        ctx: ctx,
-                        setDialogState: setDialogState,
-                        setLocalState: setLocalState,
-                        novelsBusy: novelsBusy,
-                        setLocalBusy: setLocalBusy,
-                        action: () => _searchNovelWorkbenchRows(
-                          l10n: l10n,
-                          token: token,
-                          project: project,
-                          searchCtrl: searchCtrl,
-                          searchIntakeStatusCtrl: searchIntakeStatusCtrl,
-                          searchIntakeSourceCtrl: searchIntakeSourceCtrl,
-                          applyResult: applyResult,
-                        ),
-                      ),
+                onPressed: localBusy ? null : () => unawaited(runSearch()),
                 child: Text(l10n.projectEditorNovelsWorkbenchSearchButton),
               ),
               OutlinedButton(

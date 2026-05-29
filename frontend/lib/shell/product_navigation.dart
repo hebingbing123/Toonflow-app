@@ -95,7 +95,11 @@ extension _HomePageProductNavigation on _HomePageState {
     _shellNavigationController.selectProductWorkspacePane(
       ProductWorkspacePane.projects,
     );
-    context.go('/projects/${row.numericId}/script');
+    openProjectStudioRoute(
+      context,
+      projectNumericId: row.numericId,
+      pushFromProjectsHome: true,
+    );
   }
 
   void _openShellPaneFromStudioOverlay(

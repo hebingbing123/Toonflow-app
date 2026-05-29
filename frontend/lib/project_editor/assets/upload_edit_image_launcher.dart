@@ -6,6 +6,7 @@ import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 Future<void> openProjectAssetEditImageUploadDialog({
   required BuildContext ctx,
@@ -35,7 +36,9 @@ Future<void> openProjectAssetEditImageUploadDialog({
               title: Text(dlgL10n.projectEditorAssetEditImageDialogTitle),
               content: SizedBox(
                 width: studioConstrainedDialogWidth(dialogCtx, maxWidth: 520),
-                child: Column(
+                child: StudioFormKeyboardScope(
+                  onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -71,6 +74,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
                       ),
                     ),
                   ],
+                ),
                 ),
               ),
               actions: [

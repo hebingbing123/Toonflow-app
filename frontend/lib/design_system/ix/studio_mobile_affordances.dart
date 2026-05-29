@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../layout_breakpoints.dart';
+
 /// Mobile-only helpers for immersive system chrome and tactile feedback.
 class StudioMobileAffordances {
   StudioMobileAffordances._();
@@ -22,6 +24,11 @@ class StudioMobileAffordances {
   /// Used to gate popstate back-button interception in the product shell.
   static bool get supportsAndroidWebBack =>
       kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  /// Handset-width surfaces (native or mobile web) — use overlay style only.
+  static bool prefersHandsetSystemChrome(BuildContext context) {
+    return MediaQuery.sizeOf(context).shortestSide < kStudioHandsetMaxWidth;
+  }
 }
 
 SystemUiOverlayStyle studioSystemUiOverlayStyleForSurface(Color surfaceColor) {
@@ -107,7 +114,9 @@ class _StudioSystemUiSurfaceState extends State<StudioSystemUiSurface> {
       return;
     }
     _lastStyle = style;
-    unawaited(studioApplySystemUiOverlayStyle(surfaceColor));
+    if (StudioMobileAffordances.supportsMobileChrome) {
+      unawaited(studioApplySystemUiOverlayStyle(surfaceColor));
+    }
   }
 
   @override
@@ -135,3 +144,6 @@ Future<void> studioMediumImpact() async {
   }
   await HapticFeedback.mediumImpact();
 }
+
+/// Light tap for list refresh completion or pull-to-refresh release.
+Future<void> studioRefreshHaptic() => studioLightImpact();

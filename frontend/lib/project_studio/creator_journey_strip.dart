@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'studio_step.dart';
@@ -248,6 +250,7 @@ class CreatorJourneyStrip extends StatelessWidget {
     required this.onSelectMilestone,
     this.onBackToProjects,
     this.onOpenReviewPackMilestone,
+    this.sheetPresentation = false,
   });
 
   final StudioStep currentStep;
@@ -260,6 +263,9 @@ class CreatorJourneyStrip extends StatelessWidget {
   /// Tile 4: open `/review-pack` when set.
   final VoidCallback? onOpenReviewPackMilestone;
 
+  /// Bottom-sheet layout: fixed row without horizontal scroll (avoids Web layout loops).
+  final bool sheetPresentation;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -268,6 +274,112 @@ class CreatorJourneyStrip extends StatelessWidget {
       5,
       (i) => creatorJourneyStripLabelForTile(l10n, i),
     );
+
+    Widget buildStripRow({
+      required double iconSize,
+      required TextStyle? labelStyle,
+    }) {
+      Widget milestoneTile(int i) {
+        final status = creatorJourneyTileStatus(
+          milestoneIndex: i,
+          currentStep: currentStep,
+          failedJobCount: failedJobCount,
+        );
+        final tileTarget = creatorJourneyStripTargetForTile(i);
+        final semanticsLabel =
+            '${labels[i]}, ${_statusSemantics(l10n, status)}';
+        final iconColor = _statusColor(context, status, tokens);
+        final VoidCallback onTapMilestone = switch (tileTarget.kind) {
+          CreatorJourneyStripTileKind.exitProjects =>
+            onBackToProjects ?? () => onSelectMilestone(StudioStep.script),
+          CreatorJourneyStripTileKind.studioStep =>
+            () => onSelectMilestone(tileTarget.step!),
+          CreatorJourneyStripTileKind.reviewPack =>
+            onOpenReviewPackMilestone ??
+            () => onSelectMilestone(StudioStep.deliver),
+        };
+
+        final tile = InkWell(
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          onTap: onTapMilestone,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: StudioSpacing.xs,
+              vertical: StudioSpacing.chromeActionGap,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(_statusIcon(status), size: iconSize, color: iconColor),
+                SizedBox(height: iconSize >= 19 ? 6 : 4),
+                Text(
+                  labels[i],
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: labelStyle?.copyWith(
+                    color: status == CreatorJourneyTileStatus.notStarted
+                        ? tokens.textSecondary.withValues(alpha: 0.72)
+                        : tokens.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        return Semantics(
+          button: true,
+          label: semanticsLabel,
+          child: Tooltip(message: semanticsLabel, child: tile),
+        );
+      }
+
+      Widget connectorAfter(int milestoneBefore) {
+        final nextStatus = creatorJourneyTileStatus(
+          milestoneIndex: milestoneBefore + 1,
+          currentStep: currentStep,
+          failedJobCount: failedJobCount,
+        );
+        final connectorColor =
+            nextStatus == CreatorJourneyTileStatus.notStarted
+            ? tokens.borderSubtle
+            : tokens.primary.withValues(alpha: 0.35);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
+          child: SizedBox(
+            height: 2,
+            width: 8,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: connectorColor,
+                borderRadius: BorderRadius.circular(StudioSpacing.radiusHairline),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          for (var i = 0; i < labels.length; i++) ...<Widget>[
+            Expanded(child: milestoneTile(i)),
+            if (i < labels.length - 1) connectorAfter(i),
+          ],
+        ],
+      );
+    }
+
+    if (sheetPresentation) {
+      final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        height: 1.15,
+        fontSize: 11,
+      );
+      return buildStripRow(iconSize: 20, labelStyle: labelStyle);
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -279,111 +391,100 @@ class CreatorJourneyStrip extends StatelessWidget {
           fontSize: width.isFinite && width < 520 ? 10.5 : 11,
         );
 
-        Widget milestoneTile(int i) {
-          final status = creatorJourneyTileStatus(
-            milestoneIndex: i,
-            currentStep: currentStep,
-            failedJobCount: failedJobCount,
-          );
-          final tileTarget = creatorJourneyStripTargetForTile(i);
-          final semanticsLabel =
-              '${labels[i]}, ${_statusSemantics(l10n, status)}';
-          final iconColor = _statusColor(context, status, tokens);
-          final VoidCallback onTapMilestone = switch (tileTarget.kind) {
-            CreatorJourneyStripTileKind.exitProjects =>
-              onBackToProjects ?? () => onSelectMilestone(StudioStep.script),
-            CreatorJourneyStripTileKind.studioStep =>
-              () => onSelectMilestone(tileTarget.step!),
-            CreatorJourneyStripTileKind.reviewPack =>
-              onOpenReviewPackMilestone ??
-              () => onSelectMilestone(StudioStep.deliver),
-          };
-
-          final tile = InkWell(
-            borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-            onTap: onTapMilestone,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: StudioSpacing.xs,
-                vertical: StudioSpacing.chromeActionGap,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(_statusIcon(status), size: iconSize, color: iconColor),
-                  SizedBox(height: iconSize >= 19 ? 6 : 4),
-                  Text(
-                    labels[i],
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: labelStyle?.copyWith(
-                      color: status == CreatorJourneyTileStatus.notStarted
-                          ? tokens.textSecondary.withValues(alpha: 0.72)
-                          : tokens.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-
-          return Semantics(
-            button: true,
-            label: semanticsLabel,
-            child: Tooltip(message: semanticsLabel, child: tile),
-          );
-        }
-
-        Widget connectorAfter(int milestoneBefore) {
-          final nextStatus = creatorJourneyTileStatus(
-            milestoneIndex: milestoneBefore + 1,
-            currentStep: currentStep,
-            failedJobCount: failedJobCount,
-          );
-          final connectorColor =
-              nextStatus == CreatorJourneyTileStatus.notStarted
-              ? tokens.borderSubtle
-              : tokens.primary.withValues(alpha: 0.35);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: StudioLayoutSpacing.stackMedium),
-            child: SizedBox(
-              height: 2,
-              width: 8,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: connectorColor,
-                  borderRadius: BorderRadius.circular(StudioSpacing.radiusHairline),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final rowChildren = <Widget>[
-          for (var i = 0; i < labels.length; i++) ...<Widget>[
-            Expanded(child: milestoneTile(i)),
-            if (i < labels.length - 1) connectorAfter(i),
-          ],
-        ];
+        final row = buildStripRow(iconSize: iconSize, labelStyle: labelStyle);
 
         final viewportWidth = width.isFinite ? width : 480.0;
         final rowWidth = math.max(viewportWidth, 460.0);
 
-        return Scrollbar(
+        return StudioScrollbar(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: rowWidth,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: rowChildren,
-              ),
+              child: row,
             ),
           ),
         );
       },
     );
   }
+}
+
+/// Five-milestone workflow picker as a centered dialog (safe on Flutter Web).
+///
+/// Avoids [showModalBottomSheet] + nested scrollables, which can freeze the
+/// browser tab on web when opened from [CreatorJourneyCompactBar].
+Future<void> showCreatorJourneyWorkflowDialog(
+  BuildContext context, {
+  required StudioStep currentStep,
+  required int failedJobCount,
+  required ValueChanged<StudioStep> onSelectMilestone,
+  VoidCallback? onBackToProjects,
+  VoidCallback? onOpenReviewPackMilestone,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  return showStudioDialog<void>(
+    context: context,
+    builder: (dialogContext) {
+      final tokens = StudioTokens.of(dialogContext);
+
+      void handleTileTap(int tileIndex) {
+        Navigator.of(dialogContext).pop();
+        final target = creatorJourneyStripTargetForTile(tileIndex);
+        switch (target.kind) {
+          case CreatorJourneyStripTileKind.exitProjects:
+            if (onBackToProjects != null) {
+              onBackToProjects();
+            } else {
+              onSelectMilestone(StudioStep.script);
+            }
+          case CreatorJourneyStripTileKind.studioStep:
+            onSelectMilestone(target.step!);
+          case CreatorJourneyStripTileKind.reviewPack:
+            if (onOpenReviewPackMilestone != null) {
+              onOpenReviewPackMilestone();
+            } else {
+              onSelectMilestone(StudioStep.deliver);
+            }
+        }
+      }
+
+      return StudioDialogShell(
+        title: l10n.studioCreatorJourneyCompactExpandTitle,
+        maxWidth: 440,
+        scrollable: false,
+        onClose: () => Navigator.of(dialogContext).pop(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            for (var i = 0; i < 5; i++) ...<Widget>[
+              if (i > 0) const Divider(height: 1),
+              Builder(
+                builder: (tileContext) {
+                  final status = creatorJourneyTileStatus(
+                    milestoneIndex: i,
+                    currentStep: currentStep,
+                    failedJobCount: failedJobCount,
+                  );
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: StudioSpacing.xs,
+                    ),
+                    leading: Icon(
+                      _statusIcon(status),
+                      color: _statusColor(tileContext, status, tokens),
+                    ),
+                    title: Text(creatorJourneyStripLabelForTile(l10n, i)),
+                    subtitle: Text(_statusSemantics(l10n, status)),
+                    onTap: () => handleTileTap(i),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
+      );
+    },
+  );
 }

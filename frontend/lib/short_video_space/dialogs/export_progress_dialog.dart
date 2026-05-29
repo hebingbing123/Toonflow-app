@@ -563,11 +563,13 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
           TextButton(
             onPressed: _cancelling ? null : _cancelExport,
             child: _cancelling
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: StudioControlSize.progressStroke,
+                ? const StudioRepaintBoundary(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: StudioControlSize.progressStroke,
+                      ),
                     ),
                   )
                 : Text(l10n.shortVideoSpaceDialogExportProgressCancelButton),

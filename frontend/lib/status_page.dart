@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'config.dart';
 import 'l10n/native_bridge_startup_labels.dart';
 import 'l10n/studio_code_labels.dart';
+import 'design_system/components/studio_icon_button.dart';
 import 'design_system/components/studio_async_data_view.dart';
 import 'design_system/components/studio_entrance_motion.dart';
 import 'design_system/components/studio_surfaces.dart';
@@ -136,10 +137,11 @@ class _StatusPageState extends State<StatusPage> {
       appBar: AppBar(
         title: Text(l10n.statusPageTitle),
         actions: [
-          IconButton(
-            tooltip: l10n.statusPageRefreshTooltip,
+          StudioIconButton(
+            icon: Icons.refresh,
+            label: l10n.statusPageRefreshTooltip,
+            style: studioUtilityIconButtonStyle(context),
             onPressed: _loading ? null : _refresh,
-            icon: const Icon(Icons.refresh),
           ),
           const RiskyOperationConfirmPrefsOverflowMenu(),
         ],

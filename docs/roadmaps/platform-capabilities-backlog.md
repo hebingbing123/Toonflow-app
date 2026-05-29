@@ -61,4 +61,18 @@
 
 ---
 
+## F. Flutter UI/UX 单独立项（C 类，需产品/架构拍板）
+
+| ID | 能力 | 前置 | 文档 |
+|----|------|------|------|
+| P-F1 | **乐观 UI**（点赞/收藏/快捷状态） | 实体清单、冲突策略、回滚 UX | [`flutter-ui-ux-refactor-18-phases.md`](../plans/flutter-ui-ux-refactor-18-phases.md) §C1 |
+| P-F2 | **离线数据缓存**（非仅 `StudioConnectivityBanner`） | 存储层、同步策略、Rust 契约 | 同上 §C2 |
+| P-F3 | **Fragment shader 真毛玻璃** | 性能预算；已有 `STUDIO_GLASS=false` 降级 | 同上 §C3 |
+| P-F4 | **CustomPaint 质量/计费图表** | 明确图表需求与数据源 | 同上 §C4 |
+| P-F5 | **首屏分片加载**（延迟次要块） | 路由级拆分；超重详情页专项 | 同上 §C5 |
+
+状态：`planned` — 不在 UI 扫尾 PR 中假装 ✅。
+
+---
+
 *审阅节奏：每季度扫一遍本表与 `harness-rust-flutter` 正文 §，补漏不重复造轮子。*

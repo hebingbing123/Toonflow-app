@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 import 'ix/studio_pointer.dart';
+import 'ix/studio_scroll_behavior.dart';
 import 'studio_bundled_text_theme.dart';
 import 'studio_typography.dart';
 import 'tokens.dart';
@@ -279,6 +280,7 @@ ThemeData _buildStudioTheme({
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
+      isDense: false,
       fillColor: tokens.bgInset.withValues(alpha: 0.92),
       contentPadding: typography.inputPadding,
       border: OutlineInputBorder(
@@ -436,6 +438,14 @@ ThemeData _buildStudioTheme({
       ),
     ),
     dividerTheme: DividerThemeData(color: tokens.borderSubtle, thickness: 1),
+    expansionTileTheme: ExpansionTileThemeData(
+      clipBehavior: Clip.none,
+      childrenPadding: const EdgeInsets.only(
+        top: StudioSpacing.xs,
+        bottom: StudioSpacing.xs,
+      ),
+    ),
+    scrollbarTheme: studioScrollbarTheme(tokens),
     focusColor: tokens.primary.withValues(alpha: isDark ? 0.24 : 0.12),
     hoverColor: tokens.primary.withValues(alpha: isDark ? 0.10 : 0.06),
     chipTheme: ChipThemeData(

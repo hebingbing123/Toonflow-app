@@ -29,6 +29,7 @@ import 'studio_agent_quick_bar.dart';
 import 'studio_step.dart';
 import 'project_studio_navigation.dart';
 import 'studio_step_prefs.dart';
+import 'studio_readiness.dart';
 import 'studio_step_progress_ring.dart';
 
 /// In-project six-step SOP with lazy [IndexedStack] step bodies.
@@ -650,6 +651,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
             trailing: _ProjectStudioHeaderTrailing(
               l10n: l10n,
               host: widget.host,
+              currentStep: _step,
             ),
           );
         },
@@ -1627,10 +1629,12 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
   const _ProjectStudioHeaderTrailing({
     required this.l10n,
     required this.host,
+    required this.currentStep,
   });
 
   final AppLocalizations l10n;
   final ProjectStudioHost host;
+  final StudioStep currentStep;
 
   @override
   Widget build(BuildContext context) {
@@ -1643,7 +1647,10 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             StudioStepProgressRing(
-              completedSteps: host.completedSteps,
+              completedSteps: resolveStudioProgressRingSteps(
+                host.completedSteps,
+                currentStep: currentStep,
+              ),
               heroTag: studioHeroTagProjectProgress(host.projectNumericId),
             ),
             if (host.runningJobCount > 0)
@@ -1662,12 +1669,10 @@ class _ProjectStudioHeaderTrailing extends StatelessWidget {
                         left: StudioSpacing.chromeActionGap,
                       ),
                       child: TextButton.icon(
+                        style: studioFormTextButtonIconStyle(context),
                         onPressed: host.onOpenTasks,
                         icon: const Icon(Icons.pending_actions_outlined, size: StudioIconSize.sm),
                         label: Text('${host.runningJobCount}'),
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.standard,
-                        ),
                       ),
                     ),
             StudioIconButton(

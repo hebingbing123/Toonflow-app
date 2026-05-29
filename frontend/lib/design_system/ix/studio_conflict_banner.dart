@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../components/studio_icon_button.dart';
+import '../components/studio_surfaces.dart';
 import '../tokens.dart';
 
 /// Shown when server returns a stale [clientDataVersion] conflict.
@@ -29,10 +31,12 @@ class StudioConflictBanner extends StatelessWidget {
         final actions = <Widget>[
           TextButton(onPressed: onRefresh, child: Text(l10n.studioRetry)),
           if (onDismiss != null)
-            IconButton(
-              icon: const Icon(Icons.close, size: StudioIconSize.sm),
+            StudioIconButton(
+              icon: Icons.close,
+              label: l10n.studioDismiss,
+              size: StudioIconSize.sm,
+              style: studioUtilityIconButtonStyle(context),
               onPressed: onDismiss,
-              tooltip: l10n.studioDismiss,
             ),
         ];
 

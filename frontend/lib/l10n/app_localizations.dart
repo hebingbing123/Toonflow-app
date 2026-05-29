@@ -2870,6 +2870,36 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get studioOnboardingDone;
 
+  /// No description provided for @studioOnboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tour'**
+  String get studioOnboardingSkip;
+
+  /// No description provided for @studioOnboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick start'**
+  String get studioOnboardingTitle;
+
+  /// No description provided for @studioOnboardingStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Projects'**
+  String get studioOnboardingStep1Title;
+
+  /// No description provided for @studioOnboardingStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Six-step pipeline'**
+  String get studioOnboardingStep2Title;
+
+  /// No description provided for @studioOnboardingStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get studioOnboardingStep3Title;
+
   /// No description provided for @studioOnboardingStep1.
   ///
   /// In en, this message translates to:

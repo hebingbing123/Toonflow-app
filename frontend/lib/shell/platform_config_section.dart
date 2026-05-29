@@ -437,19 +437,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    l10n.platformConfigSectionTitle,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
-                ),
-              ],
+            StudioPaneTitleMenuRow(
+              title: l10n.platformConfigSectionTitle,
+              menuTooltip: l10n.riskyPrefsTooltipSameAsMainPanelHeaders,
             ),
             const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
             Text(

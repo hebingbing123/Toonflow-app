@@ -17,6 +17,7 @@ import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class AdminConsoleSection extends StatefulWidget {
   const AdminConsoleSection({super.key, required this.controller});
@@ -235,43 +236,51 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
               subtitle: _searchController.text.trim().isNotEmpty
                   ? _searchController.text.trim()
                   : null,
-              child: StudioFilterRow(
-                wideLayout: StudioFilterWideLayout.toolbarRow,
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: widget.controller.search,
-                      decoration: InputDecoration(
-                        labelText: l10n.adminConsoleSearchLabel,
-                        hintText: l10n.adminConsoleSearchHint,
-                        prefixIcon: const Icon(Icons.search),
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: widget.controller.searching
+                    ? null
+                    : () => widget.controller.search(_searchController.text),
+                child: StudioFilterRow(
+                  wideLayout: StudioFilterWideLayout.toolbarRow,
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: widget.controller.search,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: l10n.adminConsoleSearchLabel,
+                          hintText: l10n.adminConsoleSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                        ),
                       ),
                     ),
-                  ),
-                  FilledButton.tonalIcon(
-                    style: studioFormIconLabeledButtonStyle(context),
-                    onPressed: widget.controller.searching
-                        ? null
-                        : () =>
-                              widget.controller.search(_searchController.text),
-                    icon: widget.controller.searching
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.travel_explore_outlined),
-                    label: Text(l10n.adminConsoleSearchAction),
-                  ),
-                  if (widget.controller.selectedKind != null)
-                    TextButton.icon(
-                      onPressed: widget.controller.clearDetail,
-                      icon: const Icon(Icons.layers_clear_outlined),
-                      label: Text(l10n.adminConsoleClearDetailAction),
+                    FilledButton.tonalIcon(
+                      style: studioFormIconLabeledButtonStyle(context),
+                      onPressed: widget.controller.searching
+                          ? null
+                          : () => widget.controller.search(
+                              _searchController.text,
+                            ),
+                      icon: widget.controller.searching
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.travel_explore_outlined),
+                      label: Text(l10n.adminConsoleSearchAction),
                     ),
-                ],
+                    if (widget.controller.selectedKind != null)
+                      TextButton.icon(
+                        style: studioFormTextButtonIconStyle(context),
+                        onPressed: widget.controller.clearDetail,
+                        icon: const Icon(Icons.layers_clear_outlined),
+                        label: Text(l10n.adminConsoleClearDetailAction),
+                      ),
+                  ],
+                ),
               ),
                 ),
               ),

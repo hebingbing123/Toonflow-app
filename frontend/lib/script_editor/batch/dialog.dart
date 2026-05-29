@@ -267,7 +267,11 @@ class _StoryboardBatchWorkbenchDialogState
       title: Text(l10n.scriptEditorStoryboardBatchDialogTitle),
       content: SizedBox(
         width: studioConstrainedDialogWidth(context, maxWidth: 820),
-        child: Column(
+        child: StudioFormKeyboardScope(
+          onEnterSubmit: _busyMutation
+              ? null
+              : () => recommendedAction?.call(),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -323,6 +327,7 @@ class _StoryboardBatchWorkbenchDialogState
               ),
             ),
           ],
+        ),
         ),
       ),
       actions: [

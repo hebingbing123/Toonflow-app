@@ -41,7 +41,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
             title: Text(dlgL10n.projectEditorAssetCrudCreateTitle),
             content: SizedBox(
               width: studioConstrainedDialogWidth(context, maxWidth: 520),
-              child: Column(
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
@@ -70,6 +72,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
             actions: [
@@ -166,7 +169,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                 title: Text(dlgL10n.projectEditorAssetCrudEditTitle),
                 content: SizedBox(
                   width: studioConstrainedDialogWidth(context, maxWidth: 520),
-                  child: Column(
+                  child: StudioFormKeyboardScope(
+                    onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                    child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -227,6 +232,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                         ),
                       ),
                     ],
+                  ),
                   ),
                 ),
                 actions: [

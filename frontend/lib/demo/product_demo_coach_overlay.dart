@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design_system/glass.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../l10n/app_localizations.dart';
@@ -315,26 +316,7 @@ class _CalloutBodyState extends State<_CalloutBody> {
     }
 
     final radius = BorderRadius.circular(StudioSpacing.radiusCard);
-    return ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: tokens.bgElevated.withValues(alpha: 0.28),
-            borderRadius: radius,
-            border: Border.all(
-              color: tokens.borderDefault.withValues(alpha: 0.38),
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: studioShadowColor(context, alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
+    final coachBody = Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -492,9 +474,38 @@ class _CalloutBodyState extends State<_CalloutBody> {
               ),
             ),
             ],
+    );
+    final coachDecoration = BoxDecoration(
+      color: tokens.bgElevated.withValues(
+        alpha: StudioGlassPanel.glassEnabled ? 0.28 : 0.96,
+      ),
+      borderRadius: radius,
+      border: Border.all(
+        color: tokens.borderDefault.withValues(alpha: 0.38),
+      ),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: studioShadowColor(context, alpha: 0.08),
+          blurRadius: 12,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
+    if (StudioGlassPanel.glassEnabled) {
+      return ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: DecoratedBox(
+            decoration: coachDecoration,
+            child: coachBody,
           ),
         ),
-      ),
+      );
+    }
+    return DecoratedBox(
+      decoration: coachDecoration,
+      child: coachBody,
     );
   }
 }

@@ -57,6 +57,42 @@ void main() {
     });
   });
 
+  group('StudioHero', () {
+    testWidgets('does not register hero when route is not current', (
+      tester,
+    ) async {
+      const tag = 'studio-hero-test';
+      await tester.pumpWidget(
+        MaterialApp(
+          onGenerateRoute: (settings) {
+            if (settings.name == '/top') {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (context) => const Scaffold(
+                  body: Text('foreground'),
+                ),
+              );
+            }
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (context) => Scaffold(
+                body: StudioHero(
+                  tag: tag,
+                  child: const Text('background'),
+                ),
+              ),
+            );
+          },
+          initialRoute: '/',
+        ),
+      );
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      navigator.pushNamed('/top');
+      await tester.pumpAndSettle();
+      expect(find.byType(Hero), findsNothing);
+    });
+  });
+
   group('StudioFadeSwitcher', () {
     testWidgets('swaps keyed children', (tester) async {
       await tester.pumpWidget(

@@ -2,13 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../demo/product_demo_tour_anchors.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/ix/studio_pointer.dart';
 import '../design_system/components/studio_toolbar_button.dart';
 import 'projects_studio_home_layout.dart';
 import '../design_system/components/studio_skeleton.dart';
+import '../design_system/components/studio_surfaces.dart';
 import '../design_system/components/studio_text_styles.dart';
-import '../design_system/studio_responsive_layout.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -24,6 +25,10 @@ class ProjectsGridView extends StatelessWidget {
     this.loading = false,
     this.progressForProject,
     this.listEntranceKey,
+    this.asSliver = false,
+    this.contentWidth,
+    this.demoTourAnchorId,
+    this.boundedMaxHeight,
   });
 
   final List<ProjectRow> projects;
@@ -34,112 +39,193 @@ class ProjectsGridView extends StatelessWidget {
   final int Function(ProjectRow project)? progressForProject;
   final Object? listEntranceKey;
 
+  /// When true, returns a [SliverGrid] (or [SliverToBoxAdapter]) for [CustomScrollView].
+  final bool asSliver;
+
+  /// Pane width for grid metrics when [asSliver] is true.
+  final double? contentWidth;
+
+  /// When set, the first grid card is wrapped for demo tour spotlight.
+  final String? demoTourAnchorId;
+
+  /// Split-pane embed: virtualized [GridView] inside a capped height (no shrinkWrap).
+  final double? boundedMaxHeight;
+
   @override
   Widget build(BuildContext context) {
     if (loading && projects.isEmpty) {
-      return const _LoadingGrid();
+      return asSliver
+          ? SliverToBoxAdapter(child: _LoadingGrid(width: contentWidth))
+          : const _LoadingGrid();
+    }
+
+    if (asSliver) {
+      return _buildSliverGrid(context);
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final layout = ProjectsStudioHomeLayout.resolve(
-          context: context,
-          contentWidth: width,
-        );
-        if (projects.length == 1) {
-          final project = projects.first;
-          final card = _wrapGridEntrance(
-            context,
-            index: 0,
-            child: _ProjectGridCard(
-              project: project,
-              completedSteps: progressForProject?.call(project) ?? 0,
-              selected: currentProjectNumericId == project.numericId,
-              onSelect: onSelectProject == null
-                  ? null
-                  : () => onSelectProject!(project),
-              onTap: () => onOpenProject(project),
-              dense: layout.useDenseSingleCard,
-              standalone: layout.useStandaloneSingleCard,
-            ),
-          );
-          if (layout.useDenseSingleCard) {
-            return Align(
-              alignment: Alignment.topLeft,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: width >= 1280
-                      ? 520
-                      : width >= 960
-                      ? 480
-                      : math.min(width * 0.92, 440),
-                ),
-                child: card,
-              ),
-            );
-          }
-          return card;
+        final width = contentWidth ?? constraints.maxWidth;
+        if (boundedMaxHeight != null && boundedMaxHeight! > 0) {
+          return _buildBoundedScrollGrid(context, width, boundedMaxHeight!);
         }
-        final crossAxisCount = switch (projects.length) {
-          2 => layout.isPhone || width < 840 ? 1 : 2,
-          _ =>
-            layout.isPhone
-                ? 1
-                : width >= 2100
-                ? 5
-                : width >= 1680
-                ? 4
-                : width >= 1260
-                ? 3
-                : width >= 920
-                ? 2
-                : 1,
-        };
-        final childAspectRatio = layout.isPhone
-            ? 1.12
-            : width >= 2100
-            ? 1.18
-            : width >= 1680
-            ? 1.12
-            : width >= 1280
-            ? 1.04
-            : width >= 920
-            ? 1.0
-            : width >= 620
-            ? 0.96
-            : 0.9;
-
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: StudioLayoutSpacing.stackMedium,
-            crossAxisSpacing: StudioLayoutSpacing.stackMedium,
-            childAspectRatio: childAspectRatio,
-          ),
-          itemCount: projects.length,
-          itemBuilder: (context, index) {
-            final project = projects[index];
-            final steps = progressForProject?.call(project) ?? 0;
-            return _wrapGridEntrance(
-              context,
-              index: index,
-              child: _ProjectGridCard(
-                project: project,
-                completedSteps: steps,
-                selected: currentProjectNumericId == project.numericId,
-                onSelect: onSelectProject == null
-                    ? null
-                    : () => onSelectProject!(project),
-                onTap: () => onOpenProject(project),
-              ),
-            );
-          },
-        );
+        return _buildBoxGrid(context, width);
       },
     );
+  }
+
+  Widget _buildSliverGrid(BuildContext context) {
+    final width = contentWidth ?? MediaQuery.sizeOf(context).width;
+    if (projects.length == 1) {
+      return SliverToBoxAdapter(
+        child: _buildSingleProjectCard(context, width),
+      );
+    }
+    final metrics = _ProjectsGridMetrics.resolve(
+      width: width,
+      projectCount: projects.length,
+      context: context,
+    );
+    return SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: metrics.crossAxisCount,
+        mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+        crossAxisSpacing: StudioLayoutSpacing.stackMedium,
+        childAspectRatio: metrics.childAspectRatio,
+      ),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => _buildGridCard(context, index),
+        childCount: projects.length,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: true,
+      ),
+    );
+  }
+
+  Widget _buildBoundedScrollGrid(
+    BuildContext context,
+    double width,
+    double maxHeight,
+  ) {
+    if (projects.length == 1) {
+      return _buildSingleProjectCard(context, width);
+    }
+    final metrics = _ProjectsGridMetrics.resolve(
+      width: width,
+      projectCount: projects.length,
+      context: context,
+    );
+    final estimated = metrics.estimateHeight(
+      width: width,
+      itemCount: projects.length,
+    );
+    final height = math.min(estimated, maxHeight);
+    return SizedBox(
+      height: height,
+      child: GridView.builder(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: true,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: metrics.crossAxisCount,
+          mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+          crossAxisSpacing: StudioLayoutSpacing.stackMedium,
+          childAspectRatio: metrics.childAspectRatio,
+        ),
+        itemCount: projects.length,
+        itemBuilder: (context, index) => _buildGridCard(context, index),
+      ),
+    );
+  }
+
+  Widget _buildBoxGrid(BuildContext context, double width) {
+    if (projects.length == 1) {
+      return _buildSingleProjectCard(context, width);
+    }
+    final metrics = _ProjectsGridMetrics.resolve(
+      width: width,
+      projectCount: projects.length,
+      context: context,
+    );
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      addAutomaticKeepAlives: false,
+      addRepaintBoundaries: true,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: metrics.crossAxisCount,
+        mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+        crossAxisSpacing: StudioLayoutSpacing.stackMedium,
+        childAspectRatio: metrics.childAspectRatio,
+      ),
+      itemCount: projects.length,
+      itemBuilder: (context, index) => _buildGridCard(context, index),
+    );
+  }
+
+  Widget _buildSingleProjectCard(BuildContext context, double width) {
+    final layout = ProjectsStudioHomeLayout.resolve(
+      context: context,
+      contentWidth: width,
+    );
+    final project = projects.first;
+    final card = _wrapGridEntrance(
+      context,
+      index: 0,
+      child: _ProjectGridCard(
+        project: project,
+        completedSteps: progressForProject?.call(project) ?? 0,
+        selected: currentProjectNumericId == project.numericId,
+        onSelect: onSelectProject == null
+            ? null
+            : () => onSelectProject!(project),
+        onTap: () => onOpenProject(project),
+        dense: layout.useDenseSingleCard,
+        standalone: layout.useStandaloneSingleCard,
+      ),
+    );
+    if (layout.useDenseSingleCard) {
+      return Align(
+        alignment: Alignment.topLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: width >= 1280
+                ? 520
+                : width >= 960
+                ? 480
+                : math.min(width * 0.92, 440),
+          ),
+          child: card,
+        ),
+      );
+    }
+    return card;
+  }
+
+  Widget _buildGridCard(BuildContext context, int index) {
+    final project = projects[index];
+    final steps = progressForProject?.call(project) ?? 0;
+    final card = _wrapGridEntrance(
+      context,
+      index: index,
+      child: _ProjectGridCard(
+        project: project,
+        completedSteps: steps,
+        selected: currentProjectNumericId == project.numericId,
+        onSelect: onSelectProject == null
+            ? null
+            : () => onSelectProject!(project),
+        onTap: () => onOpenProject(project),
+      ),
+    );
+    if (index == 0 &&
+        demoTourAnchorId != null &&
+        demoTourAnchorId!.isNotEmpty) {
+      return ProductDemoTourAnchor(
+        anchorId: demoTourAnchorId!,
+        child: card,
+      );
+    }
+    return card;
   }
 
   Widget _wrapGridEntrance(
@@ -147,6 +233,9 @@ class ProjectsGridView extends StatelessWidget {
     required int index,
     required Widget child,
   }) {
+    if (index > 10) {
+      return child;
+    }
     return StudioStaggeredEntrance(
       index: index,
       entranceKey: listEntranceKey,
@@ -155,39 +244,143 @@ class ProjectsGridView extends StatelessWidget {
   }
 }
 
+class _ProjectsGridMetrics {
+  const _ProjectsGridMetrics({
+    required this.crossAxisCount,
+    required this.childAspectRatio,
+  });
+
+  final int crossAxisCount;
+  final double childAspectRatio;
+
+  static _ProjectsGridMetrics resolve({
+    required double width,
+    required int projectCount,
+    required BuildContext context,
+  }) {
+    final layout = ProjectsStudioHomeLayout.resolve(
+      context: context,
+      contentWidth: width,
+    );
+    final crossAxisCount = switch (projectCount) {
+      2 => layout.isPhone || width < 840 ? 1 : 2,
+      _ =>
+        layout.isPhone
+            ? 1
+            : width >= 2100
+            ? 5
+            : width >= 1680
+            ? 4
+            : width >= 1260
+            ? 3
+            : width >= 920
+            ? 2
+            : 1,
+    };
+    final childAspectRatio = layout.isPhone
+        ? 1.12
+        : width >= 2100
+        ? 1.18
+        : width >= 1680
+        ? 1.12
+        : width >= 1280
+        ? 1.04
+        : width >= 920
+        ? 1.0
+        : width >= 620
+        ? 0.96
+        : 0.9;
+    return _ProjectsGridMetrics(
+      crossAxisCount: crossAxisCount,
+      childAspectRatio: childAspectRatio,
+    );
+  }
+
+  double estimateHeight({
+    required double width,
+    required int itemCount,
+  }) {
+    if (itemCount <= 0) {
+      return 0;
+    }
+    final rows = (itemCount / crossAxisCount).ceil();
+    final spacing = StudioLayoutSpacing.stackMedium;
+    final cellWidth =
+        (width - spacing * (crossAxisCount - 1)) / crossAxisCount;
+    final cellHeight = cellWidth / childAspectRatio;
+    return rows * cellHeight + math.max(0, rows - 1) * spacing;
+  }
+}
+
 class _LoadingGrid extends StatelessWidget {
-  const _LoadingGrid();
+  const _LoadingGrid({this.width});
+
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tokens = StudioTokens.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final crossAxisCount = width >= 920 ? 2 : 1;
-        final childAspectRatio = width >= 920 ? 1.05 : 0.9;
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: StudioLayoutSpacing.stackMedium,
-          crossAxisSpacing: StudioLayoutSpacing.stackMedium,
-          childAspectRatio: childAspectRatio,
-          children: List<Widget>.generate(
-            crossAxisCount == 1 ? 2 : 4,
-            (_) => LayoutBuilder(
-              builder: (context, constraints) {
-                final tileHeight = studioPreviewImageHeight(
-                  constraints.maxWidth,
-                  fraction: 1.05,
-                  min: 160,
-                  max: 260,
-                );
-                return StudioSkeleton(height: tileHeight, borderRadius: 14);
-              },
+        final resolvedWidth = width ?? constraints.maxWidth;
+        final crossAxisCount = resolvedWidth >= 920 ? 2 : 1;
+        final childAspectRatio = resolvedWidth >= 920 ? 1.05 : 0.9;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              l10n.projectsLoading,
+              style: studioHintStyle(context)?.copyWith(color: tokens.textMuted),
             ),
-          ),
+            const SizedBox(height: StudioSpacing.sm),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: StudioLayoutSpacing.stackMedium,
+              crossAxisSpacing: StudioLayoutSpacing.stackMedium,
+              childAspectRatio: childAspectRatio,
+              children: List<Widget>.generate(
+                crossAxisCount == 1 ? 2 : 4,
+                (_) => const _ProjectCardSkeleton(),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+}
+
+class _ProjectCardSkeleton extends StatelessWidget {
+  const _ProjectCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: studioInsetPanelDecoration(context),
+      child: Padding(
+        padding: const EdgeInsets.all(StudioLayoutSpacing.section - 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: const <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(child: StudioSkeleton(height: 18)),
+                SizedBox(width: StudioSpacing.sm),
+                StudioSkeleton(width: 40, height: 40, borderRadius: 20),
+              ],
+            ),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 14),
+            SizedBox(height: StudioSpacing.xs),
+            StudioSkeleton(height: 14, width: 180),
+            SizedBox(height: StudioSpacing.sm),
+            StudioSkeleton(height: 36, borderRadius: StudioSpacing.radiusButton),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -249,10 +442,12 @@ class _ProjectGridCard extends StatelessWidget {
       scopeSelectionEnabled: scopeSelectionEnabled,
       titleMaxLines: standalone ? 2 : 2,
       summaryMaxLines: standalone ? 2 : 3,
+      fillHeight: !standalone,
     );
 
     return StudioPointerHover(
       borderRadius: cardRadius,
+      liftShadow: false,
       builder: (context, hovered) {
         return Material(
           color: StudioPrimitives.transparent,
@@ -317,19 +512,14 @@ class _ProjectGridCard extends StatelessWidget {
     required bool scopeSelectionEnabled,
     required int titleMaxLines,
     required int summaryMaxLines,
+    bool fillHeight = false,
   }) {
-    return Material(
-      color: StudioPrimitives.transparent,
-      child: InkWell(
-        key: Key('project_select_scope_${project.numericId}'),
-        onTap: onSelect ?? onTap,
-        borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+    final content = Padding(
+      padding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -401,8 +591,22 @@ class _ProjectGridCard extends StatelessWidget {
               ],
             ],
           ),
-        ),
-      ),
+        );
+
+    return GestureDetector(
+      key: Key('project_select_scope_${project.numericId}'),
+      behavior: HitTestBehavior.opaque,
+      onTap: onSelect ?? onTap,
+      child: fillHeight
+          ? SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: content,
+              ),
+            )
+          : content,
     );
   }
 
@@ -439,17 +643,13 @@ class _ProjectGridCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              child: Material(
-                color: StudioPrimitives.transparent,
-                child: InkWell(
-                  key: Key('project_select_scope_${project.numericId}'),
-                  onTap: onSelect ?? onTap,
-                  borderRadius: BorderRadius.circular(
-                    StudioSpacing.radiusButton,
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.zero,
-                    child: Column(
+              child: GestureDetector(
+                key: Key('project_select_scope_${project.numericId}'),
+                behavior: HitTestBehavior.opaque,
+                onTap: onSelect ?? onTap,
+                child: Padding(
+                  padding: EdgeInsets.zero,
+                  child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
@@ -526,8 +726,6 @@ class _ProjectGridCard extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: StudioSpacing.sm),
             StudioStepProgressRing(
               completedSteps: completedSteps,
               heroTag: studioHeroTagProjectProgress(project.numericId),

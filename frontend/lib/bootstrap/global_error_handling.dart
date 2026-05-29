@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../design_system/debug/debug.dart';
+import '../design_system/debug/debug_error_overlay_policy.dart';
 
 /// Test hook for verifying [developer.log] is still invoked.
 @visibleForTesting
@@ -85,8 +86,11 @@ void configureGlobalErrorHandling({String logName = 'openflow.global'}) {
   };
 
   ErrorWidget.builder = (FlutterErrorDetails details) {
-    if (enableDebugOverlay) {
+    if (enableDebugOverlay && !isRenderFlexOverflowError(details)) {
       DebugErrorOverlayController.instance.report(details);
+    }
+    if (isRenderFlexOverflowError(details)) {
+      return const SizedBox.shrink();
     }
     return buildGlobalErrorDisplayWidget(
       details,
@@ -105,8 +109,9 @@ void configureGlobalErrorHandling({String logName = 'openflow.global'}) {
 
     if (enableDebugOverlay) {
       final details = FlutterErrorDetails(exception: error, stack: stack);
-      DebugErrorOverlayController.instance.report(details);
-      ErrorWidget.builder(details);
+      if (!isRenderFlexOverflowError(details)) {
+        DebugErrorOverlayController.instance.report(details);
+      }
     }
 
     return previousPlatformOnError?.call(error, stack) ?? true;

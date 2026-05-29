@@ -537,21 +537,15 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     final header = <Widget>[
       if (!widget.suppressSectionHeader) ...<Widget>[
         const SizedBox(height: StudioSpacing.radiusComfort),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(title, style: studioPaneTitleStyle(context)),
-                  const SizedBox(height: StudioLayoutSpacing.titleSubtitle - 2),
-                  Text(description, style: studioHintStyle(context)),
-                ],
-              ),
-            ),
-            const RiskyOperationConfirmPrefsOverflowMenu(),
-          ],
+        StudioPaneTitleMenuRow(
+          titleWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(title, style: studioPaneTitleStyle(context)),
+              const SizedBox(height: StudioLayoutSpacing.titleSubtitle - 2),
+              Text(description, style: studioHintStyle(context)),
+            ],
+          ),
         ),
         const SizedBox(height: StudioLayoutSpacing.stackMedium),
       ],

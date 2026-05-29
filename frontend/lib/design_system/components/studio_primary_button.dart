@@ -7,6 +7,8 @@ import '../ix/studio_pointer.dart';
 import '../studio_typography.dart';
 import '../theme.dart';
 import '../tokens.dart';
+import 'studio_debounced_action.dart';
+import 'studio_entrance_motion.dart';
 import 'studio_text_styles.dart';
 
 class StudioPrimaryButton extends StatelessWidget {
@@ -32,112 +34,114 @@ class StudioPrimaryButton extends StatelessWidget {
     final enabled = !loading && onPressed != null;
     final borderRadius = BorderRadius.circular(StudioSpacing.radiusButton);
     final buttonHeight = typography.buttonHeight;
-    final child = loading
-        ? SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: StudioControlSize.progressStroke,
-              color: enabled
-                  ? theme.colorScheme.onPrimary
-                  : tokens.textSecondary.withValues(alpha: 0.9),
-            ),
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Flexible(
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: StudioSpacing.xs,
-                  runSpacing: StudioSpacing.chromeActionGap,
-                  children: <Widget>[
-                    if (icon != null) Icon(icon, size: StudioIconSize.sm),
-                    Text(label, textAlign: TextAlign.center, softWrap: true),
-                  ],
-                ),
+    final child = StudioFadeSwitcher(
+      transitionKey: loading,
+      duration: studioMotionQuickDuration,
+      slideOffset: Offset.zero,
+      child: loading
+          ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: StudioControlSize.progressStroke,
+                color: enabled
+                    ? theme.colorScheme.onPrimary
+                    : tokens.textSecondary.withValues(alpha: 0.9),
               ),
-            ],
-          );
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Flexible(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.chromeActionGap,
+                    children: <Widget>[
+                      if (icon != null) Icon(icon, size: StudioIconSize.sm),
+                      Text(label, textAlign: TextAlign.center, softWrap: true),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+    );
 
     final foregroundColor = enabled
         ? theme.colorScheme.onPrimary
         : tokens.textSecondary.withValues(alpha: 0.88);
 
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      child: studioWrapClickCursor(
+    Widget buildButton(VoidCallback? tap) {
+      return Semantics(
+        button: true,
         enabled: enabled,
-        child: Material(
-          color: StudioPrimitives.transparent,
-          borderRadius: borderRadius,
-          child: Ink(
-            decoration: BoxDecoration(
-              gradient: enabled
-                  ? studio.primaryGradient
-                  : LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[
-                        tokens.bgElevated,
-                        tokens.bgSurface.withValues(alpha: 0.94),
-                      ],
-                    ),
-              borderRadius: borderRadius,
-              border: Border.all(
-                color: enabled
-                    ? tokens.primary.withValues(alpha: 0.58)
-                    : tokens.borderSubtle.withValues(alpha: 0.92),
+        child: studioWrapClickCursor(
+          enabled: enabled,
+          child: Material(
+            color: StudioPrimitives.transparent,
+            borderRadius: borderRadius,
+            child: Ink(
+              decoration: BoxDecoration(
+                gradient: enabled
+                    ? studio.primaryGradient
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                          tokens.bgElevated,
+                          tokens.bgSurface.withValues(alpha: 0.94),
+                        ],
+                      ),
+                borderRadius: borderRadius,
+                border: Border.all(
+                  color: enabled
+                      ? tokens.primary.withValues(alpha: 0.58)
+                      : tokens.borderSubtle.withValues(alpha: 0.92),
+                ),
+                boxShadow: enabled
+                    ? <BoxShadow>[
+                        BoxShadow(
+                          color: tokens.primary.withValues(alpha: 0.14),
+                          blurRadius: 10,
+                          spreadRadius: -10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : const <BoxShadow>[],
               ),
-              boxShadow: enabled
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: tokens.primary.withValues(alpha: 0.14),
-                        blurRadius: 10,
-                        spreadRadius: -10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : const <BoxShadow>[],
-            ),
-            child: InkWell(
-              onTap: enabled
-                  ? () {
-                      unawaited(studioLightImpact());
-                      onPressed!();
-                    }
-                  : null,
-              borderRadius: borderRadius,
-              splashColor: tokens.accent.withValues(alpha: 0.12),
-              highlightColor: tokens.primary.withValues(alpha: 0.10),
-              hoverColor: studioPointerChromeEnabled(context)
-                  ? tokens.primary.withValues(alpha: 0.12)
-                  : null,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: buttonHeight),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: StudioLayoutSpacing.insetDense,
-                    vertical: StudioSpacing.xs,
-                  ),
-                  child: Center(
-                    child: IconTheme(
-                      data: IconThemeData(
-                        size: StudioIconSize.sm,
-                        color: foregroundColor,
-                      ),
-                      child: DefaultTextStyle(
-                        style:
-                            (studioControlLabelStyle(context) ??
-                                    theme.textTheme.labelLarge ??
-                                    const TextStyle())
-                                .copyWith(
-                                  color: foregroundColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                        child: child,
+              child: InkWell(
+                onTap: tap,
+                borderRadius: borderRadius,
+                splashColor: tokens.accent.withValues(alpha: 0.12),
+                highlightColor: tokens.primary.withValues(alpha: 0.10),
+                hoverColor: studioPointerChromeEnabled(context)
+                    ? tokens.primary.withValues(alpha: 0.12)
+                    : null,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: buttonHeight),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: StudioLayoutSpacing.insetDense,
+                      vertical: StudioSpacing.xs,
+                    ),
+                    child: Center(
+                      child: IconTheme(
+                        data: IconThemeData(
+                          size: StudioIconSize.sm,
+                          color: foregroundColor,
+                        ),
+                        child: DefaultTextStyle(
+                          style:
+                              (studioControlLabelStyle(context) ??
+                                      theme.textTheme.labelLarge ??
+                                      const TextStyle())
+                                  .copyWith(
+                                    color: foregroundColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                          child: child,
+                        ),
                       ),
                     ),
                   ),
@@ -146,7 +150,22 @@ class StudioPrimaryButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      );
+    }
+
+    if (!enabled || onPressed == null) {
+      return buildButton(null);
+    }
+
+    return StudioDebouncedAction(
+      enabled: true,
+      onPressed: () async {
+        unawaited(studioLightImpact());
+        onPressed!();
+      },
+      builder: (context, debouncedOnPressed) {
+        return buildButton(debouncedOnPressed);
+      },
     );
   }
 }

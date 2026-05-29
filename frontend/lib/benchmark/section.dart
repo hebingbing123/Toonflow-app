@@ -13,7 +13,7 @@ import 'package:openflow_app/design_system/tokens.dart';
 import '../demo/benchmark_demo_data.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 
 import '../design_system/ix/studio_api_error_callout.dart';
@@ -297,19 +297,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.benchmarkSectionTitle,
-                          style: studioPaneTitleStyle(context),
-                        ),
-                      ),
-                      RiskyOperationConfirmPrefsOverflowMenu(
-                        tooltip: l10n.riskyPrefsMenuDefaultTooltip,
-                      ),
-                    ],
+                  StudioPaneTitleMenuRow(
+                    title: l10n.benchmarkSectionTitle,
+                    menuTooltip: l10n.riskyPrefsMenuDefaultTooltip,
                   ),
                   const SizedBox(height: StudioLayoutSpacing.titleSubtitle),
                   Text(
@@ -333,7 +323,6 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkProjectIdOptional,
-                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),

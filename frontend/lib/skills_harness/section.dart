@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 import '../l10n/rust_api_error_format.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 
 class HarnessSection extends StatelessWidget {
   const HarnessSection({
@@ -122,19 +122,10 @@ class HarnessSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: StudioSpacing.sm),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                l10n.skillsHarnessTitle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-            RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: l10n.skillsHarnessPrefsTooltip,
-            ),
-          ],
+        StudioPaneTitleMenuRow(
+          title: l10n.skillsHarnessTitle,
+          titleStyle: Theme.of(context).textTheme.titleSmall,
+          menuTooltip: l10n.skillsHarnessPrefsTooltip,
         ),
         const SizedBox(height: StudioSpacing.xs),
         StudioDenseActionRow(

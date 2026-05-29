@@ -20,7 +20,43 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
     required TextEditingController patchBodyCtrl,
     required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
   }) {
-    return Column(
+    void submitCreateOnEnter() {
+      if (localBusy) {
+        return;
+      }
+      final controller = studioFocusedTextField(
+        FocusManager.instance.primaryFocus?.context,
+      )?.controller;
+      if (controller == createChapterCtrl) {
+        unawaited(
+          _runNovelWorkbenchAction(
+            ctx: ctx,
+            setDialogState: setDialogState,
+            setLocalState: setLocalState,
+            novelsBusy: novelsBusy,
+            setLocalBusy: setLocalBusy,
+            action: () async {
+              await _createNovelWorkbenchChapter(
+                token: token,
+                project: project,
+                createChapterCtrl: createChapterCtrl,
+                createBodyCtrl: createBodyCtrl,
+                selectedNovelIdCtrl: selectedNovelIdCtrl,
+                patchChapterCtrl: patchChapterCtrl,
+                patchBodyCtrl: patchBodyCtrl,
+                refreshWorkbench: refreshWorkbench,
+                setLocalState: setLocalState,
+              );
+              updateInfoLine(l10n.projectEditorNovelsActionChapterCreateOk);
+            },
+          ),
+        );
+      }
+    }
+
+    return StudioFormKeyboardScope(
+      onEnterSubmit: localBusy ? null : submitCreateOnEnter,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -72,6 +108,7 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
           child: Text(l10n.projectEditorNovelsWorkbenchCreateSubmit),
         ),
       ],
+    ),
     );
   }
 }

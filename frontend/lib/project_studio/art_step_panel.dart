@@ -7,6 +7,8 @@ import '../demo/studio_demo_data.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_async_data_view.dart';
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/ix/studio_dirty_pop_guard.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -84,8 +86,6 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
   late String? _savedArtStyle;
 
   bool _saving = false;
-  bool _allowPopOnce = false;
-  bool _handlingPop = false;
   late final TextEditingController _artStyleCtrl;
   final ScrollController _scrollCtrl = ScrollController();
   final GlobalKey _styleFormKey = GlobalKey();
@@ -300,44 +300,17 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     setState(() => _seedFromProject(widget.project));
   }
 
-  bool get _canPop => _allowPopOnce || _saving || !_dirty;
-
-  Future<void> _handlePopInvoked(bool didPop) async {
-    if (didPop || _handlingPop || _saving) {
-      return;
-    }
-    if (!_dirty) {
-      if (!mounted) return;
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).maybePop();
-      });
-      return;
-    }
-
-    _handlingPop = true;
-    try {
-      final discard = await showStudioConfirmDialog(
-        context: context,
-        title: 'Discard changes?',
-        message: 'You have unsaved art direction changes. Leave anyway?',
-        confirmLabel: 'Discard',
-        cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
-        destructive: true,
-        barrierDismissible: false,
-      );
-      if (discard != true || !mounted) {
-        return;
-      }
-      setState(() => _allowPopOnce = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).maybePop();
-      });
-    } finally {
-      _handlingPop = false;
-    }
+  Future<bool> _confirmDiscard() async {
+    final discard = await showStudioConfirmDialog(
+      context: context,
+      title: 'Discard changes?',
+      message: 'You have unsaved art direction changes. Leave anyway?',
+      confirmLabel: 'Discard',
+      cancelLabel: MaterialLocalizations.of(context).cancelButtonLabel,
+      destructive: true,
+      barrierDismissible: false,
+    );
+    return discard == true;
   }
 
   Widget? _buildReadinessCard(AppLocalizations l10n) {
@@ -364,7 +337,9 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
         borderRadius: BorderRadius.circular(StudioSpacing.radiusComfort),
         border: Border.all(color: tokens.borderSubtle),
       ),
-      child: Column(
+      child: StudioFormKeyboardScope(
+        onEnterSubmit: _saving ? null : _save,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           StylePackPickerField(
@@ -403,6 +378,7 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -413,11 +389,10 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
     final tokens = StudioTokens.of(context);
     final catalog = _catalog;
 
-    return PopScope(
-      canPop: _canPop,
-      onPopInvokedWithResult: (didPop, _) {
-        unawaited(_handlePopInvoked(didPop));
-      },
+    return StudioDirtyPopGuard(
+      isDirty: _dirty,
+      popBlocked: _saving,
+      onConfirmDiscard: _confirmDiscard,
       child: LayoutBuilder(
         key: const Key('studio_art_step_panel'),
         builder: (context, constraints) {
@@ -501,6 +476,8 @@ class _ProjectStudioArtStepPanelState extends State<ProjectStudioArtStepPanel> {
                               const SizedBox(height: StudioSpacing.xs),
                               Text(
                                 l10n.studioArtStepEditSubtitle,
+                                maxLines: wide ? 3 : 4,
+                                overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: tokens.textSecondary,
                                 ),

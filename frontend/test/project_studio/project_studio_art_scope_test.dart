@@ -46,6 +46,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('studio_art_step_panel')), findsOneWidget);
-    expect(find.text('2/6'), findsOneWidget);
+    // Art milestone maps to ring step 3 (see resolveStudioProgressRingSteps).
+    expect(find.text('3/6'), findsOneWidget);
   });
 }

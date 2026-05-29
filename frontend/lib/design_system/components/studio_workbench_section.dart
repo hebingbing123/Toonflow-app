@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
 import '../studio_motion.dart';
+import 'studio_icon_button.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
@@ -100,15 +101,13 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
                         ],
                       ),
                     ),
-                    IconButton(
+                    StudioIconButton(
                       key: const Key('studio_workbench_section_toggle'),
+                      icon: _expanded ? Icons.expand_less : Icons.expand_more,
+                      label: _expanded ? collapseTip : expandTip,
+                      color: tokens.textSecondary,
                       style: studioUtilityIconButtonStyle(context),
-                      tooltip: _expanded ? collapseTip : expandTip,
                       onPressed: () => setState(() => _expanded = !_expanded),
-                      icon: Icon(
-                        _expanded ? Icons.expand_less : Icons.expand_more,
-                        color: tokens.textSecondary,
-                      ),
                     ),
                   ],
                 ),
@@ -120,7 +119,7 @@ class _StudioWorkbenchSectionState extends State<StudioWorkbenchSection> {
             secondChild: Padding(
               padding: const EdgeInsets.fromLTRB(
                 StudioLayoutSpacing.insetDense,
-                0,
+                StudioSpacing.xs,
                 StudioLayoutSpacing.insetDense,
                 StudioLayoutSpacing.insetDense,
               ),

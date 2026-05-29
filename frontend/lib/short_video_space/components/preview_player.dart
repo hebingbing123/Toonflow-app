@@ -10,6 +10,7 @@ import '../../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
 import 'package:openflow_app/design_system/ix/studio_api_error_callout.dart';
+import 'package:openflow_app/design_system/studio_scheduler.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 AppLocalizations _previewPlayerL10n(BuildContext context) =>
@@ -124,10 +125,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
     if (_isPlaylistMode) {
       _shotDurations = List.filled(widget.playlist!.length, Duration.zero);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        unawaited(_initializePlayer());
-      }
+    StudioScheduler.scheduleOnceUntil('preview_player_init', () {
+      if (!mounted) return;
+      unawaited(_initializePlayer());
     });
   }
 

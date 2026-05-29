@@ -222,11 +222,14 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
           return StatefulBuilder(
             builder: (dialogCtx, setLocalState) {
               if (planData == null && !localBusy) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (dialogCtx.mounted) {
-                    loadPlan(setLocalState);
-                  }
-                });
+                StudioScheduler.scheduleOnceUntil(
+                  'script_plan_workbench_${project.numericId}',
+                  () {
+                    if (dialogCtx.mounted) {
+                      loadPlan(setLocalState);
+                    }
+                  },
+                );
               }
               return ProjectScriptPlanWorkbenchView(
                 model: ProjectScriptPlanWorkbenchViewModel(

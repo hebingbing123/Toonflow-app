@@ -3,6 +3,7 @@ import 'dart:convert' show LineSplitter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../components/studio_icon_button.dart';
 import '../tokens.dart';
 
 // ---------------------------------------------------------------------------
@@ -139,18 +140,22 @@ class _DebugOverlayWidgetState extends State<DebugOverlayWidget> {
                           ),
                         ),
                         // Copy-to-clipboard button
-                        IconButton(
-                          icon: Icon(
-                            Icons.copy_outlined,
-                            color: tokens.textPrimary,
-                            size: 18,
-                          ),
-                          tooltip: 'Copy error to clipboard',
+                        StudioIconButton(
+                          icon: Icons.copy_outlined,
+                          label: 'Copy error to clipboard',
+                          size: 18,
+                          color: tokens.textPrimary,
                           onPressed: _copyToClipboard,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: StudioSpacing.touchTarget,
-                            minHeight: StudioSpacing.touchTarget,
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(
+                              StudioSpacing.touchTarget,
+                              StudioSpacing.touchTarget,
+                            ),
+                            fixedSize: const Size(
+                              StudioSpacing.touchTarget,
+                              StudioSpacing.touchTarget,
+                            ),
                           ),
                         ),
                       ],

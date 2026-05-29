@@ -42,8 +42,12 @@ class StudioCollapsibleFilterPanel extends StatelessWidget {
       child: ExpansionTile(
         key: const Key('studio_collapsible_filter_panel'),
         initiallyExpanded: initiallyExpanded,
+        clipBehavior: Clip.none,
         tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: StudioSpacing.xs),
+        childrenPadding: const EdgeInsets.only(
+          top: StudioSpacing.xs,
+          bottom: StudioSpacing.xs,
+        ),
         title: Text(panelTitle),
         subtitle: summary != null && summary.isNotEmpty
             ? Text(

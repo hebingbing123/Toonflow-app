@@ -10,13 +10,16 @@ import 'enum_labels.dart';
 import 'dimension_score_form.dart';
 import 'field_styling.dart';
 import 'support.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
+import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 part 'workbench_view/review_widgets.dart';
 
@@ -237,7 +240,8 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         : 840.0;
     return Theme(
       data: qualityReviewsFormTheme(context),
-      child: StudioAlertDialog(
+      child: StudioFormKeyboardScope(
+        child: StudioAlertDialog(
       title: Text(l10n.qualityReviewsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -295,8 +299,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      IconButton(
-                        tooltip: l10n.qualityReviewsCopyFilterQuery,
+                      StudioIconButton(
+                        icon: Icons.copy_rounded,
+                        label: l10n.qualityReviewsCopyFilterQuery,
+                        style: studioUtilityIconButtonStyle(context),
                         onPressed: () async {
                           final query = model.activeFilterQuerySummary;
                           if (query == null || query.isEmpty) return;
@@ -310,10 +316,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.copy_rounded),
                       ),
-                      IconButton(
-                        tooltip: l10n.qualityReviewsCopyApiUrl,
+                      StudioIconButton(
+                        icon: Icons.link_rounded,
+                        label: l10n.qualityReviewsCopyApiUrl,
+                        style: studioUtilityIconButtonStyle(context),
                         onPressed: () async {
                           final url = model.activeFilterRequestUrl;
                           if (url == null || url.isEmpty) return;
@@ -325,7 +332,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.link_rounded),
                       ),
                     ],
                   ),
@@ -818,8 +824,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                         model.tokenEfficiencyExecutionChecklist!,
                       ),
                     ),
-                    IconButton(
-                      tooltip: l10n.qualityReviewsCopyExecutionChecklist,
+                    StudioIconButton(
+                      icon: Icons.copy_all_rounded,
+                      label: l10n.qualityReviewsCopyExecutionChecklist,
+                      style: studioUtilityIconButtonStyle(context),
                       onPressed: () async {
                         final checklist =
                             model.tokenEfficiencyExecutionChecklist;
@@ -834,7 +842,6 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.copy_all_rounded),
                     ),
                   ],
                 ),
@@ -1001,7 +1008,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                         l10n.qualityReviewsNotAvailable)
                                     .toString(),
                               ),
-                              style: Theme.of(context).textTheme.titleSmall,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.withTabularFigures(),
                             ),
                             const SizedBox(height: StudioSpacing.chromeActionGap),
                             Text(
@@ -1094,13 +1106,13 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                       label: Text(l10n.qualityReviewsMemoryTag),
                                     ),
                                   if ((review.suggestedAction ?? '').trim().isNotEmpty)
-                                    IconButton(
-                                      style: studioUtilityIconButtonStyle(context),
-                                      tooltip: l10n
+                                    StudioIconButton(
+                                      icon: Icons.open_in_new_rounded,
+                                      label: l10n
                                           .qualityReviewsApplySuggestedActionTooltip,
+                                      style: studioUtilityIconButtonStyle(context),
                                       onPressed: () =>
                                           callbacks.onApplySuggestedAction(review),
-                                      icon: const Icon(Icons.open_in_new_rounded),
                                     ),
                                   Icon(
                                     Icons.chevron_right,
@@ -1137,6 +1149,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
           child: Text(l10n.helpHubDialogClose),
         ),
       ],
+      ),
       ),
     );
   }

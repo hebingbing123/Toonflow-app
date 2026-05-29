@@ -5,6 +5,8 @@ import '../../l10n/studio_code_labels.dart';
 import '../../studio/job_center.dart';
 import '../components/studio_dialog_shell.dart';
 import '../components/studio_entrance_motion.dart';
+import '../components/studio_metric_switch.dart';
+import '../components/studio_repaint_boundary.dart';
 import '../tokens.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
@@ -27,15 +29,20 @@ class StudioJobTray extends StatelessWidget {
           message: l10n.studioJobTrayActiveJobs(count),
           child: TextButton.icon(
             onPressed: () => _showJobSheet(context),
-            icon: SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: StudioControlSize.progressStroke,
-                color: tokens.accent,
+            icon: StudioRepaintBoundary(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: StudioControlSize.progressStroke,
+                  color: tokens.accent,
+                ),
               ),
             ),
-            label: Text('$count'),
+            label: StudioMetricSwitch(
+              transitionKey: count,
+              child: Text('$count'),
+            ),
           ),
         );
       },

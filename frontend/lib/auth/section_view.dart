@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../config.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 import '../rust_api.dart';

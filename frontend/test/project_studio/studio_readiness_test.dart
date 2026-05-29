@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/project_studio/studio_readiness.dart';
+import 'package:openflow_app/project_studio/studio_step.dart';
 import 'package:openflow_app/rust_api.dart';
 
 const _readiness80 = ProjectShortVideoReadiness(
@@ -16,6 +17,32 @@ const _readiness80 = ProjectShortVideoReadiness(
 void main() {
   test('computeStudioCompletedSteps defaults to first step with no data', () {
     expect(computeStudioCompletedSteps(), 1);
+  });
+
+  test('resolveStudioProgressRingSteps follows journey on deliver', () {
+    expect(
+      resolveStudioProgressRingSteps(
+        1,
+        currentStep: StudioStep.deliver,
+      ),
+      5,
+    );
+  });
+
+  test('computeProjectListProgressSteps uses saved studio step', () {
+    expect(
+      computeProjectListProgressSteps(
+        lastVisitedStep: StudioStep.deliver,
+      ),
+      5,
+    );
+  });
+
+  test('computeProjectListProgressSteps ignores unset saved step', () {
+    expect(
+      computeProjectListProgressSteps(lastVisitedStep: null),
+      1,
+    );
   });
 
   test('computeStudioCompletedSteps uses readiness rollup', () {

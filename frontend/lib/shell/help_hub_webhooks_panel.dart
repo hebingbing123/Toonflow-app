@@ -660,7 +660,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   decoration: InputDecoration(
                     labelText: l10n.opsWhUrlLabel,
                     hintText: l10n.opsWhUrlHint,
-                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
@@ -668,7 +667,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   controller: _webhookSecretController,
                   decoration: InputDecoration(
                     labelText: l10n.opsWhSecretLabel,
-                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
@@ -677,7 +675,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   decoration: InputDecoration(
                     labelText: l10n.opsWhWorkspaceIdLabel,
                     hintText: l10n.opsWhWorkspaceIdHint,
-                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
@@ -706,7 +703,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   decoration: InputDecoration(
                     labelText: l10n.opsWhTestEventTypeLabel,
                     hintText: l10n.opsWhTestEventTypeHint,
-                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: StudioSpacing.xs),
@@ -812,7 +808,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                     controller: _webhookSearchController,
                     decoration: InputDecoration(
                       labelText: l10n.opsWhSearchLabel,
-                      isDense: true,
                     ),
                     onChanged: _onWebhookSearchChanged,
                   ),
@@ -902,10 +897,7 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                   final rowBusy = _webhookMutatingId == wh.id;
                   final tokens = StudioTokens.of(context);
                   final highlightLatest = _latestCreatedWebhook?.id == wh.id;
-                  return studioStaggeredItem(
-                    index,
-                    entranceKey: filteredWebhooks.length,
-                    child: Card(
+                  final card = Card(
                     color: highlightLatest
                         ? tokens.primarySoft.withValues(alpha: 0.92)
                         : null,
@@ -998,7 +990,6 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                                       _webhookWorkspaceDraftControllers[wh.id],
                                   decoration: InputDecoration(
                                     hintText: l10n.opsWhScopeFieldHint,
-                                    isDense: true,
                                   ),
                                   enabled: !_loadingWebhooks && !rowBusy,
                                 ),
@@ -1153,7 +1144,14 @@ class _HelpHubWebhooksPanelState extends State<HelpHubWebhooksPanel> {
                         ],
                       ),
                     ),
-                  ),
+                  );
+                  if (index > 10) {
+                    return card;
+                  }
+                  return studioStaggeredItem(
+                    index,
+                    entranceKey: filteredWebhooks.length,
+                    child: card,
                   );
                 },
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
+import 'package:openflow_app/design_system/components/studio_repaint_boundary.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_tap.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
@@ -152,6 +153,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
           
           // Select all / Deselect all button
           TextButton.icon(
+            style: studioFormTextButtonIconStyle(context),
             onPressed: widget.isOperationInProgress
                 ? null
                 : () {
@@ -262,10 +264,14 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
           // Show loading indicator when operation is in progress
           if (widget.isOperationInProgress) ...[
             const SizedBox(width: StudioSpacing.sm),
-            const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
+            const StudioRepaintBoundary(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: StudioControlSize.progressStroke,
+                ),
+              ),
             ),
           ],
         ],

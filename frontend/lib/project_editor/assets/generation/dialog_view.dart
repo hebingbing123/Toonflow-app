@@ -15,6 +15,7 @@ import 'dialog_view_contract.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_entrance_motion.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 export 'dialog_view_contract.dart';
 
@@ -41,7 +42,11 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
       content: SizedBox(
         width: studioConstrainedDialogWidth(context, maxWidth: 860),
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.busyMutation
+                ? null
+                : callbacks.onBatchGenerateImages,
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -114,6 +119,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
                 onToggleAsset: callbacks.onToggleAsset,
               ),
             ],
+          ),
           ),
         ),
       ),

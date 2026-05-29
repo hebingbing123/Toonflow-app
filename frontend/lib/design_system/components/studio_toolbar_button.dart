@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../ix/studio_mobile_affordances.dart';
 import '../tokens.dart';
+import 'studio_entrance_motion.dart';
 import 'studio_surfaces.dart';
 import 'studio_text_styles.dart';
 
@@ -27,26 +28,31 @@ class StudioToolbarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = !busy && onPressed != null;
-    final child = busy
-        ? const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: StudioControlSize.progressStroke,
-            ),
-          )
-        : (icon != null
-              ? Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: StudioSpacing.xs,
-                  runSpacing: StudioSpacing.chromeActionGap,
-                  children: <Widget>[
-                    Icon(icon, size: StudioIconSize.xs),
-                    Text(label, softWrap: true),
-                  ],
-                )
-              : Text(label, softWrap: true));
+    final child = StudioFadeSwitcher(
+      transitionKey: busy,
+      duration: studioMotionQuickDuration,
+      slideOffset: Offset.zero,
+      child: busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: StudioControlSize.progressStroke,
+              ),
+            )
+          : (icon != null
+                ? Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: StudioSpacing.xs,
+                    runSpacing: StudioSpacing.chromeActionGap,
+                    children: <Widget>[
+                      Icon(icon, size: StudioIconSize.xs),
+                      Text(label, softWrap: true),
+                    ],
+                  )
+                : Text(label, softWrap: true)),
+    );
 
     final style = primary
         ? studioToolbarPrimaryButtonStyle(context)

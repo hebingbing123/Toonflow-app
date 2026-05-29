@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dense_action_row.dart';
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
@@ -317,7 +318,10 @@ class ProjectsListPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < kStudioHandsetMaxWidth;
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: StudioSpacing.sm),
@@ -327,27 +331,48 @@ class ProjectsListPreview extends StatelessWidget {
         ),
         ...studioStaggeredChildren(
           projects.map(
-            (project) => StudioListRow(
+            (project) {
+              final titleText =
+                  project.name ??
+                  l10n.projectsUnnamedProject(project.numericId);
+              return StudioListRow(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              title: Wrap(
-                spacing: StudioSpacing.xs,
-                runSpacing: StudioSpacing.xs,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    project.name ??
-                        l10n.projectsUnnamedProject(project.numericId),
-                  ),
-                  _ProjectAccessBadge(project: project),
-                ],
-              ),
+              title: narrow
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          titleText,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: StudioSpacing.chromeActionGap),
+                        _ProjectAccessBadge(project: project),
+                      ],
+                    )
+                  : Wrap(
+                      spacing: StudioSpacing.xs,
+                      runSpacing: StudioSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          titleText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        _ProjectAccessBadge(project: project),
+                      ],
+                    ),
               subtitle: Text(
                 '#${project.numericId} · ${project.id} · ${_projectAccessRoleLabel(l10n, project.projectAccessRole)}',
+                maxLines: narrow ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => onOpenProjectDetail(project),
-            ),
+            );
+            },
           ),
           entranceKey: projects.length,
         ),
@@ -358,6 +383,8 @@ class ProjectsListPreview extends StatelessWidget {
           ),
         ],
       ],
+    );
+      },
     );
   }
 }

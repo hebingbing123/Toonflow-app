@@ -92,99 +92,31 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
         style: studioFormPrimaryButtonStyle(context),
         onPressed: dialogState.saving[0]
             ? null
-            : () async {
-                setDialogState(() => dialogState.saving[0] = true);
-                try {
-                  final currentProject = dialogState;
-                  final selectedArtStylePack =
-                      currentProject.selectedArtStylePackRef[0];
-                  final selectedStoryStylePack =
-                      currentProject.selectedStoryStylePackRef[0];
-                  List<String> splitLines(String raw) => raw
-                      .split('\n')
-                      .map((line) => line.trim())
-                      .where((line) => line.isNotEmpty)
-                      .toList(growable: false);
-                  await updateProjectByProjectId(token, p.id, {
-                    'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
-                    'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
-                    'textModel': textModelCtrl.text.isEmpty
-                        ? null
-                        : textModelCtrl.text,
-                    'multimodalModel': multimodalModelCtrl.text.isEmpty
-                        ? null
-                        : multimodalModelCtrl.text,
-                    'imageModel': imageModelCtrl.text.isEmpty
-                        ? null
-                        : imageModelCtrl.text,
-                    'videoModel': videoModelCtrl.text.isEmpty
-                        ? null
-                        : videoModelCtrl.text,
-                    'voiceModel': voiceModelCtrl.text.isEmpty
-                        ? null
-                        : voiceModelCtrl.text,
-                    'voiceProfile': voiceProfileCtrl.text.isEmpty
-                        ? null
-                        : voiceProfileCtrl.text,
-                    'projectBrief': ProjectBriefDraft(
-                      premise: premiseCtrl.text,
-                      targetAudience: audienceCtrl.text,
-                      emotionalTone: toneCtrl.text,
-                      coreHook: hookCtrl.text,
-                      visualDirection: visualCtrl.text,
-                    ).toJsonOrNull(),
-                    'brandBible': BrandBibleDraft(
-                      brandName: brandNameCtrl.text,
-                      brandPromise: brandPromiseCtrl.text,
-                      visualMotifs: splitLines(visualMotifsCtrl.text),
-                      forbiddenElements: splitLines(forbiddenCtrl.text),
-                      continuityRules: splitLines(continuityCtrl.text),
-                    ).toJsonOrNull(),
-                  });
-                  final artPackToSave = _nullableNormalizedArtPack(
-                    selectedArtStylePack,
-                  );
-                  final storyPackToSave = _nullableNormalizedStoryPack(
-                    selectedStoryStylePack,
-                  );
-                  if (!artStylePackPathsMatch(artPackToSave, p.artStylePack) ||
-                      !storyStylePackPathsMatch(
-                        storyPackToSave,
-                        p.storyStylePack,
-                      )) {
-                    await patchProjectStyleConfigByProjectId(
-                      token,
-                      p.id,
-                      artStylePack: artPackToSave,
-                      storyStylePack: storyPackToSave,
-                    );
-                  }
-                  final stepPatch = dialogState.stepModelsPatchRef[0];
-                  if (stepPatch.isNotEmpty) {
-                    await patchProjectModelRoutingV1(
-                      token,
-                      p.id,
-                      steps: stepPatch,
-                    );
-                  }
-                  kStudioSnapshotBus.invalidate(
-                    StudioSnapshotInvalidation.projectOnboarding,
-                  );
-                  if (!ctx.mounted) return;
-                  Navigator.of(ctx).pop();
-                  if (!mounted) return;
-                  await _projectsController.loadProjects();
-                } catch (e) {
-                  if (ctx.mounted) {
-                    setDialogState(() => dialogState.saving[0] = false);
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(
-                        content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
-                      ),
-                    );
-                  }
-                }
-              },
+            : () => _submitProjectEditorDialogPatch(
+                  ctx: ctx,
+                  setDialogState: setDialogState,
+                  token: token,
+                  p: p,
+                  dialogState: dialogState,
+                  nameCtrl: nameCtrl,
+                  introCtrl: introCtrl,
+                  premiseCtrl: premiseCtrl,
+                  audienceCtrl: audienceCtrl,
+                  toneCtrl: toneCtrl,
+                  hookCtrl: hookCtrl,
+                  visualCtrl: visualCtrl,
+                  textModelCtrl: textModelCtrl,
+                  multimodalModelCtrl: multimodalModelCtrl,
+                  imageModelCtrl: imageModelCtrl,
+                  videoModelCtrl: videoModelCtrl,
+                  voiceModelCtrl: voiceModelCtrl,
+                  voiceProfileCtrl: voiceProfileCtrl,
+                  brandNameCtrl: brandNameCtrl,
+                  brandPromiseCtrl: brandPromiseCtrl,
+                  visualMotifsCtrl: visualMotifsCtrl,
+                  forbiddenCtrl: forbiddenCtrl,
+                  continuityCtrl: continuityCtrl,
+                ),
         child: Text(
           dialogState.saving[0]
               ? l10n.projectEditorSavingEllipsis
@@ -192,5 +124,109 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
         ),
       ),
     ];
+  }
+
+  Future<void> _submitProjectEditorDialogPatch({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required String token,
+    required ProjectRow p,
+    required _ProjectEditorDialogState dialogState,
+    required TextEditingController nameCtrl,
+    required TextEditingController introCtrl,
+    required TextEditingController premiseCtrl,
+    required TextEditingController audienceCtrl,
+    required TextEditingController toneCtrl,
+    required TextEditingController hookCtrl,
+    required TextEditingController visualCtrl,
+    required TextEditingController textModelCtrl,
+    required TextEditingController multimodalModelCtrl,
+    required TextEditingController imageModelCtrl,
+    required TextEditingController videoModelCtrl,
+    required TextEditingController voiceModelCtrl,
+    required TextEditingController voiceProfileCtrl,
+    required TextEditingController brandNameCtrl,
+    required TextEditingController brandPromiseCtrl,
+    required TextEditingController visualMotifsCtrl,
+    required TextEditingController forbiddenCtrl,
+    required TextEditingController continuityCtrl,
+  }) async {
+    if (dialogState.saving[0]) {
+      return;
+    }
+    setDialogState(() => dialogState.saving[0] = true);
+    try {
+      final currentProject = dialogState;
+      final selectedArtStylePack = currentProject.selectedArtStylePackRef[0];
+      final selectedStoryStylePack = currentProject.selectedStoryStylePackRef[0];
+      List<String> splitLines(String raw) => raw
+          .split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList(growable: false);
+      await updateProjectByProjectId(token, p.id, {
+        'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
+        'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
+        'textModel': textModelCtrl.text.isEmpty ? null : textModelCtrl.text,
+        'multimodalModel': multimodalModelCtrl.text.isEmpty
+            ? null
+            : multimodalModelCtrl.text,
+        'imageModel': imageModelCtrl.text.isEmpty ? null : imageModelCtrl.text,
+        'videoModel': videoModelCtrl.text.isEmpty ? null : videoModelCtrl.text,
+        'voiceModel': voiceModelCtrl.text.isEmpty ? null : voiceModelCtrl.text,
+        'voiceProfile': voiceProfileCtrl.text.isEmpty
+            ? null
+            : voiceProfileCtrl.text,
+        'projectBrief': ProjectBriefDraft(
+          premise: premiseCtrl.text,
+          targetAudience: audienceCtrl.text,
+          emotionalTone: toneCtrl.text,
+          coreHook: hookCtrl.text,
+          visualDirection: visualCtrl.text,
+        ).toJsonOrNull(),
+        'brandBible': BrandBibleDraft(
+          brandName: brandNameCtrl.text,
+          brandPromise: brandPromiseCtrl.text,
+          visualMotifs: splitLines(visualMotifsCtrl.text),
+          forbiddenElements: splitLines(forbiddenCtrl.text),
+          continuityRules: splitLines(continuityCtrl.text),
+        ).toJsonOrNull(),
+      });
+      final artPackToSave = _nullableNormalizedArtPack(selectedArtStylePack);
+      final storyPackToSave = _nullableNormalizedStoryPack(selectedStoryStylePack);
+      if (!artStylePackPathsMatch(artPackToSave, p.artStylePack) ||
+          !storyStylePackPathsMatch(storyPackToSave, p.storyStylePack)) {
+        await patchProjectStyleConfigByProjectId(
+          token,
+          p.id,
+          artStylePack: artPackToSave,
+          storyStylePack: storyPackToSave,
+        );
+      }
+      final stepPatch = dialogState.stepModelsPatchRef[0];
+      if (stepPatch.isNotEmpty) {
+        await patchProjectModelRoutingV1(
+          token,
+          p.id,
+          steps: stepPatch,
+        );
+      }
+      kStudioSnapshotBus.invalidate(
+        StudioSnapshotInvalidation.projectOnboarding,
+      );
+      if (!ctx.mounted) return;
+      Navigator.of(ctx).pop();
+      if (!mounted) return;
+      await _projectsController.loadProjects();
+    } catch (e) {
+      if (ctx.mounted) {
+        setDialogState(() => dialogState.saving[0] = false);
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(describeUserVisibleApiErrorResolved(ctx, e)),
+          ),
+        );
+      }
+    }
   }
 }

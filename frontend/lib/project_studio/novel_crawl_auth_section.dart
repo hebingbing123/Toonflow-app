@@ -6,6 +6,7 @@ import '../design_system/components/studio_surfaces.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import 'novel_crawl_login_webview_dialog.dart';
 import 'novel_crawl_platform_hint.dart';
 
@@ -274,7 +275,12 @@ class _StudioNovelCrawlAuthSectionState
         NovelCrawlDesktopDownloadHintTeaser(
           onTap: () => setState(() => _expanded = true),
         ),
-        if (_expanded) ...<Widget>[
+        if (_expanded)
+          StudioFormKeyboardScope(
+            onEnterSubmit: _loading || _saving ? null : _saveConfig,
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
           const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.studioNovelCrawlAuthSectionSubtitle,
@@ -434,7 +440,9 @@ class _StudioNovelCrawlAuthSectionState
               padding: EdgeInsets.only(top: StudioSpacing.xs),
               child: StudioSkeleton(height: 4, borderRadius: 2),
             ),
-        ],
+            ],
+          ),
+        ),
       ],
     );
   }

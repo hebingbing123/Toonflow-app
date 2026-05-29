@@ -11,6 +11,7 @@ import '../design_system/ix/studio_freshness_banner.dart';
 import '../platform/studio_load_state.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_entrance_motion.dart';
+import '../design_system/components/studio_text_styles.dart';
 import 'enum_labels.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
@@ -500,12 +501,8 @@ class QualityReviewsListPreview extends StatelessWidget {
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ],
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: previewReviews.length,
-          itemBuilder: (context, index) {
-            final review = previewReviews[index];
+        ...studioStaggeredChildren(
+          previewReviews.map((review) {
             final detailLines = <String>[
               review.id,
               if (review.targetId != null && review.targetId!.isNotEmpty)
@@ -516,50 +513,48 @@ class QualityReviewsListPreview extends StatelessWidget {
                 ),
               if (review.isBadCase) l10n.qualityReviewsPreviewDetailBadCase,
             ];
-            return studioStaggeredItem(
-              index,
-              entranceKey: reviews.length,
-              child: StudioListRow(
-                dense: !compact,
-                contentPadding: EdgeInsets.zero,
-                minVerticalPadding: compact ? 10 : 6,
-                title: Text(
-                  l10n.qualityReviewsPreviewListTitle(
-                    qualityTargetTypeLabel(review.targetType, l10n),
-                    qualitySourceLabel(review.source, l10n),
-                    review.overallScore?.toString() ??
-                        l10n.qualityReviewsAbbrevNotAvailable,
-                  ),
-                  maxLines: compact ? 2 : 1,
-                  overflow: TextOverflow.ellipsis,
+            return StudioListRow(
+              dense: !compact,
+              contentPadding: EdgeInsets.zero,
+              minVerticalPadding: compact ? 10 : 6,
+              title: Text(
+                l10n.qualityReviewsPreviewListTitle(
+                  qualityTargetTypeLabel(review.targetType, l10n),
+                  qualitySourceLabel(review.source, l10n),
+                  review.overallScore?.toString() ??
+                      l10n.qualityReviewsAbbrevNotAvailable,
                 ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(
-                    top: StudioSpacing.chromeActionGap,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      for (var i = 0; i < detailLines.length; i++) ...[
-                        if (i > 0)
-                          const SizedBox(
-                            height: StudioLayoutSpacing.titleTight,
-                          ),
-                        Text(
-                          detailLines[i],
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: detailStyle,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                trailing: compact ? null : const Icon(Icons.chevron_right),
-                onTap: () => onSelectQualityReview(review),
+                maxLines: compact ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.withTabularFigures(),
               ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(
+                  top: StudioSpacing.chromeActionGap,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    for (var i = 0; i < detailLines.length; i++) ...[
+                      if (i > 0)
+                        const SizedBox(
+                          height: StudioLayoutSpacing.titleTight,
+                        ),
+                      Text(
+                        detailLines[i],
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: detailStyle,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              trailing: compact ? null : const Icon(Icons.chevron_right),
+              onTap: () => onSelectQualityReview(review),
             );
-          },
+          }),
+          entranceKey: reviews.length,
         ),
       ],
     );

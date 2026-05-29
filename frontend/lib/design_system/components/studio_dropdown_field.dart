@@ -7,6 +7,7 @@ import '../studio_typography.dart';
 import '../studio_motion.dart';
 import '../tokens.dart';
 import 'studio_decorative_icon.dart';
+import 'studio_icon_button.dart';
 import 'studio_surfaces.dart';
 
 /// One selectable row in a [StudioDropdownField] menu.
@@ -311,18 +312,19 @@ class StudioIconMenuButton<T> extends StatelessWidget {
           )
           .toList(growable: false),
       builder: (context, controller, child) {
-        return IconButton(
-          style: style,
+        final label = tooltip ?? 'Menu';
+        return studioAccessibleIconButton(
+          label: label,
           tooltip: tooltip,
+          style: style,
+          icon: iconWidget ?? Icon(icon, size: iconSize),
           onPressed: () {
-            unawaited(studioLightImpact());
             if (controller.isOpen) {
               controller.close();
             } else {
               controller.open();
             }
           },
-          icon: iconWidget ?? Icon(icon, size: iconSize),
         );
       },
     );
@@ -733,10 +735,11 @@ class StudioSelectFieldTrigger extends StatelessWidget {
 
     final field = InputDecorator(
       isEmpty: valueLabel.isEmpty,
-      decoration: (decoration ?? InputDecoration()).copyWith(
-        labelText: hasLabel ? labelText : decoration?.labelText,
-        isDense: isDense,
-        suffixIcon: AnimatedRotation(
+      decoration: studioOutlineFieldDecoration(
+        (decoration ?? InputDecoration()).copyWith(
+          labelText: hasLabel ? labelText : decoration?.labelText,
+          isDense: hasLabel ? false : (decoration?.isDense ?? isDense),
+          suffixIcon: AnimatedRotation(
           turns: expanded ? 0.5 : 0,
           duration: studioAnimationDuration(
             context,
@@ -752,6 +755,7 @@ class StudioSelectFieldTrigger extends StatelessWidget {
                 : tokens.textMuted,
             size: StudioIconSize.xl,
           ),
+        ),
         ),
       ),
       child: valueLabel.isEmpty

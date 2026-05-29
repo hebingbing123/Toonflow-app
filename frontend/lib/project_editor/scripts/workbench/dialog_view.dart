@@ -9,6 +9,7 @@ import '../../../script_editor/support.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_workbench_section.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 class ProjectScriptsWorkbenchDialogViewModel {
   const ProjectScriptsWorkbenchDialogViewModel({
@@ -84,7 +85,15 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
       content: SizedBox(
         width: studioConstrainedDialogWidth(context, maxWidth: 820),
         child: SingleChildScrollView(
-          child: Column(
+          child: StudioFormKeyboardScope(
+            onEnterSubmit: model.localBusy
+                ? null
+                : () {
+                    final action = callbacks.onRunRecommendedAction ??
+                        callbacks.onBatchCreate;
+                    action?.call();
+                  },
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -313,6 +322,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

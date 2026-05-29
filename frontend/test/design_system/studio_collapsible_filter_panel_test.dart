@@ -45,4 +45,30 @@ void main() {
     expect(find.byKey(marker), findsOneWidget);
     expect(find.byKey(const Key('studio_collapsible_filter_panel')), findsNothing);
   });
+
+  testWidgets('collapsible panel does not clip floating field labels', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      studioGoldenApp(
+        child: StudioCollapsibleFilterPanel(
+          collapsible: true,
+          title: '创建',
+          initiallyExpanded: true,
+          child: const TextField(
+            decoration: InputDecoration(
+              labelText: '企业空间名称',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final tile = tester.widget<ExpansionTile>(
+      find.byKey(const Key('studio_collapsible_filter_panel')),
+    );
+    expect(tile.clipBehavior, Clip.none);
+  });
 }

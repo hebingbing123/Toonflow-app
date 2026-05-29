@@ -25,11 +25,17 @@ bool studioPointerChromeEnabled(BuildContext context) {
   };
 }
 
-/// Whether scrollbars should stay visible (tablet / desktop / pointer layouts).
+/// Whether Flutter Material scroll thumbs should wrap scrollables.
+///
+/// Web: off — scrolling is touch/trackpad-first; [web/studio_scrollbars.css] only
+/// styles rare document overflow. Native desktop uses thin overlay thumbs from theme.
 bool studioScrollbarThumbVisible(BuildContext context) {
   final mq = MediaQuery.maybeOf(context);
   if (mq == null) return false;
+  if (kIsWeb) return false;
   if (mq.size.width <= kStudioHandsetMaxWidth) return false;
+  if (mq.size.shortestSide <= kStudioHandsetMaxWidth) return false;
+
   if (studioPointerChromeEnabled(context)) return true;
   return mq.size.shortestSide > kStudioHandsetMaxWidth;
 }

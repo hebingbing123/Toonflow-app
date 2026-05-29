@@ -5,6 +5,7 @@ import 'package:openflow_app/design_system/layout_breakpoints.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/ix/studio_form_keyboard.dart';
 
 Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   final nameController = TextEditingController();
@@ -24,7 +25,49 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
     context: context,
     builder: (dialogContext) {
       final l10n = resolveAppLocalizationsForErrors(dialogContext);
-      return StudioAlertDialog(
+
+      void submit() {
+        List<String> splitLines(String raw) => raw
+            .split('\n')
+            .map((line) => line.trim())
+            .where((line) => line.isNotEmpty)
+            .toList(growable: false);
+
+        final brief = ProjectBriefDraft(
+          premise: premiseController.text.trim(),
+          targetAudience: audienceController.text.trim(),
+          emotionalTone: toneController.text.trim(),
+          coreHook: hookController.text.trim(),
+          visualDirection: visualController.text.trim(),
+        ).toJsonOrNull();
+
+        final brandBible = BrandBibleDraft(
+          brandName: brandNameController.text.trim(),
+          brandPromise: brandPromiseController.text.trim(),
+          visualMotifs: splitLines(motifsController.text),
+          forbiddenElements: splitLines(forbiddenController.text),
+          continuityRules: splitLines(continuityController.text),
+        ).toJsonOrNull();
+
+        final result = <String, dynamic>{};
+        if (nameController.text.trim().isNotEmpty) {
+          result['name'] = nameController.text.trim();
+        }
+        if (introController.text.trim().isNotEmpty) {
+          result['intro'] = introController.text.trim();
+        }
+        if (brief != null) {
+          result['projectBrief'] = brief;
+        }
+        if (brandBible != null) {
+          result['brandBible'] = brandBible;
+        }
+        Navigator.of(dialogContext).pop(result);
+      }
+
+      return StudioFormKeyboardScope(
+        onEnterSubmit: submit,
+        child: StudioAlertDialog(
         title: Text(l10n.projectsDialogCreateTitle),
         content: SizedBox(
           width: studioConstrainedDialogWidth(context, maxWidth: 560),
@@ -35,6 +78,8 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
               children: <Widget>[
                 TextField(
                   controller: nameController,
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.projectsDialogFieldName,
                   ),
@@ -141,47 +186,11 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
           ),
           FilledButton(
             style: studioFormPrimaryButtonStyle(dialogContext),
-            onPressed: () {
-              List<String> splitLines(String raw) => raw
-                  .split('\n')
-                  .map((line) => line.trim())
-                  .where((line) => line.isNotEmpty)
-                  .toList(growable: false);
-
-              final brief = ProjectBriefDraft(
-                premise: premiseController.text.trim(),
-                targetAudience: audienceController.text.trim(),
-                emotionalTone: toneController.text.trim(),
-                coreHook: hookController.text.trim(),
-                visualDirection: visualController.text.trim(),
-              ).toJsonOrNull();
-
-              final brandBible = BrandBibleDraft(
-                brandName: brandNameController.text.trim(),
-                brandPromise: brandPromiseController.text.trim(),
-                visualMotifs: splitLines(motifsController.text),
-                forbiddenElements: splitLines(forbiddenController.text),
-                continuityRules: splitLines(continuityController.text),
-              ).toJsonOrNull();
-
-              final result = <String, dynamic>{};
-              if (nameController.text.trim().isNotEmpty) {
-                result['name'] = nameController.text.trim();
-              }
-              if (introController.text.trim().isNotEmpty) {
-                result['intro'] = introController.text.trim();
-              }
-              if (brief != null) {
-                result['projectBrief'] = brief;
-              }
-              if (brandBible != null) {
-                result['brandBible'] = brandBible;
-              }
-              Navigator.of(dialogContext).pop(result);
-            },
+            onPressed: submit,
             child: Text(l10n.projectsDialogCreateButton),
           ),
         ],
+      ),
       );
     },
   ).whenComplete(() {

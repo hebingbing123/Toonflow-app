@@ -129,6 +129,7 @@ extension _ShortVideoSpaceSectionCharactersExtension
                 ),
               ),
               TextButton.icon(
+                style: studioFormTextButtonIconStyle(context),
                 onPressed: _loadingCharacters ? null : _loadProjectCharacters,
                 icon: const Icon(Icons.refresh, size: StudioIconSize.sm),
                 label: Text(l10n.shortVideoCharactersRefresh),

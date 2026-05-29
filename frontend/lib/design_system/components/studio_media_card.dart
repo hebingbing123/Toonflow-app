@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 
+import 'studio_surfaces.dart';
 import 'studio_entrance_motion.dart';
 import '../ix/studio_pointer.dart';
 import '../studio_network_image.dart';
@@ -97,9 +98,8 @@ class StudioMediaCard extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: onTap,
-                hoverColor: studioPointerChromeEnabled(context)
-                    ? tokens.primary.withValues(alpha: 0.08)
-                    : null,
+                hoverColor: studioNestedMaterialHover,
+                highlightColor: studioNestedMaterialHighlight,
                 child: AnimatedScale(
                   scale: hovered ? 1.01 : 1,
                   duration: const Duration(milliseconds: 140),

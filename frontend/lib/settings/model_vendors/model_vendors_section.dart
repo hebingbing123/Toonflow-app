@@ -17,6 +17,7 @@ import 'international_vendors_setup_banner.dart';
 import 'vendor_setup_loader.dart';
 import 'vendor_credential_dialog.dart';
 import 'vendor_gateway_ui.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/ix/studio_context_menu.dart';
 
 /// Settings UI: enable catalog vendors, store API credentials, pick models.
@@ -520,11 +521,13 @@ class _VendorCardState extends State<_VendorCard> {
                       '${m.value} · ${studioModelPricingTypeLabel(l10n, m.type)}',
                       style: theme.textTheme.bodySmall,
                     ),
-                    secondary: IconButton(
-                      tooltip: l10n.settingsModelVendorsTestAction,
+                    secondary: StudioIconButton(
+                      icon: Icons.play_circle_outline,
+                      label: l10n.settingsModelVendorsTestAction,
+                      size: StudioIconSize.md,
+                      style: studioUtilityIconButtonStyle(context),
                       onPressed:
                           widget.busy ? null : () => widget.onTestModel(m),
-                      icon: const Icon(Icons.play_circle_outline, size: StudioIconSize.md),
                     ),
                   ),
                 ),

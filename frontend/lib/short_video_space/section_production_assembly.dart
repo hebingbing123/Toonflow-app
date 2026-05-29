@@ -75,10 +75,24 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     if (kind == _exportJobKind) {
       unawaited(_refreshActiveExportTaskDetails(jobId));
     }
-    _assemblyJobPollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      unawaited(_pollActiveAssemblyJobOnce());
-    });
+    _assemblyJobPollBackoffSeconds = 3;
+    _scheduleAssemblyJobPoll();
     unawaited(_pollActiveAssemblyJobOnce());
+  }
+
+  void _scheduleAssemblyJobPoll() {
+    _assemblyJobPollTimer?.cancel();
+    _assemblyJobPollTimer = Timer.periodic(
+      Duration(seconds: _assemblyJobPollBackoffSeconds),
+      (_) => unawaited(_pollActiveAssemblyJobOnce()),
+    );
+  }
+
+  bool _isAssemblyPollRateLimited(Object error) {
+    if (error is RustApiException) {
+      return error.statusCode == 429 || error.statusCode == 503;
+    }
+    return false;
   }
 
   Future<void> _pollActiveAssemblyJobOnce() async {
@@ -102,6 +116,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (row.kind == _exportJobKind) {
         unawaited(_refreshActiveExportTaskDetails(row.id));
       }
+      _assemblyJobPollBackoffSeconds = 3;
       if (_terminalJobStatuses.contains(row.status)) {
         _assemblyJobPollTimer?.cancel();
         _assemblyJobPollTimer = null;
@@ -115,7 +130,16 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
           }
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      if (_isAssemblyPollRateLimited(e)) {
+        _assemblyJobPollBackoffSeconds =
+            (_assemblyJobPollBackoffSeconds * 2).clamp(3, 60);
+        if (_activeAssemblyJob != null &&
+            !_terminalJobStatuses.contains(_activeAssemblyJob!.status)) {
+          _scheduleAssemblyJobPoll();
+        }
+      }
+    }
   }
 
   Future<void> _cancelActiveAssemblyJob() async {
@@ -1498,13 +1522,20 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             builder: (ctx, setState) {
               updateDialogState = setState;
               final l10n = dialogL10n;
-              poller ??= Timer.periodic(
-                const Duration(seconds: 4),
-                (_) => unawaited(loadTasks()),
+              StudioScheduler.scheduleOnceUntil('tts_task_center_poll', () {
+                poller ??= Timer.periodic(
+                  const Duration(seconds: 4),
+                  (_) => unawaited(loadTasks()),
+                );
+              });
+              StudioScheduler.scheduleOnceUntil(
+                'tts_task_center_initial_load',
+                () {
+                  if (tasks.isEmpty && loading && errorMessage == null) {
+                    unawaited(loadTasks());
+                  }
+                },
               );
-              if (tasks.isEmpty && loading && errorMessage == null) {
-                unawaited(loadTasks());
-              }
               final latestTaskByShotId = <String, TtsTaskV1>{};
               if (!loading && groupedByShot) {
                 for (final task in tasks) {

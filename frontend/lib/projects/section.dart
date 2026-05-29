@@ -2,20 +2,22 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../design_system/layout_breakpoints.dart';
 import '../project_studio/projects_studio_home.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
-import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../team_workspaces/strings.dart';
 import 'workbenches/agent_memory.dart';
 import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
 import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
+import 'package:openflow_app/design_system/components/studio_icon_button.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
 import 'package:openflow_app/design_system/components/studio_empty_state.dart';
 import 'package:openflow_app/design_system/components/studio_loading_placeholders.dart';
+import 'package:openflow_app/design_system/components/studio_pane_header.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
 import 'package:openflow_app/design_system/components/studio_text_styles.dart';
 import 'package:openflow_app/design_system/tokens.dart';
@@ -146,30 +148,71 @@ class ProjectsSection extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     return AnimatedBuilder(
       animation: controller,
-      builder: (context, _) => Column(
+      builder: (context, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow =
+              constraints.maxWidth < kStudioPipelineInlineMinWidth;
+          return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: StudioSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.projectsListTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              const RiskyOperationConfirmPrefsOverflowMenu(),
-            ],
+          StudioPaneTitleMenuRow(
+            title: l10n.projectsListTitle,
+            titleStyle: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.projectsListSubtitle,
             style: studioHintStyle(context),
+            maxLines: narrow ? 4 : 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: StudioSpacing.xs),
           if (productPresentation)
-            Row(
+            narrow
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      FilledButton.icon(
+                        style: studioFormIconLabeledButtonStyle(context),
+                        onPressed: controller.creatingProject
+                            ? null
+                            : () => _createEmptyProject(context),
+                        icon: const Icon(Icons.add),
+                        label: Text(
+                          controller.creatingProject
+                              ? l10n.projectsCreating
+                              : l10n.projectsCreateFirstEmpty,
+                        ),
+                      ),
+                      const SizedBox(height: StudioSpacing.xs),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: controller.loadingProjects
+                            ? const SizedBox(
+                                width: StudioSpacing.iconTouchTarget,
+                                height: StudioSpacing.iconTouchTarget,
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth:
+                                          StudioControlSize.progressStroke,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : StudioIconButton(
+                                icon: Icons.refresh,
+                                label: l10n.projectsLoadProjectList,
+                                style: studioUtilityIconButtonStyle(context),
+                                onPressed: controller.loadProjects,
+                              ),
+                      ),
+                    ],
+                  )
+                : Row(
               children: <Widget>[
                 FilledButton.icon(
                   style: studioFormIconLabeledButtonStyle(context),
@@ -184,19 +227,26 @@ class ProjectsSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: StudioSpacing.xs),
-                IconButton(
-                  tooltip: l10n.projectsLoadProjectList,
-                  onPressed: controller.loadingProjects
-                      ? null
-                      : controller.loadProjects,
-                  icon: controller.loadingProjects
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: StudioControlSize.progressStroke),
-                        )
-                      : const Icon(Icons.refresh),
-                ),
+                controller.loadingProjects
+                    ? const SizedBox(
+                        width: StudioSpacing.iconTouchTarget,
+                        height: StudioSpacing.iconTouchTarget,
+                        child: Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: StudioControlSize.progressStroke,
+                            ),
+                          ),
+                        ),
+                      )
+                    : StudioIconButton(
+                        icon: Icons.refresh,
+                        label: l10n.projectsLoadProjectList,
+                        style: studioUtilityIconButtonStyle(context),
+                        onPressed: controller.loadProjects,
+                      ),
               ],
             )
           else ...<Widget>[
@@ -252,6 +302,8 @@ class ProjectsSection extends StatelessWidget {
             onOpenProjectDetail: onOpenProjectDetail,
           ),
         ],
+      );
+        },
       ),
     );
   }

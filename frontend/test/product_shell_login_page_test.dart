@@ -104,22 +104,27 @@ void main() {
     expect(find.byKey(const Key('auth-mode-sign-up')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('product-auth-submit')));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(signInTapped, 1);
     await tester.tap(find.byKey(const Key('auth-mode-sign-up')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.enterText(find.byType(TextField).at(2), 'mismatch');
-    await tester.tap(find.byKey(const Key('product-auth-submit')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.text('两次输入的密码不一致。'), findsOneWidget);
-
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('product-auth-password-confirm')), findsOneWidget);
     await tester.enterText(
-      find.byType(TextField).at(2),
-      authController.passwordController.text,
+      find.byKey(const Key('product-auth-password-confirm')),
+      'mismatch',
     );
     await tester.tap(find.byKey(const Key('product-auth-submit')));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('两次输入的密码不一致。'), findsOneWidget);
+    expect(signUpTapped, 0);
+
+    await tester.enterText(
+      find.byKey(const Key('product-auth-password-confirm')),
+      authController.passwordController.text,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('product-auth-submit')));
+    await tester.pumpAndSettle();
 
     expect(signInTapped, 1);
     expect(signUpTapped, 1);

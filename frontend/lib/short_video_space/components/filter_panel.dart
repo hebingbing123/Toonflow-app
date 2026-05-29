@@ -10,6 +10,7 @@ import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_filter_row.dart';
 import 'package:openflow_app/design_system/components/studio_surfaces.dart';
+import 'package:openflow_app/design_system/studio_scheduler.dart';
 import 'package:openflow_app/design_system/tokens.dart';
 
 /// Filter panel component for short video assembly
@@ -87,8 +88,7 @@ class _FilterPanelState extends State<FilterPanel> {
     _searchController = TextEditingController(text: _currentFilter.searchKeyword);
     _searchFocusNode = FocusNode();
     
-    // Notify parent about the focus node for keyboard shortcuts
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    StudioScheduler.scheduleOnceUntil('short_video_filter_search_focus', () {
       widget.onSearchFocusNodeCreated?.call(_searchFocusNode);
     });
   }

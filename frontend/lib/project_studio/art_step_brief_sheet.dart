@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/components/studio_icon_button.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/components/studio_primary_button.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -271,7 +272,9 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                 child: SingleChildScrollView(
                 controller: _scrollCtrl,
                 padding: const EdgeInsets.fromLTRB(StudioSpacing.md, 0, StudioSpacing.md, StudioSpacing.sm),
-                child: Column(
+                child: StudioFormKeyboardScope(
+                  onEnterSubmit: _saving ? null : _save,
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     if (home != null) ...<Widget>[
@@ -393,6 +396,7 @@ class _ArtStepBriefContextSheetState extends State<_ArtStepBriefContextSheet> {
                       ),
                     ),
                   ],
+                ),
                 ),
               ),
               ),

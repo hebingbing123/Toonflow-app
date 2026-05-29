@@ -24,7 +24,9 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
             title: Text(l10n.projectEditorScriptsBatchAddTitle),
             content: SizedBox(
               width: studioConstrainedDialogWidth(context, maxWidth: 420),
-              child: Column(
+              child: StudioFormKeyboardScope(
+                onEnterSubmit: () => Navigator.of(dialogCtx).pop(true),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -49,6 +51,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
                     decoration: InputDecoration(labelText: l10n.projectEditorScriptsBatchAddContentLabel),
                   ),
                 ],
+              ),
               ),
             ),
             actions: [

@@ -7,6 +7,7 @@ import '../../design_system/components/studio_async_data_view.dart';
 import '../../design_system/components/studio_loading_placeholders.dart';
 import '../../design_system/components/studio_toolbar_button.dart';
 import '../../design_system/components/studio_surfaces.dart';
+import '../../design_system/components/studio_metric_switch.dart';
 import '../../design_system/components/studio_text_styles.dart';
 import '../../design_system/studio_responsive_layout.dart';
 import '../../design_system/components/studio_entrance_motion.dart';
@@ -295,7 +296,13 @@ class _PlanCard extends StatelessWidget {
           children: <Widget>[
             Text(plan.displayName, style: studioCardTitleStyle(context)),
             const SizedBox(height: StudioSpacing.xs),
-            Text(plan.priceLabel, style: studioPageTitleStyle(context)),
+            StudioMetricSwitch(
+              transitionKey: plan.priceLabel,
+              child: Text(
+                plan.priceLabel,
+                style: studioMetricTitleStyle(context),
+              ),
+            ),
             const SizedBox(height: StudioSpacing.xs),
             Text(
               plan.description,

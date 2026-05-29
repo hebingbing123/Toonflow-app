@@ -387,12 +387,76 @@ class RealProductShellGalleryHarness {
     }
   }
 
+  /// Dismiss overlays / studio and return router to `/` before utility navigation.
+  Future<void> recoverAuditNavigationAnchor() async {
+    if (hasBlockingOverlay) {
+      await closeOverlay();
+      await pumpFrames(count: 16);
+    }
+    await closeMoreMenuIfOpen();
+    await pumpFrames(count: 8);
+    if (find.text('剧本').evaluate().isNotEmpty) {
+      await exitProjectStudio();
+      await pumpFrames(count: 16);
+    }
+    final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
+    if (shellRoot.evaluate().isNotEmpty) {
+      GoRouter.of(tester.element(shellRoot.first)).go('/');
+      await pumpFrames(count: 32);
+    }
+    for (var i = 0; i < 72; i++) {
+      await pumpFrames(count: 1);
+      if (find.text('新建项目').evaluate().isNotEmpty ||
+          find.text('New project').evaluate().isNotEmpty ||
+          find.byType(StudioPrimaryButton).evaluate().isNotEmpty) {
+        return;
+      }
+    }
+  }
+
+  bool _routerShowsUtilityPane(ProductWorkspacePane pane) {
+    final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
+    if (shellRoot.evaluate().isEmpty) {
+      return false;
+    }
+    final uri = GoRouter.of(tester.element(shellRoot.first)).state.uri;
+    final expected = Uri.parse('http://local${studioUriForUtilityPane(pane)}');
+    if (pane == ProductWorkspacePane.projects) {
+      return uri.path == '/' && uri.queryParameters['pane'] == null;
+    }
+    return uri.queryParameters['pane'] == expected.queryParameters['pane'];
+  }
+
+  static const Map<ProductWorkspacePane, List<String>> _utilityPaneMoreMenuLabels =
+      <ProductWorkspacePane, List<String>>{
+        ProductWorkspacePane.apiKeys: <String>['API 密钥', 'API keys'],
+        ProductWorkspacePane.contentCompliance: <String>[
+          '内容合规',
+          'Content compliance',
+        ],
+        ProductWorkspacePane.helpHub: <String>['帮助', 'Help'],
+        ProductWorkspacePane.platformConfig: <String>[
+          '平台配置',
+          'Platform config',
+        ],
+        ProductWorkspacePane.tasks: <String>['任务中心', 'Task center'],
+        ProductWorkspacePane.shortVideoSpace: <String>[
+          '多平台分发',
+          'Short video',
+        ],
+        ProductWorkspacePane.notifications: <String>[
+          '通知中心',
+          'Notifications',
+        ],
+      };
+
   Future<bool> navigateToUtilityPane(ProductWorkspacePane pane) async {
-    for (var attempt = 0; attempt < 2; attempt++) {
+    await recoverAuditNavigationAnchor();
+    for (var attempt = 0; attempt < 3; attempt++) {
       try {
         if (attempt > 0) {
           await goProjectsHome();
-          await pumpFrames(count: 24);
+          await recoverAuditNavigationAnchor();
         }
         final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
         if (shellRoot.evaluate().isEmpty) {
@@ -404,10 +468,50 @@ class RealProductShellGalleryHarness {
         )?.selectProductWorkspacePane(pane);
         GoRouter.of(element).go(studioUriForUtilityPane(pane));
         await pumpFrames(count: 32);
-        return true;
+        if (_utilityPaneLooksReady(pane) || _routerShowsUtilityPane(pane)) {
+          return true;
+        }
       } catch (_) {}
     }
+    await goProjectsHome();
+    final menuLabels = _utilityPaneMoreMenuLabels[pane];
+    if (menuLabels != null &&
+        await trySelectMoreMenuItemI18n(menuLabels)) {
+      await pumpFrames(count: 32);
+      if (_utilityPaneLooksReady(pane) || _routerShowsUtilityPane(pane)) {
+        return true;
+      }
+    }
+    print('E2E_AUDIT_NAV_FAIL=pane=$pane');
     return false;
+  }
+
+  bool _utilityPaneLooksReady(ProductWorkspacePane pane) {
+    switch (pane) {
+      case ProductWorkspacePane.apiKeys:
+        return find.text('API 密钥').evaluate().isNotEmpty ||
+            find.text('API keys').evaluate().isNotEmpty;
+      case ProductWorkspacePane.contentCompliance:
+        return find.text('内容合规').evaluate().isNotEmpty ||
+            find.text('Content compliance').evaluate().isNotEmpty;
+      case ProductWorkspacePane.helpHub:
+        return find.text('帮助').evaluate().isNotEmpty ||
+            find.text('Help').evaluate().isNotEmpty;
+      case ProductWorkspacePane.platformConfig:
+        return find.text('平台配置').evaluate().isNotEmpty ||
+            find.text('Platform config').evaluate().isNotEmpty;
+      case ProductWorkspacePane.tasks:
+        return find.text('任务中心').evaluate().isNotEmpty ||
+            find.text('Task center').evaluate().isNotEmpty;
+      case ProductWorkspacePane.shortVideoSpace:
+        return find.text('多平台分发').evaluate().isNotEmpty ||
+            find.text('Short video').evaluate().isNotEmpty;
+      case ProductWorkspacePane.notifications:
+        return find.text('通知中心').evaluate().isNotEmpty ||
+            find.text('Notifications').evaluate().isNotEmpty;
+      default:
+        return true;
+    }
   }
 
   /// GoRouter-first route capture — avoids «更多» menu scroll on narrow viewports.
@@ -756,21 +860,7 @@ class RealProductShellGalleryHarness {
 
   /// Re-anchor on projects home with shell + router ready (audit overlays).
   Future<void> ensureAuditShellReady() async {
-    await goProjectsHome();
-    final candidates = <Finder>[
-      find.byKey(const ValueKey<String>('studio-shell-root')),
-      find.text('你的项目'),
-      find.text('新建项目'),
-      find.text('New project'),
-    ];
-    for (var i = 0; i < 120; i++) {
-      await pumpFrames(count: 1);
-      for (final finder in candidates) {
-        if (finder.evaluate().isNotEmpty) {
-          return;
-        }
-      }
-    }
+    await recoverAuditNavigationAnchor();
   }
 
   Finder _moreMenuItem(String label) {
@@ -846,6 +936,8 @@ class RealProductShellGalleryHarness {
   }
 
   int get shotCount => _shotIndex;
+
+  int get interactionCount => _interactionIndex;
 
   List<File> listCapturedPngs() {
     final dir = Directory(outputDir);
@@ -1048,6 +1140,7 @@ class RealProductShellGalleryHarness {
     }
 
     await assertProjectStudioEntered();
+    await settleShell(count: 48);
   }
 
   int _numericIdForProjectTitle(String projectName) {
@@ -1078,7 +1171,7 @@ class RealProductShellGalleryHarness {
     for (final step in <String>['美术', '资产', '分镜', '视频', '成片']) {
       expect(find.text(step), findsWidgets);
     }
-    await pumpFrames(count: 24);
+    await settleShell(count: 32);
   }
 
   Future<bool> tryOpenProjectByName(String projectName) async {
@@ -1166,6 +1259,90 @@ class RealProductShellGalleryHarness {
       await pumpFrames(count: 16);
     }
     await settleShell();
+  }
+
+  Future<void> goStudioStepSlug(String slug) async {
+    final numericId = lastSeedProjectNumericId;
+    if (numericId == null || numericId <= 0) {
+      return;
+    }
+    final shellRoot = find.byKey(const ValueKey<String>('studio-shell-root'));
+    if (shellRoot.evaluate().isEmpty) {
+      return;
+    }
+    GoRouter.of(tester.element(shellRoot.first)).go(
+      '/projects/$numericId/$slug',
+    );
+    await pumpFrames(count: 24);
+  }
+
+  Future<bool> tryOpenCreatorJourneyWorkflowDialog() async {
+    if (await tryTapForOverlayI18n(<String>[
+      '全流程',
+      'Full workflow',
+    ], 'journey_workflow_probe', dismissAfter: false)) {
+      return find.text('六步工作流').evaluate().isNotEmpty ||
+          find.text('Six-step workflow').evaluate().isNotEmpty;
+    }
+    final expand = find.byTooltip('全流程');
+    if (expand.evaluate().isEmpty) {
+      final expandEn = find.byTooltip('Full workflow');
+      if (expandEn.evaluate().isEmpty) {
+        return false;
+      }
+      await tester.tap(expandEn.first, warnIfMissed: false);
+    } else {
+      await tester.tap(expand.first, warnIfMissed: false);
+    }
+    await pumpFrames(count: 16);
+    return find.text('六步工作流').evaluate().isNotEmpty ||
+        find.text('Six-step workflow').evaluate().isNotEmpty;
+  }
+
+  Future<bool> tryOpenArtStepBriefSheet() async {
+    return tryTapForOverlayI18n(<String>[
+      '立项与品牌约束',
+      'Project brief & brand',
+      '立项与视觉约束',
+    ], 'art_brief_probe', dismissAfter: false);
+  }
+
+  Future<bool> tryOpenScriptSetupSheetOverlay() async {
+    return tryTapForOverlayI18n(<String>[
+      '导入小说',
+      'Import novel',
+      '剧本设置',
+      'Script setup',
+      '新建剧本',
+      'New script',
+    ], 'script_setup_probe', dismissAfter: false);
+  }
+
+  Future<bool> tryOpenGlobalSearchFilterSheet() async {
+    await goProjectsHome();
+    await pumpFrames(count: 16);
+    final fields = find.byType(TextField);
+    if (fields.evaluate().isEmpty) {
+      return false;
+    }
+    await tester.enterText(fields.first, 'audit');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await pumpFrames(count: 24);
+    final filter = find.byTooltip('过滤');
+    final filterEn = find.byTooltip('Filter');
+    if (filter.evaluate().isNotEmpty) {
+      await tester.tap(filter.first, warnIfMissed: false);
+    } else if (filterEn.evaluate().isNotEmpty) {
+      await tester.tap(filterEn.first, warnIfMissed: false);
+    } else {
+      final icon = find.byIcon(Icons.filter_list);
+      if (icon.evaluate().isEmpty) {
+        return false;
+      }
+      await tester.tap(icon.first, warnIfMissed: false);
+    }
+    await pumpFrames(count: 16);
+    return find.byType(ModalBarrier).evaluate().isNotEmpty;
   }
 
   Future<bool> tryCaptureSeedProjectStudioInteractions() async {

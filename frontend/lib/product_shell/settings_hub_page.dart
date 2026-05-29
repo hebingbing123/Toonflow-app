@@ -6,6 +6,7 @@ import '../api_keys/controller.dart';
 import '../api_keys/section.dart';
 import '../design_system/components/studio_text_styles.dart';
 import '../design_system/components/studio_decorative_icon.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import '../design_system/studio_motion.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
@@ -121,7 +122,7 @@ class _SettingsHubPageState extends State<SettingsHubPage>
           );
         }
 
-        final tabView = FocusTraversalGroup(
+        final tabView = StudioFormKeyboardScope(
           child: TabBarView(
           controller: _tabController,
           children: <Widget>[

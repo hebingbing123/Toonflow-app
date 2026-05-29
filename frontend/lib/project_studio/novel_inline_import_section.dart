@@ -14,6 +14,7 @@ import '../project_editor/novels/whole_book_chapter_importer.dart';
 import '../project_editor/novels/whole_book_file_picker.dart';
 import '../project_editor/novels/whole_book_import_resume.dart';
 import '../rust_api.dart';
+import '../design_system/ix/studio_form_keyboard.dart';
 import 'novel_crawl_auth_section.dart';
 
 /// Inline novel intake on the script studio step (URL crawl, paste, single chapter).
@@ -371,7 +372,23 @@ class _StudioScriptNovelInlineImportState
         border: Border.all(color: tokens.borderSubtle),
       ),
       child: SingleChildScrollView(
-        child: Column(
+        child: StudioFormKeyboardScope(
+          onEnterSubmit: _busy
+              ? null
+              : () {
+                  final controller = studioFocusedTextField(
+                    FocusManager.instance.primaryFocus?.context,
+                  )?.controller;
+                  if (controller == _urlCtrl) {
+                    unawaited(_runAction(_importFromUrl));
+                    return;
+                  }
+                  if (controller == _chapterTitleCtrl ||
+                      controller == _chapterBodyCtrl) {
+                    unawaited(_runAction(_createSingleChapter));
+                  }
+                },
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -589,6 +606,7 @@ class _StudioScriptNovelInlineImportState
             child: const SizedBox.shrink(),
           ),
           ],
+        ),
         ),
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+
+import '../design_system/studio_scheduler.dart';
+import 'product_demo_tour.dart';
 
 /// Registers active [BuildContext]s for demo coach spotlight targets.
 class ProductDemoTourAnchors {
@@ -41,9 +43,7 @@ class ProductDemoTourAnchors {
   }
 
   void scheduleRemeasure(VoidCallback onMeasured) {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      onMeasured();
-    });
+    StudioScheduler.scheduleOncePerFrame(onMeasured);
   }
 }
 
@@ -79,11 +79,13 @@ class _ProductDemoTourAnchorState extends State<ProductDemoTourAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ProductDemoTourAnchors.instance.register(widget.anchorId, context);
-      }
-    });
+    if (ProductDemoTour.instance.isEngaged) {
+      StudioScheduler.scheduleOncePerFrame(() {
+        if (mounted) {
+          ProductDemoTourAnchors.instance.register(widget.anchorId, context);
+        }
+      });
+    }
     return widget.child;
   }
 }
