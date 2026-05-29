@@ -218,41 +218,43 @@ extension _ShortVideoSpaceSectionProductionAssemblyJobs on _ShortVideoSpaceSecti
       _preAssemblyActionBusy = true;
     });
     try {
-      final gate = buildAssemblyGateUi(
-        l10n: resolveAppLocalizationsForErrors(context),
-        exportCheck: _shortVideoExportCheck,
-        assembly: _shortVideoAssembly,
-      );
-      if (!gate.canPreAssembly) {
-        if (!mounted) return;
+      await studioRunWithRenderLock(() async {
+        final gate = buildAssemblyGateUi(
+          l10n: resolveAppLocalizationsForErrors(context),
+          exportCheck: _shortVideoExportCheck,
+          assembly: _shortVideoAssembly,
+        );
+        if (!gate.canPreAssembly) {
+          if (!mounted) return;
+          final l10n = resolveAppLocalizationsForErrors(context);
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(l10n.shortVideoSpaceAssemblyGatePreAssemblyBlocked),
+            ),
+          );
+          return;
+        }
+        final response = await postProjectShortVideoPreAssemblyByProjectId(
+          token,
+          project.id,
+        );
+        if (!mounted) {
+          return;
+        }
         final l10n = resolveAppLocalizationsForErrors(context);
+        _beginAssemblyJobTracking(response.jobId, kind: _preAssemblyJobKind);
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
-            content: Text(l10n.shortVideoSpaceAssemblyGatePreAssemblyBlocked),
-          ),
-        );
-        return;
-      }
-      final response = await postProjectShortVideoPreAssemblyByProjectId(
-        token,
-        project.id,
-      );
-      if (!mounted) {
-        return;
-      }
-      final l10n = resolveAppLocalizationsForErrors(context);
-      _beginAssemblyJobTracking(response.jobId, kind: _preAssemblyJobKind);
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.shortVideoSpacePreAssemblyEnqueued(
-              response.summary.shotCount,
-              response.summary.blockingShotCount,
-              response.jobId.substring(0, 8),
+            content: Text(
+              l10n.shortVideoSpacePreAssemblyEnqueued(
+                response.summary.shotCount,
+                response.summary.blockingShotCount,
+                response.jobId.substring(0, 8),
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }, reason: 'short_video_pre_assembly');
     } catch (e) {
       if (!mounted) {
         return;
@@ -299,81 +301,83 @@ extension _ShortVideoSpaceSectionProductionAssemblyJobs on _ShortVideoSpaceSecti
     setState(() {
       _exportActionBusy = true;
     });
-    final gate = buildAssemblyGateUi(
-      l10n: resolveAppLocalizationsForErrors(context),
-      exportCheck: _shortVideoExportCheck,
-      assembly: _shortVideoAssembly,
-    );
-    if (!gate.canExport) {
-      if (!mounted) return;
-      final l10n = resolveAppLocalizationsForErrors(context);
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(
-            gate.blockingReasonLines.isNotEmpty
-                ? gate.blockingReasonLines.first
-                : l10n.shortVideoSpacePublishExportCheckBlockingHeadline,
-          ),
-        ),
-      );
-      return;
-    }
-
     try {
-      final format = settings.format.trim().toLowerCase();
-      final enqueue = await postProjectShortVideoExportByProjectId(
-        token,
-        project.id,
-        format: format.isEmpty ? 'mp4' : format,
-      );
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _activeAssemblyJob = JobRow(
-          id: enqueue.jobId,
-          numericTaskId: 0,
-          ownerUserId: '',
-          kind: _exportJobKind,
-          status: 'queued',
-          payload: const {},
-          createdAt: DateTime.now().toUtc().toIso8601String(),
-          updatedAt: DateTime.now().toUtc().toIso8601String(),
+      await studioRunWithRenderLock(() async {
+        final gate = buildAssemblyGateUi(
+          l10n: resolveAppLocalizationsForErrors(context),
+          exportCheck: _shortVideoExportCheck,
+          assembly: _shortVideoAssembly,
         );
-      });
-      _beginAssemblyJobTracking(enqueue.jobId, kind: _exportJobKind);
-      final progressResult = await _openExportProgressDialog(
-        context: context,
-        taskId: enqueue.jobId,
-      );
-      if (!mounted) {
-        return;
-      }
-      final l10n = resolveAppLocalizationsForErrors(context);
-      if (progressResult.openHistoryRequested) {
-        final historyResult = await _openExportHistoryDialog(
-          context: context,
-          currentTaskId: enqueue.jobId,
+        if (!gate.canExport) {
+          if (!mounted) return;
+          final l10n = resolveAppLocalizationsForErrors(context);
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(
+                gate.blockingReasonLines.isNotEmpty
+                    ? gate.blockingReasonLines.first
+                    : l10n.shortVideoSpacePublishExportCheckBlockingHeadline,
+              ),
+            ),
+          );
+          return;
+        }
+
+        final format = settings.format.trim().toLowerCase();
+        final enqueue = await postProjectShortVideoExportByProjectId(
+          token,
+          project.id,
+          format: format.isEmpty ? 'mp4' : format,
         );
         if (!mounted) {
           return;
         }
-        await _applyExportHistoryDialogResult(historyResult);
-      } else {
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            content: Text(
-              progressResult.completed
-                  ? l10n.shortVideoSpaceProductionAssemblyExportCompleted
-                  : l10n.shortVideoSpaceProductionAssemblyExportNotCompleted,
-            ),
-          ),
+        setState(() {
+          _activeAssemblyJob = JobRow(
+            id: enqueue.jobId,
+            numericTaskId: 0,
+            ownerUserId: '',
+            kind: _exportJobKind,
+            status: 'queued',
+            payload: const {},
+            createdAt: DateTime.now().toUtc().toIso8601String(),
+            updatedAt: DateTime.now().toUtc().toIso8601String(),
+          );
+        });
+        _beginAssemblyJobTracking(enqueue.jobId, kind: _exportJobKind);
+        final progressResult = await _openExportProgressDialog(
+          context: context,
+          taskId: enqueue.jobId,
         );
-      }
-      _invalidateProductionSnapshots(
-        includeJobs: true,
-        extra: const <StudioSnapshotKey>[StudioSnapshotKey.assemblyVersions],
-      );
+        if (!mounted) {
+          return;
+        }
+        final l10n = resolveAppLocalizationsForErrors(context);
+        if (progressResult.openHistoryRequested) {
+          final historyResult = await _openExportHistoryDialog(
+            context: context,
+            currentTaskId: enqueue.jobId,
+          );
+          if (!mounted) {
+            return;
+          }
+          await _applyExportHistoryDialogResult(historyResult);
+        } else {
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(
+                progressResult.completed
+                    ? l10n.shortVideoSpaceProductionAssemblyExportCompleted
+                    : l10n.shortVideoSpaceProductionAssemblyExportNotCompleted,
+              ),
+            ),
+          );
+        }
+        _invalidateProductionSnapshots(
+          includeJobs: true,
+          extra: const <StudioSnapshotKey>[StudioSnapshotKey.assemblyVersions],
+        );
+      }, reason: 'short_video_export');
     } catch (e) {
       if (!mounted) {
         return;

@@ -80,7 +80,7 @@ Future<ListProjectAuditEnvelope> fetchProjectAuditV1(
     '$kApiBaseUrl/api/v1/projects/$projectId/audit',
   ).replace(queryParameters: qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return ListProjectAuditEnvelope.fromJson(

@@ -7,9 +7,12 @@ pub(crate) mod billing_workspace;
 mod dto;
 mod enqueue;
 mod handlers;
+mod idempotency;
 mod kinds;
 mod notifications;
 pub(crate) mod payload_project;
+pub(crate) mod repository;
+pub(crate) mod service;
 mod track_metadata;
 
 // Public API surface for other crates / tests; not all items referenced from this module body.

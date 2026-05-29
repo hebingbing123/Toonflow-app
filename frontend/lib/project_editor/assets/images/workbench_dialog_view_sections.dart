@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/studio_asset_block_image.dart';
 import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 import 'package:openflow_app/design_system/components/studio_dense_action_row.dart';
 import 'package:openflow_app/design_system/components/studio_async_data_view.dart';
@@ -92,8 +93,93 @@ List<Widget> buildAssetImagesWorkbenchSections(
           );
         },
       ),
+    _buildBlockSection(context, l10n: l10n, model: model, callbacks: callbacks),
   ];
   return _interleaveVisibleSections(sections);
+}
+
+Widget _buildBlockSection(
+  BuildContext context, {
+  required AppLocalizations l10n,
+  required AssetImagesWorkbenchDialogViewModel model,
+  required AssetImagesWorkbenchDialogViewCallbacks callbacks,
+}) {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(StudioSpacing.radiusComfort),
+    decoration: studioInsetPanelDecoration(context),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.projectEditorAssetImagesBlockSectionTitle,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: StudioSpacing.xs),
+        TextField(
+          controller: model.blockKeyController,
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorAssetImagesBlockKeyLabel,
+          ),
+        ),
+        const SizedBox(height: StudioSpacing.xs),
+        StudioDenseActionRow(
+          spacing: StudioSpacing.xs,
+          children: [
+            FilledButton.tonal(
+              style: studioFormTonalButtonStyle(context),
+              onPressed: callbacks.onRegisterBlock,
+              child: Text(l10n.projectEditorAssetImagesRegisterPreviewAsBlock),
+            ),
+            TextButton(
+              onPressed: callbacks.onReloadBlocks,
+              child: Text(l10n.projectEditorAssetImagesReloadBlocks),
+            ),
+          ],
+        ),
+        if (model.loadingBlocks)
+          const Padding(
+            padding: EdgeInsets.only(top: StudioSpacing.xs),
+            child: StudioListSkeleton(itemCount: 2),
+          )
+        else if (model.assetBlocks.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: StudioSpacing.xs),
+            child: Text(
+              l10n.projectEditorAssetImagesBlocksEmpty,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          )
+        else
+          ...model.assetBlocks.map((block) {
+            return Padding(
+              padding: const EdgeInsets.only(top: StudioSpacing.xs),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${block.blockKey} · ${block.dpiTier}x · ${block.width}×${block.height}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: StudioSpacing.xs),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
+                    child: StudioAssetBlockImage(
+                      accessToken: model.accessToken,
+                      projectId: model.projectId,
+                      assetNumericId: model.selectedAssetNumericId,
+                      blockKey: block.blockKey,
+                      height: 120,
+                      width: double.infinity,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+      ],
+    ),
+  );
 }
 
 Widget _buildAssetField({

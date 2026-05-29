@@ -201,10 +201,7 @@ Future<TtsGenerateResponseV1> postTtsGenerateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 20));
@@ -222,10 +219,7 @@ Future<TtsBatchGenerateResponseV1> postTtsBatchGenerateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 20));
@@ -259,7 +253,7 @@ Future<List<TtsTaskV1>> getTtsTasksV1(
     '$kApiBaseUrl/api/v1/tts/tasks',
   ).replace(queryParameters: query.isEmpty ? null : query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final payload = jsonDecode(res.body) as List<dynamic>;
@@ -272,7 +266,7 @@ Future<List<TtsTaskV1>> getTtsTasksV1(
 Future<TtsTaskV1> getTtsTaskByIdV1(String accessToken, String taskId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/tts/tasks/$taskId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   return TtsTaskV1.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
@@ -286,10 +280,7 @@ Future<TtsCancelResponseV1> postTtsCancelV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'task_id': taskId}),
       )
       .timeout(const Duration(seconds: 20));
@@ -307,10 +298,7 @@ Future<TtsRetryResponseV1> postTtsRetryV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 20));

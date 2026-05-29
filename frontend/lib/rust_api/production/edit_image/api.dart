@@ -17,10 +17,7 @@ Future<ImageFlowResponseV1> postProductionEditImageGetImageFlowV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
@@ -38,10 +35,7 @@ postProductionEditImageGetImageDefaultModelV1(String accessToken) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
@@ -62,10 +56,7 @@ Future<SaveImageFlowResponseV1> postProductionEditImageSaveImageFlowV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'flowId': flowId, 'steps': steps}),
       )
       .timeout(const Duration(seconds: 15));
@@ -90,10 +81,7 @@ Future<UpdateImageFlowResponseV1> postProductionEditImageUpdateImageFlowV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'flowId': flowId,
           'stepId': stepId,
@@ -137,10 +125,7 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -176,10 +161,7 @@ Future<EditImageUploadImageResponseV1> postProductionEditImageUploadImageV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));

@@ -27,7 +27,7 @@ Map<String, dynamic> buildProjectStyleConfigPatchBody({
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -86,7 +86,7 @@ class ProjectsSummary {
 Future<ProjectsSummary> fetchProjectsSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/summary');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -102,10 +102,7 @@ Future<ProjectRow> createProject(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(fields ?? <String, dynamic>{}),
       )
       .timeout(const Duration(seconds: 15));
@@ -129,10 +126,7 @@ Future<ProjectRow> updateProjectByProjectId(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -162,10 +156,7 @@ Future<ProjectRow> patchProjectStyleConfigByProjectId(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -187,7 +178,7 @@ Future<void> deleteProjectByProjectId(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId');
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

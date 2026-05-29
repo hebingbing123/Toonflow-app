@@ -163,10 +163,7 @@ Future<BillingWebhookEventsResponseV1> getBillingWebhookEventsV1(
   final res = await http
       .get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);

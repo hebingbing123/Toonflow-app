@@ -14,10 +14,7 @@ Future<DirectorManualListResponse> postProjectQueryDirectorManual(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 120));
@@ -47,10 +44,7 @@ Future<void> postProjectAddDirectorManual(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 120));
@@ -78,10 +72,7 @@ Future<void> postProjectEditDirectorManual(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 120));
@@ -100,10 +91,7 @@ Future<String> postProjectDeleteDirectorManual(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'name': folderName}),
       )
       .timeout(const Duration(seconds: 60));

@@ -83,6 +83,9 @@ abstract class OpenflowCoreBridgeApiApiImplPlatform
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  RenderLockStatus dco_decode_render_lock_status(dynamic raw);
+
+  @protected
   TimelineSummary dco_decode_timeline_summary(dynamic raw);
 
   @protected
@@ -152,6 +155,9 @@ abstract class OpenflowCoreBridgeApiApiImplPlatform
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  RenderLockStatus sse_decode_render_lock_status(SseDeserializer deserializer);
 
   @protected
   TimelineSummary sse_decode_timeline_summary(SseDeserializer deserializer);
@@ -237,6 +243,12 @@ abstract class OpenflowCoreBridgeApiApiImplPlatform
   @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_render_lock_status(
+    RenderLockStatus self,
     SseSerializer serializer,
   );
 

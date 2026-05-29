@@ -37,7 +37,7 @@ Future<ListAssetsResponse> fetchProjectAssetsByProjectId(
     uri = uri.replace(queryParameters: qp);
   }
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -57,7 +57,7 @@ Future<AssetRow> fetchProjectAssetByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -83,10 +83,7 @@ Future<AssetRow> createProjectAssetUnderProject(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -119,10 +116,7 @@ Future<AssetRow> patchProjectAssetByProjectIds(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -147,7 +141,7 @@ Future<void> deleteProjectAssetByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -166,7 +160,7 @@ Future<void> linkScriptToAssetByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/assets/$assetNumericId',
   );
   final res = await http
-      .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .put(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -185,7 +179,7 @@ Future<void> unlinkScriptFromAssetByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/assets/$assetNumericId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

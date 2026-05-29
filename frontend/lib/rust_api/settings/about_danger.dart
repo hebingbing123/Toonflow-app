@@ -11,10 +11,7 @@ Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: '{}',
       )
       .timeout(const Duration(seconds: 15));
@@ -27,10 +24,7 @@ Future<int> postSettingsDangerClearDatabaseV1(String accessToken) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: '{}',
       )
       .timeout(const Duration(seconds: 15));
@@ -73,10 +67,7 @@ Future<AboutCheckUpdateResponseV1> postAboutCheckUpdateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'source': source}),
       )
       .timeout(const Duration(seconds: 15));
@@ -95,10 +86,7 @@ Future<int> postAboutDownloadAppV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'url': url, 'reinstall': reinstall}),
       )
       .timeout(const Duration(seconds: 15));

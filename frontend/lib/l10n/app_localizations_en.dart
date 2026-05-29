@@ -16851,6 +16851,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorAssetImagesAddImage => 'Add image';
 
   @override
+  String get projectEditorAssetImagesBlockSectionTitle => 'Block assets (DPI)';
+
+  @override
+  String get projectEditorAssetImagesBlockKeyLabel => 'Block key';
+
+  @override
+  String get projectEditorAssetImagesRegisterPreviewAsBlock =>
+      'Register preview as block';
+
+  @override
+  String get projectEditorAssetImagesReloadBlocks => 'Reload blocks';
+
+  @override
+  String get projectEditorAssetImagesBlockRegistered =>
+      'Block registered and cached on this device';
+
+  @override
+  String get projectEditorAssetImagesBlockRegisterFailed =>
+      'Block registration failed';
+
+  @override
+  String get projectEditorAssetImagesBlocksEmpty =>
+      'No blocks for this asset yet';
+
+  @override
   String get projectEditorAssetImagesEditFilePathMayClear =>
       'Edit file_path (may clear)';
 

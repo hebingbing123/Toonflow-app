@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_entrance_motion.dart';
 import '../design_system/components/studio_dialog_shell.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
 import '../design_system/studio_typography.dart';
@@ -249,6 +250,7 @@ class CreatorJourneyStrip extends StatelessWidget {
     required this.currentStep,
     required this.failedJobCount,
     required this.onSelectMilestone,
+    this.projectNumericId,
     this.onBackToProjects,
     this.onOpenReviewPackMilestone,
     this.sheetPresentation = false,
@@ -257,6 +259,7 @@ class CreatorJourneyStrip extends StatelessWidget {
   final StudioStep currentStep;
   final int failedJobCount;
   final ValueChanged<StudioStep> onSelectMilestone;
+  final int? projectNumericId;
 
   /// Tile 0 («项目»): return to projects home.
   final VoidCallback? onBackToProjects;
@@ -312,7 +315,16 @@ class CreatorJourneyStrip extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(_statusIcon(status), size: iconSize, color: iconColor),
+                if (projectNumericId != null)
+                  StudioHero(
+                    tag: studioHeroTagCreatorJourneyMilestone(
+                      projectNumericId!,
+                      i,
+                    ),
+                    child: Icon(_statusIcon(status), size: iconSize, color: iconColor),
+                  )
+                else
+                  Icon(_statusIcon(status), size: iconSize, color: iconColor),
                 SizedBox(height: iconSize >= 19 ? 6 : 4),
                 Text(
                   labels[i],

@@ -11,7 +11,7 @@ import '../shared_kernel/index.dart';
 Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 60));
   ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
@@ -27,7 +27,7 @@ Future<PromptTemplateRowV1> fetchPromptByNumericIdV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$numericId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -49,10 +49,7 @@ Future<PromptTemplateRowV1> patchPromptByNumericIdV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'data': data}),
       )
       .timeout(const Duration(seconds: 30));

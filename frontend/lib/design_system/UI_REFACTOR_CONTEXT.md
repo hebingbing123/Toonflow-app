@@ -52,6 +52,10 @@ Attach these files before any UI/UX change:
 34. Tooltips: prefer `StudioTooltip` over raw `Tooltip` for token chrome.
 35. Batch transfer UI: `StudioTransferProgress` / `StudioTransferProgressList`.
 36. l10n: keys `feature.surface.element.state`; parity via `scripts/check_arb_locale_parity.py` (see `docs/plans/flutter-ui-ux-l10n-conventions.md`).
+37. Three-column shell: desktop `≥960dp` uses [`product_shell/product_shell_three_column_layout.dart`](../product_shell/product_shell_three_column_layout.dart) + [`studio_sidebar.dart`](../product_shell/studio_sidebar.dart); do not scale PC layout on handset.
+38. Render lock: wrap product shell with [`ix/studio_render_lock_scope.dart`](ix/studio_render_lock_scope.dart); use `studioRunWithRenderLock` for local export / assembly.
+39. Block assets: use [`rust_api/assets/block_urls.dart`](../rust_api/assets/block_urls.dart) + `studioAssetDpiTier`; never tiled `DecorationImage.repeat`.
+40. Workspace scope: set [`rust_api/workspace_scope.dart`](../rust_api/workspace_scope.dart) on workspace switch; pass `studioAuthorizedHeaders` / `X-Workspace-Id` on API calls.
 
 ## Verification
 

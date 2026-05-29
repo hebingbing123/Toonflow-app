@@ -150,10 +150,7 @@ Future<void> postProductionStoryboardSetCharacterV1(
   );
   final response = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{
       'projectUuid': projectUuid,
       'scriptId': scriptId,
@@ -329,10 +326,7 @@ Future<ProductionGetProductionDataResponseV1> postProductionGetProductionDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -352,10 +346,7 @@ Future<ProductionPatchResponse> postProductionPatchV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(request.toJson()),
       )
       .timeout(const Duration(seconds: 20));
@@ -386,10 +377,7 @@ Future<int> postProductionGetFlowDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -414,10 +402,7 @@ Future<Map<String, dynamic>> fetchProductionFlowDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -449,10 +434,7 @@ Future<int> postProductionSaveFlowDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -500,10 +482,7 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -537,10 +516,7 @@ Future<int> postProductionWorkbenchConfirmStoryboardCandidatesV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -582,10 +558,7 @@ postProductionWorkbenchBatchGenerateCandidateClipsV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 60));
@@ -619,10 +592,7 @@ Future<int> postProductionStoryboardPollingImageV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -649,10 +619,7 @@ Future<int> postProductionExportImageV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -678,10 +645,7 @@ Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 120));

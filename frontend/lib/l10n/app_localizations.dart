@@ -26581,6 +26581,48 @@ abstract class AppLocalizations {
   /// **'Add image'**
   String get projectEditorAssetImagesAddImage;
 
+  /// No description provided for @projectEditorAssetImagesBlockSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block assets (DPI)'**
+  String get projectEditorAssetImagesBlockSectionTitle;
+
+  /// No description provided for @projectEditorAssetImagesBlockKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Block key'**
+  String get projectEditorAssetImagesBlockKeyLabel;
+
+  /// No description provided for @projectEditorAssetImagesRegisterPreviewAsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Register preview as block'**
+  String get projectEditorAssetImagesRegisterPreviewAsBlock;
+
+  /// No description provided for @projectEditorAssetImagesReloadBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload blocks'**
+  String get projectEditorAssetImagesReloadBlocks;
+
+  /// No description provided for @projectEditorAssetImagesBlockRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Block registered and cached on this device'**
+  String get projectEditorAssetImagesBlockRegistered;
+
+  /// No description provided for @projectEditorAssetImagesBlockRegisterFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Block registration failed'**
+  String get projectEditorAssetImagesBlockRegisterFailed;
+
+  /// No description provided for @projectEditorAssetImagesBlocksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocks for this asset yet'**
+  String get projectEditorAssetImagesBlocksEmpty;
+
   /// No description provided for @projectEditorAssetImagesEditFilePathMayClear.
   ///
   /// In en, this message translates to:

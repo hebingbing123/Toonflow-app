@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'workspace_scope.dart';
+
 /// Parses **`Retry-After`** as delay seconds (integer form per RFC 9110).
 /// HTTP-date form is not parsed here (returns null).
 int? parseRetryAfterHeaderSeconds(String? raw) {
@@ -70,6 +72,16 @@ void ensureHttpStatus(http.Response res, int expected) {
   }
   throw RustApiException.fromHttpResponse(res);
 }
+
+/// Bearer auth + optional `X-Workspace-Id` for Rust API calls.
+Map<String, String> rustApiAuthHeaders(String accessToken) =>
+    studioAuthorizedHeaders(accessToken);
+
+/// JSON mutation headers for Rust API calls.
+Map<String, String> rustApiJsonAuthHeaders(String accessToken) => <String, String>{
+      ...rustApiAuthHeaders(accessToken),
+      'Content-Type': 'application/json',
+    };
 
 /// One storyboard blocked by **`enforce_storyboards_ready_for_generation`** (HTTP 409).
 class StoryboardGenerationBlocked {

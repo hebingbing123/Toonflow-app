@@ -104,8 +104,10 @@ class ShortVideoSpaceView extends StatelessWidget {
     this.hideMasterPanels = false,
     this.splitPublishDraftPanels = false,
     this.hideQualityOverview = false,
+    this.accessToken,
   });
 
+  final String? accessToken;
   final String targetMarket;
   final ValueChanged<String> onTargetMarketChanged;
   final List<String> targetPlatforms;
@@ -398,6 +400,7 @@ class ShortVideoSpaceView extends StatelessWidget {
             const SizedBox(height: StudioLayoutSpacing.section),
           ],
           ShortVideoCandidateCompareSection(
+            accessToken: accessToken,
             candidateCardUi: candidateCardUi,
             candidateComparePanelUi: candidateComparePanelUi,
             videoRatio: videoRatio,

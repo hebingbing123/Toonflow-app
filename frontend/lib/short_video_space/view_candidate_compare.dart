@@ -4,12 +4,14 @@ part of 'view.dart';
 class ShortVideoCandidateCompareSection extends StatelessWidget {
   const ShortVideoCandidateCompareSection({
     super.key,
+    required this.accessToken,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
     required this.videoRatio,
     this.onOpenProjectsForCandidateAssets,
   });
 
+  final String? accessToken;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
   final String videoRatio;
@@ -209,6 +211,7 @@ class ShortVideoCandidateCompareSection extends StatelessWidget {
                                       bottom: StudioSpacing.radiusComfort,
                                     ),
                                     child: _CandidateCompareCard(
+                                      accessToken: accessToken,
                                       item: item,
                                       videoRatio: videoRatio,
                                     ),
@@ -235,6 +238,7 @@ class ShortVideoCandidateCompareSection extends StatelessWidget {
                               index,
                               entranceKey: candidateComparePanelUi.items.length,
                               child: _CandidateCompareCard(
+                                accessToken: accessToken,
                                 item: candidateComparePanelUi.items[index],
                                 videoRatio: videoRatio,
                               ),
@@ -255,10 +259,12 @@ class ShortVideoCandidateCompareSection extends StatelessWidget {
 
 class _CandidateCompareCard extends StatelessWidget {
   const _CandidateCompareCard({
+    required this.accessToken,
     required this.item,
     required this.videoRatio,
   });
 
+  final String? accessToken;
   final ShortVideoCandidateCompareItemUi item;
   final String videoRatio;
 
@@ -326,6 +332,7 @@ class _CandidateCompareCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(StudioSpacing.radiusDense),
                   child: StudioNetworkImage(
+                    accessToken: accessToken,
                     url: item.referenceImageUrl!,
                     height: previewHeight,
                     width: double.infinity,

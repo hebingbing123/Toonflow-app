@@ -85,10 +85,7 @@ Future<HelpHubConfigResponseV1> getSettingsHelpHubConfigV1(
   final res = await http
       .get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -104,10 +101,7 @@ Future<HelpHubConfigResponseV1> postSettingsHelpHubUserLinksV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'items': items
               .map((e) => {'id': e.id, 'title': e.title, 'url': e.url})
@@ -129,10 +123,7 @@ Future<HelpHubConfigResponseV1> postSettingsHelpHubWorkspaceLinksV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'items': items
               .map((e) => {'id': e.id, 'title': e.title, 'url': e.url})
@@ -153,10 +144,7 @@ Future<HelpHubLinksResponseV1> getSettingsHelpHubLinksV1(
   final res = await http
       .get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);

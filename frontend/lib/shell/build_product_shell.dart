@@ -1593,6 +1593,60 @@ extension _HomePageProductShell on _HomePageState {
     }
   }
 
+  /// Right-rail preview slot for desktop three-column shell (storyboard / studio overlays).
+  Widget? _buildProductShellTrailingPreview(
+    BuildContext context, {
+    required bool useThreeColumnShell,
+  }) {
+    if (!useThreeColumnShell) {
+      return null;
+    }
+    final overlay = widget.studioOverlay;
+    if (overlay == StudioOverlayMode.storyboardStudio ||
+        overlay == StudioOverlayMode.projectStudio ||
+        overlay == StudioOverlayMode.episodeConsole) {
+      final tokens = StudioTokens.of(context);
+      final l10n = AppLocalizations.of(context)!;
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: tokens.bgInset.withValues(alpha: 0.72),
+          border: Border(left: BorderSide(color: tokens.borderSubtle)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(StudioSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                l10n.studioEpisodePreviewPlaceholder,
+                style: studioPaneTitleStyle(context),
+              ),
+              const SizedBox(height: StudioSpacing.sm),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: tokens.bgSurface,
+                    borderRadius:
+                        BorderRadius.circular(StudioSpacing.radiusCard),
+                    border: Border.all(color: tokens.borderSubtle),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.play_circle_outline,
+                      size: StudioIconSize.xl,
+                      color: tokens.textMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return null;
+  }
+
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
       StudioToastOverlay.hide();
@@ -1613,13 +1667,15 @@ extension _HomePageProductShell on _HomePageState {
     final pageTitle = _studioShellHeaderTitle(l10n);
     final useCompactStudio = _kStudioShellFourItems;
     final currentPane = _shellNavigationController.productWorkspacePane;
+    final width = MediaQuery.sizeOf(context).width;
+    final handsetShellLayout = width < kStudioHandsetMaxWidth;
+    final useThreeColumnShell =
+        studioUseThreePaneLayout(width) && !handsetShellLayout;
     final showPipeline = shouldShowStudioPipeline(
       overlayMode: widget.studioOverlay,
       currentPane: currentPane,
-    );
-    final width = MediaQuery.sizeOf(context).width;
+    ) && !useThreeColumnShell;
     final isMacOS = _isMacOSNativeShell;
-    final handsetShellLayout = width < kStudioHandsetMaxWidth;
     final useMacOSIntegratedTitleBar =
         !handsetShellLayout && _useIntegratedStudioTitleBar(width);
     // Legacy multi-row chrome only when the viewport is too narrow for integrated.
@@ -1950,7 +2006,20 @@ extension _HomePageProductShell on _HomePageState {
           ),
         ),
         Expanded(
-          child: Stack(
+          child: ProductShellThreeColumnLayout(
+            contentWidth: width,
+            appTitle: appTitle,
+            selectedPane: currentPane,
+            unreadNotifications: _notificationsController.unreadCount,
+            jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
+            qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
+            useFourItemShell: useCompactStudio,
+            onSelectPane: _applyProductShellMoreMenuSelection,
+            trailingPreview: _buildProductShellTrailingPreview(
+              context,
+              useThreeColumnShell: useThreeColumnShell,
+            ),
+            center: Stack(
             children: <Widget>[
               Padding(
             padding: EdgeInsets.fromLTRB(
@@ -2041,6 +2110,7 @@ extension _HomePageProductShell on _HomePageState {
                   ),
                 ),
             ],
+          ),
           ),
         ),
       ],

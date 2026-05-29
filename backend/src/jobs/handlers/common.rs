@@ -18,12 +18,6 @@ pub(crate) fn idempotency_key_header(headers: &HeaderMap) -> Option<String> {
         .map(|s| s.chars().take(200).collect())
 }
 
-pub(crate) fn is_unique_violation(e: &sqlx::Error) -> bool {
-    e.as_database_error()
-        .and_then(|db| db.code())
-        .is_some_and(|code| code == "23505")
-}
-
 pub(crate) fn trim_query_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
         let t = v.trim();

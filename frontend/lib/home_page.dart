@@ -140,6 +140,7 @@ import 'product_shell/product_studio_route_launcher.dart';
 import 'product_shell/studio_project_navigation.dart';
 import 'product_shell/studio_shell_scope.dart';
 import 'product_shell/studio_shell_navigation.dart';
+import 'product_shell/product_shell_three_column_layout.dart';
 import 'studio/default_project_scope.dart';
 import 'studio/recent_projects_prefs.dart';
 import 'studio/job_scope.dart';
@@ -1298,6 +1299,7 @@ class _HomePageState extends State<HomePage> {
         _loadingSessionMe = false;
         _platformConfig = PlatformConfigToggleSetV1.defaults;
       });
+      StudioWorkspaceScope.instance.setWorkspaceId(null);
       _notificationsController.reset();
       return;
     }
@@ -1348,6 +1350,7 @@ class _HomePageState extends State<HomePage> {
         _sessionMeV2 = meV2;
         _applyPlatformConfig(platformConfig);
       });
+      StudioWorkspaceScope.instance.setWorkspaceId(me.currentWorkspace?.id);
       unawaited(_notificationsController.prime());
       if (widget.shellMode == HomeShellMode.harness) {
         unawaited(_skillsHarnessController.startAutoSessionWs());
@@ -1496,6 +1499,7 @@ class _HomePageState extends State<HomePage> {
     _recentProjectIds = const <String>[];
     _sessionMe = null;
     _sessionMeV2 = null; // Task 6.2: Clear v2 response
+    StudioWorkspaceScope.instance.setWorkspaceId(null);
     _lastSessionAccessToken = null;
     _loadingSessionMe = false;
     _platformConfig = PlatformConfigToggleSetV1.defaults;

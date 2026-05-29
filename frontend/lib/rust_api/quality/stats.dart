@@ -371,7 +371,7 @@ Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
   final res = await http
       .get(
         qualityUri('/api/v1/quality/stats'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -397,7 +397,7 @@ Future<List<QualityScopeInsightRow>> fetchQualityScopeInsights(
           '/api/v1/quality/scope-insights',
           queryParameters: query.isEmpty ? null : query,
         ),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -413,7 +413,7 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
   final res = await http
       .get(
         qualityUri('/api/v1/quality/stage-pass-rate'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -429,7 +429,7 @@ Future<List<StageGradeDistributionRow>> fetchQualityStageGradeDistribution(
   final res = await http
       .get(
         qualityUri('/api/v1/quality/stage-grade-distribution'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -453,7 +453,7 @@ Future<List<QualityTokenEfficiencyRow>> fetchQualityTokenEfficiency(
           '/api/v1/quality/token-efficiency',
           queryParameters: query.isEmpty ? null : query,
         ),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -489,7 +489,7 @@ fetchQualityTokenEfficiencySamples(
           '/api/v1/quality/token-efficiency/samples',
           queryParameters: query.isEmpty ? null : query,
         ),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -536,7 +536,7 @@ Future<List<BadCaseStatItem>> fetchBadCaseStats(
   final res = await http
       .get(
         qualityUri('/api/v1/quality/bad-case-stats', queryParameters: query),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);

@@ -7,6 +7,7 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use serde::Deserialize;
+use tokio_util::io::ReaderStream;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -80,15 +81,28 @@ pub(in crate::assets) async fn get_project_asset_image_file_for_project(
     };
 
     let path = root.join(uid.to_string()).join(format!("{image_id}.png"));
-    let bytes = tokio::fs::read(&path)
+
+    if let Some(max_edge) = query.max_edge {
+        let bytes = tokio::fs::read(&path)
+            .await
+            .map_err(|_| ApiError::NotFound)?;
+        let body = downscale_image_bytes(&bytes, max_edge)?;
+        return Ok((
+            StatusCode::OK,
+            [
+                (header::CONTENT_TYPE, "image/png"),
+                (header::CACHE_CONTROL, "private, max-age=300"),
+            ],
+            Body::from(body),
+        )
+            .into_response());
+    }
+
+    let file = tokio::fs::File::open(&path)
         .await
         .map_err(|_| ApiError::NotFound)?;
-
-    let body = if let Some(max_edge) = query.max_edge {
-        downscale_image_bytes(&bytes, max_edge)?
-    } else {
-        bytes
-    };
+    let stream = ReaderStream::new(file);
+    let body = Body::from_stream(stream);
 
     Ok((
         StatusCode::OK,
@@ -96,7 +110,7 @@ pub(in crate::assets) async fn get_project_asset_image_file_for_project(
             (header::CONTENT_TYPE, "image/png"),
             (header::CACHE_CONTROL, "private, max-age=300"),
         ],
-        Body::from(body),
+        body,
     )
         .into_response())
 }

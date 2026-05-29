@@ -23,6 +23,11 @@ class AssetImagesWorkbenchDialogViewModel {
     required this.patchFilePathController,
     required this.patchStateController,
     required this.patchSortController,
+    required this.assetBlocks,
+    required this.loadingBlocks,
+    required this.blockKeyController,
+    required this.projectId,
+    required this.accessToken,
   });
 
   final List<AssetRow> assets;
@@ -41,6 +46,11 @@ class AssetImagesWorkbenchDialogViewModel {
   final TextEditingController patchFilePathController;
   final TextEditingController patchStateController;
   final TextEditingController patchSortController;
+  final List<AssetBlockRow> assetBlocks;
+  final bool loadingBlocks;
+  final TextEditingController blockKeyController;
+  final String projectId;
+  final String accessToken;
 }
 
 class AssetImagesWorkbenchDialogViewCallbacks {
@@ -53,6 +63,8 @@ class AssetImagesWorkbenchDialogViewCallbacks {
     required this.onCreateImage,
     required this.onPatchImage,
     required this.onDeleteImage,
+    required this.onReloadBlocks,
+    required this.onRegisterBlock,
   });
 
   final ValueChanged<int?> onAssetChanged;
@@ -63,5 +75,7 @@ class AssetImagesWorkbenchDialogViewCallbacks {
   final VoidCallback? onCreateImage;
   final VoidCallback? onPatchImage;
   final VoidCallback? onDeleteImage;
+  final VoidCallback? onReloadBlocks;
+  final VoidCallback? onRegisterBlock;
 }
 

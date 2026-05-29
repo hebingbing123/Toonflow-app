@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../../config.dart';
+import '../../platform/studio_asset_image_cache.dart';
 import '../core.dart';
 import 'models/corner_scape.dart';
 import 'models/images.dart';
@@ -18,7 +19,7 @@ Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -39,7 +40,7 @@ Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -65,23 +66,24 @@ Uri projectAssetImageFileV1UriByProjectId(
   );
 }
 
-/// Fetches image bytes from [`projectAssetImageFileV1UriByProjectId`].
+/// Fetches image bytes from [`projectAssetImageFileV1UriByProjectId`] (disk cache first).
 Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
   String accessToken,
   String projectId,
   int assetNumericId,
-  String imageId,
-) async {
+  String imageId, {
+  int? maxEdge,
+}) async {
   final uri = projectAssetImageFileV1UriByProjectId(
     projectId,
     assetNumericId,
     imageId,
+    maxEdge: maxEdge,
   );
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 120));
-  ensureHttpSuccess(res);
-  return res.bodyBytes;
+  return studioLoadCachedAssetImageBytes(
+    accessToken: accessToken,
+    uri: uri,
+  );
 }
 
 /// Loads image bytes for a corner-scape **`history_images`** row.
@@ -145,10 +147,7 @@ Future<AssetImageRow> createProjectAssetImageForProject(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -177,10 +176,7 @@ Future<AssetImageRow> patchProjectAssetImageByProjectIds(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -192,7 +188,11 @@ Future<AssetImageRow> patchProjectAssetImageByProjectIds(
   }
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return AssetImageRow.fromJson(map);
+  final row = AssetImageRow.fromJson(map);
+  await StudioAssetImageCache.evictUri(
+    projectAssetImageFileV1UriByProjectId(projectId, assetNumericId, imageId),
+  );
+  return row;
 }
 
 /// `DELETE …/projects/{project_id}/assets/.../images/{image_id}` — see `deleteProjectAssetImageByProjectIdV1`.
@@ -206,7 +206,7 @@ Future<void> deleteProjectAssetImageByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -215,4 +215,7 @@ Future<void> deleteProjectAssetImageByProjectIds(
     throw RustApiException.fromHttpResponse(res);
   }
   ensureHttpStatus(res, 204);
+  await StudioAssetImageCache.evictUri(
+    projectAssetImageFileV1UriByProjectId(projectId, assetNumericId, imageId),
+  );
 }

@@ -17,7 +17,7 @@ Future<ProjectDetail> fetchProjectByProjectId(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -34,7 +34,7 @@ Future<ProjectStats> fetchProjectStatsByProjectId(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/stats');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -50,7 +50,7 @@ Future<ProjectHome> fetchProjectHomeByProjectId(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/home');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -69,7 +69,7 @@ Future<ProjectShortVideoReadiness> fetchProjectShortVideoReadinessByProjectId(
     '$kApiBaseUrl/api/v1/projects/$projectId/short-video-readiness',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -88,7 +88,7 @@ Future<ProjectProductionOverview> fetchProjectProductionOverviewByProjectId(
     '$kApiBaseUrl/api/v1/projects/$projectId/production-overview',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -107,7 +107,7 @@ Future<ProjectAssetsOverview> fetchProjectAssetsOverviewByProjectId(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets-overview',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -126,7 +126,7 @@ Future<ProjectShortVideoAssembly> fetchProjectShortVideoAssemblyByProjectId(
     '$kApiBaseUrl/api/v1/projects/$projectId/short-video-assembly',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 25));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -146,7 +146,7 @@ fetchProjectShortVideoExportCheckByProjectId(
     '$kApiBaseUrl/api/v1/projects/$projectId/short-video-export-check',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 25));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -172,10 +172,7 @@ postProjectShortVideoPreAssemblyByProjectId(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -204,10 +201,7 @@ Future<ShortVideoExportEnqueueResponse> postProjectShortVideoExportByProjectId(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));

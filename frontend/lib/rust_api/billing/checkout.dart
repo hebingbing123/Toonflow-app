@@ -135,7 +135,7 @@ Future<BillingPlansResponse> fetchBillingPlansV1(
     queryParameters: <String, String>{'currency': currency},
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return BillingPlansResponse.fromJson(
@@ -153,10 +153,7 @@ Future<CheckoutResponse> postBillingCheckoutV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'plan_tier': planTier,
           'provider': provider,
@@ -176,7 +173,7 @@ Future<CheckoutSessionResponse> fetchBillingCheckoutSessionV1(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/billing/checkout/$sessionId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return CheckoutSessionResponse.fromJson(
@@ -189,10 +186,7 @@ Future<String> postBillingPortalV1(String accessToken) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: '{}',
       )
       .timeout(const Duration(seconds: 20));

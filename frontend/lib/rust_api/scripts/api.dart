@@ -24,10 +24,7 @@ Future<List<ScriptWorkbenchDetailRow>> postScriptsGetScriptApiByProjectId(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -54,10 +51,7 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'data': data.map((e) => e.toJson()).toList()}),
       )
       .timeout(const Duration(seconds: 30));
@@ -79,7 +73,7 @@ Future<ScriptRow> fetchScriptByProjectAndNumericId(
     '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -102,10 +96,7 @@ Future<ScriptRow> updateScriptByProjectAndNumericId(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -130,7 +121,7 @@ Future<void> deleteScriptByProjectAndNumericId(
     '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -148,10 +139,7 @@ Future<ScriptRow> createScriptUnderProject(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(fields ?? <String, dynamic>{}),
       )
       .timeout(const Duration(seconds: 15));
@@ -182,10 +170,7 @@ Future<Uint8List> exportScriptsZip(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'numeric_ids': ids}),
       )
       .timeout(const Duration(seconds: 120));
@@ -206,10 +191,7 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'numeric_ids': ids}),
       )
       .timeout(const Duration(seconds: 30));
@@ -261,10 +243,7 @@ Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));

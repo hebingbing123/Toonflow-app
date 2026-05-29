@@ -70,7 +70,7 @@ Future<List<QualityReview>> fetchQualityReviews(
           '/api/v1/quality/reviews',
           queryParameters: query.isEmpty ? null : query,
         ),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -87,10 +87,7 @@ Future<QualityReview> createQualityReview(
   final res = await http
       .post(
         qualityUri('/api/v1/quality/reviews'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -106,7 +103,7 @@ Future<QualityReview> fetchQualityReviewById(
   final res = await http
       .get(
         qualityUri('/api/v1/quality/reviews/$reviewId'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {

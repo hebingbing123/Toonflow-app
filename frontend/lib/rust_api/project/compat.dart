@@ -96,7 +96,7 @@ Future<List<ProjectRow>> fetchAllProjectsPaged(String accessToken) async {
       '$kApiBaseUrl/api/v1/projects?limit=$page&offset=$offset',
     );
     final res = await http
-        .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+        .get(uri, headers: rustApiAuthHeaders(accessToken))
         .timeout(const Duration(seconds: 20));
     ensureHttpSuccess(res);
     final list = jsonDecode(res.body) as List<dynamic>;

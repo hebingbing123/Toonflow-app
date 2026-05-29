@@ -37,7 +37,7 @@ Future<ListNovelsResponse> fetchProjectNovelsByProjectId(
     uri = uri.replace(queryParameters: qp);
   }
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -57,7 +57,7 @@ Future<NovelRow> fetchProjectNovelByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelNumericId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -109,10 +109,7 @@ Future<NovelRow> createProjectNovelUnderProject(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -140,10 +137,7 @@ Future<NovelRow> patchProjectNovelByProjectIds(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -168,7 +162,7 @@ Future<void> deleteProjectNovelByProjectIds(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelNumericId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -192,7 +186,7 @@ Future<NovelCrawlAuthGetResponse> getProjectNovelCrawlAuth(
   final res = await http
       .get(
         uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
@@ -216,10 +210,7 @@ Future<NovelCrawlAuthGetResponse> putProjectNovelCrawlAuth(
   final res = await http
       .put(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -253,10 +244,7 @@ Future<NovelCrawlPreviewResponse> postProjectNovelCrawlPreview(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 60));
@@ -296,10 +284,7 @@ Future<NovelCrawlImportResponse> postProjectNovelCrawlImport(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
@@ -338,10 +323,7 @@ Future<NovelCrawlImportBatchResponse> postProjectNovelCrawlImportBatch(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 180));
@@ -372,7 +354,7 @@ Future<WholeBookImportSessionResponse> getProjectNovelWholeBookImportSession(
   final res = await http
       .get(
         uri,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
@@ -414,10 +396,7 @@ Future<WholeBookImportResponse> postProjectNovelWholeBookImport(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 120));
@@ -478,10 +457,7 @@ Future<NovelCrawlScheduleRow> postProjectNovelCrawlScheduleCreate(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 20));
@@ -505,7 +481,7 @@ Future<List<NovelCrawlScheduleRow>> fetchProjectNovelCrawlSchedules(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-schedules',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -526,7 +502,7 @@ Future<NovelCrawlObservabilityResponse> fetchProjectNovelCrawlObservability(
     '$kApiBaseUrl/api/v1/projects/$projectId/novels/crawl-observability',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

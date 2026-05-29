@@ -24,6 +24,11 @@ Future<void> changeAssetImagesWorkbenchAsset({
     assetNumericId: value,
     setState: setState,
   );
+  await reloadAssetBlocks(
+    scope: scope,
+    assetNumericId: value,
+    setState: setState,
+  );
 }
 
 Future<void> selectAssetImagesWorkbenchImage({

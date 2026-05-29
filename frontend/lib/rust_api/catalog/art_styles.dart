@@ -73,7 +73,7 @@ Uri artStyleCoverV1Uri(int numericId) =>
 Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -96,10 +96,7 @@ Future<ArtStyleRow> createArtStyle(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 20));
@@ -118,7 +115,7 @@ Future<ArtStyleRow> fetchArtStyleByNumericId(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException.fromHttpResponse(res);
@@ -136,7 +133,7 @@ Future<Uint8List> fetchArtStyleCoverByNumericId(
   final res = await http
       .get(
         artStyleCoverV1Uri(numericId),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
@@ -162,10 +159,7 @@ Future<ArtStyleRow> patchArtStyleByNumericId(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 20));
@@ -184,7 +178,7 @@ Future<void> deleteArtStyleByNumericId(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException.fromHttpResponse(res);
@@ -203,10 +197,7 @@ Future<ExtractArtStylePromptResponse> extractArtStylePrompt(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'images': images}),
       )
       .timeout(const Duration(seconds: 120));

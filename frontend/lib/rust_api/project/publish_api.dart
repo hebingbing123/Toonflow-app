@@ -24,7 +24,7 @@ Future<PublishOverviewResponse> fetchPublishOverview(
   );
   final uri = qp.isEmpty ? base : base.replace(queryParameters: qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -43,7 +43,7 @@ Future<PublishPlatformMatrixResponse> fetchPublishPlatformMatrix(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/platform-matrix',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -75,7 +75,7 @@ Future<List<PublishDraftRow>> fetchPublishDrafts(
   );
   final uri = qp.isEmpty ? base : base.replace(queryParameters: qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
@@ -94,7 +94,7 @@ Future<PublishPrepareCheckResponse> fetchPublishPrepareCheck(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/$draftId/prepare-check',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -113,10 +113,7 @@ Future<PublishDraftRow> createPublishDraft(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 25));
@@ -135,7 +132,7 @@ Future<PublishDraftRow> fetchPublishDraft(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/drafts/$draftId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -155,10 +152,7 @@ Future<PublishDraftRow> patchPublishDraft(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 25));
@@ -180,10 +174,7 @@ Future<List<PublishTargetRow>> upsertPublishTargets(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'targets': targets}),
       )
       .timeout(const Duration(seconds: 25));
@@ -201,7 +192,7 @@ Future<List<PublishJobRow>> fetchPublishJobs(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
@@ -229,7 +220,7 @@ Future<List<PublishAttemptAuditRow>> fetchPublishAudit(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/audit',
   ).replace(queryParameters: qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
@@ -257,7 +248,7 @@ Future<List<PublishPerformanceAlertRow>> fetchPublishPerformanceAlerts(
         },
       );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final raw = jsonDecode(res.body) as List<dynamic>;
@@ -281,10 +272,7 @@ Future<PublishJobRow> createPublishJob(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'payload': payload}),
       )
       .timeout(const Duration(seconds: 25));
@@ -303,7 +291,7 @@ Future<PublishJobRow> confirmSemiAutoPublishJob(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs/$jobId/confirm-semi-auto',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -320,7 +308,7 @@ Future<void> retryPublishJob(
     '$kApiBaseUrl/api/v1/projects/$projectId/publish/jobs/$jobId/retry',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 25));
   ensureHttpStatus(res, 204);
 }
@@ -338,10 +326,7 @@ Future<PublishValidateCopyResponse> validatePublishCopy(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'platform_copy': platformCopy,
           'targets': targets,
@@ -371,10 +356,7 @@ Future<SuggestPlatformCopyResponse> suggestPublishPlatformCopy(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 60));
@@ -396,10 +378,7 @@ Future<BatchSchedulePublishDraftsResponse> batchSchedulePublishDrafts(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'draft_ids': draftIds,
           'scheduled_at': scheduledAtIso,
@@ -422,10 +401,7 @@ Future<PublishBatchValidationResponse> batchValidatePublishDrafts(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'draft_ids': draftIds}),
       )
       .timeout(const Duration(seconds: 25));
@@ -447,10 +423,7 @@ Future<PublishBatchPublishResponse> batchPublishDrafts(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'draft_ids': draftIds,
           'immediate': immediate,
@@ -474,10 +447,7 @@ Future<PublishBatchArchiveResponse> batchArchivePublishDrafts(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'draft_ids': draftIds}),
       )
       .timeout(const Duration(seconds: 25));

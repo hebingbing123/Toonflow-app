@@ -365,7 +365,7 @@ Future<List<WorkspaceListItem>> fetchWorkspacesV1(
         )
       : base;
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -382,10 +382,7 @@ Future<WorkspaceResponse> createWorkspaceV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -400,7 +397,7 @@ Future<List<WorkspaceMemberResponse>> fetchWorkspaceMembersV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/members');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -430,7 +427,7 @@ Future<WorkspaceAuditListEnvelope> fetchWorkspaceAuditPageV1(
     '$kApiBaseUrl/api/v1/workspaces/$workspaceId/audit',
   ).replace(queryParameters: qp.isEmpty ? null : qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -476,7 +473,7 @@ Future<WorkspaceInvitesListEnvelope> fetchWorkspaceInvitesPageV1(
     '$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites',
   ).replace(queryParameters: qp.isEmpty ? null : qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -521,7 +518,7 @@ Future<WorkspaceInviteResponse> revokeWorkspaceInviteV1(
     '$kApiBaseUrl/api/v1/workspaces/$workspaceId/invites/$inviteId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -541,10 +538,7 @@ Future<WorkspaceInviteResponse> resendWorkspaceInviteV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -562,10 +556,7 @@ Future<WorkspaceMemberResponse> addWorkspaceMemberV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -586,10 +577,7 @@ Future<WorkspaceMemberResponse> patchWorkspaceMemberV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -607,7 +595,7 @@ Future<WorkspaceMemberResponse> removeWorkspaceMemberV1(
     '$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/$userId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -622,7 +610,7 @@ Future<WorkspaceMemberResponse> leaveWorkspaceV1(
     '$kApiBaseUrl/api/v1/workspaces/$workspaceId/members/me',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -640,10 +628,7 @@ Future<WorkspaceResponse> transferWorkspaceOwnerV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -661,10 +646,7 @@ Future<WorkspaceInviteResponse> createWorkspaceInviteV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -681,10 +663,7 @@ Future<WorkspaceMemberResponse> acceptWorkspaceInviteV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -706,10 +685,7 @@ Future<WorkspaceResponse> patchWorkspaceV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 15));

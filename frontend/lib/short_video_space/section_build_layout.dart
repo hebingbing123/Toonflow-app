@@ -277,6 +277,7 @@ extension _ShortVideoSpaceSectionBuildLayout on _ShortVideoSpaceSectionState {
               assemblyInputPanelKey: _assemblyInputPanelKey,
               onResetConfirmationDontShowAgain: (ctx) =>
                   unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
+              accessToken: widget.accessToken,
             );
 
     final detailColumn = Column(
@@ -324,6 +325,7 @@ extension _ShortVideoSpaceSectionBuildLayout on _ShortVideoSpaceSectionState {
               ],
               if (widget.embedScope == ShortVideoSpaceEmbedScope.full)
                 ShortVideoCandidateCompareSection(
+                  accessToken: widget.accessToken,
                   candidateCardUi: bundle.candidateCardUi,
                   candidateComparePanelUi: bundle.candidateComparePanelUi,
                   videoRatio: _videoRatio,

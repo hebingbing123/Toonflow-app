@@ -15966,6 +15966,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetImagesAddImage => '新增图片';
 
   @override
+  String get projectEditorAssetImagesBlockSectionTitle => 'Block 资产（DPI）';
+
+  @override
+  String get projectEditorAssetImagesBlockKeyLabel => 'Block 键';
+
+  @override
+  String get projectEditorAssetImagesRegisterPreviewAsBlock => '将预览注册为 Block';
+
+  @override
+  String get projectEditorAssetImagesReloadBlocks => '重新加载 Block';
+
+  @override
+  String get projectEditorAssetImagesBlockRegistered => 'Block 已注册并缓存到本机';
+
+  @override
+  String get projectEditorAssetImagesBlockRegisterFailed => 'Block 注册失败';
+
+  @override
+  String get projectEditorAssetImagesBlocksEmpty => '该资产尚无 Block';
+
+  @override
   String get projectEditorAssetImagesEditFilePathMayClear =>
       '编辑 file_path（可清空）';
 

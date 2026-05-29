@@ -17,7 +17,7 @@ Future<List<StoryboardRow>> fetchStoryboardsForProjectScript(
     '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/storyboards',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -39,10 +39,7 @@ Future<StoryboardRow> createStoryboardUnderProjectScript(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(fields ?? <String, dynamic>{}),
       )
       .timeout(const Duration(seconds: 15));
@@ -67,7 +64,7 @@ Future<StoryboardRow> fetchStoryboardByProjectAndNumericId(
     '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardNumericId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -90,10 +87,7 @@ Future<StoryboardRow> updateStoryboardByProjectAndNumericId(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 20));
@@ -118,7 +112,7 @@ Future<void> deleteStoryboardByProjectAndNumericId(
     '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardNumericId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

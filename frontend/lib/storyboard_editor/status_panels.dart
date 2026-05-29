@@ -3,12 +3,14 @@ part of '../../home_page.dart';
 /// Renders the current storyboard image preview and its production metadata.
 class _StoryboardPreviewCard extends StatelessWidget {
   const _StoryboardPreviewCard({
+    required this.accessToken,
     required this.loadingProduction,
     required this.scriptStoryboard,
     required this.productionRow,
     required this.metaLine,
   });
 
+  final String accessToken;
   final bool loadingProduction;
   final StoryboardRow scriptStoryboard;
   final ProductionStoryboardItemV1? productionRow;
@@ -77,6 +79,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
                 child: StudioNetworkImage(
+                  accessToken: accessToken,
                   url: imageUrl,
                   height: previewHeight,
                   width: double.infinity,

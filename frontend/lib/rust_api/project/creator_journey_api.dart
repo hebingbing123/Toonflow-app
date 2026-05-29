@@ -112,7 +112,7 @@ Future<void> postCreatorJourneyEvents(
       .post(
         uri,
         headers: <String, String>{
-          'Authorization': 'Bearer $accessToken',
+      ...rustApiAuthHeaders(accessToken),
           'Content-Type': 'application/json',
         },
         body: jsonEncode(body),
@@ -131,7 +131,7 @@ Future<CreatorJourneySummary> fetchCreatorJourneySummary(
     '$kApiBaseUrl/api/v1/projects/$projectUuid/creator-journey-summary',
   ).replace(queryParameters: <String, String>{'days': '$days'});
   final res = await http
-      .get(uri, headers: <String, String>{'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return CreatorJourneySummary.fromJson(

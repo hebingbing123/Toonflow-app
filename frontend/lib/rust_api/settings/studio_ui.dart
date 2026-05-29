@@ -29,7 +29,7 @@ class StudioUiPrefsV1 {
 Future<StudioUiPrefsV1> fetchStudioUiPrefsV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/studio-ui/prefs');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return StudioUiPrefsV1.fromJson(
@@ -46,10 +46,7 @@ Future<StudioUiPrefsV1> putStudioUiPrefsV1(
   final res = await http
       .put(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(prefs.toJson()),
       )
       .timeout(const Duration(seconds: 15));

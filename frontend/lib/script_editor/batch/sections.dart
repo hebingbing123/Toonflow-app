@@ -352,6 +352,7 @@ extension _StoryboardBatchWorkbenchSections
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
                     child: StudioNetworkImage(
+                      accessToken: widget.token,
                       url: _previewUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,

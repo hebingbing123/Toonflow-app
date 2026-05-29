@@ -410,17 +410,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
                 loading: _errorMessage == null,
                 error: _errorMessage,
                 onRetry: _pollProgress,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SizedBox(height: StudioSpacing.sm),
-                    Center(
-                      child: Text(
-                        l10n.shortVideoSpaceDialogExportProgressLoadingStatus,
-                      ),
-                    ),
-                  ],
-                ),
+                loadingPlaceholder: StudioLoadingPlaceholder.pane,
+                child: const StudioAiGenerationShimmer(lines: 3),
               )
             else
               RepaintBoundary(

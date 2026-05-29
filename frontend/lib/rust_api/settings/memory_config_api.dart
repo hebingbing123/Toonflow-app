@@ -73,7 +73,7 @@ class MemoryConfigV1 {
 Future<MemoryConfigV1> fetchMemoryConfigV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/memory-config');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -89,10 +89,7 @@ Future<String> postMemoryConfigV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -127,10 +124,7 @@ Future<int> postSettingsClearAgentMemoriesV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));

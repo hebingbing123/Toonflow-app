@@ -35,10 +35,7 @@ Future<WorkbenchAssetTreeResponse> postWorkbenchAssetsGetAssetsApi(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 15));
@@ -62,10 +59,7 @@ Future<WorkbenchImageBundleResponse> postWorkbenchAssetsGetImage(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'assetsId': assetNumericId}),
       )
       .timeout(const Duration(seconds: 15));
@@ -94,10 +88,7 @@ Future<WorkbenchAssetUploadClipResponse> postWorkbenchAssetsUploadClip(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'base64Data': base64Data,
           'type': assetType,
@@ -127,10 +118,7 @@ Future<WorkbenchAssetMaterialDataResponse> postWorkbenchAssetsGetMaterialData(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
@@ -166,10 +154,7 @@ postWorkbenchAssetsBatchGenerationData(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(payload),
       )
       .timeout(const Duration(seconds: 15));
@@ -194,10 +179,7 @@ postWorkbenchAssetsPollingImageAssets(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'ids': assetNumericIds}),
       )
       .timeout(const Duration(seconds: 15));
@@ -227,10 +209,7 @@ postWorkbenchAssetsPollingPromptAssets(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'ids': assetNumericIds}),
       )
       .timeout(const Duration(seconds: 15));

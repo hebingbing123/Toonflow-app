@@ -9,6 +9,7 @@ use crate::http_kit::request_id_mw::inject_request_id_into_json_errors;
 use crate::jobs;
 use crate::manuals;
 use crate::metering;
+use crate::middleware::tracing::trace_request;
 use crate::narrative;
 use crate::production;
 use crate::projects;
@@ -150,6 +151,7 @@ pub fn build_router(state: AppState) -> Router {
             get(handlers::get_sli_definitions),
         )
         .with_state(state)
+        .layer(from_fn(trace_request))
         .layer(from_fn(inject_request_id_into_json_errors))
         .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())
         .layer(tower_http::request_id::SetRequestIdLayer::x_request_id(

@@ -214,7 +214,7 @@ Future<PlatformConfigResponseV1> fetchPlatformConfigV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/platform-config');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return PlatformConfigResponseV1.fromJson(
@@ -232,10 +232,7 @@ Future<PlatformConfigResponseV1> postPlatformConfigV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           if (toggles != null) 'toggles': toggles.toJson(),
           'scope': scope,

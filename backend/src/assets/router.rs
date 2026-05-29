@@ -7,6 +7,7 @@ use axum::{
 
 use crate::state::AppState;
 
+use super::blocks;
 use super::crud;
 use super::crud_images;
 use super::generate;
@@ -14,6 +15,10 @@ use super::workbench_query;
 use super::workbench_write;
 
 pub fn router() -> Router<AppState> {
+    use blocks::handlers::{
+        create_project_asset_block_for_project, get_project_asset_block_file_for_project,
+        list_project_asset_blocks_for_project,
+    };
     use crud::*;
     use crud_images::*;
     use workbench_query::*;
@@ -79,6 +84,14 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/assets/corner-scape",
             post(list_corner_scape_assets_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/blocks",
+            get(list_project_asset_blocks_for_project).post(create_project_asset_block_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/blocks/{block_key}/file",
+            get(get_project_asset_block_file_for_project),
         )
         .route(
             "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",

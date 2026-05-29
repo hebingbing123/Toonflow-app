@@ -519,7 +519,7 @@ Future<ProjectShortVideoTimelineV1> fetchProjectShortVideoTimelineByProjectId(
   );
   final res = await http.get(
     uri,
-    headers: {'Authorization': 'Bearer $accessToken'},
+    headers: rustApiAuthHeaders(accessToken),
   ).timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);
   return ProjectShortVideoTimelineV1.fromJson(
@@ -551,10 +551,7 @@ Future<PutProjectShortVideoTimelineResponseV1> putProjectShortVideoTimeline(
   }
   final res = await http.put(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(body),
   ).timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);
@@ -574,10 +571,7 @@ postProjectShortVideoTimelineApplyTemplate(
   );
   final res = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{'templateId': templateId}),
   ).timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);
@@ -596,7 +590,7 @@ postProjectShortVideoTimelinePreview(
   );
   final res = await http.post(
     uri,
-    headers: {'Authorization': 'Bearer $accessToken'},
+    headers: rustApiAuthHeaders(accessToken),
   ).timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);
   return ShortVideoTimelinePreviewEnqueueResponseV1.fromJson(
@@ -651,10 +645,7 @@ Future<void> postProjectShortVideoTimelineReorder(
   );
   final res = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{
       'scriptNumericId': scriptNumericId,
       'orderedStoryboardIds': orderedStoryboardIds,
@@ -673,7 +664,7 @@ fetchProjectShortVideoTimelineRevisions(
   );
   final res = await http.get(
     uri,
-    headers: {'Authorization': 'Bearer $accessToken'},
+    headers: rustApiAuthHeaders(accessToken),
   ).timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final json = Map<String, dynamic>.from(jsonDecode(res.body) as Map);
@@ -698,10 +689,7 @@ postProjectShortVideoTimelineRestore(
   );
   final res = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{'revision': revision}),
   ).timeout(const Duration(seconds: 25));
   ensureHttpSuccess(res);

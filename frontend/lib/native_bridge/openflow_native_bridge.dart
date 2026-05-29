@@ -113,6 +113,33 @@ class OpenflowNativeBridge {
     return bridge_api.summarizeWorkflowDocument(document: document);
   }
 
+  /// Returns `true` when the native render lock was acquired.
+  Future<bool> tryAcquireRenderLock() async {
+    if (!shouldUseDesktopBridge) {
+      return true;
+    }
+    await ensureInitialized();
+    return bridge_api.acquireRenderLock();
+  }
+
+  Future<void> releaseRenderLock() async {
+    if (!shouldUseDesktopBridge) {
+      return;
+    }
+    if (!_initialized) {
+      return;
+    }
+    await bridge_api.releaseRenderLock();
+  }
+
+  Future<bridge_api.RenderLockStatus?> renderLockStatus() async {
+    if (!shouldUseDesktopBridge) {
+      return null;
+    }
+    await ensureInitialized();
+    return bridge_api.renderLockStatus();
+  }
+
   @visibleForTesting
   void initializeMock({required OpenflowCoreBridgeApiApi api}) {
     OpenflowCoreBridgeApi.initMock(api: api);

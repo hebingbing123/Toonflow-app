@@ -17,6 +17,7 @@ class StudioMediaCard extends StatelessWidget {
   const StudioMediaCard({
     super.key,
     this.imageUrl,
+    this.accessToken,
     this.label,
     this.loading = false,
     this.error,
@@ -26,6 +27,7 @@ class StudioMediaCard extends StatelessWidget {
   });
 
   final String? imageUrl;
+  final String? accessToken;
   final String? label;
   final bool loading;
   final String? error;
@@ -69,6 +71,7 @@ class StudioMediaCard extends StatelessWidget {
     } else if (imageUrl != null && imageUrl!.isNotEmpty) {
       child = StudioNetworkImage(
         url: imageUrl!,
+        accessToken: accessToken,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,

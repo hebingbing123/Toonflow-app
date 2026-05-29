@@ -147,7 +147,7 @@ Future<ProjectModelRoutingResponse> fetchProjectModelRoutingV1(
     '$kApiBaseUrl/api/v1/projects/$projectId/model-routing',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return ProjectModelRoutingResponse.fromJson(
@@ -171,10 +171,7 @@ Future<ProjectModelRoutingResponse> patchProjectModelRoutingV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -198,10 +195,7 @@ Future<ResolvedProjectModel> resolveProjectModelV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'step': step,
           'slot': slot,

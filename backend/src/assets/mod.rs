@@ -10,6 +10,7 @@
 //! - `crud_images` — 资产图片 REST CRUD
 //! - `generate` — 遗留 `/api/assetsGenerate/*` 入队和取消
 
+mod blocks;
 mod crud;
 mod crud_images;
 mod generate;

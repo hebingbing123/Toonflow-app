@@ -39,7 +39,7 @@ Future<List<ProjectMemberResponse>> fetchProjectMembersV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/members');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -59,10 +59,7 @@ Future<ProjectMemberResponse> createProjectMemberV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'userId': userId, 'role': role}),
       )
       .timeout(const Duration(seconds: 15));
@@ -84,10 +81,7 @@ Future<ProjectMemberResponse> patchProjectMemberV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'role': role}),
       )
       .timeout(const Duration(seconds: 15));
@@ -106,7 +100,7 @@ Future<void> deleteProjectMemberV1(
     '$kApiBaseUrl/api/v1/projects/$projectId/members/$userId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpStatus(res, 204);
 }

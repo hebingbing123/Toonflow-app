@@ -1,12 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../design_system/components/studio_loading_placeholders.dart';
 import '../design_system/studio_network_image.dart';
 import '../design_system/tokens.dart';
+import '../platform/studio_asset_image_cache.dart';
+import '../platform/studio_asset_image_cache_keys.dart';
 import '../rust_api/production/storyboard/grid_generate.dart';
 
 /// Storyboard frame preview (http(s), data URI, or authenticated local-frame).
@@ -59,10 +61,16 @@ class StoryboardFrameImage extends StatelessWidget {
         scriptId: scriptNumericId,
         storyboardId: storyboardNumericId,
       );
-      return FutureBuilder<http.Response>(
-        future: http.get(
-          uri,
-          headers: {'Authorization': 'Bearer $accessToken'},
+      final cacheKey = studioStoryboardLocalFrameCacheKey(
+        projectUuid: projectUuid,
+        scriptNumericId: scriptNumericId,
+        storyboardNumericId: storyboardNumericId,
+      );
+      return FutureBuilder<File>(
+        future: studioLoadCachedAssetImageFile(
+          accessToken: accessToken,
+          uri: uri,
+          cacheKeyOverride: cacheKey,
         ),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -71,12 +79,12 @@ class StoryboardFrameImage extends StatelessWidget {
               child: const StudioMediaTileSkeleton(),
             );
           }
-          final res = snapshot.data;
-          if (res == null || res.statusCode != 200) {
+          final file = snapshot.data;
+          if (file == null) {
             return _errorBox(context, raw);
           }
-          return Image.memory(
-            res.bodyBytes,
+          return Image.file(
+            file,
             height: height,
             width: double.infinity,
             fit: fit,
@@ -90,6 +98,7 @@ class StoryboardFrameImage extends StatelessWidget {
         ? raw
         : resolveRustApiUrl(raw);
     return StudioNetworkImage(
+      accessToken: accessToken,
       url: resolved,
       height: height,
       width: double.infinity,

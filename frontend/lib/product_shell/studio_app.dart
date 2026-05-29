@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design_system/debug/debug.dart';
+import '../design_system/ix/studio_render_lock_scope.dart';
 import '../design_system/ix/studio_scaffold_messenger.dart';
 import '../design_system/ix/studio_mobile_affordances.dart';
 import '../design_system/ix/studio_scroll_behavior.dart';
@@ -86,7 +87,8 @@ class _StudioProductAppState extends State<StudioProductApp> {
               routerConfig: _router,
               builder: (context, child) {
                 final adaptiveTheme = studioAdaptiveDesktopTheme(context);
-                return StudioSystemUiSurface(
+                return StudioRenderLockScope(
+                  child: StudioSystemUiSurface(
                   child: AnimatedTheme(
                     data: adaptiveTheme,
                     duration: studioAnimationDuration(
@@ -104,6 +106,7 @@ class _StudioProductAppState extends State<StudioProductApp> {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 );
               },

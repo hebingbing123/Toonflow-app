@@ -1887,6 +1887,7 @@ extension _TeamWorkspacesSectionHelpers on _TeamWorkspacesSectionState {
       if (!mounted) {
         return;
       }
+      StudioWorkspaceScope.instance.setWorkspaceId(id);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.teamWorkspaceSwitchedTo(row.workspace.name)),

@@ -70,7 +70,7 @@ class OpenflowCoreBridgeApi
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1884629396;
+  int get rustContentHash => -1511466846;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -82,6 +82,8 @@ class OpenflowCoreBridgeApi
 }
 
 abstract class OpenflowCoreBridgeApiApi extends BaseApi {
+  Future<bool> crateApiAcquireRenderLock();
+
   Future<CoreBridgeHealth> crateApiBridgeHealth();
 
   Future<ImageDocument> crateApiNewImageDocument({
@@ -92,6 +94,10 @@ abstract class OpenflowCoreBridgeApiApi extends BaseApi {
   Future<TimelineDocument> crateApiNewTimelineDocument();
 
   Future<WorkflowDocument> crateApiNewWorkflowDocument();
+
+  Future<void> crateApiReleaseRenderLock();
+
+  Future<RenderLockStatus> crateApiRenderLockStatus();
 
   Future<ImageDocumentSummary> crateApiSummarizeImageDocument({
     required ImageDocument document,
@@ -143,7 +149,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
   });
 
   @override
-  Future<CoreBridgeHealth> crateApiBridgeHealth() {
+  Future<bool> crateApiAcquireRenderLock() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -152,6 +158,33 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
             generalizedFrbRustBinding,
             serializer,
             funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiAcquireRenderLockConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAcquireRenderLockConstMeta =>
+      const TaskConstMeta(debugName: "acquire_render_lock", argNames: []);
+
+  @override
+  Future<CoreBridgeHealth> crateApiBridgeHealth() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
             port: port_,
           );
         },
@@ -183,7 +216,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -213,7 +246,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -241,7 +274,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -261,6 +294,60 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
       const TaskConstMeta(debugName: "new_workflow_document", argNames: []);
 
   @override
+  Future<void> crateApiReleaseRenderLock() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiReleaseRenderLockConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiReleaseRenderLockConstMeta =>
+      const TaskConstMeta(debugName: "release_render_lock", argNames: []);
+
+  @override
+  Future<RenderLockStatus> crateApiRenderLockStatus() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_render_lock_status,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiRenderLockStatusConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiRenderLockStatusConstMeta =>
+      const TaskConstMeta(debugName: "render_lock_status", argNames: []);
+
+  @override
   Future<ImageDocumentSummary> crateApiSummarizeImageDocument({
     required ImageDocument document,
   }) {
@@ -275,7 +362,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 8,
             port: port_,
           );
         },
@@ -311,7 +398,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 9,
             port: port_,
           );
         },
@@ -347,7 +434,7 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 10,
             port: port_,
           );
         },
@@ -489,6 +576,15 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  RenderLockStatus dco_decode_render_lock_status(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return RenderLockStatus(locked: dco_decode_bool(arr[0]));
   }
 
   @protected
@@ -663,6 +759,13 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  RenderLockStatus sse_decode_render_lock_status(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_locked = sse_decode_bool(deserializer);
+    return RenderLockStatus(locked: var_locked);
   }
 
   @protected
@@ -845,6 +948,15 @@ class OpenflowCoreBridgeApiApiImpl extends OpenflowCoreBridgeApiApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_render_lock_status(
+    RenderLockStatus self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.locked, serializer);
   }
 
   @protected

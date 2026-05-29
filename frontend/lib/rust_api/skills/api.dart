@@ -120,7 +120,7 @@ class RollbackSkillVersionResponse {
 Future<SkillsSummary> fetchSkillsSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/summary');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 60));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -131,7 +131,7 @@ Future<SkillsSummary> fetchSkillsSummary(String accessToken) async {
 Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 60));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -149,7 +149,7 @@ Future<SkillContentResponse> fetchSkillContent(
     '$kApiBaseUrl/api/v1/skills/content',
   ).replace(queryParameters: {'path': relativePath});
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -173,7 +173,7 @@ Future<List<SkillVersion>> fetchSkillVersions(
     },
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -203,10 +203,7 @@ Future<RollbackSkillVersionResponse> rollbackSkillVersion(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
@@ -231,10 +228,7 @@ Future<SkillContentResponse> saveSkillContent(
   final res = await http
       .put(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'path': relativePath, 'content': content}),
       )
       .timeout(const Duration(seconds: 60));
@@ -257,10 +251,7 @@ Future<SkillContentResponse> createSkillContent(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'path': relativePath, 'content': content}),
       )
       .timeout(const Duration(seconds: 60));
@@ -282,7 +273,7 @@ Future<void> deleteSkillContent(String accessToken, String relativePath) async {
     '$kApiBaseUrl/api/v1/skills/content',
   ).replace(queryParameters: {'path': relativePath});
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

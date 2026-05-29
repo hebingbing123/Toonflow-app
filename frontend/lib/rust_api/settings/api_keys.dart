@@ -204,7 +204,7 @@ class ApiKeyCreatedResponseV1 {
 Future<ApiKeyListResponseV1> fetchApiKeysV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/api-keys');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return ApiKeyListResponseV1.fromJson(
@@ -220,7 +220,7 @@ Future<ApiKeyAuditListResponseV1> fetchApiKeyAuditV1(
     '$kApiBaseUrl/api/v1/settings/api-keys/audit?limit=$limit',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return ApiKeyAuditListResponseV1.fromJson(
@@ -245,10 +245,7 @@ Future<ApiKeyCreatedResponseV1> createApiKeyV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -282,10 +279,7 @@ Future<ApiKeyCreatedResponseV1> rotateApiKeyV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -306,10 +300,7 @@ Future<ApiKeyRecordV1> revokeApiKeyV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'reason': reason}),
       )
       .timeout(const Duration(seconds: 15));
@@ -325,7 +316,7 @@ Future<ApiKeyRecordV1> activateApiKeyV1(
     '$kApiBaseUrl/api/v1/settings/api-keys/$apiKeyId/activate',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return ApiKeyRecordV1.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
@@ -337,7 +328,7 @@ Future<void> deleteApiKeyV1(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/api-keys/$apiKeyId');
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
 }

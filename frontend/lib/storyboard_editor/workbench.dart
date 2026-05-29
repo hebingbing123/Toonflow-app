@@ -232,6 +232,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _StoryboardPreviewCard(
+          accessToken: widget.token,
           loadingProduction: _loadingProduction,
           scriptStoryboard: widget.scriptStoryboard,
           productionRow: _productionRow,

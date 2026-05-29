@@ -81,10 +81,7 @@ Future<int> postScriptAgentGetPlanDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'projectId': projectId, 'agentType': 'scriptAgent'}),
       )
       .timeout(const Duration(seconds: 15));
@@ -99,10 +96,7 @@ Future<ScriptAgentPlanData> fetchScriptAgentPlanDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'projectId': projectId, 'agentType': 'scriptAgent'}),
       )
       .timeout(const Duration(seconds: 15));
@@ -124,10 +118,7 @@ Future<int> postScriptAgentSetPlanDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'projectId': projectId,
           'agentType': 'scriptAgent',
@@ -156,10 +147,7 @@ Future<int> postScriptAgentUpdateDataV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'id': id,
           'data': {

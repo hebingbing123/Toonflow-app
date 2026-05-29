@@ -6,7 +6,20 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`
+// These functions are ignored because they are not marked as `pub`: `bridge_targets_desktop_ffi`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+
+/// Acquire the desktop render lock (prevents concurrent heavy local renders).
+Future<bool> acquireRenderLock() =>
+    OpenflowCoreBridgeApi.instance.api.crateApiAcquireRenderLock();
+
+/// Release the desktop render lock.
+Future<void> releaseRenderLock() =>
+    OpenflowCoreBridgeApi.instance.api.crateApiReleaseRenderLock();
+
+/// Current render lock state for Flutter FFI polling.
+Future<RenderLockStatus> renderLockStatus() =>
+    OpenflowCoreBridgeApi.instance.api.crateApiRenderLockStatus();
 
 Future<CoreBridgeHealth> bridgeHealth() =>
     OpenflowCoreBridgeApi.instance.api.crateApiBridgeHealth();
@@ -108,6 +121,22 @@ class ImageDocumentSummary {
           width == other.width &&
           height == other.height &&
           layerCount == other.layerCount;
+}
+
+class RenderLockStatus {
+  final bool locked;
+
+  const RenderLockStatus({required this.locked});
+
+  @override
+  int get hashCode => locked.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RenderLockStatus &&
+          runtimeType == other.runtimeType &&
+          locked == other.locked;
 }
 
 class TimelineSummary {

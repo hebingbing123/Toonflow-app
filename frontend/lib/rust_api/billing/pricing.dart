@@ -172,10 +172,7 @@ Future<BillingEstimateResponse> postBillingEstimateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'model_id': modelId,
           'task_kind': taskKind,
@@ -197,7 +194,7 @@ Future<BillingSpendSummaryResponse> fetchBillingSpendSummaryV1(
     queryParameters: <String, String>{'days': days.toString()},
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return BillingSpendSummaryResponse.fromJson(

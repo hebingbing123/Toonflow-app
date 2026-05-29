@@ -107,10 +107,7 @@ Future<String> postNovelEventsGenerateEvents(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'novelIds': novelIds,
           'concurrentCount': concurrentCount,

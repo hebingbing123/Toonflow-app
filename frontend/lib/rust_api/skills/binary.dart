@@ -20,7 +20,7 @@ Future<Uint8List> fetchSkillsBinaryV1(
 ) async {
   final uri = skillsBinaryV1Uri(pathUnderDataSkills);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 120));
   ensureHttpSuccess(res);
   return res.bodyBytes;

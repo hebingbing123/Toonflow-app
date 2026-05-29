@@ -13,11 +13,13 @@ class StudioPickGrid extends StatefulWidget {
     required this.candidateUrls,
     required this.onSelected,
     this.selectedIndex = 0,
+    this.accessToken,
   });
 
   final List<String> candidateUrls;
   final ValueChanged<int> onSelected;
   final int selectedIndex;
+  final String? accessToken;
 
   @override
   State<StudioPickGrid> createState() => _StudioPickGridState();
@@ -84,6 +86,7 @@ class _StudioPickGridState extends State<StudioPickGrid> {
                 ),
                 child: StudioMediaCard(
                   imageUrl: url,
+                  accessToken: widget.accessToken,
                   heroTag: 'studio.hero.pick_grid.$i.$url',
                   onTap: () {
                     setState(() => _index = i);

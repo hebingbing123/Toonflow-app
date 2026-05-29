@@ -323,7 +323,7 @@ Future<QualityDashboardResponse> fetchQualityDashboard(
           '/api/v1/quality/dashboard',
           queryParameters: query.isEmpty ? null : query,
         ),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: rustApiAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -340,7 +340,7 @@ Future<QualityDashboardRefreshResponse> refreshQualityDashboardReadModel(
     queryParameters: onlyIfStale ? const {'onlyIfStale': 'true'} : null,
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 60));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;

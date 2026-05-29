@@ -5,6 +5,7 @@ class AssetImagesWorkbenchController {
     required this.token,
     required this.projectId,
     required this.runtime,
+    required this.blockKeyController,
     required this.currentAssetNumericId,
     required this.onAssetNumericIdChanged,
     required this.createControllers,
@@ -19,6 +20,7 @@ class AssetImagesWorkbenchController {
   final String token;
   final String projectId;
   final AssetImagesWorkbenchRuntime runtime;
+  final TextEditingController blockKeyController;
   final int Function() currentAssetNumericId;
   final ValueChanged<int> onAssetNumericIdChanged;
   final AssetImagesWorkbenchFormControllers createControllers;
@@ -33,6 +35,7 @@ class AssetImagesWorkbenchController {
     token: token,
     projectId: projectId,
     runtime: runtime,
+    blockKeyController: blockKeyController,
     createControllers: createControllers,
     patchControllers: patchControllers,
     mutation: AssetImagesWorkbenchMutationContext(
@@ -67,6 +70,11 @@ class AssetImagesWorkbenchController {
         return;
       }
       await reloadImages(setState);
+      await reloadAssetBlocks(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        setState: setState,
+      );
     });
   }
 
@@ -164,6 +172,26 @@ class AssetImagesWorkbenchController {
     );
   }
 
+  Future<void> reloadBlocks(StateSetter setState) {
+    return _withRequestContext(
+      (request) => reloadAssetBlocks(
+        scope: request.scope,
+        assetNumericId: request.assetNumericId,
+        setState: setState,
+      ),
+    );
+  }
+
+  Future<void> registerBlock(StateSetter setState) {
+    return _withRequestContext(
+      (request) => registerPreviewAsAssetBlock(
+        scope: request.scope,
+        assetNumericId: request.assetNumericId,
+        setState: setState,
+      ),
+    );
+  }
+
   AssetImagesWorkbenchDialogCallbacks buildDialogCallbacks({
     required StateSetter setState,
   }) {
@@ -181,6 +209,8 @@ class AssetImagesWorkbenchController {
         onCreateImage: () => createImage(setState),
         onPatchImage: () => patchImage(setState),
         onDeleteImage: () => deleteImage(setState),
+        onReloadBlocks: () => reloadBlocks(setState),
+        onRegisterBlock: () => registerBlock(setState),
       ),
     );
   }

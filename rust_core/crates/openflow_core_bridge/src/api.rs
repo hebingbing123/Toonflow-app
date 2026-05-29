@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 pub use media_image_doc::ImageDocument;
 pub use media_timeline::TimelineDocument;
 pub use media_workflow::WorkflowDocument;
@@ -41,6 +43,30 @@ const fn bridge_targets_desktop_ffi() -> bool {
         target_os = "windows",
         target_os = "linux"
     ))
+}
+
+static RENDER_LOCK: AtomicBool = AtomicBool::new(false);
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RenderLockStatus {
+    pub locked: bool,
+}
+
+/// Acquire the desktop render lock (prevents concurrent heavy local renders).
+pub fn acquire_render_lock() -> bool {
+    !RENDER_LOCK.swap(true, Ordering::SeqCst)
+}
+
+/// Release the desktop render lock.
+pub fn release_render_lock() {
+    RENDER_LOCK.store(false, Ordering::SeqCst);
+}
+
+/// Current render lock state for Flutter FFI polling.
+pub fn render_lock_status() -> RenderLockStatus {
+    RenderLockStatus {
+        locked: RENDER_LOCK.load(Ordering::SeqCst),
+    }
 }
 
 pub fn bridge_health() -> CoreBridgeHealth {
@@ -100,6 +126,16 @@ pub fn summarize_workflow_document(document: WorkflowDocument) -> WorkflowSummar
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn render_lock_acquire_and_release() {
+        release_render_lock();
+        assert!(acquire_render_lock());
+        assert!(!acquire_render_lock());
+        assert!(render_lock_status().locked);
+        release_render_lock();
+        assert!(!render_lock_status().locked);
+    }
 
     #[test]
     fn bridge_health_reports_desktop_support() {

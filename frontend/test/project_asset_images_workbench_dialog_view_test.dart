@@ -21,6 +21,7 @@ AssetImagesWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController patchFilePathController,
   required TextEditingController patchStateController,
   required TextEditingController patchSortController,
+  required TextEditingController blockKeyController,
   bool loadingList = false,
   bool loadingPreview = false,
   bool busyMutation = false,
@@ -58,6 +59,11 @@ AssetImagesWorkbenchDialogViewModel buildDialogModel({
     patchFilePathController: patchFilePathController,
     patchStateController: patchStateController,
     patchSortController: patchSortController,
+    assetBlocks: const <AssetBlockRow>[],
+    loadingBlocks: false,
+    blockKeyController: blockKeyController,
+    projectId: 'project-a',
+    accessToken: 'token-a',
   );
 }
 
@@ -78,6 +84,8 @@ AssetImagesWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onCreateImage: createImage,
     onPatchImage: patchImage,
     onDeleteImage: deleteImage,
+    onReloadBlocks: noop,
+    onRegisterBlock: noop,
   );
 }
 
@@ -88,6 +96,7 @@ void main() {
   late TextEditingController patchFilePathController;
   late TextEditingController patchStateController;
   late TextEditingController patchSortController;
+  late TextEditingController blockKeyController;
 
   setUp(() {
     createFilePathController = TextEditingController();
@@ -96,6 +105,7 @@ void main() {
     patchFilePathController = TextEditingController();
     patchStateController = TextEditingController();
     patchSortController = TextEditingController();
+    blockKeyController = TextEditingController();
   });
 
   tearDown(() {
@@ -105,6 +115,7 @@ void main() {
     patchFilePathController.dispose();
     patchStateController.dispose();
     patchSortController.dispose();
+    blockKeyController.dispose();
   });
 
   testWidgets('asset images workbench view renders shared scaffold', (
@@ -120,6 +131,7 @@ void main() {
             patchFilePathController: patchFilePathController,
             patchStateController: patchStateController,
             patchSortController: patchSortController,
+            blockKeyController: blockKeyController,
           ),
           callbacks: buildDialogCallbacks(),
         ),
@@ -168,6 +180,7 @@ void main() {
             patchFilePathController: patchFilePathController,
             patchStateController: patchStateController,
             patchSortController: patchSortController,
+            blockKeyController: blockKeyController,
             loadingList: true,
             busyMutation: true,
           ),
@@ -232,6 +245,7 @@ void main() {
             patchFilePathController: patchFilePathController,
             patchStateController: patchStateController,
             patchSortController: patchSortController,
+            blockKeyController: blockKeyController,
             previewBytes: tinyTransparentPng,
           ),
           callbacks: buildDialogCallbacks(),

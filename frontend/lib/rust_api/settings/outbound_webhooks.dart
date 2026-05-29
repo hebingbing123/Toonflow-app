@@ -230,10 +230,7 @@ Future<OutboundWebhookCreatedResponseV1> postSettingsOutboundWebhookCreateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -253,10 +250,7 @@ Future<OutboundWebhookListResponseV1> getSettingsOutboundWebhookListV1(
   final res = await http
       .get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -274,10 +268,7 @@ Future<OutboundWebhookListItemV1> patchSettingsOutboundWebhookV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -295,10 +286,7 @@ Future<void> deleteSettingsOutboundWebhookV1(
   final res = await http
       .delete(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -316,10 +304,7 @@ Future<OutboundWebhookTestResponseV1> postSettingsOutboundWebhookTestV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -341,10 +326,7 @@ getSettingsOutboundWebhookDeliveriesV1(
   final res = await http
       .get(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);

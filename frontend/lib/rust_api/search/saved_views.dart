@@ -96,7 +96,7 @@ Future<List<SearchSavedViewItem>> getSearchSavedViews(String accessToken) async 
   final uri = Uri.parse('$kApiBaseUrl/api/v1/search/saved-views');
   final res = await http
       .get(uri, headers: <String, String>{
-        'Authorization': 'Bearer $accessToken',
+      ...rustApiAuthHeaders(accessToken),
       })
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
@@ -123,7 +123,7 @@ Future<List<SearchSavedViewItem>> putSearchSavedViews(
       .put(
         uri,
         headers: <String, String>{
-          'Authorization': 'Bearer $accessToken',
+      ...rustApiAuthHeaders(accessToken),
           'Content-Type': 'application/json; charset=utf-8',
         },
         body: body,

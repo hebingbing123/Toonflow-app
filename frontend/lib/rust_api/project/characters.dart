@@ -43,7 +43,7 @@ Future<List<ProjectCharacterV1>> listProjectCharactersV1(
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/characters');
   final response = await http.get(
     uri,
-    headers: {'Authorization': 'Bearer $accessToken'},
+    headers: rustApiAuthHeaders(accessToken),
   );
   if (response.statusCode != 200) {
     throw RustApiException.fromHttpResponse(response);
@@ -66,10 +66,7 @@ Future<ProjectCharacterV1> createProjectCharacterV1(
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/characters');
   final response = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{
       'name': name,
       'assetId': ?assetId,
@@ -107,10 +104,7 @@ Future<ProjectCharacterV1> patchProjectCharacterV1(
   }
   final response = await http.patch(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(body),
   );
   if (response.statusCode != 200) {
@@ -134,10 +128,7 @@ Future<http.Response> previewTtsV1(
   final uri = Uri.parse('$kApiBaseUrl/api/v1/tts/preview');
   return http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{
       'text': text,
       'project_id': ?projectId,

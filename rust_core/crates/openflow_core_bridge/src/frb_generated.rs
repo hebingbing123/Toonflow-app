@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1884629396;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1511466846;
 
 // Section: executor
 
@@ -47,6 +47,38 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__acquire_render_lock_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "acquire_render_lock",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(crate::api::acquire_render_lock())?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__bridge_health_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -172,6 +204,72 @@ fn wire__crate__api__new_workflow_document_impl(
             move |context| {
                 transform_result_sse::<_, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok(crate::api::new_workflow_document())?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__release_render_lock_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "release_render_lock",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::release_render_lock();
+                    })?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__render_lock_status_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "render_lock_status",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(crate::api::render_lock_status())?;
                     Ok(output_ok)
                 })())
             }
@@ -412,6 +510,14 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for crate::api::RenderLockStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_locked = <bool>::sse_decode(deserializer);
+        return crate::api::RenderLockStatus { locked: var_locked };
+    }
+}
+
 impl SseDecode for crate::api::TimelineSummary {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -486,13 +592,16 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__bridge_health_impl(port, ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__new_image_document_impl(port, ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__new_timeline_document_impl(port, ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__new_workflow_document_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__summarize_image_document_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__summarize_timeline_document_impl(port, ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__summarize_workflow_document_impl(port, ptr, rust_vec_len, data_len),
+        1 => wire__crate__api__acquire_render_lock_impl(port, ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__bridge_health_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__new_image_document_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__new_timeline_document_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__new_workflow_document_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__release_render_lock_impl(port, ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__render_lock_status_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__summarize_image_document_impl(port, ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__summarize_timeline_document_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__summarize_workflow_document_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -595,6 +704,20 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::ImageDocumentSummary>
     for crate::api::ImageDocumentSummary
 {
     fn into_into_dart(self) -> crate::api::ImageDocumentSummary {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::RenderLockStatus {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [self.locked.into_into_dart().into_dart()].into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::RenderLockStatus {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::RenderLockStatus>
+    for crate::api::RenderLockStatus
+{
+    fn into_into_dart(self) -> crate::api::RenderLockStatus {
         self
     }
 }
@@ -733,6 +856,13 @@ impl SseEncode for Vec<u8> {
         for item in self {
             <u8>::sse_encode(item, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::api::RenderLockStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.locked, serializer);
     }
 }
 

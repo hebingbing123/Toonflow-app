@@ -101,6 +101,27 @@ class FakeBridgeApi implements OpenflowCoreBridgeApiApi {
     );
   }
 
+  var _renderLocked = false;
+
+  @override
+  Future<bool> crateApiAcquireRenderLock() async {
+    if (_renderLocked) {
+      return false;
+    }
+    _renderLocked = true;
+    return true;
+  }
+
+  @override
+  Future<void> crateApiReleaseRenderLock() async {
+    _renderLocked = false;
+  }
+
+  @override
+  Future<RenderLockStatus> crateApiRenderLockStatus() async {
+    return RenderLockStatus(locked: _renderLocked);
+  }
+
   @override
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_ImageDocument => _noopArc;

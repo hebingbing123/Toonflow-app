@@ -254,7 +254,7 @@ Future<SearchResponse> search(
   final uri = Uri.parse('$kApiBaseUrl/api/v1/search?${queryParts.join('&')}');
 
   final request = http.Request('GET', uri)
-    ..headers['Authorization'] = 'Bearer $accessToken';
+    ..headers.addAll(rustApiAuthHeaders(accessToken));
 
   // Support cancellation
   final client = http.Client();
@@ -282,7 +282,7 @@ Future<SearchResponse> search(
 Future<List<HistoryEntry>> getHistory(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/search/history');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
 
   ensureHttpSuccess(res);
@@ -299,7 +299,7 @@ Future<List<HistoryEntry>> getHistory(String accessToken) async {
 Future<void> deleteHistory(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/search/history');
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
 
   ensureHttpStatus(res, 204);

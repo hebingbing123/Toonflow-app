@@ -21,7 +21,7 @@ Future<List<BenchmarkCaseV1>> fetchBenchmarkCases(
     '$kApiBaseUrl/api/v1/benchmark/cases',
   ).replace(queryParameters: query.isEmpty ? null : query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -55,10 +55,7 @@ Future<BenchmarkCaseV1> promoteBenchmarkCaseFromReview(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -86,7 +83,7 @@ Future<List<ExperimentRunV1>> fetchBenchmarkExperiments(
     '$kApiBaseUrl/api/v1/benchmark/experiments',
   ).replace(queryParameters: query.isEmpty ? null : query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -107,7 +104,7 @@ Future<ExperimentDetailV1> fetchBenchmarkExperimentDetail(
     '$kApiBaseUrl/api/v1/benchmark/experiments/$experimentId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -138,10 +135,7 @@ Future<ExperimentDetailV1> createBenchmarkExperiment(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
@@ -161,7 +155,7 @@ Future<ExperimentDetailV1> startBenchmarkExperiment(
     '$kApiBaseUrl/api/v1/benchmark/experiments/$experimentId/start',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -179,7 +173,7 @@ Future<ExperimentDetailV1> cancelBenchmarkExperiment(
     '$kApiBaseUrl/api/v1/benchmark/experiments/$experimentId/cancel',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -194,7 +188,7 @@ Future<List<ReviewQueueItemV1>> fetchBenchmarkReviewQueue(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/review-queue');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -220,10 +214,7 @@ Future<ReviewQueueItemV1> submitBenchmarkReview(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'submittedScore': submittedScore}),
       )
       .timeout(const Duration(seconds: 30));
@@ -250,10 +241,7 @@ Future<ReviewQueueItemV1> skipBenchmarkReview(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -270,7 +258,7 @@ Future<MemoryProfilesResponseV1> fetchBenchmarkMemoryProfiles(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/memory-profiles');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -288,7 +276,7 @@ Future<RoiEvidenceSummaryV1> fetchBenchmarkExperimentRoi(
     '$kApiBaseUrl/api/v1/benchmark/experiments/$experimentId/roi',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -306,7 +294,7 @@ Future<GateDecisionEnvelopeV1> fetchBenchmarkGate(
     '$kApiBaseUrl/api/v1/benchmark/experiments/$experimentId/gate',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -340,10 +328,7 @@ Future<GateDecisionRecordV1> submitBenchmarkGateDecision(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -363,7 +348,7 @@ Future<BenchmarkTrendsResponseV1> fetchBenchmarkTrends(
     '$kApiBaseUrl/api/v1/benchmark/trends',
   ).replace(queryParameters: {'limitWeeks': '$limitWeeks'});
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -390,10 +375,7 @@ Future<ABCompareResponseV1> compareBenchmarkABJobs(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 60));
@@ -410,7 +392,7 @@ Future<List<ABCompareRunRowV1>> fetchBenchmarkABCompareRuns(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/ab/runs');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);
@@ -429,7 +411,7 @@ Future<ABCompareRunDetailV1> fetchBenchmarkABCompareRunDetail(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/benchmark/ab/runs/$runId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   final decoded = jsonDecode(res.body);

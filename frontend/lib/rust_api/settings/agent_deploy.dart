@@ -52,10 +52,7 @@ Future<List<AgentDeployListItemV1>> postAgentDeployListV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: '{}',
       )
       .timeout(const Duration(seconds: 15));
@@ -82,10 +79,7 @@ Future<int> postSettingsAgentDeployModelV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({
           'id': id,
           'name': name,
@@ -105,10 +99,7 @@ Future<int> postSettingsAgentDeploySetKeyV1(String accessToken) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: '{}',
       )
       .timeout(const Duration(seconds: 15));

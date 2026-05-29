@@ -41,17 +41,24 @@ class AssetImagesWorkbenchSession {
   bool busyMutation = false;
   bool initialLoadTriggered = false;
   String? statusLine;
+  List<AssetBlockRow> assetBlocks = const [];
+  bool loadingBlocks = false;
+  final TextEditingController blockKeyController = TextEditingController();
 
   AssetImagesWorkbenchRuntime buildRuntime() {
     return AssetImagesWorkbenchRuntime(
       imagesResponse: () => imagesResponse,
       selectedImageId: () => selectedImageId,
       previewBytes: () => previewBytes,
+      assetBlocks: () => assetBlocks,
+      loadingBlocks: () => loadingBlocks,
       onImagesResponseChanged: (response) => imagesResponse = response,
       onSelectedImageIdChanged: (value) => selectedImageId = value,
       onPreviewBytesChanged: (bytes) => previewBytes = bytes,
+      onAssetBlocksChanged: (rows) => assetBlocks = rows,
       onListLoadingChanged: (loading) => loadingList = loading,
       onPreviewLoadingChanged: (loading) => loadingPreview = loading,
+      onLoadingBlocksChanged: (loading) => loadingBlocks = loading,
       onStatusChanged: (line) => statusLine = line,
     );
   }
@@ -73,6 +80,9 @@ class AssetImagesWorkbenchSession {
       busyMutation: busyMutation,
       statusLine: statusLine,
       previewBytes: previewBytes,
+      assetBlocks: assetBlocks,
+      loadingBlocks: loadingBlocks,
+      blockKeyController: blockKeyController,
       createControllers: createControllers,
       patchControllers: patchControllers,
     );
@@ -91,6 +101,9 @@ class AssetImagesWorkbenchDialogState {
     required this.busyMutation,
     required this.statusLine,
     required this.previewBytes,
+    required this.assetBlocks,
+    required this.loadingBlocks,
+    required this.blockKeyController,
     required this.createControllers,
     required this.patchControllers,
   });
@@ -105,6 +118,9 @@ class AssetImagesWorkbenchDialogState {
   final bool busyMutation;
   final String? statusLine;
   final Uint8List? previewBytes;
+  final List<AssetBlockRow> assetBlocks;
+  final bool loadingBlocks;
+  final TextEditingController blockKeyController;
   final AssetImagesWorkbenchFormControllers createControllers;
   final AssetImagesWorkbenchFormControllers patchControllers;
 
@@ -119,6 +135,9 @@ class AssetImagesWorkbenchDialogState {
     required bool busyMutation,
     required String? statusLine,
     required Uint8List? previewBytes,
+    required List<AssetBlockRow> assetBlocks,
+    required bool loadingBlocks,
+    required TextEditingController blockKeyController,
     required AssetImagesWorkbenchFormControllers createControllers,
     required AssetImagesWorkbenchFormControllers patchControllers,
   }) {
@@ -140,6 +159,9 @@ class AssetImagesWorkbenchDialogState {
       busyMutation: busyMutation,
       statusLine: statusLine,
       previewBytes: previewBytes,
+      assetBlocks: assetBlocks,
+      loadingBlocks: loadingBlocks,
+      blockKeyController: blockKeyController,
       createControllers: createControllers,
       patchControllers: patchControllers,
     );
@@ -156,6 +178,8 @@ class AssetImagesWorkbenchDialogCallbacks {
     required this.onCreateImage,
     required this.onPatchImage,
     required this.onDeleteImage,
+    required this.onReloadBlocks,
+    required this.onRegisterBlock,
   });
 
   final Future<void> Function(int? value) onAssetChanged;
@@ -166,4 +190,6 @@ class AssetImagesWorkbenchDialogCallbacks {
   final Future<void> Function() onCreateImage;
   final Future<void> Function() onPatchImage;
   final Future<void> Function() onDeleteImage;
+  final Future<void> Function() onReloadBlocks;
+  final Future<void> Function() onRegisterBlock;
 }

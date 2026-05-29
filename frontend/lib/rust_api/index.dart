@@ -17,6 +17,7 @@ export 'skills/index.dart';
 export 'scripts/index.dart';
 export 'system/index.dart';
 export 'workspaces/workspaces.dart';
+export 'workspace_scope.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

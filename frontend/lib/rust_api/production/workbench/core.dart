@@ -49,10 +49,7 @@ Future<VideoModelDetail> postWorkbenchGetVideoModelDetailV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));

@@ -33,10 +33,7 @@ Future<CloneVoiceResponseV1> postCloneVoiceV1(
   final uri = Uri.parse('$kApiBaseUrl/api/v1/tts/clone-voice');
   final response = await http.post(
     uri,
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    },
+    headers: rustApiJsonAuthHeaders(accessToken),
     body: jsonEncode(<String, dynamic>{
       'projectId': projectId,
       'displayName': displayName,

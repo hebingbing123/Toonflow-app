@@ -5,22 +5,30 @@ class AssetImagesWorkbenchRuntime {
     required this.imagesResponse,
     required this.selectedImageId,
     required this.previewBytes,
+    required this.assetBlocks,
+    required this.loadingBlocks,
     required this.onImagesResponseChanged,
     required this.onSelectedImageIdChanged,
     required this.onPreviewBytesChanged,
+    required this.onAssetBlocksChanged,
     required this.onListLoadingChanged,
     required this.onPreviewLoadingChanged,
+    required this.onLoadingBlocksChanged,
     required this.onStatusChanged,
   });
 
   final ListAssetImagesResponse? Function() imagesResponse;
   final String? Function() selectedImageId;
   final Uint8List? Function() previewBytes;
+  final List<AssetBlockRow> Function() assetBlocks;
+  final bool Function() loadingBlocks;
   final ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged;
   final ValueChanged<String?> onSelectedImageIdChanged;
   final ValueChanged<Uint8List?> onPreviewBytesChanged;
+  final ValueChanged<List<AssetBlockRow>> onAssetBlocksChanged;
   final ValueChanged<bool> onListLoadingChanged;
   final ValueChanged<bool> onPreviewLoadingChanged;
+  final ValueChanged<bool> onLoadingBlocksChanged;
   final ValueChanged<String?> onStatusChanged;
 
   String? get currentSelectedImageId => selectedImageId();
@@ -70,6 +78,7 @@ class AssetImagesWorkbenchScope {
     required this.token,
     required this.projectId,
     required this.runtime,
+    required this.blockKeyController,
     required this.createControllers,
     required this.patchControllers,
     required this.mutation,
@@ -78,6 +87,7 @@ class AssetImagesWorkbenchScope {
   final String token;
   final String projectId;
   final AssetImagesWorkbenchRuntime runtime;
+  final TextEditingController blockKeyController;
   final AssetImagesWorkbenchFormControllers createControllers;
   final AssetImagesWorkbenchFormControllers patchControllers;
   final AssetImagesWorkbenchMutationContext mutation;

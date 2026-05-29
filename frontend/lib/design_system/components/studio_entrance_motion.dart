@@ -29,6 +29,10 @@ String studioHeroTagProjectProgress(int projectNumericId) =>
 String studioHeroTagProjectTitle(int projectNumericId) =>
     'studio.hero.project.title.$projectNumericId';
 
+/// Hero tag for creator journey milestone icons (script → art → storyboard → deliver).
+String studioHeroTagCreatorJourneyMilestone(int projectNumericId, int milestoneIndex) =>
+    'studio.hero.journey.$projectNumericId.$milestoneIndex';
+
 /// Hero tag for search result leading avatar (type icon).
 String studioHeroTagSearchResultLeading(ResultType type, String resultId) =>
     'studio.hero.search.${type.wireName}.$resultId';

@@ -17,10 +17,7 @@ Future<int> postSettingsVendorModelTestV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'modelName': modelName, 'type': type, 'id': id}),
       )
       .timeout(const Duration(seconds: 15));
@@ -81,10 +78,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsUpdateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -100,10 +94,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsDeleteV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'id': id}),
       )
       .timeout(const Duration(seconds: 15));
@@ -120,10 +111,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsEnableV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'id': id, 'enable': enable}),
       )
       .timeout(const Duration(seconds: 15));
@@ -140,10 +128,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsUpdateCodeV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'id': id, 'tsCode': tsCode}),
       )
       .timeout(const Duration(seconds: 15));
@@ -159,10 +144,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsCodeFromLinkV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'link': link}),
       )
       .timeout(const Duration(seconds: 15));
@@ -178,10 +160,7 @@ Future<VendorMutationResponseV1> postSettingsVendorsAddV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'tsCode': tsCode}),
       )
       .timeout(const Duration(seconds: 15));

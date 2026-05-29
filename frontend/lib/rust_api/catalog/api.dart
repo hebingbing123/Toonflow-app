@@ -20,7 +20,7 @@ Future<List<ModelListEntry>> fetchModelsCatalog(
     },
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -35,7 +35,7 @@ Future<VendorsSummaryResponseV1> fetchVendorsSummaryV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/summary');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -51,7 +51,7 @@ Future<ModelDetailResponse> fetchModelDetail(
     '$kApiBaseUrl/api/v1/models/detail',
   ).replace(queryParameters: {'model_id': modelId});
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -62,7 +62,7 @@ Future<ModelDetailResponse> fetchModelDetail(
 Future<TextModelDefaultV1> fetchTextModelDefaultV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/models/text-default');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -78,10 +78,7 @@ Future<TextModelDefaultV1> patchTextModelDefaultV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'model_id': modelId}),
       )
       .timeout(const Duration(seconds: 15));

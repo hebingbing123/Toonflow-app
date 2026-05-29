@@ -39,6 +39,7 @@ class _AssetImagesWorkbenchDialogDeps {
         token: token,
         projectId: project.id,
         runtime: runtime,
+        blockKeyController: session.blockKeyController,
         currentAssetNumericId: () => session.selectedAssetNumericId,
         onAssetNumericIdChanged: (value) =>
             session.selectedAssetNumericId = value,
@@ -73,6 +74,7 @@ class _AssetImagesWorkbenchDialogDeps {
   void dispose() {
     createControllers.dispose();
     patchControllers.dispose();
+    session.blockKeyController.dispose();
   }
 }
 
@@ -148,6 +150,11 @@ Future<void> openAssetImagesWorkbenchDialog({
                     dialogState.patchControllers.filePathCtrl,
                 patchStateController: dialogState.patchControllers.stateCtrl,
                 patchSortController: dialogState.patchControllers.sortCtrl,
+                assetBlocks: dialogState.assetBlocks,
+                loadingBlocks: dialogState.loadingBlocks,
+                blockKeyController: dialogState.blockKeyController,
+                projectId: project.id,
+                accessToken: token,
               ),
               callbacks: AssetImagesWorkbenchDialogViewCallbacks(
                 onAssetChanged: (value) {
@@ -185,6 +192,17 @@ Future<void> openAssetImagesWorkbenchDialog({
                     ? null
                     : () {
                         callbacks.onDeleteImage();
+                      },
+                onReloadBlocks: dialogState.loadingBlocks || mutationDisabled
+                    ? null
+                    : () {
+                        callbacks.onReloadBlocks();
+                      },
+                onRegisterBlock:
+                    mutationDisabled || dialogState.previewBytes == null
+                    ? null
+                    : () {
+                        callbacks.onRegisterBlock();
                       },
               ),
             );

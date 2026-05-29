@@ -141,7 +141,7 @@ class RevokeHarnessUserWasmResponse {
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -160,8 +160,8 @@ Future<ValidateHarnessUserWasmResponse> validateHarnessUserWasm(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
+        headers: <String, String>{
+          ...rustApiAuthHeaders(accessToken),
           'Content-Type': contentType,
         },
         body: wasmBytes,
@@ -182,8 +182,8 @@ Future<PersistHarnessUserWasmResponse> persistHarnessUserWasm(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
+        headers: <String, String>{
+          ...rustApiAuthHeaders(accessToken),
           'Content-Type': contentType,
         },
         body: wasmBytes,
@@ -200,7 +200,7 @@ Future<ListHarnessUserWasmResponse> listHarnessUserWasm(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -214,7 +214,7 @@ Future<RevokeHarnessUserWasmResponse> revokeHarnessUserWasm(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/user-wasm/$wasmRowId');
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;

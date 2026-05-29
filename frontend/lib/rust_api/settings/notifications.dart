@@ -656,7 +656,7 @@ Future<NotificationsListEnvelopeV1> fetchNotificationsV1(
     '$kApiBaseUrl/api/v1/settings/notifications',
   ).replace(queryParameters: queryParameters);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return NotificationsListEnvelopeV1.fromJson(
@@ -673,10 +673,7 @@ Future<MarkNotificationsReadEnvelopeV1> markNotificationsReadV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'ids': ids, 'read': read}),
       )
       .timeout(const Duration(seconds: 15));
@@ -693,7 +690,7 @@ Future<MarkAllNotificationsReadResponseV1> markAllNotificationsReadV1(
     '$kApiBaseUrl/api/v1/settings/notifications/mark-all-read',
   );
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return MarkAllNotificationsReadResponseV1.fromJson(
@@ -711,10 +708,7 @@ Future<int> syncContentComplianceAlertsV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'alerts': alerts.map((item) => item.toJson()).toList(growable: false),
         }),
@@ -732,7 +726,7 @@ Future<NotificationPreferencesV1> fetchNotificationPreferencesV1(
     '$kApiBaseUrl/api/v1/settings/notifications/preferences',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return NotificationPreferencesV1.fromJson(
@@ -750,10 +744,7 @@ Future<NotificationPreferencesV1> saveNotificationPreferencesV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(preferences.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -770,7 +761,7 @@ Future<NotificationPreferencesEnvelopeV1> fetchNotificationPreferencesExportV1(
     '$kApiBaseUrl/api/v1/settings/notifications/preferences/export',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return NotificationPreferencesEnvelopeV1.fromJson(
@@ -784,7 +775,7 @@ fetchContentComplianceClearedTemplatesV1(String accessToken) async {
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -810,10 +801,7 @@ upsertContentComplianceClearedTemplateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'template': template.toJson()}),
       )
       .timeout(const Duration(seconds: 15));
@@ -838,10 +826,7 @@ deleteContentComplianceClearedTemplateV1(String accessToken, String id) async {
   final res = await http
       .delete(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'id': id}),
       )
       .timeout(const Duration(seconds: 15));
@@ -864,7 +849,7 @@ fetchWorkspaceSharedComplianceClearedTemplatesV1(String accessToken) async {
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return WorkspaceSharedComplianceTemplatesV1.fromJson(
@@ -883,10 +868,7 @@ upsertWorkspaceSharedComplianceClearedTemplateV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'template': template.toJson()}),
       )
       .timeout(const Duration(seconds: 15));
@@ -907,10 +889,7 @@ deleteWorkspaceSharedComplianceClearedTemplateV1(
   final res = await http
       .delete(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'id': id}),
       )
       .timeout(const Duration(seconds: 15));
@@ -950,7 +929,7 @@ fetchWorkspaceSharedComplianceClearedTemplateAuditV1(
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit',
   ).replace(queryParameters: query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -995,7 +974,7 @@ Future<(String, String)> exportWorkspaceSharedComplianceClearedTemplateAuditV1(
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export',
   ).replace(queryParameters: query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -1037,10 +1016,7 @@ postWorkspaceSharedComplianceClearedTemplateAuditExportAsyncV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 30));
@@ -1059,7 +1035,7 @@ fetchWorkspaceSharedComplianceClearedTemplateAuditExportJobV1(
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/${Uri.encodeComponent(jobId)}',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return WorkspaceSharedAuditExportJobRecordV1.fromJson(
@@ -1077,7 +1053,7 @@ downloadWorkspaceSharedComplianceClearedTemplateAuditExportJobFileV1(
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/${Uri.encodeComponent(jobId)}/file',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(minutes: 2));
   ensureHttpSuccess(res);
   return WorkspaceSharedAuditExportDownloadV1(
@@ -1118,7 +1094,7 @@ fetchWorkspaceSharedComplianceClearedTemplateAuditExportsV1(
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/exports',
   ).replace(queryParameters: query);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -1143,10 +1119,7 @@ applyContentComplianceClearedTemplateV1(String accessToken, String id) async {
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'id': id}),
       )
       .timeout(const Duration(seconds: 15));
@@ -1176,10 +1149,7 @@ reorderContentComplianceClearedTemplatesV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{'ids': ids}),
       )
       .timeout(const Duration(seconds: 15));
@@ -1204,7 +1174,7 @@ exportContentComplianceClearedTemplatesV1(String accessToken) async {
     '$kApiBaseUrl/api/v1/settings/notifications/content-compliance/cleared-templates/export',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -1248,10 +1218,7 @@ importContentComplianceClearedTemplatesV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'templates': templates
               .map((item) => item.toJson())

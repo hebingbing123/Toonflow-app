@@ -19,6 +19,7 @@ import 'creator_journey_menu.dart';
 import 'creator_journey_compact_bar.dart';
 import 'creator_journey_strip.dart';
 import 'creator_journey_telemetry.dart';
+import 'layout/project_studio_responsive_shell.dart';
 import 'project_studio_focus_scope.dart';
 import 'project_studio_generic_step_setup.dart';
 import 'project_studio_script_step_setup.dart';
@@ -754,6 +755,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                   CreatorJourneyStrip(
                     currentStep: _step,
                     failedJobCount: widget.host.failedJobCount,
+                    projectNumericId: widget.host.projectNumericId,
                     onSelectMilestone: (StudioStep step) =>
                         _selectStep(step, telemetrySource: 'milestone'),
                     onBackToProjects: widget.host.onExit,
@@ -846,6 +848,35 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                     ),
                   ),
                 );
+          final useHandsetShell =
+              constraints.maxWidth < kStudioHandsetMaxWidth;
+          final stepStack = Padding(
+            padding: EdgeInsets.only(
+              bottom: useHandsetShell || _studioFocusMode ? 12 : 72,
+            ),
+            child: StudioIndexedPaneFade(
+              index: _step.sopStackIndex,
+              child: IndexedStack(
+                index: _step.sopStackIndex,
+                children: StudioStep.sopSteps
+                    .map((step) {
+                      if (!_visited.contains(step)) {
+                        return const SizedBox.shrink();
+                      }
+                      final bodyStep =
+                          step == StudioStep.deliver &&
+                              _step == StudioStep.quality
+                          ? StudioStep.quality
+                          : step;
+                      return KeyedSubtree(
+                        key: ValueKey<String>(bodyStep.slug),
+                        child: widget.host.buildStepBody(bodyStep),
+                      );
+                    })
+                    .toList(growable: false),
+              ),
+            ),
+          );
           return Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
@@ -854,37 +885,16 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                 children: <Widget>[
                   topChromeWidget,
                   Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: _studioFocusMode ? 12 : 72,
-                      ),
-                      child: StudioIndexedPaneFade(
-                        index: _step.sopStackIndex,
-                        child: IndexedStack(
-                        index: _step.sopStackIndex,
-                        children: StudioStep.sopSteps
-                            .map((step) {
-                              if (!_visited.contains(step)) {
-                                return const SizedBox.shrink();
-                              }
-                              final bodyStep =
-                                  step == StudioStep.deliver &&
-                                      _step == StudioStep.quality
-                                  ? StudioStep.quality
-                                  : step;
-                              return KeyedSubtree(
-                                key: ValueKey<String>(bodyStep.slug),
-                                child: widget.host.buildStepBody(bodyStep),
-                              );
-                            })
-                            .toList(growable: false),
-                      ),
-                        ),
+                    child: ProjectStudioResponsiveShell(
+                      stepBody: stepStack,
+                      mobileDock: !_studioFocusMode && useHandsetShell
+                          ? _buildCreatorNextFooter(l10n)
+                          : null,
                     ),
                   ),
                 ],
               ),
-              if (!_studioFocusMode)
+              if (!_studioFocusMode && !useHandsetShell)
                 Positioned(
                   left: 0,
                   right: 0,

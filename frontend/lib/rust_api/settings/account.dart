@@ -126,10 +126,7 @@ Future<AccountExportJobRecordV1> createAccountExportV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'includeAuditLogs': includeAuditLogs,
           'includeNotifications': includeNotifications,
@@ -147,7 +144,7 @@ Future<AccountExportsResponseV1> fetchAccountExportsV1(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/account/exports');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 30));
   ensureHttpSuccess(res);
   return AccountExportsResponseV1.fromJson(
@@ -164,7 +161,7 @@ Future<AccountExportDownloadV1> downloadAccountExportV1(
     '$kApiBaseUrl/api/v1/settings/account/exports/$jobId/file',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(minutes: 2));
   ensureHttpSuccess(res);
   return AccountExportDownloadV1(
@@ -185,10 +182,7 @@ Future<AccountDeleteResponseV1> deleteAccountV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(<String, dynamic>{
           'confirmPhrase': confirmPhrase,
           'acknowledgeIrreversible': acknowledgeIrreversible,

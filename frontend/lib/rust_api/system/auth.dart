@@ -205,7 +205,7 @@ class PatchCurrentWorkspaceBody {
 Future<MeResponse> fetchMeV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/me');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 5));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -217,7 +217,7 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
 Future<MeV2Response> fetchMeV2(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/me?v=2');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 5));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -232,10 +232,7 @@ Future<WorkspaceSummary> patchCurrentWorkspaceV1(
   final res = await http
       .patch(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body.toJson()),
       )
       .timeout(const Duration(seconds: 15));
@@ -259,7 +256,7 @@ class SwitchAiDevToolV1 {
 Future<SwitchAiDevToolV1> fetchSwitchAiDevToolV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/dev/switch-ai-tool');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
@@ -275,10 +272,7 @@ Future<SwitchAiDevToolV1> putSwitchAiDevToolV1(
   final res = await http
       .put(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode({'value': value}),
       )
       .timeout(const Duration(seconds: 15));

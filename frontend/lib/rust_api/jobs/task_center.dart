@@ -168,7 +168,7 @@ Future<TaskCenterGetTaskApiResult> postTasksGetTaskApi(
     '$kApiBaseUrl/api/v1/jobs/page',
   ).replace(queryParameters: qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400) {
     throw RustApiException.fromHttpResponse(res);
@@ -184,7 +184,7 @@ Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
     '$kApiBaseUrl/api/v1/jobs/task-detail/${Uri.encodeComponent('$taskId')}',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

@@ -34,7 +34,7 @@ Future<List<JobRow>> fetchJobs(
     '$kApiBaseUrl/api/v1/jobs',
   ).replace(queryParameters: qp.isEmpty ? null : qp);
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -45,7 +45,7 @@ Future<List<JobRow>> fetchJobs(
 Future<List<String>> fetchJobKinds(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/kinds');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -70,7 +70,7 @@ class JobKindSummary {
 Future<List<JobKindSummary>> fetchJobKindSummaries(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/kinds/summary');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -99,7 +99,7 @@ Future<List<JobStatusSummary>> fetchJobStatusSummaries(
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/status/summary');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   ensureHttpSuccess(res);
   final list = jsonDecode(res.body) as List<dynamic>;
@@ -112,7 +112,7 @@ Future<List<JobStatusSummary>> fetchJobStatusSummaries(
 Future<JobRow> fetchJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId');
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -134,10 +134,7 @@ Future<JobRow> createJob(
   String? idempotencyKey,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
-  final headers = <String, String>{
-    'Authorization': 'Bearer $accessToken',
-    'Content-Type': 'application/json',
-  };
+  final headers = rustApiJsonAuthHeaders(accessToken);
   if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
     headers['Idempotency-Key'] = idempotencyKey;
   }
@@ -160,7 +157,7 @@ Future<JobRow> createJob(
 Future<JobRow> cancelJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/cancel');
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -177,7 +174,7 @@ Future<JobRow> cancelJob(String accessToken, String jobId) async {
 Future<JobRow> retryJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/retry');
   final res = await http
-      .post(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .post(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);

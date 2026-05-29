@@ -2,19 +2,12 @@ use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::jobs::billing_workspace::resolve_billing_workspace_id;
 use crate::jobs::dto::{CreateJobBody, JobRow};
-use crate::jobs::payload_project::{
-    normalize_project_scope_in_job_payload, resolved_workspace_id_from_job_payload,
-};
-use crate::jobs::{
-    hydrate_job_row, merge_client_request_id_from_http_headers, merge_default_track_metadata,
-};
-use crate::metering::quota;
-use crate::metering::usage;
+use crate::jobs::payload_project::resolved_workspace_id_from_job_payload;
+use crate::jobs::{hydrate_job_row, repository::JobRepository, service::JobCreationService};
 use crate::state::AppState;
 
-use super::super::common::{idempotency_key_header, is_unique_violation, require_pool};
+use super::super::common::{idempotency_key_header, require_pool};
 
 /// Validates workspace member access when creating jobs with project fields in payload.
 ///
@@ -87,101 +80,32 @@ pub(crate) async fn create_job(
         return Err(ApiError::BadRequest("kind must not be empty".into()));
     }
 
-    let idem = idempotency_key_header(&headers);
-    if let Some(ref key) = idem {
-        if let Some(mut row) = sqlx::query_as::<_, JobRow>(
-            r#"
-            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
-            FROM app_generation_job
-            WHERE owner_user_id = $1 AND idempotency_key = $2
-            "#,
-        )
-        .bind(uid)
-        .bind(key)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-        {
+    let idem_raw = idempotency_key_header(&headers);
+    if let Some(ref key) = idem_raw {
+        if let Some(mut row) = JobRepository::find_by_idempotency_key(pool, uid, key).await? {
             hydrate_job_row(&mut row);
             return Ok(Json(row));
         }
     }
 
-    let mut payload = body.payload;
-    merge_client_request_id_from_http_headers(&headers, &mut payload);
-    merge_default_track_metadata(kind, &mut payload);
-
-    // Resolve workspace_id from project context (if applicable)
-    let resolved_workspace_id =
-        normalize_project_scope_in_job_payload(pool, uid, &mut payload).await?;
-
-    // Canonical workspace_id resolution for billing attribution (Task 2.1)
-    let billing_workspace_id =
-        resolve_billing_workspace_id(pool, uid, resolved_workspace_id).await?;
-
-    // Check quota with effective billing context (Task 3.3)
-    quota::check_daily_job_quota_with_context(
+    let row = JobCreationService::create_with_idempotency(
+        &state,
         pool,
         uid,
-        billing_workspace_id,
-        &state.billing_config,
+        kind,
+        body.payload,
+        &headers,
+        idem_raw,
     )
     .await?;
 
-    let insert = sqlx::query_as::<_, JobRow>(
-        r#"
-        INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key, workspace_id)
-        VALUES ($1, $2, $3, 'queued', $4, $5)
-        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
-        "#,
-    )
-    .bind(uid)
-    .bind(kind)
-    .bind(payload)
-    .bind(idem.clone())
-    .bind(billing_workspace_id)
-    .fetch_one(pool)
-    .await;
-
-    let mut row = match insert {
-        Ok(r) => r,
-        Err(e) if is_unique_violation(&e) => {
-            let Some(key) = idem.as_ref() else {
-                return Err(ApiError::DatabaseError(e.to_string()));
-            };
-            let mut r = sqlx::query_as::<_, JobRow>(
-                r#"
-                SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
-                FROM app_generation_job
-                WHERE owner_user_id = $1 AND idempotency_key = $2
-                "#,
-            )
-            .bind(uid)
-            .bind(key)
-            .fetch_optional(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-            .ok_or_else(|| {
-                ApiError::DatabaseError("idempotency conflict but row not found".into())
-            })?;
-            hydrate_job_row(&mut r);
-            r
-        }
-        Err(e) => return Err(ApiError::DatabaseError(e.to_string())),
-    };
-
-    hydrate_job_row(&mut row);
-
-    if let Some(workspace_id) =
-        resolved_workspace_id.or_else(|| resolved_workspace_id_from_job_payload(&row.payload))
-    {
+    if let Some(workspace_id) = resolved_workspace_id_from_job_payload(&row.payload) {
         tracing::info!(
             event = "generation_job_enqueued",
             user_id = %uid,
             job_id = %row.id,
             kind = %row.kind,
             workspace_id = %workspace_id,
-            billing_workspace_id = %billing_workspace_id,
             client_request_id = row
                 .payload
                 .get("client_request_id")
@@ -196,7 +120,6 @@ pub(crate) async fn create_job(
             user_id = %uid,
             job_id = %row.id,
             kind = %row.kind,
-            billing_workspace_id = %billing_workspace_id,
             client_request_id = row
                 .payload
                 .get("client_request_id")
@@ -207,20 +130,13 @@ pub(crate) async fn create_job(
         );
     }
 
-    if let Err(e) = usage::record_generation_job_created(pool, uid, row.id, &row.kind).await {
-        tracing::warn!(
-            error = %e,
-            job_id = %row.id,
-            "app_usage_event insert failed for generation_job.created (job still created)"
-        );
-    }
-
     Ok(Json(row))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::jobs::payload_project::normalize_project_scope_in_job_payload;
     use serde_json::json;
     use uuid::Uuid;
 

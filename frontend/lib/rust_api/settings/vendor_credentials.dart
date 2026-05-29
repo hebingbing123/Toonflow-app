@@ -65,10 +65,7 @@ Future<VendorCredentialResponseV1> postSettingsVendorCredentialV1(
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: rustApiJsonAuthHeaders(accessToken),
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
@@ -84,7 +81,7 @@ Future<VendorCredentialResponseV1> getSettingsVendorCredentialV1(
     '$kApiBaseUrl/api/v1/settings/vendors/credential/$vendorId',
   );
   final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .get(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   return _decodeVendorCredentialResponse(res);
 }
@@ -98,7 +95,7 @@ Future<VendorMutationResponseV1> deleteSettingsVendorCredentialV1(
     '$kApiBaseUrl/api/v1/settings/vendors/credential/$vendorId',
   );
   final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .delete(uri, headers: rustApiAuthHeaders(accessToken))
       .timeout(const Duration(seconds: 15));
   return _decodeVendorCredentialMutationResponse(res);
 }
