@@ -181,6 +181,6 @@ See `ACCESSIBILITY.md` for complete guidelines, examples, and testing procedures
 ## 🔗 Quick Links
 
 - Full Guidelines: `ACCESSIBILITY.md`
-- Audit Report: `.tmp/a11y_audit_report.md`
-- Progress Tracking: `.tmp/a11y_implementation_progress.md`
+- Manual a11y matrix: [`docs/plans/flutter-ui-ux-manual-a11y-matrix.md`](../../../docs/plans/flutter-ui-ux-manual-a11y-matrix.md)
+- UI refactor signoff: [`docs/plans/flutter-ui-ux-refactor-signoff.md`](../../../docs/plans/flutter-ui-ux-refactor-signoff.md)
 - Component Docs: `components/studio_icon_button.dart`
