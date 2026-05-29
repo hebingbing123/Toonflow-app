@@ -5,7 +5,7 @@ Composer / Agent 执行本指南前，**必须先读**：
 - [`frontend/lib/design_system/UI_REFACTOR_CONTEXT.md`](../../frontend/lib/design_system/UI_REFACTOR_CONTEXT.md)
 - [`frontend/lib/design_system/theme.dart`](../../frontend/lib/design_system/theme.dart) + [`tokens.dart`](../../frontend/lib/design_system/tokens.dart)
 - [`docs/product/ux/studio-visual-guidelines.md`](../product/ux/studio-visual-guidelines.md)
-- 本轮 E2E 审计：[`ui-ux-audit-round-2026-05-27.md`](ui-ux-audit-round-2026-05-27.md)
+- 本轮 E2E 审计：[`ui-e2e-runbook.md`](ui-e2e-runbook.md)、[`flutter-ui-ux-refactor-signoff.md`](flutter-ui-ux-refactor-signoff.md)
 
 ## 能否「一次全部修完」？
 

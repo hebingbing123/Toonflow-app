@@ -61,4 +61,4 @@ cd frontend && flutter analyze
 cd frontend && flutter test test/ui/studio_async_sections_test.dart
 ```
 
-E2E UI audit: `bash scripts/run-ui-ux-audit-e2e.sh` (see [`docs/plans/ui-ux-audit-round-2026-05-27.md`](../../../docs/plans/ui-ux-audit-round-2026-05-27.md)).
+E2E UI audit: `bash scripts/run-ui-ux-audit-e2e.sh` (see [`docs/plans/ui-e2e-runbook.md`](../../../docs/plans/ui-e2e-runbook.md)).
